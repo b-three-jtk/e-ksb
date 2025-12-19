@@ -1,4 +1,7 @@
 import './bootstrap';
+import '../css/app.css';
+import ThemeProvider from '@/Layouts/Admin/ThemeProvider.vue'
+import SidebarProvider from '@/Layouts/Admin/SidebarProvider.vue'
 
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
@@ -11,6 +14,8 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
             .use(plugin)
+            .component('ThemeProvider', ThemeProvider)
+            .component('SidebarProvider', SidebarProvider)
             .mount(el)
     },
 })
