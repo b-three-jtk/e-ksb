@@ -1,7 +1,9 @@
 <template>
     <AdminLayout>
         <div class="flex flex-col px-20 gap-4">
-            <div class=""></div>
+            <div class="">
+                <!-- TODO: page title and breadcrumbs -->
+            </div>
             <div class="card-layout flex justify-between">
                 <div class="flex gap-2 items-center">
                     <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{ transaction.number }}
@@ -22,7 +24,7 @@
             <div class="grid grid-cols-5 gap-4">
                 <div class="card-layout col-span-3">
                     <h2 class="card-title mb-4">Detail Transaksi</h2>
-                    <ul class="grid grid-cols-1 gap-6">
+                    <ul class="grid grid-cols-2 gap-6 mb-4">
                         <li class="flex flex-col gap-2">
                             <span class="text-sm text-gray-500 dark:text-gray-300">Nominal Simpanan</span>
                             <span class="font-medium text-dark-text dark:text-white">Rp {{ transaction.amount }}</span>
@@ -51,6 +53,10 @@
                             <span class="text-sm text-gray-500 dark:text-gray-300">Metode Pembayaran</span>
                             <span class="font-medium text-dark-text dark:text-white">{{ transaction.method }}</span>
                         </li>
+                        <li class="flex flex-col gap-2">
+                            <span class="text-sm text-gray-500 dark:text-gray-300">Keterangan</span>
+                            <span class="font-medium text-dark-text dark:text-white">{{ transaction.description }}</span>
+                        </li>
                     </ul>
                 </div>
                 <div class="flex flex-col col-span-2 gap-2">
@@ -77,7 +83,7 @@
                     </div>
                     <div class="card-layout h-full">
                         <h1 class="card-title">Riwayat Simpanan</h1>
-
+                        <!-- TODO: implement ui for history -->
                     </div>
                 </div>
             </div>
@@ -97,6 +103,7 @@ const props = defineProps({
         category: String,
         transaction_date: String,
         method: String,
+        description: String,
     },
     member: {
         id: String,

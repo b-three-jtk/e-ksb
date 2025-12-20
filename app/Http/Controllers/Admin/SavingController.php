@@ -38,13 +38,14 @@ class SavingController extends Controller
     {
         // dummy data
         $transaction = [
-            'number' => 'TRX-20240612-001',
+            'number' => $id,
             'status' => 'Selesai',
             'amount' => 1500000,
             'type' => 'Simpanan Sukarela',
             'category' => 'Penyetoran',
             'transaction_date' => '12 Juni 2024',
             'method' => 'Tunai',
+            'description' => 'Setoran simpanan sukarela bulan Juni',
         ];
 
         $member = [
