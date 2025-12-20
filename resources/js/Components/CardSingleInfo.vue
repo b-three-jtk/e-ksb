@@ -14,7 +14,7 @@
         <div
             class="card-info bg-white dark:bg-gray-800 py-6 rounded-xl border border-stroke dark:border-gray-700 flex flex-col gap-2">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-8 pb-5 pt-2">
-                <div v-for="d in data" :key="data.key">
+                <div v-for="d in data" :key="d.label">
                     <div class="flex flex-col">
                         <p class="">{{ d.label }}</p>
                         <h1 class="font-semibold font-body text-xl">{{ d.content }}</h1>
@@ -39,8 +39,6 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
-
 const props = defineProps({
     title: {
         type: String,
