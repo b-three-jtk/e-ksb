@@ -1,9 +1,9 @@
 <template>
     <div
-        class="overflow-hidden rounded-2xl border border-gray-200 bg-white px-8 pb-3 pt-5 dark:border-gray-800 dark:bg-white/[0.03] h-full w-full">
+        class="overflow-hidden card-layout h-full w-full">
         <div class="flex flex-col gap-2 mb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h3 class="text-xl font-semibold text-dark-text dark:text-white/90">{{ title }}</h3>
+                <h3 class="card-title">{{ title }}</h3>
             </div>
 
             <div class="flex items-center gap-3">

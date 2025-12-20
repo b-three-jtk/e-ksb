@@ -3,7 +3,7 @@
         class="flex flex-col px-8 py-6 bg-light-bg rounded-2xl border border-gray-200 dark:bg-gray-800 dark:border-gray-700 gap-4">
         <div class="flex justify-between items-center">
             <div class="flex flex-col gap-2">
-                <h1 class="text-xl font-semibold text-dark-text dark:text-white/90">{{ title }}</h1>
+                <h1 class="card-title">{{ title }}</h1>
                 <p class="text-gray-500">No. Transaksi #{{ subTitle }}</p>
             </div>
             <button
@@ -16,7 +16,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-8 pb-5 pt-2">
                 <div v-for="d in data" :key="d.label">
                     <div class="flex flex-col">
-                        <p class="">{{ d.label }}</p>
+                        <p>{{ d.label }}</p>
                         <h1 class="font-semibold font-body text-xl">{{ d.content }}</h1>
                     </div>
                 </div>

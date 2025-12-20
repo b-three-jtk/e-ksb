@@ -15,7 +15,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="card-info bg-white dark:bg-gray-800 px-8 py-6 rounded-xl border border-stroke dark:border-gray-700 flex flex-col gap-2">
+    <div class="card-layout flex flex-col gap-2">
         <h2 class="text-3xl font-semibold mb-2 text-gray-800 dark:text-gray-200">{{ content }}</h2>
         <div class="flex justify-between items-center">
             <p class="text-gray-text dark:text-gray-400">{{ title }}</p>

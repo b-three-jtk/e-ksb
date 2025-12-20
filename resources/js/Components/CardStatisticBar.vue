@@ -99,8 +99,8 @@ const chartOptions = ref({
 
 <template>
     <div
-        class="bg-white w-full dark:bg-gray-800 px-8 py-6 rounded-xl border border-stroke dark:border-gray-700 flex flex-col gap-10">
-        <h1 class="font-semibold text-xl text-dark-text">{{ title }}</h1>
+        class="w-full card-layout flex flex-col gap-10">
+        <h1 class="card-title">{{ title }}</h1>
         <div class="max-w-full overflow-x-auto custom-scrollbar">
             <div id="chartOne" class="-ml-5 min-w-[650px] xl:min-w-full pl-2">
                 <VueApexCharts type="bar" height="300" :options="chartOptions" :series="series" />

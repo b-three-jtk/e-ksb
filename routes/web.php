@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\SavingController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 
@@ -14,3 +15,5 @@ Route::get('/dashboard', function () {
         'title' => 'Dashboard',
     ]);
 });
+
+Route::get('/savings/{id}', [SavingController::class, 'show'])->name('savings.show');

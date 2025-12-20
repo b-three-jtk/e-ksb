@@ -792,3 +792,11 @@ span.flatpickr-weekday,
 .drop-accent {
     box-shadow: var(--sds-size-depth-0) var(--sds-size-depth-400) var(--sds-size-depth-800) var(--sds-size-depth-negative-100) var(--sds-color-black-200), var(--sds-size-depth-0) var(--sds-size-depth-100) var(--sds-size-depth-100) var(--sds-size-depth-negative-100) var(--sds-color-black-100);
 }
+
+.card-layout {
+    @apply bg-white dark:bg-gray-800 px-8 py-6 rounded-xl border border-stroke dark:border-gray-700;
+}
+
+.card-title {
+    @apply text-xl font-semibold text-dark-text dark:text-white/90;
+}
