@@ -150,14 +150,14 @@
 import { ref, computed } from "vue";
 import { Link, usePage } from '@inertiajs/vue3'
 
-import {
-    GridIcon,
-    CalenderIcon,
-    ChevronDownIcon,
-    HorizontalDots,
-    UserCircleIcon,
-    PageIcon,
-} from "@/Icons";
+// import {
+//     GridIcon,
+//     CalenderIcon,
+//     ChevronDownIcon,
+//     HorizontalDots,
+//     UserCircleIcon,
+//     PageIcon,
+// } from "../../Icons";
 // import SidebarWidget from "./SidebarWidget.vue";
 import { useSidebar } from "@/Composables/useSidebar";
 
@@ -170,13 +170,13 @@ const menuGroups = [
         title: "Menu",
         items: [
             {
-                icon: GridIcon,
+                icon: "",
                 name: "Dashboard",
                 path: "/dashboard",
             },
             {
                 name: "Keanggotaan",
-                icon: UserCircleIcon,
+                icon: "UserCircleIcon",
                 subItems: [
                     { name: "Anggota", path: "/anggota", pro: false },
                     { name: "Verifikasi", path: "/verifikasi", pro: false },
@@ -185,7 +185,7 @@ const menuGroups = [
             },
             {
                 name: "Produk",
-                icon: PageIcon,
+                icon: "PageIcon",
                 subItems: [
                     { name: "Simpanan", path: "/simpanan", pro: false },
                     { name: "Pembiayaan Murabahah", path: "/pembiayaan", pro: false },
@@ -193,7 +193,7 @@ const menuGroups = [
             },
             {
                 name: "Penjualan",
-                icon: PageIcon,
+                icon: "PageIcon",
                 subItems: [
                     { name: "Kasir", path: "/kasir", pro: false },
                     { name: "Produk", path: "/produk", pro: false },
@@ -206,7 +206,7 @@ const menuGroups = [
         title: "Lainnya",
         items: [
             {
-                icon: CalenderIcon,
+                icon: "CalenderIcon",
                 name: "Keluar",
                 path: "/keluar",
             },
