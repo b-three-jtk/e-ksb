@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('gender', ['Laki-laki', 'Perempuan'])->nullable();
             $table->string('institution');
             $table->enum('marital_status', ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'])->nullable();
+            $table->string('spouse_name')->nullable();
             $table->text('address')->nullable();
             $table->text('residential_address')->nullable();
             $table->string('phone_number')->unique()->nullable();

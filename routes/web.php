@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\Admin\SavingController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SavingController;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
@@ -16,4 +17,5 @@ Route::get('/dashboard', function () {
     ]);
 });
 
-Route::get('/savings/{id}', [SavingController::class, 'show'])->name('savings.show');
+Route::get('/savings/{id}', [SavingController::class, 'show'])->name('admin.savings.show');
+Route::get('/users/{id}', [UserController::class, 'show'])->name('admin.users.show');

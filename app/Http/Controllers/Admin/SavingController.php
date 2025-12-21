@@ -54,7 +54,7 @@ class SavingController extends Controller
             'status' => 'Aktif',
             'work_unit' => 'JTK',
         ];
-        return inertia('Admin/Savings/Index', [
+        return inertia('Admin/Savings/Show', [
             'transaction' => $transaction,
             'member' => $member,
             'history' => [],
