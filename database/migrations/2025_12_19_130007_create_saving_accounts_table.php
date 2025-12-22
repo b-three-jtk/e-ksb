@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('id')->primary();
             $table->decimal('balance', 15, 2);
             $table->enum('type', ['Simpanan Pokok', 'Simpanan Wajib', 'Simpanan Sukarela']);
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }

@@ -147,18 +147,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import { Link, usePage } from '@inertiajs/vue3'
-
-// import {
-//     GridIcon,
-//     CalenderIcon,
-//     ChevronDownIcon,
-//     HorizontalDots,
-//     UserCircleIcon,
-//     PageIcon,
-// } from "../../Icons";
-// import SidebarWidget from "./SidebarWidget.vue";
+import GridIcon from "../../Icons/GridIcon.vue";
+import UserIcon from "../../Icons/UserIcon.vue";
+import ProductIcon from "../../Icons/ProductIcon.vue";
+import LogoutIcon from "../../Icons/LogoutIcon.vue";
+import ChevronDownIcon from "../../Icons/ChevronDownIcon.vue";
 import { useSidebar } from "@/Composables/useSidebar";
 
 const page = usePage()
@@ -170,13 +165,13 @@ const menuGroups = [
         title: "Menu",
         items: [
             {
-                icon: "",
+                icon: GridIcon,
                 name: "Dashboard",
                 path: "/dashboard",
             },
             {
                 name: "Keanggotaan",
-                icon: "UserCircleIcon",
+                icon: UserIcon,
                 subItems: [
                     { name: "Anggota", path: "/anggota", pro: false },
                     { name: "Verifikasi", path: "/verifikasi", pro: false },
@@ -185,19 +180,10 @@ const menuGroups = [
             },
             {
                 name: "Produk",
-                icon: "PageIcon",
+                icon: ProductIcon,
                 subItems: [
                     { name: "Simpanan", path: "/simpanan", pro: false },
                     { name: "Pembiayaan Murabahah", path: "/pembiayaan", pro: false },
-                ],
-            },
-            {
-                name: "Penjualan",
-                icon: "PageIcon",
-                subItems: [
-                    { name: "Kasir", path: "/kasir", pro: false },
-                    { name: "Produk", path: "/produk", pro: false },
-                    { name: "Supplier", path: "/supplier", pro: false },
                 ],
             },
         ],
@@ -206,7 +192,7 @@ const menuGroups = [
         title: "Lainnya",
         items: [
             {
-                icon: "CalenderIcon",
+                icon: LogoutIcon,
                 name: "Keluar",
                 path: "/keluar",
             },
