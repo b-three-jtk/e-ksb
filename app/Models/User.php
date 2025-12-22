@@ -71,11 +71,6 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function invoices()
-    {
-        return $this->hasMany(Invoice::class);
-    }
-
     public function savingAccounts()
     {
         return $this->hasMany(SavingAccount::class);

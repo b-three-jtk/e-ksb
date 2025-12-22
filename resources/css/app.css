@@ -131,18 +131,17 @@
   --color-warning-900: #7a2e0e;
   --color-warning-950: #4e1d09;
 
-  --color-brand-25: #f2f7ff;
-  --color-brand-50: #ecf3ff;
-  --color-brand-100: #dde9ff;
-  --color-brand-200: #c2d6ff;
-  --color-brand-300: #9cb9ff;
-  --color-brand-400: #7592ff;
-  --color-brand-500: #465fff;
-  --color-brand-600: #3641f5;
-  --color-brand-700: #2a31d8;
-  --color-brand-800: #252dae;
-  --color-brand-900: #262e89;
-  --color-brand-950: #161950;
+--color-brand-50: #eef8ff;
+--color-brand-100: #d9eeff;
+--color-brand-200: #bce2ff;
+--color-brand-300: #8ed1ff;
+--color-brand-400: #59b6ff;
+--color-brand-500: #3296ff;
+--color-brand-600: #1c77f4;
+--color-brand-700: #1460e1;
+--color-brand-800: #174db6;
+--color-brand-900: #173f84;/* ini */
+--color-brand-950: #142a57;
 
   --color-theme-pink-500: #ee46bc;
 
@@ -204,7 +203,7 @@
 }
 
 @utility menu-item-active {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply bg-brand-50 text-brand-900 dark:bg-brand-500/[0.12] dark:text-brand-400;
 }
 
 @utility menu-item-inactive {
@@ -216,7 +215,7 @@
 }
 
 @utility menu-item-icon-active {
-  @apply text-brand-500 dark:text-brand-400;
+  @apply text-brand-900 dark:text-brand-500;
 }
 
 @utility menu-item-icon-inactive {

@@ -24,7 +24,7 @@
                             fill="currentColor" />
                     </svg>
                 </button>
-                <!-- <HeaderLogo /> -->
+                <HeaderLogo />
                 <button @click="toggleApplicationMenu"
                     class="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -39,9 +39,9 @@
                 class="items-center justify-between w-full gap-4 px-5 py-4 shadow-theme-md lg:flex lg:justify-end lg:px-0 lg:shadow-none">
                 <div class="flex items-center gap-2 2xsm:gap-3">
                     <ThemeToggler />
-                    <!-- <NotificationMenu /> -->
+                    <NotificationMenu />
                 </div>
-                <!-- <UserMenu /> -->
+                <UserMenu />
             </div>
         </div>
     </header>
@@ -51,9 +51,9 @@
 import { ref } from 'vue'
 import { useSidebar } from '../../Composables/useSidebar'
 import ThemeToggler from '../../Components/ThemeToggler.vue'
-// import HeaderLogo from './header/HeaderLogo.vue'
-// import NotificationMenu from './header/NotificationMenu.vue'
-// import UserMenu from './header/UserMenu.vue'
+import HeaderLogo from './Header/HeaderLogo.vue'
+import NotificationMenu from './header/NotificationMenu.vue'
+import UserMenu from './Header/UserMenu.vue'
 
 const { toggleSidebar, toggleMobileSidebar, isMobileOpen } = useSidebar()
 
