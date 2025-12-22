@@ -12,17 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('financings', function (Blueprint $table) {
-            $table->integer('id')->primary();
+            $table->id()->primary();
             $table->string('product_type');
             $table->string('brand');
             $table->string('color');
-            $table->enum('condition', ['bekas', 'baru']);
+            $table->enum('condition', ['Bekas', 'Baru']);
             $table->text('description');
             $table->decimal('price', 15, 2);
             $table->integer('qty');
             $table->decimal('profit', 15, 2);
-            $table->enum('status', ['belum ditinjau', 'disetujui', 'disetujui dengan catatan', 'ditolak', 'menunggu kelengkapan dokumen', 'barang diterima']);
-            $table->foreignUuid('user_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->enum('status', ['Belum Ditinjau', 'Disetujui', 'Disetujui Dengan Catatan', 'Ditolak', 'Menunggu Kelengkapan Dokumen', 'Barang Diterima']);
+            $table->foreignUuid('user_id')->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }
