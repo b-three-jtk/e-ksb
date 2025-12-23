@@ -3,6 +3,7 @@
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SavingController;
 
 Route::get('/', function () {
@@ -11,11 +12,16 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Admin/Dashboard', [
-        'title' => 'Dashboard',
-    ]);
-});
 
-Route::get('/savings/{id}', [SavingController::class, 'show'])->name('admin.savings.show');
-Route::get('/users/{id}', [UserController::class, 'show'])->name('admin.users.show');
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Admin/Dashboard', [
+            'title' => 'Dashboard',
+        ]);
+    });
+    Route::get('/savings/show/{id}', [SavingController::class, 'show']);
+    Route::get('/users/show/{id}', [UserController::class, 'show']);
+
+    Route::get('/create', [AdminController::class, 'create']);
+    Route::get('/show/{id}', [AdminController::class, 'store']);
+});

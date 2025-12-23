@@ -26,7 +26,7 @@ const toggleUserDropdown = () => {
             <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse items-center">
                 <!-- Auth Section -->
                 <div class="flex items-center gap-4">
-                    <Link href="/dashboard" class="inline-block text-sm px-6 py-2.5 leading-none border rounded-lg hover:bg-gray-200 font-medium border-transparent">
+                    <Link href="/admin/dashboard" class="inline-block text-sm px-6 py-2.5 leading-none border rounded-lg hover:bg-gray-200 font-medium border-transparent">
                         Dashboard
                     </Link>
 
