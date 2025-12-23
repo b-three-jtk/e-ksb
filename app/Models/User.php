@@ -40,7 +40,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
-        // TODO: Add work units relationship
+        'work_unit_id',
     ];
 
     /**
@@ -71,8 +71,43 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function workUnit()
+    {
+        return $this->belongsTo(WorkUnit::class);
+    }
+
     public function savingAccounts()
     {
         return $this->hasMany(SavingAccount::class);
+    }
+
+    public function financials()
+    {
+        return $this->hasMany(Financial::class);
+    }
+
+    public function accounts()
+    {
+        return $this->hasMany(Account::class);
+    }
+
+    public function heirs()
+    {
+        return $this->hasMany(Heir::class);
+    }
+
+    public function userDocs()
+    {
+        return $this->hasMany(UserDoc::class);
+    }
+
+    public function savingTransactions()
+    {
+        return $this->hasMany(SavingTransaction::class);
+    }
+
+    public function financings()
+    {
+        return $this->hasMany(Financing::class);
     }
 }
