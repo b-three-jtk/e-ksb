@@ -20,7 +20,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->dateTime('transaction_date');
             $table->foreignUuid('updated_by')->constrained('users');
-            $table->foreignId('saving_account_id')->constrained('saving_accounts');
+            $table->string('saving_account_id');
+            $table->foreign('saving_account_id')->references('id')->on('saving_accounts')->cascadeOnDelete();
             $table->timestamps();
         });
     }
