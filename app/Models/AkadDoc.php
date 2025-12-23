@@ -15,7 +15,7 @@ class AkadDoc extends Model
     ];
 
     protected $casts = [
-        'signed_at' => 'date',
+        'signed_at' => 'datetime',
     ];
 
     public function financing(): BelongsTo
