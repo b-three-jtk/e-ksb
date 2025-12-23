@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('attachment');
             $table->timestamp('signed_at')->nullable();
-            $table->foreignId('financing_id')->constrained('financings');
+            $table->foreignUuid('financing_id')->constrained('financings');
             $table->timestamps();
         });
     }
