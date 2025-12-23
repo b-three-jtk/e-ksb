@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('financials', function (Blueprint $table) {
             $table->foreignUuid('user_id')->primary()->constrained('users')->onDelete('cascade');
-            $table->enum('financial_type', ['Penghasilan bulanan', 'Pengeluaran bulanan', 'Sisa penghasilan bulanan']);
+            $table->enum('financial_type', ['Gaji Pokok Dan Tunjangan', 'Penghasilan Usaha Bersih', 'Penghasilan Pasangan', 'Penghasilan Lainnya', 'Biaya Hidup Keluarga', 'Biaya Pendidikan', 'Cicilan/Kredit Lainnya', 'Biaya Lainnya']);
             $table->decimal('amount', 15, 2);
             $table->timestamps();
         });
