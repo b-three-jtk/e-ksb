@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('attachment');
-            $table->foreignUuid('user_id')->constrained('users');
             $table->foreignId('transaction_id')->constrained('saving_transactions');
             $table->timestamps();
         });

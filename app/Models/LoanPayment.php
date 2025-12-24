@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class LoanPayment extends Model
 {
-    public $incrementing = false;
 
     protected $fillable = [
         'status',

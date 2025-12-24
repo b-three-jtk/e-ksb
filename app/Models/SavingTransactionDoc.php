@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SavingTransactionDoc extends Model
 {
     protected $fillable = [
-        'user_id',
         'transaction_id',
         'name',
         'attachment',
