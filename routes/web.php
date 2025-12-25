@@ -23,5 +23,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/users/show/{id}', [UserController::class, 'show']);
 
     Route::get('/create', [AdminController::class, 'create']);
-    Route::get('/show/{id}', [AdminController::class, 'store']);
+    Route::get('/show/{id}', [AdminController::class, 'show']);
 });

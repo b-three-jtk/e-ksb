@@ -38,7 +38,34 @@ class AdminController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $user = [
+            'name' => 'Asep Suhendar',
+            'nik' => '123456789012345',
+            'gender' => 'Laki-laki',
+            'birth_date' => '1990-01-01',
+            'last_education' => 'STRATA I',
+            'work_unit' => 'JTK',
+            'institution' => 'Politeknik Negeri Bandung',
+            'marital_status' => 'Kawin',
+            'spouse_name' => 'Siti Aminah',
+            'dependents' => 2,
+            'phone_number' => '081234567890',
+            'email' => 'user@example.com',
+            'address' => 'Jl. Merdeka No. 123, Bandung',
+            'residential_address' => 'Jl. Sudirman No. 456, Bandung',
+        ];
+        $heirs = [
+            [
+                'name' => 'Siti Aminah',
+                'relationship' => 'Istri',
+                'contact' => '081298765432',
+            ]
+        ];
+        return inertia('Admin/Admins/Show', [
+            'user' => $user,
+            'heirs' => $heirs,
+            'id' => $id,
+        ]);
     }
 
     /**
