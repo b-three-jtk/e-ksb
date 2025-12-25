@@ -1,5 +1,5 @@
 <script setup>
-    import ThemeProvider from './Admin/ThemeProvider.vue';
+import ThemeProvider from './Admin/ThemeProvider.vue';
 import Navbar from './Navbar.vue'
 </script>
 
