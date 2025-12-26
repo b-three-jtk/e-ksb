@@ -25,8 +25,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/create', [AdminController::class, 'create']);
     Route::get('/show/{id}', [AdminController::class, 'store']);
 
-    Route::get('/verifikasi', function () {
-        return Inertia::render('Admin/Admins/ProspectiveMembers');
-    });
+    Route::get('/verifikasi', [UserController::class, 'prospectiveMembers'])
+        ->name('users.prospective');
 
 });
