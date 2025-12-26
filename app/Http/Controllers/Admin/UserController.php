@@ -69,23 +69,31 @@ class UserController extends Controller
 
     public function prospectiveMembers(Request $request)
     {
-        $query = User::query()
+        $perPage = $request->input('per_page', 10);
+
+        $members = User::query()
             ->where('status', 'Dalam Peninjauan')
             ->with('workUnit:id,name')
-            ->when($request->search, function ($q, $search) {
-                $q->where(function ($q) use ($search) {
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
                     ->orWhere('nik', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
                 });
             })
-            ->when($request->work_unit_id, function ($q, $unitId) {
-                $q->where('work_unit_id', $unitId);
+            ->when($request->work_unit_id, function ($query, $unitId) {
+                $query->where('work_unit_id', $unitId);
             })
-            ->orderByDesc('created_at');
-
-        $perPage = $request->input('per_page', 10);
-        $members = $query->paginate($perPage)->withQueryString();
+            ->orderByDesc('created_at')
+            ->paginate($perPage)
+            ->withQueryString()
+            ->through(fn ($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'nik' => $user->nik,
+                'email' => $user->email,
+                'unit_kerja' => $user->workUnit?->name ?? '-',
+            ]);
 
         return Inertia::render('Admin/User/ProspectiveMembers', [
             'prospectiveMembers' => $members,
