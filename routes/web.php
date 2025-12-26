@@ -24,4 +24,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/create', [AdminController::class, 'create']);
     Route::get('/show/{id}', [AdminController::class, 'show']);
+
+    Route::get('/admin', function() {
+        return
+        Inertia::render('Admin/Admins/List');
+    });
 });
