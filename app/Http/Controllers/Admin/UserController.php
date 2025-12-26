@@ -5,11 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\WorkUnit;
-use App\Mail\ApprovalNotificationMail;
-use App\Mail\RejectionNotificationMail;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -143,64 +140,5 @@ class UserController extends Controller
             'workUnits' => WorkUnit::select('id', 'name')->get(),
             'title' => 'Verifikasi Calon Anggota',
         ]);
-    }
-
-    public function submitApproval(Request $request, string $id)
-    {
-        $validated = $request->validate([
-            'decision' => 'required|in:approved,rejected',
-            'note' => 'nullable|string',
-        ]);
-
-        $user = User::findOrFail($id);
-        $emailSent = true;
-
-        if ($validated['decision'] === 'approved') {
-            // Update status user menjadi Aktif
-            $user->update(['status' => 'Aktif']);
-
-            try {
-                Mail::to($user->email)->send(new ApprovalNotificationMail($user));
-            } catch (\Throwable $e) {
-                $emailSent = false;
-                Log::error('Failed sending approval notification email', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-
-            $redirect = redirect()->route('admin.users.prospective')
-                ->with('success', 'Status berhasil diperbarui menjadi Aktif untuk ' . $user->name . '.');
-
-            if (!$emailSent) {
-                $redirect->with('warning', 'Status berhasil diperbarui, tetapi email notifikasi tidak dapat dikirim. Silakan coba lagi nanti.');
-            }
-
-            return $redirect;
-        } else {
-            // Update status user menjadi Ditolak
-            $user->update(['status' => 'Ditolak']);
-
-            try {
-                Mail::to($user->email)->send(new RejectionNotificationMail($user, $validated['note'] ?? ''));
-            } catch (\Throwable $e) {
-                $emailSent = false;
-                Log::error('Failed sending rejection notification email', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-
-            $redirect = redirect()->route('admin.users.prospective')
-                ->with('success', 'Status berhasil diperbarui menjadi Ditolak untuk ' . $user->name . '.');
-
-            if (!$emailSent) {
-                $redirect->with('warning', 'Status berhasil diperbarui, tetapi email pemberitahuan tidak dapat dikirim. Silakan coba lagi nanti.');
-            }
-
-            return $redirect;
-        }
     }
 }
