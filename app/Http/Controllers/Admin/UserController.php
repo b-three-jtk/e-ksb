@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\WorkUnit;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -62,5 +65,33 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         //
+    }
+
+    public function prospectiveMembers(Request $request)
+    {
+        $query = User::query()
+            ->where('status', 'Dalam Peninjauan')
+            ->with('workUnit:id,name')
+            ->when($request->search, function ($q, $search) {
+                $q->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->work_unit_id, function ($q, $unitId) {
+                $q->where('work_unit_id', $unitId);
+            })
+            ->orderByDesc('created_at');
+
+        $perPage = $request->input('per_page', 10);
+        $members = $query->paginate($perPage)->withQueryString();
+
+        return Inertia::render('Admin/User/ProspectiveMembers', [
+            'prospectiveMembers' => $members,
+            'filters' => $request->only(['search', 'work_unit_id', 'per_page']),
+            'workUnits' => WorkUnit::select('id', 'name')->get(),
+            'title' => 'Verifikasi Calon Anggota',
+        ]);
     }
 }
