@@ -2,6 +2,7 @@
 import { Link, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { reactive, watch } from 'vue'
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     prospectiveMembers: Object,
@@ -18,12 +19,16 @@ const filters = reactive({
 
 const applyFilters = () => {
     router.get(
-        route('admin.users.prospective'),
-        { ...filters, page: 1 }, // reset page
+        '/admin/verifikasi',
         {
-            preserveState: true,
+            search: filters.search || undefined,
+            work_unit_id: filters.work_unit_id || undefined,
+            per_page: filters.per_page,
+        },
+        {
             preserveScroll: true,
             replace: true,
+            preserveState: false,
         }
     )
 }
@@ -73,7 +78,7 @@ watch(() => filters.work_unit_id, applyFilters)
             <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <span class="text-sm text-gray-500">Tampilkan</span>
-                    <select v-model="filters.per_page" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select v-model.number="filters.per_page" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option :value="10">10</option>
                         <option :value="25">25</option>
                         <option :value="50">50</option>
