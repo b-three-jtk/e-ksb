@@ -185,7 +185,11 @@ class UserController extends Controller
 
         return Inertia::render('Admin/User/ProspectiveMembers', [
             'prospectiveMembers' => $members,
-            'filters' => $request->only(['search', 'work_unit_id', 'per_page']),
+            'filters' => [
+                'search' => $request->search,
+                'work_unit_id' => $request->work_unit_id,
+                'per_page' => $perPage,
+            ],
             'workUnits' => WorkUnit::select('id', 'name')->get(),
             'title' => 'Verifikasi Calon Anggota',
         ]);
