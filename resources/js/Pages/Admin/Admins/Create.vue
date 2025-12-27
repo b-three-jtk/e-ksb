@@ -15,7 +15,7 @@
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 NIK<span class="text-red-500">*</span>
                             </label>
-                            <input type="text" v-model="form.nik" placeholder="Masukkan 16 digit NIK" maxlength="16"
+                            <input type="tel" v-model="form.nik" placeholder="Masukkan 16 digit NIK" maxlength="16" minlength="16" pattern="[0-9]*"
                                 :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                                     form.errors.nik ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                                 ]"
@@ -157,14 +157,14 @@ import Layout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 
 const form = useForm({
-    email: null,
-    nik: null,
-    role_id: null,
-    work_unit_id: null,
-    name: null,
-    institution: null,
-    address: null,
-    phone_number: null,
+    email: '',
+    nik: '',
+    role_id: '',
+    work_unit_id: '',
+    name: '',
+    institution: '',
+    address: '',
+    phone_number: '',
 })
 
 const props = defineProps({
