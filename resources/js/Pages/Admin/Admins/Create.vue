@@ -9,7 +9,7 @@
                 </div>
 
                 <form @submit.prevent="form.post('/admin/store')" class="flex flex-col">
-                    <div class="grid grid-cols-2 px-8 gap-6">
+                    <div class="grid md:grid-cols-2 grid-cols-1 px-8 gap-6">
                         <!-- NIK -->
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
