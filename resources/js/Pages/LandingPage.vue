@@ -34,7 +34,7 @@ onUnmounted(() => {
 <template>
     <Base>
         <div class="landing-page-content h-full w-full">
-            <section class="hero-section flex items-center h-full w-full relative">
+            <section class="hero-section flex items-center h-full w-full relative overflow-hidden">
                 <div class="flex flex-col gap-4 justify-left pl-12 pr-40">
                     <div class="absolute inset-0 -z-10" :style="{ transform: `translateY(${parallaxOffset}px)` }">
                         <img src="/public/images/home/polban.png" class="w-full h-full object-cover"

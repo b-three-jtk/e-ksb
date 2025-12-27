@@ -18,10 +18,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         return Inertia::render('Admin/Dashboard', [
             'title' => 'Dashboard',
         ]);
-    });
-    Route::get('/savings/show/{id}', [SavingController::class, 'show']);
-    Route::get('/users/show/{id}', [UserController::class, 'show']);
+    })->name('dashboard');
 
-    Route::get('/create', [AdminController::class, 'create']);
-    Route::get('/show/{id}', [AdminController::class, 'show']);
+    Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
+
+    Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
+
+    Route::get('/create', [AdminController::class, 'create'])->name('create');
+    Route::post('/store', [AdminController::class, 'store'])->name('store');
+    Route::get('/show/{id}', [AdminController::class, 'show'])->name('show');
 });

@@ -1,107 +1,147 @@
 <template>
     <Layout>
         <div class="flex flex-col px-20">
-            <PageBreadcrumb :page-title="'Tambah Admin'" />
+            <PageBreadcrumb page-title="Tambah Admin" />
             <div class="card-layout px-0!">
                 <div class="flex flex-col px-8 border-b-2 border-gray-200 dark:border-gray-700 pb-4 mb-4">
                     <h1 class="card-title">Tambah Admin</h1>
                     <p class="text-sm text-gray-400">Tambahkan data admin baru di sini.</p>
                 </div>
-                <form class="flex flex-col">
+
+                <form @submit.prevent="form.post('/admin/store')" class="flex flex-col">
                     <div class="grid grid-cols-2 px-8 gap-6">
+                        <!-- NIK -->
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                NIK
+                                NIK<span class="text-red-500">*</span>
                             </label>
-                            <input type="text" v-model="formData.inputWithPlaceholder" placeholder="info@gmail.com"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                            <input type="text" v-model="form.nik" placeholder="Masukkan 16 digit NIK" maxlength="16"
+                                :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                                    form.errors.nik ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                ]"
+                                class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                            <p v-if="form.errors.nik" class="text-red-500 text-xs mt-1">{{ form.errors.nik }}</p>
                         </div>
+
+                        <!-- Posisi -->
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                Posisi
-                            </label>
-                            <div class="relative z-20 bg-transparent">
-                                <select v-model="formData.selectInput"
-                                    class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                    :class="{ 'text-gray-800 dark:text-white/90': formData.selectInput }">
-                                    <option value="" disabled selected>Select Option</option>
-                                    <option value="marketing">Marketing</option>
-                                    <option value="template">Template</option>
-                                    <option value="development">Development</option>
-                                </select>
-                                <span
-                                    class="absolute z-30 text-gray-500 -translate-y-1/2 pointer-events-none right-4 top-1/2 dark:text-gray-400">
-                                    <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke=""
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                Nama
-                            </label>
-                            <input type="text" v-model="formData.inputWithPlaceholder" placeholder="info@gmail.com"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                Unit Kerja
+                                Posisi<span class="text-red-500">*</span>
                             </label>
                             <div class="relative z-20 bg-transparent">
-                                <select v-model="formData.selectInput"
-                                    class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                    :class="{ 'text-gray-800 dark:text-white/90': formData.selectInput }">
-                                    <option value="" disabled selected>Select Option</option>
-                                    <option value="marketing">Marketing</option>
-                                    <option value="template">Template</option>
-                                    <option value="development">Development</option>
+                                <select v-model="form.role_id" :class="['h-11 w-full appearance-none font-body rounded-lg border bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                                    form.errors.role_id ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                ]"
+                                    class="dark:bg-dark-900 text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                                    <option value="">Pilih Posisi</option>
+                                    <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}
+                                    </option>
                                 </select>
-                                <span
-                                    class="absolute z-30 text-gray-500 -translate-y-1/2 pointer-events-none right-4 top-1/2 dark:text-gray-400">
-                                    <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke=""
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
+                                <svg class="absolute z-30 right-4 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 stroke-current text-gray-500 dark:text-gray-400"
+                                    viewBox="0 0 20 20" fill="none">
+                                    <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
                             </div>
+                            <p v-if="form.errors.role_id" class="text-red-500 text-xs mt-1">{{ form.errors.role_id }}</p>
                         </div>
+
+                        <!-- Nama -->
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                Email
+                                Nama<span class="text-red-500">*</span>
                             </label>
-                            <input type="text" v-model="formData.inputWithPlaceholder" placeholder="info@gmail.com"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                            <input type="text" v-model="form.name" autocomplete="off"
+                                placeholder="Masukkan nama lengkap" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                                    form.errors.name ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                ]"
+                                class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                            <p v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</p>
                         </div>
+
+                        <!-- Unit Kerja -->
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                Lembaga
+                                Unit Kerja<span class="text-red-500">*</span>
                             </label>
-                            <input type="text" v-model="formData.inputWithPlaceholder" placeholder="info@gmail.com"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                            <div class="relative z-20 bg-transparent">
+                                <select v-model="form.work_unit_id" :class="['h-11 w-full font-body appearance-none rounded-lg border bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                                    form.errors.work_unit_id ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                ]"
+                                    class="dark:bg-dark-900 text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                                    <option value="">Pilih Unit Kerja</option>
+                                    <option v-for="unit in work_units" :key="unit.id" :value="unit.id">
+                                        {{ unit.name }}
+                                    </option>
+                                </select>
+                                <svg class="absolute z-30 right-4 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 stroke-current text-gray-500 dark:text-gray-400"
+                                    viewBox="0 0 20 20" fill="none">
+                                    <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <p v-if="form.errors.work_unit_id" class="text-red-500 text-xs mt-1">{{ form.errors.work_unit_id }}</p>
                         </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                Email<span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" v-model="form.email" placeholder="nama@example.com" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                                form.errors.email ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                            ]"
+                                class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                            <p v-if="form.errors.email" class="text-red-500 text-xs mt-1">{{ form.errors.email }}</p>
+                        </div>
+
+                        <!-- Lembaga -->
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                Lembaga<span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" v-model="form.institution" placeholder="Masukkan lembaga" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                                form.errors.institution ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                            ]"
+                                class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                            <p v-if="form.errors.institution" class="text-red-500 text-xs mt-1">{{ form.errors.institution }}
+                            </p>
+                        </div>
+
+                        <!-- Alamat (full width) -->
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 Alamat
                             </label>
-                            <textarea v-model="normalDescription" placeholder="Enter a description..." rows="4"
-                                class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
+                            <textarea v-model="form.address" placeholder="Masukkan alamat lengkap" rows="4" :class="['w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                                form.errors.address ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                            ]"
+                                class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"></textarea>
+                            <p v-if="form.errors.address" class="text-red-500 text-xs mt-1">{{ form.errors.address }}</p>
                         </div>
+
+                        <!-- No. Telp -->
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 No. Telp
                             </label>
-                            <input type="text" v-model="formData.inputWithPlaceholder" placeholder="info@gmail.com"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                            <input type="tel" v-model="form.phone_number" placeholder="Masukkan nomor telepon" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                                form.errors.phone_number ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                            ]"
+                                class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                            <p v-if="form.errors.phone_number" class="text-red-500 text-xs mt-1">{{ form.errors.phone_number }}
+                            </p>
                         </div>
                     </div>
-                    <div class="flex items-center justify-center pt-10">
-                        <button
-                            class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-secondary px-8 py-2.5 text-white font-medium shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-                            Simpan
+
+                    <div class="flex items-center justify-center gap-4 pt-10 px-8 pb-8">
+                        <Link href="/admin/admins"
+                            class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-8 py-2.5 text-gray-800 font-medium shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                            Batal
+                        </Link>
+                        <button type="submit" :disabled="form.processing"
+                            class="inline-flex items-center gap-2 rounded-xl border border-secondary bg-secondary px-8 py-2.5 text-white font-medium shadow-theme-xs hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed">
+                            {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                         </button>
                     </div>
                 </form>
@@ -111,16 +151,24 @@
 </template>
 
 <script setup>
-import Layout from '@/Layouts/Admin/Layout.vue';
-import { reactive } from 'vue'
-import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue';
-const formData = reactive({
-    input: '',
-    inputWithPlaceholder: '',
-    selectInput: '',
-    password: '',
-    date: '',
-    time: '',
-    cardNumber: '',
+import { useForm } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
+import Layout from '@/Layouts/Admin/Layout.vue'
+import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+
+const form = useForm({
+    email: null,
+    nik: null,
+    role_id: null,
+    work_unit_id: null,
+    name: null,
+    institution: null,
+    address: null,
+    phone_number: null,
+})
+
+const props = defineProps({
+    roles: { type: Array, required: true },
+    work_units: { type: Array, required: true },
 })
 </script>
