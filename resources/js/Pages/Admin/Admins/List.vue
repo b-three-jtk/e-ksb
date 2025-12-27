@@ -1,38 +1,29 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
+import { reactive, watch } from 'vue'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { Icon } from '@iconify/vue'
 
-// Data statis dulu (nanti dari backend)
-const admins = [
-    {
-        id: 1,
-        nik: 'SW15120004',
-        name: 'Diana Larasati',
-        email: 'dianalarasati@gmail.com',
-        posisi: 'Bendahara',
-        status: 'Aktif',
-        avatar: 'https://i.pravatar.cc/40?img=5',
-    },
-    {
-        id: 1,
-        nik: 'SW15120009',
-        name: 'Alvaro Cleosanda',
-        email: 'alvarooo@gmail.com',
-        posisi: 'Administratif',
-        status: 'Aktif',
-        avatar: 'https://i.pravatar.cc/40?img=5',
-    },
-    {
-        id: 1,
-        nik: 'SW15120006',
-        name: 'Hekal Mlanaf',
-        email: 'kallll@gmail.com',
-        posisi: 'Administrasi',
-        status: 'Aktif',
-        avatar: 'https://i.pravatar.cc/40?img=5',
-    },
-]
+const props = defineProps({
+    admins: Object,
+    filters: Object,
+    roles: Array,
+})
+
+const filters = reactive({
+    search: props.filters?.search ?? '',
+    status: props.filters?.status ?? '',
+    role: props.filters?.role ?? '',
+    perPage: props.filters?.perPage ?? 10,
+})
+
+watch(filters, () => {
+    router.get(
+        '/admin/admins',
+        filters,
+        { preserveState: true, replace: true }
+    )
+})
 </script>
 
 <template>
@@ -65,7 +56,7 @@ const admins = [
                 </div>
 
                 <Link
-                    href="/admin/admins/create"
+                    href="/admin/create"
                     class="font-heading bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 text-sm"
                 >
                     + Tambah Admin
@@ -76,7 +67,10 @@ const admins = [
             <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <span class="text-sm text-gray-500">Tampilkan</span>
-                    <select class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select 
+                        v-model="filters.perPage"
+                        class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
                         <option>10</option>
                         <option>25</option>
                         <option>50</option>
@@ -88,6 +82,7 @@ const admins = [
                 <div class="flex justify-end gap-3 px-6 py-4 border-b">
                     <div class="relative">
                         <input
+                            v-model="filters.search"
                             type="text"
                             placeholder="Search..."
                             class="pl-10 pr-4 py-2 border rounded-lg text-sm w-64"
@@ -98,10 +93,22 @@ const admins = [
                         />
                     </div>
 
-                    <button class="flex items-center gap-2 border rounded-lg px-4 py-2 text-sm">
-                        <Icon icon="mdi:filter-variant" class="w-4 h-4" />
-                        Filter
-                    </button>
+                    <select v-model="filters.status" class="border rounded-md px-3 py-2 text-sm">
+                        <option value="">Semua Status</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Tidak Aktif">Tidak Aktif</option>
+                    </select>
+
+                    <select v-model="filters.role" class="border rounded-md px-3 py-2 text-sm">
+                        <option value="">Semua Posisi</option>
+                        <option
+                            v-for="role in roles"
+                            :key="role"
+                            :value="role"
+                        >
+                            {{ role }}
+                        </option>
+                    </select>
                 </div>
             </div>
 
@@ -124,11 +131,11 @@ const admins = [
                     <tbody
                         class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         <tr
-                            v-for="(admin, index) in admins" 
+                            v-for="(admin, index) in admins.data" 
                             :key="admin.id"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td class="px-6 py-4 text-sm">
-                                {{ index + 1 }}
+                                {{ admins.from + index }}
                             </td>
 
                             <td class="px-6 py-4 text-sm">
@@ -155,9 +162,12 @@ const admins = [
 
                             <td class="px-6 py-4">
                                 <span
-                                    class="px-4 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
+                                    class="px-4 py-1 rounded-full text-xs"
+                                    :class="admin.status === 'Aktif'
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-gray-200 text-gray-600'"
                                 >
-                                    Aktif
+                                    {{ admin.status }}
                                 </span>
                             </td>
 
@@ -172,12 +182,12 @@ const admins = [
                                     </button>
 
                                     <!-- View -->
-                                    <button
-                                        class="text-gray-500 hover:text-blue-600 transition"
-                                        title="Detail"
+                                    <Link
+                                        :href="`/admin/show/${admin.id}`"
+                                        class="text-gray-500 hover:text-blue-600"
                                     >
-                                        <Icon icon="mdi:eye-outline" class="w-5 h-5" />
-                                    </button>
+                                        <Icon icon="mdi:eye-outline" />
+                                    </Link>
                                 </div>
                             </td>
                         </tr>
@@ -186,19 +196,18 @@ const admins = [
             </div>
 
             <!-- Pagination -->
-            <div
-                class="p-6 flex justify-center items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                <button class="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                    Sebelumnya
-                </button>
-                <span class="px-3 py-1 bg-blue-600 text-white rounded">
-                    1
-                </span>
-                <span>2</span>
-                <span>3</span>
-                <button class="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                    Berikutnya
-                </button>
+            <div class="p-6 flex gap-2 justify-center">
+                <Link
+                    v-for="link in admins.links"
+                    :key="link.label"
+                    :href="link.url ?? '#'"
+                    v-html="link.label"
+                    class="px-3 py-1 border rounded"
+                    :class="{
+                        'bg-blue-600 text-white': link.active,
+                        'text-gray-400': !link.url
+                    }"
+                />
             </div>
         </div>
     </AdminLayout>
