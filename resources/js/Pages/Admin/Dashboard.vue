@@ -7,7 +7,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <CardInfo title="Total Kas" content="Rp18,600,000" :percentage="5" />
                 <CardInfo title="Total Penjualan" content="Rp108,600,000" :percentage="-3" />
-                <CardInfo title="Jumlah Anggota Aktif" content="1213" :percentage="2" />
+                <CardInfo title="Jumlah Anggota Aktif" :content="active_user_count" :percentage="2" />
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <CardStatisticBar title="Statistik Penjualan" />
@@ -31,6 +31,10 @@ import CardInfo from '@/Components/CardInfo.vue'
 import CardStatisticBar from '@/Components/CardStatisticBar.vue'
 import CardTable from '@/Components/CardTable.vue'
 import CardSingleInfo from '@/Components/CardSingleInfo.vue'
+
+const props = defineProps({
+    active_user_count: Number,
+});
 
 const user_columns = [
     { key: 'name', label: 'Nama' },
