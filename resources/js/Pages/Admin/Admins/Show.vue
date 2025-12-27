@@ -9,7 +9,7 @@
                         <div class="flex flex-col justify-center gap-1">
                             <h1 class="card-title">{{ user.name }}</h1>
                             <p class="text-gray-500">
-                                {{ user.work_unit }}
+                                {{ user.role.name }}
                             </p>
                         </div>
                     </div>
@@ -35,63 +35,26 @@
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jenis Kelamin</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.gender }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.gender ?? '-' }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Lahir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.birth_date
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.birth_date ?? '-'
                                         }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Pendidikan Terakhir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.last_education
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.last_education ?? '-'
                                         }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Unit Kerja</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.work_unit }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.work_unit.name }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Lembaga</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.institution
                                         }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Status Pernikahan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.marital_status
-                                        }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pasangan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.spouse_name
-                                        }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Jumlah Tanggungan
-                                        Keluarga</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.dependents
-                                        }}</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="flex flex-col gap-8 border-0 border-l-2 border-l-stroke pl-8 py-6">
-                            <h1 class="card-title">Berkas Pendukung</h1>
-                            <ul class="grid grid-cols-2 gap-6">
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Foto KTP</span>
-                                    <button
-                                        class="items-center flex justify-center gap-2 rounded-xl border border-gray-300 bg-muted mr-auto px-12 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-                                        <span class="icon-[tabler--eye]" style="width: 24px; height: 24px;"></span>
-                                        Lihat
-                                    </button>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Foto KK</span>
-                                    <button
-                                        class="items-center flex justify-center gap-2 rounded-xl border border-gray-300 bg-muted mr-auto px-12 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-                                        <span class="icon-[tabler--eye]" style="width: 24px; height: 24px;"></span>
-                                        Lihat
-                                    </button>
                                 </li>
                             </ul>
                         </div>
@@ -102,7 +65,7 @@
                             <ul class="grid grid-cols-2 gap-6">
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Telepon</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.phone_number
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.phone_number ?? '-'
                                         }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
@@ -111,30 +74,11 @@
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Sesuai KTP</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.address }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.address ?? '-' }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Domisili</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.residential_address
-                                        }}</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="flex flex-col gap-8 border-0 border-l-2 border-l-stroke pl-8 py-6">
-                            <h1 class="card-title">Ahli Waris</h1>
-                            <ul class="grid grid-cols-2 gap-6">
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Nama Ahli Waris</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ heirs[0].name }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Hubungan Keluarga</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ heirs[0].relationship
-                                        }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Kontak Ahli Waris</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ heirs[0].contact
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.residential_address ?? '-'
                                         }}</span>
                                 </li>
                             </ul>
@@ -151,45 +95,6 @@ import AdminLayout from '@/Layouts/Admin/Layout.vue';
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue';
 
 const props = defineProps({
-    user: {
-        nik: String,
-        gender: String,
-        birth_date: String,
-        last_education: String,
-        work_unit: String,
-        institution: String,
-        marital_status: String,
-        spouse_name: String,
-        dependents: Number,
-        phone_number: String,
-        email: String,
-        address: String,
-        residential_address: String,
-    },
-    heirs: {
-        name: String,
-        relationship: String,
-        contact: String,
-    },
-    saving_accounts: {
-        pokok: {
-            balance: Number,
-            last_updated: String,
-            last_transaction: String,
-            transaction_date: String,
-        },
-        wajib: {
-            balance: Number,
-            last_updated: String,
-            last_transaction: String,
-            transaction_date: String,
-        },
-        sukarela: {
-            balance: Number,
-            last_updated: String,
-            last_transaction: String,
-            transaction_date: String,
-        },
-    },
+    user: { type: Object, required: true },
 });
 </script>

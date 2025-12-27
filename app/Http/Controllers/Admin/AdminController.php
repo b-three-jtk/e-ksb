@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Role;
+use App\Models\User;
+use App\Models\WorkUnit;
+use App\Enums\UserStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreAdminRequest;
 
 class AdminController extends Controller
 {
@@ -20,17 +26,42 @@ class AdminController extends Controller
      */
     public function create()
     {
+        $work_units = WorkUnit::all()->map(fn($unit) => [
+            'id' => $unit->id,
+            'name' => $unit->name
+        ]);
+        $roles = Role::all()->map(fn($role) => [
+            'id' => $role->id,
+            'name' => $role->name
+        ]);
+
         return inertia('Admin/Admins/Create', [
-            'title' => 'Create Admin',
+            'work_units' => $work_units,
+            'roles' => $roles,
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreAdminRequest $request)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $data = $request->validated();
+
+            User::create([
+                ...$data,
+                'password' => bcrypt('Password123'),
+                'status' => UserStatus::ACTIVE->value,
+            ]);
+
+            DB::commit();
+            return redirect()->route('admin.dashboard')->with('success', 'Admin berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menambahkan admin: ' . $e->getMessage())->withInput();
+        }
     }
 
     /**
@@ -38,32 +69,9 @@ class AdminController extends Controller
      */
     public function show(string $id)
     {
-        $user = [
-            'name' => 'Asep Suhendar',
-            'nik' => '123456789012345',
-            'gender' => 'Laki-laki',
-            'birth_date' => '1990-01-01',
-            'last_education' => 'STRATA I',
-            'work_unit' => 'JTK',
-            'institution' => 'Politeknik Negeri Bandung',
-            'marital_status' => 'Kawin',
-            'spouse_name' => 'Siti Aminah',
-            'dependents' => 2,
-            'phone_number' => '081234567890',
-            'email' => 'user@example.com',
-            'address' => 'Jl. Merdeka No. 123, Bandung',
-            'residential_address' => 'Jl. Sudirman No. 456, Bandung',
-        ];
-        $heirs = [
-            [
-                'name' => 'Siti Aminah',
-                'relationship' => 'Istri',
-                'contact' => '081298765432',
-            ]
-        ];
+        $admin = User::with('role', 'workUnit')->findOrFail($id);
         return inertia('Admin/Admins/Show', [
-            'user' => $user,
-            'heirs' => $heirs,
+            'user' => $admin,
             'id' => $id,
         ]);
     }
