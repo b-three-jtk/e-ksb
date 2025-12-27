@@ -165,7 +165,7 @@ watch(filters, () => {
                                     class="px-4 py-1 rounded-full text-xs"
                                     :class="admin.status === 'Aktif'
                                         ? 'bg-green-100 text-green-700'
-                                        : 'bg-gray-200 text-gray-600'"
+                                        : 'bg-red-200 text-red-600'"
                                 >
                                     {{ admin.status }}
                                 </span>
