@@ -1,42 +1,77 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
+import { reactive, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 
-// Ringkasan (statis)
-const summary = [
-    {
-        title: 'Jumlah Anggota Aktif',
-        value: 1213,
-        change: '+2.5%',
-        trend: 'up',
-        note: 'dari bulan lalu',
-    },
-    {
-        title: 'Anggota Baru Bulan Ini',
-        value: 12,
-        change: '-2.5%',
-        trend: 'down',
-        note: 'dari bulan lalu',
-    },
-    {
-        title: 'Menunggu Verifikasi',
-        value: 10,
-        link: 'Selengkapnya',
-    },
-]
+const props = defineProps({
+    members: Object,
+    filters: Object,
+    statuses: Array,
+    summary: Object,
+})
 
-// Data anggota (statis)
-const members = Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    no_anggota: 'SW15120004',
-    name: 'Diana Larasati',
-    joined_at: '12/9/2025',
-    phone: '08936482876',
-    total_simpanan: 'Penyetoran',
-    status: 'Aktif',
-    avatar: 'https://i.pravatar.cc/40?img=5',
-}))
+const filters = reactive({
+    search: props.filters.search ?? '',
+    status: props.filters.status ?? '',
+    per_page: props.filters.per_page ?? 10,
+    sort_by: props.filters.sort_by ?? 'joined_date',
+    sort_dir: props.filters.sort_dir ?? 'desc',
+})
+
+const applyFilters = () => {
+    router.get(
+        '/admin/anggota',
+        {
+            search: filters.search || undefined,
+            status: filters.status || undefined,
+            per_page: filters.per_page,
+            sort_by: filters.sort_by,
+            sort_dir: filters.sort_dir,
+        },
+        {
+            preserveScroll: true,
+            replace: true,
+            preserveState: false,
+        }
+    )
+}
+
+let timeout
+watch(() => filters.search, () => {
+    clearTimeout(timeout)
+    timeout = setTimeout(applyFilters, 500)
+})
+
+watch(() => filters.per_page, applyFilters)
+watch(() => filters.status, applyFilters)
+
+const toggleSort = (column) => {
+    if (filters.sort_by === column) {
+        filters.sort_dir = filters.sort_dir === 'asc' ? 'desc' : 'asc'
+    } else {
+        filters.sort_by = column
+        filters.sort_dir = 'asc'
+    }
+    applyFilters()
+}
+
+const statusClass = (status) => {
+    switch (status) {
+        case 'Aktif':
+            return 'bg-green-100 text-green-700 border border-green-200'
+        case 'Nonaktif':
+            return 'bg-red-100 text-red-700 border border-red-200'
+        case 'Mengundurkan Diri':
+            return 'bg-orange-100 text-orange-700 border border-orange-200'
+        case 'Menunggu Verifikasi':
+            return 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+        case 'Ditolak':
+            return 'bg-gray-100 text-gray-700 border border-gray-200'
+        default:
+            return 'bg-gray-100 text-gray-600 border border-gray-200'
+    }
+}
 </script>
 
 <template>
@@ -66,34 +101,19 @@ const members = Array.from({ length: 10 }, (_, i) => ({
             <h2 class="font-semibold mb-4 dark:text-gray-100">Ringkasan</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div
-                    v-for="item in summary"
-                    :key="item.title"
-                    class="border rounded-xl p-5 dark:text-gray-100"
-                >
-                    <div class="text-2xl font-bold">
-                        {{ item.value }}
-                    </div>
+                <div class="border rounded-xl p-5 dark:text-gray-100">
+                    <div class="text-2xl font-bold">{{ summary.active }}</div>
+                    <div class="text-sm text-gray-500">Jumlah Anggota Aktif</div>
+                </div>
 
-                    <div class="font-heading text-sm text-gray-500 mt-1">
-                        {{ item.title }}
-                    </div>
+                <div class="border rounded-xl p-5 dark:text-gray-100">
+                    <div class="text-2xl font-bold">{{ summary.new_this_month }}</div>
+                    <div class="text-sm text-gray-500">Anggota Baru Bulan Ini</div>
+                </div>
 
-                    <div v-if="item.change" class="mt-2 text-xs flex items-center gap-2">
-                        <span
-                            :class="item.trend === 'up'
-                                ? 'text-green-600 bg-green-100'
-                                : 'text-red-600 bg-red-100'"
-                            class="px-2 py-0.5 rounded-full"
-                        >
-                            {{ item.change }}
-                        </span>
-                        <span class="text-gray-400">{{ item.note }}</span>
-                    </div>
-
-                    <div v-if="item.link" class="mt-3 text-sm text-blue-600 cursor-pointer">
-                        {{ item.link }} →
-                    </div>
+                <div class="border rounded-xl p-5 dark:text-gray-100">
+                    <div class="text-2xl font-bold">{{ summary.in_review }}</div>
+                    <div class="text-sm text-gray-500">Menunggu Verifikasi</div>
                 </div>
             </div>
         </div>
@@ -110,11 +130,15 @@ const members = Array.from({ length: 10 }, (_, i) => ({
             <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 dark:text-gray-100">
                 <div class="flex items-center gap-3">
                     <span class="text-sm text-gray-500">Tampilkan</span>
-                    <select class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>10</option>
-                        <option>25</option>
-                        <option>50</option>
-                        <option>100</option>
+                    <select 
+                        v-model="filters.per_page"
+                        class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option :value="10">10</option>
+                        <option :value="25">25</option>
+                        <option :value="50">50</option>
+                        <option :value="100">100</option>
+
                     </select>
                     <span class="text-sm text-gray-500">data per halaman</span>
                 </div>
@@ -122,6 +146,7 @@ const members = Array.from({ length: 10 }, (_, i) => ({
                 <div class="flex justify-end gap-3 px-6 py-4 border-b">
                     <div class="relative">
                         <input
+                            v-model="filters.search"
                             type="text"
                             placeholder="Search..."
                             class="pl-10 pr-4 py-2 border rounded-lg text-sm w-64"
@@ -132,10 +157,15 @@ const members = Array.from({ length: 10 }, (_, i) => ({
                         />
                     </div>
 
-                    <button class="flex items-center gap-2 border rounded-lg px-4 py-2 text-sm">
-                        <Icon icon="mdi:filter-variant" class="w-4 h-4" />
-                        Filter
-                    </button>
+                    <select
+                        v-model="filters.status"
+                        class="border rounded-lg px-3 py-2 text-sm"
+                    >
+                        <option value="" class="dark:text-gray-800">Semua Status</option>
+                        <option v-for="status in statuses" :key="status" :value="status" class="dark:text-gray-800">
+                            {{ status }}
+                        </option>
+                    </select>
                 </div>
             </div>
 
@@ -147,8 +177,52 @@ const members = Array.from({ length: 10 }, (_, i) => ({
                         <tr>
                             <th class="font-heading px-6 py-3 text-left text-sm font-medium">No</th>
                             <th class="font-heading px-6 py-3 text-left text-sm font-medium">No Anggota</th>
-                            <th class="font-heading px-6 py-3 text-left text-sm font-medium">Profil Anggota</th>
-                            <th class="font-heading px-6 py-3 text-left text-sm font-medium">Tanggal Bergabung</th>
+                            <th
+                                @click="toggleSort('name')"
+                                class="cursor-pointer select-none font-heading px-6 py-3 text-left text-sm font-medium"
+                            >
+                                <div class="flex items-center gap-1">
+                                    Profil Anggota
+                                    <Icon
+                                        v-if="filters.sort_by === 'name' && filters.sort_dir === 'asc'"
+                                        icon="tabler:chevron-down"
+                                        class="w-4 h-4"
+                                    />
+                                    <Icon
+                                        v-else-if="filters.sort_by === 'name' && filters.sort_dir === 'desc'"
+                                        icon="tabler:chevron-up"
+                                        class="w-4 h-4"
+                                    />
+                                    <Icon
+                                        v-else
+                                        icon="tabler:chevrons-up-down"
+                                        class="w-4 h-4 opacity-40"
+                                    />
+                                </div>
+                            </th>
+                            <th
+                                @click="toggleSort('joined_date')"
+                                class="cursor-pointer select-none font-heading px-6 py-3 text-left text-sm font-medium"
+                            >
+                                <div class="flex items-center gap-1">
+                                    Tanggal Bergabung
+                                    <Icon
+                                        v-if="filters.sort_by === 'joined_date' && filters.sort_dir === 'asc'"
+                                        icon="tabler:chevron-down"
+                                        class="w-4 h-4"
+                                    />
+                                    <Icon
+                                        v-else-if="filters.sort_by === 'joined_date' && filters.sort_dir === 'desc'"
+                                        icon="tabler:chevron-up"
+                                        class="w-4 h-4"
+                                    />
+                                    <Icon
+                                        v-else
+                                        icon="tabler:chevrons-up-down"
+                                        class="w-4 h-4 opacity-40"
+                                    />
+                                </div>
+                            </th>
                             <th class="font-heading px-6 py-3 text-left text-sm font-medium">Kontak</th>
                             <th class="font-heading px-6 py-3 text-left text-sm font-medium">Total Simpanan</th>
                             <th class="font-heading px-6 py-3 text-left text-sm font-medium">Status</th>
@@ -159,11 +233,11 @@ const members = Array.from({ length: 10 }, (_, i) => ({
                     <tbody
                         class="font-body bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 ">
                         <tr
-                            v-for="(member, index) in members" 
+                            v-for="(member, index) in members.data" 
                             :key="member.id"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td class="px-6 py-4 text-sm dark:text-gray-300">
-                                {{ index + 1 }}
+                                {{ (members.current_page - 1) * members.per_page + index + 1 }}
                             </td>
 
                             <td class="px-6 py-4 text-sm dark:text-gray-300">
@@ -194,7 +268,10 @@ const members = Array.from({ length: 10 }, (_, i) => ({
                             </td>
 
                             <td class="px-6 py-4">
-                                <span class="px-4 py-1 text-xs rounded-full bg-green-100 text-green-700">
+                                <span
+                                    class="px-3 py-1 text-xs rounded-full font-medium whitespace-nowrap"
+                                    :class="statusClass(member.status)"
+                                >
                                     {{ member.status }}
                                 </span>
                             </td>
@@ -210,12 +287,13 @@ const members = Array.from({ length: 10 }, (_, i) => ({
                                     </button>
 
                                     <!-- View -->
-                                    <button
-                                        class="text-gray-500 hover:text-blue-600 transition"
-                                        title="Detail"
+                                    <Link
+                                        :href="`/admin/users/show/${member.id}`"
+                                        class="text-gray-500 hover:text-blue-600"
                                     >
                                         <Icon icon="mdi:eye-outline" class="w-5 h-5" />
-                                    </button>
+                                    </Link>
+
                                 </div>
                             </td>
                         </tr>
@@ -225,18 +303,25 @@ const members = Array.from({ length: 10 }, (_, i) => ({
 
             <!-- Pagination -->
             <div
-                class="p-6 flex justify-center items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                <button class="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                    Sebelumnya
-                </button>
-                <span class="px-3 py-1 bg-blue-600 text-white rounded">
-                    1
-                </span>
-                <span>2</span>
-                <span>3</span>
-                <button class="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                    Berikutnya
-                </button>
+                v-if="members.total > 0"
+                class="p-6 flex justify-center gap-1 flex-wrap text-sm"
+            >
+                <template v-for="link in members.links" :key="link.label">
+                    <span
+                        v-if="!link.url"
+                        class="px-3 py-1 text-gray-400"
+                        v-html="link.label"
+                    />
+                    <Link
+                        v-else
+                        :href="link.url"
+                        preserve-scroll
+                        preserve-state
+                        class="px-3 py-1 border rounded"
+                        :class="{ 'bg-blue-600 text-white': link.active }"
+                        v-html="link.label"
+                    />
+                </template>
             </div>
         </div>
     </AdminLayout>
