@@ -131,6 +131,33 @@ class UserController extends Controller
             ->when($request->work_unit_id, function ($query, $unitId) {
                 $query->where('work_unit_id', $unitId);
             })
+    public function list_member(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $search = $request ->input('search');
+        $status = $request->input('status');
+
+        $allowedSorts = ['name', 'joined_date'];
+        $sortBy = in_array($request->sort_by, $allowedSorts)
+            ? $request->sort_by
+            : 'joined_date';
+        $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
+
+        $query = User::with('savingAccounts');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ILIKE', "%{$search}%")
+                ->orWhere('nik', 'ILIKE', "%{$search}%")
+                ->orWhere('phone_number', 'ILIKE', "%{$search}%");
+            });
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $members = $query
             ->orderBy($sortBy, $sortDir)
             ->paginate($perPage)
             ->withQueryString()
