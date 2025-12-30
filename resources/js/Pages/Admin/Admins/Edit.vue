@@ -8,7 +8,7 @@
                     <p class="text-sm text-gray-400">Perbarui data admin di sini.</p>
                 </div>
 
-                    <form @submit.prevent="form.put(`/admin/edit/${props.admin.id}`)" class="flex flex-col">
+                    <form @submit.prevent="form.put(`/admin/${props.admin.id}`)" class="flex flex-col">
                     <div class="grid md:grid-cols-2 grid-cols-1 px-8 gap-6">
                         <!-- NIK -->
                         <div>
@@ -88,7 +88,7 @@
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 Email<span class="text-red-500">*</span>
                             </label>
-                            <input type="email" v-model="form.email" placeholder="nama@example.com" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                            <input type="email" v-model="form.email" autocomplete="email" placeholder="nama@example.com" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                                 form.errors.email ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                             ]"
                                 class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />

@@ -23,7 +23,7 @@ class StoreAdminRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'nik' => 'required|string|unique:users,nik|min:16|max:16',
+            'nik' => 'required|string|unique:users,nik|digits:16',
             'work_unit_id' => 'required|exists:work_units,id',
             'email' => 'required|email|unique:users,email|max:255',
             'phone_number' => 'nullable|string|max:20',
