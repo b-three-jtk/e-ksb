@@ -251,7 +251,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/Admin/Layout.vue';
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue';
-import ProgressBar from 'primevue/progressbar';
 
 const props = defineProps({
     user: { type: Object, required: true },

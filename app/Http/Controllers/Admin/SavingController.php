@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\SavingTransaction;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -36,28 +37,10 @@ class SavingController extends Controller
      */
     public function show(string $id)
     {
-        // dummy data
-        $transaction = [
-            'number' => $id,
-            'status' => 'Selesai',
-            'amount' => 1500000,
-            'type' => 'Simpanan Sukarela',
-            'category' => 'Penyetoran',
-            'transaction_date' => '12 Juni 2024',
-            'method' => 'Tunai',
-            'description' => 'Setoran simpanan sukarela bulan Juni',
-        ];
+        $data = SavingTransaction::with( 'savingAccount.user.workUnit')->find($id);
 
-        $member = [
-            'id' => 'AGT-2023001',
-            'name' => 'Asep Suhendar',
-            'status' => 'Aktif',
-            'work_unit' => 'JTK',
-        ];
         return inertia('Admin/Savings/Show', [
-            'transaction' => $transaction,
-            'member' => $member,
-            'history' => [],
+            'data' => $data,
         ]);
     }
 
