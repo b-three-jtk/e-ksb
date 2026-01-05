@@ -2,6 +2,7 @@
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SavingController;
@@ -13,9 +14,22 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/auth/register', function () {
-    return Inertia::render('Auth/Register');
-})->name('register');
+// Authentication Routes
+Route::prefix('auth')
+    ->name('auth.')
+    ->middleware('guest')
+    ->group(function () {
+
+        Route::get('/register', [RegisterController::class, 'create'])
+            ->name('register');
+
+        Route::post('/register', [RegisterController::class, 'store'])
+            ->name('register.store');
+
+        Route::get('/register/success', function () {
+            return Inertia::render('Auth/RegisterSuccess');
+        })->name('register.success');
+    });
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
