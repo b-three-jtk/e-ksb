@@ -14,12 +14,22 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/auth/register', [RegisterController::class, 'create'])
+// Authentication Routes
+Route::prefix('auth')
+    ->name('auth.')
     ->middleware('guest')
-    ->name('register');
+    ->group(function () {
 
-Route::post('/auth/register', [RegisterController::class, 'store'])
-    ->name('register.store');
+        Route::get('/register', [RegisterController::class, 'create'])
+            ->name('register');
+
+        Route::post('/register', [RegisterController::class, 'store'])
+            ->name('register.store');
+
+        Route::get('/register/success', function () {
+            return Inertia::render('Auth/RegisterSuccess');
+        })->name('register.success');
+    });
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
