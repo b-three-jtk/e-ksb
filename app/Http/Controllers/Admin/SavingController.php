@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\TransactionStatus;
+use App\Http\Requests\StoreSavingTransactionValidationRequest;
 use App\Models\SavingTransaction;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -66,5 +68,25 @@ class SavingController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function validateRequest(StoreSavingTransactionValidationRequest $request, string $id)
+    {
+        try {
+            $data = $request->validated();
+
+            $transaction = SavingTransaction::findOrFail($id);
+            if ($data['status'] === 'accepted') {
+                $transaction->status = TransactionStatus::COMPLETED;
+            } elseif ($data['status'] === 'rejected') {
+                $transaction->status = TransactionStatus::REJECTED;
+                $transaction->description = $data['description'] ?? null;
+            }
+            $transaction->save();
+
+            return redirect()->back()->with('success', 'Transaksi simpanan berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui transaksi simpanan: ' . $e->getMessage());
+        }
     }
 }
