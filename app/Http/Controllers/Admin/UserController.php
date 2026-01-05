@@ -37,7 +37,7 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $user = User::with('role', 'workUnit', 'savingAccounts', 'heirs', 'userDocs', 'financings.loan.payments')->findOrFail($id);
+        $user = User::with(['role', 'workUnit', 'savingAccounts.transactions' => function($query) {$query->latest('created_at');}, 'heirs', 'userDocs', 'financings.loan.payments'])->findOrFail($id);
         return inertia('Admin/User/Show', ['user' => $user]);
     }
     /**

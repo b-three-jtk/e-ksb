@@ -36,45 +36,45 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jenis Kelamin</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.gender ?? '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Lahir</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.birth_date ?? '-'
-                                    }}</span>
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Pendidikan Terakhir</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.last_education ??
                                         '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Unit Kerja</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.work_unit.name
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Lembaga</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.institution
-                                    }}</span>
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Status Pernikahan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.marital_status ??
                                         '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pasangan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.spouse_name ?? '-'
-                                    }}</span>
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jumlah Tanggungan
                                         Keluarga</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.dependents ?? '-'
-                                    }}</span>
+                                        }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -107,7 +107,7 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Telepon</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.phone_number ?? '-'
-                                    }}</span>
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Email</span>
@@ -116,13 +116,13 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Sesuai KTP</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.address ?? '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Domisili</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.residential_address
                                         ?? '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -132,19 +132,19 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Ahli Waris</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.heirs.name ?? '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Hubungan Keluarga</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.heirs.relationship
                                         ?? '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Kontak Ahli Waris</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.heirs.contact ??
                                         '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -157,23 +157,26 @@
                             <ul class="grid grid-cols-2 gap-6">
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Saldo</span>
-                                    <span class="font-medium text-dark-text dark:text-white">Rp{{
-                                        account.balance }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{
+                                        parseCurrencyAmount(account.balance) ?? '0' }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir Diperbarui</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        account.last_updated }}</span>
+                                        dateParser(account.updated_at) ?? '-' }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Transaksi Terakhir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        account.last_transaction }}</span>
+                                    <span
+                                        :class="account.transactions[0]?.type == 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
+                                        class="font-medium text-dark-text dark:text-white">{{
+                                            account.transactions[0]?.type == 'Penyetoran' ? '+' : '-' }}
+                                        {{ parseCurrencyAmount(account.transactions[0]?.amount) ?? '-' }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Transaksi</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        account.transaction_date }}</span>
+                                        dateParser(account.transactions[0]?.transaction_date) ?? '-' }}</span>
                                 </li>
                             </ul>
                             <button
@@ -196,34 +199,42 @@
                                         financing.product_type }}</span>
                                 </li>
                                 <li class="flex justify-between">
+                                    <span class="text-sm text-gray-500 dark:text-gray-300">Harga Pembiayaan</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{
+                                        parseCurrencyAmount(financing.loan.total_price) }}</span>
+                                </li>
+                                <li class="flex justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir Diperbarui</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        financing.created_at }}</span>
+                                        dateParser(financing.created_at) }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Sisa Pembiayaan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            financing.status }}</span>
+                                            parseCurrencyAmount(financing.loan.total_price -
+                                                financing.loan.payments.length * financing.loan.amount_ins) }}</span>
                                     </div>
                                     <div class="progress-container">
-                                        <div class="progress-bar" :style="{ width: '50%' }"></div>
+                                        <div class="progress-bar"
+                                            :style="{ width: (financing.loan.payments.length / financing.loan.tenor * 100) + '%' }">
+                                        </div>
                                     </div>
                                 </li>
                                 <li class="flex justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">Rp{{
-                                        financing.loan.amount_ins }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{
+                                        parseCurrencyAmount(financing.loan.amount_ins) }}</span>
                                 </li>
                                 <li class="flex justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jatuh Tempo Berikutnya</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        financing.created_at }}</span>
+                                        dateParser(financing.created_at) }}</span>
                                 </li>
                                 <li class="flex justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Posisi Angsuran</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        financing.created_at }}</span>
+                                        financing.loan.payments.length }} dari {{ financing.loan.tenor }}</span>
                                 </li>
                             </ul>
                             <div class="flex gap-4 w-full px-8">
@@ -251,10 +262,11 @@
 <script setup>
 import AdminLayout from '@/Layouts/Admin/Layout.vue';
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue';
+import dateParser from '@/Composables/dateParser.js';
+import parseCurrencyAmount from '@/Composables/moneyParser.js';
 
 const props = defineProps({
     user: { type: Object, required: true },
 });
 
-console.log('loaded user', props.user)
 </script>
