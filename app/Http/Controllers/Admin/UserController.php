@@ -6,6 +6,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\WorkUnit;
+use App\Mail\ApprovalNotificationMail;
+use App\Mail\RejectionNotificationMail;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -54,6 +57,7 @@ class UserController extends Controller
 
         return Inertia::render('Admin/User/Verification/Show', [
             'member' => [
+                'id' => $user->id,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'work_unit' => $user->workUnit->name ?? '-',
@@ -138,5 +142,31 @@ class UserController extends Controller
             'workUnits' => WorkUnit::select('id', 'name')->get(),
             'title' => 'Verifikasi Calon Anggota',
         ]);
+    }
+
+    public function submitApproval(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'decision' => 'required|in:approved,rejected',
+            'note' => 'nullable|string',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        if ($validated['decision'] === 'approved') {
+            // Update status user menjadi Aktif
+            $user->update(['status' => 'Aktif']);
+            Mail::to($user->email)->send(new ApprovalNotificationMail($user));
+
+            return redirect()->route('admin.users.prospective')
+                ->with('success', 'Persetujuan berhasil dikirim dan email notifikasi sudah dikirim ke ' . $user->email);
+        } else {
+            // Update status user menjadi Ditolak
+            $user->update(['status' => 'Ditolak dengan alasan']);
+            Mail::to($user->email)->send(new RejectionNotificationMail($user, $validated['note'] ?? ''));
+
+            return redirect()->route('admin.users.prospective')
+                ->with('success', 'Penolakan berhasil dicatat dan email pemberitahuan sudah dikirim ke ' . $user->name);
+        }
     }
 }
