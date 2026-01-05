@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('saving_transactions', function (Blueprint $table) {
-            $table->id();
+            $table->string('id')->primary();
             $table->decimal('amount', 15, 2);
             $table->enum('type', ['Penarikan', 'Penyetoran']);
             $table->enum('status', ['Belum Ditinjau', 'Ditolak dengan alasan', 'Selesai']);

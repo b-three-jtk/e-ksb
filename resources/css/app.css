@@ -799,3 +799,24 @@ span.flatpickr-weekday,
 .card-title {
     @apply text-xl font-semibold text-dark-text dark:text-white/90;
 }
+
+.features-strip { overflow-x: hidden; }
+.marquee { display: flex; }
+.marquee__inner {
+  display: flex;
+  flex: none;           /* jangan shrink */
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee__inner { animation-play-state: paused; } /* pause saat hover */
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); } /* geser satu track penuh */
+}
+
+.progress-container {
+    @apply w-full h-2 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.progress-bar { height: 100%; background: #4caf50; transition: width 0.3s ease; }

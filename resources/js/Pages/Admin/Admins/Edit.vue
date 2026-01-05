@@ -1,14 +1,14 @@
 <template>
     <Layout>
         <div class="flex flex-col px-20">
-            <PageBreadcrumb page-title="Tambah Admin" />
+            <PageBreadcrumb page-title="Edit Admin" />
             <div class="card-layout px-0!">
                 <div class="flex flex-col px-8 border-b-2 border-gray-200 dark:border-gray-700 pb-4 mb-4">
-                    <h1 class="card-title">Tambah Admin</h1>
-                    <p class="text-sm text-gray-400">Tambahkan data admin baru di sini.</p>
+                    <h1 class="card-title">Edit Admin</h1>
+                    <p class="text-sm text-gray-400">Perbarui data admin di sini.</p>
                 </div>
 
-                <form @submit.prevent="form.post('/admin/store')" class="flex flex-col">
+                    <form @submit.prevent="form.put(`/admin/${props.admin.id}`)" class="flex flex-col">
                     <div class="grid md:grid-cols-2 grid-cols-1 px-8 gap-6">
                         <!-- NIK -->
                         <div>
@@ -88,7 +88,7 @@
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 Email<span class="text-red-500">*</span>
                             </label>
-                            <input type="email" v-model="form.email" placeholder="nama@example.com" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                            <input type="email" v-model="form.email" autocomplete="email" placeholder="nama@example.com" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                                 form.errors.email ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                             ]"
                                 class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
@@ -156,19 +156,20 @@ import { Link } from '@inertiajs/vue3'
 import Layout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 
-const form = useForm({
-    email: '',
-    nik: '',
-    role_id: '',
-    work_unit_id: '',
-    name: '',
-    institution: '',
-    address: '',
-    phone_number: '',
-})
-
 const props = defineProps({
+    admin: { type: Object, required: true },
     roles: { type: Array, required: true },
     work_units: { type: Array, required: true },
+})
+
+const form = useForm({
+    nik: props.admin.nik || '',
+    name: props.admin.name || '',
+    email: props.admin.email || '',
+    role_id: props.admin.role_id || '',
+    work_unit_id: props.admin.work_unit_id || '',
+    institution: props.admin.institution || '',
+    address: props.admin.address || '',
+    phone_number: props.admin.phone_number || '',
 })
 </script>

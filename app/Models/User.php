@@ -66,6 +66,17 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Get the profile picture URL
+     */
+    public function getProfilePictureUrlAttribute()
+    {
+        if ($this->profile_picture) {
+            return asset('storage/' . $this->profile_picture);
+        }
+        return asset('images/default-avatar.png');
+    }
+
     public function role()
     {
         return $this->belongsTo(Role::class);
