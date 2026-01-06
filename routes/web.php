@@ -34,9 +34,16 @@ Route::prefix('auth')
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
+    Route::put('/savings/validate/{id}', [SavingController::class, 'validateRequest'])->name('savings.validate');
+
+    Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
+
     Route::get('/admins', [AdminController::class, 'list']);
     Route::get('/create', [AdminController::class, 'create']);
     Route::get('/show/{id}', [AdminController::class, 'store']);
+    Route::get('/show/{id}', [AdminController::class, 'show']);
+
     Route::get('/verifikasi', [UserController::class, 'prospectiveMembers'])->name('users.prospective');
 
 });

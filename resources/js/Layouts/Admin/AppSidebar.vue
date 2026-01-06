@@ -174,8 +174,8 @@ const menuGroups = [
                 icon: UserIcon,
                 subItems: [
                     { name: "Anggota", path: "/anggota", pro: false },
-                    { name: "Verifikasi", path: "/verifikasi", pro: false },
-                    { name: "Admin", path: "/admin/admins", pro: false },
+                    { name: "Verifikasi", path: "/admin/verifikasi", pro: false },
+                    { name: "Admin", path: "/admin/admin", pro: false },
                 ],
             },
             {
