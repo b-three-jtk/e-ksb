@@ -167,23 +167,23 @@ const menuGroups = [
             {
                 icon: GridIcon,
                 name: "Dashboard",
-                path: "/dashboard",
+                path: "/admin/dashboard",
             },
             {
                 name: "Keanggotaan",
                 icon: UserIcon,
                 subItems: [
-                    { name: "Anggota", path: "/anggota", pro: false },
+                    { name: "Anggota", path: "/admin/anggota", pro: false },
                     { name: "Verifikasi", path: "/admin/verifikasi", pro: false },
-                    { name: "Admin", path: "/admin", pro: false },
+                    { name: "Admin", path: "/admin/admin", pro: false },
                 ],
             },
             {
                 name: "Produk",
                 icon: ProductIcon,
                 subItems: [
-                    { name: "Simpanan", path: "/simpanan", pro: false },
-                    { name: "Pembiayaan Murabahah", path: "/pembiayaan", pro: false },
+                    { name: "Simpanan", path: "/admin/savings", pro: false },
+                    { name: "Pembiayaan Murabahah", path: "/admin/financing", pro: false },
                 ],
             },
         ],

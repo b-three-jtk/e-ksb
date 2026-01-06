@@ -225,7 +225,7 @@
                     <div class="flex justify-between items-center">
                         <div class="flex flex-col gap-2">
                             <h1 class="card-title">Pengajuan Pembiayaan Murabahah</h1>
-                            <p class="text-gray-500">No. Transaksi #{{ financing_data[activeIndex].id }}</p>
+                            <p class="text-gray-500">No. Transaksi #{{ financing_data[activeIndex]?.id ?? '' }}</p>
                         </div>
                         <button
                             class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
@@ -237,19 +237,19 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-8 pb-5 pt-2">
                             <div class="flex flex-col">
                                 <p>Permintaan Produk</p>
-                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex].product_type }}</h1>
+                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex]?.product_type ?? '' }}</h1>
                             </div>
                             <div class="flex flex-col">
                                 <p>Nomor Anggota</p>
-                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex].member_number }}</h1>
+                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex]?.member_number ?? '' }}</h1>
                             </div>
                             <div class="flex flex-col">
                                 <p>Status</p>
-                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex].status }}</h1>
+                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex]?.status ?? '' }}</h1>
                             </div>
                             <div class="flex flex-col">
                                 <p>Nama Anggota</p>
-                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex].user_name }}</h1>
+                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex]?.user_name ?? '' }}</h1>
                             </div>
                         </div>
                         <div class="border border-stroke"></div>

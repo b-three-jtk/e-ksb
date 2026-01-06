@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('attachment');
-            $table->foreignId('transaction_id')->constrained('saving_transactions');
+            $table->string('transaction_id');
+            $table->foreign('transaction_id')
+                ->references('id')
+                ->on('saving_transactions')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

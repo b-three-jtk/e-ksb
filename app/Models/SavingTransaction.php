@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class SavingTransaction extends Model
 {
-    use HasUuids;
 
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
+        'id',
         'amount',
         'type',
         'status',

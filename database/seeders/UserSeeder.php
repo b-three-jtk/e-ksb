@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
         $role = Role::create(['name' => 'Super Admin']);
         $work_unit = WorkUnit::create(['name' => 'Jurusan Akuntansi']);
         User::create([
+            'member_number' => 'KS001',
             'nik' => '0000000001',
             'name' => 'Admin',
             'email' => 'admin@example.com',
