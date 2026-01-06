@@ -120,7 +120,7 @@ const toggleSort = (column) => {
                         <input
                             v-model="filters.search"
                             type="text"
-                            placeholder="Cari nama, NIK, email..."
+                            placeholder="Search"
                             class="
                                 pl-10 pr-4 py-2 w-64 text-sm
                                 border border-gray-300 rounded-lg
