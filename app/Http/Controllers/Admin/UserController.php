@@ -61,7 +61,7 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'nik' => $user->nik,
-                'work_unit' => $user->workUnit->name ?? '-',
+                'work_unit' => $user->workUnit->name,
                 'institution' => $user->institution,
                 'email' => $user->email,
                 'photo_url' => $photoUrl,
@@ -202,5 +202,116 @@ class UserController extends Controller
 
             return $redirect;
         }
+    }
+
+    /**
+     * Display the user's public profile
+     */
+    public function profile(string $id)
+    {
+        $user = User::with(['role', 'workUnit'])->findOrFail($id);
+        
+        $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
+        
+        return Inertia::render('User/Profile/Show', [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'nik' => $user->nik,
+                'birth_date' => $user->birth_date,
+                'gender' => $user->gender,
+                'institution' => $user->institution,
+                'work_unit' => $user->workUnit->name ?? '-',
+                'profile_picture' => $user->profile_picture,
+                'photo_url' => $photoUrl,
+            ]
+        ]);
+    }
+
+    /**
+     * Show the form for editing user profile
+     */
+    public function editProfile(string $id)
+    {
+        $user = User::with(['role', 'workUnit'])->findOrFail($id);
+        
+        $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
+        
+        return Inertia::render('User/Profile/Edit', [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'nik' => $user->nik,
+                'birth_date' => $user->birth_date,
+                'gender' => $user->gender,
+                'institution' => $user->institution,
+                'work_unit' => $user->workUnit->name ?? '-',
+                'profile_picture' => $user->profile_picture,
+                'photo_url' => $photoUrl,
+            ]
+        ]);
+    }
+
+    /**
+     * Update user profile
+     */
+    public function updateProfile(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'nik' => 'required|string|max:16',
+            'birth_date' => 'required|date',
+            'gender' => 'required|string|in:Laki-laki,Perempuan',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update($validated);
+
+        return redirect()->route('user.profile.show', $id)
+            ->with('success', 'Profil berhasil diperbarui');
+    }
+
+    /**
+     * Update user's profile picture
+     */
+    public function updateProfilePicture(Request $request, string $id)
+    {
+        $request->validate([
+            'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        // Delete old profile picture if exists
+        if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
+            \Storage::disk('public')->delete($user->profile_picture);
+        }
+
+        // Store new profile picture
+        $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+
+        $user->update([
+            'profile_picture' => $path
+        ]);
+
+        return redirect()->back()->with('success', 'Foto profil berhasil diperbarui');
+    }
+
+    /**
+     * Delete user's profile picture
+     */
+    public function deleteProfilePicture(string $id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
+            \Storage::disk('public')->delete($user->profile_picture);
+        }
+
+        $user->update([
+            'profile_picture' => null
+        ]);
+
+        return redirect()->back()->with('success', 'Foto profil berhasil dihapus');
     }
 }
