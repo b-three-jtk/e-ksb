@@ -10,6 +10,7 @@ use App\Enums\UserStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreAdminRequest;
 
 class AdminController extends Controller
 {
