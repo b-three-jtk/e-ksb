@@ -200,7 +200,7 @@ const toggleSort = (column) => {
                             <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">{{ member.email }}</td>
                             <td class="px-6 py-4">
                                 <Link
-                                    :href="`/admin/users/show/${member.id}`"
+                                    :href="`/admin/verifikasi/${member.id}`"
                                     class="
                                         inline-flex items-center gap-2
                                         font-body text-sm
