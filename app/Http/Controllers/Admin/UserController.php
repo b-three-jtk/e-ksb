@@ -129,7 +129,7 @@ class UserController extends Controller
                 'unit_kerja' => $user->workUnit?->name ?? '-',
             ]);
 
-        return Inertia::render('Admin/User/ProspectiveMembers', [
+        return Inertia::render('Admin/User/Verification/ProspectiveMembers', [
             'prospectiveMembers' => $members,
             'filters' => [
                 'search' => $request->search,
