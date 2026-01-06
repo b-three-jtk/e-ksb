@@ -1,10 +1,8 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { Icon } from '@iconify/vue'
-import { ref, computed } from 'vue'
-
-const activeTab = ref('semua')
+import { ref, computed, reactive, watch } from 'vue'
 
 const tabs = [
     { key: 'semua', label: 'Semua' },
@@ -14,39 +12,50 @@ const tabs = [
     { key: 'sukarela', label: 'Simpanan Sukarela' },
 ]
 
-const summary = [
-    {
-        title: 'Total Kas',
-        value: 'Rp.18,600,000',
-        trend: '+2.5%',
-        up: true,
-    },
-    {
-        title: 'Total Simpanan Keluar',
-        value: 'Rp.1,600,000',
-        trend: '',
-        up: false,
-    },
-    {
-        title: 'Total Simpanan Masuk',
-        value: 'Rp.8,600,000',
-        trend: '',
-        up: true,
-    },
-]
+const page = usePage()
 
-const transactions = Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    no_transaksi: 'SW15120004',
-    tanggal: '12/9/2025',
-    anggota: '231511041 - Diana Larasati',
-    nominal: i % 3 === 1 ? -20000 : 269000,
-    produk: ['Sukarela', 'Wajib', 'Pokok'][i % 3],
-    jenis: i % 4 === 0 ? 'Penarikan' : 'Penyetoran',
-}))
+const filters = reactive({
+    search: page.props.filters?.search ?? '',
+    per_page: page.props.filters.per_page ?? 10,
+    tab: page.props.filters.tab ?? 'semua',
+    sort_by: page.props.filters?.sort_by ?? 'transaction_date',
+    sort_dir: page.props.filters?.sort_dir ?? 'desc'
+})
+
+const toggleSortDate = () => {
+    if(filters.sort_by === 'transaction_date') {
+        filters.sort_dir = filters.sort_dir === 'asc' ? 'desc' : 'asc'
+    } else {
+        filters.sort_by = 'transaction_date'
+        filters.sort_dir = 'desc'
+    }
+    applyFilters()
+}
+
+const transactions = computed(() => page.props.transactions ?? {
+    data: [],
+    current_page: 1,
+    per_page: 10,
+    total: 0,
+    links: [],
+})
+
+const goToPage = (url) => {
+    router.get(
+        url,
+        {},
+        {
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        }
+    )
+}
+
+const summary = computed(() => page.props.summary ?? [])
 
 const tableTitle = computed(() => {
-    switch (activeTab.value) {
+    switch (filters.tab) {
         case 'permohonan':
             return 'Data Permohonan Penarikan/Penyetoran Simpanan'
         case 'pokok':
@@ -59,12 +68,39 @@ const tableTitle = computed(() => {
             return 'Data Simpanan'
     }
 })
+
+const applyFilters = () => {
+    router.get(
+        '/admin/savings',
+        {
+            search: filters.search || undefined,
+            per_page: filters.per_page,
+            tab: filters.tab,
+            sort_by: filters.sort_by,
+            sort_dir: filters.sort_dir,
+            page: 1,
+        },
+        {
+            preserveScroll: true,
+            replace: true,
+        }
+    )
+}
+
+let timeout
+watch(() => filters.search, () => {
+    clearTimeout(timeout)
+    timeout = setTimeout(applyFilters, 500)
+})
+
+watch(() => filters.per_page, applyFilters)
+watch(() => filters.tab, applyFilters)
 </script>
 
 <template>
     <AdminLayout>
         <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
+        <div class="font-body flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-blue-900 dark:text-blue-300">
                 Pengelolaan Simpanan
             </h1>
@@ -84,12 +120,12 @@ const tableTitle = computed(() => {
         <!-- Ringkasan -->
         <div class="bg-white dark:bg-slate-800 rounded-xl p-6 mb-10 relative">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="font-semibold dark:text-white">Ringkasan</h2>
+                <h2 class="font-head font-semibold dark:text-white">Ringkasan</h2>
 
                 <!-- Tombol Tambah -->
                 <Link
                     href="#"
-                    class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
+                    class="font-head inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
                 >
                     <Icon icon="mdi:plus" />
                     Tambah Transaksi
@@ -102,11 +138,11 @@ const tableTitle = computed(() => {
                     :key="item.title"
                     class="border rounded-xl p-5"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-100">
+                    <p class="font-body text-sm text-gray-500 dark:text-gray-100">
                         {{ item.title }}
                     </p>
 
-                    <p class="text-xl font-bold mt-1 dark:text-gray-100">
+                    <p class="font-head text-xl font-bold mt-1 dark:text-gray-100">
                         {{ item.value }}
                     </p>
 
@@ -132,9 +168,9 @@ const tableTitle = computed(() => {
                 <button
                     v-for="tab in tabs"
                     :key="tab.key"
-                    @click="activeTab = tab.key"
-                    class="px-4 py-2 rounded-lg text-sm border transition border-gray-200 dark:border-slate-700"
-                     :class="activeTab === tab.key
+                    @click="filters.tab = tab.key"
+                    class="font-head px-4 py-2 rounded-lg text-sm border transition border-gray-200 dark:border-slate-700"
+                     :class="filters.tab === tab.key
                         ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-medium shadow'
                         : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'"
                 >
@@ -146,7 +182,7 @@ const tableTitle = computed(() => {
             <div class="bg-white dark:bg-slate-800 rounded-xl shadow overflow-hidden relative z-10">
                 <!-- Header Table -->
                 <div class="px-6 pb-4 p-7">
-                    <h3 class="font-semibold text-gray-900 dark:text-slate-100">
+                    <h3 class="font-head font-semibold text-gray-900 dark:text-slate-100">
                         {{ tableTitle }}
                     </h3>
                     <p class="text-sm text-gray-500 dark:text-slate-400">
@@ -158,20 +194,24 @@ const tableTitle = computed(() => {
                 <div class="flex justify-between items-center px-6 py-4 border-b">
                     <div class="flex items-center gap-3">
                         <span class="text-sm text-gray-500">Tampilkan</span>
-                        <select class="border rounded px-3 py-1 text-sm bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-slate-100">
-                            <option>10</option>
-                            <option>25</option>
-                            <option>50</option>
+                        <select
+                            v-model="filters.per_page" 
+                            class="border rounded px-3 py-1 text-sm bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-slate-100">
+                            <option :value="10">10</option>
+                            <option :value="25">25</option>
+                            <option :value="50">50</option>
+                            <option :value="100">100</option>
                         </select>
-                        <span class="text-sm text-gray-500">data per halaman</span>
+                        <span class="font-head text-sm text-gray-500">data per halaman</span>
                     </div>
 
                     <div class="flex gap-3">
                         <div class="relative">
                             <input
+                                v-model="filters.search"
                                 type="text"
                                 placeholder="Search..."
-                                class="pl-10 pr-4 py-2 border rounded-lg text-sm bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-400"
+                                class="font-head pl-10 pr-4 py-2 border rounded-lg text-sm bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-400"
                             />
                             <Icon
                                 icon="mdi:magnify"
@@ -179,20 +219,43 @@ const tableTitle = computed(() => {
                             />
                         </div>
 
-                        <button class="flex items-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-slate-100">
+                        <!-- <button class="font-head flex items-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-slate-100">
                             <Icon icon="mdi:filter-variant" />
                             Filter
-                        </button>
+                        </button> -->
                     </div>
                 </div>
 
                 <!-- Table -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y">
-                        <thead class="bg-gray-50 dark:bg-slate-700 dark:text-gray-100">
+                        <thead class="font-head bg-gray-50 dark:bg-slate-700 dark:text-gray-100">
                             <tr>
+                                <th class="px-6 py-3 text-left text-sm font-medium">No</th>
                                 <th class="px-6 py-3 text-left text-sm font-medium">No. Transaksi</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium">Tanggal</th>
+                                <th
+                                    @click="toggleSortDate"
+                                    class="px-6 py-3 text-left text-sm font-medium cursor-pointer select-none"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Tanggal
+                                        <Icon
+                                            v-if="filters.sort_by === 'transaction_date' && filters.sort_dir === 'asc'"
+                                            icon="tabler:chevron-up"
+                                            class="w-4 h-4"
+                                        />
+                                        <Icon
+                                            v-else-if="filters.sort_by === 'transaction_date' && filters.sort_dir === 'desc'"
+                                            icon="tabler:chevron-down"
+                                            class="w-4 h-4"
+                                        />
+                                        <Icon
+                                            v-else
+                                            icon="tabler:chevrons-up-down"
+                                            class="w-4 h-4 opacity-40"
+                                        />
+                                    </div>
+                                </th>
                                 <th class="px-6 py-3 text-left text-sm font-medium">Anggota</th>
                                 <th class="px-6 py-3 text-left text-sm font-medium">Nominal</th>
                                 <th class="px-6 py-3 text-left text-sm font-medium">Produk Simpanan</th>
@@ -203,10 +266,15 @@ const tableTitle = computed(() => {
 
                         <tbody class="divide-y divide-gray-200 dark:divide-slate-700 dark:text-gray-100">
                             <tr
-                                v-for="trx in transactions"
+                                v-for="(trx, index) in transactions.data"
                                 :key="trx.id"
                                 class="hover:bg-gray-50 dark:hover:bg-slate-700"
                             >
+                                <td class="px-6 py-4 text-sm">
+                                    {{ (transactions.current_page - 1) * transactions.per_page + index + 1 }}
+                                </td>
+
+
                                 <td class="px-6 py-4 text-sm">
                                     {{ trx.no_transaksi }}
                                 </td>
@@ -245,7 +313,7 @@ const tableTitle = computed(() => {
 
                                 <td class="px-6 py-4 text-center">
                                     <button
-                                        class="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600"
+                                        class="font-head inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600"
                                     >
                                         <Icon icon="mdi:eye-outline" />
                                         Tinjau
@@ -258,18 +326,26 @@ const tableTitle = computed(() => {
             </div>
 
             <!-- Pagination -->
-            <div class="p-6 flex justify-center gap-3 text-sm text-gray-600 dark:text-slate-400">
-                <button class="px-4 py-2 border rounded-lg">
-                    Sebelumnya
-                </button>
-                <span class="px-3 py-1 bg-blue-600 text-white rounded">
-                    1
-                </span>
-                <span>2</span>
-                <span>3</span>
-                <button class="px-4 py-2 border rounded-lg">
-                    Berikutnya
-                </button>
+            <div 
+                v-if="transactions.total"
+                class="font-head p-6 flex justify-center gap-3 text-sm text-gray-600 dark:text-slate-400">
+                <template
+                    v-for="link in transactions.links"
+                    :key="link.label"    
+                >
+                    <span
+                        v-if="!link.url"
+                        class="px-3 py-1 text-gray-400"
+                        v-html="link.label"
+                    />
+                    <button
+                        v-else
+                        @click="goToPage(link.url)"
+                        class="px-3 py-1 border rounded"
+                        :class="{ 'bg-blue-600 text-white': link.active }"
+                        v-html="link.label"
+                    />
+                </template>
             </div>
         </div>
     </AdminLayout>
