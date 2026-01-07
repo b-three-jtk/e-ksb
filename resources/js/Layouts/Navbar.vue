@@ -57,12 +57,12 @@ const toggleUserDropdown = () => {
                 <!-- Authenticated User Section -->
                 <template v-else>
                     <!-- User Avatar & Dropdown -->
-                    <div class="relative flex gap-4">
-                        <Link :href="user.role.name === 'User' ? '/dashboard' : '/admin/dashboard'"
-                            class="relative flex items-center justify-center text-dark-text transition-colors bg-transparent border border-gray-200 rounded-full hover:text-dark-900 h-11 w-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
-                            <span class="icon-[material-symbols-light--home-outline-rounded]"
-                                style="width: 24px; height: 24px;"></span>
-                        </Link>
+                    <Link :href="user.role.name === 'User' ? '/dashboard' : '/admin/dashboard'"
+                        class="relative flex items-center justify-center text-dark-text transition-colors bg-transparent border border-gray-200 rounded-full hover:text-dark-900 h-11 w-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
+                        <span class="icon-[material-symbols-light--home-outline-rounded]"
+                            style="width: 24px; height: 24px;"></span>
+                    </Link>
+                    <div class="relative">
                         <button @click="toggleUserDropdown" class="flex items-center">
                             <div v-if="user.profile_picture">
                                 <img class="w-10 h-10 rounded-lg cursor-pointer object-cover"
