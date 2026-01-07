@@ -18,9 +18,48 @@ class AdminController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $admins = User::with('role')
+            ->when($request->search, function ($q) use ($request) {
+                $q->where(function ($qq) use ($request) {
+                    $qq->where('name', 'like', "%{$request->search}%")
+                       ->orWhere('nik', 'like', "%{$request->search}%")
+                       ->orWhere('email', 'like', "%{$request->search}%");
+                });
+            })
+            ->when($request->status, fn ($q) =>
+                $q->where('status', $request->status)
+            )
+            ->when($request->role, fn ($q) =>
+                $q->whereHas('role', fn ($r) =>
+                    $r->where('name', $request->role)
+                )
+            )
+            ->orderBy(
+                $request->sort_by ?? 'created_at',
+                $request->sort_dir ?? 'desc'
+            )
+            ->paginate($request->per_page ?? 10)
+            ->withQueryString()
+            ->through(fn ($user) => [
+                'id' => $user->id,
+                'nik' => $user->nik,
+                'name' => $user-> name,
+                'email' => $user->email,
+                'posisi' => $user->role->name,
+                'status' => $user->status,
+                'avatar' => $user->profile_picture
+                    ? asset('storage/' . $user->profile_picture)
+                    : 'https://i.pravatar.cc/40?u=' . $user->id,
+            ]);
+
+        return inertia('Admin/Admins/List', [
+            'admins' => $admins,
+            'roles' => Role::whereHas('users')->pluck('name'),
+            'filters' => $request->only(['search', 'status', 'role', 'per_page', 'sort_by', 'sort_dir']),
+            'title' => 'Pengelolaan Admin'
+        ]);
     }
 
     /**
@@ -140,47 +179,4 @@ class AdminController extends Controller
         //
     }
 
-    public function list(Request $request)
-    {
-        $admins = User::with('role')
-            ->when($request->search, function ($q) use ($request) {
-                $q->where(function ($qq) use ($request) {
-                    $qq->where('name', 'like', "%{$request->search}%")
-                       ->orWhere('nik', 'like', "%{$request->search}%")
-                       ->orWhere('email', 'like', "%{$request->search}%");
-                });
-            })
-            ->when($request->status, function ($q) use ($request) {
-                $q->where('status', $request->status);
-            })
-            ->when($request->role, function ($q) use ($request) {
-                $q->whereHas('role', function ($r) use ($request) {
-                    $r->where('name', $request->role);
-                });
-            })
-            ->paginate($request->perPage ?? 10)
-            ->withQueryString()
-            ->through(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'nik' => $user->nik,
-                    'name' => $user-> name,
-                    'email' => $user->email,
-                    'posisi' => $user->role->name,
-                    'status' => $user->status,
-                    'avatar' => $user->profile_picture
-                        ? asset('storage/' . $user->profile_picture)
-                        : 'https://i.pravatar.cc/40?u=' . $user->id,
-                ];
-            });
-
-        $roles = Role::whereHas('users')->pluck('name');
-
-        return inertia('Admin/Admins/List', [
-            'admins' => $admins,
-            'roles' => $roles,
-            'filters' => $request->only(['search', 'status', 'role', 'perPage']),
-            'title' => 'Pengelolaan Admin'
-        ]);
-    }
 }
