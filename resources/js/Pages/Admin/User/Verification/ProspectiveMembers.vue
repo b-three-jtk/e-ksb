@@ -88,11 +88,10 @@ const toggleSort = (column) => {
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
             <!-- Header -->
-            <div
-                class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-white">
-                    Data Calon Anggota
-                </h2>
+            <div class="flex justify-between items-center p-6 border-b">
+                <div>
+                    <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Calon Anggota</h2>
+                </div>
             </div>
 
             <!-- Filter & Search -->
