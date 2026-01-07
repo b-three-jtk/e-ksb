@@ -40,12 +40,18 @@ class RegisterController extends Controller
         DB::transaction(function () use ($request, $data) {
             $profilePath = $request->file('foto_pribadi')->store('profile', 'public');
             $ktpPath = $request->file('foto_ktp')->store('ktp', 'public');
+            $latestMemberNumber = User::max('member_number');
+            $nextNumber = $latestMemberNumber
+                ? ((int) preg_replace('/\D/', '', $latestMemberNumber)) + 1
+                : 1;
+            $memberNumber = 'KS' . str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
 
             // Get or create User role
             $userRole = Role::firstOrCreate(['name' => 'User']);
 
             $user = User::create([
                 'id' => Str::uuid(),
+                'member_number' => $memberNumber,
                 'name' => $data['nama_lengkap'],
                 'email' => $data['email'],
                 'nik' => $data['nik'],
