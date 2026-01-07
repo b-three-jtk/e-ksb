@@ -2,6 +2,7 @@
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
@@ -20,6 +21,12 @@ Route::prefix('auth')
     ->middleware('guest')
     ->group(function () {
 
+        Route::get('/login', [LoginController::class, 'create'])
+            ->name('login');
+
+        Route::post('/login', [LoginController::class, 'store'])
+            ->name('login.store');
+
         Route::get('/register', [RegisterController::class, 'create'])
             ->name('register');
 
@@ -30,6 +37,12 @@ Route::prefix('auth')
             return Inertia::render('Auth/RegisterSuccess');
         })->name('register.success');
     });
+
+Route::redirect('/login', '/auth/login')->middleware('guest');
+
+Route::post('/auth/logout', [LoginController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('auth.logout');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
