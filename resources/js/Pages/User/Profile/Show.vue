@@ -30,7 +30,7 @@ const props = defineProps({
                     </div>
                     <div class="w-full sm:w-auto ml-auto text-center sm:text-right self-end">
                         <button
-                            @click="router.visit(`/user/profile/${user.id}/edit`)"
+                            @click="router.visit(`/user/profile/${user.member_number}/edit`)"
                             class="px-6 py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-orange-600 transition-colors"
                         >
                             Edit Profile

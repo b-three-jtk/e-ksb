@@ -69,6 +69,7 @@ class UserController extends Controller
         return Inertia::render('Admin/User/Verification/Show', [
             'member' => [
                 'id' => $user->id,
+                'member_number' => $user->member_number,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'work_unit' => $user->workUnit->name,
@@ -135,6 +136,7 @@ class UserController extends Controller
             ->withQueryString()
             ->through(fn ($user) => [
                 'id' => $user->id,
+                'member_number' => $user->member_number,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'email' => $user->email,
@@ -225,6 +227,7 @@ class UserController extends Controller
         return Inertia::render('User/Profile/Show', [
             'user' => [
                 'id' => $user->id,
+                'member_number' => $user->member_number,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'birth_date' => $user->birth_date,
@@ -253,6 +256,7 @@ class UserController extends Controller
         return Inertia::render('User/Profile/Edit', [
             'user' => [
                 'id' => $user->id,
+                'member_number' => $user->member_number,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'birth_date' => $user->birth_date,

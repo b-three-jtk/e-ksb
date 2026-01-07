@@ -56,7 +56,7 @@ const onFileChange = (event) => {
     formData.append('profile_picture', file)
     formData.append('_method', 'POST')
 
-    router.post(`/user/profile/${props.user.id}/picture`, formData, {
+    router.post(`/user/profile/${props.user.member_number}/picture`, formData, {
         preserveScroll: true,
         onSuccess: () => {
             uploading.value = false
@@ -81,7 +81,7 @@ const handleDeletePicture = () => {
 
     deleting.value = true
 
-    router.delete(`/user/profile/${props.user.id}/picture`, {
+    router.delete(`/user/profile/${props.user.member_number}/picture`, {
         preserveScroll: true,
         onSuccess: () => {
             deleting.value = false
@@ -94,10 +94,10 @@ const handleDeletePicture = () => {
 }
 
 const submit = () => {
-    form.put(`/user/profile/${props.user.id}`, {
+    form.put(`/user/profile/${props.user.member_number}`, {
         preserveScroll: true,
         onSuccess: () => {
-            router.visit(`/user/profile/${props.user.id}`)
+            router.visit(`/user/profile/${props.user.member_number}`)
         }
     })
 }
@@ -207,7 +207,7 @@ const submit = () => {
                         </div>
                         <button
                             type="button"
-                            @click="router.visit(`/user/profile/${user.id}`)"
+                            @click="router.visit(`/user/profile/${user.member_number}`)"
                             class="px-8 py-3 bg-gray-200 text-gray-700 text-base font-semibold rounded-lg hover:bg-gray-300 transition-colors"
                         >
                             Batal
