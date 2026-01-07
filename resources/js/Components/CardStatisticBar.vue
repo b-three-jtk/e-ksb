@@ -6,12 +6,15 @@ const props = defineProps({
     title: {
         type: String,
     },
+    data: {
+        type: Array,
+    },
 })
 
 const series = ref([
     {
-        name: 'Sales',
-        data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
+        name: 'Permohonan',
+        data: props.data,
     },
 ])
 
