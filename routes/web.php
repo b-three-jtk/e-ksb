@@ -39,7 +39,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
 
-    Route::get('/admins', [AdminController::class, 'list']);
+    Route::get('/admins', [AdminController::class, 'index'])->name('admin.admins.index');
     Route::get('/create', [AdminController::class, 'create']);
     Route::get('/show/{id}', [AdminController::class, 'store']);
     Route::get('/show/{id}', [AdminController::class, 'show']);
