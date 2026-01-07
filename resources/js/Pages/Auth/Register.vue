@@ -61,19 +61,19 @@ const props = defineProps({
   <AuthLayout>
     <div class="w-full px-4">
       <div class="text-center mb-24">
-        <h1 class="text-xl font-semibold text-white">
+        <h1 class="text-xl font-semibold text-white font-body">
           Logo KopSy-Kampus
         </h1>
       </div>
 
-      <div class="mx-auto max-w-3xl bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="mb-12 mx-auto max-w-3xl bg-white rounded-xl shadow-lg overflow-hidden font-body">
         <div class="flex h-2">
           <div class="flex-1" :class="step >= 1 ? 'bg-blue-900' : 'bg-gray-300'"></div>
           <div class="flex-1" :class="step >= 2 ? 'bg-blue-900' : 'bg-gray-300'"></div>
         </div>
 
         <div class="p-8">
-          <div class="flex justify-center mb-8">
+          <div class="flex justify-center mb-12">
             <div class="flex items-center gap-3 mr-24">
               <div
                 class="w-8 h-8 rounded-md flex items-center justify-center text-sm font-semibold"
@@ -102,14 +102,14 @@ const props = defineProps({
           <RegisterStepOne v-if="step === 1" :form="form" :workUnits="props.workUnits" />
           <RegisterStepTwo v-if="step === 2" :form="form" />
 
-          <div class="mt-8 flex flex-col items-center gap-4">
+          <div class="mt-12 flex flex-col items-center gap-6">
             <button
               v-if="step === 1"
               type="button"
               @click="next"
               :disabled="!stepOneValid"
               class="w-full max-w-md py-2 rounded-lg
-                     bg-blue-900 text-white font-medium
+                     bg-blue-900 text-white font-medium font-body
                      disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Selanjutnya
@@ -121,16 +121,16 @@ const props = defineProps({
               @click="submit"
               :disabled="!stepTwoValid || form.processing"
               class="w-full max-w-md py-2 rounded-lg
-                     bg-blue-900 text-white font-medium
+                     bg-blue-900 text-white font-medium font-body
                      disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="form.processing">Mendaftar...</span>
               <span v-else>Daftar</span>
             </button>
 
-            <p class="text-center text-sm text-gray-500">
+            <p class="text-center text-md text-gray-500 font-body">
               Sudah punya akun?
-              <a href="/login" class="text-orange-500 font-medium">
+              <a href="/auth/login" class="text-orange-500 font-medium font-body">
                 Masuk sekarang
               </a>
             </p>

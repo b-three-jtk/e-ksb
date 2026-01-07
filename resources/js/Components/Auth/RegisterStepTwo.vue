@@ -60,13 +60,13 @@ const placeholderImage = new URL(
         </div>
 
 
-      <p class="mt-3 text-xs text-gray-500">
+      <p class="mt-3 text-xs text-gray-500 font-body">
         * Foto pribadi & KTP harus terlihat jelas
       </p>
     </div>
 
     <div>
-        <h2 class="text-2xl font-bold text-orange-500 mb-12 mt-2 text-right">
+        <h2 class="text-2xl font-bold text-orange-500 mb-12 mt-2 text-right font-head">
             Upload Foto Diri & KTP
         </h2>
 
@@ -100,7 +100,7 @@ const placeholderImage = new URL(
                 />
             </label>
 
-            <p class="mt-2 text-sm text-blue-900 font-medium">
+            <p class="mt-2 text-sm text-blue-900 font-medium font-body">
                 Foto Pribadi
             </p>
             </div>
@@ -134,7 +134,7 @@ const placeholderImage = new URL(
                 />
             </label>
 
-            <p class="mt-2 text-sm text-blue-900 font-medium">
+            <p class="mt-2 text-sm text-blue-900 font-medium font-body">
                 Foto KTP
             </p>
             </div>

@@ -22,7 +22,7 @@ const { errors } = useRegisterValidation(props.form)
     class="grid grid-cols-1 md:grid-cols-2 gap-4"
   >
 
-    <h2 class="text-2xl font-bold text-orange-500">
+    <h2 class="text-2xl font-bold text-orange-500 font-head">
         Create an Account
     </h2>
 
