@@ -21,7 +21,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $search = $request ->input('search');
+        $search = $request->input('search');
         $status = $request->input('status');
 
         $allowedSorts = ['name', 'joined_date'];
