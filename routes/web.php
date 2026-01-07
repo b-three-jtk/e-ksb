@@ -55,15 +55,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/admins', [AdminController::class, 'index'])->name('admin.admins.index');
     Route::get('/create', [AdminController::class, 'create']);
-    Route::get('/show/{id}', [AdminController::class, 'store']);
+    Route::post('/store', [AdminController::class, 'store']);
+    Route::get('/edit/{id}', [AdminController::class, 'edit']);
+    Route::put('/update/{id}', [AdminController::class, 'update'])->name('update');
     Route::get('/show/{id}', [AdminController::class, 'show']);
-  
+
     Route::get('/verifikasi', [UserController::class, 'prospectiveMembers'])
         ->name('users.prospective');
-    
+
     Route::get('/verifikasi/{user:member_number}', [UserController::class, 'verificationDetail'])
         ->name('users.verification.show');
-    
+
     Route::post('/verifikasi/{user:member_number}/approval', [UserController::class, 'submitApproval'])
         ->name('users.verification.submit');
 });

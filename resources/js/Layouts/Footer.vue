@@ -1,5 +1,5 @@
 <template>
-    <footer class="bg-light-bg">
+    <footer class="bg-light-bg dark:bg-dark-text dark:text-gray-300">
         <div class="flex flex-col md:flex-row p-14 justify-between">
             <div class="flex flex-col gap-4 mb-9">
                 <img class="max-w-32 mx-auto" src="" alt="">
@@ -29,7 +29,7 @@
         </div>
         <div class="flex justify-between px-14 py-8">
             <h1 class="text-gray-500">2026 - KoTA 203</h1>
-            <div class="flex gap-4 text-dark-text">
+            <div class="flex gap-4 text-dark-text dark:text-light-accent">
                 <span class="icon-[tabler--brand-instagram]" style="width: 32px; height: 32px;"></span>
                 <span class="icon-[tabler--brand-facebook]" style="width: 32px; height: 32px;"></span>
                 <span class="icon-[tabler--brand-youtube]" style="width: 32px; height: 32px;"></span>

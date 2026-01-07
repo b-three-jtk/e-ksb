@@ -776,6 +776,7 @@ span.flatpickr-weekday,
     backdrop-filter: blur(10px);
     transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
     z-index: 100;
+    @apply dark:bg-primary/20;
 }
 
 .nav-bar {
@@ -786,6 +787,7 @@ span.flatpickr-weekday,
 
 .why-section {
     background: linear-gradient(94deg, #ECF3FF 45.3%, #173F84 231.12%);
+    @apply dark:bg-gray-800;
 }
 
 .drop-accent {

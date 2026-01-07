@@ -8,7 +8,7 @@
                     <p class="text-sm text-gray-400">Tambahkan data admin baru di sini.</p>
                 </div>
 
-                <form @submit.prevent="form.post('/admin/store')" class="flex flex-col">
+                <div class="flex flex-col">
                     <div class="grid md:grid-cols-2 grid-cols-1 px-8 gap-6">
                         <!-- NIK -->
                         <div>
@@ -125,7 +125,7 @@
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 No. Telp
                             </label>
-                            <input type="tel" v-model="form.phone_number" placeholder="Masukkan nomor telepon" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                            <input type="tel" maxlength="20" v-model="form.phone_number" placeholder="Masukkan nomor telepon" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                                 form.errors.phone_number ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                             ]"
                                 class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
@@ -139,12 +139,12 @@
                             class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-8 py-2.5 text-gray-800 font-medium shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
                             Batal
                         </Link>
-                        <button type="submit" :disabled="form.processing"
+                        <button type="button" @click="submitForm" :disabled="form.processing"
                             class="inline-flex items-center gap-2 rounded-xl border border-secondary bg-secondary px-8 py-2.5 text-white font-medium shadow-theme-xs hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed">
                             {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </Layout>
@@ -155,6 +155,7 @@ import { useForm } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import Layout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import Swal from 'sweetalert2'
 
 const form = useForm({
     email: '',
@@ -171,4 +172,39 @@ const props = defineProps({
     roles: { type: Array, required: true },
     work_units: { type: Array, required: true },
 })
+
+const submitForm = () => {
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin menambahkan data admin ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, tambahkan',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#007943',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.post('/admin/store', {
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Sukses!',
+                        text: 'Admin berhasil ditambahkan.',
+                        icon: 'success',
+                        confirmButtonColor: '#007943',
+                    }).then(() => {
+                        window.location.href = route('admin.dashboard')
+                    })
+                },
+                onError: () => {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: 'Gagal menambahkan admin.',
+                        icon: 'error',
+                        confirmButtonColor: '#007943',
+                    })
+                }
+            })
+        }
+    })
+}
 </script>

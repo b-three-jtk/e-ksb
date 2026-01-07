@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Models\WorkUnit;
 use App\Enums\UserStatus;
 use Illuminate\Http\Request;
-use SweetAlert2\Laravel\Swal;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdminRequest;
@@ -104,19 +103,9 @@ class AdminController extends Controller
 
             DB::commit();
 
-            Swal::success([
-                'title' => 'Sukses!',
-                'text' => 'Admin berhasil ditambahkan.',
-                'icon' => 'success',
-            ]);
             return redirect()->route('admin.dashboard');
         } catch (\Exception $e) {
             DB::rollBack();
-            Swal::error([
-                'title' => 'Gagal!',
-                'text' => 'Gagal membuat admin' . $e->getMessage(),
-                'icon' => 'error',
-            ]);
             return redirect()->back()->withInput();
         }
     }
@@ -139,14 +128,8 @@ class AdminController extends Controller
     public function edit(string $id)
     {
         $admin = User::with('role', 'workUnit')->findOrFail($id);
-        $work_units = WorkUnit::all()->map(fn($unit) => [
-            'id' => $unit->id,
-            'name' => $unit->name
-        ]);
-        $roles = Role::all()->map(fn($role) => [
-            'id' => $role->id,
-            'name' => $role->name
-        ]);
+        $work_units = WorkUnit::all();
+        $roles = Role::all();
 
         return inertia('Admin/Admins/Edit', [
             'admin' => $admin,
@@ -167,7 +150,6 @@ class AdminController extends Controller
             $admin = User::findOrFail($id);
             $admin->update($data);
             DB::commit();
-
             return redirect()->route('admin.dashboard')->with('success', 'Admin berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();

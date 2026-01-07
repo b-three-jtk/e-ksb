@@ -61,6 +61,13 @@ class DashboardController extends Controller
                     'created_at' => $financing->created_at,
                 ];
             });
+        $data['financing_stats'] = Financing::selectRaw('EXTRACT(MONTH FROM created_at) AS month, COUNT(*) AS count')
+            ->whereYear('created_at', now()->year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->pluck('count', 'month')
+            ->toArray();
         return inertia('Admin/Dashboard', $data);
     }
 }

@@ -1,4 +1,3 @@
-
 <script setup>
     const props = defineProps({
         width: String,
@@ -7,5 +6,5 @@
 </script>
 
 <template>
-    <span class="icon-[tabler--info-circle]" :style="{ width: props.width || '24px', height: props.height || '24px' }"></span>
+    <span class="icon-[ic--outline-rate-review]" :style="{ width: props.width || '24px', height: props.height || '24px' }"></span>
 </template>

@@ -1,3 +1,63 @@
+<script setup>
+import { useForm } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
+import Layout from '@/Layouts/Admin/Layout.vue'
+import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import Swal from 'sweetalert2'
+
+const props = defineProps({
+    admin: { type: Object, required: true },
+    roles: { type: Array, required: true },
+    work_units: { type: Array, required: true },
+})
+
+const form = useForm({
+    nik: props.admin.nik || '',
+    name: props.admin.name || '',
+    email: props.admin.email || '',
+    role_id: props.admin.role_id || '',
+    work_unit_id: props.admin.work_unit_id || '',
+    institution: props.admin.institution || '',
+    address: props.admin.address || '',
+    phone_number: props.admin.phone_number || '',
+})
+
+const submitForm = () => {
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin memperbarui data admin ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, perbarui',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#007943',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.put(('/admin/update/' + props.admin.id), {
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Sukses!',
+                        text: 'Admin berhasil diperbarui.',
+                        icon: 'success',
+                        confirmButtonColor: '#007943',
+                    }).then(() => {
+                        window.location.href = route('admin.dashboard')
+                    })
+                },
+                onError: () => {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: 'Gagal memperbarui admin.',
+                        icon: 'error',
+                        confirmButtonColor: '#007943',
+                    })
+                }
+            })
+        }
+    })
+}
+</script>
+
 <template>
     <Layout>
         <div class="flex flex-col px-20">
@@ -8,7 +68,7 @@
                     <p class="text-sm text-gray-400">Perbarui data admin di sini.</p>
                 </div>
 
-                    <form @submit.prevent="form.put(`/admin/${props.admin.id}`)" class="flex flex-col">
+                    <div class="flex flex-col">
                     <div class="grid md:grid-cols-2 grid-cols-1 px-8 gap-6">
                         <!-- NIK -->
                         <div>
@@ -139,37 +199,13 @@
                             class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-8 py-2.5 text-gray-800 font-medium shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
                             Batal
                         </Link>
-                        <button type="submit" :disabled="form.processing"
+                        <button @click="submitForm()" :disabled="form.processing"
                             class="inline-flex items-center gap-2 rounded-xl border border-secondary bg-secondary px-8 py-2.5 text-white font-medium shadow-theme-xs hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed">
                             {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </Layout>
 </template>
-
-<script setup>
-import { useForm } from '@inertiajs/vue3'
-import { Link } from '@inertiajs/vue3'
-import Layout from '@/Layouts/Admin/Layout.vue'
-import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
-
-const props = defineProps({
-    admin: { type: Object, required: true },
-    roles: { type: Array, required: true },
-    work_units: { type: Array, required: true },
-})
-
-const form = useForm({
-    nik: props.admin.nik || '',
-    name: props.admin.name || '',
-    email: props.admin.email || '',
-    role_id: props.admin.role_id || '',
-    work_unit_id: props.admin.work_unit_id || '',
-    institution: props.admin.institution || '',
-    address: props.admin.address || '',
-    phone_number: props.admin.phone_number || '',
-})
-</script>
