@@ -32,7 +32,7 @@ const toggleSort = (field: string) => {
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <!-- Header -->
-            <thead class="text-head bg-gray-50 dark:bg-gray-700">
+            <thead class="font-head bg-gray-50 dark:bg-gray-700">
                 <tr>
                     <th
                         v-for="col in columns"
@@ -73,7 +73,7 @@ const toggleSort = (field: string) => {
             </thead>
 
             <!-- Body -->
-            <tbody class="text-body bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody class="font-body bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr
                     v-for="(row, index) in data"
                     :key="row.id ?? index"
@@ -111,7 +111,7 @@ const toggleSort = (field: string) => {
                 <tr v-if="data.length === 0">
                     <td
                         :colspan="columns.length"
-                        class="text-head px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                        class="font-head px-6 py-8 text-center text-gray-500 dark:text-gray-400"
                     >
                         Tidak ada data
                     </td>
