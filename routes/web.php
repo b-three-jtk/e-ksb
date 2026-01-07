@@ -52,9 +52,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/users/show/{user:member_number}', [UserController::class, 'show'])->name('users.show');
 
+    Route::get('/admins', [AdminController::class, 'index'])->name('admin.admins.index');
     Route::get('/create', [AdminController::class, 'create']);
-    Route::post('/store', [AdminController::class, 'store']);
+    Route::get('/show/{id}', [AdminController::class, 'store']);
     Route::get('/show/{id}', [AdminController::class, 'show']);
+  
     Route::get('/verifikasi', [UserController::class, 'prospectiveMembers'])
         ->name('users.prospective');
     
