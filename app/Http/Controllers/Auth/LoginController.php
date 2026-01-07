@@ -24,7 +24,7 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        $user = User::where('member_number', $credentials['member_number'])->first();
+        $user = User::with('role')->where('member_number', $credentials['member_number'])->first();
 
         if (! $user) {
             throw ValidationException::withMessages([

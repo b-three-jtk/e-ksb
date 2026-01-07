@@ -42,14 +42,14 @@ onUnmounted(() => {
                     <div class="absolute inset-0 -z-10" :style="{ transform: `translateY(${parallaxOffset}px)` }">
                         <img src="/public/images/home/polban.avif" class="w-full h-full object-cover"
                             alt="Hero Background">
-                        <div class="absolute inset-0 bg-white opacity-85"></div>
+                        <div class="absolute inset-0 bg-white dark:bg-dark-text opacity-85"></div>
                     </div>
-                    <img src="/public/images/home/ornament_blue.svg" class="w-72 h-auto absolute -z-10 -left-0 top-24"
+                    <img src="/public/images/home/ornament_blue.svg" class="w-72 h-auto absolute -z-10 dark:opacity-10 -left-0 top-24"
                         alt="">
 
-                    <h1 class="font-semibold text-5xl w-lg leading-20 tracking-wide">Sejahtera <span
+                    <h1 class="font-semibold text-5xl w-lg leading-20 tracking-wide dark:text-gray-100">Sejahtera <span
                             class="font-light">bersama</span> Koperasi Syariah Warga Polban</h1>
-                    <p class="text-xl w-md tracking-wide leading-8">Rasakan aman, nyaman, dan berkahnya bertransaksi
+                    <p class="text-xl w-md tracking-wide leading-8 dark:text-gray-300">Rasakan aman, nyaman, dan berkahnya bertransaksi
                         sesuai Al-Qur'an dan Sunnah</p>
                     <div class="flex gap-4">
                         <Link href="/register" class="bg-secondary text-white px-6 py-3 rounded-xl hover:bg-brand-900">
@@ -78,26 +78,26 @@ onUnmounted(() => {
                 </div>
             </section>
 
-            <section class="features-strip bg-white relative overflow-x-hidden">
+            <section class="features-strip bg-white dark:bg-dark-text relative overflow-x-hidden">
                 <div class="marquee group">
                     <!-- track 1 -->
                     <ul class="marquee__inner flex w-max text-2xl font-semibold">
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Simpanan <span class="text-green-700">Syariah</span>
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Pembayaran Tanpa <span class="text-accent">Riba</span>
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Keuntungan <span class="text-blue-accent">Halal</span> Dibagi Rata
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Simpanan <span class="text-green-700">Syariah</span>
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Pembayaran Tanpa <span class="text-accent">Riba</span>
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Keuntungan <span class="text-blue-accent">Halal</span> Dibagi Rata
                         </li>
                     </ul>
@@ -106,19 +106,19 @@ onUnmounted(() => {
                         <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
                             Simpanan <span class="text-green-700">Syariah</span>
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Pembayaran Tanpa <span class="text-accent">Riba</span>
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Keuntungan <span class="text-blue-accent">Halal</span> Dibagi Rata
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Simpanan <span class="text-green-700">Syariah</span>
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Pembayaran Tanpa <span class="text-accent">Riba</span>
                         </li>
-                        <li class="shrink-0 border-l-2 border-stroke px-12 py-10 whitespace-nowrap">
+                        <li class="shrink-0 border-l-2 border-stroke dark:border-gray-600 dark:text-gray-300 px-12 py-10 whitespace-nowrap">
                             Keuntungan <span class="text-blue-accent">Halal</span> Dibagi Rata
                         </li>
                     </ul>
@@ -161,26 +161,26 @@ onUnmounted(() => {
                         class="font-normal">Mengapa memilih</span> Koperasi Syariah Warga Polban?</h1>
             </section>
 
-            <section class="grid xl:grid-cols-2 grid-cols-1 h-fit py-36 px-32 relative">
+            <section class="grid xl:grid-cols-2 grid-cols-1 h-fit py-36 px-32 relative dark:bg-brand-950">
                 <div>
-                    <img src="/public/images/home/ornament_blue.svg" class="w-60 h-auto absolute -z-1 top-20" alt="">
+                    <img src="/public/images/home/ornament_blue.svg" class="w-60 h-auto absolute z-10 dark:opacity-20 top-20" alt="">
                     <img src="/public/images/home/ornament_orange.svg"
-                        class="w-60 h-auto absolute -z-1 bottom-8 right-0" alt="">
+                        class="w-60 h-auto absolute z-10 bottom-8 right-0" alt="">
                     <img src="/public/images/home/ornament_circle.svg"
-                        class="w-32 h-auto absolute -z-1 bottom-36 left-16" alt="">
+                        class="w-32 h-auto absolute z-10 bottom-36 left-16" alt="">
                     <img src="/public/images/home/about_us.png" class="w-3xl h-full" />
                 </div>
                 <div class="flex flex-col gap-6 mt-auto">
-                    <h2 class="text-3xl font-bold text-primary">Tentang Kami</h2>
-                    <p class="text-lg text-dark-text leading-8">Koperasi Syariah Warga Polban didirikan pada tahun
+                    <h2 class="text-3xl font-bold text-primary dark:text-brand-600">Tentang Kami</h2>
+                    <p class="text-lg text-dark-text leading-8 dark:text-gray-300">Koperasi Syariah Warga Polban didirikan pada tahun
                         2024 dengan tujuan memberikan solusi keuangan yang sesuai dengan prinsip-prinsip syariah
                         kepada masyarakat Politeknik Negeri Bandung. Kami berkomitmen untuk menyediakan layanan
                         keuangan yang transparan, adil, dan bermanfaat bagi seluruh anggota kami.</p>
                 </div>
             </section>
 
-            <section class="px-32 py-36 flex flex-col gap-8">
-                <h2 class="text-3xl font-bold text-primary">Produk Koperasi</h2>
+            <section class="px-32 py-36 flex flex-col gap-8 dark:bg-brand-950">
+                <h2 class="text-3xl font-bold text-primary dark:text-brand-600">Produk Koperasi</h2>
                 <ul class="flex xl:flex-row flex-col gap-6">
                     <CardProduct productImage="/images/home/product_murabaha.avif" productTitle="Pembiayaan Murabahah"
                         productLink="#" :main="true" />
@@ -193,20 +193,20 @@ onUnmounted(() => {
                 </ul>
             </section>
 
-            <section class="bg-light-bg h-fit flex flex-col items-center py-36 px-32 gap-14 relative">
+            <section class="bg-light-bg dark:bg-dark-text h-fit flex flex-col items-center py-36 px-32 gap-14 relative">
                 <img src="/public/images/home/ornament_orange.svg" class="w-60 h-auto absolute z-1 -top-20 right-0"
                     alt="">
-                <h1 class="text-5xl text-secondary font-semibold">Apa Kata Anggota Kami?</h1>
+                <h1 class="text-5xl text-secondary font-semibold dark:text-brand-600">Apa Kata Anggota Kami?</h1>
 
                 <div class="flex flex-col">
-                    <div class="bg-white px-12 pt-10 pb-32 rounded-2xl xl:w-6xl w-full h-72 flex gap-6">
+                    <div class="bg-white dark:bg-brand-950 dark:border dark:border-stroke px-12 pt-10 pb-32 rounded-2xl xl:w-6xl w-full h-72 flex gap-6 dark:text-gray-300">
                         <span class="text-6xl font-semibold">“</span>
                         <p class="font-body text-2xl leading-10 tracking-wide text-justify">
                             {{ activeTestimonial.quote || 'Belum ada testimoni.' }}
                         </p>
                     </div>
                     <div
-                        class="w-0 h-0 ml-12 border-l-20 border-l-transparent border-r-20 border-r-transparent border-t-30 border-t-white">
+                        class="w-0 h-0 ml-12 border-l-20 border-l-transparent border-r-20 border-r-transparent border-t-30 border-t-white dark:border-t-stroke">
                     </div>
 
                     <div class="flex mt-10 px-10 justify-between">
@@ -214,13 +214,13 @@ onUnmounted(() => {
                             <button type="button" class="flex items-center gap-2 text-gray-700 dark:text-gray-400"
                                 @click="setActive(i)">
                                 <span
-                                    class="mr-3 overflow-hidden rounded-full h-16 w-16 ring-2 bg-white flex items-center justify-center ring-transparent"
+                                    class="mr-3 overflow-hidden rounded-full dark:bg-gray-200 h-16 w-16 ring-2 bg-white flex items-center justify-center ring-transparent"
                                     :class="i === activeIndex ? 'ring-secondary' : ''">
                                     <UserIcon />
                                 </span>
                                 <div v-if="i === activeIndex" class="flex flex-col text-left">
-                                    <span class="text-dark-text">{{ t.name }}</span>
-                                    <span class="text-dark-text font-semibold">{{ t.title }}</span>
+                                    <span class="text-dark-text dark:text-gray-200">{{ t.name }}</span>
+                                    <span class="text-dark-text font-semibold dark:text-gray-300">{{ t.title }}</span>
                                 </div>
                             </button>
                         </template>

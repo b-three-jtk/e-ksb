@@ -1,10 +1,13 @@
 <template>
     <div class="relative" ref="dropdownRef">
         <button class="flex items-center text-gray-700 dark:text-gray-400" @click.prevent="toggleDropdown">
-            <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
-                <img :src="user.profile_picture_url || '/public/images/user/owner.jpg'" alt="User" />
+            <span v-if="user.profile_picture" class="mr-3 overflow-hidden rounded-full h-11 w-11">
+                <img :src="user.profile_picture" alt="User" />
             </span>
-
+            <span v-else
+                class="w-11 h-11 mr-3 rounded-full border border-stroke bg-white flex items-center justify-center text-gray-500 cursor-pointer">
+                <UserIcon />
+            </span>
             <span class="block mr-1 font-medium text-theme-sm">{{ user.name }}</span>
 
             <ChevronDownIcon :class="{ 'rotate-180': dropdownOpen }" />
@@ -59,7 +62,7 @@ const dropdownRef = ref(null)
 const user = computed(() => page.props.auth?.user || {
     name: 'User',
     email: 'user@example.com',
-    profile_picture_url: '/public/images/user/owner.jpg',
+    profile_picture: '/public/images/user/owner.jpg',
 })
 
 const menuItems = [
