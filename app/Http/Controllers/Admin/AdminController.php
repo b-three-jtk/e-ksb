@@ -45,7 +45,7 @@ class AdminController extends Controller
             ->through(fn ($user) => [
                 'id' => $user->id,
                 'nik' => $user->nik,
-                'name' => $user-> name,
+                'name' => $user->name,
                 'email' => $user->email,
                 'posisi' => $user->role->name,
                 'status' => $user->status,
