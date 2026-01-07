@@ -120,7 +120,7 @@ const toggleSort = (column) => {
                         <input
                             v-model="filters.search"
                             type="text"
-                            placeholder="Search"
+                            placeholder="Cari nama, NIK, email..."
                             class="
                                 pl-10 pr-4 py-2 w-64 text-sm
                                 border border-gray-300 rounded-lg
@@ -200,7 +200,7 @@ const toggleSort = (column) => {
                             <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">{{ member.email }}</td>
                             <td class="px-6 py-4">
                                 <Link
-                                    :href="`/admin/users/show/${member.id}`"
+                                    :href="`/admin/verifikasi/${member.id}`"
                                     class="
                                         inline-flex items-center gap-2
                                         font-body text-sm

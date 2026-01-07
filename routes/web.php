@@ -44,4 +44,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/show/{id}', [AdminController::class, 'show']);
     Route::get('/verifikasi', [UserController::class, 'prospectiveMembers'])->name('users.prospective');
 
+    Route::get('/verifikasi', [UserController::class, 'prospectiveMembers'])
+        ->name('users.prospective');
+    
+    Route::get('/verifikasi/{id}', [UserController::class, 'verificationDetail'])
+        ->name('users.verification.show');
+    
+    Route::post('/verifikasi/{id}/approval', [UserController::class, 'submitApproval'])
+        ->name('users.verification.submit');
 });

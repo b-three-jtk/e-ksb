@@ -64,7 +64,7 @@ class RegisterController extends Controller
             ]);
         });
 
-        return redirect()->route('register.success');
+        return redirect()->route('auth.register.success');
     }
 }
 
