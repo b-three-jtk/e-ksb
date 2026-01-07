@@ -121,7 +121,7 @@ const toggleSort = (column) => {
 
                 <template #cell-aksi="{ row }">
                     <Link
-                        :href="`/admin/verifikasi/${row.id}`"
+                        :href="`/admin/verifikasi/${row.member_number}`"
                         class="inline-flex items-center gap-2
                             bg-blue-light-600 hover:bg-blue-light-900 text-white px-4 py-2 rounded-lg"
                     >
