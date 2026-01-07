@@ -4,6 +4,7 @@ defineProps<{
   label: string
   required?: boolean
   error?: string
+  disabled?: boolean
 }>()
 
 defineEmits(['update:modelValue'])
@@ -14,6 +15,7 @@ defineEmits(['update:modelValue'])
     <select
       :value="modelValue ?? ''"
       @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
+      :disabled="disabled"
       class="peer h-12 w-full rounded-lg border border-gray-300
              bg-transparent px-4 pt-2 pb-2 text-sm
              text-gray-800

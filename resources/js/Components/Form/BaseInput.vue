@@ -5,6 +5,7 @@ defineProps<{
   type?: string
   required?: boolean
   error?: string
+  disabled?: boolean
 }>()
 
 defineEmits(['update:modelValue'])
@@ -18,6 +19,7 @@ defineEmits(['update:modelValue'])
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       placeholder=" "
       :required="required"
+      :disabled="disabled"
       :aria-invalid="!!error"
       autocomplete="off"
       class="peer h-12 w-full rounded-lg border border-gray-300

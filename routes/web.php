@@ -53,3 +53,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/verifikasi/{id}/approval', [UserController::class, 'submitApproval'])
         ->name('users.verification.submit');
 });
+
+// User Routes
+Route::prefix('user')->name('user.')->group(function () {
+    Route::get('/profile/{id}', [UserController::class, 'profile'])->name('profile.show');
+    Route::get('/profile/{id}/edit', [UserController::class, 'editProfile'])->name('profile.edit');
+    Route::put('/profile/{id}', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/{id}/picture', [UserController::class, 'updateProfilePicture'])->name('profile.picture.update');
+    Route::delete('/profile/{id}/picture', [UserController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
+});
