@@ -30,7 +30,11 @@ class UserController extends Controller
             : 'joined_date';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $query = User::with('savingAccounts');
+        $query = User::with('savingAccounts')
+            ->whereHas('role', fn ($q) =>
+                $q->where('name', 'Anggota')
+            )
+            ->whereNotNull('joined_date');
 
         if ($search) {
             $query->where(fn ($q) =>
@@ -68,15 +72,29 @@ class UserController extends Controller
                     : "https://i.pravatar.cc/40?u=$user->id",
             ]);
 
-        return Inertia::render('Admin/User/ListMember', [
+        return Inertia::render('Admin/User/List', [
             'members'  => $members,
             'filters'  => $request->only([
                 'search', 'status', 'per_page', 'sort_by', 'sort_dir'
             ]),
-            'summary'  => [
-                'active' => User::where('status', 'Aktif')->count(),
-                'new_this_month' => User::whereMonth('created_at', now()->month)->count(),
-                'in_review' => User::where('status', 'Dalam Peninjauan')->count(),
+            'summary' => [
+                'active' => User::whereHas('role', fn ($q) =>
+                    $q->where('name', 'Anggota')
+                )
+                ->where('status', 'Aktif')
+                ->count(),
+
+                'new_this_month' => User::whereHas('role', fn ($q) =>
+                    $q->where('name', 'Anggota')
+                )
+                ->whereMonth('created_at', now()->month)
+                ->count(),
+
+                'in_review' => User::whereHas('role', fn ($q) =>
+                    $q->where('name', 'Anggota')
+                )
+                ->whereNull('joined_date')
+                ->count(),
             ],
             'statuses' => [
                 'Aktif',
@@ -207,7 +225,7 @@ class UserController extends Controller
                 'unit_kerja' => $user->workUnit?->name ?? '-',
             ]);
 
-        return Inertia::render('Admin/User/Verification/ProspectiveMembers', [
+        return Inertia::render('Admin/User/Verification/List', [
             'prospectiveMembers' => $members,
             'filters' => [
                 'search' => $request->search,
