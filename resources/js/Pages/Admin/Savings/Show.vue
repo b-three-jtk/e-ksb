@@ -1,7 +1,8 @@
 <template>
     <AdminLayout>
         <div class="flex flex-col px-20">
-            <PageBreadcrumb :page-title=" data.status != 'Belum Ditinjau' ? 'Detail Simpanan' : 'Validasi Permohonan Simpanan'" />
+            <PageBreadcrumb
+                :page-title="data.status != 'Belum Ditinjau' ? 'Detail Simpanan' : 'Validasi Permohonan Simpanan'" />
             <div class="flex flex-col gap-6">
                 <div class="card-layout flex justify-between">
                     <div class="flex gap-2 items-center">
@@ -24,12 +25,12 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nominal Simpanan</span>
                                     <span class="font-medium text-dark-text dark:text-white">Rp {{ data.amount
-                                    }}</span>
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Kategori Simpanan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ data.saving_account.type
-                                    }}</span>
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Akad</span>
@@ -44,7 +45,7 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Transaksi</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ data.transaction_date
-                                    }}</span>
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Metode Pembayaran</span>
@@ -53,17 +54,17 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Keterangan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ data.description ?? '-'
-                                    }}</span>
+                                        }}</span>
                                 </li>
                             </ul>
                         </div>
                         <div v-if="data.status == 'Belum Ditinjau'" class="flex items-center gap-4 justify-end mt-4">
                             <button @click="acceptTransaction()"
-                                class="inline-flex items-center gap-2 rounded-lg border bg-success-500 px-8 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-success-400 dark:border-gray-700 dark:text-white dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                                class="inline-flex items-center gap-2 rounded-lg border bg-success-500 px-8 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-success-400 dark:border-gray-700 dark:text-white">
                                 Terima
                             </button>
                             <button @click="showModal()"
-                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-error-500 px-8 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-error-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-error-500 px-8 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-error-400 dark:border-gray-700">
                                 Tolak
                             </button>
                         </div>
@@ -91,7 +92,7 @@
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Unit Kerja</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
                                         data.saving_account.user.work_unit.name
-                                    }}</span>
+                                        }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -124,6 +125,7 @@
 import AdminLayout from '../../../Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
 import { useForm } from '@inertiajs/vue3'
+import Swal from 'sweetalert2'
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -143,13 +145,75 @@ const form = useForm({
 
 const acceptTransaction = () => {
     form.status = 'accepted'
-    form.put('/admin/savings/validate/' + props.data.id)
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin menerima transaksi ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, terima',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#007943',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.put('/admin/savings/validate/' + props.data.id, {
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Sukses!',
+                        text: 'Transaksi berhasil diterima.',
+                        icon: 'success',
+                        confirmButtonColor: '#007943',
+                    }).then(() => {
+                        window.location.href = route('admin.dashboard')
+                    })
+                },
+                onError: () => {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: 'Gagal menerima transaksi.',
+                        icon: 'error',
+                        confirmButtonColor: '#007943',
+                    })
+                }
+            })
+            hideModal()
+        }
+    })
 }
 
 const rejectTransaction = () => {
     form.status = 'rejected'
-    form.put('/admin/savings/validate/' + props.data.id, {
-        onSuccess: () => hideModal()
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin menolak transaksi ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, tolak',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#007943',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.put('/admin/savings/validate/' + props.data.id, {
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Sukses!',
+                        text: 'Transaksi berhasil ditolak.',
+                        icon: 'success',
+                        confirmButtonColor: '#007943',
+                    }).then(() => {
+                        window.location.href = route('admin.dashboard')
+                    })
+                },
+                onError: () => {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: 'Gagal menolak transaksi.',
+                        icon: 'error',
+                        confirmButtonColor: '#007943',
+                    })
+                }
+            })
+            hideModal()
+        }
     })
 }
 
