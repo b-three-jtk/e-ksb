@@ -220,7 +220,7 @@ watch(() => filters.tab, applyFilters)
                     @sort="toggleSort"
                 >
                     <template #cell-no="{ index }">
-                        {{ (transactions.current_page -1) * transactions.per_page + index + 1 }}
+                        {{ (transactions.current_page - 1) * transactions.per_page + index + 1 }}
                     </template>
                     
                     <template #cell-nominal="{ row }">
