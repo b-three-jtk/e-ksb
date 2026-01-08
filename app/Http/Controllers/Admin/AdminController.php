@@ -27,6 +27,9 @@ class AdminController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
         $admins = User::with('role')
+            ->whereHas('role', fn ($q) =>
+                $q->where('name', '!=', 'Anggota')
+            )
             ->when($request->search, function ($q) use ($request) {
                 $q->where(function ($qq) use ($request) {
                     $qq->where('name', 'like', "%{$request->search}%")
