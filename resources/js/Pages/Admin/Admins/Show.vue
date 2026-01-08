@@ -5,7 +5,14 @@
             <div class="flex flex-col gap-6">
                 <div class="card-layout flex justify-between items-center">
                     <div class="flex gap-6">
-                        <img class="rounded-full w-20" src="/public/images/user/owner.jpg"></img>
+                        <div v-if="user.profile_picture">
+                            <img class="w-20 h-20 rounded-full object-cover bg-gray-400" :src="user.profile_picture"
+                                alt="User avatar">
+                        </div>
+                        <div v-else
+                            class="w-20 h-20 rounded-full bg-white border border-stroke flex items-center justify-center text-gray-500">
+                            <UserIcon />
+                        </div>
                         <div class="flex flex-col justify-center gap-1">
                             <h1 class="card-title">{{ user.name }}</h1>
                             <p class="text-gray-500">
@@ -13,8 +20,8 @@
                             </p>
                         </div>
                     </div>
-                    <button
-                        class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                    <Link :href="`/admin/edit/${user.id}`"
+                        class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current fill-white dark:fill-gray-800"
                             width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path
@@ -22,7 +29,7 @@
                                 fill="#1D2939" />
                         </svg>
                         Edit
-                    </button>
+                    </Link>
                 </div>
                 <div class="card-layout grid gap-5">
                     <div class="card-layout py-0! grid grid-cols-2">
@@ -35,26 +42,29 @@
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jenis Kelamin</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.gender ?? '-' }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.gender ?? '-'
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Lahir</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.birth_date ?? '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Pendidikan Terakhir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.last_education ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.last_education ??
+                                        '-'
                                         }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Unit Kerja</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.work_unit.name }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.work_unit.name
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Lembaga</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.institution
-                                        }}</span>
+                                    }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -66,7 +76,7 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Telepon</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.phone_number ?? '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Email</span>
@@ -74,11 +84,13 @@
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Sesuai KTP</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.address ?? '-' }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.address ?? '-'
+                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Domisili</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.residential_address ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.residential_address
+                                        ?? '-'
                                         }}</span>
                                 </li>
                             </ul>
@@ -93,10 +105,11 @@
 <script setup>
 import AdminLayout from '@/Layouts/Admin/Layout.vue';
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue';
+import { Link } from '@inertiajs/vue3';
+import UserIcon from '@/Icons/UserIcon.vue';
 
 const props = defineProps({
     user: { type: Object, required: true },
 });
 
-console.log('loaded data', props.user);
 </script>

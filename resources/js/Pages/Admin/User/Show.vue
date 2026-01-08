@@ -5,11 +5,18 @@
             <div class="flex flex-col gap-6">
                 <div class="card-layout flex flex-col xl:flex-row justify-between gap-4 items-center">
                     <div class="flex flex-col xl:flex-row justify-center items-center text-center xl:text-left gap-6">
-                        <img class="rounded-full w-20" src="/public/images/user/owner.jpg"></img>
+                        <div v-if="user.profile_picture">
+                            <img class="w-20 h-20 rounded-full object-cover bg-gray-400" :src="user.profile_picture"
+                                alt="User avatar">
+                        </div>
+                        <div v-else
+                            class="w-20 h-20 rounded-full bg-white border border-stroke flex items-center justify-center text-gray-500">
+                            <UserIcon />
+                        </div>
                         <div class="flex flex-col justify-center gap-1">
                             <h1 class="card-title">{{ user.name }}</h1>
                             <p class="text-gray-500">
-                                {{ user.role.name }}
+                                {{ user.role.name }} - {{ user.member_number }}
                             </p>
                         </div>
                     </div>
@@ -78,13 +85,14 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:pl-8 py-6">
+                        <div
+                            class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6">
                             <h1 class="card-title">Berkas Pendukung</h1>
                             <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Foto KTP</span>
                                     <button
-                                        class="items-center flex justify-center gap-2 rounded-xl border border-gray-300 bg-muted mr-auto px-12 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                                        class="items-center flex justify-center gap-2 rounded-xl border border-gray-300 bg-muted mr-auto px-12 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
                                         <span class="icon-[tabler--eye]" style="width: 24px; height: 24px;"></span>
                                         Lihat
                                     </button>
@@ -92,7 +100,7 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Foto KK</span>
                                     <button
-                                        class="items-center flex justify-center gap-2 rounded-xl border border-gray-300 bg-muted mr-auto px-12 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                                        class="items-center flex justify-center gap-2 rounded-xl border border-gray-300 bg-muted mr-auto px-12 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
                                         <span class="icon-[tabler--eye]" style="width: 24px; height: 24px;"></span>
                                         Lihat
                                     </button>
@@ -126,7 +134,8 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:pl-8 py-6">
+                        <div
+                            class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6">
                             <h1 class="card-title">Ahli Waris</h1>
                             <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
                                 <li class="flex flex-col gap-2">
@@ -151,111 +160,126 @@
                     </div>
                 </div>
                 <div class="card-layout flex flex-col gap-4">
-                    <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
-                        <div v-for="account in user.saving_accounts" class="card-layout flex flex-col gap-12">
-                            <h1>{{ account.type }}</h1>
-                            <ul class="grid sm:grid-cols-2 grid-cols-1 gap-6">
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Saldo</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        parseCurrencyAmount(account.balance) ?? '0' }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir Diperbarui</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        dateParser(account.updated_at) ?? '-' }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Transaksi Terakhir</span>
-                                    <span
-                                        :class="account.transactions[0]?.type == 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
-                                        class="font-medium text-dark-text dark:text-white">{{
-                                            account.transactions[0]?.type == 'Penyetoran' ? '+' : '-' }}
-                                        {{ parseCurrencyAmount(account.transactions[0]?.amount) ?? '-' }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Transaksi</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        dateParser(account.transactions[0]?.transaction_date) ?? '-' }}</span>
-                                </li>
-                            </ul>
-                            <button
-                                class="flex justify-center items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-                                <span class="icon-[material-symbols--info-outline-rounded]"
-                                    style="width: 24px; height: 24px;"></span>
-                                Mutasi
-                            </button>
+                    <h1 class="card-title">Akun</h1>
+                    <div v-if="user.saving_accounts?.length && user.saving_accounts?.length"
+                        class="flex flex-col gap-4">
+                        <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
+                            <div v-for="account in user.saving_accounts" class="card-layout flex flex-col gap-12">
+                                <h1>{{ account.type }}</h1>
+                                <ul class="grid sm:grid-cols-2 grid-cols-1 gap-6">
+                                    <li class="flex flex-col gap-2">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Saldo</span>
+                                        <span class="font-medium text-dark-text dark:text-white">{{
+                                            parseCurrencyAmount(account.balance) ?? '0' }}</span>
+                                    </li>
+                                    <li class="flex flex-col gap-2">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir
+                                            Diperbarui</span>
+                                        <span class="font-medium text-dark-text dark:text-white">{{
+                                            dateParser(account.updated_at) ?? '-' }}</span>
+                                    </li>
+                                    <li class="flex flex-col gap-2">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Transaksi Terakhir</span>
+                                        <span
+                                            :class="account.transactions[0]?.type == 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
+                                            class="font-medium text-dark-text dark:text-white">{{
+                                                account.transactions[0]?.type == 'Penyetoran' ? '+' : '-' }}
+                                            {{ parseCurrencyAmount(account.transactions[0]?.amount) ?? '-' }}</span>
+                                    </li>
+                                    <li class="flex flex-col gap-2">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Transaksi</span>
+                                        <span class="font-medium text-dark-text dark:text-white">{{
+                                            dateParser(account.transactions[0]?.transaction_date) ?? '-' }}</span>
+                                    </li>
+                                </ul>
+                                <button
+                                    class="flex justify-center items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                                    <span class="icon-[material-symbols--info-outline-rounded]"
+                                        style="width: 24px; height: 24px;"></span>
+                                    Mutasi
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid xl:grid-cols-2 grid-cols-1">
+                            <div v-for="financing in user.financings" class="card-layout flex flex-col gap-12 px-0!">
+                                <div class="border-b-2 border-gray-200 dark:border-gray-700 pb-4 px-8">
+                                    <h1 class="font-semibold text-dark-text dark:text-white/90">Pembiayaan Murabahah
+                                    </h1>
+                                </div>
+                                <ul class="grid grid-cols-1 gap-6 px-8">
+                                    <li class="flex sm:flex-row flex-col justify-between">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Objek Pembiayaan</span>
+                                        <span class="font-medium text-dark-text dark:text-white">{{
+                                            financing.product_type }}</span>
+                                    </li>
+                                    <li class="flex sm:flex-row flex-col justify-between">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Harga Pembiayaan</span>
+                                        <span class="font-medium text-dark-text dark:text-white">{{
+                                            parseCurrencyAmount(financing.loan.total_price) }}</span>
+                                    </li>
+                                    <li class="flex sm:flex-row flex-col justify-between">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir
+                                            Diperbarui</span>
+                                        <span class="font-medium text-dark-text dark:text-white">{{
+                                            dateParser(financing.created_at) }}</span>
+                                    </li>
+                                    <li class="flex flex-col gap-2">
+                                        <div class="flex sm:flex-row flex-col justify-between items-center">
+                                            <span class="text-sm text-gray-500 dark:text-gray-300">Sisa
+                                                Pembiayaan</span>
+                                            <span class="font-medium text-dark-text dark:text-white">{{
+                                                parseCurrencyAmount(
+                                                    Math.max(
+                                                        0,
+                                                        financing.loan.total_price -
+                                                        financing.loan.payments.length * financing.loan.amount_ins
+                                                    )) }}</span>
+                                        </div>
+                                        <div class="progress-container">
+                                            <div class="progress-bar"
+                                                :style="{ width: (Math.min(financing.loan.tenor ? (financing.loan.payments.length / financing.loan.tenor * 100) : 0, 100)) + '%' }">
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="flex sm:flex-row flex-col justify-between">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
+                                        <span class="font-medium text-dark-text dark:text-white">{{
+                                            parseCurrencyAmount(financing.loan.amount_ins) }}</span>
+                                    </li>
+                                    <li class="flex sm:flex-row flex-col justify-between">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Jatuh Tempo
+                                            Berikutnya</span>
+                                        <span class="font-medium text-dark-text dark:text-white">{{
+                                            dateParser(financing.created_at) }}</span>
+                                    </li>
+                                    <li class="flex sm:flex-row flex-col justify-between">
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Posisi Angsuran</span>
+                                        <span class="font-medium text-dark-text dark:text-white">{{
+                                            financing.loan.payments.length }} dari {{ financing.loan.tenor }}</span>
+                                    </li>
+                                </ul>
+                                <div class="flex flex-col sm:flex-row gap-4 w-full px-8">
+                                    <button
+                                        class="flex w-full justify-center items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                                        <span class="icon-[material-symbols--info-outline-rounded]"
+                                            style="width: 24px; height: 24px;"></span>
+                                        Detail
+                                    </button>
+                                    <button
+                                        class="flex w-full justify-center items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                                        <span class="icon-[material-symbols--info-outline-rounded]"
+                                            style="width: 24px; height: 24px;"></span>
+                                        Riwayat
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="grid xl:grid-cols-2 grid-cols-1">
-                        <div v-for="financing in user.financings" class="card-layout flex flex-col gap-12 px-0!">
-                            <div class="border-b-2 border-gray-200 dark:border-gray-700 pb-4 px-8">
-                                <h1 class="font-semibold text-dark-text dark:text-white/90">Pembiayaan Murabahah</h1>
-                            </div>
-                            <ul class="grid grid-cols-1 gap-6 px-8">
-                                <li class="flex sm:flex-row flex-col justify-between">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Objek Pembiayaan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        financing.product_type }}</span>
-                                </li>
-                                <li class="flex sm:flex-row flex-col justify-between">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Harga Pembiayaan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        parseCurrencyAmount(financing.loan.total_price) }}</span>
-                                </li>
-                                <li class="flex sm:flex-row flex-col justify-between">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir Diperbarui</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        dateParser(financing.created_at) }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <div class="flex sm:flex-row flex-col justify-between items-center">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Sisa Pembiayaan</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(
-                                                Math.max(
-                                                    0,
-                                                    financing.loan.total_price -
-                                                    financing.loan.payments.length * financing.loan.amount_ins
-                                            )) }}</span>
-                                    </div>
-                                    <div class="progress-container">
-                                        <div class="progress-bar"
-                                            :style="{ width: (Math.min(financing.loan.tenor ? (financing.loan.payments.length / financing.loan.tenor * 100) : 0, 100)) + '%' }">
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="flex sm:flex-row flex-col justify-between">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        parseCurrencyAmount(financing.loan.amount_ins) }}</span>
-                                </li>
-                                <li class="flex sm:flex-row flex-col justify-between">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Jatuh Tempo Berikutnya</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        dateParser(financing.created_at) }}</span>
-                                </li>
-                                <li class="flex sm:flex-row flex-col justify-between">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Posisi Angsuran</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{
-                                        financing.loan.payments.length }} dari {{ financing.loan.tenor }}</span>
-                                </li>
-                            </ul>
-                            <div class="flex flex-col sm:flex-row gap-4 w-full px-8">
-                                <button
-                                    class="flex w-full justify-center items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-                                    <span class="icon-[material-symbols--info-outline-rounded]"
-                                        style="width: 24px; height: 24px;"></span>
-                                    Detail
-                                </button>
-                                <button
-                                    class="flex w-full justify-center items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-                                    <span class="icon-[material-symbols--info-outline-rounded]"
-                                        style="width: 24px; height: 24px;"></span>
-                                    Riwayat
-                                </button>
-                            </div>
-                        </div>
+                    <div v-else class="flex flex-col items-center justify-center py-12">
+                        <NoArchiveIcon width="120px" height="120px" />
+                        <p class="text-dark-text text-sm dark:text-gray-400 pt-4">
+                            Tidak ada data akun.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -268,6 +292,8 @@ import AdminLayout from '@/Layouts/Admin/Layout.vue';
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue';
 import dateParser from '@/Composables/dateParser.js';
 import parseCurrencyAmount from '@/Composables/moneyParser.js';
+import NoArchiveIcon from '@/Icons/NoArchiveIcon.vue';
+import UserIcon from '@/Icons/UserIcon.vue';
 
 const props = defineProps({
     user: { type: Object, required: true },

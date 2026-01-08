@@ -105,19 +105,9 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(string $id)
     {
-        $user->load([
-            'role',
-            'workUnit',
-            'savingAccounts.transactions' => function ($query) {
-                $query->latest('created_at')->take(1);
-            },
-            'heirs',
-            'userDocs',
-            'financings.loan.payments'
-        ]);
-
+        $user = User::with(['role', 'workUnit', 'savingAccounts.transactions' => function($query) {$query->latest('created_at')->take(1);}, 'heirs', 'userDocs', 'financings.loan.payments'])->findOrFail($id);
         return inertia('Admin/User/Show', ['user' => $user]);
     }
 
@@ -287,7 +277,7 @@ class UserController extends Controller
         $user->load(['role', 'workUnit']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-        
+
         return Inertia::render('User/Profile/Show', [
             'user' => [
                 'id' => $user->id,
@@ -316,7 +306,7 @@ class UserController extends Controller
         $user->load(['role', 'workUnit']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-        
+
         return Inertia::render('User/Profile/Edit', [
             'user' => [
                 'id' => $user->id,
