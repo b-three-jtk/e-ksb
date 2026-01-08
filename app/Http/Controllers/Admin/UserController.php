@@ -10,6 +10,7 @@ use App\Mail\ApprovalNotificationMail;
 use App\Mail\RejectionNotificationMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Enums\UserStatus;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -17,9 +18,72 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $perPage = $request->input('per_page', 10);
+        $search = $request->input('search');
+        $status = $request->input('status');
+
+        $allowedSorts = ['name', 'joined_date'];
+        $sortBy = in_array($request->sort_by, $allowedSorts)
+            ? $request->sort_by
+            : 'joined_date';
+        $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
+
+        $query = User::with('savingAccounts');
+
+        if ($search) {
+            $query->where(fn ($q) =>
+                $q->where('name', 'ILIKE', "%{$search}%")
+                ->orWhere('member_number', 'ILIKE', "%{$search}%")
+                ->orWhere('phone_number', 'ILIKE', "%{$search}%")
+            );
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $members = $query
+            ->orderBy($sortBy, $sortDir)
+            ->paginate($perPage)
+            ->withQueryString()
+            ->through(fn ($user) => [
+                'id' => $user->id,
+                'no_anggota' => $user->member_number,
+                'name' => $user->name,
+                'joined_at' => $user->joined_date
+                    ? \Carbon\Carbon::parse($user->joined_date)->format('d/m/Y')
+                    : null,
+                'phone' => $user->phone_number,
+                'status' => $user->status,
+                'total_simpanan' => 'Rp ' . number_format(
+                    $user->savingAccounts->sum('balance'),
+                    0,
+                    ',',
+                    '.'
+                ),
+                'avatar' => $user->profile_picture
+                    ? asset('storage/' . $user->profile_picture)
+                    : "https://i.pravatar.cc/40?u=$user->id",
+            ]);
+
+        return Inertia::render('Admin/User/ListMember', [
+            'members'  => $members,
+            'filters'  => $request->only([
+                'search', 'status', 'per_page', 'sort_by', 'sort_dir'
+            ]),
+            'summary'  => [
+                'active' => User::where('status', 'Aktif')->count(),
+                'new_this_month' => User::whereMonth('created_at', now()->month)->count(),
+                'in_review' => User::where('status', 'Dalam Peninjauan')->count(),
+            ],
+            'statuses' => [
+                'Aktif',
+                'Tidak Aktif',
+                'Mengundurkan Diri',
+            ],
+        ]);
     }
 
     /**
@@ -339,4 +403,5 @@ class UserController extends Controller
 
         return redirect()->back()->with('success', 'Foto profil berhasil dihapus');
     }
+
 }

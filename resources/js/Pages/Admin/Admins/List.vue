@@ -11,7 +11,7 @@ import Pagination from '../../../Components/Table/Pagination.vue'
 const columns = [
     { key: 'no', label: 'No' },
     { key: 'nik', label: 'NIK' },
-    { key: 'profil', label: 'Profil Anggota' },
+    { key: 'name', label: 'Profil Anggota', sortable: true },
     { key: 'email', label: 'Email' },
     { key: 'posisi', label: 'Posisi' },
     { key: 'status', label: 'Status', align: 'center' },
@@ -105,7 +105,7 @@ const toggleSort = (column) => {
             <!-- Card Header -->
             <div class="flex justify-between items-center p-6 border-b">
                 <div>
-                    <h2 class="font-head text-lg font-semibold text-gray-900">Data Admin</h2>
+                    <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Admin</h2>
                 </div>
 
                 <Link
@@ -143,7 +143,7 @@ const toggleSort = (column) => {
                     {{ (admins.current_page - 1) * admins.per_page + index + 1 }}
                 </template>
 
-                <template #cell-profil="{ row }">
+                <template #cell-name="{ row }">
                     <div class="flex items-center gap-3">
                         <img :src="row.avatar" class="w-9 h-9 rounded-full" />
                         <span class="font-medium">{{ row.name }}</span>
@@ -168,15 +168,15 @@ const toggleSort = (column) => {
                             class="text-gray-500 hover:text-blue-600 transition"
                             title="Edit"
                         >
-                            <Icon icon="mdi:pencil-outline" class="w-4 h-4"/>
+                            <Icon icon="mdi:pencil-outline" class="w-5 h-5"/>
                         </Link>
 
                         <Link
                             :href="`/admin/show/${row.id}`"
-                            class="text-gray-500 hover:text-blue-600 transition"
+                            class="text-gray-500 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
                             title="Lihat"
                         >
-                            <Icon icon="mdi:eye-outline" class="w-4 h-4"/>
+                            <Icon icon="mdi:eye-outline" class="w-5 h-5"/>
                         </Link>
                     </div>
                 </template>

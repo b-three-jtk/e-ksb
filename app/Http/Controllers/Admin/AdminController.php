@@ -19,6 +19,13 @@ class AdminController extends Controller
      */
     public function index(Request $request)
     {
+        $allowedSorts = ['name', 'created_at', 'email'];
+        $sortBy = in_array($request->sort_by, $allowedSorts)
+            ? $request->sort_by
+            : 'created_at';
+
+        $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
+
         $admins = User::with('role')
             ->when($request->search, function ($q) use ($request) {
                 $q->where(function ($qq) use ($request) {
@@ -35,10 +42,7 @@ class AdminController extends Controller
                     $r->where('name', $request->role)
                 )
             )
-            ->orderBy(
-                $request->sort_by ?? 'created_at',
-                $request->sort_dir ?? 'desc'
-            )
+            ->orderBy($sortBy, $sortDir)
             ->paginate($request->per_page ?? 10)
             ->withQueryString()
             ->through(fn ($user) => [
