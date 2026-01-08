@@ -24,9 +24,9 @@ class SavingController extends Controller
         $sortBy = $request->input('sort_by', 'transaction_date');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $alloweSorts = ['transaction_date'];
+        $allowedSorts = ['transaction_date'];
 
-        if (!in_array($sortBy, $alloweSorts)) {
+        if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'transaction_date';
         }
 
