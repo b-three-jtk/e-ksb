@@ -7,7 +7,6 @@ use App\Http\Requests\StoreSavingTransactionValidationRequest;
 use App\Models\SavingTransaction;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\SavingTransaction;
 use Inertia\Inertia;
 use Carbon\Carbon;
 
@@ -41,7 +40,8 @@ class SavingController extends Controller
             });
         })
         ->when($tab === 'permohonan', function ($q) {
-            $q->whereIn('type', ['Penarikan', 'Penyetoran']);
+            $q->whereIn('type', ['Penarikan', 'Penyetoran'])
+              ->where('status', TransactionStatus::PENDING);
         })
         ->when(in_array($tab, ['pokok', 'wajib', 'sukarela']), function ($q) use ($tab) {
             $map = [
@@ -64,7 +64,7 @@ class SavingController extends Controller
                     'id' => $trx->id,
                     'no_transaksi' => 'TRX-' . str_pad($trx->id, 6, '0', STR_PAD_LEFT),
                     'tanggal' => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                    'anggota' => $trx->savingAccount->user->nik
+                    'anggota' => $trx->savingAccount->user->member_number
                         . ' - '
                         . $trx->savingAccount->user->name,
                     'nominal' => $trx->type === 'Penarikan'
@@ -75,31 +75,42 @@ class SavingController extends Controller
                 ];
             });
 
-        $summarySource = collect($transactions->items());
+        $summaryQuery = SavingTransaction::query()
+            ->where('status', TransactionStatus::COMPLETED)
+            ->when(in_array($tab, ['pokok', 'wajib', 'sukarela']), function ($q) use ($tab){
+                $map = [
+                    'pokok' => 'Simpanan Pokok',
+                    'wajib' => 'Simpanan Wajib',
+                    'sukarela' => 'Simpanan Sukarela',
+                ];
 
-        $summary = [
-            [
-                'title' => 'Total Kas',
-                'value' => 'Rp.' . number_format($summarySource->sum('nominal'), 0, ',', '.'),
-                'up' => true,
-            ],
-            [
-                'title' => 'Total Simpanan Keluar',
-                'value' => 'Rp.' . number_format(
-                    abs($summarySource->where('nominal', '<', 0)->sum('nominal')),
-                    0, ',', '.'
-                ),
-                'up' => false,
-            ],
-            [
-                'title' => 'Total Simpanan Masuk',
-                'value' => 'Rp.' . number_format(
-                    $summarySource->where('nominal', '>', 0)->sum('nominal'),
-                    0, ',', '.'
-                ),
-                'up' => true,
-            ],
-        ];
+                $q->whereHas('savingAccount', function ($sa) use ($map, $tab) {
+                    $sa->where('type', $map[$tab]);
+                });
+            });
+
+            $totalMasuk = (clone $summaryQuery)
+                ->where('type', 'Penyetoran')
+                ->sum('amount');
+
+            $totalKeluar = (clone $summaryQuery)
+                ->where('type', 'Penarikan')
+                ->sum('amount');
+
+            $summary = [
+                [
+                    'title' => 'Total Kas',
+                    'value' => 'Rp ' . number_format($totalMasuk - $totalKeluar, 0, ',', '.'),
+                ],
+                [
+                    'title' => 'Total Simpanan Keluar',
+                    'value' => 'Rp ' . number_format($totalKeluar, 0, ',', '.'),
+                ],
+                [
+                    'title' => 'Total Simpanan Masuk',
+                    'value' => 'Rp ' . number_format($totalMasuk, 0, ',', '.'),
+                ],
+            ];
 
         return Inertia::render('Admin/Savings/List', [
             'transactions' => $transactions,
