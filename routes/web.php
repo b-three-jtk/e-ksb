@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ProfileController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SavingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\User\LedgerController;
+use App\Http\Controllers\User\AnggotaController;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
@@ -48,8 +50,11 @@ Route::post('/auth/logout', [LoginController::class, 'destroy'])
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+
     Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
     Route::put('/savings/validate/{id}', [SavingController::class, 'validateRequest'])->name('savings.validate');
+    Route::get('/savings', [SavingController::class, 'index'])->name('savings.index');
 
     Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
     Route::get('/anggota', [UserController::class, 'index'])->name('users.index');
@@ -73,6 +78,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 // User Routes
 Route::prefix('user')->name('user.')->middleware('auth')->group(function () {
+    Route::get('dashboard', [AnggotaController::class, 'index'])->name('userDashboard');
+
     Route::get('/profile/{user:member_number}', [UserController::class, 'profile'])->name('profile.show');
     Route::get('/profile/{user:member_number}/edit', [UserController::class, 'editProfile'])->name('profile.edit');
     Route::put('/profile/{user:member_number}', [UserController::class, 'updateProfile'])->name('profile.update');

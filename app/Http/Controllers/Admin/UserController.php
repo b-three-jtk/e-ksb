@@ -30,7 +30,11 @@ class UserController extends Controller
             : 'joined_date';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $query = User::with('savingAccounts');
+        $query = User::with('savingAccounts')
+            ->whereHas('role', fn ($q) =>
+                $q->where('name', 'Anggota')
+            )
+            ->whereNotNull('joined_date');
 
         if ($search) {
             $query->where(fn ($q) =>
@@ -68,15 +72,29 @@ class UserController extends Controller
                     : "https://i.pravatar.cc/40?u=$user->id",
             ]);
 
-        return Inertia::render('Admin/User/ListMember', [
+        return Inertia::render('Admin/User/List', [
             'members'  => $members,
             'filters'  => $request->only([
                 'search', 'status', 'per_page', 'sort_by', 'sort_dir'
             ]),
-            'summary'  => [
-                'active' => User::where('status', 'Aktif')->count(),
-                'new_this_month' => User::whereMonth('created_at', now()->month)->count(),
-                'in_review' => User::where('status', 'Dalam Peninjauan')->count(),
+            'summary' => [
+                'active' => User::whereHas('role', fn ($q) =>
+                    $q->where('name', 'Anggota')
+                )
+                ->where('status', 'Aktif')
+                ->count(),
+
+                'new_this_month' => User::whereHas('role', fn ($q) =>
+                    $q->where('name', 'Anggota')
+                )
+                ->whereMonth('created_at', now()->month)
+                ->count(),
+
+                'in_review' => User::whereHas('role', fn ($q) =>
+                    $q->where('name', 'Anggota')
+                )
+                ->whereNull('joined_date')
+                ->count(),
             ],
             'statuses' => [
                 'Aktif',
@@ -105,19 +123,9 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(string $id)
     {
-        $user->load([
-            'role',
-            'workUnit',
-            'savingAccounts.transactions' => function ($query) {
-                $query->latest('created_at')->take(1);
-            },
-            'heirs',
-            'userDocs',
-            'financings.loan.payments'
-        ]);
-
+        $user = User::with(['role', 'workUnit', 'savingAccounts.transactions' => function($query) {$query->latest('created_at')->take(1);}, 'heirs', 'userDocs', 'financings.loan.payments'])->findOrFail($id);
         return inertia('Admin/User/Show', ['user' => $user]);
     }
 
@@ -207,7 +215,7 @@ class UserController extends Controller
                 'unit_kerja' => $user->workUnit?->name ?? '-',
             ]);
 
-        return Inertia::render('Admin/User/Verification/ProspectiveMembers', [
+        return Inertia::render('Admin/User/Verification/List', [
             'prospectiveMembers' => $members,
             'filters' => [
                 'search' => $request->search,
@@ -287,7 +295,7 @@ class UserController extends Controller
         $user->load(['role', 'workUnit']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-        
+
         return Inertia::render('User/Profile/Show', [
             'user' => [
                 'id' => $user->id,
@@ -316,7 +324,7 @@ class UserController extends Controller
         $user->load(['role', 'workUnit']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-        
+
         return Inertia::render('User/Profile/Edit', [
             'user' => [
                 'id' => $user->id,

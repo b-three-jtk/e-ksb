@@ -66,7 +66,7 @@ const user = computed(() => page.props.auth?.user || {
 })
 
 const menuItems = [
-    { href: '/profile', icon: UserIcon, text: 'Edit profile' },
+    { href: '/admin/profile', icon: UserIcon, text: 'Edit profile' },
     { href: '/settings', icon: SettingsIcon, text: 'Account settings' },
     { href: '/support', icon: InfoCircleIcon, text: 'Support' },
 ]
