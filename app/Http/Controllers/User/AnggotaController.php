@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SavingTransaction;
+use Carbon\Carbon;
 
 class AnggotaController extends Controller
 {
@@ -40,7 +41,7 @@ class AnggotaController extends Controller
         ->get()
         ->map(function ($trx) {
             return [
-                'date'    => $trx->transaction_date->format('d/m/Y'),
+                'date'    => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
                 'product' => $trx->savingAccount->type,
                 'type'    => $trx->type,
                 'amount'  => 'Rp ' . number_format($trx->amount, 0, ',', '.'),
