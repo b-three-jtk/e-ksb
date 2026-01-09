@@ -191,9 +191,9 @@ class SavingController extends Controller
             }
             $transaction->save();
 
-            return redirect()->back()->with('success', 'Transaksi simpanan berhasil diperbarui.');
+            return redirect()->back();
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui transaksi simpanan: ' . $e->getMessage());
+            return redirect()->back();
         }
     }
 }
