@@ -13,16 +13,6 @@ class AnggotaController extends Controller
     {
         $user = $request->user();
 
-        if (!$user) {
-            return inertia('User/Dashboard', [
-                'summary' => [
-                    'total_saving' => 0,
-                    'total_installment' => 0,
-                ],
-                'ledger' => [],
-            ]);
-        }
-
         $totalSaving = $user->savingAccounts()->sum('balance');
 
         $totalInstallment = $user->financings()
