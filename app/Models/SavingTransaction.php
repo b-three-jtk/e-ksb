@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class SavingTransaction extends Model
 {
+    use HasFactory, HasUuids;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -22,6 +24,10 @@ class SavingTransaction extends Model
         'saving_account_id',
     ];
 
+    protected $casts = [
+        'transaction_date' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -30,5 +36,10 @@ class SavingTransaction extends Model
     public function savingAccount()
     {
         return $this->belongsTo(SavingAccount::class);
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }
