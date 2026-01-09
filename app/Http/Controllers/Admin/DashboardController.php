@@ -6,9 +6,7 @@ use App\Models\Loan;
 use App\Models\User;
 use App\Enums\UserStatus;
 use App\Models\Financing;
-use Illuminate\Http\Request;
 use App\Models\SavingAccount;
-use App\Enums\FinancingReqStatus;
 use App\Models\SavingTransaction;
 use App\Http\Controllers\Controller;
 

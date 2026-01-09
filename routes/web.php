@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ProfileController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
@@ -46,6 +47,8 @@ Route::post('/auth/logout', [LoginController::class, 'destroy'])
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 
     Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
     Route::put('/savings/validate/{id}', [SavingController::class, 'validateRequest'])->name('savings.validate');
