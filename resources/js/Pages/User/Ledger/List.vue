@@ -1,45 +1,56 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount } from 'vue'
 import { router } from '@inertiajs/vue3'
-import BaseLayout from '@/Layouts/Base.vue'
-import FieldRow from '@/Components/Form/FieldRow.vue'
-import BaseTable from '@/Components/Table/BaseTable.vue'
-import BaseFunctionality from '@/Components/Table/BaseFunctionality.vue'
-import Pagination from '@/Components/Table/Pagination.vue'
+import BaseLayout from '../../../Layouts/Base.vue'
+import FieldRow from '../../../Components/Form/FieldRow.vue'
+import BaseTable from '../../../Components/Table/BaseTable.vue'
+import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
+import Pagination from '../../../Components/Table/Pagination.vue'
 
 defineOptions({
     layout: BaseLayout,
 })
 
-const props = defineProps({
-    transactions: {
-        type: Object,
-        default: () => ({
-            data: [],
-            current_page: 1,
-            per_page: 10,
-            total: 0,
-            last_page: 1,
-            links: [],
-        }),
-    },
-    memberInfo: {
-        type: Object,
-        default: () => ({
-            nama: '',
-            no_anggota: '',
-            status: '',
-            tanggal_bergabung: '',
-        }),
-    },
-    filters: {
-        type: Object,
-        default: () => ({
-            search: '',
-            month: '',
-            per_page: 10,
-        }),
-    },
+const props = withDefaults(defineProps<{
+    transactions?: {
+        data: any[]
+        current_page: number
+        per_page: number
+        total: number
+        last_page: number
+        links: any[]
+    }
+    memberInfo?: {
+        nama: string
+        no_anggota: string
+        status: string
+        tanggal_bergabung: string
+    }
+    filters?: {
+        search: string
+        month: string
+        per_page: number
+    }
+}>(), {
+    transactions: () => ({
+        data: [],
+        current_page: 1,
+        per_page: 10,
+        total: 0,
+        last_page: 1,
+        links: [],
+    }),
+    memberInfo: () => ({
+        nama: '',
+        no_anggota: '',
+        status: '',
+        tanggal_bergabung: '',
+    }),
+    filters: () => ({
+        search: '',
+        month: '',
+        per_page: 10,
+    }),
 })
 
 const columns = [
