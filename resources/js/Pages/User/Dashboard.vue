@@ -106,7 +106,7 @@ const rupiah = (value) =>
                         <Link href="/simpanan/setor" class="group">
                             <div class="flex flex-col items-center gap-3">
                                 <div class="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
-                                    <Icon icon="uil:money-insert", class="w-9 h-9" />
+                                    <Icon icon="uil:money-insert" class="w-9 h-9" />
                                 </div>
                                 <div class="mt-1">
                                     <p class="text-sm font-medium">
@@ -122,7 +122,7 @@ const rupiah = (value) =>
                         <Link href="/simpanan/tarik" class="group">
                             <div class="flex flex-col items-center gap-2">
                                 <div class="w-20 h-20 rounded-full bg-orange-500 flex items-center justify-center text-white group-hover:bg-orange-600 transition-colors">
-                                    <Icon icon="uil:money-withdraw", class="w-9 h-9" />
+                                    <Icon icon="uil:money-withdraw" class="w-9 h-9" />
                                 </div>
                                 <div class="mt-1">
                                     <p class="text-sm font-medium">
@@ -138,7 +138,7 @@ const rupiah = (value) =>
                         <Link href="/pembiayaan/murabahah" class="group">
                             <div class="flex flex-col items-center gap-2">
                                 <div class="w-20 h-20 rounded-full bg-sky-400 flex items-center justify-center text-white group-hover:bg-blue-light-600 transition-colors">
-                                    <Icon icon="uil:credit-card", class="w-9 h-9" />
+                                    <Icon icon="uil:credit-card" class="w-9 h-9" />
                                 </div>
                                 <div class="mt-1">
                                     <p class="text-sm font-medium">
