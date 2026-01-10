@@ -5,7 +5,11 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SavingTransaction;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
+use App\Models\UserDoc;
 
 class AnggotaController extends Controller
 {
@@ -54,5 +58,60 @@ class AnggotaController extends Controller
             ],
             'ledger' => $ledger,
         ]);
+    }
+
+    public function createResign(Request $request, User $user)
+    {
+        if ($request->user()->id !== $user->id) {
+            abort(403);
+        }
+
+        $totalSaving = $user->savingAccounts()->sum('balance');
+
+        $totalObligation = $user->financings()
+            ->whereHas('loan')
+            ->with(['loan.payments'])
+            ->get()
+            ->sum(function ($financing) {
+                $loan = $financing->loan;
+                if (!$loan) return 0;
+
+                $totalPaid = $loan->payments->sum('amount');
+                return max($loan->total_price - $totalPaid, 0);
+            });
+
+        return inertia('User/Resign/Create', [
+            'member' => [
+                'name' => $user->name,
+                'member_number' => $user->member_number,
+                'joined_date' => Carbon::parse($user->joined_date)->locale('id')->translatedFormat('d F Y'),
+                'total_saving' => $totalSaving,
+                'total_obligation' => $totalObligation,
+            ],
+        ]);
+    }
+
+    public function storeResign(Request $request, User $user)
+    {
+        if ($request->user()->id !== $user->id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'document' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        ], [
+            'document.max' => 'Ukuran file maksimal 2 MB',
+            'document.mimes' => 'File harus berupa PDF atau DOC',
+        ]);
+
+        $path = $request->file('document')->store('resign_docs', 'public');
+
+        UserDoc::create([
+            'name' => 'Dokumen Pengunduran Diri',
+            'attachment' => $path,
+            'user_id' => $user->id,
+        ]);
+
+        return back()->with('success', 'Permohonan pengunduran diri berhasil dikirim');
     }
 }
