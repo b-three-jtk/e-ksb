@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import Base from '../../Layouts/Base.vue'
-import CardInfo from '../../Components/CardInfo.vue';
 import BaseTable from '../../Components/Table/BaseTable.vue';
 import { Icon } from '@iconify/vue';
 
