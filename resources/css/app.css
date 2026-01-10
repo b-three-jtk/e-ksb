@@ -822,3 +822,7 @@ span.flatpickr-weekday,
 }
 
 .progress-bar { height: 100%; background: #4caf50; transition: width 0.3s ease; }
+
+.border-dashed:hover {
+    border-color: #3b82f6;
+}
