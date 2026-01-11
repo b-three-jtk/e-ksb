@@ -170,6 +170,7 @@ watch(() => filters.tab, applyFilters)
                     :key="item.title"
                     :title="item.title"
                     :content="item.value"
+                    :percentage="item.percentage"
                 />
             </div>
         </div>

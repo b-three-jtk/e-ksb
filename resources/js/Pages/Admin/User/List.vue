@@ -89,7 +89,7 @@ const statusClass = (status) => {
     switch (status) {
         case 'Aktif':
             return 'bg-green-100 text-green-700 border border-green-200'
-        case 'Nonaktif':
+        case 'Tidak Aktif':
             return 'bg-red-100 text-red-700 border border-red-200'
         case 'Mengundurkan Diri':
             return 'bg-orange-100 text-orange-700 border border-orange-200'
@@ -112,14 +112,17 @@ const statusClass = (status) => {
                 <CardInfo
                     title="Jumlah Anggota Aktif"
                     :content="summary.active"
+                    :percentage="summary.active_percent"
                 />
                 <CardInfo
                     title="Anggota Baru Bulan Ini"
                     :content="summary.new_this_month"
+                    :percentage="summary.new_percent"
                 />
                 <CardInfo
                     title="Menunggu Verifikasi"
                     :content="summary.in_review"
+                    :percentage="summary.in_review_percent"
                 />
             </div>
         </div>
