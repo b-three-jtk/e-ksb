@@ -97,20 +97,31 @@ class SavingController extends Controller
                 ->where('type', 'Penarikan')
                 ->sum('amount');
 
+            $totalPerputaran = $totalMasuk + $totalKeluar;
+
             $summary = [
-                [
-                    'title' => 'Total Kas',
-                    'value' => 'Rp ' . number_format($totalMasuk - $totalKeluar, 0, ',', '.'),
-                ],
-                [
-                    'title' => 'Total Simpanan Keluar',
-                    'value' => 'Rp ' . number_format($totalKeluar, 0, ',', '.'),
-                ],
-                [
-                    'title' => 'Total Simpanan Masuk',
-                    'value' => 'Rp ' . number_format($totalMasuk, 0, ',', '.'),
-                ],
-            ];
+            [
+                'title' => 'Total Kas',
+                'value' => 'Rp ' . number_format($totalMasuk - $totalKeluar, 0, ',', '.'),
+                'percentage' => $totalMasuk > 0
+                    ? round((($totalMasuk - $totalKeluar) / $totalMasuk) * 100)
+                    : 0,
+            ],
+            [
+                'title' => 'Total Simpanan Keluar',
+                'value' => 'Rp ' . number_format($totalKeluar, 0, ',', '.'),
+                'percentage' => $totalPerputaran > 0
+                    ? round(($totalKeluar / $totalPerputaran) * 100)
+                    : 0,
+            ],
+            [
+                'title' => 'Total Simpanan Masuk',
+                'value' => 'Rp ' . number_format($totalMasuk, 0, ',', '.'),
+                'percentage' => $totalPerputaran > 0
+                    ? round(($totalMasuk / $totalPerputaran) * 100)
+                    : 0,
+            ],
+        ];
 
         return Inertia::render('Admin/Savings/List', [
             'transactions' => $transactions,
