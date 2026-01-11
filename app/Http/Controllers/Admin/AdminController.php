@@ -26,10 +26,17 @@ class AdminController extends Controller
 
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
+        $allowedAdminStatuses = [
+            'Aktif',
+            'Tidak Aktif',
+            'Mengundurkan Diri',
+        ];
+
         $admins = User::with('role')
             ->whereHas('role', fn ($q) =>
-                $q->where('name', '!=', 'Anggota')
+                $q->where('name', '!=', 'User')
             )
+            ->whereIn('status', $allowedAdminStatuses)
             ->when($request->search, function ($q) use ($request) {
                 $q->where(function ($qq) use ($request) {
                     $qq->where('name', 'like', "%{$request->search}%")
@@ -37,8 +44,9 @@ class AdminController extends Controller
                        ->orWhere('email', 'like', "%{$request->search}%");
                 });
             })
-            ->when($request->status, fn ($q) =>
-                $q->where('status', $request->status)
+            ->when(
+                $request->status && in_array($request->status, $allowedAdminStatuses),
+                fn ($q) => $q->where('status', $request->status)
             )
             ->when($request->role, fn ($q) =>
                 $q->whereHas('role', fn ($r) =>

@@ -40,6 +40,7 @@ const selectFilters = [
         options: [
             { label: 'Aktif', value: 'Aktif' },
             { label: 'Tidak Aktif', value: 'Tidak Aktif' },
+            { label: 'Mengundurkan Diri', value: 'Mengundurkan Diri' },
         ],
         optionLabel: 'label',
         optionValue: 'value',
@@ -153,9 +154,11 @@ const toggleSort = (column) => {
                 <template #cell-status="{ row }">
                     <span
                         class="px-3 py-1 rounded-full text-xs"
-                        :class="row.status === 'Aktif'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-200 text-red-600'"
+                        :class="{
+                            'bg-green-100 text-green-700': row.status === 'Aktif',
+                            'bg-red-100 text-red-700': row.status === 'Tidak Aktif',
+                            'bg-orange-100 text-orange-700': row.status === 'Mengundurkan Diri',
+                        }"
                     >
                         {{ row.status }}
                     </span>
