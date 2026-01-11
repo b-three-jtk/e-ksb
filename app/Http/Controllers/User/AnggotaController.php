@@ -121,6 +121,11 @@ class AnggotaController extends Controller
 
         $path = $request->file('document')->store('resign_docs', 'public');
 
+        if (!$path || !Storage::disk('public')->exists($path)) {
+            return back()->withErrors([
+                'document' => 'Gagal menyimpan dokumen. Silakan coba lagi.',
+            ]);
+        }
         UserDoc::create([
             'name' => 'Dokumen Pengunduran Diri',
             'attachment' => $path,
