@@ -32,9 +32,32 @@ class UserController extends Controller
 
         $query = User::with('savingAccounts')
             ->whereHas('role', fn ($q) =>
-                $q->where('name', 'Anggota')
+                $q->where('name', 'User')
             )
             ->whereNotNull('joined_date');
+
+        $memberBaseQuery = User::whereHas('role', fn ($q) =>
+            $q->where('name', 'User')
+        );
+
+        $verifiedMembersQuery = (clone $memberBaseQuery)
+            ->whereNotNull('joined_date');
+
+        $totalVerifiedMembers = $verifiedMembersQuery->count();
+
+        $activeMembers = (clone $verifiedMembersQuery)
+            ->where('status', 'Aktif')
+            ->count();
+
+        $newThisMonth = (clone $verifiedMembersQuery)
+            ->whereMonth('joined_date', now()->month)
+            ->whereYear('joined_date', now()->year)
+            ->count();
+
+        $inReview = (clone $memberBaseQuery)
+            ->where('status', 'Dalam Peninjauan')
+            ->whereNull('joined_date')
+            ->count();
 
         if ($search) {
             $query->where(fn ($q) =>
@@ -78,23 +101,23 @@ class UserController extends Controller
                 'search', 'status', 'per_page', 'sort_by', 'sort_dir'
             ]),
             'summary' => [
-                'active' => User::whereHas('role', fn ($q) =>
-                    $q->where('name', 'Anggota')
-                )
-                ->where('status', 'Aktif')
-                ->count(),
+                'total_verified' => $totalVerifiedMembers,
 
-                'new_this_month' => User::whereHas('role', fn ($q) =>
-                    $q->where('name', 'Anggota')
-                )
-                ->whereMonth('created_at', now()->month)
-                ->count(),
+                'active' => $activeMembers,
+                'new_this_month' => $newThisMonth,
+                'in_review' => $inReview,
 
-                'in_review' => User::whereHas('role', fn ($q) =>
-                    $q->where('name', 'Anggota')
-                )
-                ->whereNull('joined_date')
-                ->count(),
+                'active_percent' => $totalVerifiedMembers > 0
+                    ? round(($activeMembers / $totalVerifiedMembers) * 100)
+                    : 0,
+
+                'new_percent' => $totalVerifiedMembers > 0
+                    ? round(($newThisMonth / $totalVerifiedMembers) * 100)
+                    : 0,
+
+                'in_review_percent' => ($memberBaseQuery->count()) > 0
+                    ? round(($inReview / $memberBaseQuery->count()) * 100)
+                    : 0,
             ],
             'statuses' => [
                 'Aktif',
