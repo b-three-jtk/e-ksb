@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SavingController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\User\LedgerController;
 use App\Http\Controllers\User\AnggotaController;
 use App\Models\User;
 
@@ -41,7 +42,7 @@ Route::prefix('auth')
         })->name('register.success');
     });
 
-Route::redirect('/login', '/auth/login')->middleware('guest');
+Route::redirect('/login', '/auth/login')->middleware('guest')->name('login');
 
 Route::post('/auth/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
@@ -88,4 +89,8 @@ Route::prefix('user')->name('user.')->middleware('auth')->group(function () {
 
     Route::get('/resign/{user:member_number}', [AnggotaController::class, 'createResign'])->name('resign.create');
     Route::post('/resign/{user:member_number}', [AnggotaController::class, 'storeResign'])->name('resign.store');
+    
+    // Ledger Routes
+    Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
+    Route::get('/ledger/export', [LedgerController::class, 'export'])->name('ledger.export');
 });
