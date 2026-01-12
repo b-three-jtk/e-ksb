@@ -21,6 +21,7 @@ defineProps<{
     }
     sortBy?: string
     sortDir?: 'asc' | 'desc'
+    isLoading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -78,48 +79,64 @@ const toggleSort = (field: string) => {
 
             <!-- Body -->
             <tbody class="font-body bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                <tr
-                    v-for="(row, index) in data"
-                    :key="row.id ?? index"
-                    class="hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
+                <tr v-if="isLoading">
                     <td
-                        v-for="col in columns"
-                        :key="col.key"
-                        class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100"
-                        :class="[
-                            col.align === 'center' && 'text-center',
-                            col.align === 'right' && 'text-right'
-                        ]"
+                        :colspan="columns.length"
+                        class="px-6 py-10 text-center text-gray-500 dark:text-gray-400"
                     >
-                        <div
-                            :class="[
-                                col.align === 'center' && 'flex justify-center',
-                                col.align === 'right' && 'flex justify-end'
-                            ]"
-                        >
-                            <!-- Slot -->
-                            <slot
-                                :name="`cell-${col.key}`"
-                                :row="row"
-                                :index="index"
-                            >
-                                {{ row[col.key] }}
-                            </slot>
+                        <div class="flex items-center justify-center gap-3">
+                            <Icon
+                                icon="tabler:loader-2"
+                                class="w-5 h-5 animate-spin"
+                            />
+                            Memuat data...
                         </div>
                     </td>
                 </tr>
 
-
-                <!-- Ini Buat Kalau Tidak Ada Data -->
-                <tr v-if="data.length === 0">
-                    <td
-                        :colspan="columns.length"
-                        class="font-head px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                <template v-else>               
+                    <tr
+                        v-for="(row, index) in data"
+                        :key="row.id ?? index"
+                        class="hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
-                        Tidak ada data
-                    </td>
-                </tr>
+                        <td
+                            v-for="col in columns"
+                            :key="col.key"
+                            class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100"
+                            :class="[
+                                col.align === 'center' && 'text-center',
+                                col.align === 'right' && 'text-right'
+                            ]"
+                        >
+                            <div
+                                :class="[
+                                    col.align === 'center' && 'flex justify-center',
+                                    col.align === 'right' && 'flex justify-end'
+                                ]"
+                            >
+                                <!-- Slot -->
+                                <slot
+                                    :name="`cell-${col.key}`"
+                                    :row="row"
+                                    :index="index"
+                                >
+                                    {{ row[col.key] }}
+                                </slot>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Ini Buat Kalau Tidak Ada Data -->
+                    <tr v-if="data.length === 0">
+                        <td
+                            :colspan="columns.length"
+                            class="font-head px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                        >
+                            Tidak ada data
+                        </td>
+                    </tr>
+                </template>
             </tbody>
         </table>
     </div>
