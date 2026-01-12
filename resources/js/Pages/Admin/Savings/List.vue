@@ -9,6 +9,8 @@ import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import BaseTable from '../../../Components/Table/BaseTable.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
 
+const isLoading = ref(false)
+
 const tabs = [
     { key: 'semua', label: 'Semua' },
     { key: 'permohonan', label: 'Permohonan Penarikan/Penyetoran' },
@@ -117,6 +119,7 @@ const getProductColor = (produk) => {
 }
 
 const applyFilters = () => {
+    isLoading.value = true
     router.get(
         '/admin/savings',
         {
@@ -130,6 +133,9 @@ const applyFilters = () => {
         {
             preserveScroll: true,
             replace: true,
+            onFinish: () => {
+                isLoading.value = false
+            }
         }
     )
 }
@@ -153,15 +159,6 @@ watch(() => filters.tab, applyFilters)
         <div class="bg-white dark:bg-slate-800 rounded-xl p-6 mb-10 relative">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Ringkasan</h2>
-
-                <!-- Tombol Tambah -->
-                <Link
-                    href="#"
-                    class="font-head inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
-                >
-                    <Icon icon="mdi:plus" />
-                    Tambah Transaksi
-                </Link>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -215,6 +212,7 @@ watch(() => filters.tab, applyFilters)
                 <BaseTable
                     :columns="columns"
                     :data="transactions.data"
+                    :is-loading="isLoading"
                     :pagination="transactions"
                     :sort-by="filters.sort_by"
                     :sort-dir="filters.sort_dir"
