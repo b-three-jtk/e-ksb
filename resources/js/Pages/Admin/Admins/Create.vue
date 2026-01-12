@@ -15,8 +15,8 @@
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 NIK<span class="text-red-500">*</span>
                             </label>
-                            <input type="tel" v-model="form.nik" placeholder="Masukkan 16 digit NIK" maxlength="16" minlength="16" pattern="[0-9]*"
-                                :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                            <input type="tel" v-model="form.nik" placeholder="Masukkan 16 digit NIK" maxlength="16"
+                                minlength="16" pattern="[0-9]*" :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                                     form.errors.nik ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                                 ]"
                                 class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
@@ -43,7 +43,8 @@
                                         stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </div>
-                            <p v-if="form.errors.role_id" class="text-red-500 text-xs mt-1">{{ form.errors.role_id }}</p>
+                            <p v-if="form.errors.role_id" class="text-red-500 text-xs mt-1">{{ form.errors.role_id }}
+                            </p>
                         </div>
 
                         <!-- Nama -->
@@ -80,7 +81,8 @@
                                         stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </div>
-                            <p v-if="form.errors.work_unit_id" class="text-red-500 text-xs mt-1">{{ form.errors.work_unit_id }}</p>
+                            <p v-if="form.errors.work_unit_id" class="text-red-500 text-xs mt-1">{{
+                                form.errors.work_unit_id }}</p>
                         </div>
 
                         <!-- Email -->
@@ -104,7 +106,8 @@
                                 form.errors.institution ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                             ]"
                                 class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
-                            <p v-if="form.errors.institution" class="text-red-500 text-xs mt-1">{{ form.errors.institution }}
+                            <p v-if="form.errors.institution" class="text-red-500 text-xs mt-1">{{
+                                form.errors.institution }}
                             </p>
                         </div>
 
@@ -117,7 +120,8 @@
                                 form.errors.address ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                             ]"
                                 class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"></textarea>
-                            <p v-if="form.errors.address" class="text-red-500 text-xs mt-1">{{ form.errors.address }}</p>
+                            <p v-if="form.errors.address" class="text-red-500 text-xs mt-1">{{ form.errors.address }}
+                            </p>
                         </div>
 
                         <!-- No. Telp -->
@@ -125,11 +129,13 @@
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 No. Telp
                             </label>
-                            <input type="tel" maxlength="20" v-model="form.phone_number" placeholder="Masukkan nomor telepon" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
-                                form.errors.phone_number ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
-                            ]"
+                            <input type="tel" maxlength="20" v-model="form.phone_number"
+                                placeholder="Masukkan nomor telepon" :class="['h-11 w-full rounded-lg font-body border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                                    form.errors.phone_number ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                                ]"
                                 class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
-                            <p v-if="form.errors.phone_number" class="text-red-500 text-xs mt-1">{{ form.errors.phone_number }}
+                            <p v-if="form.errors.phone_number" class="text-red-500 text-xs mt-1">{{
+                                form.errors.phone_number }}
                             </p>
                         </div>
                     </div>
@@ -156,6 +162,7 @@ import { Link } from '@inertiajs/vue3'
 import Layout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import Swal from 'sweetalert2'
+import { toast } from 'vue3-toastify';
 
 const form = useForm({
     email: '',
@@ -186,21 +193,22 @@ const submitForm = () => {
         if (result.isConfirmed) {
             form.post('/admin/store', {
                 onSuccess: () => {
-                    Swal.fire({
-                        title: 'Sukses!',
-                        text: 'Admin berhasil ditambahkan.',
-                        icon: 'success',
-                        confirmButtonColor: '#007943',
+                    toast("Admin berhasil ditambahkan!", {
+                        "type": "success",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
                     }).then(() => {
                         window.location.href = route('admin.dashboard')
                     })
                 },
+
                 onError: () => {
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: 'Gagal menambahkan admin.',
-                        icon: 'error',
-                        confirmButtonColor: '#007943',
+                    toast("Gagal menambahkan admin.", {
+                        "type": "error",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
                     })
                 }
             })

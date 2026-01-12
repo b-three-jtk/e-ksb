@@ -4,6 +4,7 @@ import { Link } from '@inertiajs/vue3'
 import Layout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import Swal from 'sweetalert2'
+import { toast } from "vue3-toastify";
 
 const props = defineProps({
     admin: { type: Object, required: true },
@@ -35,21 +36,21 @@ const submitForm = () => {
         if (result.isConfirmed) {
             form.put(('/admin/update/' + props.admin.id), {
                 onSuccess: () => {
-                    Swal.fire({
-                        title: 'Sukses!',
-                        text: 'Admin berhasil diperbarui.',
-                        icon: 'success',
-                        confirmButtonColor: '#007943',
+                    toast("Admin berhasil diperbarui!", {
+                        "type": "success",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
                     }).then(() => {
                         window.location.href = route('admin.dashboard')
                     })
                 },
                 onError: () => {
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: 'Gagal memperbarui admin.',
-                        icon: 'error',
-                        confirmButtonColor: '#007943',
+                    toast("Gagal menambahkan admin.", {
+                        "type": "error",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
                     })
                 }
             })

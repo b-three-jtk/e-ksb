@@ -126,6 +126,7 @@ import AdminLayout from '../../../Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
 import { useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
+import { toast } from "vue3-toastify";
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -157,21 +158,21 @@ const acceptTransaction = () => {
         if (result.isConfirmed) {
             form.put('/admin/savings/validate/' + props.data.id, {
                 onSuccess: () => {
-                    Swal.fire({
-                        title: 'Sukses!',
-                        text: 'Transaksi berhasil diterima.',
-                        icon: 'success',
-                        confirmButtonColor: '#007943',
+                    toast("Transaksi berhasil diterima!", {
+                        "type": "success",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
                     }).then(() => {
                         router.visit(route('admin.dashboard'))
                     })
                 },
                 onError: () => {
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: 'Gagal menerima transaksi.',
-                        icon: 'error',
-                        confirmButtonColor: '#007943',
+                    toast("Gagal menerima transaksi.", {
+                        "type": "error",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
                     })
                 }
             })
@@ -194,21 +195,21 @@ const rejectTransaction = () => {
             hideModal()
             form.put('/admin/savings/validate/' + props.data.id, {
                 onSuccess: () => {
-                    Swal.fire({
-                        title: 'Sukses!',
-                        text: 'Transaksi berhasil ditolak.',
-                        icon: 'success',
-                        confirmButtonColor: '#007943',
+                    toast("Transaksi berhasil ditolak!", {
+                        "type": "success",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
                     }).then(() => {
                         router.visit(route('admin.dashboard'))
                     })
                 },
                 onError: () => {
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: 'Gagal menolak transaksi.',
-                        icon: 'error',
-                        confirmButtonColor: '#007943',
+                    toast("Gagal menolak transaksi.", {
+                        "type": "error",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
                     })
                 }
             })
