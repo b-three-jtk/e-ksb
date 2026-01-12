@@ -7,11 +7,12 @@ import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
 import BaseTable from '../../../Components/Table/BaseTable.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
+import UserIcon from '../../../Icons/UserIcon.vue'
 
 const columns = [
     { key: 'no', label: 'No' },
     { key: 'nik', label: 'NIK' },
-    { key: 'name', label: 'Profil Anggota', sortable: true },
+    { key: 'name', label: 'Profil Admin', sortable: true },
     { key: 'email', label: 'Email' },
     { key: 'posisi', label: 'Posisi' },
     { key: 'status', label: 'Status', align: 'center' },
@@ -146,7 +147,14 @@ const toggleSort = (column) => {
 
                 <template #cell-name="{ row }">
                     <div class="flex items-center gap-3">
-                        <img :src="row.avatar" class="w-9 h-9 rounded-full" />
+                        <img v-if="row.avatar" :src="row.avatar" class="w-9 h-9 rounded-full object-cover" />
+                         <div
+                            v-else
+                            class="w-9 h-9 flex items-center justify-center
+                                rounded-full bg-gray-200 dark:bg-gray-700"
+                        >
+                            <UserIcon />
+                        </div>
                         <span class="font-medium">{{ row.name }}</span>
                     </div>
                 </template>

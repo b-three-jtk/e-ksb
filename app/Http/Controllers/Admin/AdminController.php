@@ -65,12 +65,14 @@ class AdminController extends Controller
                 'status' => $user->status,
                 'avatar' => $user->profile_picture
                     ? asset('storage/' . $user->profile_picture)
-                    : 'https://i.pravatar.cc/40?u=' . $user->id,
+                    : null,
             ]);
 
         return inertia('Admin/Admins/List', [
             'admins' => $admins,
-            'roles' => Role::whereHas('users')->pluck('name'),
+            'roles' => Role::whereHas('users')
+                ->where('name', '!=', 'User')
+                ->pluck('name'),
             'filters' => $request->only(['search', 'status', 'role', 'per_page', 'sort_by', 'sort_dir']),
             'title' => 'Pengelolaan Admin'
         ]);
