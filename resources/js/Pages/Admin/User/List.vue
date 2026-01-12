@@ -8,6 +8,7 @@ import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import BaseTable from '../../../Components/Table/BaseTable.vue'
 import CardInfo from '../../../Components/CardInfo.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
+import UserIcon from '../../../Icons/UserIcon.vue'
 
 const props = defineProps({
     members: Object,
@@ -161,7 +162,14 @@ const statusClass = (status) => {
 
                 <template #cell-profil="{ row }">
                     <div class="flex items-center gap-3">
-                        <img :src="row.avatar" class="w-9 h-9 rounded-full" />
+                        <img v-if="row.avatar" :src="row.avatar" class="w-9 h-9 rounded-full object-cover" />
+                         <div
+                            v-else
+                            class="w-9 h-9 flex items-center justify-center
+                                rounded-full bg-gray-200 dark:bg-gray-700"
+                        >
+                            <UserIcon />
+                        </div>
                         <span>{{ row.name }}</span>
                     </div>
                 </template>

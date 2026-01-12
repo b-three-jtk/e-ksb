@@ -30,11 +30,14 @@ class UserController extends Controller
             : 'joined_date';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $query = User::with('savingAccounts')
-            ->whereHas('role', fn ($q) =>
-                $q->where('name', 'User')
-            )
-            ->whereNotNull('joined_date');
+        $query = User::with(['savingAccounts.transactions' => fn ($q) =>
+            $q->where('status', 'Selesai')
+        ])
+        ->whereHas('role', fn ($q) =>
+            $q->where('name', 'User')
+        )
+        ->whereNotNull('joined_date')
+        ->whereNotNull('member_number');
 
         $memberBaseQuery = User::whereHas('role', fn ($q) =>
             $q->where('name', 'User')
@@ -85,14 +88,14 @@ class UserController extends Controller
                 'phone' => $user->phone_number,
                 'status' => $user->status,
                 'total_simpanan' => 'Rp ' . number_format(
-                    $user->savingAccounts->sum('balance'),
+                    $user->savingAccounts->flatMap(fn ($account) => $account->transactions)->sum('amount'),
                     0,
                     ',',
                     '.'
                 ),
                 'avatar' => $user->profile_picture
                     ? asset('storage/' . $user->profile_picture)
-                    : "https://i.pravatar.cc/40?u=$user->id",
+                    : null,
             ]);
 
         return Inertia::render('Admin/User/List', [
