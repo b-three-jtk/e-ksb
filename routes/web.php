@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\SavingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\User\LedgerController;
 use App\Http\Controllers\User\AnggotaController;
+use App\Http\Controllers\User\SimpananController;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
@@ -89,4 +90,10 @@ Route::prefix('user')->name('user.')->middleware('auth')->group(function () {
     // Ledger Routes
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
     Route::get('/ledger/export', [LedgerController::class, 'export'])->name('ledger.export');
+
+    // Simpanan Routes - Penarikan
+    Route::get('/simpanan/penarikan', [SimpananController::class, 'showWithdrawalInfo'])->name('simpanan.withdraw.info');
+    Route::get('/simpanan/penarikan/detail', [SimpananController::class, 'showWithdrawalDetail'])->name('simpanan.withdraw.detail');
+    Route::get('/simpanan/penarikan/pernyataan', [SimpananController::class, 'showWithdrawalStatement'])->name('simpanan.withdraw.statement');
+    Route::post('/simpanan/penarikan/submit', [SimpananController::class, 'submitWithdrawal'])->name('simpanan.withdraw.submit');
 });
