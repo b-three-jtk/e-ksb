@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import UserIcon from '../Icons/UserIcon.vue'
 import ThemeToggler from '../Components/ThemeToggler.vue'
+import Logo from '@/Components/Logo.vue'
 
 const isMenuOpen = ref(true)
 const isUserDropdownOpen = ref(false)
@@ -25,38 +26,38 @@ const toggleMenu = () => {
 const toggleUserDropdown = () => {
     isUserDropdownOpen.value = !isUserDropdownOpen.value
 }
+
+console.log(isMenuOpen.value);
 </script>
 
 <template>
     <nav class="sticky nav-bar font-manrope border-gray-200 px-10">
         <div class="flex flex-wrap items-center justify-between mx-auto px-4 py-6">
             <!-- Logo -->
-            <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-                <img class="max-h-12" src="/public/images/logo/logo-icon.svg" alt="Logo">
-            </a>
+            <Logo />
 
             <!-- Right Section -->
             <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse items-center gap-4">
                 <ThemeToggler />
                 <!-- Guest Auth Section -->
                 <template v-if="!user">
-                    <div class="flex items-center gap-4">
-                        <a href="/auth/login"
+                    <div class="flex items-center gap-4 opacity-0 md:opacity-100">
+                        <Link href="/auth/login"
                             class="inline-flex items-center justify-center rounded-xl bg-white px-8 py-2 font-body font-semibold text-orange-500 shadow-lg transition-colors hover:text-orange-600 hover:bg-gray-100">
                             Masuk
-                        </a>
+                        </Link>
 
-                        <a href="/auth/register"
+                        <Link href="/auth/register"
                             class="inline-flex items-center justify-center rounded-xl bg-orange-500 px-8 py-2 text-body font-semibold text-white hover:bg-orange-600 transition-colors shadow-lg">
                             Daftar
-                        </a>
+                        </Link>
                     </div>
                 </template>
 
                 <!-- Authenticated User Section -->
                 <template v-else>
                     <!-- User Avatar & Dropdown -->
-                    <Link :href="user.role.name === 'User' ? '/dashboard' : '/admin/dashboard'"
+                    <Link :href="user.role?.name === 'User' ? '/dashboard' : '/admin/dashboard'"
                         class="relative flex items-center justify-center text-dark-text transition-colors bg-transparent border border-gray-200 rounded-full hover:text-dark-900 h-11 w-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
                         <span class="icon-[material-symbols-light--home-outline-rounded]"
                             style="width: 24px; height: 24px;"></span>
@@ -82,9 +83,9 @@ const toggleUserDropdown = () => {
                             </div>
                             <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
                                 <li>
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <Link href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
                                         Settings
-                                    </a>
+                                    </Link>
                                 </li>
                             </ul>
                             <div class="py-1">
@@ -113,32 +114,44 @@ const toggleUserDropdown = () => {
             </div>
 
             <!-- Navigation Menu -->
-            <div v-if="isMenuOpen" class="w-full md:flex md:w-auto md:order-1 hidden">
+            <div v-if="isMenuOpen" class="w-full md:flex md:w-auto md:order-1">
                 <ul
-                    class="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 dark:border-gray-700">
+                    class="flex flex-col font-medium gap-2 p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 dark:border-gray-700">
                     <li>
-                        <a href="#"
+                        <Link href="/"
                             class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:p-0 dark:text-white">
                             Beranda
-                        </a>
+                        </Link>
                     </li>
                     <li>
-                        <a href="#"
+                        <Link href="#"
                             class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:p-0 dark:text-white">
                             Produk
-                        </a>
+                        </Link>
                     </li>
                     <li>
-                        <a href="#"
+                        <Link href="#"
                             class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:p-0 dark:text-white">
                             Tentang Kami
-                        </a>
+                        </Link>
                     </li>
                     <li>
-                        <a href="#"
+                        <Link href="#"
                             class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:p-0 dark:text-white">
                             Bantuan
-                        </a>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link href="/login"
+                            class="block py-2 px-3 text-gray-900 bg-white rounded hover:bg-gray-100 md:hover:bg-transparent md:p-0 md:hidden">
+                            Masuk
+                        </Link>
+                    </li>
+                    <li>
+                        <Link href="/register"
+                            class="block py-2 px-3 text-white bg-light-accent rounded hover:bg-light-accent/90 md:hover:bg-transparent md:p-0 md:hidden">
+                            Daftar
+                        </Link>
                     </li>
                 </ul>
             </div>

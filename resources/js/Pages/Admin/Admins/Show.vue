@@ -1,5 +1,5 @@
 <template>
-    <AdminLayout>
+    <AdminLayout title="Detail Admin">
         <div class="flex flex-col px-20">
             <PageBreadcrumb :page-title="'Detail Admin'" />
             <div class="flex flex-col gap-6">

@@ -104,7 +104,7 @@ const submit = () => {
 </script>
 
 <template>
-<Base>
+<Base title="Edit Profil Anggota">
     <div class="min-h-screen bg-gray-50 pt-20 pb-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-bold text-blue-900 mb-8">Edit Profil Anggota</h1>

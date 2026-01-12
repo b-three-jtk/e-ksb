@@ -98,7 +98,7 @@ const toggleSort = (column) => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AdminLayout title="Daftar Admin">
         <!-- Breadcrumb + Title -->
         <PageBreadcrumb page-title="Pengelolaan Admin" />
 

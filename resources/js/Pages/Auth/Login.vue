@@ -17,7 +17,7 @@ const submit = () => {
 </script>
 
 <template>
-  <AuthLayout>
+  <AuthLayout title="Masuk">
     <div class="w-full px-4 py-8">
       <div class="max-w-xl mx-auto bg-white/95 border border-white/60 shadow-xl rounded-2xl backdrop-blur">
         <div class="p-10 space-y-8">
@@ -43,7 +43,7 @@ const submit = () => {
                     :error="form.errors.password"
                   />
                 </div>
-                
+
                 <div class="space-y-4">
                     <span class="text-gray-500 font-body">Lupa password?</span>
                     <button

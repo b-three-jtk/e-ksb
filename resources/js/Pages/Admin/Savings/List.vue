@@ -145,7 +145,7 @@ watch(() => filters.tab, applyFilters)
 </script>
 
 <template>
-    <AdminLayout>
+    <AdminLayout title="Daftar Simpanan">
         <!-- Title + Breadcrumb -->
         <PageBreadcrumb page-title="Pengelolaan Simpanan" />
 
@@ -204,7 +204,7 @@ watch(() => filters.tab, applyFilters)
                 </div>
 
                 <!-- Functionality -->
-                <BaseFunctionality 
+                <BaseFunctionality
                     :per-page="filters.per_page"
                     :search="filters.search"
                     @update:per-page="val => filters.per_page = val"
@@ -223,7 +223,7 @@ watch(() => filters.tab, applyFilters)
                     <template #cell-no="{ index }">
                         {{ (transactions.current_page - 1) * transactions.per_page + index + 1 }}
                     </template>
-                    
+
                     <template #cell-nominal="{ row }">
                         <span
                             :class="row.nominal < 0 ? 'text-red-500' : 'text-green-500'"

@@ -1,5 +1,5 @@
 <template>
-    <Layout>
+    <Layout title="Tambah Admin">
         <div class="flex flex-col px-20">
             <PageBreadcrumb page-title="Tambah Admin" />
             <div class="card-layout px-0!">

@@ -60,7 +60,7 @@ const submitForm = () => {
 </script>
 
 <template>
-    <Layout>
+    <Layout title="Edit Admin">
         <div class="flex flex-col px-20">
             <PageBreadcrumb page-title="Edit Admin" />
             <div class="card-layout px-0!">

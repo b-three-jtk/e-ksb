@@ -44,7 +44,7 @@ const handleContinue = () => {
         alert('Silakan pilih keputusan terlebih dahulu')
         return
     }
-    
+
     router.post(
         `/admin/verifikasi/${props.member.id}/approval`,
         {
@@ -61,7 +61,7 @@ const handleContinue = () => {
 </script>
 
 <template>
-	<AdminLayout>
+	<AdminLayout title="Verifikasi Calon Anggota">
 		<div class="space-y-8">
 			<div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 				<h1 class="text-2xl font-bold text-blue-900">Verifikasi Calon Anggota</h1>

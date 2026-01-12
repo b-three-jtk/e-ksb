@@ -84,7 +84,7 @@ const submitResignation = () => {
         showAlreadySubmittedModal.value = true
         return
     }
-    
+
     if (!uploadedFile.value || !isAgreed.value || !isConfirmed.value) {
         alert('Harap lengkapi semua persyaratan')
         return
@@ -111,10 +111,10 @@ const submitResignation = () => {
                 if (errors.resign) {
                     errorMessage.value = errors.resign
                     showAlreadySubmittedModal.value = true
-                } 
+                }
                 else if (errors.document) {
                     errorFile.value = errors.document
-                } 
+                }
                 else {
                     const errorKeys = Object.keys(errors)
                     if (errorKeys.length > 0) {
@@ -142,7 +142,7 @@ watch(
 </script>
 
 <template>
-    <Base>
+    <Base title="Pengunduran Diri Anggota">
         <div class="font-body min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 dark:bg-gray-900 transition-colors">
             <div class="max-w-5xl mx-auto border rounded-xl mt-20 p-10 dark:bg-gray-800 shadow-md overflow-hidden">
                 <!-- Header -->
@@ -151,7 +151,7 @@ watch(
                         PENGUNDURAN DIRI ANGGOTA KOPERASI
                     </h1>
                     <p class="text-gray-600 dark:text-gray-300">
-                        Periksa kembali ringkasan informasi keanggotaan Anda dan lampirkan 
+                        Periksa kembali ringkasan informasi keanggotaan Anda dan lampirkan
                         permohonan pengunduran diri untuk proses lebih lanjut.
                     </p>
                 </div>
@@ -162,18 +162,18 @@ watch(
                 <!-- Informasi Anggota -->
                 <div class="mb-8 mt-15">
                     <h2 class="font-head text-lg font-semibold text-gray-900 mb-4 dark:text-gray-100">Informasi Anggota</h2>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <ReadonlyField
                             label="Nama Anggota"
                             :modelValue="memberData.name"
                         />
-                        
+
                         <ReadonlyField
                             label="Nomor Anggota"
                             :modelValue="memberData.member_number"
                         />
-                        
+
                         <ReadonlyField
                             label="Total Simpanan"
                             :modelValue="formatRupiah(memberData.total_saving)"
@@ -183,9 +183,9 @@ watch(
                                 label="Total Kewajiban"
                                 :modelValue="formatRupiah(memberData.total_obligation)"
                             />
-                        
+
                         <div class="md:col-span-2">
-                            <ReadonlyField 
+                            <ReadonlyField
                                 label="Tanggal Bergabung"
                                 :modelValue="memberData.joined_date"
                             />
@@ -198,8 +198,8 @@ watch(
                     <h2 class="font-head text-lg font-semibold text-gray-900 mb-4 dark:text-gray-100">
                         Upload Dokumen Permohonan
                     </h2>
-                    
-                    <div 
+
+                    <div
                         @drop="handleDrop"
                         @dragover="handleDragOver"
                         class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
@@ -212,22 +212,22 @@ watch(
                             accept=".pdf,.doc,.docx"
                             class="hidden"
                         />
-                        
+
                         <div class="space-y-3">
                             <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
-                            
+
                             <div>
                                 <p class="text-sm text-gray-600 dark:text-gray-300">
-                                    Drag & drop file untuk melampirkannya, atau 
+                                    Drag & drop file untuk melampirkannya, atau
                                     <span class="text-blue-600 font-medium dark:text-blue-400">browse</span>
                                 </p>
                                 <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">
                                     Hanya file PDF dan DOC yang diterima (maks. 2MB)
                                 </p>
                             </div>
-                            
+
                             <!-- File yang diupload -->
                             <div v-if="uploadedFile" class="mt-4 p-3 bg-blue-50 rounded-lg">
                                 <div class="flex items-center justify-between">
@@ -244,7 +244,7 @@ watch(
                                             </p>
                                         </div>
                                     </div>
-                                    <button 
+                                    <button
                                         @click.stop="removeFile"
                                         class="text-red-500 hover:text-red-700"
                                     >
@@ -260,11 +260,11 @@ watch(
                     <p v-if="errorFile" class="font-body mt-2 text-sm text-red-600">
                         {{ errorFile }}
                     </p>
-                    
+
                     <p class="text-sm text-gray-600 mt-4">
-                        Unduh dokumen permohonan 
-                        <a 
-                            href="/dokumen-permohonan-pengunduran-diri.pdf" 
+                        Unduh dokumen permohonan
+                        <a
+                            href="/dokumen-permohonan-pengunduran-diri.pdf"
                             target="_blank"
                             class="text-blue-600 hover:text-blue-800 underline font-medium"
                         >
@@ -277,10 +277,10 @@ watch(
                 <div class="mb-8">
                     <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 dark:bg-gray-800">
                         <p class="font-head text-gray-700 mb-6 dark:text-gray-100">
-                            Dengan ini saya menyatakan bahwa saya benar-benar ingin mengundurkan diri 
+                            Dengan ini saya menyatakan bahwa saya benar-benar ingin mengundurkan diri
                             sebagai anggota koperasi dan seluruh dokumen yang saya kirimkan adalah benar.
                         </p>
-                        
+
                         <div class="space-y-4">
                             <label class="flex items-start space-x-3 cursor-pointer">
                                 <input
@@ -292,7 +292,7 @@ watch(
                                     Saya memahami bahwa setelah permohonan dikirim, data tidak dapat diubah.
                                 </span>
                             </label>
-                            
+
                             <label class="flex items-start space-x-3 cursor-pointer">
                                 <input
                                     v-model="isConfirmed"
@@ -360,7 +360,7 @@ watch(
             <p class="text-md opacity-90 mb-10">
                 {{ errorMessage }}
             </p>
-            
+
             <div class="flex justify-end">
                 <button
                     @click="showErrorModal = false"
@@ -378,7 +378,7 @@ watch(
             <div class="flex justify-center">
                 <Icon icon="ic:twotone-info" width="65" height="65"  style="color: #fff34f" class="mb-5"  />
             </div>
-        
+
             <h2 class="font-head text-3xl font-bold mb-10">
                 Permohonan Sudah Diajukan
             </h2>

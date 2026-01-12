@@ -12,7 +12,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <Base>
+    <Base title="Profil Anggota">
         <div class="min-h-screen bg-gray-50 pt-20 pb-12">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center mb-8">

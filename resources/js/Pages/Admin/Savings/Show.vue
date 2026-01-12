@@ -1,5 +1,5 @@
 <template>
-    <AdminLayout>
+    <AdminLayout title="Detail Transaksi Simpanan">
         <div class="flex flex-col px-20">
             <PageBreadcrumb
                 :page-title="data.status != 'Belum Ditinjau' ? 'Detail Simpanan' : 'Validasi Permohonan Simpanan'" />

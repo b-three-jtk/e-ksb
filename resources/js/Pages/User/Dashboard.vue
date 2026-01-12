@@ -16,28 +16,28 @@ const rupiah = (value) =>
 </script>
 
 <template>
-    <Base>
+    <Base title="Dashboard">
         <div class="font-head min-h-screen bg-blue-900/20 dark:bg-gray-900 transition-colors">
             <section
-                class="relative h-[450px] flex items-center" 
-                style="background-image: url('/images/home/polban_v2.png'); 
-                    background-size: cover; 
-                    background-position: center;" 
+                class="relative h-[450px] flex items-center"
+                style="background-image: url('/images/home/polban_v2.png');
+                    background-size: cover;
+                    background-position: center;"
             >
-            
+
                 <div class="absolute inset-0 bg-blue-900/75"></div>
 
                 <div class="relative z-10 max-w-7xl mx-auto px-6 text-white">
                     <div class="text-center mt-10">
                         <h1 class="text-3xl md:text-4xl font-semibold mb-2 text-white">
-                            Halo selamat datang 
+                            Halo selamat datang
                             <span class="text-orange-400">{{ user?.name }}</span>
                         </h1>
-                        
+
                         <p class="font-body text-lg mb-6 text-gray-200">
                             Punya kebutuhan pembiayaan?
                         </p>
-                        
+
                         <Link
                             href="/pembiayaan/murabahah"
                             class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors"
@@ -58,7 +58,7 @@ const rupiah = (value) =>
                             <div class="flex-shrink-0">
                                 <Icon icon="tabler:wallet" class="w-12 h-12" />
                             </div>
-                            
+
                             <div class="flex-1">
                                 <p class="font-body text-sm opacity-90 mb-1">Total Simpanan</p>
                                 <h2 class="text-2xl font-bold">{{ rupiah(summary.total_saving) }}</h2>
@@ -72,7 +72,7 @@ const rupiah = (value) =>
                             <div class="flex-shrink-0">
                                 <Icon icon="tabler:receipt" class="w-12 h-12" />
                             </div>
-                            
+
                             <div class="flex-1">
                                 <p class="font-body text-sm opacity-90 mb-1">Total Angsuran</p>
                                 <h2 class="text-2xl font-bold">{{ rupiah(summary.total_installment) }}</h2>
@@ -86,7 +86,7 @@ const rupiah = (value) =>
                             <div class="flex-shrink-0">
                                 <Icon icon="tabler:printer" class="w-12 h-12" />
                             </div>
-                            
+
                             <div class="flex-1">
                                 <p class="font-body text-sm opacity-90 mb-1">Cetak Ledger</p>
                                 <h2 class="text-2xl font-bold">{{ summary.ledger_count }}</h2>
@@ -156,8 +156,8 @@ const rupiah = (value) =>
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow dark:text-gray-100 h-[250px] flex flex-col">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-lg">Your Ledger</h3>
-                        <Link 
-                            href="/ledger" 
+                        <Link
+                            href="/ledger"
                             class="text-sm text-orange-500 font-medium border border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-3 py-1.5 rounded-lg transition-colors">
                             See All
                         </Link>

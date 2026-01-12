@@ -4,7 +4,7 @@ import AuthLayout from '@/Layouts/AuthLayout.vue'
 </script>
 
 <template>
-  <AuthLayout>
+  <AuthLayout title="Pendaftaran Berhasil">
     <div class="flex items-center justify-center px-4 min-h-screen">
       <div class="max-w-lg w-full rounded-3xl bg-blue-900/80 p-12 text-white shadow-2xl">
         <h1 class="text-4xl font-bold mb-3">

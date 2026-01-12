@@ -21,7 +21,7 @@ const form = useForm({
 
 const next = () => (step.value = 2)
 const submit = () => {
-  form.post('/auth/register', { 
+  form.post('/auth/register', {
     forceFormData: true,
     onSuccess: () => {
       console.log('Registration successful')
@@ -58,7 +58,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <AuthLayout>
+  <AuthLayout title="Daftar">
     <div class="w-full px-4">
       <div class="text-center mb-24">
         <h1 class="text-xl font-semibold text-white font-body">

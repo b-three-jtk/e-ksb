@@ -82,7 +82,7 @@ const toggleSort = (column) => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AdminLayout title="Verifikasi Calon Anggota">
         <!-- Breadcrumb + Title -->
         <PageBreadcrumb page-title="Verifikasi Calon Anggota" />
 

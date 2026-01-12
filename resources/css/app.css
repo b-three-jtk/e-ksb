@@ -1,4 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@font-face {
+    font-family: 'Manrope';
+    src: url('/fonts/Manrope-VariableFont_wght.ttf') format('truetype');
+    font-weight: 200 800;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    src: url('/fonts/PlusJakartaSans-VariableFont_wght.ttf') format('truetype');
+    font-weight: 200 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    src: url('/fonts/PlusJakartaSans-Italic-VariableFont_wght.ttf') format('truetype');
+    font-weight: 200 800;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Caveat';
+    src: url('/fonts/Caveat-VariableFont_wght.ttf') format('truetype');
+    font-weight: 400 700;
+    font-display: swap;
+}
 @plugin "@iconify/tailwind4";
 
 @import 'tailwindcss';

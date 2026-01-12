@@ -100,7 +100,7 @@ const statusClass = (status) => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AdminLayout title="Daftar Anggota">
         <!-- Breadcrumb + Title -->
          <PageBreadcrumb page-title="Pengelolaan Data Anggota"/>
 
@@ -174,7 +174,7 @@ const statusClass = (status) => {
                 </template>
 
                 <template #cell-status="{ row }">
-                    <span 
+                    <span
                         class="px-3 py-1 text-xs rounded-full font-medium"
                         :class="statusClass(row.status)"
                     >

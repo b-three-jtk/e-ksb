@@ -37,7 +37,7 @@ const prevFinancingData = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AdminLayout title="Dashboard Admin">
         <div class="flex flex-col gap-4">
             <div class="flex justify-between">
                 <!-- TODO:  -->

@@ -14,10 +14,12 @@
             !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start',
         ]">
             <Link href="/">
-                <img v-if="isExpanded || isHovered || isMobileOpen" class="dark:hidden" src="/public/images/logo/logo.svg"
-                    alt="Logo" width="150" height="40" />
-                <img v-if="isExpanded || isHovered || isMobileOpen" class="hidden dark:block"
-                    src="/public/images/logo/logo-dark.svg" alt="Logo" width="150" height="40" />
+                <div v-if="isExpanded || isHovered || isMobileOpen" class="flex items-center space-x-3 rtl:space-x-reverse">
+                    <img class="max-h-12" src="/public/images/logo/logo-icon.svg" alt="Logo">
+                    <span
+                        class="self-center text-2xl text-brand-950 font-semibold whitespace-nowrap dark:text-white">KS<span
+                            class="text-accent">WP</span> Admin</span>
+                </div>
                 <img v-else src="/public/images/logo/logo-icon.svg" alt="Logo" width="32" height="32" />
             </Link>
         </div>
@@ -155,6 +157,7 @@ import ProductIcon from "../../Icons/ProductIcon.vue";
 import LogoutIcon from "../../Icons/LogoutIcon.vue";
 import ChevronDownIcon from "../../Icons/ChevronDownIcon.vue";
 import { useSidebar } from "@/Composables/useSidebar";
+import Logo from "../../Components/Logo.vue";
 
 const page = usePage()
 
