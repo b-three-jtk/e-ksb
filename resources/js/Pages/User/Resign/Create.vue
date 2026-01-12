@@ -4,6 +4,7 @@ import ReadonlyField from '@/Components/Form/ReadonlyField.vue'
 import { ref, watch } from 'vue';
 import { router, usePage, Link } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
+import BaseContainer from '../../../Components/BaseContainer.vue';
 
 const uploadedFile = ref(null)
 const isAgreed = ref(false)
@@ -144,21 +145,14 @@ watch(
 <template>
     <Base title="Pengunduran Diri Anggota">
         <div class="font-body min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 dark:bg-gray-900 transition-colors">
-            <div class="max-w-5xl mx-auto border rounded-xl mt-20 p-10 dark:bg-gray-800 shadow-md overflow-hidden">
-                <!-- Header -->
-                <div class="mb-8">
-                    <h1 class="font-head text-2xl font-bold text-gray-900 mb-2 dark:text-gray-100">
-                        PENGUNDURAN DIRI ANGGOTA KOPERASI
-                    </h1>
-                    <p class="text-gray-600 dark:text-gray-300">
-                        Periksa kembali ringkasan informasi keanggotaan Anda dan lampirkan
-                        permohonan pengunduran diri untuk proses lebih lanjut.
-                    </p>
-                </div>
-
-                <!-- Divider -->
-                <div class="border-b p-0 m-0 border-gray-300"></div>
-
+            <BaseContainer
+                title="PENGUNDURAN DIRI ANGGOTA KOPERASI"
+                subtitle="Periksa kembali ringkasan informasi keanggotaan Anda dan lampirkan 
+                        permohonan pengunduran diri untuk proses lebih lanjut."
+                :showDivider="true"
+                class="mt-20"
+                contentClass="mt-8"
+            >
                 <!-- Informasi Anggota -->
                 <div class="mb-8 mt-15">
                     <h2 class="font-head text-lg font-semibold text-gray-900 mb-4 dark:text-gray-100">Informasi Anggota</h2>
@@ -214,10 +208,9 @@ watch(
                         />
 
                         <div class="space-y-3">
-                            <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-
+                            <div class="flex justify-center text-gray-500 dark:text-gray-200">
+                                <Icon icon="lets-icons:upload" width="50" height="50" />
+                            </div>
                             <div>
                                 <p class="text-sm text-gray-600 dark:text-gray-300">
                                     Drag & drop file untuk melampirkannya, atau
@@ -232,9 +225,9 @@ watch(
                             <div v-if="uploadedFile" class="mt-4 p-3 bg-blue-50 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-3">
-                                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
+                                        <div class="text-blue-500">
+                                            <Icon icon="akar-icons:file" width="30" height="30" />
+                                        </div>
                                         <div>
                                             <p class="text-sm font-medium text-gray-900">
                                                 {{ uploadedFile.name }}
@@ -248,9 +241,9 @@ watch(
                                         @click.stop="removeFile"
                                         class="text-red-500 hover:text-red-700"
                                     >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
+                                        <div class="text-red-500">
+                                            <Icon icon="iconoir:cancel" width="30" height="30" />
+                                        </div>
                                     </button>
                                 </div>
                             </div>
@@ -317,7 +310,7 @@ watch(
                         Ajukan Permohonan
                     </button>
                 </div>
-            </div>
+            </BaseContainer>
         </div>
     </Base>
 
