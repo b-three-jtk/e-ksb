@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Carbon\Carbon;
 use App\Models\Loan;
 use App\Models\User;
 use App\Enums\UserStatus;
 use App\Models\Financing;
+use Illuminate\Http\Request;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Http\Controllers\Controller;
@@ -15,12 +17,38 @@ class DashboardController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $req)
     {
-        $data['active_user_count'] = User::where('status', UserStatus::ACTIVE->value)->count();
+        // Date Range
+        $startDate = $req->start_date ?? now()->startOfMonth();
+        $endDate = $req->end_date ?? now()->endOfMonth();
+        $filterBy = $req->filter_by ?? 'month';
+
+        if ($filterBy == 'month') {
+            $prevDate = Carbon::parse($startDate)->subMonth()->endOfMonth()->toDateString();
+        } elseif ($filterBy == 'day') {
+            $prevDate = Carbon::parse($startDate)->subDay()->toDateString();
+        } elseif ($filterBy == 'year') {
+            $prevDate = Carbon::parse($startDate)->subYear()->endOfYear()->toDateString();
+        } else {
+            $prevDate = Carbon::parse($startDate)->subDay()->toDateString();
+        }
+
+        // Get Active User Count sampai end date yang dipilih (batas akhir)
+        $data['active_user_count'] = User::where('status', UserStatus::ACTIVE->value)
+            ->where('created_at', '<=', $endDate)
+            ->count();
+        $activeUserCountPrev = User::where('status', UserStatus::ACTIVE->value)
+            ->where('created_at', '<=', $prevDate)
+            ->count();
+
+        $data['active_user_percentage'] = $activeUserCountPrev == 0 ? 0 : round((($data['active_user_count'] - $activeUserCountPrev) / $activeUserCountPrev) * 100);
+
         $data['total_saving_amount'] = SavingAccount::sum('balance') ?? 0;
-        $data['total_financing_amount'] = Loan::sum('total_price') ?? 0;
-        $data['transaction_data'] = SavingTransaction::with('savingAccount.user')
+        $data['total_financing_amount'] = Loan::whereBetween('created_at', [$req->start_date ?? now()->startOfYear(), $req->end_date ?? now()->endOfYear()])
+            ->sum('total_price') ?? 0;
+
+            $data['transaction_data'] = SavingTransaction::with('savingAccount.user')
             ->latest()
             ->take(5)
             ->get()

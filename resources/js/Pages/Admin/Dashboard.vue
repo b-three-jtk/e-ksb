@@ -1,17 +1,19 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import CardInfo from '@/Components/CardInfo.vue'
 import CardStatisticBar from '@/Components/CardStatisticBar.vue'
 import dateParser from '@/Composables/dateParser.js';
 import parseCurrencyAmount from '@/Composables/moneyParser.js';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import ReviewIcon from '@/Icons/ReviewIcon.vue';
 import NoArchiveIcon from '@/Icons/NoArchiveIcon.vue';
 import InfoCircleIcon from '@/Icons/InfoCircleIcon.vue';
+import { VueDatePicker } from '@vuepic/vue-datepicker';
 
 const props = defineProps({
     active_user_count: Number,
+    active_user_percentage: Number,
     total_saving_amount: Number,
     total_financing_amount: Number,
     transaction_data: Object,
@@ -20,6 +22,8 @@ const props = defineProps({
     financing_stats: Object,
 });
 
+const dates = ref([new Date(), new Date()]);
+const selectedFilter = ref('month');
 const activeIndex = ref(0);
 
 const nextFinancingData = () => {
@@ -34,19 +38,55 @@ const prevFinancingData = () => {
     }
 };
 
+watch(dates, () => {
+    applyFilter();
+}, { deep: true });
+
+watch(selectedFilter, () => {
+    applyFilter();
+});
+
+// everytime dates change, update data accordingly
+const applyFilter = () => {
+    router.get('/admin/dashboard', {
+        start_date: dates.value[0] ? dates.value[0].toISOString().split('T')[0] : null,
+        end_date: dates.value[1] ? dates.value[1].toISOString().split('T')[0] : null,
+        filter_by: selectedFilter.value,
+    }, {
+        preserveState: true,
+        replace: true,
+    });
+};
+
 </script>
 
 <template>
     <AdminLayout title="Dashboard Admin">
         <div class="flex flex-col gap-4">
-            <div class="flex justify-between">
-                <!-- TODO:  -->
+            <div class="flex justify-between items-center">
+                <div class="mr-auto min-w-75">
+                    <VueDatePicker v-model="dates" range></VueDatePicker>
+                </div>
+                <div class="relative z-20 bg-transparent">
+                    <select
+                        v-model="selectedFilter"
+                        class="h-11 w-full font-body appearance-none rounded-lg border px-4 bg-white pr-11 text-sm shadow-theme-xs focus:outline-hidden dark:bg-dark-900 text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="day">Harian</option>
+                        <option value="month">Bulanan</option>
+                        <option value="year">Tahunan</option>
+                    </select>
+                    <svg class="absolute z-30 right-4 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 stroke-current text-gray-500 dark:text-gray-400"
+                        viewBox="0 0 20 20" fill="none">
+                        <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
             </div>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <CardInfo title="Total Kas" :content="parseCurrencyAmount(total_saving_amount)" :percentage="5" />
                 <CardInfo title="Total Pembiayaan" :content="parseCurrencyAmount(total_financing_amount)"
                     :percentage="-3" />
-                <CardInfo title="Jumlah Anggota Aktif" :content="active_user_count" :percentage="2" />
+                <CardInfo title="Jumlah Anggota Aktif" :content="active_user_count" :percentage="active_user_percentage" :filter="selectedFilter" />
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <CardStatisticBar title="Statistik Permohonan Pembiayaan" :data="Object.values(financing_stats)" />
@@ -276,7 +316,8 @@ const prevFinancingData = () => {
                     <div class="flex justify-between items-center">
                         <div class="flex flex-col gap-2">
                             <h1 class="card-title">Pengajuan Pembiayaan Murabahah</h1>
-                            <p v-if="financing_data?.length" class="text-gray-500 dark:text-gray-300">No. Transaksi #{{ financing_data[activeIndex]?.id ?? '' }}</p>
+                            <p v-if="financing_data?.length" class="text-gray-500 dark:text-gray-300">No. Transaksi #{{
+                                financing_data[activeIndex]?.id ?? '' }}</p>
                         </div>
                         <button
                             class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
@@ -299,7 +340,7 @@ const prevFinancingData = () => {
                             <div class="flex flex-col">
                                 <p>Status</p>
                                 <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex]?.status ?? ''
-                                }}</h1>
+                                    }}</h1>
                             </div>
                             <div class="flex flex-col">
                                 <p>Nama Anggota</p>
@@ -308,7 +349,8 @@ const prevFinancingData = () => {
                             </div>
                         </div>
                         <div v-else class="flex flex-col items-center justify-center gap-4 pb-2">
-                            <span class="icon-[streamline-freehand-color--task-list-pin-1]" style="width: 100px; height: 100px;"></span>
+                            <span class="icon-[streamline-freehand-color--task-list-pin-1]"
+                                style="width: 100px; height: 100px;"></span>
                             <p class="text-center text-dark-text dark:text-gray-400">Tidak ada data pengajuan
                                 pembiayaan.</p>
                         </div>
