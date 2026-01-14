@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
+import { toast } from 'vue3-toastify';
+import Swal from 'sweetalert2';
 import Base from '../../../../Layouts/Base.vue';
 import StepIndicator from '../../../../Components/StepIndicator.vue';
 
@@ -44,34 +46,69 @@ const form = useForm({
 const isSubmitDisabled = computed(() => !agreed.value || form.processing);
 
 const handleBack = () => {
-    router.get(route('user.simpanan.withdraw.detail'), {
-        amount: props.withdrawalData.amount,
-        description: props.withdrawalData.description,
-        method: props.withdrawalData.method,
-        bank_name: props.withdrawalData.bank_name,
-        account_number: props.withdrawalData.account_number,
-        account_name: props.withdrawalData.account_name
-    });
+    router.get(route('user.simpanan.withdraw.detail'));
 };
 
 const handleSubmit = () => {
     if (!agreed.value) {
-        alert('Anda harus menyetujui pernyataan sebelum mengirim');
+        toast('Anda harus menyetujui pernyataan sebelum mengirim', {
+            type: 'warning',
+            position: 'bottom-right',
+            transition: 'slide',
+            autoClose: 3000,
+        });
         return;
     }
 
-    form.agreed = agreed.value;
-    
-    form.post(route('user.simpanan.withdraw.submit'), {
-        onSuccess: () => {
-            alert('Permohonan penarikan simpanan sukarela berhasil dikirim.');
-        },
-        onError: (errors) => {
-            console.error('Submission error:', errors);
-            alert('Terjadi kesalahan saat mengirim permohonan. Silakan coba lagi.');
+    Swal.fire({
+        title: 'Konfirmasi Penarikan',
+        html: `Apakah Anda yakin ingin melakukan penarikan simpanan sebesar <strong>Rp ${formatNumber(props.withdrawalData.amount)}</strong>?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Ajukan',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#1e3a8a',
+        cancelButtonColor: '#6b7280',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.agreed = agreed.value;
+            
+            form.post(route('user.simpanan.withdraw.submit'), {
+                onSuccess: () => {
+                    toast('Permohonan penarikan simpanan berhasil diajukan dan sedang dalam peninjauan admin', {
+                        type: 'success',
+                        position: 'bottom-right',
+                        transition: 'slide',
+                        autoClose: 5000,
+                    });
+                },
+                onError: (errors) => {
+                    console.error('Submission error:', errors);
+                    let errorMessage = 'Terjadi kesalahan saat mengirim permohonan. Silakan coba lagi.';
+                    
+                    if (errors.error) {
+                        errorMessage = errors.error;
+                    } else if (errors.amount) {
+                        errorMessage = errors.amount;
+                    }
+                    
+                    toast(errorMessage, {
+                        type: 'error',
+                        position: 'bottom-right',
+                        transition: 'slide',
+                        autoClose: 5000,
+                    });
+                }
+            });
         }
     });
 };
+
+function formatNumber(value) {
+    if (!value) return '0';
+    const num = value.toString().replace(/\D/g, '');
+    return num.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
 </script>
 
 <template>
