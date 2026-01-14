@@ -3,10 +3,10 @@ import { ref, computed, onBeforeUnmount } from 'vue'
 import { router } from '@inertiajs/vue3'
 import BaseLayout from '../../../Layouts/Base.vue'
 import FieldRow from '../../../Components/Form/FieldRow.vue'
-import BaseTable from '../../../Components/Table/BaseTable.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
 import Ringkasan from './Ringkasan.vue'
+import Table from './Table.vue'
 
 defineOptions({
     layout: BaseLayout,
@@ -130,14 +130,6 @@ onBeforeUnmount(() => {
     if (timeout) clearTimeout(timeout)
 })
 
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(value)
-}
-
 const handleExport = () => {
     const params = new URLSearchParams()
     
@@ -212,37 +204,10 @@ const handleExport = () => {
 
                 <!-- Table -->
                 <div class="px-8 py-6">
-                    <BaseTable
+                    <Table
+                        :transactions="transactions.data"
                         :columns="columns"
-                        :data="transactions.data"
-                        :pagination="transactions"
-                    >
-                        <template #cell-debit="{ row }">
-                            <span
-                                v-if="row.debit > 0"
-                                class="text-green-600 dark:text-green-400 font-semibold"
-                            >
-                                {{ formatCurrency(row.debit) }}
-                            </span>
-                            <span v-else class="text-gray-400">-</span>
-                        </template>
-
-                        <template #cell-kredit="{ row }">
-                            <span
-                                v-if="row.kredit > 0"
-                                class="text-red-600 dark:text-red-400 font-semibold"
-                            >
-                                {{ formatCurrency(row.kredit) }}
-                            </span>
-                            <span v-else class="text-gray-400">-</span>
-                        </template>
-
-                        <template #cell-saldo="{ row }">
-                            <span class="font-semibold text-blue-600 dark:text-blue-400">
-                                {{ formatCurrency(row.saldo) }}
-                            </span>
-                        </template>
-                    </BaseTable>
+                    />
 
                     <!-- Pagination -->
                     <Pagination
