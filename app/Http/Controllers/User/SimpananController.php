@@ -5,11 +5,14 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
+use App\Models\SavingTransactionDoc;
 use App\Enums\SavingType;
 use App\Enums\TransactionStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class SimpananController extends Controller
 {
@@ -158,5 +161,113 @@ class SimpananController extends Controller
 
         return redirect()->route('user.userDashboard')
             ->with('success', 'Permohonan penarikan simpanan berhasil diajukan dan sedang dalam peninjauan');
+    }
+
+    public function createDeposit(Request $request) 
+    {
+        $user = $request->user();
+
+        $savingAccounts = $user->savingAccounts()
+            ->select('id', 'type', 'balance')
+            ->get();
+
+        $totalBalance = SavingTransaction::where('status', TransactionStatus::COMPLETED)
+            ->whereHas('savingAccount', fn ($q) =>
+                $q->where('user_id', $user->id)
+            )
+            ->sum(DB::raw("
+                CASE
+                    WHEN type = 'Penyetoran' THEN amount
+                    WHEN type = 'Penarikan' THEN -amount
+                END
+            "));
+
+        $totalPerCategory = SavingTransaction::where('status', TransactionStatus::COMPLETED)
+            ->whereHas('SavingAccount', fn ($q) =>
+                $q->where('user_id', $user->id)
+            )
+            ->selectRaw("
+                saving_accounts.type as category,
+                SUM(
+                    CASE
+                        WHEN saving_transactions.type = 'Penyetoran' THEN saving_transactions.amount
+                        WHEN saving_transactions.type = 'Penarikan' THEN -saving_transactions.amount
+                    END
+                ) as total
+            ")
+            ->join('saving_accounts', 'saving_accounts.id', '=', 'saving_transactions.saving_account_id')
+            ->groupBy('saving_accounts.type')
+            ->pluck('total', 'category');
+
+        $accounts = $user->accounts()
+            ->select('account_number', 'account_name', 'bank_name')
+            ->get()
+            ->toArray();
+
+            return inertia('User/Simpanan/Penyetoran/Create', [
+                'totalBalance' => $totalBalance,
+                'totalPerCategory' => [
+                    'pokok' => $totalPerCategory['Simpanan Pokok'] ?? 0,
+                    'wajib' => $totalPerCategory['Simpanan Wajib'] ?? 0,
+                    'sukarela' => $totalPerCategory['Simpanan Sukarela'] ?? 0,
+                ],
+                'accounts' => $accounts,
+                'member' => $user,
+                'savingAccounts' => $savingAccounts
+            ]);
+    }
+
+    public function storeDeposit(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'saving_account_id' => 'required|exists:saving_accounts,id',
+            'method' => 'required|in:Tunai,Non-Tunai',
+            'saving_category' => 'required|in:Simpanan Pokok,Simpanan Wajib,Simpanan Sukarela',
+        ]);
+
+        if ($request->method === 'Non-Tunai') {
+            $request->validate([
+                'account_name' => 'required|string|max:255',
+                'account_number' => 'required|string|max:255',
+                'bank_name' => 'required|string|max:255',
+                'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            ]);
+        }
+
+        DB::transaction(function () use ($request) {
+
+            $savingAccount = SavingAccount::find($request->saving_account_id);
+
+            if (!$savingAccount || $savingAccount->type !== $request->saving_category) {
+                throw new \Exception('Kategori simpanan tidak sesuai dengan akun simpanan');
+            }
+
+             $transaction = SavingTransaction::create([
+                'amount' => $request->amount,
+                'type' => 'Penyetoran',
+                'status' => 'Belum Ditinjau',
+                'method' => $request->method,
+                'transaction_date' => now(),
+                'saving_account_id' => $request->saving_account_id,
+                'account_number' => $request->method === 'Non-Tunai' ? $request->account_number : null,
+                'updated_by' => $request->user()->id,
+            ]);
+
+            if ($request->method === 'Non-Tunai' && $request->hasFile('payment_proof')) {
+                $path = $request->file('payment_proof')
+                    ->store('saving-transactions', 'public');
+
+                SavingTransactionDoc::create([
+                    'transaction_id' => $transaction->id,
+                    'name' => 'Bukti Penyetoran',
+                    'attachment' => $path,
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('user.userDashboard')
+            ->with('success', 'Simpanan berhasil diajukan');
     }
 }
