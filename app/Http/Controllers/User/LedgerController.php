@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -114,9 +115,28 @@ class LedgerController extends Controller
             'tanggal_bergabung' => optional($member->created_at)->format('d F Y'),
         ];
 
+        // Get saving summary
+        $savingAccounts = SavingAccount::where('user_id', $userId)->get();
+        $savingSummary = [
+            'simpanan_pokok' => 0,
+            'simpanan_wajib' => 0,
+            'simpanan_sukarela' => 0,
+        ];
+
+        foreach ($savingAccounts as $account) {
+            if ($account->type === 'Simpanan Pokok') {
+                $savingSummary['simpanan_pokok'] = $account->balance;
+            } elseif ($account->type === 'Simpanan Wajib') {
+                $savingSummary['simpanan_wajib'] = $account->balance;
+            } elseif ($account->type === 'Simpanan Sukarela') {
+                $savingSummary['simpanan_sukarela'] = $account->balance;
+            }
+        }
+
         return Inertia::render('User/Ledger/List', [
             'transactions' => $transactions,
             'memberInfo' => $memberInfo,
+            'savings' => $savingSummary,
             'filters' => [
                 'search' => $search ?? '',
                 'month' => $month ?? '',
