@@ -121,7 +121,7 @@ const getProductColor = (produk) => {
 const applyFilters = () => {
     isLoading.value = true
     router.get(
-        '/admin/savings',
+        '/admin/savings/list',
         {
             search: filters.search || undefined,
             per_page: filters.per_page,
@@ -243,12 +243,11 @@ watch(() => filters.tab, applyFilters)
                         </span>
                     </template>
 
-
                     <template #cell-aksi="{ row }">
                         <div class="flex justify-center gap-3">
                             <Link
                                 v-if="filters.tab === 'permohonan'"
-                                :href="`/admin/savings/${row.id}`"
+                                :href="`/admin/savings/validate/${row.id}`"
                                 class="inline-flex items-center gap-2
                                     bg-blue-light-600 hover:bg-blue-light-900 text-white px-4 py-2 rounded-lg"
                             >
@@ -258,7 +257,7 @@ watch(() => filters.tab, applyFilters)
 
                             <Link
                                 v-else
-                                :href="`/admin/savings/${row.id}`"
+                                :href="`/admin/savings/show/${row.id}`"
                                 class="text-gray-500 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
                             >
                                 <Icon icon="mdi:eye-outline" class="w-5 h-5"/>

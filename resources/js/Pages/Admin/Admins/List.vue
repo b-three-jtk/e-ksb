@@ -60,7 +60,7 @@ const selectFilters = [
 
 const applyFilters = () => {
     router.get(
-        '/admin/admins',
+        '/admin/list',
         {
             search: filters.search || undefined,
             status: filters.status || undefined,

@@ -51,7 +51,7 @@ const filters = reactive({
 
 const applyFilters = () => {
     router.get(
-        '/admin/anggota',
+        '/admin/users/list',
         {
             search: filters.search || undefined,
             status: filters.status || undefined,
@@ -192,12 +192,12 @@ const statusClass = (status) => {
 
                 <template #cell-aksi="{ row }">
                     <div class="flex justify-center gap-3">
-                        <Link
+                        <!-- <Link
                             :href="`/admin/users/${row.id}/edit`"
                             class="text-gray-500 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
                         >
                             <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
-                        </Link>
+                        </Link> -->
 
                         <Link
                             :href="`/admin/users/show/${row.id}`"

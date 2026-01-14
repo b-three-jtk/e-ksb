@@ -45,7 +45,7 @@ const filters = reactive({
 
 const applyFilters = () => {
     router.get(
-        '/admin/verifikasi',
+        '/admin/users/verification',
         {
             search: filters.search || undefined,
             work_unit_id: filters.work_unit_id || undefined,
