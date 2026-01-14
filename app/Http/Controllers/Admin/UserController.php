@@ -288,8 +288,7 @@ class UserController extends Controller
 
             return $redirect;
         } else {
-            // Update status user menjadi Ditolak
-            $user->update(['status' => 'Ditolak']);
+            $user->update(['status' => 'Ditolak dengan alasan']);
 
             try {
                 Mail::to($user->email)->send(new RejectionNotificationMail($user, $validated['note'] ?? ''));
