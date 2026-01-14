@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignUuid('updated_by')->constrained('users');
             $table->string('saving_account_id');
             $table->foreign('saving_account_id')->references('id')->on('saving_accounts')->nullOnDelete();
-            $table->string('account_number');
+            $table->string('account_number')->nullable();
             $table->foreign('account_number')->references('account_number')->on('accounts')->nullOnDelete();
             $table->timestamps();
         });
