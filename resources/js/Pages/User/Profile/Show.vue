@@ -2,6 +2,7 @@
 import { router } from '@inertiajs/vue3'
 import Base from '../../../Layouts/Base.vue';
 import ReadonlyField from '@/Components/Form/ReadonlyField.vue'
+import UserIcon from '@/Icons/UserIcon.vue'
 
 const props = defineProps({
     user: {
@@ -13,13 +14,13 @@ const props = defineProps({
 
 <template>
     <Base title="Profil Anggota">
-        <div class="min-h-screen bg-gray-50 pt-20 pb-12">
+        <div class="min-h-screen bg-white dark:bg-gray-900 pt-20 pb-12">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-3xl font-bold text-blue-900">Profil Anggota</h1>
+                <div class="flex justify-between items-center mt-24 mb-8">
+                    <h1 class="text-3xl font-bold font-head text-blue-900 dark:text-blue-600">Profil Anggota</h1>
                 </div>
 
-                <div class="bg-white rounded-lg shadow-md p-8">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
                     <div class="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-gray-200">
                         <div class="relative flex-shrink-0">
                             <img
@@ -33,7 +34,7 @@ const props = defineProps({
                                 @click="router.visit(`/user/profile/${user.member_number}/edit`)"
                                 class="px-6 py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-orange-600 transition-colors"
                             >
-                                Edit Profile
+                                Edit Profil
                             </button>
                         </div>
                     </div>

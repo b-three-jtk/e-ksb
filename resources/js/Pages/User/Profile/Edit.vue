@@ -5,6 +5,7 @@ import Base from '../../../Layouts/Base.vue'
 import BaseInput from '@/Components/Form/BaseInput.vue'
 import BaseSelect from '@/Components/Form/BaseSelect.vue'
 import ReadonlyField from '@/Components/Form/ReadonlyField.vue'
+import UserIcon from '@/Icons/UserIcon.vue'
 
 const props = defineProps({
     user: {
@@ -56,7 +57,7 @@ const onFileChange = (event) => {
     formData.append('profile_picture', file)
     formData.append('_method', 'POST')
 
-    router.post(`/user/profile/${props.user.member_number}/picture`, formData, {
+    router.post('/user/profile/picture', formData, {
         preserveScroll: true,
         onSuccess: () => {
             uploading.value = false
@@ -81,7 +82,7 @@ const handleDeletePicture = () => {
 
     deleting.value = true
 
-    router.delete(`/user/profile/${props.user.member_number}/picture`, {
+    router.delete('/user/profile/picture', {
         preserveScroll: true,
         onSuccess: () => {
             deleting.value = false
@@ -94,10 +95,10 @@ const handleDeletePicture = () => {
 }
 
 const submit = () => {
-    form.put(`/user/profile/${props.user.member_number}`, {
+    form.put('/user/profile', {
         preserveScroll: true,
         onSuccess: () => {
-            router.visit(`/user/profile/${props.user.member_number}`)
+            router.visit('/user/profile')
         }
     })
 }
@@ -105,12 +106,12 @@ const submit = () => {
 
 <template>
 <Base title="Edit Profil Anggota">
-    <div class="min-h-screen bg-gray-50 pt-20 pb-12">
+    <div class="min-h-screen bg-white dark:bg-gray-900 pt-20 pb-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold text-blue-900 mb-8">Edit Profil Anggota</h1>
+            <h1 class="text-3xl font-bold font-head text-blue-900 dark:text-blue-600 mt-24 mb-8">Edit Profil Anggota</h1>
 
             <form @submit.prevent="submit">
-                <div class="bg-white rounded-lg shadow-md p-8">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
                     <div class="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-gray-200">
                         <div class="relative flex-shrink-0">
                             <img
@@ -139,18 +140,18 @@ const submit = () => {
                                 type="button"
                                 @click="handleChangePicture"
                                 :disabled="uploading || deleting"
-                                class="px-6 py-2 bg-blue-900 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                class="px-6 py-2.5 bg-blue-900 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
                             >
-                                {{ uploading ? 'Uploading...' : 'Change picture' }}
+                                {{ uploading ? 'Uploading...' : 'Ubah foto' }}
                             </button>
 
                             <button
                                 type="button"
                                 @click="handleDeletePicture"
                                 :disabled="uploading || deleting || !user.profile_picture"
-                                class="px-6 py-2 bg-red-100 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-200 disabled:opacity-50"
+                                class="px-6 py-2.5 bg-red-100 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-200 disabled:opacity-50"
                             >
-                                {{ deleting ? 'Deleting...' : 'Delete picture' }}
+                                {{ deleting ? 'Deleting...' : 'Hapus foto' }}
                             </button>
                         </div>
 
@@ -215,7 +216,7 @@ const submit = () => {
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="px-8 py-3 bg-blue-900 text-white text-base font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            class="px-6 py-2.5 bg-blue-900 text-white text-base font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
                         >
                             {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                         </button>
