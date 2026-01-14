@@ -316,8 +316,9 @@ class UserController extends Controller
     /**
      * Display the user's public profile
      */
-    public function profile(User $user)
+    public function profile()
     {
+        $user = auth()->user();
         $user->load(['role', 'workUnit']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
@@ -341,12 +342,9 @@ class UserController extends Controller
     /**
      * Show the form for editing user profile
      */
-    public function editProfile(User $user)
+    public function editProfile()
     {
-        if (request()->user()->isNot($user)) {
-            abort(403, 'Anda tidak berhak mengedit profil ini.');
-        }
-
+        $user = auth()->user();
         $user->load(['role', 'workUnit']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
@@ -370,11 +368,9 @@ class UserController extends Controller
     /**
      * Update user profile
      */
-    public function updateProfile(Request $request, User $user)
+    public function updateProfile(Request $request)
     {
-        if ($request->user()->isNot($user)) {
-            abort(403, 'Anda tidak berhak memperbarui profil ini.');
-        }
+        $user = auth()->user();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -391,18 +387,16 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('user.profile.show', $user)
+        return redirect()->route('user.profile.show')
             ->with('success', 'Profil berhasil diperbarui');
     }
 
     /**
      * Update user's profile picture
      */
-    public function updateProfilePicture(Request $request, User $user)
+    public function updateProfilePicture(Request $request)
     {
-        if ($request->user()->isNot($user)) {
-            abort(403, 'Anda tidak berhak mengubah foto profil ini.');
-        }
+        $user = auth()->user();
 
         $request->validate([
             'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -430,12 +424,9 @@ class UserController extends Controller
     /**
      * Delete user's profile picture
      */
-    public function deleteProfilePicture(User $user)
+    public function deleteProfilePicture()
     {
-        // Authorization: only allow deleting own profile picture
-        if (request()->user()->isNot($user)) {
-            abort(403, 'Anda tidak berhak menghapus foto profil ini.');
-        }
+        $user = auth()->user();
 
         if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
             \Storage::disk('public')->delete($user->profile_picture);
