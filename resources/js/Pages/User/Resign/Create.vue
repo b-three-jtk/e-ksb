@@ -5,16 +5,14 @@ import { ref, watch } from 'vue';
 import { router, usePage, Link } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 import BaseContainer from '../../../Components/BaseContainer.vue';
+import Swal from 'sweetalert2';
+import { toast } from 'vue3-toastify';
 
 const uploadedFile = ref(null)
 const isAgreed = ref(false)
 const isConfirmed = ref(false)
 const fileInput = ref(null)
 const errorFile = ref(null)
-const showSuccessModal = ref(false)
-const showErrorModal = ref(false)
-const showAlreadySubmittedModal = ref(false)
-const errorMessage = ref('')
 
 const page = usePage()
 const memberData = page.props.member
@@ -81,65 +79,112 @@ const handleDragOver = (event) => {
 
 const submitResignation = () => {
     if (hasExistingResign) {
-        errorMessage.value = 'Permohonan pengunduran diri sudah pernah diajukan. Harap menunggu peninjauan dari petugas koperasi.'
-        showAlreadySubmittedModal.value = true
+        Swal.fire({
+            icon: 'warning',
+            title: 'Permohonan Sudah Diajukan',
+            text: 'Permohonan pengunduran diri sudah pernah diajukan. Harap menunggu peninjauan dari petugas koperasi.',
+            confirmButtonColor: '#f59e0b',
+            confirmButtonText: 'Kembali ke Dashboard'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/user/dashboard';
+            }
+        });
         return
     }
 
     if (!uploadedFile.value || !isAgreed.value || !isConfirmed.value) {
-        alert('Harap lengkapi semua persyaratan')
-        return
+        Swal.fire({
+            icon: 'error',
+            title: 'Data Belum Lengkap',
+            text: 'Harap lengkapi semua persyaratan (upload dokumen dan centang pernyataan)',
+            confirmButtonColor: '#ef4444'
+        });
+        return;
     }
 
-    const formData = new FormData()
-    formData.append('document', uploadedFile.value)
+    Swal.fire({
+        title: 'Konfirmasi Pengajuan',
+        text: 'Apakah Anda yakin ingin mengajukan permohonan pengunduran diri?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Ajukan',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#007943',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new FormData()
+            formData.append('document', uploadedFile.value)
 
-    router.post(
-        `/user/resign/${memberData.member_number}`,
-        formData,
-        {
-            forceFormData: true,
-            preserveScroll: true,
-            preserveState : true,
-            onSuccess: (page) => {
-                showSuccessModal.value = true
-                uploadedFile.value = null
-                isAgreed.value = false
-                isConfirmed.value = false
-                if (fileInput.value) fileInput.value.value = null
-            },
-            onError: (errors) => {
-                if (errors.resign) {
-                    errorMessage.value = errors.resign
-                    showAlreadySubmittedModal.value = true
-                }
-                else if (errors.document) {
-                    errorFile.value = errors.document
-                }
-                else {
-                    const errorKeys = Object.keys(errors)
-                    if (errorKeys.length > 0) {
-                        errorMessage.value = errors[errorKeys[0]]
-                    } else {
-                        errorMessage.value = 'Terjadi kesalahan saat mengirim permohonan'
+            router.post(
+                `/user/resign/${memberData.member_number}`,
+                formData,
+                {
+                    forceFormData: true,
+                    preserveScroll: true,
+                    preserveState: true,
+                    onSuccess: () => {
+                        toast("Permohonan pengunduran diri berhasil diajukan!", {
+                            "type": "success",
+                            "position": "bottom-right",
+                            "transition": "slide",
+                            "dangerouslyHTMLString": true
+                        }).then(() => {
+                            setTimeout(() => {
+                                window.location.href = '/user/dashboard';
+                            }, 1500);
+                        });
+
+                        // Reset form
+                        uploadedFile.value = null
+                        isAgreed.value = false
+                        isConfirmed.value = false
+                        if (fileInput.value) fileInput.value.value = null
+                    },
+                    onError: (errors) => {
+                        if (errors.resign) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Permohonan Sudah Ada',
+                                text: errors.resign,
+                                confirmButtonColor: '#f59e0b',
+                                confirmButtonText: 'Kembali ke Dashboard'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/user/dashboard';
+                                }
+                            });
+                        }
+                        else if (errors.document) {
+                            errorFile.value = errors.document
+                            toast("Gagal mengupload dokumen: " + errors.document, {
+                                "type": "error",
+                                "position": "bottom-right",
+                                "transition": "slide"
+                            });
+                        }
+                        else {
+                            const errorKeys = Object.keys(errors)
+                            if (errorKeys.length > 0) {
+                                toast(errors[errorKeys[0]], {
+                                    "type": "error",
+                                    "position": "bottom-right",
+                                    "transition": "slide"
+                                });
+                            } else {
+                                toast("Terjadi kesalahan saat mengirim permohonan", {
+                                    "type": "error",
+                                    "position": "bottom-right",
+                                    "transition": "slide"
+                                });
+                            }
+                        }
                     }
-                    showErrorModal.value = true
                 }
-            }
+            )
         }
-    )
+    })
 }
-
-watch(
-    () => page.props.flash,
-    (newFlash) => {
-        if (newFlash?.success) {
-            showSuccessModal.value = true
-        }
-    },
-    { deep: true }
-)
-
 </script>
 
 <template>
@@ -313,81 +358,4 @@ watch(
             </BaseContainer>
         </div>
     </Base>
-
-    <!-- Success Modal -->
-    <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div class="bg-blue-900 rounded-2xl p-8 max-w-md w-full text-white shadow-xl">
-            <div class="flex justify-center">
-                <Icon icon="ix:success-filled" width="65" height="65" style="color: #36bffa" class="mb-5" />
-            </div>
-
-            <h2 class="font-head text-3xl font-bold mb-10">
-                Berkas Pengunduran Diri<br />Telah Berhasil Terkirim!
-            </h2>
-
-            <p class="text-md opacity-90 mb-10">
-                Berkas pengunduran diri yang telah terkirim akan dilakukan peninjauan oleh petugas kami!
-            </p>
-
-            <div class="flex justify-end">
-                <Link
-                    :href="'/user/dashboard/'"
-                    class="font-head bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium transition no-underline"
-                >
-                    Kembali ke Dashboard
-                </Link>
-            </div>
-        </div>
-    </div>
-
-    <!-- Error Modal -->
-    <div v-if="showErrorModal && !showAlreadySubmittedModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div class="bg-red-700 rounded-2xl p-8 max-w-md w-full text-white text-center shadow-xl">
-            <div class="flex justify-center">
-                <Icon icon="icon-park-twotone:error" width="65" height="65"  style="color: #ff929a" class="mb-5" />
-            </div>
-
-            <h2 class="font-head text-3xl font-bold mb-10">
-                Gagal Mengirim Permohonan
-            </h2>
-            <p class="text-md opacity-90 mb-10">
-                {{ errorMessage }}
-            </p>
-
-            <div class="flex justify-end">
-                <button
-                    @click="showErrorModal = false"
-                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg font-medium transition"
-                >
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sudah Pernah Mengajukan Modal -->
-    <div v-if="showAlreadySubmittedModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div class="bg-yellow-600 rounded-2xl p-8 max-w-md w-full text-white shadow-xl">
-            <div class="flex justify-center">
-                <Icon icon="ic:twotone-info" width="65" height="65"  style="color: #fff34f" class="mb-5"  />
-            </div>
-
-            <h2 class="font-head text-3xl font-bold mb-10">
-                Permohonan Sudah Diajukan
-            </h2>
-
-            <p class="text-md opacity-90 mb-10">
-                {{ errorMessage || 'Anda sudah pernah mengajukan permohonan pengunduran diri. Tunggu proses peninjauan dari petugas kami.' }}
-            </p>
-
-            <div class="flex justify-end">
-                <Link
-                    :href="'/user/dashboard/'"
-                    class="font-head bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition no-underline text-lg"
-                >
-                    Kembali ke Dashboard
-                </Link>
-            </div>
-        </div>
-    </div>
 </template>
