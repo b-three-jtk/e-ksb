@@ -223,17 +223,17 @@ class SimpananController extends Controller
             ->get()
             ->toArray();
 
-            return inertia('User/Simpanan/Penyetoran/Create', [
-                'totalBalance' => $totalBalance,
-                'totalPerCategory' => [
-                    'pokok' => $totalPerCategory['Simpanan Pokok'] ?? 0,
-                    'wajib' => $totalPerCategory['Simpanan Wajib'] ?? 0,
-                    'sukarela' => $totalPerCategory['Simpanan Sukarela'] ?? 0,
-                ],
-                'accounts' => $accounts,
-                'member' => $user,
-                'savingAccounts' => $savingAccounts
-            ]);
+        return inertia('User/Simpanan/Penyetoran/Create', [
+            'totalBalance' => $totalBalance,
+            'totalPerCategory' => [
+                'pokok' => $totalPerCategory['Simpanan Pokok'] ?? 0,
+                'wajib' => $totalPerCategory['Simpanan Wajib'] ?? 0,
+                'sukarela' => $totalPerCategory['Simpanan Sukarela'] ?? 0,
+            ],
+            'accounts' => $accounts,
+            'member' => $user,
+            'savingAccounts' => $savingAccounts
+        ]);
     }
 
     public function storeDeposit(Request $request)
