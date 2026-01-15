@@ -1,34 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { formatCurrency } from '../../../utils/currency'
 
 interface Transaction {
-    tanggal: string
-    produk: string
-    jenis: string
-    metode: string
-    petugas: string
-    debit: number
-    kredit: number
-    saldo: number
+    [key: string]: any
 }
 
 interface Column {
     key: string
     label: string
+    formatter?: (value: any) => string
 }
 
 const props = defineProps<{
     transactions: Transaction[]
     columns: Column[]
 }>()
-
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(value)
-}
 
 // Group transactions by month
 const groupedTransactions = computed(() => {
@@ -104,43 +91,23 @@ const sortedMonthKeys = computed(() => {
                             :key="`${monthKey}-${index}`"
                             class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
-                            <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                                {{ row.tanggal }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                                {{ row.produk }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                                {{ row.jenis }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                                {{ row.metode }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                                {{ row.petugas }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                                <span
-                                    v-if="row.debit > 0"
-                                    class="text-green-600 dark:text-green-400 font-semibold"
-                                >
-                                    {{ formatCurrency(row.debit) }}
+                            <td
+                                v-for="col in columns"
+                                :key="col.key"
+                                class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100"
+                            >
+                                <span v-if="col.key === 'debit' && row[col.key] > 0" class="text-green-600 dark:text-green-400 font-semibold">
+                                    {{ formatCurrency(row[col.key]) }}
                                 </span>
-                                <span v-else class="text-gray-400">-</span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                                <span
-                                    v-if="row.kredit > 0"
-                                    class="text-red-600 dark:text-red-400 font-semibold"
-                                >
-                                    {{ formatCurrency(row.kredit) }}
+                                <span v-else-if="col.key === 'debit'" class="text-gray-400">-</span>
+                                <span v-else-if="col.key === 'kredit' && row[col.key] > 0" class="text-red-600 dark:text-red-400 font-semibold">
+                                    {{ formatCurrency(row[col.key]) }}
                                 </span>
-                                <span v-else class="text-gray-400">-</span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                                <span class="font-semibold text-blue-600 dark:text-blue-400">
-                                    {{ formatCurrency(row.saldo) }}
+                                <span v-else-if="col.key === 'kredit'" class="text-gray-400">-</span>
+                                <span v-else-if="col.key === 'saldo'" class="font-semibold text-blue-600 dark:text-blue-400">
+                                    {{ formatCurrency(row[col.key]) }}
                                 </span>
+                                <span v-else>{{ col.formatter ? col.formatter(row[col.key]) : row[col.key] }}</span>
                             </td>
                         </tr>
                     </template>
