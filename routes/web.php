@@ -82,11 +82,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('user')->name('user.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [AnggotaController::class, 'index'])->name('userDashboard');
 
-    Route::get('/profile/{user:member_number}', [UserController::class, 'profile'])->name('profile.show');
-    Route::get('/profile/{user:member_number}/edit', [UserController::class, 'editProfile'])->name('profile.edit');
-    Route::put('/profile/{user:member_number}', [UserController::class, 'updateProfile'])->name('profile.update');
-    Route::post('/profile/{user:member_number}/picture', [UserController::class, 'updateProfilePicture'])->name('profile.picture.update');
-    Route::delete('/profile/{user:member_number}/picture', [UserController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile.show');
+    Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
+    Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/picture', [UserController::class, 'updateProfilePicture'])->name('profile.picture.update');
+    Route::delete('/profile/picture', [UserController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
 
     Route::get('/resign/{user:member_number}', [AnggotaController::class, 'createResign'])->name('resign.create');
     Route::post('/resign/{user:member_number}', [AnggotaController::class, 'storeResign'])->name('resign.store');

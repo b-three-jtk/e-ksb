@@ -112,7 +112,7 @@ function formatNumber(value) {
 </script>
 
 <template>
-    <Base>
+    <Base title="Penarikan Simpanan">
         <div class="font-head min-h-screen bg-white dark:bg-gray-900 transition-colors py-8">
             <div class="max-w-5xl mx-auto px-6">
                 <StepIndicator :steps="steps" :currentStep="currentStep" />

@@ -14,6 +14,14 @@ const user = computed(() => {
     return page.props.auth?.user || null
 })
 
+// Get photo URL from profile_picture
+const photoUrl = computed(() => {
+    if (user.value?.profile_picture) {
+        return `/storage/${user.value.profile_picture}`
+    }
+    return null
+})
+
 // Get CSRF token
 const csrfToken = computed(() => {
     return page.props.csrf_token || ''
@@ -64,9 +72,10 @@ console.log(isMenuOpen.value);
                     </Link>
                     <div class="relative">
                         <button @click="toggleUserDropdown" class="flex items-center">
-                            <div v-if="user.profile_picture">
-                                <img class="w-10 h-10 rounded-lg cursor-pointer object-cover"
-                                    src="/public/images/user/owner.jpg" alt="User avatar">
+                            <div v-if="photoUrl"
+                                class="w-10 h-10 rounded-lg overflow-hidden cursor-pointer">
+                                <img class="w-full h-full object-cover"
+                                    :src="photoUrl" :alt="user.name">
                             </div>
                             <div v-else
                                 class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-gray-500 cursor-pointer">
@@ -76,11 +85,13 @@ console.log(isMenuOpen.value);
 
                         <!-- Dropdown Menu -->
                         <div v-if="isUserDropdownOpen"
-                            class="absolute right-0 z-10 mt-2 w-44 divide-y divide-gray-100 rounded-lg shadow bg-white dark:divide-gray-600">
-                            <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                <div>{{ user.name }}</div>
-                                <div class="font-medium truncate">{{ user.email }}</div>
-                            </div>
+                            class="absolute right-0 z-10 mt-2 w-44 divide-y divide-gray-100 rounded-lg shadow bg-white dark:bg-gray-800 dark:divide-gray-600">
+                            <Link href="/user/profile" class="block">
+                                <div class="px-4 py-3 text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <div>{{ user.name }}</div>
+                                    <div class="font-medium truncate">{{ user.email }}</div>
+                                </div>
+                            </Link>
                             <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
                                 <li>
                                     <Link href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
@@ -93,7 +104,7 @@ console.log(isMenuOpen.value);
                                     <input type="hidden" name="_token" :value="csrfToken" />
                                     <button type="submit"
                                         class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200">
-                                        Sign out
+                                        Keluar
                                     </button>
                                 </form>
                             </div>
