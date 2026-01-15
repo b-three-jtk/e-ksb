@@ -74,7 +74,7 @@ const onSearchInput = (e: Event) => {
         </div>
 
         <!-- Right -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
             <!-- Search with optional Tooltip -->
             <div v-if="props.search !== undefined" class="flex items-center gap-2">
                 <div class="relative">
@@ -133,6 +133,8 @@ const onSearchInput = (e: Event) => {
                     {{ opt[select.optionLabel] }}
                 </option>
             </select>
+
+            <slot name="actions" />
         </div>
     </div>
 </template>
