@@ -1,6 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
+import Swal from 'sweetalert2'
+import { toast } from 'vue3-toastify'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import ReadonlyField from '@/Components/Form/ReadonlyField.vue'
 
@@ -9,6 +11,7 @@ const props = defineProps({
 		type: Object,
 		default: () => ({
 			id: '',
+			member_number: '',
 			name: '',
 			nik: '',
 			work_unit: '',
@@ -23,6 +26,7 @@ const props = defineProps({
 
 const note = ref(props.member.note ?? '')
 const decision = ref(null)
+const processing = ref(false)
 
 const member = computed(() => ({
 	id: props.member?.id ?? '',
@@ -35,8 +39,57 @@ const member = computed(() => ({
 	id_card_url: props.member?.id_card_url ?? null,
 }))
 
+const isNoteValid = computed(() => {
+	if (decision.value === 'rejected') {
+		return note.value.trim() !== ''
+	}
+	return true
+})
+
 const setDecision = (value) => {
 	decision.value = value
+}
+
+const handleApproved = () => {
+	Swal.fire({
+		title: 'Terima Calon Anggota?',
+		text: 'Apakah Anda yakin ingin menerima calon anggota ini?',
+		icon: 'question',
+		showCancelButton: true,
+		confirmButtonColor: '#3085d6',
+		cancelButtonColor: '#d33',
+		confirmButtonText: 'Ya, Terima!',
+		cancelButtonText: 'Batal'
+	}).then((result) => {
+		if (result.isConfirmed) {
+			processing.value = true
+			router.post(
+				`/admin/verifikasi/${props.member.member_number}/approval`,
+				{
+					decision: 'approved',
+					note: '',
+				},
+				{
+					onSuccess: (response) => {
+						processing.value = false
+						toast.success('Pemberitahuan terkirim ke email anggota', {
+							autoClose: 2000,
+							position: 'bottom-right'
+						})
+						router.visit('/admin/verifikasi')
+					},
+					onError: (error) => {
+						processing.value = false
+						const errorMessage = error?.message || 'Gagal mengirim pemberitahuan'
+						toast.error(`${errorMessage}`, {
+							autoClose: 3000,
+							position: 'bottom-right'
+						})
+					}
+				}
+			)
+		}
+	})
 }
 
 const handleContinue = () => {
@@ -45,18 +98,45 @@ const handleContinue = () => {
         return
     }
 
-    router.post(
-        `/admin/verifikasi/${props.member.id}/approval`,
-        {
-            decision: decision.value,
-            note: decision.value === 'rejected' ? note.value : '',
-        },
-        {
-            onSuccess: () => {
-                window.location.href = '/admin/verifikasi'
-            },
+    Swal.fire({
+        title: 'Tolak Calon Anggota?',
+        text: 'Apakah Anda yakin ingin menolak calon anggota ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Tolak!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            processing.value = true
+            router.post(
+                `/admin/verifikasi/${props.member.member_number}/approval`,
+                {
+                    decision: decision.value,
+                    note: decision.value === 'rejected' ? note.value : '',
+                },
+                {
+                    onSuccess: (response) => {
+                        processing.value = false
+                        toast.success('Pemberitahuan terkirim ke email calon anggota', {
+                            autoClose: 2000,
+                            position: 'bottom-right'
+                        })
+                        router.visit('/admin/verifikasi')
+                    },
+                    onError: (error) => {
+                        processing.value = false
+                        const errorMessage = error?.message || 'Gagal mengirim pemberitahuan'
+                        toast.error(`${errorMessage}`, {
+                            autoClose: 3000,
+                            position: 'bottom-right'
+                        })
+                    }
+                }
+            )
         }
-    )
+    })
 }
 </script>
 
@@ -75,10 +155,10 @@ const handleContinue = () => {
 			</div>
 
 			<div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-				<section class="rounded-xl bg-white shadow-sm ring-1 ring-gray-100 xl:col-span-2">
+				<section class="rounded-xl bg-white dark:bg-gray-800 xl:col-span-2">
 					<div
 						class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-						<h2 class="font-heading text-xl font-semibold text-gray-900 dark:text-white">
+						<h2 class="font-head text-xl font-semibold text-gray-900 dark:text-white">
 							Detail Data Calon Anggota
 						</h2>
 					</div>
@@ -93,61 +173,80 @@ const handleContinue = () => {
 							<div class="flex items-end justify-start gap-3 md:justify-end">
 								<button
 									type="button"
-									@click="() => { decision = 'approved'; handleContinue(); }"
+								@click="handleApproved"
+									:disabled="processing"
 									:class="[
-										'h-11 min-w-[120px] rounded-lg px-5 text-sm font-semibold transition',
-										'bg-blue-800 text-white hover:bg-blue-900'
+										'h-11 min-w-[120px] rounded-lg px-5 text-sm font-semibold transition flex items-center justify-center gap-2',
+										'bg-blue-800 text-white hover:bg-blue-900 disabled:opacity-50 disabled:cursor-not-allowed'
 									]"
 								>
-									Diterima
+									<span v-if="processing">
+										<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+											<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+											<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+										</svg>
+									</span>
+									{{ processing ? 'Memproses...' : 'Diterima' }}
 								</button>
 								<button
 									type="button"
 									@click="setDecision('rejected')"
+									:disabled="processing"
 									:class="[
 										'h-11 min-w-[120px] rounded-lg px-5 text-sm font-semibold transition',
 										decision === 'rejected'
 											? 'bg-red-700 text-white shadow'
-											: 'bg-red-700 text-white hover:bg-red-900'
+											: 'bg-red-700 text-white hover:bg-red-900',
+										'disabled:opacity-50 disabled:cursor-not-allowed'
 									]"
 								>
 									Ditolak
 								</button>
 							</div>
 							<div v-if="decision === 'rejected'" class="flex flex-col gap-2 md:col-span-2">
-								<label class="text-sm font-medium text-gray-600 mt-4">Catatan</label>
+								<label class="text-sm font-medium text-gray-600 dark:text-white mt-4">
+									Catatan 
+									<span class="text-error-500">*</span>
+								</label>
 								<textarea
 									v-model="note"
 									rows="3"
 									placeholder="Catatan jika ditolak"
-									class="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
+									class="w-full rounded-lg border border-gray-200 bg-white dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
 								></textarea>
 							</div>
 						</div>
 					</div>
 
-					<div v-if="decision === 'rejected'" class="mt-6 flex justify-end">
+					<div v-if="decision === 'rejected'" class="p-8 mt-6 flex justify-end">
 						<button
 							type="button"
 							@click="handleContinue"
-							class="inline-flex items-center justify-center rounded-lg bg-blue-800 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-900"
+							:disabled="!isNoteValid || processing"
+							class="inline-flex items-center justify-center rounded-lg bg-blue-800 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-900 disabled:opacity-50 disabled:cursor-not-allowed gap-2"
 						>
-							Lanjutkan
+							<span v-if="processing">
+								<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
+							</span>
+							{{ processing ? 'Memproses...' : 'Lanjutkan' }}
 						</button>
 					</div>
 				</section>
 
 				<div class="flex flex-col gap-4">
-					<section class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-						<h3 class="mb-4 text-base font-semibold text-gray-900">Foto Calon Anggota</h3>
-						<div class="mx-auto flex w-60 aspect-square items-center justify-center rounded-lg border-2 bg-gray-50">
+					<section class="rounded-xl bg-white dark:bg-gray-800 p-6">
+						<h3 class="mb-4 text-base font-semibold font-head text-gray-900 dark:text-white">Foto Calon Anggota</h3>
+						<div class="mx-auto flex w-60 aspect-square items-center justify-center rounded-lg border-2 bg-gray-50 dark:border-gray-700">
 							<img v-if="member.photo_url" :src="member.photo_url" alt="Foto calon anggota" class="h-full w-full rounded-lg object-cover" />
 						</div>
 					</section>
 
-					<section class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-						<h3 class="mb-4 text-base font-semibold text-gray-900">Foto KTP</h3>
-						<div class="flex w-full aspect-[16/10] items-center justify-center rounded-lg border-2 bg-gray-50">
+					<section class="rounded-xl bg-white dark:bg-gray-800 p-6">
+						<h3 class="mb-4 text-base font-semibold font-head text-gray-900 dark:text-white">Foto KTP</h3>
+						<div class="flex w-full aspect-[16/10] items-center justify-center rounded-lg border-2 bg-gray-50 dark:border-gray-700">
 							<img v-if="member.id_card_url" :src="member.id_card_url" alt="Foto KTP" class="h-full w-full rounded-lg object-cover" />
 						</div>
 					</section>
