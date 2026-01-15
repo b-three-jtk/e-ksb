@@ -57,6 +57,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
     Route::put('/savings/validate/{id}', [SavingController::class, 'validateRequest'])->name('savings.validate');
     Route::get('/savings/list', [SavingController::class, 'index'])->name('savings.index');
+    Route::get('/savings/export/csv', [SavingController::class, 'exportCsv'])->name('savings.export.csv');
+    Route::get('/savings/export/pdf', [SavingController::class, 'exportPdf'])->name('savings.export.pdf');
 
     Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
     Route::get('/users/list', [UserController::class, 'index'])->name('users.index');
@@ -88,8 +90,8 @@ Route::prefix('user')->name('user.')->middleware('auth')->group(function () {
     Route::post('/profile/{user:member_number}/picture', [UserController::class, 'updateProfilePicture'])->name('profile.picture.update');
     Route::delete('/profile/{user:member_number}/picture', [UserController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
 
-    Route::get('/resign/{user:member_number}', [AnggotaController::class, 'createResign'])->name('resign.create');
-    Route::post('/resign/{user:member_number}', [AnggotaController::class, 'storeResign'])->name('resign.store');
+    Route::get('/resign', [AnggotaController::class, 'createResign'])->name('resign.create');
+    Route::post('/resign', [AnggotaController::class, 'storeResign'])->name('resign.store');
 
     Route::get('/simpanan/penyetoran', [SimpananController::class, 'createDeposit'])->name('deposit.create');
     Route::post('/simpanan/penyetoran', [SimpananController::class, 'storeDeposit'])->name('deposit.store');
