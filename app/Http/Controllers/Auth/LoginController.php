@@ -53,7 +53,12 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended('/admin/dashboard');
+        // Redirect based on user role
+        if ($user->role->name === 'Super Admin') {
+            return redirect()->intended('/admin/dashboard');
+        }
+
+        return redirect()->intended('/user/dashboard');
     }
 
     public function destroy(Request $request)
