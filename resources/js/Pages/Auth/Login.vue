@@ -2,6 +2,7 @@
 import { Link, useForm } from '@inertiajs/vue3'
 import AuthLayout from '@/Layouts/AuthLayout.vue'
 import BaseInput from '@/Components/Form/BaseInput.vue'
+import Logo from '@/Components/Logo.vue'
 
 const form = useForm({
   member_number: '',
@@ -19,10 +20,10 @@ const submit = () => {
 <template>
   <AuthLayout title="Masuk">
     <div class="w-full px-4 py-8">
-      <div class="max-w-xl mx-auto bg-white/95 border border-white/60 shadow-xl rounded-2xl backdrop-blur">
-        <div class="p-10 space-y-8">
-            <div class="text-center mb-12 mt-4">
-                <h1 class="text-2xl font-semibold text-blue-900 font-head">Logo KopSy-Kampus</h1>
+      <div class="max-w-xl mx-auto bg-white/95 dark:bg-gray-800 border border-white/60 dark:border-gray-700 shadow-xl rounded-2xl backdrop-blur">
+        <div class="p-8 space-y-8">
+            <div class="flex justify-center mb-12">
+                <Logo class="h-16 mx-auto" />
             </div>
 
             <form @submit.prevent="submit" class="space-y-8">
@@ -45,10 +46,10 @@ const submit = () => {
                 </div>
 
                 <div class="space-y-4">
-                    <span class="text-gray-500 font-body">Lupa password?</span>
+                    <span class="text-gray-500 dark:text-white font-head">Lupa password?</span>
                     <button
                     type="submit"
-                    class="mt-2 w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold font-body py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
+                    class="mt-2 w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold font-head py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
                     :disabled="form.processing"
                     >
                     <span v-if="form.processing">Memproses...</span>
@@ -56,9 +57,9 @@ const submit = () => {
                     </button>
                 </div>
 
-                <p class="text-center text-md text-gray-600 font-body">
+                <p class="text-center text-md text-gray-600 dark:text-white font-head">
                 Tidak punya akun?
-                <Link href="/auth/register" class="text-orange-500 font-semibold">Daftar sekarang</Link>
+                <Link href="/auth/register" class="text-accent dark:text-accent font-semibold">Daftar sekarang</Link>
                 </p>
             </form>
         </div>
