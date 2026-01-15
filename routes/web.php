@@ -49,7 +49,7 @@ Route::post('/auth/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('auth.logout');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -79,7 +79,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 // User Routes
-Route::prefix('user')->name('user.')->middleware('auth')->group(function () {
+Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [AnggotaController::class, 'index'])->name('userDashboard');
 
     Route::get('/profile', [UserController::class, 'profile'])->name('profile.show');
