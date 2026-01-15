@@ -159,7 +159,6 @@ const submit = () => {
 
                         uploading.value = true
                         router.post('/user/profile/picture', formData, {
-                            preserveScroll: true,
                             onSuccess: () => {
                                 uploading.value = false
                                 selectedFile.value = null
@@ -167,45 +166,34 @@ const submit = () => {
                                     autoClose: 2000,
                                     position: 'bottom-right'
                                 })
-                                setTimeout(() => {
-                                    router.visit('/user/profile')
-                                }, 500)
+                                router.visit('/user/profile')
                             },
                             onError: () => {
                                 uploading.value = false
-                                toast.error('Profil disimpan tapi gagal mengupload foto', {
-                                    autoClose: 2000,
+                                toast.error('Data profil berhasil disimpan, tetapi foto profil gagal diunggah. Silakan coba unggah foto kembali.', {
+                                    autoClose: 3000,
                                     position: 'bottom-right'
                                 })
-                                setTimeout(() => {
-                                    router.visit('/user/profile')
-                                }, 1500)
                             }
                         })
                     } else if (previewUrl.value === null && props.user.profile_picture) {
                         // Delete photo if user cleared preview
                         deleting.value = true
                         router.delete('/user/profile/picture', {
-                            preserveScroll: true,
                             onSuccess: () => {
                                 deleting.value = false
-                                toast.success('Profil dan foto berhasil disimpan', {
+                                toast.success('Profil berhasil disimpan dan foto dihapus', {
                                     autoClose: 2000,
                                     position: 'bottom-right'
                                 })
-                                setTimeout(() => {
-                                    router.visit('/user/profile')
-                                }, 500)
+                                router.visit('/user/profile')
                             },
                             onError: () => {
                                 deleting.value = false
-                                toast.error('Profil disimpan tapi gagal menghapus foto', {
-                                    autoClose: 2000,
+                                toast.error('Data profil berhasil disimpan, tetapi foto profil gagal dihapus. Silakan coba hapus foto kembali.', {
+                                    autoClose: 3000,
                                     position: 'bottom-right'
                                 })
-                                setTimeout(() => {
-                                    router.visit('/user/profile')
-                                }, 1500)
                             }
                         })
                     } else {
@@ -213,9 +201,7 @@ const submit = () => {
                             autoClose: 2000,
                             position: 'bottom-right'
                         })
-                        setTimeout(() => {
-                            router.visit('/user/profile')
-                        }, 500)
+                        router.visit('/user/profile')
                     }
                 },
                 onError: () => {
@@ -273,7 +259,7 @@ const submit = () => {
                                     :disabled="uploading || deleting"
                                     class="px-6 py-2.5 bg-blue-900 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
                                 >
-                                    {{ uploading ? 'Uploading...' : 'Ubah foto' }}
+                                    {{ uploading ? 'Mengunggah...' : 'Ubah foto' }}
                                 </button>
 
                                 <button
@@ -282,7 +268,7 @@ const submit = () => {
                                     :disabled="uploading || deleting || (!selectedFile && !user.profile_picture)"
                                     class="px-6 py-2.5 bg-red-100 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-200 disabled:opacity-50"
                                 >
-                                    {{ deleting ? 'Deleting...' : 'Hapus foto' }}
+                                    {{ deleting ? 'Menghapus...' : 'Hapus foto' }}
                                 </button>
                             </div>
                         </div>
