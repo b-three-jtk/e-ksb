@@ -258,11 +258,15 @@ class SimpananController extends Controller
 
             $savingAccount = SavingAccount::find($request->saving_account_id);
 
-            if (!$savingAccount || $savingAccount->type !== $request->saving_category) {
+            if (!$savingAccount || $savingAccount->user_id !== $request->user()->id) {
+                abort(403, 'Tidak diizinkan mengakses akun simpanan ini');
+            }
+
+            if ($savingAccount->type !== $request->saving_category) {
                 throw new \Exception('Kategori simpanan tidak sesuai dengan akun simpanan');
             }
 
-             $transaction = SavingTransaction::create([
+            $transaction = SavingTransaction::create([
                 'amount' => $request->amount,
                 'type' => 'Penyetoran',
                 'status' => 'Belum Ditinjau',
