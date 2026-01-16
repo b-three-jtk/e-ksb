@@ -87,7 +87,7 @@ const onUploadKtp = (e) => {
                 class="object-cover w-full h-full"
                 />
 
-                <span class="icon-[mdi--image-plus-outline]" style="width: 32px; height: 32px; color: gray;"></span>
+                <span v-else class="icon-[mdi--image-plus-outline]" style="width: 32px; height: 32px; color: gray;"></span>
             </label>
 
             <p class="mt-2 text-sm text-blue-900 dark:text-white font-medium font-body">
@@ -116,7 +116,7 @@ const onUploadKtp = (e) => {
                 class="object-cover w-full h-full"
                 />
 
-                <span class="icon-[mdi--image-plus-outline]" style="width: 32px; height: 32px; color: gray;"></span>
+                <span v-else class="icon-[mdi--image-plus-outline]" style="width: 32px; height: 32px; color: gray;"></span>
             </label>
 
             <p class="mt-2 text-sm text-blue-900 dark:text-white font-medium font-body">
