@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import { toast } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
 import AuthLayout from '@/Layouts/AuthLayout.vue'
 import RegisterStepOne from '@/Components/Auth/RegisterStepOne.vue'
 import RegisterStepTwo from '@/Components/Auth/RegisterStepTwo.vue'
@@ -24,12 +26,59 @@ const next = () => (step.value = 2)
 const submit = () => {
   form.post('/auth/register', {
     forceFormData: true,
-    onSuccess: () => {
-      console.log('Registration successful')
-    },
     onError: (errors) => {
       console.error('Registration failed:', errors)
-      alert('Terjadi kesalahan saat mendaftar. Silakan cek kembali data Anda.')
+      
+      // error spesifik untuk setiap field
+      if (errors.email) {
+        toast.error(`Email: ${errors.email}`, {
+          autoClose: 5000,
+          position: toast.POSITION.BOTTOM_RIGHT
+        })
+      }
+      if (errors.nik) {
+        toast.error(`NIK: ${errors.nik}`, {
+          autoClose: 5000,
+          position: toast.POSITION.BOTTOM_RIGHT
+        })
+      }
+      if (errors.password) {
+        toast.error(`Password: ${errors.password}`, {
+          autoClose: 5000,
+          position: toast.POSITION.BOTTOM_RIGHT
+        })
+      }
+      if (errors.foto_pribadi) {
+        toast.error(`Foto Pribadi: ${errors.foto_pribadi}`, {
+          autoClose: 5000,
+          position: toast.POSITION.BOTTOM_RIGHT
+        })
+      }
+      if (errors.foto_ktp) {
+        toast.error(`Foto KTP: ${errors.foto_ktp}`, {
+          autoClose: 5000,
+          position: toast.POSITION.BOTTOM_RIGHT
+        })
+      }
+      
+      const handledFields = ['email', 'nik', 'password', 'foto_pribadi', 'foto_ktp']
+      const otherErrors = Object.keys(errors).filter(key => !handledFields.includes(key))
+      
+      if (otherErrors.length > 0) {
+        otherErrors.forEach(key => {
+          toast.error(`${key}: ${errors[key]}`, {
+            autoClose: 5000,
+            position: toast.POSITION.BOTTOM_RIGHT
+          })
+        })
+      }
+      
+      if (Object.keys(errors).length === 0) {
+        toast.error('Terjadi kesalahan saat mendaftar. Silakan cek kembali data Anda.', {
+          autoClose: 5000,
+          position: toast.POSITION.BOTTOM_RIGHT
+        })
+      }
     }
   })
 }
@@ -129,7 +178,7 @@ const props = defineProps({
 
             <p class="text-center text-md text-gray-500 dark:text-white font-body">
               Sudah punya akun?
-              <a href="/auth/login" class="text-accent dark:text-accent font-medium font-body">
+              <a href="/auth/login" class="text-accent dark:text-accent font-bold font-body">
                 Masuk sekarang
               </a>
             </p>
