@@ -13,7 +13,7 @@ class WorkUnitSeeder extends Seeder
      */
     public function run(): void
     {
-        WorkUnit::insert([
+        $workUnits = [
             ['name' => 'Teknik Sipil'],
             ['name' => 'Teknik Mesin'],
             ['name' => 'Teknik Refrigerasi dan Tata Udara'],
@@ -24,6 +24,13 @@ class WorkUnitSeeder extends Seeder
             ['name' => 'Akuntansi'],
             ['name' => 'Administrasi Niaga'],
             ['name' => 'Bahasa Inggris'],
-        ]);
+        ];
+
+        foreach ($workUnits as $workUnit) {
+            WorkUnit::firstOrCreate(
+                ['name' => $workUnit['name']],
+                $workUnit
+            );
+        }
     }
 }

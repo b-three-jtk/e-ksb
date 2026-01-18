@@ -231,8 +231,8 @@ onUnmounted(() => {
                     <p class="text-gray-200">Koperasi Syariah Polban akan membantu memenuhi kebutuhan finansial Anda dengan prinsip syariah yang terpercaya.</p>
                 </div>
                 <div class="flex gap-4 mx-auto">
-                    <Link href="/register" class="px-8 py-4 my-auto bg-secondary rounded-xl text-white hover:bg-brand-800">Daftar Sekarang</Link>
-                    <Link href="/register" class="px-8 py-4 my-auto bg-white/70 font-medium rounded-xl text-dark-text hover:bg-gray-200 flex items-center gap-2">Pelajari Lebih Lanjut <span class="icon-[system-uicons--arrow-top-right]" style="width: 24px; height: 24px;"></span></Link>
+                    <Link href="/auth/register" class="px-8 py-4 my-auto bg-secondary rounded-xl text-white hover:bg-brand-800">Daftar Sekarang</Link>
+                    <Link href="/" class="px-8 py-4 my-auto bg-white/70 font-medium rounded-xl text-dark-text hover:bg-gray-200 flex items-center gap-2">Pelajari Lebih Lanjut <span class="icon-[system-uicons--arrow-top-right]" style="width: 24px; height: 24px;"></span></Link>
                 </div>
             </section>
         <Footer />

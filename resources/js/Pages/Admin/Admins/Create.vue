@@ -141,7 +141,7 @@
                     </div>
 
                     <div class="flex items-center justify-center gap-4 pt-10 px-8 pb-8">
-                        <Link href="/admin/admins"
+                        <Link href="/admin/list"
                             class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-8 py-2.5 text-gray-800 font-medium shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">
                             Batal
                         </Link>

@@ -15,18 +15,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $role = Role::create(['name' => 'Super Admin']);
-        $work_unit = WorkUnit::create(['name' => 'Jurusan Akuntansi']);
-        User::create([
-            'member_number' => 'KS001',
-            'nik' => '0000000001',
-            'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
-            'institution' => 'Polban',
-            'status' => 'Aktif',
-            'role_id' => $role->id,
-            'work_unit_id' => $work_unit->id,
-        ]);
+        // 20 data users
+        User::factory()->count(20)->create();
     }
 }

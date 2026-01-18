@@ -49,35 +49,39 @@ Route::post('/auth/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('auth.logout');
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/users/verification', [UserController::class, 'prospectiveMembers'])
+            ->name('users.prospective');
 
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+        Route::get('/verifikasi/{user:member_number}', [UserController::class, 'verificationDetail'])
+            ->name('users.verification.show');
 
-    Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
-    Route::put('/savings/validate/{id}', [SavingController::class, 'validateRequest'])->name('savings.validate');
-    Route::get('/savings/list', [SavingController::class, 'index'])->name('savings.index');
-    Route::get('/savings/export/csv', [SavingController::class, 'exportCsv'])->name('savings.export.csv');
-    Route::get('/savings/export/pdf', [SavingController::class, 'exportPdf'])->name('savings.export.pdf');
+        Route::post('/verifikasi/{user:member_number}/approval', [UserController::class, 'submitApproval'])
+            ->name('users.verification.submit');
 
-    Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
-    Route::get('/users/list', [UserController::class, 'index'])->name('users.index');
+        Route::get('/list', [AdminController::class, 'index'])->name('index');
+        Route::get('/create', [AdminController::class, 'create']);
+        Route::post('/store', [AdminController::class, 'store']);
+        Route::get('/edit/{id}', [AdminController::class, 'edit']);
+        Route::put('/update/{id}', [AdminController::class, 'update'])->name('update');
+        Route::get('/show/{id}', [AdminController::class, 'show']);
+    });
 
-    Route::get('/list', [AdminController::class, 'index'])->name('admin.admins.index');
-    Route::get('/create', [AdminController::class, 'create']);
-    Route::post('/store', [AdminController::class, 'store']);
-    Route::get('/edit/{id}', [AdminController::class, 'edit']);
-    Route::put('/update/{id}', [AdminController::class, 'update'])->name('update');
-    Route::get('/show/{id}', [AdminController::class, 'show']);
+    Route::middleware('role:manajer')->group(function () {
+        Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
+        Route::put('/savings/validate/{id}', [SavingController::class, 'validateRequest'])->name('savings.validate');
+        Route::get('/savings/list', [SavingController::class, 'index'])->name('savings.index');
+        Route::get('/savings/export/csv', [SavingController::class, 'exportCsv'])->name('savings.export.csv');
+        Route::get('/savings/export/pdf', [SavingController::class, 'exportPdf'])->name('savings.export.pdf');
+    });
 
-    Route::get('/users/verification', [UserController::class, 'prospectiveMembers'])
-        ->name('users.prospective');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('role:manajer,admin');
 
-    Route::get('/verifikasi/{user:member_number}', [UserController::class, 'verificationDetail'])
-        ->name('users.verification.show');
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show')->middleware('role:manajer,admin');
 
-    Route::post('/verifikasi/{user:member_number}/approval', [UserController::class, 'submitApproval'])
-        ->name('users.verification.submit');
+    Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show')->middleware('role:manajer,admin');
+    Route::get('/users/list', [UserController::class, 'index'])->name('users.index')->middleware('role:manajer,admin');
 });
 
 // User Routes
@@ -95,7 +99,7 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(f
 
     Route::get('/simpanan/penyetoran', [SimpananController::class, 'createDeposit'])->name('deposit.create');
     Route::post('/simpanan/penyetoran', [SimpananController::class, 'storeDeposit'])->name('deposit.store');
-    
+
     // Ledger Routes
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
     Route::get('/ledger/export', [LedgerController::class, 'export'])->name('ledger.export');

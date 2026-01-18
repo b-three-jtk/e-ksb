@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -21,13 +22,22 @@ class EnsureUserRole
             return redirect('/auth/login');
         }
 
-        // Redirect based on role
-        if ($role === 'admin' && $user->role->name !== 'Super Admin') {
-            return redirect('/user/dashboard')->with('error', 'Anda tidak memiliki akses ke halaman admin.');
+        $userRole = $user->role->name;
+
+        if ($role === 'admin' && $userRole !== 'Admin') {
+            return Inertia::render('Admin/Errors/403')
+                ->toResponse($request)
+                ->setStatusCode(403);
         }
 
-        if ($role === 'user' && $user->role->name === 'Super Admin') {
-            return redirect('/admin/dashboard')->with('error', 'Admin harus menggunakan dashboard admin.');
+        if ($role === 'manajer' && !in_array($userRole, ['Admin', 'Manajer'])) {
+            return Inertia::render('Admin/Errors/403')
+                ->toResponse($request)
+                ->setStatusCode(403);
+        }
+
+        if ($role === 'user' && $userRole !== 'Anggota') {
+            abort(403);
         }
 
         return $next($request);
