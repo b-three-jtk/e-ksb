@@ -5,9 +5,8 @@ namespace Database\Seeders;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\WorkUnit;
+use App\Enums\UserStatus;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-
 class UserSeeder extends Seeder
 {
     /**
@@ -24,6 +23,7 @@ class UserSeeder extends Seeder
             'email' => 'admin@example.com',
             'institution' => 'KopSy Campus',
             'password' => bcrypt('password'),
+            'status' => UserStatus::ACTIVE->value,
             'role_id' => Role::where('name', 'Admin')->first()->id,
             'work_unit_id' => WorkUnit::inRandomOrder()->first()->id,
         ]);

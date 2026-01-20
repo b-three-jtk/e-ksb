@@ -83,14 +83,8 @@ class AdminController extends Controller
      */
     public function create()
     {
-        $work_units = WorkUnit::all()->map(fn($unit) => [
-            'id' => $unit->id,
-            'name' => $unit->name
-        ]);
-        $roles = Role::all()->map(fn($role) => [
-            'id' => $role->id,
-            'name' => $role->name
-        ]);
+        $work_units = WorkUnit::all();
+        $roles = Role::where('name', '!=', 'Anggota')->get();
 
         return inertia('Admin/Admins/Create', [
             'work_units' => $work_units,
@@ -116,7 +110,7 @@ class AdminController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('admin.index');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withInput();
@@ -142,7 +136,7 @@ class AdminController extends Controller
     {
         $admin = User::with('role', 'workUnit')->findOrFail($id);
         $work_units = WorkUnit::all();
-        $roles = Role::all();
+        $roles = Role::where('name', '!=', 'Anggota')->get();
 
         return inertia('Admin/Admins/Edit', [
             'admin' => $admin,
@@ -163,7 +157,7 @@ class AdminController extends Controller
             $admin = User::findOrFail($id);
             $admin->update($data);
             DB::commit();
-            return redirect()->route('admin.dashboard')->with('success', 'Admin berhasil diperbarui.');
+            return redirect()->route('admin.index');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withInput();

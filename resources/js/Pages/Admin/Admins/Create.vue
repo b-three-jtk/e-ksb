@@ -199,7 +199,7 @@ const submitForm = () => {
                         "transition": "slide",
                         "dangerouslyHTMLString": true
                     }).then(() => {
-                        window.location.href = route('admin.dashboard')
+                        window.location.href = route('admin.index')
                     })
                 },
 
