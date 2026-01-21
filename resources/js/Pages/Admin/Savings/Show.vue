@@ -10,9 +10,9 @@
                         </h1>
                         <span :class="getStatusClass()">{{ data.status }}</span>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <button
-                            class="inline-flex items-center gap-2 rounded-lg border bg-blue-accent px-6 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                    <div v-if="data.account_number" class="flex items-center gap-4">
+                        <button @click="showModalDoc()"
+                            class="inline-flex items-center gap-2 rounded-lg border bg-blue-accent px-6 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-blue-accent/70 dark:border-gray-700 dark:text-white dark:hover:bg-blue-accent/70 dark:hover:text-gray-200">
                             Lihat Bukti
                         </button>
                     </div>
@@ -25,12 +25,12 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nominal Simpanan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ moneyParser(data.amount)
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Kategori Simpanan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ data.saving_account.type
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Akad</span>
@@ -46,7 +46,7 @@
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Transaksi</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
                                         dateParser(data.transaction_date)
-                                        }}</span>
+                                    }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Metode Pembayaran</span>
@@ -55,7 +55,7 @@
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Keterangan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ data.description ?? '-'
-                                        }}</span>
+                                    }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -93,7 +93,27 @@
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Unit Kerja</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
                                         data.saving_account.user.work_unit.name
-                                        }}</span>
+                                    }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-layout flex flex-col pb-12.5! gap-6">
+                            <h1 class="card-title">Informasi Rekening</h1>
+                            <ul class="grid grid-cols-1 gap-6">
+                                <li class="flex lg:flex-row flex-col gap-2 justify-between">
+                                    <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Rekening</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{
+                                        data.account_number }}</span>
+                                </li>
+                                <li class="flex lg:flex-row flex-col gap-2 justify-between">
+                                    <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pemilik Rekening</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{
+                                        data.account.account_name }}</span>
+                                </li>
+                                <li class="flex lg:flex-row flex-col gap-2 justify-between">
+                                    <span class="text-sm text-gray-500 dark:text-gray-300">Nama Bank</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{
+                                        data.account.bank_name }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -101,7 +121,7 @@
                 </div>
             </div>
         </div>
-        <div id="modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden">
+        <div id="modal" @click.self="hideModal()" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden">
             <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-96">
                 <h2 class="text-lg font-semibold mb-4 text-dark-text dark:text-white">Alasan Penolakan</h2>
                 <textarea rows="4" v-model="form.description"
@@ -116,6 +136,23 @@
                         class="px-8 py-2.5 text-theme-sm bg-primary text-white rounded-lg hover:bg-brand-800">
                         Simpan
                     </button>
+                </div>
+            </div>
+        </div>
+        <div id="modalDoc" @click.self="hideModalDoc()" class="fixed inset-0 bg-black/50 flex items-center justify-center pt-44 pb-22 h-screen hidden">
+            <div class="bg-white max-h-[80vh] rounded-2xl dark:bg-gray-800">
+                <div class="flex justify-between px-4">
+                    <h1 class="card-title p-4">Bukti Pembayaran</h1>
+                    <button @click="hideModalDoc()" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-4 pb-4 max-h-[70vh] overflow-y-scroll custom-scrollbar">
+                    <img :src="data.saving_transaction_doc[0]?.attachment" alt="Bukti Pembayaran" class="w-full h-auto object-contain" />
+                    <p class="mt-2 text-center text-gray-600 dark:text-gray-400">{{ data.saving_transaction_doc[0]?.name
+                    }}</p>
                 </div>
             </div>
         </div>
@@ -140,6 +177,13 @@ const showModal = () => {
 };
 const hideModal = () => {
     document.getElementById('modal').classList.add('hidden');
+};
+
+const showModalDoc = () => {
+    document.getElementById('modalDoc').classList.remove('hidden');
+};
+const hideModalDoc = () => {
+    document.getElementById('modalDoc').classList.add('hidden');
 };
 
 const form = useForm({

@@ -47,4 +47,9 @@ class SavingTransaction extends Model
     {
         return $this->belongsTo(Account::class, 'account_number', 'account_number');
     }
+
+    public function savingTransactionDoc()
+    {
+        return $this->hasMany(SavingTransactionDoc::class, 'transaction_id', 'id');
+    }
 }

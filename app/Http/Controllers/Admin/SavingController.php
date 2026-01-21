@@ -247,7 +247,13 @@ class SavingController extends Controller
      */
     public function show(string $id)
     {
-        $data = SavingTransaction::with( 'savingAccount.user.workUnit')->find($id);
+        $data = SavingTransaction::with( 'savingAccount.user.workUnit', 'account', 'savingTransactionDoc')->find($id);
+        // dd($data->savingTransactionDoc);
+
+        $data->savingTransactionDoc->first()->attachment = $data->savingTransactionDoc->first()->attachment
+            ? asset('storage/' . $data->savingTransactionDoc->first()->attachment)
+            : null;
+
 
         return inertia('Admin/Savings/Show', [
             'data' => $data,
