@@ -45,6 +45,7 @@ const { errors } = useRegisterValidation(props.form)
       v-model="form.nik"
       label="NIK"
       required
+      max="16"
       :error="errors.nik"
     />
 

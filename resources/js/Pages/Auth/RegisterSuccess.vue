@@ -8,13 +8,13 @@ import AuthLayout from '@/Layouts/AuthLayout.vue'
     <div class="flex items-center justify-center px-4 min-h-screen">
       <div class="max-w-lg w-full rounded-3xl bg-blue-900/80 p-12 text-white shadow-2xl">
         <h1 class="text-4xl font-bold mb-3">
-          <span class="text-orange-500">Thanks!</span><br />
-          <span class="text-white">Your registration is submitted</span>
+          <span class="text-orange-500">Terima Kasih!</span><br />
+          <span class="text-white">Pendaftaran Anda telah berhasil dikirim</span>
         </h1>
 
         <p class="mt-6 text-base text-gray-300 leading-relaxed">
-          Your data is being <span class="text-orange-500 font-medium">reviewed</span> by the admin.<br />
-          Please check your email regularly for further updates.
+          Data Anda sedang <span class="text-orange-500 font-medium">ditinjau</span> oleh admin.<br />
+          Silakan periksa email Anda secara berkala untuk pembaruan lebih lanjut.
         </p>
 
         <div class="flex justify-end">
@@ -25,7 +25,7 @@ import AuthLayout from '@/Layouts/AuthLayout.vue'
                 text-base font-semibold text-white
                 hover:bg-orange-600 transition-colors shadow-lg"
         >
-            Back to Home
+            Kembali ke Beranda
         </button>
         </div>
       </div>

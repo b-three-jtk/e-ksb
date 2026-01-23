@@ -6,6 +6,7 @@ const props = defineProps<{
   label: string
   type?: string
   required?: boolean
+  max?: number
   error?: string
   disabled?: boolean
 }>()
@@ -35,6 +36,7 @@ const isPasswordField = computed(() => props.type === 'password')
       :required="required"
       :disabled="disabled"
       :aria-invalid="!!error"
+      :maxlength="max"
       autocomplete="off"
       :class="`peer h-12 w-full rounded-lg border border-gray-300
               bg-transparent px-4 pt-2 pb-2 text-sm
