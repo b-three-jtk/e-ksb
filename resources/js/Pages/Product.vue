@@ -131,7 +131,7 @@ onUnmounted(() => {
                         sebagai berikut:</p>
                     <h2 class="font-semibold dark:text-gray-300">Syarat Muwakkil (yang mewakilkan)</h2>
                     <ul class="list-disc text-gray-400 dark:text-gray-300 pl-10 font-body">
-                        <li>Pemilih sah yang dapat bertindak terhadap hal yang diwakilkan</li>
+                        <li>Pemilik sah yang dapat bertindak terhadap hal yang diwakilkan</li>
                         <li>Orang mukallaf atau anak mumayyiz dalam batas tertentu</li>
                     </ul>
                     <h2 class="font-semibold mt-4 dark:text-gray-300">Syarat Wakil (yang mewakili)</h2>
