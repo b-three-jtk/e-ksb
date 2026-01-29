@@ -25,7 +25,7 @@ onUnmounted(() => {
         <div class="h-full w-full">
             <section class="flex items-center justify-center rounded-b-2xl dark:rounded-b-none relative overflow-hidden h-fit">
                 <div class="absolute inset-0 -z-10" :style="{ transform: `translateY(${parallaxOffset}px)` }">
-                    <img src="/public/images/home/polban.avif" class="w-full h-full object-cover" alt="Hero Background">
+                    <img src="/public/images/home/polban.avif" class="w-full h-full object-cover" alt="Politeknik Negeri Bandung campus building">
                     <div class="absolute inset-0 bg-primary dark:bg-dark-text opacity-70"></div>
                 </div>
                 <div class="text-center py-40 pb-20 px-4">
