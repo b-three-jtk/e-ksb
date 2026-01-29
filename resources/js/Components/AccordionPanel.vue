@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 
+// Module-level counter for unique IDs
+let idCounter = 0;
+
 const props = defineProps({
     title: { type: String, required: true },
     subTitle: { type: String, required: false },
@@ -13,7 +16,7 @@ const togglePanel = (event) => {
 }
 
 // Generate unique IDs for ARIA attributes (stable across renders)
-const uniqueId = Math.random().toString(36).substr(2, 9);
+const uniqueId = ++idCounter;
 const buttonId = `accordion-button-${uniqueId}`;
 const contentId = `accordion-content-${uniqueId}`;
 </script>
@@ -22,8 +25,9 @@ const contentId = `accordion-content-${uniqueId}`;
     <div class="panel">
         <button 
             :id="buttonId"
+            type="button"
             :aria-controls="contentId"
-            :aria-expanded="showPanel"
+            :aria-expanded="String(showPanel)"
             :class="showPanel ? 'rounded-t-2xl border-b border-stroke dark:border-gray-600' : 'rounded-2xl'" 
             class="bg-white dark:bg-gray-800 shadow-md px-6 py-4 w-full flex items-center justify-between transition-all duration-400" 
             @click.prevent="togglePanel">
