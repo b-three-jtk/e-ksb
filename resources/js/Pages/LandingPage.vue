@@ -54,7 +54,7 @@ onUnmounted(() => {
 
 <template>
     <Base title="Beranda">
-        <div class="landing-page-content h-full w-full">
+        <div class="h-full w-full">
             <section class="hero-section flex xl:flex-row flex-col items-center h-full w-full relative overflow-hidden">
                 <div class="flex flex-col gap-4 justify-left xl:pl-12 xl:pr-40 px-40 pt-50">
                     <div class="absolute inset-0 -z-10" :style="{ transform: `translateY(${parallaxOffset}px)` }">

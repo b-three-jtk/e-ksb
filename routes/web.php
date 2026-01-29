@@ -20,6 +20,10 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/products', function () {
+    return Inertia::render('Product');
+})->name('products');
+
 // Authentication Routes
 Route::prefix('auth')
     ->name('auth.')

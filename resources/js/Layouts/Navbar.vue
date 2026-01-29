@@ -45,7 +45,7 @@ const menuItems = [
     },
     {
         name: "Produk",
-        path: "/product"
+        path: "/products"
     },
     {
         name: "Tentang Kami",
