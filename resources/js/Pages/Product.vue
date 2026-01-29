@@ -147,8 +147,7 @@ onUnmounted(() => {
                         <li>Dapat diwakilkan menurut syariah Islam</li>
                     </ul>
                     <div class="p-6 mt-4 border-l-2 border-l-gray-400 shadow-sm shadow-gray-200 dark:shadow-gray-700 dark:text-gray-200 dark:bg-gray-700 rounded-xl flex font-semibold gap-2">
-                        <span class="icon-[tabler--alert-triangle-filled]"
-                            style="width: 24px; height: 24px; color: #FFA629;"></span>
+                        <span class="icon-[tabler--alert-triangle-filled] w-6 h-6 text-orange-400"></span>
                         <p>Ketentuan Penting: Wakalah dengan imbalan bersifat mengikat dan tidak boleh dibatalkan secara
                             sepihak.</p>
                     </div>
