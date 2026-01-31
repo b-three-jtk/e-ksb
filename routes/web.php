@@ -54,7 +54,7 @@ Route::post('/auth/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('auth.logout');
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'revalidate'])->group(function () {
     Route::get('/users/verification', [UserController::class, 'prospectiveMembers'])
         ->name('users.prospective');
 
@@ -90,7 +90,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 });
 
 // User Routes
-Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
+Route::prefix('user')->name('user.')->middleware(['auth', 'role:user', 'revalidate'])->group(function () {
     Route::get('/dashboard', [AnggotaController::class, 'index'])->name('userDashboard');
 
     Route::get('/profile', [UserProfileController::class, 'show'])->name('profile.show');
