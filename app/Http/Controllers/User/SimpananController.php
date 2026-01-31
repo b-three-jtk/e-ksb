@@ -288,7 +288,7 @@ class SimpananController extends Controller
             }
 
             $transaction = SavingTransaction::create([
-                'id' => 'SP' . Str::upper(Str::random(10)),
+                'transaction_code' => 'SP' . Str::upper(Str::random(10)),
                 'amount' => $request->amount,
                 'type' => 'Penyetoran',
                 'status' => 'Belum Ditinjau',

@@ -222,7 +222,7 @@ const breadcrumbItems = [
                                 </li>
                             </ul>
                         </div>
-                        <div class="card-layout flex flex-col pb-12.5! gap-6">
+                        <div v-if="data.account" class="card-layout flex flex-col pb-12.5! gap-6">
                             <h1 class="card-title">Informasi Rekening</h1>
                             <ul class="grid grid-cols-1 gap-6">
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
@@ -233,12 +233,12 @@ const breadcrumbItems = [
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pemilik Rekening</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.account.account_name }}</span>
+                                        data.account?.account_name }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Bank</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.account.bank_name }}</span>
+                                        data.account?.bank_name }}</span>
                                 </li>
                             </ul>
                         </div>

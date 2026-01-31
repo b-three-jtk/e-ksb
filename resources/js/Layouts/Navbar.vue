@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, usePage, useForm } from '@inertiajs/vue3'
 import UserIcon from '../Icons/UserIcon.vue'
 import ThemeToggler from '../Components/ThemeToggler.vue'
 import Logo from '@/Components/Logo.vue'
+import Swal from 'sweetalert2'
+import { toast } from "vue3-toastify";
 
 const isMenuOpen = ref(true)
 const isUserDropdownOpen = ref(false)
@@ -56,6 +58,43 @@ const menuItems = [
         path: "/help"
     }
 ]
+
+const form = useForm({})
+
+const logout = () => {
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin keluar?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, keluar',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#007943',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.post(('/auth/logout'), {
+                onSuccess: () => {
+                    toast("Sampai jumpa!", {
+                        "type": "success",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
+                    }).then(() => {
+                        window.location.href = route('landing')
+                    })
+                },
+                onError: () => {
+                    toast("Gagal keluar.", {
+                        "type": "error",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
+                    })
+                }
+            })
+        }
+    })
+}
 </script>
 
 <template>
@@ -85,7 +124,7 @@ const menuItems = [
                 <!-- Authenticated User Section -->
                 <template v-else>
                     <!-- User Avatar & Dropdown -->
-                    <Link :href="user.role?.name === 'Anggota' ? '/dashboard' : '/admin/dashboard'"
+                    <Link :href="user.role?.name === 'Anggota' ? '/user/dashboard' : '/admin/dashboard'"
                         class="relative flex items-center justify-center text-dark-text transition-colors bg-transparent border border-gray-200 rounded-full hover:text-dark-900 h-11 w-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
                         <span class="icon-[material-symbols-light--home-outline-rounded]"
                             style="width: 24px; height: 24px;"></span>
@@ -103,30 +142,23 @@ const menuItems = [
 
                         <!-- Dropdown Menu -->
                         <div v-if="isUserDropdownOpen"
-                            class="absolute right-0 z-10 mt-2 w-44 divide-y divide-gray-100 rounded-lg shadow bg-white dark:bg-gray-800 dark:divide-gray-600">
-                            <Link href="/user/profile" class="block">
-                                <div
-                                    class="px-4 py-3 text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600">
-                                    <div>{{ user.name }}</div>
-                                    <div class="font-medium truncate">{{ user.email }}</div>
-                                </div>
-                            </Link>
-                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                            class="absolute right-0 z-10 mt-2 w-44 divide-y divide-gray-100 rounded-lg hover:rounded-lg shadow bg-white dark:bg-gray-800 dark:divide-gray-600">
+                            <div class="px-4 py-3 text-sm cursor-default text-gray-900 dark:text-white dark:hover:bg-gray-600">
+                                <div>{{ user.name }}</div>
+                                <div class="font-medium truncate">{{ user.email }}</div>
+                            </div>
+                            <ul class="text-sm text-gray-700 dark:text-gray-200">
                                 <li>
-                                    <Link href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                        Settings
+                                    <Link href="/user/profile"
+                                        class="block px-4 py-4 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        Profil
                                     </Link>
                                 </li>
                             </ul>
-                            <div class="py-1">
-                                <form method="post" action="/auth/logout" style="display: inline;">
-                                    <input type="hidden" name="_token" :value="csrfToken" />
-                                    <button type="submit"
-                                        class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200">
-                                        Keluar
-                                    </button>
-                                </form>
-                            </div>
+                            <button type="button" @click="logout"
+                                class="w-full text-left block px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-b-lg dark:hover:bg-gray-600 dark:text-gray-200">
+                                Keluar
+                            </button>
                         </div>
                     </div>
                 </template>

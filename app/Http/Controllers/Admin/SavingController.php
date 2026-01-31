@@ -28,7 +28,7 @@ class SavingController extends Controller
             ->when($search, function ($q) use ($search) {
                 $q->whereHas('savingAccount.user', function ($u) use ($search) {
                     $u->where('name', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%");
+                        ->orWhere('nik', 'like', "%{$search}%");
                 });
             })
             ->when($tab === 'permohonan', function ($q) {
@@ -66,7 +66,7 @@ class SavingController extends Controller
         }
 
         $query = $this->baseQuery($request)
-        ->orderBy($sortBy, $sortDir);
+            ->orderBy($sortBy, $sortDir);
 
         $transactions = $query
             ->paginate($perPage)
@@ -89,7 +89,7 @@ class SavingController extends Controller
 
         $summaryQuery = SavingTransaction::query()
             ->where('status', TransactionStatus::COMPLETED)
-            ->when(in_array($tab, ['pokok', 'wajib', 'sukarela']), function ($q) use ($tab){
+            ->when(in_array($tab, ['pokok', 'wajib', 'sukarela']), function ($q) use ($tab) {
                 $map = [
                     'pokok' => 'Simpanan Pokok',
                     'wajib' => 'Simpanan Wajib',
@@ -101,17 +101,17 @@ class SavingController extends Controller
                 });
             });
 
-            $totalMasuk = (clone $summaryQuery)
-                ->where('type', 'Penyetoran')
-                ->sum('amount');
+        $totalMasuk = (clone $summaryQuery)
+            ->where('type', 'Penyetoran')
+            ->sum('amount');
 
-            $totalKeluar = (clone $summaryQuery)
-                ->where('type', 'Penarikan')
-                ->sum('amount');
+        $totalKeluar = (clone $summaryQuery)
+            ->where('type', 'Penarikan')
+            ->sum('amount');
 
-            $totalPerputaran = $totalMasuk + $totalKeluar;
+        $totalPerputaran = $totalMasuk + $totalKeluar;
 
-            $summary = [
+        $summary = [
             [
                 'title' => 'Total Kas',
                 'value' => 'Rp ' . number_format($totalMasuk - $totalKeluar, 0, ',', '.'),
@@ -198,8 +198,8 @@ class SavingController extends Controller
                     $trx->savingAccount->type,
                     $trx->type,
                     $trx->type === 'Penarikan'
-                        ? -$trx->amount
-                        : $trx->amount,
+                    ? -$trx->amount
+                    : $trx->amount,
                 ]);
             }
             fclose($handle);
@@ -231,12 +231,14 @@ class SavingController extends Controller
      */
     public function show(string $id)
     {
-        $data = SavingTransaction::with( 'savingAccount.user.workUnit', 'account', 'savingTransactionDoc')->find($id);
+        $data = SavingTransaction::with('savingAccount.user.workUnit', 'account', 'savingTransactionDoc')->find($id);
 
-        $data->savingTransactionDoc->first()->attachment = $data->savingTransactionDoc->first()->attachment
-            ? asset('storage/' . $data->savingTransactionDoc->first()->attachment)
-            : null;
-
+        if ($data->savingTransactionDoc && $data->savingTransactionDoc->isNotEmpty()) {
+            $firstDoc = $data->savingTransactionDoc->first();
+            if ($firstDoc && $firstDoc->attachment) {
+                $firstDoc->attachment = asset('storage/' . $firstDoc->attachment);
+            }
+        }
 
         return inertia('Admin/Savings/Show', [
             'data' => $data,

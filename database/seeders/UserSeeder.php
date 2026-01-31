@@ -26,5 +26,27 @@ class UserSeeder extends Seeder
             'role_id' => Role::where('name', 'Admin')->first()->id,
             'work_unit_id' => WorkUnit::inRandomOrder()->first()->id,
         ]);
+        User::create([
+            'member_number' => 'KSP002',
+            'nik' => '6543210987654321',
+            'name' => 'Anggota',
+            'email' => 'contactsims11@gmail.com',
+            'institution' => 'KopSy Campus',
+            'password' => bcrypt('password'),
+            'status' => UserStatus::ACTIVE->value,
+            'role_id' => Role::where('name', 'Anggota')->first()->id,
+            'work_unit_id' => WorkUnit::inRandomOrder()->first()->id,
+        ]);
+        User::create([
+            'member_number' => 'KSP003',
+            'nik' => '1122334455667788',
+            'name' => 'Manajer',
+            'email' => 'manajer@example.com',
+            'institution' => 'KopSy Campus',
+            'password' => bcrypt('password'),
+            'status' => UserStatus::ACTIVE->value,
+            'role_id' => Role::where('name', 'Manajer')->first()->id,
+            'work_unit_id' => WorkUnit::inRandomOrder()->first()->id,
+        ]);
     }
 }

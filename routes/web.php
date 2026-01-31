@@ -20,7 +20,7 @@ Route::get('/', function () {
     return Inertia::render('LandingPage', [
         'title' => 'Landing Page',
     ]);
-});
+})->name('landing');
 
 Route::get('/products', function () {
     return Inertia::render('Product');
