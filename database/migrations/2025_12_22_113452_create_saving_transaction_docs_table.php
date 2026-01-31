@@ -12,11 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('saving_transaction_docs', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->string('attachment');
-            $table->string('transaction_id');
-            $table->foreign('transaction_id')
+            $table->foreignUuid('transaction_id')
                 ->references('id')
                 ->on('saving_transactions')
                 ->cascadeOnDelete();

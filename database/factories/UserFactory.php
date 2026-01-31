@@ -2,9 +2,13 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
+use App\Enums\Education;
+use App\Enums\Gender;
+use App\Enums\UserStatus;
 use Illuminate\Support\Str;
+use App\Enums\MaritalStatus;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -28,15 +32,15 @@ class UserFactory extends Factory
             'nik' => fake()->unique()->numerify('################'),
             'name' => fake()->name(),
             'birth_date' => fake()->date(),
-            'gender' => fake()->randomElement(['Laki-laki', 'Perempuan']),
+            'gender' => fake()->randomElement(Gender::cases())->value,
             'institution' => fake()->company(),
-            'marital_status' => fake()->randomElement(['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati']),
+            'marital_status' => fake()->randomElement(MaritalStatus::cases())->value,
             'address' => fake()->address(),
             'residential_address' => fake()->address(),
             'phone_number' => fake()->unique()->numerify('08##########'),
-            'last_education' => fake()->randomElement(['TIDAK/BELUM SEKOLAH', 'TAMAT SD/SEDERAJAT', 'SLTP/SEDERAJAT', 'SLTA/SEDERAJAT', 'DIPLOMA I/II', 'AKADEMI/DIPLOMA III/SARJANA MUDA', 'DIPLOMA IV/STRATA I', 'STRATA II', 'STRATA III']),
+            'last_education' => fake()->randomElement(Education::cases())->value,
             'dependents' => fake()->numberBetween(0, 5),
-            'status' => fake()->randomElement(['Aktif', 'Tidak Aktif', 'Mengundurkan Diri', 'Dalam Peninjauan', 'Ditolak dengan alasan']),
+            'status' => fake()->randomElement(UserStatus::cases())->value,
             'spouse_name' => fake()->optional()->name(),
             'joined_date' => fake()->date(),
             'email' => fake()->unique()->safeEmail(),

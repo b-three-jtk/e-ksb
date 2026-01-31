@@ -21,6 +21,12 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             WorkUnitSeeder::class,
             UserSeeder::class,
+            FinancialSeeder::class,
+            AccountSeeder::class,
+            FinancingSeeder::class,
+            LoanSeeder::class,
+            HeirSeeder::class,
+            SavingAccountSeeder::class,
         ]);
     }
 }

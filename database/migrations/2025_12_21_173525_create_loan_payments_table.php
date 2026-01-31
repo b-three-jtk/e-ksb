@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Enums\LoanStatus;
+use App\Enums\TransactionMethods;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -12,11 +14,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('loan_payments', function (Blueprint $table) {
-            $table->id()->primary();
-            $table->enum('status', ['Dibayar', 'Terlambat']);
-            $table->enum('method', ['Tunai', 'Non-Tunai']);
+            $table->uuid('id')->primary();
+            $table->string('transaction_code')->unique();
+            $table->enum('status', array_column(LoanStatus::cases(), 'value'));
+            $table->enum('method', array_column(TransactionMethods::cases(), 'value'));
             $table->string('attachment');
-            $table->foreignId('loan_id')->nullable()->constrained('loans')->onDelete('set null');
+            $table->foreignUuid('loan_id')->nullable()->constrained('loans')->onDelete('set null');
             $table->date('payment_date');
             $table->foreignUuid('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();

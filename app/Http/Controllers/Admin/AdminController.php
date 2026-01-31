@@ -36,7 +36,7 @@ class AdminController extends Controller
             ->whereHas(
                 'role',
                 fn($q) =>
-                $q->where('name', '!=', 'User')
+                $q->where('name', '!=', 'Anggota')
             )
             ->whereIn('status', $allowedAdminStatuses)
             ->when($request->search, function ($q) use ($request) {
@@ -77,7 +77,7 @@ class AdminController extends Controller
         return inertia('Admin/Admins/List', [
             'admins' => $admins,
             'roles' => Role::whereHas('users')
-                ->where('name', '!=', 'User')
+                ->where('name', '!=', 'Anggota')
                 ->pluck('name'),
             'filters' => $request->only(['search', 'status', 'role', 'per_page', 'sort_by', 'sort_dir']),
             'title' => 'Pengelolaan Admin'
@@ -174,13 +174,4 @@ class AdminController extends Controller
             return redirect()->back()->withInput();
         }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
 }

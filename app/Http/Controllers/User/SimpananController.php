@@ -255,7 +255,7 @@ class SimpananController extends Controller
             ]
         );
 
-        if ($request->method === 'Non-Tunai') {
+        if ($request->input('method') === 'Non-Tunai') {
             $request->validate([
                 'account_name' => 'required|string|max:255',
                 'account_number' => 'required|string|max:255',
@@ -274,7 +274,7 @@ class SimpananController extends Controller
                 throw new \Exception('Kategori simpanan tidak sesuai dengan akun simpanan');
             }
 
-            if ($request->method === 'Non-Tunai') {
+            if ($request->input('method') === 'Non-Tunai') {
                 Account::updateOrCreate(
                     [
                         'account_number' => $request->account_number,
@@ -292,14 +292,14 @@ class SimpananController extends Controller
                 'amount' => $request->amount,
                 'type' => 'Penyetoran',
                 'status' => 'Belum Ditinjau',
-                'method' => $request->method,
+                'method' => $request->input('method'),
                 'transaction_date' => now(),
                 'saving_account_id' => $savingAccount->id,
-                'account_number' => $request->method === 'Non-Tunai' ? $request->account_number : null,
+                'account_number' => $request->input('method') === 'Non-Tunai' ? $request->account_number : null,
                 'updated_by' => $request->user()->id,
             ]);
 
-            if ($request->method === 'Non-Tunai' && $request->hasFile('payment_proof')) {
+            if ($request->input('method') === 'Non-Tunai' && $request->hasFile('payment_proof')) {
                 $path = $request->file('payment_proof')
                     ->store('saving-transactions', 'public');
 

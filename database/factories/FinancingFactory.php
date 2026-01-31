@@ -1,0 +1,39 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\User;
+use App\Enums\Condition;
+use App\Enums\FinancingReqStatus;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Financing>
+ */
+class FinancingFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'transaction_code' => $this->faker->unique()->numerify('PM########'),
+            'product_name' => $this->faker->word(),
+            'product_type' => $this->faker->randomElement(['Electronics', 'Furniture', 'Vehicle', 'Appliance']),
+            'brand' => $this->faker->company(),
+            'color' => $this->faker->safeColorName(),
+            'condition' => $this->faker->randomElement(Condition::cases())->value,
+            'description' => $this->faker->sentence(),
+            'price' => $this->faker->numberBetween(100000, 10000000),
+            'qty' => $this->faker->numberBetween(1, 10),
+            'profit' => $this->faker->numberBetween(10000, 500000),
+            'status' => $this->faker->randomElement(FinancingReqStatus::cases())->value,
+            'updated_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'created_at' => $this->faker->dateTimeBetween('-6 months', 'now'),
+        ];
+    }
+}

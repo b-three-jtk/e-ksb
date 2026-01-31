@@ -17,10 +17,10 @@
     </Head>
     <ThemeProvider>
       <div
-        class="min-h-screen bg-no-repeat bg-center bg-cover"
-        style="background-image: url('/images/auth/bg_auth.png')"
+        class="min-h-screen bg-no-repeat bg-bottom bg-cover"
+        style="background-image: url('/images/home/polban.avif')"
       >
-        <div class="min-h-screen bg-blue-900/60 flex items-center justify-center relative">
+        <div class="min-h-screen bg-linear-to-b from-transparent to-brand-900 flex items-center justify-center relative">
           <div class="absolute top-6 right-6">
             <ThemeToggler />
           </div>

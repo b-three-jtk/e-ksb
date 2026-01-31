@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('saving_transactions', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->uuid('id')->primary();
+            $table->string('transaction_code')->unique();
             $table->decimal('amount', 15, 2);
             $table->enum('type', ['Penarikan', 'Penyetoran']);
             $table->enum('status', ['Belum Ditinjau', 'Ditolak dengan alasan', 'Selesai']);
@@ -20,11 +21,12 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->dateTime('transaction_date');
             $table->foreignUuid('updated_by')->constrained('users');
-            $table->string('saving_account_id');
-            $table->foreign('saving_account_id')->references('id')->on('saving_accounts')->nullOnDelete();
+            $table->foreignUuid('saving_account_id')->nullable()->constrained('saving_accounts')->nullOnDelete();
             $table->string('account_number')->nullable();
             $table->foreign('account_number')->references('account_number')->on('accounts')->nullOnDelete();
             $table->timestamps();
+
+            $table->index('transaction_code');
         });
     }
 

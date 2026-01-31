@@ -59,10 +59,10 @@ const submit = () => {
                 </div>
 
                 <div class="space-y-4">
-                    <span class="text-gray-500 dark:text-white font-head">Lupa password?</span>
+                    <Link href="/auth/forgot-password" class="text-gray-500 hover:text-accent hover:underline dark:text-white font-head">Lupa password?</Link>
                     <button
                     type="submit"
-                    class="mt-2 w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold font-head py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
+                    class="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold font-head py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
                     :disabled="form.processing"
                     >
                     <span v-if="form.processing">Memproses...</span>

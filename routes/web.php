@@ -1,18 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\ResignationController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\SavingController;
-use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\User\LedgerController;
+use App\Http\Controllers\Admin\SavingController;
 use App\Http\Controllers\User\AnggotaController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\User\SimpananController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\User\UserProfileController;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
@@ -64,7 +66,7 @@ Route::post('/auth/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('auth.logout');
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'revalidate'])->group(function () {
     Route::get('/users/verification', [UserController::class, 'prospectiveMembers'])
         ->name('users.prospective');
 
@@ -94,17 +96,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
     Route::get('/users/list', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{id}/nonactive', [UserController::class, 'updateStatusToInactive'])->name('users.nonactive');
+
+    // Resignation Routes
+    Route::get('/resignation/{id}', [ResignationController::class, 'validation'])->name('resignations.validation');
 });
 
 // User Routes
-Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
+Route::prefix('user')->name('user.')->middleware(['auth', 'role:user', 'revalidate'])->group(function () {
     Route::get('/dashboard', [AnggotaController::class, 'index'])->name('userDashboard');
 
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile.show');
-    Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
-    Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
-    Route::post('/profile/picture', [UserController::class, 'updateProfilePicture'])->name('profile.picture.update');
-    Route::delete('/profile/picture', [UserController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
+    Route::get('/profile', [UserProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [UserProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [UserProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/picture', [UserProfileController::class, 'updateProfilePicture'])->name('profile.picture.update');
+    Route::delete('/profile/picture', [UserProfileController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
 
     Route::get('/resign', [AnggotaController::class, 'createResign'])->name('resign.create');
     Route::post('/resign', [AnggotaController::class, 'storeResign'])->name('resign.store');

@@ -12,10 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('financials', function (Blueprint $table) {
-            $table->foreignUuid('user_id')->primary()->constrained('users')->onDelete('cascade');
+            $table->id();
+            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->enum('financial_type', ['Gaji Pokok Dan Tunjangan', 'Penghasilan Usaha Bersih', 'Penghasilan Pasangan', 'Penghasilan Lainnya', 'Biaya Hidup Keluarga', 'Biaya Pendidikan', 'Cicilan/Kredit Lainnya', 'Biaya Lainnya']);
             $table->decimal('amount', 15, 2);
             $table->timestamps();
+
+            $table->unique(['user_id', 'financial_type']);
         });
     }
 

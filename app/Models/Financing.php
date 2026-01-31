@@ -3,23 +3,29 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Financing extends Model
 {
-    use HasUuids;
+    use HasUuids, HasFactory;
 
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'amount',
-        'type',
-        'status',
-        'method',
+        'transaction_code',
+        'product_name',
+        'product_type',
+        'brand',
+        'color',
+        'condition',
         'description',
-        'transaction_date',
+        'price',
+        'qty',
+        'profit',
+        'status',
         'updated_by',
-        'saving_account_id',
+        'user_id',
     ];
 
     public function user()

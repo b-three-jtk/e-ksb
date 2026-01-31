@@ -211,27 +211,27 @@ const applyFilter = () => {
                                 <thead>
                                     <tr class="border-t border-gray-100 dark:border-gray-800">
                                         <th class="py-5 text-left">
-                                            <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">No.
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">No.
                                                 Transaksi</p>
                                         </th>
                                         <th class="py-5 text-left">
-                                            <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">
                                                 Pemohon</p>
                                         </th>
                                         <th class="py-5 text-left">
-                                            <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Total
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">Total
                                             </p>
                                         </th>
                                         <th class="py-5 text-left">
-                                            <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Tipe
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">Tipe
                                             </p>
                                         </th>
                                         <th class="py-5 text-left">
-                                            <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">
                                                 Tanggal</p>
                                         </th>
                                         <th class="py-5 text-left">
-                                            <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Aksi
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">Aksi
                                             </p>
                                         </th>
                                     </tr>
@@ -239,32 +239,32 @@ const applyFilter = () => {
                                 <tbody v-if="transaction_data?.length">
                                     <tr v-for="data in transaction_data"
                                         class="border-t border-gray-100 dark:border-gray-800">
-                                        <td class="py-5 whitespace-nowrap">
+                                        <td class="py-5 px-2 whitespace-nowrap">
                                             <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                                {{ data.id }}
+                                                {{ data.transaction_code }}
                                             </p>
                                         </td>
-                                        <td class="py-5 whitespace-nowrap">
+                                        <td class="py-5 px-2 whitespace-nowrap">
                                             <p class="text-dark-text text-theme-sm dark:text-gray-400">
                                                 {{ data.user_name }}
                                             </p>
                                         </td>
-                                        <td class="py-5 whitespace-nowrap">
+                                        <td class="py-5 px-2 whitespace-nowrap">
                                             <p class="text-dark-text text-theme-sm dark:text-gray-400">
                                                 {{ parseCurrencyAmount(data.amount) }}
                                             </p>
                                         </td>
-                                        <td class="py-5 whitespace-nowrap">
+                                        <td class="py-5 px-2 whitespace-nowrap">
                                             <p class="text-dark-text text-theme-sm dark:text-gray-400">
                                                 {{ data.type }}
                                             </p>
                                         </td>
-                                        <td class="py-5 whitespace-nowrap">
+                                        <td class="py-5 px-2 whitespace-nowrap">
                                             <p class="text-dark-text text-theme-sm dark:text-gray-400">
                                                 {{ dateParser(data.created_at) }}
                                             </p>
                                         </td>
-                                        <td class="py-5 whitespace-nowrap">
+                                        <td class="py-5 px-2 whitespace-nowrap">
                                             <Link :href="`/admin/savings/show/${data.id}`"
                                                 class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-blue-accent px-4 py-2 text-white font-medium text-xs shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:hover:bg-white/3 dark:hover:text-gray-200">
                                                 <InfoCircleIcon width="18px" height="18px" />
@@ -293,7 +293,7 @@ const applyFilter = () => {
                         <div class="flex flex-col gap-2">
                             <h1 class="card-title">Pengajuan Pembiayaan Murabahah</h1>
                             <p v-if="financing_data?.length" class="text-gray-500 dark:text-gray-300">No. Transaksi #{{
-                                financing_data[activeIndex]?.id ?? '' }}</p>
+                                financing_data[activeIndex]?.transaction_code ?? '' }}</p>
                         </div>
                         <button
                             class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">

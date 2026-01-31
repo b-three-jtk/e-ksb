@@ -35,13 +35,13 @@ class UserController extends Controller
             $q->where('status', TransactionStatus::COMPLETED)
         ])
         ->whereHas('role', fn ($q) =>
-            $q->where('name', 'User')
+            $q->where('name', 'Anggota')
         )
         ->whereNotNull('joined_date')
         ->whereNotNull('member_number');
 
         $memberBaseQuery = User::whereHas('role', fn ($q) =>
-            $q->where('name', 'User')
+            $q->where('name', 'Anggota')
         );
 
         $verifiedMembersQuery = (clone $memberBaseQuery)
@@ -153,7 +153,7 @@ class UserController extends Controller
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
         $idCard = $user->userDocs
-            ->first(fn ($doc) => strtolower($doc->name) === 'ktp');
+            ->firstWhere('name', 'ktp');
         $idCardUrl = $idCard?->attachment ? asset('storage/' . $idCard->attachment) : null;
 
         return Inertia::render('Admin/User/Verification/Show', [
@@ -169,30 +169,6 @@ class UserController extends Controller
                 'id_card_url' => $idCardUrl,
             ],
         ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(User $user)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, User $user)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user)
-    {
-        //
     }
 
     public function updateStatusToInactive(String $id)
@@ -313,131 +289,4 @@ class UserController extends Controller
             return $redirect;
         }
     }
-
-    /**
-     * Display the user's public profile
-     */
-    public function profile()
-    {
-        $user = auth()->user();
-        $user->load(['role', 'workUnit']);
-
-        $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-
-        return Inertia::render('User/Profile/Show', [
-            'user' => [
-                'id' => $user->id,
-                'member_number' => $user->member_number,
-                'name' => $user->name,
-                'nik' => $user->nik,
-                'birth_date' => $user->birth_date,
-                'gender' => $user->gender,
-                'institution' => $user->institution,
-                'work_unit' => $user->workUnit->name ?? '-',
-                'profile_picture' => $user->profile_picture,
-                'photo_url' => $photoUrl,
-            ]
-        ]);
-    }
-
-    /**
-     * Show the form for editing user profile
-     */
-    public function editProfile()
-    {
-        $user = auth()->user();
-        $user->load(['role', 'workUnit']);
-
-        $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-
-        return Inertia::render('User/Profile/Edit', [
-            'user' => [
-                'id' => $user->id,
-                'member_number' => $user->member_number,
-                'name' => $user->name,
-                'nik' => $user->nik,
-                'birth_date' => $user->birth_date,
-                'gender' => $user->gender,
-                'institution' => $user->institution,
-                'work_unit' => $user->workUnit->name ?? '-',
-                'profile_picture' => $user->profile_picture,
-                'photo_url' => $photoUrl,
-            ]
-        ]);
-    }
-
-    /**
-     * Update user profile
-     */
-    public function updateProfile(Request $request)
-    {
-        $user = auth()->user();
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            // Ensure NIK is unique except for current user
-            'nik' => [
-                'required',
-                'string',
-                'size:16',
-                \Illuminate\Validation\Rule::unique('users', 'nik')->ignore($user->id, 'id'),
-            ],
-            'birth_date' => 'required|date|before_or_equal:today|after_or_equal:1900-01-01',
-            'gender' => 'required|string|in:Laki-laki,Perempuan',
-        ]);
-
-        $user->update($validated);
-
-        return redirect()->route('user.profile.show')
-            ->with('success', 'Profil berhasil diperbarui');
-    }
-
-    /**
-     * Update user's profile picture
-     */
-    public function updateProfilePicture(Request $request)
-    {
-        $user = auth()->user();
-
-        $request->validate([
-            'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $tmpPath = $request->file('profile_picture')->getPathname();
-        if (! @getimagesize($tmpPath)) {
-            return back()->withErrors(['profile_picture' => 'File tidak valid sebagai gambar.']);
-        }
-
-        if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
-            \Storage::disk('public')->delete($user->profile_picture);
-        }
-
-        // Store new profile picture
-        $path = $request->file('profile_picture')->store('profile_pictures', 'public');
-
-        $user->update([
-            'profile_picture' => $path
-        ]);
-
-        return redirect()->back()->with('success', 'Foto profil berhasil diperbarui');
-    }
-
-    /**
-     * Delete user's profile picture
-     */
-    public function deleteProfilePicture()
-    {
-        $user = auth()->user();
-
-        if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
-            \Storage::disk('public')->delete($user->profile_picture);
-        }
-
-        $user->update([
-            'profile_picture' => null
-        ]);
-
-        return redirect()->back()->with('success', 'Foto profil berhasil dihapus');
-    }
-
 }

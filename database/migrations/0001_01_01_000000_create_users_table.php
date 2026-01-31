@@ -1,8 +1,12 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Enums\Gender;
+use App\Enums\Education;
+use App\Enums\UserStatus;
+use App\Enums\MaritalStatus;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -18,16 +22,16 @@ return new class extends Migration
             $table->string('nik', 16)->unique();
             $table->string('name');
             $table->string('birth_date')->nullable();
-            $table->enum('gender', ['Laki-laki', 'Perempuan'])->nullable();
+            $table->enum('gender', array_column(Gender::cases(), 'value'))->nullable();
             $table->string('institution');
-            $table->enum('marital_status', ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'])->nullable();
+            $table->enum('marital_status', array_column(MaritalStatus::cases(), 'value'))->nullable();
             $table->string('spouse_name')->nullable();
             $table->text('address')->nullable();
             $table->text('residential_address')->nullable();
             $table->string('phone_number')->unique()->nullable();
-            $table->enum('last_education', ['TIDAK/BELUM SEKOLAH', 'TAMAT SD/SEDERAJAT', 'SLTP/SEDERAJAT', 'SLTA/SEDERAJAT', 'DIPLOMA I/II', 'AKADEMI/DIPLOMA III/SARJANA MUDA', 'DIPLOMA IV/STRATA I', 'STRATA II', 'STRATA III'])->nullable();
+            $table->enum('last_education', array_column(Education::cases(), 'value'))->nullable();
             $table->integer('dependents')->nullable();
-            $table->enum('status', ['Aktif', 'Tidak Aktif', 'Mengundurkan Diri', 'Dalam Peninjauan', 'Ditolak dengan alasan', 'Menunggu Pembayaran'])->default('Dalam Peninjauan');
+            $table->enum('status', array_column(UserStatus::cases(), 'value'))->default('Dalam Peninjauan');
             $table->date('joined_date')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -36,6 +40,10 @@ return new class extends Migration
             $table->foreignId('work_unit_id')->constrained('work_units');
             $table->rememberToken();
             $table->timestamps();
+
+            $table->index('member_number');
+            $table->index('name');
+            $table->index('phone_number');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

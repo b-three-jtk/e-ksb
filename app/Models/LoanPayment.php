@@ -3,11 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class LoanPayment extends Model
 {
-
+    use HasUuids;
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $fillable = [
+        'transaction_code',
         'status',
         'method',
         'attachment',

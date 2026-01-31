@@ -14,8 +14,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 20 data users
-        User::factory()->count(20)->create();
+        User::factory()->count(100)->create();
         User::create([
             'member_number' => 'KSP001',
             'nik' => '1234567890123456',

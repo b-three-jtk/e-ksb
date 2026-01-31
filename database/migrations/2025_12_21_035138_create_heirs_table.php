@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Enums\Heir;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -14,7 +15,7 @@ return new class extends Migration
         Schema::create('heirs', function (Blueprint $table) {
             $table->string('nik')->primary();
             $table->string('name');
-            $table->enum('relationship', ['Anak', 'Suami', 'Istri', 'Sepupu', 'Saudara']);
+            $table->enum('relationship', array_column(Heir::cases(), 'value'));
             $table->string('contact');
             $table->foreignUuid('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();

@@ -176,7 +176,7 @@ const handleContinue = () => {
 								@click="handleApproved"
 									:disabled="processing"
 									:class="[
-										'h-11 min-w-[120px] rounded-lg px-5 text-sm font-semibold transition flex items-center justify-center gap-2',
+										'h-11 min-w-30 rounded-lg px-5 text-sm font-semibold transition flex items-center justify-center gap-2',
 										'bg-blue-800 text-white hover:bg-blue-900 disabled:opacity-50 disabled:cursor-not-allowed'
 									]"
 								>
@@ -193,7 +193,7 @@ const handleContinue = () => {
 									@click="setDecision('rejected')"
 									:disabled="processing"
 									:class="[
-										'h-11 min-w-[120px] rounded-lg px-5 text-sm font-semibold transition',
+										'h-11 min-w-30 rounded-lg px-5 text-sm font-semibold transition',
 										decision === 'rejected'
 											? 'bg-red-700 text-white shadow'
 											: 'bg-red-700 text-white hover:bg-red-900',
@@ -246,7 +246,7 @@ const handleContinue = () => {
 
 					<section class="rounded-xl bg-white dark:bg-gray-800 p-6">
 						<h3 class="mb-4 text-base font-semibold font-head text-gray-900 dark:text-white">Foto KTP</h3>
-						<div class="flex w-full aspect-[16/10] items-center justify-center rounded-lg border-2 bg-gray-50 dark:border-gray-700">
+						<div class="flex w-full aspect-16/10 items-center justify-center rounded-lg border-2 bg-gray-50 dark:border-gray-700">
 							<img v-if="member.id_card_url" :src="member.id_card_url" alt="Foto KTP" class="h-full w-full rounded-lg object-cover" />
 						</div>
 					</section>
