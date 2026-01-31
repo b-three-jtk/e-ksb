@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Http\Controllers\Admin\ResignationController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
@@ -84,6 +84,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
     Route::get('/users/list', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{id}/nonactive', [UserController::class, 'updateStatusToInactive'])->name('users.nonactive');
+
+    // Resignation Routes
+    Route::get('/resignation/{id}', [ResignationController::class, 'validation'])->name('resignations.validation');
 });
 
 // User Routes

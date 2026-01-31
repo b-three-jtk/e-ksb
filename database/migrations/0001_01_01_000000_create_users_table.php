@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('phone_number')->unique()->nullable();
             $table->enum('last_education', ['TIDAK/BELUM SEKOLAH', 'TAMAT SD/SEDERAJAT', 'SLTP/SEDERAJAT', 'SLTA/SEDERAJAT', 'DIPLOMA I/II', 'AKADEMI/DIPLOMA III/SARJANA MUDA', 'DIPLOMA IV/STRATA I', 'STRATA II', 'STRATA III'])->nullable();
             $table->integer('dependents')->nullable();
-            $table->enum('status', ['Aktif', 'Tidak Aktif', 'Mengundurkan Diri', 'Dalam Peninjauan', 'Ditolak dengan alasan', 'Menunggu Pembayaran'])->default('Dalam Peninjauan');
+            $table->enum('status', ['Aktif', 'Tidak Aktif', 'Pengunduran Diri Diajukan', 'Pengunduran Diri Ditolak', 'Dalam Peninjauan', 'Ditolak dengan alasan', 'Menunggu Pembayaran'])->default('Dalam Peninjauan');
             $table->date('joined_date')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();

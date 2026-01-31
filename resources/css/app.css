@@ -222,7 +222,7 @@
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-head z-1 bg-gray-50;
+    @apply relative font-normal font-head z-1 bg-gray-50 m-0!;
   }
 }
 
