@@ -40,7 +40,7 @@ const submit = () => {
                     </div>
                     <div class="flex flex-col text-center">
                         <h1 class="card-title">Lupa Password</h1>
-                        <p class="text-gray-400 font-body px-6">Mohon masukan email terdaftar Anda untuk menerima instruksi reset password.</p>
+                        <p class="text-gray-400 font-body px-6">Mohon masukkan email terdaftar Anda untuk menerima instruksi reset password.</p>
                     </div>
 
                     <form @submit.prevent="submit" class="space-y-8">
