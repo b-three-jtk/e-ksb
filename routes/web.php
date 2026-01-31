@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
@@ -12,7 +13,6 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\User\LedgerController;
 use App\Http\Controllers\User\AnggotaController;
 use App\Http\Controllers\User\SimpananController;
-use App\Models\User;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
@@ -45,6 +45,17 @@ Route::prefix('auth')
         Route::get('/register/success', function () {
             return Inertia::render('Auth/RegisterSuccess');
         })->name('register.success');
+
+        Route::get('/forgot-password', [ForgotPasswordController::class, 'index'])
+            ->name('password.request');
+
+        Route::post('/forgot-password', [ForgotPasswordController::class, 'submitRequest'])
+            ->name('password.email');
+
+        // Password Reset Routes == SEMENTARA ==
+        Route::get('/reset-password/{token}', function (string $token) {
+            return view('auth.reset-password', ['token' => $token]);
+        })->name('password.reset');
     });
 
 Route::redirect('/login', '/auth/login')->middleware('guest')->name('login');
