@@ -145,7 +145,7 @@ watch(statementAccepted, () => {
 })
 
 const formatRupiah = (value) => {
-    return 'Rp ' + Number(value ?? 0).toLocaleString('id-ID')
+    return Number(value ?? 0).toLocaleString('id-ID')
 }
 
 const formatCurrencyInput = (value) => {
@@ -344,32 +344,44 @@ const submitDeposit = () => {
                             </p>
                             <div class="flex items-center gap-2">
                                 <p class="font-head font-medium text-gray-900 dark:text-gray-100 text-lg">
-                                    {{ formatRupiah(totalBalance) }}
+                                    Rp. {{ formatRupiah(totalBalance) }}
                                 </p>
                                 <!-- Tooltip informasi simpanan -->
                                 <span class="relative group cursor-pointer">
                                     <Icon
                                         icon="mdi:information-outline"
-                                        class="text-gray-400 hover:text-blue-500 cursor-pointer"
+                                        class="text-gray-400 hover:text-blue-500"
                                         width="18"
                                         height="18"
                                     />
                                     <div
-                                        class="absolute left-1/2 -translate-x-1/2 mt-2 w-74 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg
-                                            opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-10"
+                                        class="absolute left-full top-1/2 -translate-y-1/2 ml-2 mt-12
+                                            w-72 bg-white dark:bg-gray-800
+                                            border border-gray-200 dark:border-gray-700
+                                            rounded-lg shadow-lg
+                                            opacity-0 group-hover:opacity-100
+                                            pointer-events-none
+                                            transition-opacity duration-200
+                                            z-50"
                                     >
-                                        <div class="p-4 space-y-2 text-sm">
+                                        <div class="p-4 space-y-2 text-sm text-gray-700 dark:text-gray-200">
                                             <div class="grid grid-cols-2 gap-1.5">
                                                 <span class="font-head">Simpanan Pokok</span>
-                                                <span class="font-medium text-blue-500">{{ formatRupiah(totalPerCategory.pokok) }}</span>
+                                                <span class="font-medium text-blue-500">
+                                                    {{ formatRupiah(totalPerCategory.pokok) }}
+                                                </span>
                                             </div>
                                             <div class="grid grid-cols-2 gap-1.5">
                                                 <span class="font-head">Simpanan Wajib</span>
-                                                <span class="font-medium text-blue-500">{{ formatRupiah(totalPerCategory.wajib) }}</span>
+                                                <span class="font-medium text-blue-500">
+                                                    {{ formatRupiah(totalPerCategory.wajib) }}
+                                                </span>
                                             </div>
                                             <div class="grid grid-cols-2 gap-1.5">
                                                 <span class="font-head">Simpanan Sukarela</span>
-                                                <span class="font-medium text-blue-500">{{ formatRupiah(totalPerCategory.sukarela) }}</span>
+                                                <span class="font-medium text-blue-500">
+                                                    {{ formatRupiah(totalPerCategory.sukarela) }}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
