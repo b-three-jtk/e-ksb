@@ -87,6 +87,11 @@ console.log(isMenuOpen.value);
                                         Settings
                                     </Link>
                                 </li>
+                                <li>
+                                    <Link href="/user/resign" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        Pengunduran Diri
+                                    </Link>
+                                </li>
                             </ul>
                             <div class="py-1">
                                 <form method="post" action="/auth/logout" style="display: inline;">
