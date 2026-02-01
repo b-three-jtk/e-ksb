@@ -34,7 +34,7 @@ class AdminController extends Controller
 
         $admins = User::with('role')
             ->whereHas('role', fn ($q) =>
-                $q->where('name', '!=', 'User')
+                $q->whereNotIn('name', ['User', 'Anggota'])
             )
             ->whereIn('status', $allowedAdminStatuses)
             ->when($request->search, function ($q) use ($request) {
@@ -48,10 +48,11 @@ class AdminController extends Controller
                 $request->status && in_array($request->status, $allowedAdminStatuses),
                 fn ($q) => $q->where('status', $request->status)
             )
-            ->when($request->role, fn ($q) =>
-                $q->whereHas('role', fn ($r) =>
-                    $r->where('name', $request->role)
-                )
+            ->when($request->role && !in_array($request->role, ['User', 'Anggota']), 
+                fn ($q) =>
+                    $q->whereHas('role', fn ($r) =>
+                        $r->where('name', $request->role)
+                    )
             )
             ->orderBy($sortBy, $sortDir)
             ->paginate($request->per_page ?? 10)
@@ -71,7 +72,7 @@ class AdminController extends Controller
         return inertia('Admin/Admins/List', [
             'admins' => $admins,
             'roles' => Role::whereHas('users')
-                ->where('name', '!=', 'User')
+                ->whereNotIn('name', ['User', 'Anggota'])
                 ->pluck('name'),
             'filters' => $request->only(['search', 'status', 'role', 'per_page', 'sort_by', 'sort_dir']),
             'title' => 'Pengelolaan Admin'
