@@ -42,6 +42,7 @@ const menuGroups = [
                 subItems: [
                     { name: "Anggota", path: "/admin/users/list", pro: false, },
                     { name: "Verifikasi", path: "/admin/users/verification", pro: false, },
+                    { name: "Pengunduran Diri", path: "/admin/resignations/list", pro: false, },
                     { name: "Admin", path: "/admin/list", pro: false },
                 ],
             },
