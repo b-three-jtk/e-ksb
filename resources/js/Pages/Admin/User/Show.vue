@@ -275,7 +275,7 @@ const breadcrumbItems = [
                                             dateParser(account.transactions[0]?.transaction_date) ?? '-' }}</span>
                                     </li>
                                 </ul>
-                                <Button size="small" variant="light">
+                                <Button full size="small" variant="light">
                                     <InfoCircleIcon />
                                     Mutasi
                                 </Button>
@@ -340,11 +340,11 @@ const breadcrumbItems = [
                                     </li>
                                 </ul>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full px-8">
-                                    <Button variant="info">
+                                    <Button full variant="info">
                                         <InfoCircleIcon />
                                         Detail
                                     </Button>
-                                    <Button variant="light">
+                                    <Button full variant="light">
                                         <span class="icon-[tabler--history]" style="width: 24px; height: 24px;"></span>
                                         Riwayat
                                     </Button>

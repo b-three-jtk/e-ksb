@@ -21,6 +21,10 @@ const props = defineProps({
     size: {
         type: String,
     },
+    full: {
+        type: Boolean,
+        default: false,
+    }
 })
 
 const getStyles = () => {
@@ -43,6 +47,8 @@ const getStyles = () => {
             return 'bg-success-500 text-white hover:bg-success-400';
         case 'gray':
             return 'bg-gray-400 text-white hover:bg-gray-300';
+        default:
+            return 'bg-primary text-white hover:bg-brand-800';
     }
 }
 
@@ -63,13 +69,26 @@ const emit = defineEmits(['click'])
 </script>
 
 <template>
-    <Link v-if="href" @click="emit('click', $event)" v-on="$attrs" :class="`${getStyles()} ${getSizeClasses()} w-fit rounded-lg flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-semibold`" disabled="disabled" :href="href">
+    <Link v-if="href" @click="emit('click', $event)" v-on="$attrs"
+        :class="[
+            getStyles(),
+            getSizeClasses(),
+            full ? 'w-full' : 'w-fit',
+            'rounded-lg flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-semibold'
+        ]"
+        disabled="disabled"
+        :href="href">
         <slot></slot>
     </Link>
     <button
         v-else
         :type="type"
-        :class="`${getStyles()} ${getSizeClasses()} rounded-lg flex items-center justify-center gap-2 w-fit focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-semibold`"
+        :class="[
+            getStyles(),
+            getSizeClasses(),
+            full ? 'w-full' : 'w-fit',
+            'rounded-lg flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-semibold'
+        ]"
         :disabled="disabled"
         v-on="$attrs"
         @click="emit('click', $event)"

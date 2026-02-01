@@ -2,10 +2,10 @@
     <div class="min-h-screen h-max xl:flex">
         <AppSidebar />
         <Backdrop />
-        <div class="flex-1 bg-admin dark:bg-gray-900 transition-all duration-300 ease-in-out"
+        <div class="flex-1 transition-all duration-300 ease-in-out"
             :class="[isExpanded || isHovered ? 'lg:ml-72.5' : 'lg:ml-22.5']">
             <AppHeader />
-            <div class="p-4 md:p-6 w-full">
+            <div class="p-4 bg-admin dark:bg-gray-900 md:p-6 w-full">
                 <slot></slot>
             </div>
         </div>
