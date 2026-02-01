@@ -31,16 +31,21 @@ class UserController extends Controller
             : 'joined_date';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $query = User::with(['savingAccounts.transactions' => fn ($q) =>
-            $q->where('status', TransactionStatus::COMPLETED)
+        $query = User::with([
+            'savingAccounts.transactions' => fn($q) =>
+                $q->where('status', TransactionStatus::COMPLETED)
         ])
-        ->whereHas('role', fn ($q) =>
-            $q->where('name', 'Anggota')
-        )
-        ->whereNotNull('joined_date')
-        ->whereNotNull('member_number');
+            ->whereHas(
+                'role',
+                fn($q) =>
+                $q->where('name', 'Anggota')
+            )
+            ->whereNotNull('joined_date')
+            ->whereNotNull('member_number');
 
-        $memberBaseQuery = User::whereHas('role', fn ($q) =>
+        $memberBaseQuery = User::whereHas(
+            'role',
+            fn($q) =>
             $q->where('name', 'Anggota')
         );
 
@@ -64,10 +69,11 @@ class UserController extends Controller
             ->count();
 
         if ($search) {
-            $query->where(fn ($q) =>
+            $query->where(
+                fn($q) =>
                 $q->where('name', 'ILIKE', "%{$search}%")
-                ->orWhere('member_number', 'ILIKE', "%{$search}%")
-                ->orWhere('phone_number', 'ILIKE', "%{$search}%")
+                    ->orWhere('member_number', 'ILIKE', "%{$search}%")
+                    ->orWhere('phone_number', 'ILIKE', "%{$search}%")
             );
         }
 
@@ -79,7 +85,7 @@ class UserController extends Controller
             ->orderBy($sortBy, $sortDir)
             ->paginate($perPage)
             ->withQueryString()
-            ->through(fn ($user) => [
+            ->through(fn($user) => [
                 'id' => $user->id,
                 'no_anggota' => $user->member_number,
                 'name' => $user->name,
@@ -90,11 +96,12 @@ class UserController extends Controller
                 'status' => $user->status,
                 'total_simpanan' => 'Rp ' . number_format(
                     $user->savingAccounts
-                        ->flatMap(fn ($account) => $account->transactions)
-                        ->sum(fn ($trx) =>
+                        ->flatMap(fn($account) => $account->transactions)
+                        ->sum(
+                            fn($trx) =>
                             $trx->type === 'Penarikan'
-                                ? -$trx->amount
-                                : $trx->amount
+                            ? -$trx->amount
+                            : $trx->amount
                         ),
                     0,
                     ',',
@@ -106,9 +113,13 @@ class UserController extends Controller
             ]);
 
         return Inertia::render('Admin/User/List', [
-            'members'  => $members,
-            'filters'  => $request->only([
-                'search', 'status', 'per_page', 'sort_by', 'sort_dir'
+            'members' => $members,
+            'filters' => $request->only([
+                'search',
+                'status',
+                'per_page',
+                'sort_by',
+                'sort_dir'
             ]),
             'summary' => [
                 'total_verified' => $totalVerifiedMembers,
@@ -142,9 +153,29 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $user = User::with(['role', 'workUnit', 'savingAccounts.transactions' => function($query) {$query->latest('created_at')->where('status', TransactionStatus::COMPLETED)->take(1);}, 'heirs', 'userDocs', 'financings.loan.payments'])->findOrFail($id);
+        $user = User::with([
+            'userDocs',
+            'role',
+            'workUnit',
+            'savingAccounts.transactions'
+            => function ($query) {
+                $query->latest('created_at')
+                    ->where('status', TransactionStatus::COMPLETED)
+                    ->take(1);
+            },
+            'heirs',
+            'financings.loan.payments'
+        ])->findOrFail($id);
+
         $user->profile_picture = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-        return inertia('Admin/User/Show', ['user' => $user]);
+        $ktpDoc = $user->userDocs->firstWhere('name', 'ktp');
+        $kkDoc = $user->userDocs->firstWhere('name', 'kk');
+
+        return inertia('Admin/User/Show', [
+            'user' => $user,
+            'ktp_photo' => $ktpDoc?->attachment ? asset('storage/' . $ktpDoc->attachment) : null,
+            'kk_photo' => $kkDoc?->attachment ? asset('storage/' . $kkDoc->attachment) : null,
+        ]);
     }
 
     public function verificationDetail(User $user)
@@ -171,7 +202,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function updateStatusToInactive(String $id)
+    public function updateStatusToInactive(string $id)
     {
         $user = User::findOrFail($id);
         $user->update([
@@ -200,8 +231,8 @@ class UserController extends Controller
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('nik', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
                 });
             })
             ->when($request->work_unit_id, function ($query, $unitId) {
@@ -210,7 +241,7 @@ class UserController extends Controller
             ->orderBy($sortBy, $sortDir)
             ->paginate($perPage)
             ->withQueryString()
-            ->through(fn ($user) => [
+            ->through(fn($user) => [
                 'id' => $user->id,
                 'member_number' => $user->member_number,
                 'name' => $user->name,

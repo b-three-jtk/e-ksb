@@ -8,6 +8,7 @@ import CardInfo from '../../../Components/CardInfo.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import BaseTable from '../../../Components/Table/BaseTable.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
+import Button from '../../../Components/Form/Button.vue'
 
 const isLoading = ref(false)
 
@@ -224,26 +225,15 @@ const breadcrumbItems = [
                     @update:search="val => filters.search = val"
                 >
                     <template #actions>
-                        <a
-                            :href="`/admin/savings/export/csv?${exportQuery}`"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm
-                                border rounded-lg
-                                bg-green-600 text-white hover:bg-green-700"
-
-                        >
+                        <Button size="small" variant="success" :href="`/admin/savings/export/csv?${exportQuery}`">
                             <Icon icon="mdi:file-delimited-outline" class="w-4 h-4" />
                             Export CSV
-                        </a>
+                        </Button>
 
-                        <a
-                            :href="`/admin/savings/export/pdf?${exportQuery}`"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm
-                                rounded-lg
-                                bg-red-600 text-white hover:bg-red-700"
-                        >
+                        <Button size="small" variant="danger" :href="`/admin/savings/export/pdf?${exportQuery}`">
                             <Icon icon="mdi:file-pdf-box" class="w-4 h-4" />
                             Export PDF
-                        </a>
+                        </Button>
                     </template>
                 </BaseFunctionality>
 

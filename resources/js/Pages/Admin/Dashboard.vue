@@ -10,6 +10,7 @@ import ReviewIcon from '@/Icons/ReviewIcon.vue';
 import NoArchiveIcon from '@/Icons/NoArchiveIcon.vue';
 import InfoCircleIcon from '@/Icons/InfoCircleIcon.vue';
 import { VueDatePicker } from '@vuepic/vue-datepicker';
+import Button from '@/Components/Form/Button.vue';
 
 const page = usePage()
 
@@ -112,11 +113,11 @@ const applyFilter = () => {
                             <div>
                                 <h3 class="card-title">Permohonan Registrasi Terbaru</h3>
                             </div>
-
-                            <Link :href="user.role?.name === 'Admin' ? '/admin/users/verification' : '/admin/users/list'"
-                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">
+                            <Button
+                                :href="user.role?.name === 'Admin' ? '/admin/users/verification' : '/admin/users/list'"
+                                variant="light" size="small">
                                 See all
-                            </Link>
+                            </Button>
                         </div>
 
                         <div class="max-w-full overflow-x-auto custom-scrollbar">
@@ -132,7 +133,8 @@ const applyFilter = () => {
                                                 Email</p>
                                         </th>
                                         <th class="py-5 text-left">
-                                            <p class="font-medium text-gray-500 px-2 text-theme-xs dark:text-gray-400">Unit
+                                            <p class="font-medium text-gray-500 px-2 text-theme-xs dark:text-gray-400">
+                                                Unit
                                                 Kerja
                                             </p>
                                         </th>
@@ -142,7 +144,8 @@ const applyFilter = () => {
                                             </p>
                                         </th>
                                         <th v-if="user.role?.name === 'Admin'" class="py-5 text-left">
-                                            <p class="font-medium text-gray-500 px-2 text-theme-xs dark:text-gray-400">Aksi
+                                            <p class="font-medium text-gray-500 px-2 text-theme-xs dark:text-gray-400">
+                                                Aksi
                                             </p>
                                         </th>
                                     </tr>
@@ -171,11 +174,10 @@ const applyFilter = () => {
                                             </p>
                                         </td>
                                         <td v-if="user.role?.name === 'Admin'" class="py-5 px-2 whitespace-nowrap">
-                                            <Link :href="`/admin/verifikasi/${data.member_number}`"
-                                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-light-accent px-4 py-2 text-white font-medium text-xs shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-light-accent dark:text-white dark:hover:bg-light-accent/70] dark:hover:text-gray-200">
+                                            <Button :href="`/admin/verifikasi/${data.member_number}`" size="small" variant="accent">
                                                 <ReviewIcon width="16px" height="16px" />
                                                 Tinjau
-                                            </Link>
+                                            </Button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -199,11 +201,9 @@ const applyFilter = () => {
                             <div>
                                 <h3 class="card-title">Transaksi Terbaru</h3>
                             </div>
-
-                            <Link href="/admin/savings/list"
-                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">
+                            <Button href="/admin/savings/list" variant="light" size="small">
                                 See all
-                            </Link>
+                            </Button>
                         </div>
 
                         <div class="max-w-full overflow-x-auto custom-scrollbar">
@@ -211,7 +211,8 @@ const applyFilter = () => {
                                 <thead>
                                     <tr class="border-t border-gray-100 dark:border-gray-800">
                                         <th class="py-5 text-left">
-                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">No.
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                                                No.
                                                 Transaksi</p>
                                         </th>
                                         <th class="py-5 text-left">
@@ -219,11 +220,13 @@ const applyFilter = () => {
                                                 Pemohon</p>
                                         </th>
                                         <th class="py-5 text-left">
-                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">Total
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                                                Total
                                             </p>
                                         </th>
                                         <th class="py-5 text-left">
-                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">Tipe
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                                                Tipe
                                             </p>
                                         </th>
                                         <th class="py-5 text-left">
@@ -231,7 +234,8 @@ const applyFilter = () => {
                                                 Tanggal</p>
                                         </th>
                                         <th class="py-5 text-left">
-                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">Aksi
+                                            <p class="font-medium px-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                                                Aksi
                                             </p>
                                         </th>
                                     </tr>
@@ -265,11 +269,11 @@ const applyFilter = () => {
                                             </p>
                                         </td>
                                         <td class="py-5 px-2 whitespace-nowrap">
-                                            <Link :href="`/admin/savings/show/${data.id}`"
-                                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-blue-accent px-4 py-2 text-white font-medium text-xs shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:hover:bg-white/3 dark:hover:text-gray-200">
+                                            <Button size="small" variant="info"
+                                                :href="`/admin/savings/show/${data.id}`">
                                                 <InfoCircleIcon width="18px" height="18px" />
                                                 Detail
-                                            </Link>
+                                            </Button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -295,10 +299,9 @@ const applyFilter = () => {
                             <p v-if="financing_data?.length" class="text-gray-500 dark:text-gray-300">No. Transaksi #{{
                                 financing_data[activeIndex]?.transaction_code ?? '' }}</p>
                         </div>
-                        <button
-                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">
+                        <Button href="#" variant="light" size="small">
                             See all
-                        </button>
+                        </Button>
                     </div>
                     <div
                         class="card-info bg-white dark:bg-gray-800 py-6 rounded-xl border border-stroke dark:border-gray-700 dark:text-gray-300 flex flex-col gap-2">
@@ -316,7 +319,7 @@ const applyFilter = () => {
                             <div class="flex flex-col">
                                 <p>Status</p>
                                 <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex]?.status ?? ''
-                                    }}</h1>
+                                }}</h1>
                             </div>
                             <div class="flex flex-col">
                                 <p>Nama Anggota</p>
@@ -332,11 +335,10 @@ const applyFilter = () => {
                         </div>
                         <div v-if="financing_data?.length" class="border border-stroke dark:border-gray-700"></div>
                         <div class="flex justify-end px-8 pt-2">
-                            <Link href="#" v-if="financing_data?.length"
-                                class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-secondary px-5 py-2.5 text-white font-medium shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-secondary dark:text-gray-100 dark:hover:bg-secondary/70 dark:hover:text-gray-200">
+                            <Button variant="secondary">
                                 <ReviewIcon width="24px" height="24px" />
                                 Tinjau
-                            </Link>
+                            </Button>
                         </div>
                     </div>
                     <div class="flex gap-2 justify-center text-dark-text dark:text-gray-400">
@@ -355,11 +357,11 @@ const applyFilter = () => {
 </template>
 
 <style>
-    .dp__theme_dark {
-        --dp-background-color: #1f2937!important;
-        --dp-text-color: #d1d5db!important;
-        --dp-primary-text-color: #fff!important;
-        --dp-accent-color: #3b82f6!important;
-        --dp-border-color: #374151!important;
-    }
+.dp__theme_dark {
+    --dp-background-color: #1f2937 !important;
+    --dp-text-color: #d1d5db !important;
+    --dp-primary-text-color: #fff !important;
+    --dp-accent-color: #3b82f6 !important;
+    --dp-border-color: #374151 !important;
+}
 </style>

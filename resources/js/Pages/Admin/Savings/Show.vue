@@ -6,6 +6,9 @@ import Swal from 'sweetalert2'
 import { toast } from "vue3-toastify";
 import dateParser from '@/Composables/dateParser'
 import moneyParser from '@/Composables/moneyParser'
+import ModalDocument from '@/Components/ModalDocument.vue';
+import Button from '@/Components/Form/Button.vue';
+import { ref } from 'vue'
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -16,13 +19,6 @@ const showModal = () => {
 };
 const hideModal = () => {
     document.getElementById('modal').classList.add('hidden');
-};
-
-const showModalDoc = () => {
-    document.getElementById('modalDoc').classList.remove('hidden');
-};
-const hideModalDoc = () => {
-    document.getElementById('modalDoc').classList.add('hidden');
 };
 
 const form = useForm({
@@ -121,25 +117,25 @@ const breadcrumbItems = [
     {name: 'Pengelolaan Simpanan', link: '/admin/savings/list'},
     {name: 'Transaksi Simpanan'},
 ];
+
+const modalRef = ref(null)
+const openModalBukti = () => modalRef.value?.openModal()
 </script>
 
 <template>
     <AdminLayout title="Detail Transaksi Simpanan">
-        <div class="flex flex-col px-20">
+        <div class="flex flex-col">
             <PageBreadcrumb
                 :page-title="data.status != 'Belum Ditinjau' ? 'Detail Simpanan' : 'Validasi Permohonan Simpanan'" :items="breadcrumbItems" />
-            <div class="flex flex-col gap-6">
+            <div class="flex flex-col gap-4">
                 <div class="card-layout flex justify-between">
                     <div class="flex gap-2 items-center">
-                        <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{ data.id }}
+                        <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{ data.transaction_code }}
                         </h1>
                         <span :class="getStatusClass()">{{ data.status }}</span>
                     </div>
                     <div v-if="data.account_number" class="flex items-center gap-4">
-                        <button @click="showModalDoc()"
-                            class="inline-flex items-center gap-2 rounded-lg border bg-blue-accent px-6 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-blue-accent/70 dark:border-gray-700 dark:text-white dark:hover:bg-blue-accent/70 dark:hover:text-gray-200">
-                            Lihat Bukti
-                        </button>
+                        <Button @click="openModalBukti()" variant="info">Lihat Bukti</Button>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
@@ -185,14 +181,12 @@ const breadcrumbItems = [
                             </ul>
                         </div>
                         <div v-if="data.status == 'Belum Ditinjau'" class="flex items-center gap-4 justify-end mt-4">
-                            <button @click="acceptTransaction()"
-                                class="inline-flex items-center gap-2 rounded-lg border bg-success-500 px-8 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-success-400 dark:border-gray-700 dark:text-white">
+                            <Button @click="acceptTransaction()" variant="success">
                                 Terima
-                            </button>
-                            <button @click="showModal()"
-                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-error-500 px-8 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-error-400 dark:border-gray-700">
+                            </Button>
+                            <Button @click="showModal()" variant="danger">
                                 Tolak
-                            </button>
+                            </Button>
                         </div>
                     </div>
                     <div class="flex flex-col col-span-1 lg:col-span-2 gap-2">
@@ -253,33 +247,11 @@ const breadcrumbItems = [
                     class="w-full p-2 border font-body border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     placeholder="Masukkan alasan penolakan..."></textarea>
                 <div class="flex justify-end mt-4 gap-2">
-                    <button @click="hideModal()" type="button"
-                        class="px-8 text-theme-sm py-2.5 bg-gray-300 text-dark-text dark:text-gray-800 rounded-lg hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500">
-                        Batal
-                    </button>
-                    <button @click="rejectTransaction()" type="button"
-                        class="px-8 py-2.5 text-theme-sm bg-primary text-white rounded-lg hover:bg-brand-800">
-                        Simpan
-                    </button>
+                    <Button @click="hideModal()" variant="light" size="small">Batal</Button>
+                    <Button @click="rejectTransaction()" size="small">Simpan</Button>
                 </div>
             </div>
         </div>
-        <div id="modalDoc" @click.self="hideModalDoc()" class="fixed inset-0 bg-black/50 flex items-center justify-center pt-44 pb-22 h-screen hidden">
-            <div class="bg-white max-h-[80vh] rounded-2xl dark:bg-gray-800">
-                <div class="flex justify-between px-4">
-                    <h1 class="card-title p-4">Bukti Pembayaran</h1>
-                    <button @click="hideModalDoc()" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="px-4 pb-4 max-h-[70vh] overflow-y-scroll custom-scrollbar">
-                    <img :src="data.saving_transaction_doc[0]?.attachment" alt="Bukti Pembayaran" class="w-full h-auto object-contain" />
-                    <p class="mt-2 text-center text-gray-600 dark:text-gray-400">{{ data.saving_transaction_doc[0]?.name
-                    }}</p>
-                </div>
-            </div>
-        </div>
+        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="data.saving_transaction_doc[0]?.name" :attachment="data.saving_transaction_doc[0]?.attachment" />
     </AdminLayout>
 </template>

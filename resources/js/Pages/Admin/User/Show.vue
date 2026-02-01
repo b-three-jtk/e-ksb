@@ -7,14 +7,27 @@ import NoArchiveIcon from '@/Icons/NoArchiveIcon.vue';
 import UserIcon from '@/Icons/UserIcon.vue';
 import Swal from 'sweetalert2';
 import { useForm } from '@inertiajs/vue3'
+import Button from '@/Components/Form/Button.vue';
+import InfoCircleIcon from '@/Icons/InfoCircleIcon.vue'
+import EyeIcon from '@/Icons/EyeIcon.vue';
+import ModalDocument from '@/Components/ModalDocument.vue';
+import { ref } from 'vue'
 
 const props = defineProps({
     user: { type: Object, required: true },
+    ktp_photo: String,
+    kk_photo: String,
 });
 
 const form = useForm({
     status: '',
 });
+
+const ktpModalRef = ref(null)
+const kkModalRef = ref(null)
+
+const openKtpModal = () => ktpModalRef.value?.openModal()
+const openKkModal = () => kkModalRef.value?.openModal()
 
 const nonactiveUser = () => {
     Swal.fire({
@@ -71,7 +84,7 @@ const breadcrumbItems = [
 
 <template>
     <AdminLayout title="Detail Anggota">
-        <div class="flex flex-col px-20">
+        <div class="flex flex-col">
             <PageBreadcrumb :page-title="'Detail Anggota'" :items="breadcrumbItems" />
             <div class="flex flex-col gap-6">
                 <div class="card-layout flex flex-col xl:flex-row justify-between gap-4 items-center">
@@ -161,21 +174,19 @@ const breadcrumbItems = [
                             class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6">
                             <h1 class="card-title">Berkas Pendukung</h1>
                             <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
-                                <li class="flex flex-col gap-2">
+                                <li class="flex flex-col gap-2 w-fit">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Foto KTP</span>
-                                    <button
-                                        class="items-center flex justify-center gap-2 rounded-xl border border-gray-300 bg-muted mr-auto px-12 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-white/3 dark:hover:text-gray-200">
-                                        <span class="icon-[tabler--eye]" style="width: 24px; height: 24px;"></span>
+                                    <Button :disabled="ktp_photo" variant="gray" @click="openKtpModal">
+                                        <EyeIcon />
                                         Lihat
-                                    </button>
+                                    </Button>
                                 </li>
-                                <li class="flex flex-col gap-2">
+                                <li class="flex flex-col gap-2 w-fit">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Foto KK</span>
-                                    <button
-                                        class="items-center flex justify-center gap-2 rounded-xl border border-gray-300 bg-muted mr-auto px-12 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-white/3 dark:hover:text-gray-200">
-                                        <span class="icon-[tabler--eye]" style="width: 24px; height: 24px;"></span>
+                                    <Button variant="gray" :disabled="kk_photo" @click="openKkModal()">
+                                        <EyeIcon />
                                         Lihat
-                                    </button>
+                                    </Button>
                                 </li>
                             </ul>
                         </div>
@@ -264,12 +275,10 @@ const breadcrumbItems = [
                                             dateParser(account.transactions[0]?.transaction_date) ?? '-' }}</span>
                                     </li>
                                 </ul>
-                                <button
-                                    class="flex justify-center items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">
-                                    <span class="icon-[material-symbols--info-outline-rounded]"
-                                        style="width: 24px; height: 24px;"></span>
+                                <Button size="small" variant="light">
+                                    <InfoCircleIcon />
                                     Mutasi
-                                </button>
+                                </Button>
                             </div>
                         </div>
                         <div class="grid xl:grid-cols-2 grid-cols-1">
@@ -287,7 +296,7 @@ const breadcrumbItems = [
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Harga Pembiayaan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(financing.loan.total_price) }}</span>
+                                            parseCurrencyAmount(financing.loan?.total_price ?? 0) }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir
@@ -303,20 +312,20 @@ const breadcrumbItems = [
                                                 parseCurrencyAmount(
                                                     Math.max(
                                                         0,
-                                                        financing.loan.total_price -
-                                                        financing.loan.payments.length * financing.loan.amount_ins
+                                                        (financing.loan?.total_price ?? 0) -
+                                                        financing.loan?.payments.length * (financing.loan?.amount_ins ?? 0)
                                                     )) }}</span>
                                         </div>
                                         <div class="progress-container">
                                             <div class="progress-bar"
-                                                :style="{ width: (Math.min(financing.loan.tenor ? (financing.loan.payments.length / financing.loan.tenor * 100) : 0, 100)) + '%' }">
+                                                :style="{ width: (Math.min((financing.loan?.tenor ?? 0) ? (financing.loan.payments.length / financing.loan.tenor * 100) : 0, 100)) + '%' }">
                                             </div>
                                         </div>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(financing.loan.amount_ins) }}</span>
+                                            parseCurrencyAmount(financing.loan?.amount_ins ?? 0) }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Jatuh Tempo
@@ -327,22 +336,18 @@ const breadcrumbItems = [
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Posisi Angsuran</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            financing.loan.payments.length }} dari {{ financing.loan.tenor }}</span>
+                                            financing.loan?.payments?.length ?? 0 }} dari {{ financing.loan?.tenor ?? 0 }}</span>
                                     </li>
                                 </ul>
-                                <div class="flex flex-col sm:flex-row gap-4 w-full px-8">
-                                    <button
-                                        class="flex w-full justify-center items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">
-                                        <span class="icon-[material-symbols--info-outline-rounded]"
-                                            style="width: 24px; height: 24px;"></span>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full px-8">
+                                    <Button variant="info">
+                                        <InfoCircleIcon />
                                         Detail
-                                    </button>
-                                    <button
-                                        class="flex w-full justify-center items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">
-                                        <span class="icon-[material-symbols--info-outline-rounded]"
-                                            style="width: 24px; height: 24px;"></span>
+                                    </Button>
+                                    <Button variant="light">
+                                        <span class="icon-[tabler--history]" style="width: 24px; height: 24px;"></span>
                                         Riwayat
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         </div>
@@ -356,5 +361,7 @@ const breadcrumbItems = [
                 </div>
             </div>
         </div>
+        <ModalDocument ref="ktpModalRef" modal-id="modal-ktp" title="Dokumen KTP Anggota" name="KTP" :attachment="ktp_photo" />
+        <ModalDocument ref="kkModalRef" modal-id="modal-kk" title="Dokumen KK Anggota" name="KK" :attachment="kk_photo" />
     </AdminLayout>
 </template>
