@@ -98,6 +98,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::put('/users/{id}/nonactive', [UserController::class, 'updateStatusToInactive'])->name('users.nonactive');
 
     // Resignation Routes
+    Route::get('/resignations/list', [ResignationController::class, 'index'])->name('resignations.index');
     Route::get('/resignation/{id}', [ResignationController::class, 'validation'])->name('resignations.validation');
 });
 

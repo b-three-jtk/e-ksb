@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\WorkUnit;
 use App\Enums\LoanStatus;
 use App\Enums\UserStatus;
 use Illuminate\Http\Request;
@@ -14,9 +15,45 @@ class ResignationController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $search = $request->input('search', '');
+        $per_page = $request->input('per_page', 10);
+        $sort_by = $request->input('sort_by', 'created_at');
+        $sort_dir = $request->input('sort_dir', 'desc');
+        $work_unit_id = $request->input('work_unit_id', '');
+
+        $query = User::with('workUnit')
+            ->where('status', UserStatus::RESIGNED_REQUESTED)
+            ->when($search, function ($q) use ($search) {
+                return $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('member_number', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->when($work_unit_id, function ($q) use ($work_unit_id) {
+                return $q->where('work_unit_id', $work_unit_id);
+            });
+
+        // Apply sorting
+        $query->orderBy($sort_by, $sort_dir);
+
+        // Paginate results
+        $members = $query->paginate($per_page)->withQueryString();
+
+        // Get all work units for filter
+        $workUnits = WorkUnit::all(['id', 'name']);
+
+        return inertia('Admin/User/Resignation/List', [
+            'members' => $members,
+            'workUnits' => $workUnits,
+            'filters' => [
+                'search' => $search,
+                'per_page' => $per_page,
+                'sort_by' => $sort_by,
+                'sort_dir' => $sort_dir,
+                'work_unit_id' => $work_unit_id,
+            ],
+        ]);
     }
 
     /**
