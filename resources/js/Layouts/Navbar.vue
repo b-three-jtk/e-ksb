@@ -154,6 +154,11 @@ const logout = () => {
                                         Profil
                                     </Link>
                                 </li>
+                                <li>
+                                    <Link href="/user/resign" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        Pengunduran Diri
+                                    </Link>
+                                </li>
                             </ul>
                             <button type="button" @click="logout"
                                 class="w-full text-left block px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-b-lg dark:hover:bg-gray-600 dark:text-gray-200">

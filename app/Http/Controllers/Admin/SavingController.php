@@ -74,7 +74,7 @@ class SavingController extends Controller
             ->through(function ($trx) {
                 return [
                     'id' => $trx->id,
-                    'no_transaksi' => $trx->transaction_code,
+                    'no_transaksi' => str_pad($trx->id, 6, '0', STR_PAD_LEFT),
                     'tanggal' => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
                     'anggota' => $trx->savingAccount->user->member_number
                         . ' - '
@@ -192,7 +192,7 @@ class SavingController extends Controller
 
             foreach ($transactions as $trx) {
                 fputcsv($handle, [
-                    $trx->transaction_code,
+                    str_pad($trx->id, 6, '0', STR_PAD_LEFT),
                     $trx->transaction_date->format('d/m/Y'),
                     $trx->savingAccount->user->member_number . ' - ' . $trx->savingAccount->user->name,
                     $trx->savingAccount->type,

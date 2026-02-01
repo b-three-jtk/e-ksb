@@ -80,16 +80,16 @@ const rupiah = (value) =>
                         </div>
                     </div>
 
-                    <!-- Cetak Ledger -->
-                    <div class="bg-blue-light-400 rounded-2xl shadow-lg p-6 text-white flex items-center justify-center min-h-35">
+                    <!-- Jumlah Pembiayaan Murabahah -->
+                    <div class="bg-blue-light-400 rounded-2xl shadow-lg p-6 text-white flex items-center justify-center min-h-[140px]">
                         <div class="flex items-center gap-4 w-full">
-                            <div class="shrink-0">
-                                <Icon icon="tabler:printer" class="w-12 h-12" />
+                            <div class="flex-shrink-0">
+                                <Icon icon="carbon:finance" class="w-12 h-12" />
                             </div>
 
                             <div class="flex-1">
-                                <p class="font-body text-sm opacity-90 mb-1">Cetak Ledger</p>
-                                <h2 class="text-2xl font-bold">{{ summary.ledger_count }}</h2>
+                                <p class="font-body text-sm opacity-90 mb-1">Jumlah Pembiayaan</p>
+                                <h2 class="text-2xl font-bold">{{ summary.murabahah_count }}</h2>
                             </div>
                         </div>
                     </div>

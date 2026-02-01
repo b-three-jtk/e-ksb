@@ -72,20 +72,30 @@ class AnggotaController extends Controller
                 ];
             });
 
-        $ledgerCount = SavingTransaction::where('status', TransactionStatus::COMPLETED)
-            ->whereHas(
-                'savingAccount',
-                fn ($q) => $q->where('user_id', $user->id)
-            )
-            ->whereMonth('transaction_date', now()->month)
-            ->whereYear('transaction_date', now()->year)
+        $activeMurabahahCount = $user->financings()
+            ->whereIn('status', [FinancingReqStatus::APPROVED, FinancingReqStatus::APPROVED_WITH_NOTES,])
+            ->whereHas('loan')
+            ->with(['loan.payments' => fn ($q) =>
+                $q->where('status', LoanStatus::PAID)
+            ])
+            ->get()
+            ->filter(function ($financing) {
+                $loan = $financing->loan;
+                if (!$loan){
+                    return false;
+                }
+
+                $totalPaid = $loan->payments->sum('amount');
+
+                return $totalPaid < $loan->total_price;
+            })
             ->count();
 
         return inertia('User/Dashboard', [
             'summary' => [
                 'total_saving' => $totalSaving,
                 'total_installment' => $totalInstallment,
-                'ledger_count' => $ledgerCount,
+                'murabahah_count' => $activeMurabahahCount,
             ],
             'ledger' => $ledger,
         ]);
