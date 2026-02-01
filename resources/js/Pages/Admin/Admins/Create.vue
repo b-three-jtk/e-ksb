@@ -7,6 +7,7 @@ import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify';
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 import { useCreateAdminValidation } from '@/Composables/Validation/useCreateAdminValidation'
+import Button from '../../../Components/Form/Button.vue'
 
 const form = useForm({
     email: '',
@@ -72,7 +73,7 @@ const submitForm = () => {
 
 <template>
     <Layout title="Tambah Admin">
-        <div class="flex flex-col px-20">
+        <div class="flex flex-col">
             <PageBreadcrumb page-title="Tambah Admin" :items="breadcrumbItems" />
             <div class="card-layout px-0!">
                 <div class="flex flex-col px-8 border-b-2 border-gray-200 dark:border-gray-700 pb-4 mb-4">
@@ -120,14 +121,12 @@ const submitForm = () => {
                     </div>
 
                     <div class="flex items-center justify-center gap-4 pt-10 px-8 pb-8">
-                        <Link href="/admin/list"
-                            class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-8 py-2.5 text-gray-800 font-medium shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">
+                        <Button href="/admin/list" variant="light">
                             Batal
-                        </Link>
-                        <button type="button" @click="submitForm" :disabled="form.processing"
-                            class="inline-flex items-center gap-2 rounded-xl border border-secondary bg-secondary px-8 py-2.5 text-white font-medium shadow-theme-xs hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed">
+                        </Button>
+                        <Button @click="submitForm" variant="secondary">
                             {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

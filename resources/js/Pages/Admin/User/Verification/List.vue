@@ -7,7 +7,7 @@ import BaseTable from '../../../../Components/Table/BaseTable.vue'
 import BaseFunctionality from '../../../../Components/Table/BaseFunctionality.vue'
 import Pagination from '../../../../Components/Table/Pagination.vue'
 import PageBreadcrumb from '../../../../Components/PageBreadcrumb.vue'
-
+import Button from '@/Components/Form/Button.vue'
 
 const columns = [
     { key: 'no', label: 'No' },
@@ -124,14 +124,10 @@ const breadcrumbItems = [
                 </template>
 
                 <template #cell-aksi="{ row }">
-                    <Link
-                        :href="`/admin/verifikasi/${row.member_number}`"
-                        class="inline-flex items-center gap-2
-                            bg-blue-light-600 hover:bg-blue-light-900 text-white px-4 py-2 rounded-lg"
-                    >
+                    <Button :href="`/admin/verifikasi/${row.member_number}`" variant="info" size="small">
                         <Icon icon="tabler:checklist" class="w-4 h-4" />
                         Tinjau
-                    </Link>
+                    </Button>
                 </template>
             </BaseTable>
 

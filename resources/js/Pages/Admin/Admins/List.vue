@@ -8,6 +8,7 @@ import BaseTable from '../../../Components/Table/BaseTable.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
 import UserIcon from '../../../Icons/UserIcon.vue'
+import Button from '../../../Components/Form/Button.vue'
 
 const columns = [
     { key: 'no', label: 'No' },
@@ -114,14 +115,10 @@ const breadcrumbItems = [
                 <div>
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Admin</h2>
                 </div>
-
-                <Link
-                    href="/admin/create"
-                    class="font-heading bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 text-sm"
-                >
+                <Button size="medium" variant="secondary" href="/admin/create">
                     <Icon icon="mdi:plus" class="w-5 h-5"/>
                     Tambah Admin
-                </Link>
+                </Button>
             </div>
 
             <!-- Filter & Search -->
