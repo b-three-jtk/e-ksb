@@ -2,22 +2,27 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\WorkUnit;
-use App\Models\UserDoc;
 use App\Models\Role;
+use App\Models\User;
+use Inertia\Inertia;
+use App\Models\UserDoc;
+use App\Models\WorkUnit;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Cache;
 
 class RegisterController extends Controller
 {
     public function create()
     {
-        $workUnits = WorkUnit::all(['id', 'name'])->toArray();
+        $workUnits = Cache::remember(
+            'work_units_all',
+            now()->addHours(6),
+            fn () => WorkUnit::all(['id', 'name'])
+        );
 
         return Inertia::render('Auth/Register', [
             'workUnits' => $workUnits

@@ -3,16 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Inertia\Inertia;
 use App\Models\WorkUnit;
+use App\Enums\UserStatus;
+use Illuminate\Http\Request;
+use App\Enums\TransactionStatus;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use App\Mail\ApprovalNotificationMail;
 use App\Mail\RejectionNotificationMail;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use App\Enums\UserStatus;
-use Inertia\Inertia;
-use App\Enums\TransactionStatus;
 
 class UserController extends Controller
 {
@@ -228,7 +229,11 @@ class UserController extends Controller
                 'sort_by' => $sortBy,
                 'sort_dir' => $sortDir,
             ],
-            'workUnits' => WorkUnit::select('id', 'name')->get(),
+            'workUnits' => Cache::remember(
+                'work_units_all',
+                now()->addHours(6),
+                fn () => WorkUnit::all(['id', 'name'])
+            ),
             'title' => 'Verifikasi Calon Anggota',
         ]);
     }
