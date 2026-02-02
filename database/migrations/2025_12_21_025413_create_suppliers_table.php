@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\FinancialType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('financials', function (Blueprint $table) {
+        Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
-            $table->enum('financial_type', array_column(FinancialType::cases(), 'value'));
-            $table->decimal('amount', 15, 2);
+            $table->string('name');
+            $table->string('contact')->nullable();
+            $table->string('address')->nullable();
+            $table->string('link_address')->nullable();
             $table->timestamps();
-
-            $table->unique(['user_id', 'financial_type']);
         });
     }
 
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('financials');
+        Schema::dropIfExists('suppliers');
     }
 };

@@ -24,6 +24,10 @@ class Financing extends Model
         'qty',
         'profit',
         'status',
+        'isWakalah',
+        'down_payment',
+        'market_price',
+        'supplier_id',
         'updated_by',
         'user_id',
     ];
@@ -36,5 +40,10 @@ class Financing extends Model
     public function loan()
     {
         return $this->hasOne(Loan::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
     }
 }

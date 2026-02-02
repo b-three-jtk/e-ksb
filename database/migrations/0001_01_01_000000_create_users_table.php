@@ -17,7 +17,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('member_number')->unique();
+            $table->string('member_number', 10)->unique();
             $table->string('profile_picture')->nullable();
             $table->string('nik', 16)->unique();
             $table->string('name');
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('spouse_name')->nullable();
             $table->text('address')->nullable();
             $table->text('residential_address')->nullable();
-            $table->string('phone_number')->unique()->nullable();
+            $table->string('phone_number', 20)->unique()->nullable();
             $table->enum('last_education', array_column(Education::cases(), 'value'))->nullable();
             $table->integer('dependents')->nullable();
             $table->enum('status', array_column(UserStatus::cases(), 'value'))->default('Dalam Peninjauan');

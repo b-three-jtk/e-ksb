@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use App\Enums\Condition;
+use App\Models\Supplier;
 use App\Enums\FinancingReqStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -31,6 +32,10 @@ class FinancingFactory extends Factory
             'qty' => $this->faker->numberBetween(1, 10),
             'profit' => $this->faker->numberBetween(10000, 500000),
             'status' => $this->faker->randomElement(FinancingReqStatus::cases())->value,
+            'isWakalah' => $this->faker->boolean(),
+            'down_payment' => $this->faker->numberBetween(50000, 5000000),
+            'market_price' => $this->faker->numberBetween(150000, 12000000),
+            'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
             'updated_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'created_at' => $this->faker->dateTimeBetween('-6 months', 'now'),

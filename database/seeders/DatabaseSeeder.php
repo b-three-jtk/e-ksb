@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
+use Database\Seeders\SupplierSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class DatabaseSeeder extends Seeder
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             WorkUnitSeeder::class,
             UserSeeder::class,
+            SupplierSeeder::class,
             FinancialSeeder::class,
             AccountSeeder::class,
             FinancingSeeder::class,
