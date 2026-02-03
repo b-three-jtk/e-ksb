@@ -30,6 +30,10 @@ Route::get('/about', function () {
     return Inertia::render('About');
 })->name('about');
 
+Route::get('/faq', function () {
+    return Inertia::render('Faq');
+})->name('faq');
+
 // Authentication Routes
 Route::prefix('auth')
     ->name('auth.')

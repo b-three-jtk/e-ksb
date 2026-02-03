@@ -55,7 +55,7 @@ const menuItems = [
     },
     {
         name: "Bantuan",
-        path: "/help"
+        path: "/faq"
     }
 ]
 
