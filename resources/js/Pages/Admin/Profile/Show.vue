@@ -24,7 +24,7 @@ const breadcrumbItems = [
 <template>
     <AdminLayout title="Detail Profil Admin">
         <div class="flex flex-col">
-            <PageBreadcrumb :page-title="'Profile'" :items="breadcrumbItems" />
+            <PageBreadcrumb :page-title="'Profil'" :items="breadcrumbItems" />
             <div class="flex flex-col gap-6">
                 <div class="card-layout flex justify-between items-center">
                     <div class="flex gap-6">
