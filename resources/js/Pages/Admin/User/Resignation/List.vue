@@ -23,7 +23,7 @@ const columns = [
     { key: 'name', label: 'Nama' },
     { key: 'work_unit', label: 'Unit Kerja' },
     { key: 'email', label: 'Email' },
-    { key: 'aksi', label: 'Aksi', align: 'center' },
+    { key: 'aksi', label: 'Aksi' },
 ]
 
 const page = usePage()
@@ -160,12 +160,10 @@ const breadcrumbItems = [
                 </template>
 
                 <template #cell-aksi="{ row }">
-                    <div class="flex justify-left gap-3">
-                        <Button variant="info" size="small" :href="`/admin/resignation/${row.id}`">
-                            <Icon icon="tabler:checklist" class="w-4 h-4" />
+                    <Button variant="info" size="small" :href="`/admin/resignation/${row.id}`">
+                        <Icon icon="tabler:checklist" class="w-4 h-4" />
                             Tinjau
                         </Button>
-                    </div>
                 </template>
             </BaseTable>
 
