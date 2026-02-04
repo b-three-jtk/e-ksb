@@ -162,8 +162,8 @@ const breadcrumbItems = [
                 <template #cell-aksi="{ row }">
                     <Button variant="info" size="small" :href="`/admin/resignation/${row.id}`">
                         <Icon icon="tabler:checklist" class="w-4 h-4" />
-                            Tinjau
-                        </Button>
+                        Tinjau
+                    </Button>
                 </template>
             </BaseTable>
 
