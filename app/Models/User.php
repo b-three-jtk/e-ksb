@@ -27,6 +27,7 @@ class User extends Authenticatable
         'profile_picture',
         'nik',
         'name',
+        'birth_place',
         'birth_date',
         'gender',
         'institution',

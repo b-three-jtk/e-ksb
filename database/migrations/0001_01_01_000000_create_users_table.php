@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('profile_picture')->nullable();
             $table->string('nik', 16)->unique();
             $table->string('name');
+            $table->string('birth_place')->nullable();
             $table->string('birth_date')->nullable();
             $table->enum('gender', array_column(Gender::cases(), 'value'))->nullable();
             $table->string('institution');

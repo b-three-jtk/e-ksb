@@ -1,0 +1,216 @@
+<script setup>
+import AdminLayout from '@/Layouts/Admin/Layout.vue';
+import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import UserIcon from '@/Icons/UserIcon.vue';
+import Button from '@/Components/Form/Button.vue'
+import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
+import { useUserValidation } from '@/Composables/Validation/useUserValidation.ts'
+import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import Swal from 'sweetalert2'
+import { toast } from 'vue3-toastify';
+import { computed } from 'vue';
+import Base from '../../../Layouts/Base.vue';
+
+const props = defineProps({
+    user: Object,
+    work_units: Object,
+    educations: Array
+});
+
+const breadcrumbItems = [
+    { name: 'Dashboard', link: '/admin' },
+    { name: 'Profil', link: '/admin/profile' },
+    { name: 'Edit Profil' }
+];
+
+const form = useForm({
+    nik: props.user.nik || '',
+    name: props.user.name || '',
+    email: props.user.email || '',
+    birth_place: props.user.birth_place || '',
+    birth_date: props.user.birth_date || '',
+    gender: props.user.gender || '',
+    work_unit_id: props.user.work_unit_id || '',
+    institution: props.user.institution || '',
+    address: props.user.address || '',
+    residential_address: props.user.residential_address || '',
+    phone_number: props.user.phone_number || '',
+    last_education: props.user.last_education || '',
+    profile_picture: props.user.profile_picture,
+    profile_picture_file: null
+})
+
+const fileInput = ref(null)
+
+const { errors } = useUserValidation(form)
+
+const uploadProfilePicture = () => {
+    fileInput.value.click()
+}
+
+const onFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        form.profile_picture_file = file;
+        form.profile_picture = URL.createObjectURL(file);
+    }
+}
+
+const submitForm = () => {
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin mengubah data profil ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, ubah profil',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#007943',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.transform((data) => ({
+                ...data,
+                _method: 'put',
+            })).post('/admin/profile/update', {
+                forceFormData: true,
+                onSuccess: () => {
+                    toast("Profil berhasil diubah!", {
+                        "type": "success",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
+                    }).then(() => {
+                        window.location.href = route('admin.profile.show')
+                    })
+                },
+
+                onError: (errors) => {
+                    toast(("Gagal mengubah profil:" + Object.values(errors).flat().join(' ')), {
+                        "type": "error",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
+                    })
+                }
+            })
+        }
+    })
+}
+
+const photoUrl = computed(() => {
+    if (form.profile_picture && !form.profile_picture_file) {
+        return `/storage/${form.profile_picture}`
+    }
+    return form.profile_picture || null
+})
+</script>
+
+<template>
+    <AdminLayout title="Edit Profil">
+        <PageBreadcrumb page-title="Edit Profil" :items="breadcrumbItems" />
+        <div class="flex flex-col gap-6">
+            <div class="card-layout flex items-center gap-4">
+                <div v-if="photoUrl">
+                    <img class="w-20 h-20 rounded-full object-cover bg-gray-400" :src="photoUrl" alt="User avatar">
+                </div>
+                <div v-else
+                    class="w-20 h-20 rounded-full bg-white border border-stroke flex items-center justify-center text-gray-500">
+                    <UserIcon />
+                </div>
+                <div>
+                    <input type="file" class="hidden" ref="fileInput" accept="image/jpeg,image/png,image/jpg,image/gif"
+                        @change="onFileChange($event)" />
+                    <Button @click.prevent="uploadProfilePicture()" variant="light">Unggah Foto Baru</Button>
+                </div>
+                <p class="w-sm text-gray-400 font-manrope">Direkomendasikan gambar ukuran 800x800, Hanya diperbolehkan
+                    format JPG atau PNG, Maksimal Ukuran Gambar 1MB</p>
+                <p class="text-error-500 text-sm">{{ errors.profile_picture }}</p>
+            </div>
+            <div class="card-layout flex flex-col gap-6">
+                <div class="card-layout flex flex-col gap-4">
+                    <h1 class="card-title">Identitas Pribadi</h1>
+                    <ul class="grid md:grid-cols-2 grid-cols-1 gap-4">
+                        <li>
+                            <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
+                                placeholder="Masukkan nama lengkap" :error="errors.name">
+                            </BaseInputAdmin>
+                        </li>
+                        <li>
+                            <BaseInputAdmin v-model="form.nik" label="NIK" type="text" required
+                                placeholder="Masukkan 16 digit NIK" max="16" min="16" pattern="[0-9]*"
+                                :error="errors.nik">
+                            </BaseInputAdmin>
+                        </li>
+                        <li>
+                            <BaseInputAdmin v-model="form.birth_place" label="Tempat Lahir" type="text"
+                                placeholder="Masukkan tempat lahir" :error="errors.birth_place">
+                            </BaseInputAdmin>
+                        </li>
+                        <li>
+                            <BaseInputAdmin v-model="form.birth_date" label="Tanggal Lahir" type="date"
+                                :error="errors.birth_date">
+                            </BaseInputAdmin>
+                        </li>
+                        <li>
+                            <BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required
+                                :selectables="[
+                                    { value: 'Laki-laki', text: 'Laki-laki' },
+                                    { value: 'Perempuan', text: 'Perempuan' }
+                        ]" :error="errors.gender">
+                            </BaseInputAdmin>
+                        </li>
+                        <li>
+                            <BaseInputAdmin v-model="form.work_unit_id" label="Unit Kerja" type="select"
+                                :selectables="work_units.map(unit => ({ value: unit.id, text: unit.name }))" required
+                                :error="errors.work_unit_id">
+                            </BaseInputAdmin>
+                        </li>
+                        <li>
+                            <BaseInputAdmin v-model="form.institution" label="Nama Lembaga" type="text" required
+                                placeholder="Masukkan nama lembaga" :error="errors.institution">
+                            </BaseInputAdmin>
+                        </li>
+                        <li>
+                            <BaseInputAdmin v-model="form.last_education" label="Pendidikan Terakhir" type="select"
+                                :selectables="educations.map(unit => ({ value: unit, text: unit }))"
+                                :error="errors.last_education">
+                            </BaseInputAdmin>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-layout flex flex-col gap-4">
+                    <h1 class="card-title">Kontak dan Alamat</h1>
+                    <ul class="grid md:grid-cols-2 grid-cols-1 gap-4">
+                        <li>
+                            <BaseInputAdmin v-model="form.email" label="Email" type="email" required
+                                placeholder="Masukkan email" :error="errors.email">
+                            </BaseInputAdmin>
+                        </li>
+                        <li>
+                            <BaseInputAdmin v-model="form.phone_number" label="Nomor Telepon" type="text"
+                                placeholder="Masukkan nomor telepon" max="16" min="16" pattern="[0-9]*"
+                                :error="errors.phone_number">
+                            </BaseInputAdmin>
+                        </li>
+                        <li class="flex flex-col cols-span-1 gap-4">
+                            <BaseInputAdmin v-model="form.address" label="Alamat Sesuai KTP" type="textarea"
+                                placeholder="Masukkan alamat" :error="errors.address">
+                            </BaseInputAdmin>
+                            <BaseInputAdmin v-model="form.residential_address" label="Alamat Domisili" type="textarea"
+                                placeholder="Masukkan alamat domisili" :error="errors.residential_address">
+                            </BaseInputAdmin>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex items-center justify-center gap-4">
+                <Button href="/admin/profile" variant="light">
+                    Batal
+                </Button>
+                <Button @click="submitForm" variant="secondary">
+                    {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
+                </Button>
+            </div>
+        </div>
+    </AdminLayout>
+</template>

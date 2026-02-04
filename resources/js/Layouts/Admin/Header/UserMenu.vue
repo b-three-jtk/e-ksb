@@ -18,6 +18,13 @@ const user = computed(() => page.props.auth?.user || {
     profile_picture: '/public/images/user/owner.jpg',
 })
 
+const photoUrl = computed(() => {
+    if (user.value?.profile_picture) {
+        return `/storage/${user.value.profile_picture}`
+    }
+    return null
+})
+
 const menuItems = [
     { href: '/admin/profile', icon: UserIcon, text: 'Profil' },
     { href: '/settings', icon: SettingsIcon, text: 'Pengaturan Akun' },
@@ -51,8 +58,8 @@ onUnmounted(() => {
 <template>
     <div class="relative" ref="dropdownRef">
         <button class="flex items-center text-gray-700 dark:text-gray-400" @click.prevent="toggleDropdown">
-            <span v-if="user.profile_picture" class="mr-3 overflow-hidden rounded-full h-11 w-11">
-                <img :src="user.profile_picture" alt="User" />
+            <span v-if="photoUrl" class="mr-3 overflow-hidden rounded-full h-11 w-11">
+                <img :src="photoUrl" alt="User" />
             </span>
             <span v-else
                 class="w-11 h-11 mr-3 rounded-full border border-stroke bg-white flex items-center justify-center text-gray-500 cursor-pointer">
