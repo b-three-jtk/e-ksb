@@ -16,13 +16,24 @@
     onMounted(() => {
         const img = new Image();
         img.src = '/images/home/polban.avif';
+        
         img.onload = () => {
             imageLoaded.value = true;
         };
+        
+        img.onerror = () => {
+            imageLoaded.value = true;
+        };
+        
         // Jika sudah di-cache, langsung set true
         if (img.complete) {
             imageLoaded.value = true;
         }
+        
+        // Fallback timeout to ensure content displays after 3 seconds
+        setTimeout(() => {
+            imageLoaded.value = true;
+        }, 3000);
     });
 </script>
 
