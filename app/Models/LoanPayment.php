@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\LoanPaymentSchedule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
@@ -15,14 +16,18 @@ class LoanPayment extends Model
         'status',
         'method',
         'attachment',
-        'loan_id',
+        'amount',
+        'principal_paid',
+        'margin_paid',
+        'is_early_repayment',
+        'loan_payment_schedule_id',
         'payment_date',
         'updated_by',
     ];
 
-    public function loan()
+    public function loanPaymentSchedule()
     {
-        return $this->belongsTo(Loan::class);
+        return $this->belongsTo(LoanPaymentSchedule::class);
     }
 
     public function user()

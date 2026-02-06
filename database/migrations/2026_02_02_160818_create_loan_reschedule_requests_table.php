@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('loan_reschedule_requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('loan_payment_id')->constrained('loan_payments')->onDelete('cascade');
+            $table->foreignId('loan_payment_schedule_id')->constrained('loan_payment_schedules')->onDelete('cascade');
             $table->date('requested_date')->nullable();
             $table->string('reason')->nullable();
             $table->enum('status', array_column(TransactionStatus::cases(), 'value'))->default('pending');

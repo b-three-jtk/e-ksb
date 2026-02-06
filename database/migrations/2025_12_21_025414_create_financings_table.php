@@ -22,9 +22,10 @@ return new class extends Migration
             $table->string('color')->nullable();
             $table->enum('condition', array_column(Condition::cases(), 'value'))->nullable();
             $table->text('description');
-            $table->decimal('price', 15, 2)->nullable();
+            $table->decimal('cost_price', 15, 2)->nullable();
+            $table->decimal('margin', 15, 2)->nullable();
+            $table->decimal('tsaman_naqdy', 15, 2)->nullable();
             $table->integer('qty');
-            $table->decimal('profit', 15, 2)->nullable();
             $table->boolean('isWakalah')->nullable();
             $table->decimal('down_payment', 15, 2)->nullable();
             $table->decimal('market_price', 15, 2)->nullable();

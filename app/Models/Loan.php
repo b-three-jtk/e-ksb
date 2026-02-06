@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\LoanPaymentSchedule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
@@ -11,9 +12,11 @@ class Loan extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'total_price',
+        'total_loan',
         'tenor',
-        'amount_ins',
+        'monthly_installment',
+        'remaining_principal',
+        'remaining_margin',
         'financing_id',
     ];
 
@@ -22,8 +25,8 @@ class Loan extends Model
         return $this->belongsTo(Financing::class);
     }
 
-    public function payments()
+    public function paymentSchedules()
     {
-        return $this->hasMany(LoanPayment::class);
+        return $this->hasMany(LoanPaymentSchedule::class);
     }
 }
