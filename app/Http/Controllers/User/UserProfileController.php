@@ -77,8 +77,8 @@ class UserProfileController extends Controller
                 'size:16',
                 \Illuminate\Validation\Rule::unique('users', 'nik')->ignore($user->id, 'id'),
             ],
-            'birth_date' => 'required|date|before_or_equal:today|after_or_equal:1900-01-01',
-            'gender' => 'required|string|in:Laki-laki,Perempuan',
+            'birth_date' => 'nullable|date|before_or_equal:today|after_or_equal:1900-01-01',
+            'gender' => 'nullable|string|in:Laki-laki,Perempuan',
         ]);
 
         $user->update($validated);

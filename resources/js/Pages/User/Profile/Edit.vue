@@ -295,14 +295,12 @@ const submit = () => {
                                     type="date"
                                     :disabled="form.processing"
                                     :error="form.errors.birth_date"
-                                    required
                                 />
                                 <BaseSelect
                                     label="Jenis Kelamin"
                                     v-model="form.gender"
                                     :disabled="form.processing"
                                     :error="form.errors.gender"
-                                    required
                                 >
                                     <option v-for="option in genderOptions" :key="option.value" :value="option.value">
                                         {{ option.label }}

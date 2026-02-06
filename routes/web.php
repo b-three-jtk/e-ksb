@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\ResignationController;
-use App\Http\Controllers\Admin\ProfileController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
@@ -11,11 +8,15 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\User\LedgerController;
 use App\Http\Controllers\Admin\SavingController;
 use App\Http\Controllers\User\AnggotaController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\User\SimpananController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\UserProfileController;
+use App\Http\Controllers\Admin\ResignationController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\User\UserRepaymentController;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
@@ -65,7 +66,7 @@ Route::prefix('auth')
 
         Route::get('/reset-password/{token}', [ResetPasswordController::class, 'index'])
             ->name('password.reset');
-        
+
         Route::post('/reset-password', [ResetPasswordController::class, 'submitRequest'])
             ->name('password.update');
 
@@ -141,4 +142,8 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:user', 'revalida
     Route::get('/simpanan/penarikan/detail', [SimpananController::class, 'showWithdrawalDetail'])->name('simpanan.withdraw.detail');
     Route::post('/simpanan/penarikan/pernyataan', [SimpananController::class, 'showWithdrawalStatement'])->name('simpanan.withdraw.statement');
     Route::post('/simpanan/penarikan/submit', [SimpananController::class, 'submitWithdrawal'])->name('simpanan.withdraw.submit');
+
+    // Pembiayaan
+    Route::get('/financing/repayment/show/{id}', [UserRepaymentController::class, 'show'])->name('financing.repayment.show');
+    Route::post('/financing/repayment/submit', [UserRepaymentController::class, 'sendRequest'])->name('financing.repayment.request');
 });

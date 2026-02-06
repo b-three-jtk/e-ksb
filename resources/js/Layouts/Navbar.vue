@@ -6,6 +6,7 @@ import ThemeToggler from '../Components/ThemeToggler.vue'
 import Logo from '@/Components/Logo.vue'
 import Swal from 'sweetalert2'
 import { toast } from "vue3-toastify";
+import ChevronDownIcon from '@/Icons/ChevronDownIcon.vue'
 
 const isMenuOpen = ref(true)
 const isUserDropdownOpen = ref(false)
@@ -130,20 +131,30 @@ const logout = () => {
                             style="width: 24px; height: 24px;"></span>
                     </Link>
                     <div class="relative">
-                        <button @click="toggleUserDropdown" class="flex items-center">
-                            <div v-if="photoUrl" class="w-10 h-10 rounded-lg overflow-hidden cursor-pointer">
-                                <img class="w-full h-full object-cover" :src="photoUrl" :alt="user.name">
-                            </div>
-                            <div v-else
-                                class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-gray-500 cursor-pointer">
+                        <button class="flex items-center text-gray-700 dark:text-gray-400"
+                            @click.prevent="toggleUserDropdown">
+                            <span v-if="photoUrl" class="mr-3 overflow-hidden rounded-full h-11 w-11">
+                                <img :src="photoUrl" alt="User" />
+                            </span>
+                            <span v-else
+                                class="w-11 h-11 mr-3 rounded-full border border-stroke bg-white flex items-center justify-center text-gray-500 cursor-pointer">
                                 <UserIcon />
+                            </span>
+                            <div class="flex flex-col text-left">
+                                <span class="block mr-1 font-medium text-theme-sm">{{ user.name }}</span>
+                                <span class="mt-0.5 block text-theme-xs text-gray-200 dark:text-gray-400">
+                                    {{ user.member_number }}
+                                </span>
                             </div>
+
+                            <ChevronDownIcon :class="{ 'rotate-180 transition-all duration-300': isUserDropdownOpen }" />
                         </button>
 
                         <!-- Dropdown Menu -->
                         <div v-if="isUserDropdownOpen"
                             class="absolute right-0 z-10 mt-2 w-44 divide-y divide-gray-100 rounded-lg hover:rounded-lg shadow bg-white dark:bg-gray-800 dark:divide-gray-600">
-                            <div class="px-4 py-3 text-sm cursor-default text-gray-900 dark:text-white dark:hover:bg-gray-600">
+                            <div
+                                class="px-4 py-3 text-sm cursor-default text-gray-900 dark:text-white dark:hover:bg-gray-600">
                                 <div>{{ user.name }}</div>
                                 <div class="font-medium truncate">{{ user.email }}</div>
                             </div>
@@ -155,7 +166,8 @@ const logout = () => {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/user/resign" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <Link href="/user/resign"
+                                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
                                         Pengunduran Diri
                                     </Link>
                                 </li>
