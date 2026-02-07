@@ -29,7 +29,7 @@ class CreateResignRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'document.mimes' => 'File harus berupa PDF atau DOC',
+            'document.mimes' => 'File harus berupa PDF, DOC, atau DOCX',
             'document.max' => 'Ukuran file maksimal 2 MB',
         ];
     }
