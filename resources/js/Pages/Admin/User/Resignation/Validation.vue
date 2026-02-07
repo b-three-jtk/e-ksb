@@ -11,10 +11,9 @@ import { toast } from "vue3-toastify";
 
 const props = defineProps({
     data: { type: Object, required: true },
-    resign_doc : String,
-    total_obligation : String,
-    total_savings: { type: String, required: true },
 });
+
+console.log(props.data.total_obligations)
 
 const showModal = () => {
     document.getElementById('modal').classList.remove('hidden');
@@ -122,13 +121,13 @@ const rejectTransaction = () => {
                     <div class="grid grid-cols-2 gap-6 p-8 pb-6">
                         <BaseInputAdmin label="Nama" type="text" v-model="props.data.name" isDisabled />
                         <BaseInputAdmin label="Nomor Anggota" type="text" v-model="props.data.member_number" isDisabled />
-                        <BaseInputAdmin label="Tanggal Bergabung" type="date" v-model="props.data.join_date" isDisabled />
+                        <BaseInputAdmin label="Tanggal Bergabung" type="date" v-model="props.data.joined_date" isDisabled />
                         <BaseInputAdmin label="Email" type="email" v-model="props.data.email" isDisabled />
                         <BaseInputAdmin label="Unit Kerja" type="text" v-model="props.data.work_unit.name" isDisabled />
                         <div class="grid grid-cols-2 col-span-2 gap-6">
-                            <BaseInputAdmin label="Total Simpanan" type="string" v-model="props.total_savings" isMoney
+                            <BaseInputAdmin label="Total Simpanan" type="string" v-model="props.data.total_savings" isMoney
                                 isDisabled />
-                            <BaseInputAdmin label="Total Kewajiban" type="number" v-model="props.total_obligation"
+                            <BaseInputAdmin label="Total Kewajiban" type="string" v-model="props.data.total_obligations"
                                 isMoney isDisabled />
                         </div>
                     </div>
@@ -163,6 +162,6 @@ const rejectTransaction = () => {
                 </div>
             </div>
         </div>
-        <ModalDocument ref="buktiResignRef" modal-id="modal-doc" title="Dokumen Pengunduran Diri Anggota" name="Dokumen Pengunduran Diri Anggota" :attachment="resign_doc" />
+        <ModalDocument ref="buktiResignRef" modal-id="modal-doc" title="Dokumen Pengunduran Diri Anggota" name="Dokumen Pengunduran Diri Anggota" :attachment="props.data.resignation_doc" />
     </AdminLayout>
 </template>

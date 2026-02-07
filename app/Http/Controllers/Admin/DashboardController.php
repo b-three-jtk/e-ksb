@@ -28,7 +28,7 @@ class DashboardController extends Controller
         // Get previous period dates
         [$prevStartDate, $prevEndDate] = $this->getPreviousPeriod($startDate, $filterBy);
 
-        $totalFinancingAmount = Loan::whereBetween('created_at', [$startDate, $endDate])->sum('total_price') ?? '0';
+        $totalFinancingAmount = Loan::whereBetween('created_at', [$startDate, $endDate])->sum('total_loan') ?? '0';
         $activeUserCount = User::where('status', UserStatus::ACTIVE->value)->where('created_at', '<=', $endDate)->count();
 
         return inertia('Admin/Dashboard', [
@@ -41,7 +41,7 @@ class DashboardController extends Controller
             'total_financing_amount' => $totalFinancingAmount,
             'total_financing_percentage' => $this->calculatePercentage(
                 $totalFinancingAmount,
-                Loan::whereBetween('created_at', [$prevStartDate, $prevEndDate])->sum('total_price') ?? 0
+                Loan::whereBetween('created_at', [$prevStartDate, $prevEndDate])->sum('total_loan') ?? 0
             ),
             'transaction_data' => $this->getRecentTransactions(),
             'registration_data' => $this->getPendingRegistrations(),
@@ -108,7 +108,7 @@ class DashboardController extends Controller
             ->map(fn($f) => [
                 'id' => $f->id,
                 'transaction_code' => $f->transaction_code,
-                'product_type' => $f->product_type,
+                'product_name' => $f->product_name,
                 'status' => $f->status,
                 'member_number' => $f->user->member_number,
                 'user_name' => $f->user->name,

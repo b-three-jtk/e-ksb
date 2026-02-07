@@ -308,7 +308,7 @@ const applyFilter = () => {
                         <div v-if="financing_data?.length" class="grid grid-cols-1 md:grid-cols-2 gap-4 px-8 pb-5 pt-2">
                             <div class="flex flex-col">
                                 <p>Permintaan Produk</p>
-                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex]?.product_type
+                                <h1 class="font-semibold font-body text-lg">{{ financing_data[activeIndex]?.product_name
                                     ?? '' }}</h1>
                             </div>
                             <div class="flex flex-col">

@@ -7,6 +7,7 @@ import { Icon } from '@iconify/vue';
 import BaseContainer from '../../../Components/BaseContainer.vue';
 import Swal from 'sweetalert2';
 import { toast } from 'vue3-toastify';
+import dateParser from '@/Composables/dateParser.js';
 
 const uploadedFile = ref(null)
 const isAgreed = ref(false)
@@ -192,7 +193,7 @@ const submitResignation = () => {
         <div class="font-body min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 dark:bg-gray-900 transition-colors">
             <BaseContainer
                 title="PENGUNDURAN DIRI ANGGOTA KOPERASI"
-                subtitle="Periksa kembali ringkasan informasi keanggotaan Anda dan lampirkan 
+                subtitle="Periksa kembali ringkasan informasi keanggotaan Anda dan lampirkan
                         permohonan pengunduran diri untuk proses lebih lanjut."
                 :showDivider="true"
                 class="mt-20"
@@ -226,7 +227,7 @@ const submitResignation = () => {
                         <div class="md:col-span-2">
                             <ReadonlyField
                                 label="Tanggal Bergabung"
-                                :modelValue="memberData.joined_date"
+                                :modelValue="dateParser(memberData.joined_date)"
                             />
                         </div>
                     </div>

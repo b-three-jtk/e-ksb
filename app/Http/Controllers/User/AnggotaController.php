@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Enums\FinancingReqStatus;
-use App\Enums\LoanStatus;
-use App\Enums\TransactionStatus;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\SavingTransaction;
-use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 use App\Models\UserDoc;
+use App\Enums\LoanStatus;
+use App\Enums\UserStatus;
+use App\Models\Financing;
+use Illuminate\Http\Request;
+use App\Enums\TransactionStatus;
+use App\Enums\FinancingReqStatus;
+use App\Models\SavingTransaction;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
+use App\Enums\LoanPaymentScheduleStatus;
+use App\Http\Requests\CreateResignRequest;
 
 class AnggotaController extends Controller
 {
@@ -37,15 +41,15 @@ class AnggotaController extends Controller
             FinancingReqStatus::APPROVED_WITH_NOTES,
         ])
         ->whereHas('loan')
-        ->with(['loan.payments' => fn ($q) =>
-            $q->where('status', LoanStatus::PAID)
+        ->with(['loan.paymentSchedules' => fn ($q) =>
+            $q->where('paymentSchedules.status', LoanPaymentScheduleStatus::PAID)
         ])
         ->get()
         ->sum(function ($financing) {
             $loan = $financing->loan;
             if (!$loan) return 0;
 
-            $totalPaid = $loan->payments->sum('amount');
+            $totalPaid = $loan->paymentSchedules->sum('total_amount');
 
             if ($totalPaid >= $loan->total_price) {
                 return 0;
@@ -75,8 +79,8 @@ class AnggotaController extends Controller
         $activeMurabahahCount = $user->financings()
             ->whereIn('status', [FinancingReqStatus::APPROVED, FinancingReqStatus::APPROVED_WITH_NOTES,])
             ->whereHas('loan')
-            ->with(['loan.payments' => fn ($q) =>
-                $q->where('status', LoanStatus::PAID)
+            ->with(['loan.paymentSchedules' => fn ($q) =>
+                $q->where('paymentSchedules.status', LoanPaymentScheduleStatus::PAID)
             ])
             ->get()
             ->filter(function ($financing) {
@@ -85,7 +89,7 @@ class AnggotaController extends Controller
                     return false;
                 }
 
-                $totalPaid = $loan->payments->sum('amount');
+                $totalPaid = $loan->paymentSchedules->sum('total_amount');
 
                 return $totalPaid < $loan->total_price;
             })
@@ -101,13 +105,11 @@ class AnggotaController extends Controller
         ]);
     }
 
-    public function createResign(Request $request)
+    public function createResign()
     {
-        $user = $request->user();
+        $user = auth()->user();
 
-        $hasExistingResign = UserDoc::where('user_id', $user->id)
-            ->where('name', 'Dokumen Pengunduran Diri')
-            ->exists();
+        $hasExistingResign = $user->status === UserStatus::RESIGNED_REQUESTED->value;
 
         $totalSaving = SavingTransaction::where('status', TransactionStatus::COMPLETED)
             ->whereHas('savingAccount', fn ($q) =>
@@ -120,29 +122,21 @@ class AnggotaController extends Controller
                 END
             "));
 
-        $totalObligation = $user->financings()
-            ->whereIn('status', [
-                FinancingReqStatus::APPROVED, 
-                FinancingReqStatus::APPROVED_WITH_NOTES,
-            ])
-            ->whereHas('loan')
-            ->with(['loan.payments' => fn ($q) =>
-                $q->where('status', LoanStatus::PAID)
-            ])
+        $totalObligation = Financing::with('loan')->where('user_id', $user->id)
+            ->where('status', FinancingReqStatus::ACTIVE_INSTALLMENTS->value)
             ->get()
             ->sum(function ($financing) {
                 $loan = $financing->loan;
                 if (!$loan) return 0;
 
-                $totalPaid = $loan->payments->sum('amount');
-                return max($loan->total_price - $totalPaid, 0);
+                $totalUnpaid = $loan->remaining_principal + $loan->remaining_margin;
+
+                return $totalUnpaid;
             });
 
         return inertia('User/Resign/Create', [
             'member' => [
-                'name' => $user->name,
-                'member_number' => $user->member_number,
-                'joined_date' => Carbon::parse($user->joined_date)->locale('id')->translatedFormat('d F Y'),
+                ...$user->toArray(),
                 'total_saving' => $totalSaving,
                 'total_obligation' => $totalObligation,
             ],
@@ -150,13 +144,11 @@ class AnggotaController extends Controller
         ]);
     }
 
-    public function storeResign(Request $request)
+    public function storeResign(CreateResignRequest $request)
     {
-        $user = $request->user();
+        $user = auth()->user();
 
-        $hasExistingResign = UserDoc::where('user_id', $user->id)
-            ->where('name', 'Dokumen Pengunduran Diri')
-            ->exists();
+        $hasExistingResign = $user->status === UserStatus::RESIGNED_REQUESTED->value;
 
         if ($hasExistingResign) {
             return back()->withErrors([
@@ -164,28 +156,36 @@ class AnggotaController extends Controller
             ]);
         }
 
-        $request->validate([
-            'document' => 'required|file|mimes:pdf,doc,docx|max:2048',
-        ], [
-            'document.max' => 'Ukuran file maksimal 2 MB',
-            'document.mimes' => 'File harus berupa PDF atau DOC',
-        ]);
+        $data = $request->validated();
 
-        $path = $request->file('document')->store('resign_docs', 'public');
+        $path = $data['document']->store('resign_docs', 'public');
 
         if (!$path || !Storage::disk('public')->exists($path)) {
             return back()->withErrors([
                 'document' => 'Gagal menyimpan dokumen. Silakan coba lagi.',
             ]);
         }
-        UserDoc::create([
-            'name' => 'Dokumen Pengunduran Diri',
-            'attachment' => $path,
-            'user_id' => $user->id,
-        ]);
 
-        return redirect()
-        ->route('user.userDashboard')
-        ->with('success', 'Permohonan pengunduran diri berhasil dikirim.');
+        DB::beginTransaction();
+        try {
+            UserDoc::create([
+                'name' => 'Dokumen Pengunduran Diri',
+                'attachment' => $path,
+                'user_id' => $user->id,
+            ]);
+            $user->status = UserStatus::RESIGNED_REQUESTED->value;
+            $user->save();
+
+            DB::commit();
+
+            return redirect()
+            ->route('user.userDashboard')
+            ->with('success', 'Permohonan pengunduran diri berhasil dikirim.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors([
+                'resign' => 'Terjadi kesalahan saat mengajukan pengunduran diri. Silakan coba lagi.',
+            ]);
+        }
     }
 }

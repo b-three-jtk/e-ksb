@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Models\WorkUnit;
-use App\Enums\LoanStatus;
 use App\Enums\UserStatus;
+use App\Models\Financing;
 use Illuminate\Http\Request;
 use App\Enums\FinancingReqStatus;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
+use App\Enums\LoanPaymentScheduleStatus;
 
 class ResignationController extends Controller
 {
@@ -69,35 +70,32 @@ class ResignationController extends Controller
      */
     public function validation(string $id)
     {
-        $user = User::with('userDocs', 'workUnit', 'savingAccounts', 'financings.loan')->where('status', UserStatus::RESIGNED_REQUESTED)->findOrFail($id);
-        $user->userDocs()->where('name', 'Dokumen Pengunduran Diri')->first();
-        $resignationDoc = $user->userDocs?->first()?->attachment ? asset('storage/' . $user->userDocs->first()->attachment) : 0;
+        $data = [];
+        $data['user'] = User::with('userDocs', 'workUnit', 'savingAccounts')->where('status', UserStatus::RESIGNED_REQUESTED)->findOrFail($id);
+        $data['user']->userDocs->where('name', 'Dokumen Pengunduran Diri')->first();
 
-        $totalSavings = $user->savingAccounts()->sum('balance');
-        $totalObligation = $user->financings()
-            ->whereIn('status', [
-                FinancingReqStatus::APPROVED,
-                FinancingReqStatus::APPROVED_WITH_NOTES,
-            ])
-            ->whereHas('loan')
-            ->with([
-                'loan.payments' => fn($q) =>
-                    $q->where('status', LoanStatus::PAID)
-            ])
+        $resignationDoc = $data['user']->userDocs?->first()?->attachment ? asset('storage/' . $data['user']->userDocs->first()->attachment) : 0;
+
+        $totalSavings = $data['user']->savingAccounts()->sum('balance');
+        $totalObligation = Financing::with('loan')->where('user_id', $data['user']->id)
+            ->where('status', FinancingReqStatus::ACTIVE_INSTALLMENTS->value)
             ->get()
             ->sum(function ($financing) {
                 $loan = $financing->loan;
-                if (!$loan)
-                    return 0;
+                if (!$loan) return 0;
 
-                $totalPaid = $loan->payments->sum('amount');
-                return max($loan->total_price - $totalPaid, 0);
-            });
+                $totalUnpaid = $loan->remaining_principal + $loan->remaining_margin;
+
+                return $totalUnpaid;
+        });
+
         return inertia('Admin/User/Resignation/Validation', [
-            'data' => $user,
-            'resign_doc' => $resignationDoc,
-            'total_savings' => $totalSavings,
-            'total_obligation' => $totalObligation,
+            'data' => [
+                ...$data['user']->toArray(),
+                'resignation_doc' => $resignationDoc,
+                'total_savings' => $totalSavings,
+                'total_obligations' => $totalObligation,
+            ]
         ]);
     }
 
