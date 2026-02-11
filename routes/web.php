@@ -9,14 +9,16 @@ use App\Http\Controllers\User\LedgerController;
 use App\Http\Controllers\Admin\SavingController;
 use App\Http\Controllers\User\AnggotaController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\User\SimpananController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\RepaymentController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Admin\ResignationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\User\UserRepaymentController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
@@ -79,6 +81,8 @@ Route::post('/auth/logout', [LoginController::class, 'destroy'])
     ->name('auth.logout');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'revalidate'])->group(function () {
+    Route::resource('settings', SettingsController::class);
+
     Route::get('/users/verification', [UserController::class, 'prospectiveMembers'])
         ->name('users.prospective');
 
@@ -115,6 +119,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::get('/resignations/list', [ResignationController::class, 'index'])->name('resignations.index');
     Route::get('/resignation/{id}', [ResignationController::class, 'validation'])->name('resignations.validation');
     Route::put('/resignation/{id}', [ResignationController::class, 'validate'])->name('resignations.validate');
+
+    // Financing Routes
+    Route::get('/repayments/validation/{id}', [RepaymentController::class, 'validation'])->name('repayments.validation');
 });
 
 // User Routes

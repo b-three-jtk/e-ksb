@@ -62,7 +62,7 @@ const menuGroups = [
             {
                 icon: SettingsIcon,
                 name: "Pengaturan",
-                path: "/admin/settings",
+                path: "/admin/settings/create",
             }
         ],
     }
