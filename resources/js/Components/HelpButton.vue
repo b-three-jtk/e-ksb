@@ -12,7 +12,7 @@ const openWhatsapp = () => {
 <template>
     <button 
         @click="openWhatsapp"
-        class="fixed bottom-8 right-8 z-40 flex items-center justify-center w-16 h-16 rounded-full bg-accent hover:bg-orange-600 shadow-lg transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-orange-300 dark:focus:ring-orange-700"
+        class="fixed bottom-8 right-8 z-40 flex items-center justify-center w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 shadow-lg transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-orange-300 dark:focus:ring-orange-700"
         aria-label="Hubungi kami melalui WhatsApp"
         title="Hubungi kami"
     >

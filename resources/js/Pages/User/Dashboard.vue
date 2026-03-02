@@ -81,7 +81,7 @@ const rupiah = (value) =>
                     </div>
 
                     <!-- Jumlah Pembiayaan Murabahah -->
-                    <div class="bg-blue-light-400 rounded-2xl shadow-lg p-6 text-white flex items-center justify-center min-h-[140px]">
+                    <div class="bg-green-400 rounded-2xl shadow-lg p-6 text-white flex items-center justify-center min-h-[140px]">
                         <div class="flex items-center gap-4 w-full">
                             <div class="flex-shrink-0">
                                 <Icon icon="carbon:finance" class="w-12 h-12" />
@@ -136,7 +136,7 @@ const rupiah = (value) =>
 
                         <Link href="/pembiayaan/murabahah" class="group">
                             <div class="flex flex-col items-center gap-2">
-                                <div class="w-20 h-20 rounded-full bg-sky-400 flex items-center justify-center text-white group-hover:bg-blue-light-600 transition-colors">
+                                <div class="w-20 h-20 rounded-full bg-sky-400 flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
                                     <Icon icon="uil:credit-card" class="w-9 h-9" />
                                 </div>
                                 <div class="mt-1">

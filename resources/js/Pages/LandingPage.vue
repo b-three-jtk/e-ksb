@@ -30,7 +30,7 @@ const marqueeItems = [
         content: 'Keuntungan',
         highlight: 'Halal',
         after: 'Dibagi Rata',
-        color: 'text-blue-accent'
+        color: 'text-green-accent'
     },
 ]
 
@@ -67,7 +67,7 @@ onUnmounted(() => {
                         alt="">
 
                     <h1 class="font-semibold text-5xl w-lg leading-20 tracking-wide dark:text-gray-100">Sejahtera <span
-                            class="font-light">bersama</span> Koperasi Syariah Warga Polban</h1>
+                            class="font-light">bersama</span> Koperasi Syariah Berkah</h1>
                     <p class="text-xl w-md tracking-wide leading-8 dark:text-gray-300">Rasakan aman, nyaman, dan berkahnya bertransaksi
                         sesuai Al-Qur'an dan Sunnah</p>
                     <div class="flex gap-4">
@@ -90,7 +90,7 @@ onUnmounted(() => {
                         class="w-80 h-80 object-cover absolute top-72 z-11 right-72" alt="">
                     <img src="/public/images/home/hero_04.avif"
                         class="w-40 h-40 rounded-full object-cover absolute ml-52 bottom-52 z-11" alt="">
-                    <div class="w-40 bg-blue-accent h-40 absolute z-10 bottom-52 ml-64 rounded-full"></div>
+                    <div class="w-40 bg-green-accent h-40 absolute z-10 bottom-52 ml-64 rounded-full"></div>
                     <img src="/public/images/home/hero_03.avif"
                         class="w-44 h-44 rounded-full object-cover absolute right-96 bottom-16 z-11" alt="">
                     <div class="w-32 bg-accent h-32 absolute z-10 bottom-8 -right-16 rounded-full"></div>
@@ -153,7 +153,7 @@ onUnmounted(() => {
                     </ul>
                 </div>
                 <h1 class="font-semibold w-lg text-right text-5xl text-dark-text dark:text-white/80 leading-20 tracking-wide"><span
-                        class="font-normal">Mengapa memilih</span> Koperasi Syariah Warga Polban?</h1>
+                        class="font-normal">Mengapa memilih</span> Koperasi Syariah Berkah?</h1>
             </section>
 
             <section class="grid xl:grid-cols-2 grid-cols-1 h-fit py-36 px-32 relative dark:bg-brand-950">
@@ -166,16 +166,16 @@ onUnmounted(() => {
                     <img src="/public/images/home/about_us.png" class="w-3xl h-full" />
                 </div>
                 <div class="flex flex-col gap-6 mt-auto">
-                    <h2 class="text-3xl font-bold text-primary dark:text-blue-accent">Tentang Kami</h2>
-                    <p class="text-lg text-dark-text leading-8 dark:text-gray-300">Koperasi Syariah Warga Polban didirikan pada tahun
-                        2024 dengan tujuan memberikan solusi keuangan yang sesuai dengan prinsip-prinsip syariah
-                        kepada masyarakat Politeknik Negeri Bandung. Kami berkomitmen untuk menyediakan layanan
-                        keuangan yang transparan, adil, dan bermanfaat bagi seluruh anggota kami.</p>
+                    <h2 class="text-3xl font-bold text-primary dark:text-green-accent">Tentang Kami</h2>
+                    <p class="text-lg text-dark-text leading-8 dark:text-gray-300">Koperasi Syariah Berkah didirikan pada tahun
+                        2020 dengan tujuan memberikan solusi keuangan yang sesuai dengan prinsip-prinsip syariah
+                        kepada masyarakat. Kami berkomitmen untuk menyediakan layanan keuangan yang transparan, 
+                        adil, dan bermanfaat bagi seluruh anggota kami.</p>
                 </div>
             </section>
 
             <section class="px-32 py-36 flex flex-col gap-8 dark:bg-brand-950">
-                <h2 class="text-3xl font-bold text-primary dark:text-blue-accent">Produk Koperasi</h2>
+                <h2 class="text-3xl font-bold text-primary dark:text-green-accent">Produk Koperasi</h2>
                 <ul class="flex xl:flex-row flex-col gap-6">
                     <CardProduct productImage="/images/home/product_murabaha.avif" productTitle="Pembiayaan Murabahah"
                         productLink="#" :main="true" />
@@ -191,7 +191,7 @@ onUnmounted(() => {
             <section class="bg-light-bg dark:bg-primary/90 h-fit flex flex-col items-center py-36 px-32 gap-14 relative">
                 <img src="/public/images/home/ornament_orange.svg" class="w-60 h-auto absolute z-1 -top-20 right-0"
                     alt="">
-                <h1 class="text-5xl text-secondary font-semibold dark:text-blue-accent">Apa Kata Anggota Kami?</h1>
+                <h1 class="text-5xl text-secondary font-semibold dark:text-green-accent">Apa Kata Anggota Kami?</h1>
 
                 <div class="flex flex-col">
                     <div class="bg-white dark:bg-brand-950 dark:border dark:border-stroke px-12 pt-10 pb-32 rounded-2xl xl:w-6xl w-full h-72 flex gap-6 dark:text-gray-300">
@@ -229,7 +229,7 @@ onUnmounted(() => {
                     <h2 class="text-3xl font-bold text-white">Bergabunglah bersama kami dan rasakan manfaatnya
                         sekarang
                         juga!</h2>
-                    <p class="text-gray-200">Koperasi Syariah Polban akan membantu memenuhi kebutuhan finansial Anda dengan prinsip syariah yang terpercaya.</p>
+                    <p class="text-gray-200">Koperasi Syariah Berkah akan membantu memenuhi kebutuhan finansial Anda dengan prinsip syariah yang terpercaya.</p>
                 </div>
                 <div class="flex gap-4 mx-auto">
                     <Link href="/auth/register" class="px-8 py-4 my-auto bg-secondary rounded-xl text-white hover:bg-brand-800">Daftar Sekarang</Link>

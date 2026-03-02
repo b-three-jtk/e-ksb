@@ -278,7 +278,7 @@ const breadcrumbItems = [
                                 v-if="filters.tab === 'permohonan'"
                                 :href="`/admin/savings/show/${row.id}`"
                                 class="inline-flex items-center gap-2
-                                    bg-blue-light-600 hover:bg-blue-light-900 text-white px-4 py-2 rounded-lg"
+                                    bg-green-600 hover:bg-green-900 text-white px-4 py-2 rounded-lg"
                             >
                                 <Icon icon="tabler:checklist" class="w-4 h-4" />
                                 Tinjau
