@@ -11,6 +11,7 @@ import Button from '../../../Components/Form/Button.vue';
 const props = defineProps({
     admin: { type: Object, required: true },
     roles: { type: Array, required: true },
+    educations: Array
 })
 
 const form = useForm({
@@ -20,6 +21,11 @@ const form = useForm({
     role_id: props.admin.role_id || '',
     address: props.admin.address || '',
     phone_number: props.admin.phone_number || '',
+    last_education: props.admin.last_education || '',
+    birth_place: props.admin.birth_place || '',
+    birth_date: props.admin.birth_date || '',
+    gender: props.admin.gender || '',
+    residential_address: props.admin.residential_address || '',
 })
 
 const breadcrumbItems = [
@@ -70,50 +76,73 @@ const submitForm = () => {
     <Layout title="Edit Admin">
         <div class="flex flex-col">
             <PageBreadcrumb page-title="Edit Admin" :items="breadcrumbItems" />
-            <div class="card-layout px-0!">
-                <div class="flex flex-col px-8 border-b-2 border-gray-200 dark:border-gray-700 pb-4 mb-4">
-                    <h1 class="card-title">Edit Admin</h1>
-                    <p class="text-sm text-gray-400">Perbarui data admin di sini.</p>
+            <div class="card-layout flex flex-col gap-10">
+                <div class="grid md:grid-cols-2 grid-cols-1 gap-6">
+                    <!-- NIK -->
+                    <BaseInputAdmin v-model="form.nik" label="NIK" type="text" required
+                        placeholder="Masukkan 16 digit NIK" max="16" min="16" pattern="[0-9]*" :error="errors.nik">
+                    </BaseInputAdmin>
+
+                    <!-- Nama -->
+                    <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
+                        placeholder="Masukkan nama lengkap" :error="errors.name"></BaseInputAdmin>
+
+                    <!-- Jenis Kelamin -->
+                    <BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required :selectables="[
+                        { value: 'Laki-laki', text: 'Laki-laki' },
+                        { value: 'Perempuan', text: 'Perempuan' }
+                    ]" :error="errors.gender">
+                    </BaseInputAdmin>
+
+                    <div class="flex gap-6">
+                        <!-- Tempat Lahir -->
+                        <BaseInputAdmin v-model="form.birth_place" label="Tempat Lahir" type="text"
+                            placeholder="Masukkan tempat lahir" :error="errors.birth_place">
+                        </BaseInputAdmin>
+                        <!-- Tanggal Lahir -->
+                        <BaseInputAdmin v-model="form.birth_date" label="Tanggal Lahir" type="date"
+                            :error="errors.birth_date">
+                        </BaseInputAdmin>
+                    </div>
+
+                    <!-- Pendidikan Terakhir -->
+                    <BaseInputAdmin v-model="form.last_education" label="Pendidikan Terakhir" type="select"
+                        :selectables="educations.map(unit => ({ value: unit, text: unit }))"
+                        :error="errors.last_education">
+                    </BaseInputAdmin>
+
+                    <!-- Posisi -->
+                    <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
+                        :selectables="roles.map(role => ({ value: role.id, text: role.name }))" :error="errors.role_id">
+                    </BaseInputAdmin>
+
+                    <!-- Email -->
+                    <BaseInputAdmin v-model="form.email" label="Email" type="email" required
+                        placeholder="Masukkan email" :error="errors.email"></BaseInputAdmin>
+
+                    <!-- No. Telp -->
+                    <BaseInputAdmin v-model="form.phone_number" label="Nomor Telepon" type="text"
+                        placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number">
+                    </BaseInputAdmin>
+
+                    <!-- Alamat (full width) -->
+                    <BaseInputAdmin v-model="form.address" label="Alamat" type="textarea"
+                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.address">
+                    </BaseInputAdmin>
+
+                    <!-- Alamat Domisili (full width) -->
+                    <BaseInputAdmin v-model="form.residential_address" label="Alamat Domisili" type="textarea"
+                        placeholder="Masukkan alamat domisili" rows="4" :error="errors.residential_address">
+                    </BaseInputAdmin>
                 </div>
 
-                <div class="flex flex-col">
-                    <div class="grid md:grid-cols-2 grid-cols-1 px-8 gap-6">
-                        <!-- NIK -->
-                        <BaseInputAdmin v-model="form.nik" label="NIK" type="text" required
-                            placeholder="Masukkan 16 digit NIK" max="16" min="16" pattern="[0-9]*" :error="errors.nik">
-                        </BaseInputAdmin>
-
-                        <!-- Posisi -->
-                        <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
-                            :selectables="roles.map(role => ({ value: role.id, text: role.name }))"
-                            :error="errors.role_id"></BaseInputAdmin>
-
-                        <!-- Nama -->
-                        <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
-                            placeholder="Masukkan nama lengkap" :error="errors.name"></BaseInputAdmin>
-
-                        <!-- Email -->
-                        <BaseInputAdmin v-model="form.email" label="Email" type="email" required
-                            placeholder="Masukkan email" :error="errors.email"></BaseInputAdmin>
-
-                        <!-- Alamat (full width) -->
-                        <BaseInputAdmin v-model="form.address" label="Alamat" type="textarea"
-                            placeholder="Masukkan alamat lengkap" rows="4" :error="errors.address"></BaseInputAdmin>
-
-                        <!-- No. Telp -->
-                        <BaseInputAdmin v-model="form.phone_number" label="Nomor Telepon" type="text"
-                            placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number">
-                        </BaseInputAdmin>
-                    </div>
-
-                    <div class="flex items-center justify-center gap-4 pt-10 px-8 pb-8">
-                        <Button href="/admin/list" variant="light">
-                            Batal
-                        </Button>
-                        <Button @click="submitForm" variant="secondary">
-                            {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
-                        </Button>
-                    </div>
+                <div class="flex items-center justify-end gap-6 pb-6">
+                    <Button href="/admin/list" variant="light">
+                        Batal
+                    </Button>
+                    <Button @click="submitForm" variant="secondary">
+                        {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
+                    </Button>
                 </div>
             </div>
         </div>

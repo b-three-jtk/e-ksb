@@ -107,7 +107,6 @@ const breadcrumbItems = [
             <BaseFunctionality
                 :per-page="filters.per_page"
                 :search="filters.search"
-                :selects="selectFilters"
                 :search-tooltip="searchTooltipItems"
                 @update:per-page="val => filters.per_page = val"
                 @update:search="val => filters.search = val"

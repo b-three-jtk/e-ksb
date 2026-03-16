@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Role;
-use App\Models\User;
+use App\Enums\Education;
 use App\Enums\UserStatus;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdminRequest;
 use App\Http\Requests\UpdateAdminRequest;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -84,9 +85,11 @@ class AdminController extends Controller
     public function create()
     {
         $roles = Role::where('name', '!=', 'Anggota')->get();
+        $educations = array_column(Education::cases(), 'value');
 
         return inertia('Admin/Admins/Create', [
             'roles' => $roles,
+            'educations' => $educations,
         ]);
     }
 
@@ -139,10 +142,12 @@ class AdminController extends Controller
     {
         $admin = User::with('role')->findOrFail($id);
         $roles = Role::where('name', '!=', 'Anggota')->get();
+        $educations = array_column(Education::cases(), 'value');
 
         return inertia('Admin/Admins/Edit', [
             'admin' => $admin,
             'roles' => $roles,
+            'educations' => $educations,
         ]);
     }
 
