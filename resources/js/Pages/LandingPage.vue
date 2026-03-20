@@ -165,7 +165,7 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
                         berkahnya bertransaksi
                         sesuai Al-Qur'an dan Sunnah</p>
                     <div class="flex gap-4">
-                        <Link href="/auth/register"
+                        <Link href="/auth/login"
                             class="bg-secondary text-white px-6 py-3 rounded-xl hover:bg-brand-900">
                             Masuk Sekarang
                         </Link>
@@ -191,7 +191,6 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
                         </defs>
                         <rect fill="url(#sp)" width="100%" height="100%" />
                     </svg>
-                    <rect fill="url(#sp)" width="200" height="200" />
                     <img src="/public/images/home/hero_04.webp"
                         class="w-40 h-40 rounded-full object-cover absolute ml-52 bottom-52 z-11" alt="">
                     <div class="w-40 bg-green-accent h-40 absolute z-10 bottom-52 ml-64 rounded-full"></div>
