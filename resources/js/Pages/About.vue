@@ -35,7 +35,7 @@ import HelpButton from '@/Components/HelpButton.vue';
                 <!-- Gambar -->
                 <div
                 class="w-80 h-96 bg-no-repeat bg-contain bg-center"
-                style="background-image: url('/images/home/misi.png');"
+                style="background-image: url('/images/home/misi.webp');"
                 ></div>
 
                 <!-- Konten -->

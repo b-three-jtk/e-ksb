@@ -111,12 +111,12 @@ const logout = () => {
                 <template v-if="!user">
                     <div class="flex items-center gap-4 opacity-0 lg:opacity-100">
                         <Link href="/auth/login"
-                            class="inline-flex items-center justify-center rounded-xl bg-white px-8 py-2 font-body font-semibold text-orange-500 shadow-lg transition-colors hover:text-orange-600 hover:bg-gray-100">
+                            class="inline-flex items-center justify-center rounded-xl bg-white px-8 py-2 font-body font-semibold text-brand-600 shadow-lg transition-colors hover:text-brand-700 hover:bg-gray-100">
                             Masuk
                         </Link>
 
                         <Link href="/auth/register"
-                            class="inline-flex items-center justify-center rounded-xl bg-orange-500 px-8 py-2 text-body font-semibold text-white hover:bg-orange-600 transition-colors shadow-lg">
+                            class="inline-flex items-center justify-center rounded-xl bg-brand-600 px-8 py-2 text-body font-semibold text-white hover:bg-brand-700 transition-colors shadow-lg">
                             Daftar
                         </Link>
                     </div>
