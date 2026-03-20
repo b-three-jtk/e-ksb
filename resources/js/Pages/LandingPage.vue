@@ -446,12 +446,6 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
             <section
                 class="bg-light-bg dark:bg-primary/90 h-fit flex flex-col items-center py-36 px-32 gap-14 relative">
                 <svg class="w-60 h-60 absolute z-1 -top-20 right-0 opacity-60" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <pattern id="sp3" width="50" height="50" patternUnits="userSpaceOnUse">
-                            <path d="M24,12 L26.5,20.5 L35,24 L26.5,27.5 L24,36 L21.5,27.5 L13,24 L21.5,20.5 Z"
-                                fill="#CEE381" />
-                        </pattern>
-                    </defs>
                     <rect fill="url(#sp3)" width="100%" height="100%" />
                 </svg>
                 <h1 class="text-5xl text-secondary font-semibold dark:text-gray-300">Apa Kata Anggota Kami?</h1>
