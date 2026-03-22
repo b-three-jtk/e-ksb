@@ -102,7 +102,7 @@ const rejectTransaction = () => {
 const getStatusClass = () => {
     const baseClass = 'font-semibold rounded-2xl px-4 text-theme-sm py-1'
 
-    switch (props.data.financing.loan.paymentSchedules.status) {
+    switch (props.data.status) {
         case 'Selesai':
             return `${baseClass} text-green-600 bg-green-50`
         case 'Ditolak dengan alasan':

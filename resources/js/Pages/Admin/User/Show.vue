@@ -12,6 +12,7 @@ import InfoCircleIcon from '@/Icons/InfoCircleIcon.vue'
 import EyeIcon from '@/Icons/EyeIcon.vue';
 import ModalDocument from '@/Components/ModalDocument.vue';
 import { ref } from 'vue'
+import ModalMutasi from '@/Components/ModalMutasi.vue';
 
 const props = defineProps({
     user: { type: Object, required: true },
@@ -25,6 +26,14 @@ const form = useForm({
 
 const ktpModalRef = ref(null)
 const kkModalRef = ref(null)
+
+const mutasiModalRef = ref(null)
+const riwayatModalRef = ref(null)
+const isLoadingMutasi = ref(false)
+const isLoadingRiwayat = ref(false)
+
+const selectedAccount = ref(null)
+const selectedFinancing = ref(null)
 
 const openKtpModal = () => ktpModalRef.value?.openModal()
 const openKkModal = () => kkModalRef.value?.openModal()
@@ -75,10 +84,40 @@ const getStatusClass = () => {
     }
 }
 
+const openMutasiModal = async (account) => {
+    selectedAccount.value = account
+    isLoadingMutasi.value = true
+
+    try {
+        const res = await axios.get(`/admin/accounts/${account.id}/mutasi`)
+        mutasiData.value = res.data
+    } catch (error) {
+        console.error('Error fetching mutasi:', error)
+    }
+
+    isLoadingMutasi.value = false
+    mutasiModalRef.value?.openModal()
+}
+
+const openRiwayatModal = async (financing) => {
+    selectedFinancing.value = financing
+    isLoadingRiwayat.value = true
+
+    try {
+        const res = await axios.get(`/admin/financings/${financing.id}/riwayat`)
+        riwayatData.value = res.data
+    } catch (error) {
+        console.error('Error fetching riwayat:', error)
+    }
+
+    isLoadingRiwayat.value = false
+    riwayatModalRef.value?.openModal()
+}
+
 const breadcrumbItems = [
-    {name: 'Dashboard', link: '/admin'},
-    {name: 'Pengelolaan Data Anggota', link: '/admin/users/list'},
-    {name: 'Detail Anggota'},
+    { name: 'Dashboard', link: '/admin' },
+    { name: 'Pengelolaan Data Anggota', link: '/admin/users/list' },
+    { name: 'Detail Anggota' },
 ];
 </script>
 
@@ -108,8 +147,7 @@ const breadcrumbItems = [
                         </div>
                     </div>
                     <div class="flex gap-4">
-                        <button @click="nonactiveUser()"
-                            v-if="user.status === 'Aktif'"
+                        <button @click="nonactiveUser()" v-if="user.status === 'Aktif'"
                             class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-error-500 px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-error-400 dark:border-gray-700 dark:hover:bg-error-500/70 dark:hover:text-gray-200">
                             <span class="icon-[tabler--ban]" style="width: 24px; height: 24px;"></span>
                             Nonaktifkan
@@ -265,13 +303,13 @@ const breadcrumbItems = [
                                             dateParser(account.transactions[0]?.transaction_date) ?? '-' }}</span>
                                     </li>
                                 </ul>
-                                <Button full size="small" variant="light">
+                                <Button full size="small" variant="light" @click="openMutasiModal(account)">
                                     <InfoCircleIcon />
                                     Mutasi
                                 </Button>
                             </div>
                         </div>
-                        <div class="grid xl:grid-cols-2 grid-cols-1">
+                        <div class="grid xl:grid-cols-2 grid-cols-1 gap-4">
                             <div v-for="financing in user.financings" class="card-layout flex flex-col gap-12 px-0!">
                                 <div class="border-b-2 border-gray-200 dark:border-gray-700 pb-4 px-8">
                                     <h1 class="font-semibold text-dark-text dark:text-white/90">Pembiayaan Murabahah
@@ -281,60 +319,57 @@ const breadcrumbItems = [
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Objek Pembiayaan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            financing.product_type }}</span>
+                                            financing.product_name }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Harga Pembiayaan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(financing.loan?.total_price ?? 0) }}</span>
+                                            parseCurrencyAmount(financing.loan?.total_loan) }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir
                                             Diperbarui</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            dateParser(financing.created_at) }}</span>
+                                            dateParser(financing.updated_at) }}</span>
                                     </li>
                                     <li class="flex flex-col gap-2">
                                         <div class="flex sm:flex-row flex-col justify-between items-center">
                                             <span class="text-sm text-gray-500 dark:text-gray-300">Sisa
                                                 Pembiayaan</span>
-                                            <span class="font-medium text-dark-text dark:text-white">{{
-                                                parseCurrencyAmount(
-                                                    Math.max(
-                                                        0,
-                                                        (financing.loan?.total_price ?? 0) -
-                                                        financing.loan?.payments.length * (financing.loan?.amount_ins ?? 0)
-                                                    )) }}</span>
+                                            <span class="font-medium text-dark-text dark:text-white">
+                                                {{ parseCurrencyAmount((parseFloat(financing.loan.remaining_principal) || 0) + (parseFloat(financing.loan.remaining_margin) || 0)) }}
+                                            </span>
                                         </div>
                                         <div class="progress-container">
                                             <div class="progress-bar"
-                                                :style="{ width: (Math.min((financing.loan?.tenor ?? 0) ? (financing.loan.payments.length / financing.loan.tenor * 100) : 0, 100)) + '%' }">
+                                                :style="{ width: (Math.min((financing.loan?.tenor ?? 0) ? (financing.loan.payment_schedules.length / financing.loan.tenor * 100) : 0, 100)) + '%' }">
                                             </div>
                                         </div>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(financing.loan?.amount_ins ?? 0) }}</span>
+                                            parseCurrencyAmount(financing.loan?.monthly_installment) }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Jatuh Tempo
                                             Berikutnya</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            dateParser(financing.created_at) }}</span>
+                                            dateParser(financing.next_payment?.due_date) }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Posisi Angsuran</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            financing.loan?.payments?.length ?? 0 }} dari {{ financing.loan?.tenor ?? 0 }}</span>
+                                            financing.loan_payment_paid_count ?? 0 }} dari {{ financing.loan?.tenor ?? 0
+                                            }}</span>
                                     </li>
                                 </ul>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full px-8">
-                                    <Button full variant="info">
+                                    <Button size="small" full variant="info">
                                         <InfoCircleIcon />
                                         Detail
                                     </Button>
-                                    <Button full variant="light">
+                                    <Button full size="small" variant="light" @click="openRiwayatModal(financing)">
                                         <span class="icon-[tabler--history]" style="width: 24px; height: 24px;"></span>
                                         Riwayat
                                     </Button>
@@ -351,7 +386,27 @@ const breadcrumbItems = [
                 </div>
             </div>
         </div>
-        <ModalDocument ref="ktpModalRef" modal-id="modal-ktp" title="Dokumen KTP Anggota" name="KTP" :attachment="ktp_photo" />
-        <ModalDocument ref="kkModalRef" modal-id="modal-kk" title="Dokumen KK Anggota" name="KK" :attachment="kk_photo" />
+        <ModalMutasi
+            ref="mutasiModalRef"
+            modal-id="modal-mutasi"
+            title="Mutasi Rekening Anggota"
+            :account="selectedAccount"
+            :transactions="mutasiData"
+            :loading="isLoadingMutasi"
+            :key="selectedAccount?.id"
+        />
+        <ModalMutasi
+            ref="riwayatModalRef"
+            modal-id="modal-riwayat"
+            title="Riwayat Pembiayaan"
+            :financing="selectedFinancing"
+            :schedules="riwayatData"
+            :loading="isLoadingRiwayat"
+            :key="selectedFinancing?.id"
+        />
+        <ModalDocument ref="ktpModalRef" modal-id="modal-ktp" title="Dokumen KTP Anggota" name="KTP"
+            :attachment="ktp_photo" />
+        <ModalDocument ref="kkModalRef" modal-id="modal-kk" title="Dokumen KK Anggota" name="KK"
+            :attachment="kk_photo" />
     </AdminLayout>
 </template>

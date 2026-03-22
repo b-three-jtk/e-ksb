@@ -168,7 +168,7 @@ const breadcrumbItems = [
                 <template #cell-profil="{ row }">
                     <div class="flex items-center gap-3">
                         <img v-if="row.avatar" :src="row.avatar" class="w-9 h-9 rounded-full object-cover" />
-                         <div
+                        <div
                             v-else
                             class="w-9 h-9 flex items-center justify-center
                                 rounded-full bg-gray-200 dark:bg-gray-700"

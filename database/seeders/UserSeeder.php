@@ -49,6 +49,7 @@ class UserSeeder extends Seeder
             'password' => bcrypt('password'),
             'status' => UserStatus::ACTIVE->value,
             'role_id' => Role::where('name', 'Anggota')->first()->id,
+            'joined_date' => now()->subDays(30),
         ]);
         User::create([
             'member_number' => 'KSP003',

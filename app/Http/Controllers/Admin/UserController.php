@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\User;
-use Inertia\Inertia;
-use App\Enums\UserStatus;
-use Illuminate\Http\Request;
+use App\Enums\LoanPaymentScheduleStatus;
 use App\Enums\TransactionStatus;
-use Illuminate\Support\Facades\Log;
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Cache;
 use App\Mail\ApprovalNotificationMail;
 use App\Mail\RejectionNotificationMail;
+use App\Models\Financing;
+use App\Models\SavingAccount;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -35,14 +38,18 @@ class UserController extends Controller
             'savingAccounts.transactions' => fn($q) =>
                 $q->where('status', TransactionStatus::COMPLETED)
         ])
-        ->whereHas('role', fn ($q) =>
-            $q->whereIn('name', ['User', 'Anggota'])
-        )
-        ->whereNotNull('joined_date')
-        ->whereNotNull('member_number');
+            ->whereHas(
+                'role',
+                fn($q) =>
+                $q->where('name', 'Anggota')
+            )
+            ->whereNotNull('joined_date')
+            ->whereNotNull('member_number');
 
-        $memberBaseQuery = User::whereHas('role', fn ($q) =>
-            $q->whereIn('name', ['User', 'Anggota'])
+        $memberBaseQuery = User::whereHas(
+            'role',
+            fn($q) =>
+            $q->where('name', 'Anggota')
         );
 
         $verifiedMembersQuery = (clone $memberBaseQuery)
@@ -155,18 +162,46 @@ class UserController extends Controller
                     ->take(1);
             },
             'heirs',
-            'financings.loan.payments'
+            'financings.loan.paymentSchedules',
         ])->findOrFail($id);
 
         $user->profile_picture = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
         $ktpDoc = $user->userDocs->firstWhere('name', 'ktp');
         $kkDoc = $user->userDocs->firstWhere('name', 'kk');
 
+        $user->financings->each(function ($financing) {
+            $financing->loan_payment_paid_count = $financing->loan->paymentSchedules
+                ->where('status', LoanPaymentScheduleStatus::PAID->value)
+                ->count();
+            $financing->next_payment = $financing->loan->paymentSchedules
+                ->where('status', LoanPaymentScheduleStatus::SCHEDULED->value)
+                ->sortBy('due_date')
+                ->first();
+        });
+
         return inertia('Admin/User/Show', [
             'user' => $user,
             'ktp_photo' => $ktpDoc?->attachment ? asset('storage/' . $ktpDoc->attachment) : null,
             'kk_photo' => $kkDoc?->attachment ? asset('storage/' . $kkDoc->attachment) : null,
         ]);
+    }
+
+    public function getMutasi($accountId)
+    {
+        $account = SavingAccount::with([
+            'transactions' => fn($q) => $q->latest('transaction_date')
+        ])->findOrFail($accountId);
+
+        return response()->json($account->transactions);
+    }
+
+    public function getRiwayat($financingId)
+    {
+        $financing = Financing::with([
+            'loan.paymentSchedules.payment' => fn($q) => $q->latest('payment_date')
+        ])->findOrFail($financingId);
+
+        return response()->json($financing->loan->paymentSchedules);
     }
 
     public function verificationDetail(User $user)

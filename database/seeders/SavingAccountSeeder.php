@@ -23,7 +23,10 @@ class SavingAccountSeeder extends Seeder
         $savingTypes = [
             SavingType::SIMPANAN_POKOK->value,
             SavingType::SIMPANAN_WAJIB->value,
-            SavingType::SIMPANAN_SUKARELA->value,
+            SavingType::TABUNGAN_ANGGOTA->value,
+            SavingType::TABUNGAN_BERJANGKA->value,
+            SavingType::TABUNGAN_IBADAH->value,
+            SavingType::TABUNGAN_SOSIAL->value,
         ];
 
         $transactionMethods = collect(TransactionMethods::cases())->map(fn($m) => $m->value)->all();
