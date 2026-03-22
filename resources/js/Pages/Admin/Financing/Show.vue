@@ -7,6 +7,7 @@ import Button from '../../../Components/Form/Button.vue';
 import moneyParser from '../../../Composables/moneyParser.js';
 import dateParser from '../../../Composables/dateParser.js';
 import EyeIcon from '../../../Icons/EyeIcon.vue';
+import FinancingChart from '../../../Components/FinancingChart.vue';
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -110,8 +111,9 @@ const getScheduleStatusClass = (status) => {
                         <Info label="Angsuran/Bulan" :value="moneyParser(data.loan.monthly_installment)" />
                         <Info label="Tenor" :value="data.loan.tenor + ' Bulan'" />
                     </div>
-                    <div class="">
-                        <!-- TODO GRAFIK -->
+                    <div class="py-8 px-8">
+                        <h3 class="font-semibold mb-4">Status Angsuran</h3>
+                        <FinancingChart :payment-schedules="data.loan.payment_schedules" />
                     </div>
                 </div>
             </div>
