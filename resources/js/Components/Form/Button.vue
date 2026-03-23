@@ -40,7 +40,7 @@ const getStyles = () => {
         case 'warning':
             return 'bg-yellow-500 text-white hover:bg-yellow-600';
         case 'info':
-            return 'bg-green-600 text-white hover:bg-green-700';
+            return 'bg-blue-500 text-white hover:bg-blue-600';
         case 'light':
             return 'bg-white text-black hover:bg-gray-100 border border-gray-300 dark:bg-gray-800 dark:text-gray-300';
         case 'success':
