@@ -108,6 +108,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
+    Route::get('/accounts/{id}/mutasi', [UserController::class, 'getMutasi']);
+    Route::get('/financings/{id}/riwayat', [UserController::class, 'getRiwayat']);
     Route::get('/users/list', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{id}/nonactive', [UserController::class, 'updateStatusToInactive'])->name('users.nonactive');
 

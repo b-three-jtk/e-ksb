@@ -32,6 +32,9 @@ const riwayatModalRef = ref(null)
 const isLoadingMutasi = ref(false)
 const isLoadingRiwayat = ref(false)
 
+const mutasiData = ref([])
+const riwayatData = ref([])
+
 const selectedAccount = ref(null)
 const selectedFinancing = ref(null)
 
@@ -87,35 +90,35 @@ const getStatusClass = () => {
 const openMutasiModal = async (account) => {
     selectedAccount.value = account
     isLoadingMutasi.value = true
+    mutasiModalRef.value?.openModal()
 
     try {
         const res = await axios.get(`/admin/accounts/${account.id}/mutasi`)
         mutasiData.value = res.data
     } catch (error) {
         console.error('Error fetching mutasi:', error)
+    } finally {
+        isLoadingMutasi.value = false
     }
-
-    isLoadingMutasi.value = false
-    mutasiModalRef.value?.openModal()
 }
 
 const openRiwayatModal = async (financing) => {
     selectedFinancing.value = financing
     isLoadingRiwayat.value = true
+    riwayatModalRef.value?.openModal()
 
     try {
         const res = await axios.get(`/admin/financings/${financing.id}/riwayat`)
         riwayatData.value = res.data
     } catch (error) {
         console.error('Error fetching riwayat:', error)
+    } finally {
+        isLoadingRiwayat.value = false
     }
-
-    isLoadingRiwayat.value = false
-    riwayatModalRef.value?.openModal()
 }
 
 const breadcrumbItems = [
-    { name: 'Dashboard', link: '/admin' },
+    { name: 'Dashboard', link: '/admin/dashboard' },
     { name: 'Pengelolaan Data Anggota', link: '/admin/users/list' },
     { name: 'Detail Anggota' },
 ];
@@ -337,12 +340,15 @@ const breadcrumbItems = [
                                             <span class="text-sm text-gray-500 dark:text-gray-300">Sisa
                                                 Pembiayaan</span>
                                             <span class="font-medium text-dark-text dark:text-white">
-                                                {{ parseCurrencyAmount((parseFloat(financing.loan.remaining_principal) || 0) + (parseFloat(financing.loan.remaining_margin) || 0)) }}
+                                                {{ parseCurrencyAmount((parseFloat(financing.loan?.remaining_principal)
+                                                    || 0) + (parseFloat(financing.loan?.remaining_margin) || 0)) }}
                                             </span>
                                         </div>
                                         <div class="progress-container">
                                             <div class="progress-bar"
-                                                :style="{ width: (Math.min((financing.loan?.tenor ?? 0) ? (financing.loan.payment_schedules.length / financing.loan.tenor * 100) : 0, 100)) + '%' }">
+                                                :style="{ width: (Math.min(((financing.loan?.tenor ?? 0) > 0
+                                                    ? (((financing.loan?.payment_schedules?.length ?? 0) / (financing.loan?.tenor ?? 0)) * 100)
+                                                    : 0), 100)) + '%' }">  
                                             </div>
                                         </div>
                                     </li>
@@ -386,24 +392,12 @@ const breadcrumbItems = [
                 </div>
             </div>
         </div>
-        <ModalMutasi
-            ref="mutasiModalRef"
-            modal-id="modal-mutasi"
-            title="Mutasi Rekening Anggota"
-            :account="selectedAccount"
-            :transactions="mutasiData"
-            :loading="isLoadingMutasi"
-            :key="selectedAccount?.id"
-        />
-        <ModalMutasi
-            ref="riwayatModalRef"
-            modal-id="modal-riwayat"
-            title="Riwayat Pembiayaan"
-            :financing="selectedFinancing"
-            :schedules="riwayatData"
-            :loading="isLoadingRiwayat"
-            :key="selectedFinancing?.id"
-        />
+        <ModalMutasi ref="mutasiModalRef" modal-id="modal-mutasi" title="Mutasi Rekening Anggota"
+            :account="selectedAccount" :transactions="mutasiData" :loading="isLoadingMutasi"
+            :key="selectedAccount?.id" />
+        <ModalMutasi ref="riwayatModalRef" modal-id="modal-riwayat" title="Riwayat Pembiayaan"
+            :financing="selectedFinancing" :schedules="riwayatData" :loading="isLoadingRiwayat"
+            :key="selectedFinancing?.id" />
         <ModalDocument ref="ktpModalRef" modal-id="modal-ktp" title="Dokumen KTP Anggota" name="KTP"
             :attachment="ktp_photo" />
         <ModalDocument ref="kkModalRef" modal-id="modal-kk" title="Dokumen KK Anggota" name="KK"
