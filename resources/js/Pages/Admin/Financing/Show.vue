@@ -8,15 +8,14 @@ import moneyParser from '../../../Composables/moneyParser.js';
 import dateParser from '../../../Composables/dateParser.js';
 import EyeIcon from '../../../Icons/EyeIcon.vue';
 import FinancingChart from '../../../Components/FinancingChart.vue';
+import NoArchiveIcon from '../../../Icons/NoArchiveIcon.vue';
 
 const props = defineProps({
     data: { type: Object, required: true },
 });
 
-console.log(props.data)
-
 const breadcrumbItems = [
-    { name: 'Dashboard', link: '/admin' },
+    { name: 'Dashboard', link: '/admin/dashboard' },
     { name: 'Pengelolaan Pembiayaan' },
 ];
 
@@ -140,9 +139,9 @@ const getScheduleStatusClass = (status) => {
                                 </th>
                             </tr>
                         </thead>
-                        <tbody v-if="data.loan.payment_schedules">
+                        <tbody v-if="data.loan.payment_schedules && data.loan.payment_schedules.length > 0">
                             <tr v-for="data in data.loan.payment_schedules"
-                                class="border-t border-gray-100 dark:border-gray-500">
+                                class="border-t border-gray-100 dark:border-gray-500 font-body">
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
                                         {{ data.installment_number }}
@@ -172,7 +171,7 @@ const getScheduleStatusClass = (status) => {
                                         </Button>
                                     </div>
                                     <div v-else>
-                                        <Button size="small" variant="info" :href="`/admin/savings/show/${data.id}`">
+                                        <Button size="small" variant="info" :href="`/admin/savings/show/${data.payment.id}`">
                                             <EyeIcon width="18px" height="18px" />
                                             Lihat Bukti
                                         </Button>

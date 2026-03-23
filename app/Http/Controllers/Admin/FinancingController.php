@@ -40,10 +40,17 @@ class FinancingController extends Controller
     {
         $financing = Financing::with(['loan', 'loan.paymentSchedules.payment'])->findOrFail($id);
         $financing->total_price = $financing->cost_price + $financing->margin - $financing->down_payment;
-        $financing->total_paid = $financing->loan->paymentSchedules
-            ->where('status', LoanPaymentScheduleStatus::PAID->value)
-            ->sum('total_amount');
-        $financing->remaining_balance = $financing->loan->remaining_margin + $financing->loan->remaining_principal;
+    
+        $loan = $financing->loan;
+        if ($loan !== null) {
+            $financing->total_paid = $loan->paymentSchedules
+                ->where('status', LoanPaymentScheduleStatus::PAID->value)
+                ->sum('total_amount');
+            $financing->remaining_balance = $loan->remaining_margin + $loan->remaining_principal;
+        } else {
+            $financing->total_paid = 0;
+            $financing->remaining_balance = 0;
+        }
 
         return inertia('Admin/Financing/Show', [
             'data' => $financing
