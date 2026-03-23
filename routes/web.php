@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\FinancingController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
@@ -115,6 +116,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::get('/resignations/list', [ResignationController::class, 'index'])->name('resignations.index');
     Route::get('/resignation/{id}', [ResignationController::class, 'validation'])->name('resignations.validation');
     Route::put('/resignation/{id}', [ResignationController::class, 'validate'])->name('resignations.validate');
+
+    Route::get('/financing/show/{id}', [FinancingController::class, 'show'])->name('financing.show');
 });
 
 // User Routes

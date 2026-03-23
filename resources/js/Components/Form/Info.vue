@@ -14,6 +14,6 @@ const props = defineProps({
 <template>
     <div class="flex flex-col gap-2">
         <span class="text-gray-500 dark:text-gray-300">{{ props.label }}</span>
-        <span class="font-semibold text-dark-text dark:text-white">{{ props.value }}</span>
+        <span class="font-semibold text-dark-text dark:text-white">{{ props.value ?? '-' }}</span>
     </div>
 </template>
