@@ -15,7 +15,7 @@
 
     onMounted(() => {
         const img = new Image();
-        img.src = '/images/home/polban.avif';
+        img.src = '/images/home/al-hikmah.png';
         
         img.onload = () => {
             imageLoaded.value = true;
@@ -39,16 +39,16 @@
 
 <template>
     <Head>
-        <title>{{ title }} - Koperasi Syariah Warga Polban</title>
-        <link rel="preload" as="image" href="/images/home/polban.avif" />
+        <title>{{ title }} - Koperasi Syariah Berkah</title>
+        <link rel="preload" as="image" href="/images/home/al-hikmah.png" />
     </Head>
     <ThemeProvider>
       <div
         class="min-h-screen bg-no-repeat bg-bottom bg-cover bg-gray-100 dark:bg-gray-900 transition-opacity duration-300"
         :class="{ 'opacity-100': imageLoaded, 'opacity-0': !imageLoaded }"
-        :style="imageLoaded ? 'background-image: url(\'/images/home/polban.avif\')' : ''"
+        :style="imageLoaded ? 'background-image: url(\'/images/home/al-hikmah.png\')' : ''"
       >
-        <div class="min-h-screen bg-linear-to-b from-transparent to-brand-900 flex items-center justify-center relative">
+        <div class="min-h-screen bg-linear-to-b from-transparent to-black flex items-center justify-center relative">
           <div class="absolute top-6 right-6">
             <ThemeToggler />
           </div>
