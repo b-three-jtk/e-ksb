@@ -73,9 +73,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::get('/users/verification', [UserController::class, 'prospectiveMembers'])
         ->name('users.prospective');
 
-    Route::get('/verifikasi/{user:member_number}', [UserController::class, 'verificationDetail'])
-        ->name('users.verification.show');
-
     Route::post('/verifikasi/{user:member_number}/approval', [UserController::class, 'submitApproval'])
         ->name('users.verification.submit');
 
