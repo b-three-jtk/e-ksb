@@ -59,21 +59,22 @@ const submit = () => {
                 </div>
 
                 <div class="space-y-4">
-                    <Link href="/auth/forgot-password" class="text-gray-500 hover:text-accent hover:underline dark:text-white font-head">Lupa password?</Link>
-                    <button
+                  <div class="flex justify-end">
+                      <Link href="/auth/forgot-password"
+                          class="text-gray-500 hover:text-accent hover:underline dark:text-white font-head">
+                          Lupa password?
+                      </Link>
+                  </div>
+                  
+                  <button
                     type="submit"
-                    class="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold font-head py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
+                    class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-semibold font-head py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
                     :disabled="form.processing"
                     >
                     <span v-if="form.processing">Memproses...</span>
                     <span v-else>Masuk</span>
-                    </button>
+                  </button>
                 </div>
-
-                <p class="text-center text-md text-gray-600 dark:text-white font-head">
-                Tidak punya akun?
-                <Link href="/auth/register" class="text-accent dark:text-accent font-semibold">Daftar sekarang</Link>
-                </p>
             </form>
         </div>
       </div>

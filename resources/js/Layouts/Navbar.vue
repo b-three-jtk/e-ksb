@@ -114,11 +114,6 @@ const logout = () => {
                             class="inline-flex items-center justify-center rounded-xl bg-white px-8 py-2 font-body font-semibold text-brand-600 shadow-lg transition-colors hover:text-brand-700 hover:bg-gray-100">
                             Masuk
                         </Link>
-
-                        <Link href="/auth/register"
-                            class="inline-flex items-center justify-center rounded-xl bg-brand-600 px-8 py-2 text-body font-semibold text-white hover:bg-brand-700 transition-colors shadow-lg">
-                            Daftar
-                        </Link>
                     </div>
                 </template>
 
