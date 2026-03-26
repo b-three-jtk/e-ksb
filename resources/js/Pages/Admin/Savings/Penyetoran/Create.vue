@@ -1,0 +1,845 @@
+<script setup>
+import AdminLayout from '@/Layouts/Admin/Layout.vue'
+import { ref, computed, watch } from 'vue'
+import { router, usePage } from '@inertiajs/vue3'
+import { Icon } from '@iconify/vue'
+import { toast } from 'vue3-toastify'
+import Struk from './Struk.vue'
+import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+
+const page = usePage()
+
+const members  = computed(() => page.props.members  || [])
+const accounts = computed(() => page.props.accounts || [])
+const pengurus = computed(() => page.props.pengurus || {})
+const memberQuery   = ref('')
+const selectedMember = ref(null)
+
+const memberSuggestions = computed(() => {
+  const q = memberQuery.value.toLowerCase().trim()
+  if (!q || q.length < 2) return []
+  return members.value
+    .filter(m =>
+      m.name?.toLowerCase().includes(q) ||
+      m.member_number?.toLowerCase().includes(q)
+    )
+    .slice(0, 6)
+})
+
+const showSuggestions = computed(() =>
+  memberSuggestions.value.length > 0 && !selectedMember.value
+)
+
+function pilihAnggota(member) {
+  selectedMember.value = member
+  memberQuery.value    = member.name
+  jenisSimpanan.value  = ''
+}
+
+function resetAnggota() {
+  selectedMember.value = null
+  memberQuery.value    = ''
+  jenisSimpanan.value  = ''
+}
+
+watch(memberQuery, val => {
+  if (selectedMember.value && val !== selectedMember.value.name) {
+    selectedMember.value = null
+  }
+})
+
+const jenisSimpanan  = ref('')
+const nominalRaw     = ref('')
+const nominalDisplay = ref('')
+const tanggalSetor   = ref(today())
+const catatan        = ref('')
+const depositMethod  = ref('Tunai')
+const errorTarget = ref('')
+const errorNominal   = ref('')
+
+// Field dinamis
+const tenorMonths  = ref('')
+const targetAmount = ref('')
+const targetDisplay = ref('')
+
+// Non-tunai
+const bankName      = ref('')
+const accountName   = ref('')
+const accountNumber = ref('')
+const paymentFile   = ref(null)
+const paymentProof  = ref(null)
+const errorFile     = ref('')
+const fileInput     = ref(null)
+
+// Dialog & konfirmasi
+const showDialog        = ref(false)
+const konfirmasiChecked = ref(false)
+
+watch(jenisSimpanan, () => {
+  tenorMonths.value   = ''
+  targetAmount.value  = ''
+  targetDisplay.value = ''
+})
+
+watch(depositMethod, val => {
+  if (val === 'Tunai') resetNonTunai()
+})
+
+watch(accountName, val => {
+  const acc = filteredAccounts.value.find(a => a.account_name === val)
+  if (acc) {
+    accountNumber.value = acc.account_number
+    bankName.value      = acc.bank_name
+  }
+})
+
+watch(accountNumber, val => {
+  const acc = filteredAccounts.value.find(a => a.account_number === val)
+  if (acc) {
+    accountName.value = acc.account_name
+    bankName.value    = acc.bank_name
+  }
+})
+
+function today() {
+  const d     = new Date()
+  const year  = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day   = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function formatRp(val) {
+  return Number(val || 0).toLocaleString('id-ID')
+}
+
+function initials(name = '') {
+  return name.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() || '').join('')
+}
+
+function tenorHint(months) {
+  const m = Number(months)
+  if (!m || m <= 0) return ''
+  const years  = Math.floor(m / 12)
+  const remain = m % 12
+  const parts  = []
+  if (years  > 0) parts.push(`${years} tahun`)
+  if (remain > 0) parts.push(`${remain} bulan`)
+  return 'Setara ' + parts.join(' ')
+}
+
+function onNominalInput(e) {
+  const value = e.target.value
+  errorNominal.value = /[^0-9.]/.test(value) ? 'Nominal hanya boleh angka' : ''
+  const raw = value.replace(/\D/g, '')
+  nominalRaw.value     = raw
+  nominalDisplay.value = raw ? formatRp(raw) : ''
+}
+
+function onTargetInput(e) {
+  const value = e.target.value
+
+  errorTarget.value = /[^0-9.]/.test(value)
+    ? 'Target hanya boleh angka'
+    : ''
+
+  const raw = value.replace(/\D/g, '')
+  targetAmount.value  = raw
+  targetDisplay.value = raw ? formatRp(raw) : ''
+}
+
+function resetNonTunai() {
+  bankName.value = accountName.value = accountNumber.value = ''
+  paymentFile.value = paymentProof.value = null
+  errorFile.value = ''
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+const bankOptions = ['BCA','BNI','BRI','Mandiri','BTN','CIMB Niaga','Permata','Danamon','BSI','BJB']
+
+const filteredAccounts = computed(() => {
+  if (!selectedMember.value) return []
+  return accounts.value.filter(a => a.user_id === selectedMember.value.id)
+})
+
+const accountNameOptions   = computed(() => filteredAccounts.value.map(a => a.account_name))
+const accountNumberOptions = computed(() => filteredAccounts.value.map(a => a.account_number))
+
+function handleFileUpload(e) {
+  const file  = e.target.files[0]
+  if (!file) return
+  const valid = ['image/jpeg','image/png','image/jpg','application/pdf']
+  if (!valid.includes(file.type)) { errorFile.value = 'Hanya JPG, PNG, atau PDF'; return }
+  if (file.size > 2 * 1024 * 1024) { errorFile.value = 'Maksimal 2 MB'; return }
+  paymentFile.value  = file
+  paymentProof.value = URL.createObjectURL(file)
+  errorFile.value    = ''
+}
+
+function removeFile() {
+  paymentFile.value = paymentProof.value = null
+  errorFile.value   = ''
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+// Jenis simpanan 
+const allJenis = [
+  'Simpanan Pokok',
+  'Simpanan Wajib',
+  'Tabungan Anggota',
+  'Tabungan Berjangka',
+  'Tabungan Ibadah',
+  'Tabungan Sosial',
+]
+
+const jenisList = computed(() => allJenis)
+
+const selectedAccount = computed(() => {
+  if (!selectedMember.value || !jenisSimpanan.value) return null
+  return (selectedMember.value.savingAccounts || []).find(
+    acc => acc.type === jenisSimpanan.value
+  ) || null
+})
+
+const isNewAccount = computed(() => !selectedAccount.value)
+
+// Validasi 
+const errorsForm = computed(() => {
+  const e = {}
+  if (!selectedMember.value) e.anggota = 'Pilih anggota dulu'
+  if (!jenisSimpanan.value)  e.jenis   = 'Pilih jenis simpanan'
+  if (!nominalRaw.value || Number(nominalRaw.value) <= 0) e.nominal = 'Masukkan nominal valid'
+  if (!tanggalSetor.value)           e.tanggal = 'Pilih tanggal'
+  if (tanggalSetor.value > today())  e.tanggal = 'Tanggal tidak boleh di masa depan'
+
+  if (isNewAccount.value) {
+    if (jenisSimpanan.value === 'Tabungan Berjangka' && !tenorMonths.value)
+      e.tenor = 'Jangka waktu wajib diisi'
+    if (jenisSimpanan.value === 'Tabungan Ibadah' && !targetAmount.value)
+      e.target = 'Target wajib diisi'
+  }
+
+  if (depositMethod.value === 'Non-Tunai') {
+    if (!bankName.value)      e.bank          = 'Pilih bank'
+    if (!accountNumber.value) e.accountNumber = 'Isi nomor rekening'
+    if (!accountName.value)   e.accountName   = 'Isi atas nama'
+    if (!paymentFile.value)   e.bukti         = 'Upload bukti transfer'
+  }
+  return e
+})
+
+const isFormValid = computed(() => Object.keys(errorsForm.value).length === 0)
+
+// Struk
+const showStruk = ref(false)
+const dataStruk = ref(null)
+
+// Submit 
+function bukaDialog() {
+  if (!isFormValid.value) {
+    toast('Lengkapi data yang wajib diisi', { type: 'warning' })
+    return
+  }
+  showDialog.value = true
+}
+
+function submitPosting() {
+  if (!konfirmasiChecked.value) {
+    toast('Centang konfirmasi terlebih dahulu', { type: 'warning' })
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('member_id',       selectedMember.value.id)
+  formData.append('saving_category', jenisSimpanan.value)
+  formData.append('amount',          nominalRaw.value)
+  formData.append('date',            tanggalSetor.value)
+  formData.append('method',          depositMethod.value)
+  formData.append('notes',           catatan.value)
+
+  if (isNewAccount.value) {
+    formData.append('tenor_months',  tenorMonths.value)
+    formData.append('target_amount', targetAmount.value)
+  }
+
+  if (depositMethod.value === 'Non-Tunai') {
+    formData.append('bank_name',      bankName.value)
+    formData.append('account_name',   accountName.value)
+    formData.append('account_number', accountNumber.value)
+    formData.append('payment_proof',  paymentFile.value)
+  }
+
+  router.post('/admin/simpanan/penyetoran', formData, {
+    forceFormData: true,
+    preserveScroll: true,
+    onSuccess: (page) => {
+      toast('Penyetoran berhasil!', { type: 'success' })
+      dataStruk.value  = page.props.struk
+      showStruk.value  = true
+      showDialog.value = false
+      resetForm()
+    },
+    onError: (errors) => {
+      showDialog.value = false
+      const msg = Object.values(errors).flat().join('\n')
+      toast(msg || 'Gagal menyimpan', { type: 'error' })
+    }
+  })
+}
+
+function resetForm() {
+  resetAnggota()
+  jenisSimpanan.value  = ''
+  nominalRaw.value     = ''
+  nominalDisplay.value = ''
+  tanggalSetor.value   = today()
+  catatan.value        = ''
+  depositMethod.value  = 'Tunai'
+  konfirmasiChecked.value = false
+  tenorMonths.value    = ''
+  targetAmount.value   = ''
+  targetDisplay.value  = ''
+  resetNonTunai()
+}
+
+const breadcrumbItems = [
+  { name: 'Dashboard',              link: '/admin' },
+  { name: 'Pengelolaan Simpanan',   link: '/admin/savings/list' },
+  { name: 'Penyetoran Simpanan' },
+]
+</script>
+
+<template>
+  <AdminLayout title="Penyetoran Simpanan">
+    <PageBreadcrumb page-title="Penyetoran Simpanan" :items="breadcrumbItems" />
+
+    <div class="py-6 px-4 sm:px-6 lg:px-8">
+      <div class="w-full px-4 sm:px-10 lg:px-10 space-y-6">
+
+        <!-- ══ Pilih Anggota ══ -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+          <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xs font-semibold tracking-widest text-gray-500 dark:text-gray-400 uppercase">
+              Data Anggota
+            </h2>
+          </div>
+
+          <div class="p-5 space-y-4">
+            <!-- Search box -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Cari Anggota <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  v-model="memberQuery"
+                  type="text"
+                  placeholder="Nama / No. Anggota..."
+                  class="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600
+                         rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <!-- Suggestions dropdown -->
+              <div
+                v-if="showSuggestions"
+                class="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-200
+                       dark:border-gray-600 rounded-lg shadow-lg mt-1 max-h-64 overflow-auto"
+              >
+                <button
+                  v-for="m in memberSuggestions" :key="m.id"
+                  @click="pilihAnggota(m)"
+                  class="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-gray-700
+                         flex items-center gap-3 transition-colors"
+                >
+                  <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center
+                              justify-center text-blue-700 dark:text-blue-300 font-semibold text-sm shrink-0">
+                    {{ initials(m.name) }}
+                  </div>
+                  <div>
+                    <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ m.name }}</div>
+                    <div class="text-xs text-gray-500">{{ m.member_number }}</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Selected member card -->
+            <Transition name="fade">
+              <div
+                v-if="selectedMember"
+                class="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/20
+                       border border-blue-100 dark:border-blue-800 rounded-lg"
+              >
+                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center
+                            justify-center text-xl font-bold text-blue-700 dark:text-blue-300 shrink-0">
+                  {{ initials(selectedMember.name) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
+                  <div class="text-sm text-gray-500">{{ selectedMember.member_number }}</div>
+                </div>
+                <button @click="resetAnggota" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
+                  <Icon icon="mdi:close" width="20" />
+                </button>
+              </div>
+            </Transition>
+          </div>
+        </div>
+
+        <!-- Detail Penyetoran -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xs font-semibold tracking-widest text-gray-500 dark:text-gray-400 uppercase">
+              Detail Penyetoran
+            </h2>
+          </div>
+
+          <div class="p-5 space-y-5">
+
+            <!-- Peringatan jika anggota belum dipilih -->
+            <Transition name="fade">
+              <div
+                v-if="!selectedMember"
+                class="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-900/20
+                       border border-amber-200 dark:border-amber-700 rounded-lg"
+              >
+                <Icon icon="mdi:account-alert-outline" class="text-amber-500 shrink-0" width="22" />
+                <p class="text-sm text-amber-700 dark:text-amber-300">
+                  Pilih anggota terlebih dahulu untuk mengisi detail penyetoran.
+                </p>
+              </div>
+            </Transition>
+
+            <!-- Fieldset disable jika belum pilih anggota -->
+            <fieldset
+              :disabled="!selectedMember"
+              class="space-y-5 transition-opacity duration-200"
+              :class="{ 'opacity-40 pointer-events-none select-none': !selectedMember }"
+            >
+
+              <!-- Jenis simpanan -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Jenis Simpanan <span class="text-red-500">*</span>
+                </label>
+                <select
+                  v-model="jenisSimpanan"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                         bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="" disabled>— Pilih jenis simpanan —</option>
+                  <option v-for="j in jenisList" :key="j" :value="j">{{ j }}</option>
+                </select>
+              </div>
+
+              <!-- Field dinamis: Tenor & Target -->
+              <Transition name="fade">
+                <div v-if="isNewAccount && jenisSimpanan" class="space-y-4">
+
+                  <!-- Tabungan Berjangka — Tenor -->
+                  <div v-if="jenisSimpanan === 'Tabungan Berjangka'">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Jangka Waktu <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                      <input
+                        v-model="tenorMonths"
+                        type="number"
+                        min="1"
+                        max="360"
+                        placeholder="Contoh: 12"
+                        class="w-full px-4 py-2.5 pr-20 border rounded-lg
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                               focus:outline-none focus:ring-2 transition-colors"
+                        :class="errorsForm.tenor
+                          ? 'border-red-400 focus:ring-red-400 dark:border-red-500'
+                          : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
+                      />
+                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none">
+                        bulan
+                      </span>
+                    </div>
+                    <p v-if="errorsForm.tenor" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                      <Icon icon="mdi:alert-circle-outline" width="13" />
+                      {{ errorsForm.tenor }}
+                    </p>
+                    <p v-else-if="tenorMonths && Number(tenorMonths) > 0" class="mt-1 text-xs text-gray-400">
+                      {{ tenorHint(tenorMonths) }}
+                    </p>
+                  </div>
+
+                  <!-- Tabungan Ibadah — Target -->
+                  <div v-if="jenisSimpanan === 'Tabungan Ibadah'">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Target Tabungan <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 pointer-events-none">
+                        Rp
+                      </span>
+                      <input
+                        :value="targetDisplay"
+                        @input="onTargetInput"
+                        type="text"
+                        inputmode="numeric"
+                        placeholder="0"
+                        class="w-full pl-10 pr-4 py-2.5 border rounded-lg
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                               focus:outline-none focus:ring-2 transition-colors"
+                        :class="errorsForm.target
+                          ? 'border-red-400 focus:ring-red-400 dark:border-red-500'
+                          : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
+                      />
+                    </div>
+                    <p v-if="errorsForm.target" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                      <Icon icon="mdi:alert-circle-outline" width="13" />
+                      {{ errorsForm.target }}
+                    </p>
+                    <p v-else-if="targetAmount" class="mt-1 text-xs text-gray-400">
+                      Target: Rp {{ formatRp(targetAmount) }}
+                    </p>
+                    <p v-if="errorTarget" class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                    <Icon icon="mdi:alert-circle-outline" width="13" />
+                    {{ errorTarget }}
+                  </p>
+                  </div>
+
+                  <!-- Info rekening baru -->
+                  <div class="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20
+                              border border-amber-200 dark:border-amber-700 rounded-lg">
+                    <Icon icon="mdi:information-outline" class="text-amber-500 mt-0.5 shrink-0" width="16" />
+                    <p class="text-xs text-amber-600 dark:text-amber-400">
+                      Rekening simpanan akan dibuat otomatis saat transaksi diposting.
+                    </p>
+                  </div>
+
+                </div>
+              </Transition>
+
+              <!-- Nominal -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nominal <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">Rp</span>
+                  <input
+                    :value="nominalDisplay"
+                    @input="onNominalInput"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="0"
+                    class="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                           focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <p v-if="errorNominal" class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                  <Icon icon="mdi:alert-circle-outline" width="13" />
+                  {{ errorNominal }}
+                </p>
+              </div>
+
+              <!-- Tanggal & Catatan -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tanggal Setor <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="tanggalSetor"
+                    type="date"
+                    :max="today()"
+                    readonly
+                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                           bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Catatan</label>
+                  <input
+                    v-model="catatan"
+                    type="text"
+                    placeholder="Opsional"
+                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                           focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <!-- Metode -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Metode Penyetoran
+                </label>
+                <div class="flex gap-6">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" value="Tunai" v-model="depositMethod" class="text-blue-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Tunai</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" value="Non-Tunai" v-model="depositMethod" class="text-blue-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Transfer</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Non-Tunai fields -->
+              <Transition name="slide">
+                <div
+                  v-if="depositMethod === 'Non-Tunai'"
+                  class="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+                >
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Bank -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Bank <span class="text-red-500">*</span>
+                      </label>
+                      <select
+                        v-model="bankName"
+                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                               focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="" disabled>— Pilih —</option>
+                        <option v-for="b in bankOptions" :key="b">{{ b }}</option>
+                      </select>
+                    </div>
+
+                    <!-- No. Rekening -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        No. Rekening <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        list="norekList"
+                        v-model="accountNumber"
+                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                               focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <datalist id="norekList">
+                        <option v-for="n in accountNumberOptions" :key="n" :value="n" />
+                      </datalist>
+                    </div>
+
+                    <!-- Atas Nama -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Atas Nama <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        list="namaRekList"
+                        v-model="accountName"
+                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                               focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <datalist id="namaRekList">
+                        <option v-for="n in accountNameOptions" :key="n" :value="n" />
+                      </datalist>
+                    </div>
+                  </div>
+
+                  <!-- Upload bukti -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Bukti Transfer <span class="text-red-500">*</span>
+                    </label>
+                    <div
+                      @click="fileInput?.click()"
+                      class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6
+                             text-center cursor-pointer hover:border-blue-400 transition-colors"
+                    >
+                      <input
+                        ref="fileInput"
+                        type="file"
+                        @change="handleFileUpload"
+                        accept="image/*,.pdf"
+                        class="hidden"
+                      />
+                      <div v-if="!paymentProof">
+                        <Icon icon="lets-icons:upload" class="mx-auto text-gray-400 mb-2" width="40" />
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Klik untuk upload bukti</p>
+                        <p class="text-xs text-gray-400 mt-1">JPG / PNG / PDF • max 2MB</p>
+                      </div>
+                      <div v-else class="flex items-center gap-3">
+                        <Icon icon="akar-icons:file" class="text-blue-500 shrink-0" width="32" />
+                        <div class="flex-1 text-left text-sm text-gray-700 dark:text-gray-300 min-w-0">
+                          <div class="truncate">{{ paymentFile?.name }}</div>
+                          <div class="text-xs text-gray-500">{{ (paymentFile.size / 1024).toFixed(1) }} KB</div>
+                        </div>
+                        <button @click.stop="removeFile" class="text-red-500 hover:text-red-700 shrink-0">
+                          <Icon icon="mdi:close" width="20" />
+                        </button>
+                      </div>
+                    </div>
+                    <p v-if="errorFile" class="mt-1 text-xs text-red-600">{{ errorFile }}</p>
+                  </div>
+                </div>
+              </Transition>
+
+            </fieldset>
+            <!-- Akhir fieldset -->
+
+          </div>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="flex justify-between">
+          <button
+            @click="resetForm"
+            class="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm
+                   text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            Reset
+          </button>
+          <button
+            @click="bukaDialog"
+            :disabled="!isFormValid"
+            class="px-8 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg
+                   hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Posting
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modal Konfirmasi -->
+    <Transition name="modal">
+      <div
+        v-if="showDialog"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+        @click.self="showDialog = false"
+      >
+        <div class="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full shadow-xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Konfirmasi Penyetoran</h3>
+            <p class="text-sm text-gray-500 mt-0.5">Pastikan data sudah benar sebelum posting</p>
+          </div>
+
+          <div class="p-5 space-y-4">
+            <!-- Identitas anggota -->
+            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center
+                          justify-center text-blue-700 dark:text-blue-300 font-bold shrink-0">
+                {{ initials(selectedMember?.name) }}
+              </div>
+              <div class="min-w-0">
+                <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember?.name }}</div>
+                <div class="text-sm text-gray-500">{{ selectedMember?.member_number }}</div>
+              </div>
+            </div>
+
+            <!-- Ringkasan transaksi -->
+            <table class="w-full text-sm">
+              <tr class="border-b border-gray-100 dark:border-gray-700">
+                <td class="py-2 text-gray-500">Jenis</td>
+                <td class="text-right font-medium text-gray-900 dark:text-gray-100">{{ jenisSimpanan }}</td>
+              </tr>
+              <tr v-if="jenisSimpanan === 'Tabungan Berjangka' && tenorMonths" class="border-b border-gray-100 dark:border-gray-700">
+                <td class="py-2 text-gray-500">Jangka Waktu</td>
+                <td class="text-right text-gray-900 dark:text-gray-100">{{ tenorMonths }} bulan</td>
+              </tr>
+              <tr v-if="jenisSimpanan === 'Tabungan Ibadah' && targetAmount" class="border-b border-gray-100 dark:border-gray-700">
+                <td class="py-2 text-gray-500">Target</td>
+                <td class="text-right text-gray-900 dark:text-gray-100">Rp {{ formatRp(targetAmount) }}</td>
+              </tr>
+              <tr class="border-b border-gray-100 dark:border-gray-700">
+                <td class="py-2 text-gray-500">Nominal</td>
+                <td class="text-right font-bold text-gray-900 dark:text-gray-100">Rp {{ formatRp(nominalRaw) }}</td>
+              </tr>
+              <tr class="border-b border-gray-100 dark:border-gray-700">
+                <td class="py-2 text-gray-500">Metode</td>
+                <td class="text-right text-gray-900 dark:text-gray-100">{{ depositMethod }}</td>
+              </tr>
+              <tr class="border-b border-gray-100 dark:border-gray-700">
+                <td class="py-2 text-gray-500">Tanggal</td>
+                <td class="text-right text-gray-900 dark:text-gray-100">{{ tanggalSetor }}</td>
+              </tr>
+              <tr>
+                <td class="py-2 text-gray-500">Oleh</td>
+                <td class="text-right text-gray-900 dark:text-gray-100">{{ pengurus.name }}</td>
+              </tr>
+            </table>
+
+            <!-- Konfirmasi checkbox -->
+            <label class="flex items-start gap-3 cursor-pointer p-3 bg-amber-50 dark:bg-amber-900/20
+                          border border-amber-200 dark:border-amber-800 rounded-lg">
+              <input v-model="konfirmasiChecked" type="checkbox" class="mt-0.5 text-blue-600" />
+              <span class="text-sm text-gray-700 dark:text-gray-300">
+                Saya menyatakan data di atas sudah benar dan siap diposting ke rekening simpanan anggota.
+                Transaksi tidak dapat dibatalkan.
+              </span>
+            </label>
+          </div>
+
+          <div class="px-5 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+            <button
+              @click="showDialog = false"
+              class="px-5 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm
+                     text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              Batal
+            </button>
+            <button
+              @click="submitPosting"
+              :disabled="!konfirmasiChecked"
+              class="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg
+                     hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Posting Sekarang
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ══ Modal Struk ══ -->
+    <Transition name="modal">
+      <div
+        v-if="showStruk && dataStruk"
+        class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50"
+        @click.self="showStruk = false"
+      >
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-full max-w-sm">
+          <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div>
+              <h3 class="font-semibold text-gray-900 dark:text-gray-100">Transaksi Berhasil</h3>
+              <p class="text-sm text-gray-500 mt-0.5">Berikut kwitansi penyetoran</p>
+            </div>
+            <button
+              @click="showStruk = false"
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            >
+              <Icon icon="mdi:close" width="22" />
+            </button>
+          </div>
+          <div class="overflow-y-auto max-h-[70vh] p-5 flex justify-center">
+            <Struk :transaksi="dataStruk" />
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+  </AdminLayout>
+</template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from,  .fade-leave-to      { opacity: 0; }
+
+.slide-enter-active, .slide-leave-active { transition: all 0.25s ease; overflow: hidden; }
+.slide-enter-from,   .slide-leave-to     { opacity: 0; max-height: 0; }
+
+.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
+.modal-enter-from,   .modal-leave-to     { opacity: 0; }
+</style>
