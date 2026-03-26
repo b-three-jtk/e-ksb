@@ -1,7 +1,7 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
-import { reactive, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
@@ -16,6 +16,10 @@ const props = defineProps({
     statuses: Array,
     summary: Object,
 })
+
+const page = usePage()
+
+const isSekretaris = computed(() => page.props.auth?.user?.role?.name === 'Sekretaris')
 
 const columns = [
     { key: 'no', label: 'No' },
@@ -139,6 +143,14 @@ const breadcrumbItems = [
                 <div>
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Anggota</h2>
                 </div>
+
+                <Link
+                    v-if="isSekretaris"
+                    href="/admin/users/create"
+                    class="bg-green-500 hover:bg-green-600 text-white font-semibold font-head px-5 py-2 rounded-xl shadow-sm"
+                >
+                    + Tambah Anggota
+                </Link>
             </div>
 
             <!-- Filter & Search -->
