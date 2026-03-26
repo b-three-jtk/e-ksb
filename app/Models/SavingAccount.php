@@ -14,6 +14,8 @@ class SavingAccount extends Model
         'account_number',
         'balance',
         'type',
+        'tenor_months',
+        'target_amount',
         'user_id',
     ];
 

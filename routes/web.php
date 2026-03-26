@@ -107,6 +107,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::put('/resignation/{id}', [ResignationController::class, 'validate'])->name('resignations.validate');
 
     Route::get('/financing/show/{id}', [FinancingController::class, 'show'])->name('financing.show');
+
+    Route::get('/simpanan/penyetoran', [SimpananController::class, 'createDeposit'])->name('deposit.create');
+    Route::post('/simpanan/penyetoran', [SimpananController::class, 'storeDeposit'])->name('deposit.store');
 });
 
 // User Routes
@@ -121,9 +124,6 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:user', 'revalida
 
     Route::get('/resign', [AnggotaController::class, 'createResign'])->name('resign.create');
     Route::post('/resign', [AnggotaController::class, 'storeResign'])->name('resign.store');
-
-    Route::get('/simpanan/penyetoran', [SimpananController::class, 'createDeposit'])->name('deposit.create');
-    Route::post('/simpanan/penyetoran', [SimpananController::class, 'storeDeposit'])->name('deposit.store');
 
     // Ledger Routes
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');

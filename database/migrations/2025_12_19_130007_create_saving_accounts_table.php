@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('account_number')->unique();
             $table->decimal('balance', 15, 2);
             $table->enum('type', array_column(SavingType::cases(), 'value'));
+            $table->integer('tenor_months')->nullable();
+            $table->decimal('target_amount', 15, 2)->nullable();
             $table->foreignUuid('user_id')->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
