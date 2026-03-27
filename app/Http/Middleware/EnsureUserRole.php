@@ -30,6 +30,10 @@ class EnsureUserRole
             return redirect('/admin/dashboard')->with('error', 'Admin harus menggunakan dashboard admin.');
         }
 
+        if ($role === 'sekretaris' && $user->role->name !== 'Sekretaris') {
+            return redirect('/admin/dashboard')->with('error', 'Hanya sekretaris yang dapat mengakses halaman ini.');
+        }
+
         return $next($request);
     }
 }

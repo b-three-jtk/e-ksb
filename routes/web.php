@@ -98,6 +98,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
     Route::get('/accounts/{id}/mutasi', [UserController::class, 'getMutasi']);
     Route::get('/financings/{id}/riwayat', [UserController::class, 'getRiwayat']);
+    Route::get('/users/create', [UserController::class, 'create'])
+        ->middleware('role:sekretaris')
+        ->name('users.create');
+    Route::post('/users/store', [UserController::class, 'store'])
+        ->middleware('role:sekretaris')
+        ->name('users.store');
     Route::get('/users/list', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{id}/nonactive', [UserController::class, 'updateStatusToInactive'])->name('users.nonactive');
 

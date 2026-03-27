@@ -1,9 +1,16 @@
 import { reactive, watch } from "vue";
 
-export function useUserValidation(form: any) {
+type UserValidationOptions = {
+    requireEmail?: boolean;
+};
+
+export function useUserValidation(form: any, options: UserValidationOptions = {}) {
+    const requireEmail = options.requireEmail ?? true;
+
     const errors = reactive({
         email: "",
         nik: "",
+        heir_nik: "",
         name: "",
         role_id: "",
         phone_number: "",
@@ -15,8 +22,10 @@ export function useUserValidation(form: any) {
         (v) => {
             const value = v?.trim() || "";
 
-            if (!value) {
+            if (!value && requireEmail) {
                 errors.email = "Email wajib diisi";
+            } else if (!value) {
+                errors.email = "";
             } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
                 errors.email = "Format email tidak valid";
             } else {
@@ -36,6 +45,21 @@ export function useUserValidation(form: any) {
                 errors.nik = "NIK harus 16 digit";
             } else {
                 errors.nik = "";
+            }
+        }
+    );
+
+    watch(
+        () => form.heir_nik,
+        (v) => {
+            if (!v) {
+                errors.heir_nik = "NIK ahli waris wajib diisi";
+            } else if (!/^\d+$/.test(v)) {
+                errors.heir_nik = "NIK ahli waris hanya boleh berisi angka";
+            } else if (v.length !== 16) {
+                errors.heir_nik = "NIK ahli waris harus 16 digit";
+            } else {
+                errors.heir_nik = "";
             }
         }
     );

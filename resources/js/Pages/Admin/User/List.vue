@@ -1,8 +1,11 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
-import { reactive, watch } from 'vue'
+import { computed, reactive, watch, onMounted, ref } from 'vue'
 import { Icon } from '@iconify/vue'
+import Swal from 'sweetalert2'
+import { toast } from 'vue3-toastify'
+import { useWhatsAppCredentials } from '@/Composables/useWhatsAppCredentials'
 import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import BaseTable from '../../../Components/Table/BaseTable.vue'
@@ -15,6 +18,45 @@ const props = defineProps({
     filters: Object,
     statuses: Array,
     summary: Object,
+})
+
+const page = usePage()
+const { sendCredentialsToWhatsApp } = useWhatsAppCredentials(toast)
+const memberCredentials = ref(null)
+
+const isSekretaris = computed(() => page.props.auth?.user?.role?.name === 'Sekretaris')
+
+const showNewMemberCredentials = async () => {
+    if (!memberCredentials.value?.member_number || !memberCredentials.value?.initial_password) {
+        return
+    }
+
+    const result = await Swal.fire({
+        title: 'Akun Anggota Berhasil Dibuat',
+        html: `
+            <div style="text-align:left;font-size:14px;line-height:1.8">
+                <div><strong>Nama:</strong> ${memberCredentials.value.name ?? '-'}</div>
+                <div><strong>Nomor Anggota:</strong> ${memberCredentials.value.member_number}</div>
+                <div><strong>Password Awal:</strong> ${memberCredentials.value.initial_password}</div>
+            </div>
+        `,
+        icon: 'success',
+        confirmButtonText: 'Kirim ke WhatsApp',
+        confirmButtonColor: '#007943',
+    })
+
+    if (result.isConfirmed) {
+        sendCredentialsToWhatsApp(memberCredentials.value)
+    }
+
+    memberCredentials.value = null
+}
+
+onMounted(() => {
+    memberCredentials.value = page.props.flash?.member_credentials ?? null
+    if (memberCredentials.value) {
+        showNewMemberCredentials()
+    }
 })
 
 const columns = [
@@ -139,6 +181,14 @@ const breadcrumbItems = [
                 <div>
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Anggota</h2>
                 </div>
+
+                <Link
+                    v-if="isSekretaris"
+                    href="/admin/users/create"
+                    class="bg-green-500 hover:bg-green-600 text-white font-semibold font-head px-5 py-2 rounded-xl shadow-sm"
+                >
+                    + Tambah Anggota
+                </Link>
             </div>
 
             <!-- Filter & Search -->

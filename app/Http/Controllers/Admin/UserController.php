@@ -2,23 +2,67 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Education;
+use App\Enums\Heir as HeirEnum;
 use App\Enums\LoanPaymentScheduleStatus;
+use App\Enums\MaritalStatus;
 use App\Enums\TransactionStatus;
 use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMemberRequest;
 use App\Mail\ApprovalNotificationMail;
 use App\Mail\RejectionNotificationMail;
 use App\Models\Financing;
 use App\Models\SavingAccount;
 use App\Models\User;
+use App\Services\Admin\RegisterMemberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use RuntimeException;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
+    public function create()
+    {
+        return Inertia::render('Admin/User/Create/Index', [
+            'educationOptions' => $this->enumOptions(Education::cases()),
+            'maritalStatusOptions' => $this->enumOptions(MaritalStatus::cases()),
+            'heirRelationshipOptions' => $this->enumOptions(HeirEnum::cases()),
+        ]);
+    }
+
+    public function store(StoreMemberRequest $request, RegisterMemberService $registerMemberService)
+    {
+        $validated = $request->validated();
+
+        try {
+            $memberCredentials = $registerMemberService->register($validated, $request);
+        } catch (RuntimeException $e) {
+            return back()->withErrors([
+                'member' => $e->getMessage(),
+            ]);
+        }
+
+        return redirect()->route('admin.users.index')->with([
+            'success' => 'Anggota berhasil ditambahkan.',
+            'member_credentials' => $memberCredentials,
+        ]);
+    }
+
+    private function enumOptions(array $cases): array
+    {
+        return collect($cases)
+            ->map(fn($item) => [
+                'value' => $item->value,
+                'text' => $item->value,
+            ])
+            ->values()
+            ->all();
+    }
+
     /**
      * Display a listing of the resource.
      */
