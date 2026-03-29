@@ -223,6 +223,7 @@ const getStatusClass = (status?: string) => {
 					:filters="{ product_type: filterState.product_type }"
 					:selects="selectFilters"
 					:search-tooltip="['No Transaksi', 'Tanggal Akad']"
+					:show-search-button="true"
 					:show-border="true"
 					@update:search="handleSearch"
 					@submit:search="applyFilters"
