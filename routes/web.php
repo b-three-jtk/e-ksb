@@ -139,12 +139,6 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:user', 'revalida
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
     Route::get('/ledger/export', [LedgerController::class, 'export'])->name('ledger.export');
 
-    // Simpanan Routes - Penarikan
-    Route::get('/simpanan/penarikan', [SimpananController::class, 'showWithdrawalInfo'])->name('simpanan.withdraw.info');
-    Route::get('/simpanan/penarikan/detail', [SimpananController::class, 'showWithdrawalDetail'])->name('simpanan.withdraw.detail');
-    Route::post('/simpanan/penarikan/pernyataan', [SimpananController::class, 'showWithdrawalStatement'])->name('simpanan.withdraw.statement');
-    Route::post('/simpanan/penarikan/submit', [SimpananController::class, 'submitWithdrawal'])->name('simpanan.withdraw.submit');
-
     // Pembiayaan
     Route::get('/financing/repayment/show/{id}', [UserRepaymentController::class, 'show'])->name('financing.repayment.show');
     Route::post('/financing/repayment/submit', [UserRepaymentController::class, 'sendRequest'])->name('financing.repayment.request');
