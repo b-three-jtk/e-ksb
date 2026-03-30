@@ -4,8 +4,9 @@ import { ref, computed, watch } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { Icon } from '@iconify/vue'
 import { toast } from 'vue3-toastify'
-import Struk from './Struk.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import ConfirmationModal from '@/Components/Savings/ConfirmationModal.vue'
+import Struk from '@/Components/Savings/Struk.vue'
 
 const page = usePage()
 
@@ -73,7 +74,6 @@ const fileInput     = ref(null)
 
 // Dialog & konfirmasi
 const showDialog        = ref(false)
-const konfirmasiChecked = ref(false)
 
 watch(jenisSimpanan, () => {
   tenorMonths.value   = ''
@@ -243,39 +243,47 @@ function bukaDialog() {
   showDialog.value = true
 }
 
-function submitPosting() {
-  if (!konfirmasiChecked.value) {
-    toast('Centang konfirmasi terlebih dahulu', { type: 'warning' })
-    return
-  }
+const confirmationData = computed(() => ({
+  memberName: selectedMember.value?.name,
+  memberNumber: selectedMember.value?.member_number,
+  savingType: jenisSimpanan.value,
+  method: depositMethod.value,
+  amount: nominalRaw.value,
+  date: tanggalSetor.value,
+  tenorMonths: tenorMonths.value,
+  targetAmount: targetAmount.value,
+  officerName: pengurus.value?.name,
+}))
 
+function handleConfirm() {
   const formData = new FormData()
-  formData.append('member_id',       selectedMember.value.id)
+
+  formData.append('member_id', selectedMember.value.id)
   formData.append('saving_category', jenisSimpanan.value)
-  formData.append('amount',          nominalRaw.value)
-  formData.append('date',            tanggalSetor.value)
-  formData.append('method',          depositMethod.value)
-  formData.append('notes',           catatan.value)
+  formData.append('amount', nominalRaw.value)
+  formData.append('date', tanggalSetor.value)
+  formData.append('method', depositMethod.value)
+  formData.append('notes', catatan.value)
 
   if (isNewAccount.value) {
-    formData.append('tenor_months',  tenorMonths.value)
+    formData.append('tenor_months', tenorMonths.value)
     formData.append('target_amount', targetAmount.value)
   }
 
   if (depositMethod.value === 'Non-Tunai') {
-    formData.append('bank_name',      bankName.value)
-    formData.append('account_name',   accountName.value)
+    formData.append('bank_name', bankName.value)
+    formData.append('account_name', accountName.value)
     formData.append('account_number', accountNumber.value)
-    formData.append('payment_proof',  paymentFile.value)
+    formData.append('payment_proof', paymentFile.value)
   }
 
   router.post('/admin/simpanan/penyetoran', formData, {
     forceFormData: true,
     preserveScroll: true,
     onSuccess: (page) => {
-      toast('Penyetoran berhasil!', { type: 'success' })
-      dataStruk.value  = page.props.struk
-      showStruk.value  = true
+      toast('Penyetoran berhasil!', { type: 'success', position: 'top-center' })
+      dataStruk.value = page.props.struk
+      showStruk.value = true
       showDialog.value = false
       resetForm()
     },
@@ -713,123 +721,34 @@ const breadcrumbItems = [
       </div>
     </div>
 
-    <!-- Modal Konfirmasi -->
-    <Transition name="modal">
-      <div
-        v-if="showDialog"
-        class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-        @click.self="showDialog = false"
-      >
-        <div class="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full shadow-xl overflow-hidden">
-          <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Konfirmasi Penyetoran</h3>
-            <p class="text-sm text-gray-500 mt-0.5">Pastikan data sudah benar sebelum posting</p>
-          </div>
+    <ConfirmationModal
+      :isOpen="showDialog"
+      type="deposit"
+      :data="confirmationData"
+      @confirm="handleConfirm"
+      @close="showDialog = false"
+    />
 
-          <div class="p-5 space-y-4">
-            <!-- Identitas anggota -->
-            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-              <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center
-                          justify-center text-blue-700 dark:text-blue-300 font-bold shrink-0">
-                {{ initials(selectedMember?.name) }}
-              </div>
-              <div class="min-w-0">
-                <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember?.name }}</div>
-                <div class="text-sm text-gray-500">{{ selectedMember?.member_number }}</div>
-              </div>
-            </div>
+    <div
+      v-if="showStruk && dataStruk"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+    >
+      <div class="bg-white rounded-xl shadow-lg p-4 max-w-sm w-full relative">
 
-            <!-- Ringkasan transaksi -->
-            <table class="w-full text-sm">
-              <tr class="border-b border-gray-100 dark:border-gray-700">
-                <td class="py-2 text-gray-500">Jenis</td>
-                <td class="text-right font-medium text-gray-900 dark:text-gray-100">{{ jenisSimpanan }}</td>
-              </tr>
-              <tr v-if="jenisSimpanan === 'Tabungan Berjangka' && tenorMonths" class="border-b border-gray-100 dark:border-gray-700">
-                <td class="py-2 text-gray-500">Jangka Waktu</td>
-                <td class="text-right text-gray-900 dark:text-gray-100">{{ tenorMonths }} bulan</td>
-              </tr>
-              <tr v-if="jenisSimpanan === 'Tabungan Ibadah' && targetAmount" class="border-b border-gray-100 dark:border-gray-700">
-                <td class="py-2 text-gray-500">Target</td>
-                <td class="text-right text-gray-900 dark:text-gray-100">Rp {{ formatRp(targetAmount) }}</td>
-              </tr>
-              <tr class="border-b border-gray-100 dark:border-gray-700">
-                <td class="py-2 text-gray-500">Nominal</td>
-                <td class="text-right font-bold text-gray-900 dark:text-gray-100">Rp {{ formatRp(nominalRaw) }}</td>
-              </tr>
-              <tr class="border-b border-gray-100 dark:border-gray-700">
-                <td class="py-2 text-gray-500">Metode</td>
-                <td class="text-right text-gray-900 dark:text-gray-100">{{ depositMethod }}</td>
-              </tr>
-              <tr class="border-b border-gray-100 dark:border-gray-700">
-                <td class="py-2 text-gray-500">Tanggal</td>
-                <td class="text-right text-gray-900 dark:text-gray-100">{{ tanggalSetor }}</td>
-              </tr>
-              <tr>
-                <td class="py-2 text-gray-500">Oleh</td>
-                <td class="text-right text-gray-900 dark:text-gray-100">{{ pengurus.name }}</td>
-              </tr>
-            </table>
+        <!-- tombol close -->
+        <!-- <button
+          @click="showStruk = false"
+          class="absolute top-2 right-2 text-gray-500 hover:text-red-500"
+        >
+          ✕
+        </button> -->
 
-            <!-- Konfirmasi checkbox -->
-            <label class="flex items-start gap-3 cursor-pointer p-3 bg-amber-50 dark:bg-amber-900/20
-                          border border-amber-200 dark:border-amber-800 rounded-lg">
-              <input v-model="konfirmasiChecked" type="checkbox" class="mt-0.5 text-blue-600" />
-              <span class="text-sm text-gray-700 dark:text-gray-300">
-                Saya menyatakan data di atas sudah benar dan siap diposting ke rekening simpanan anggota.
-                Transaksi tidak dapat dibatalkan.
-              </span>
-            </label>
-          </div>
-
-          <div class="px-5 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-            <button
-              @click="showDialog = false"
-              class="px-5 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm
-                     text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              Batal
-            </button>
-            <button
-              @click="submitPosting"
-              :disabled="!konfirmasiChecked"
-              class="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg
-                     hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Posting Sekarang
-            </button>
-          </div>
-        </div>
+        <Struk
+          :transaksi="dataStruk"
+          mode="deposit"
+        />
       </div>
-    </Transition>
-
-    <!-- ══ Modal Struk ══ -->
-    <Transition name="modal">
-      <div
-        v-if="showStruk && dataStruk"
-        class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50"
-        @click.self="showStruk = false"
-      >
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-full max-w-sm">
-          <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div>
-              <h3 class="font-semibold text-gray-900 dark:text-gray-100">Transaksi Berhasil</h3>
-              <p class="text-sm text-gray-500 mt-0.5">Berikut kwitansi penyetoran</p>
-            </div>
-            <button
-              @click="showStruk = false"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-            >
-              <Icon icon="mdi:close" width="22" />
-            </button>
-          </div>
-          <div class="overflow-y-auto max-h-[70vh] p-5 flex justify-center">
-            <Struk :transaksi="dataStruk" />
-          </div>
-        </div>
-      </div>
-    </Transition>
-
+    </div>
   </AdminLayout>
 </template>
 
