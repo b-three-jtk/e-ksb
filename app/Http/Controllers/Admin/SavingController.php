@@ -90,17 +90,17 @@ class SavingController extends Controller
             ->withQueryString()
             ->through(function ($trx) {
                 return [
-                    'id' => $trx->id,
-                    'no_transaksi' => str_pad($trx->saving_transaction_code, 6, '0', STR_PAD_LEFT),
-                    'tanggal' => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                    'anggota' => $trx->savingAccount->member->user->user_code
-                        . ' - '
-                        . $trx->savingAccount->member->user->name,
-                    'nominal' => $trx->transaction_type === 'Penarikan'
-                        ? -$trx->saving_amount
-                        : $trx->saving_amount,
-                    'produk' => $trx->savingAccount->savingProduct->name, // nama lengkap
-                    'jenis' => $trx->savingAccount->savingProduct->name,
+                    'id'           => $trx->id,
+                    'no_transaksi' => $trx->transaction_code, 
+                    'tanggal'      => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
+                    'anggota'      => $trx->savingAccount->user->member_number
+                                    . ' - '
+                                    . $trx->savingAccount->user->name,
+                    'nominal'      => $trx->type === 'Penarikan'
+                                    ? -$trx->amount
+                                    : $trx->amount,
+                    'produk'       => $trx->savingAccount->type, // nama lengkap
+                    'jenis'        => $trx->type,
                 ];
             });
 
