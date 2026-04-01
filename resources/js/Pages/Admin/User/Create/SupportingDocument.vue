@@ -47,7 +47,7 @@ defineProps({
 				<label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Foto KTP</label>
 				<input ref="ktpInput" type="file" class="hidden" accept="image/*,.pdf" @change="setFile($event, 'ktp')" />
 				<div v-if="ktpPreviewUrl" class="mb-3">
-					<button type="button" class="w-full" @click="openImageOptions('ktp')">
+					<button type="button" class="w-full" @click="openImageOptions('ktp', () => openPicker('ktp'))">
 						<img
 							:src="ktpPreviewUrl"
 							alt="Preview KTP"
@@ -72,7 +72,7 @@ defineProps({
 				<label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Foto KK</label>
 				<input ref="kkInput" type="file" class="hidden" accept="image/*,.pdf" @change="setFile($event, 'kk')" />
 				<div v-if="kkPreviewUrl" class="mb-3">
-					<button type="button" class="w-full" @click="openImageOptions('kk')">
+					<button type="button" class="w-full" @click="openImageOptions('kk', () => openPicker('kk'))">
 						<img
 							:src="kkPreviewUrl"
 							alt="Preview KK"
