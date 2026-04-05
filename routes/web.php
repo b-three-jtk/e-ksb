@@ -131,6 +131,7 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:user', 'revalida
     Route::put('/profile', [UserProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/picture', [UserProfileController::class, 'updateProfilePicture'])->name('profile.picture.update');
     Route::delete('/profile/picture', [UserProfileController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
+    Route::post('/profile/update-password', [UserProfileController::class, 'updatePassword'])->name('profile.update-password');
 
     Route::get('/resign', [AnggotaController::class, 'createResign'])->name('resign.create');
     Route::post('/resign', [AnggotaController::class, 'storeResign'])->name('resign.store');

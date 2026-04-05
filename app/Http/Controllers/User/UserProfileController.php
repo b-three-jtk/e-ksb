@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 
 class UserProfileController extends Controller
@@ -129,5 +130,45 @@ class UserProfileController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Foto profil berhasil dihapus');
+    }
+
+    /**
+     * Update user's password
+     */
+    public function updatePassword(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'current_password' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) use ($user) {
+                    if (!Hash::check($value, $user->password)) {
+                        $fail('Password saat ini tidak sesuai.');
+                    }
+                },
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/[A-Z]/',
+                'regex:/[0-9]/',
+                'confirmed',
+            ],
+        ], [
+            'current_password.required' => 'Password saat ini harus diisi.',
+            'password.required' => 'Password baru harus diisi.',
+            'password.min' => 'Password harus minimal 8 karakter.',
+            'password.regex' => 'Password harus mengandung huruf besar dan angka.',
+            'password.confirmed' => 'Konfirmasi password tidak sesuai dengan password baru.',
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return redirect()->back()->with('success', 'Password berhasil diubah');
     }
 }
