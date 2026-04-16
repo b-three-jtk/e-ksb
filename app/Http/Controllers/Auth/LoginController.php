@@ -41,7 +41,7 @@ class LoginController extends Controller
             ];
 
             throw ValidationException::withMessages([
-                'member_number' => $messages[$user->status->value] ?? 'Akun Anda belum aktif.',
+                'member_number' => $messages[$user->status] ?? 'Akun Anda belum aktif.',
             ]);
         }
 

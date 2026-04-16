@@ -14,6 +14,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showPrintButton: {
+    type: Boolean,
+    default: true,
+  },
+  showTime: {
+    type: Boolean,
+    default: true,
+  },
   namaKoperasi: {
     type: String,
     default: 'Koperasi Syariah Berkah',
@@ -31,11 +39,13 @@ const formatRp = (val) =>
 
 const tanggalFormatted = computed(() => {
   const d = new Date(props.transaksi.tanggal)
-  return (
-    d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) +
-    '  ' +
-    d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-  )
+  const datePart = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  if (!props.showTime) {
+    return datePart
+  }
+
+  return datePart + '  ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
 })
 
 const waktuCetak = computed(() => {
@@ -308,6 +318,7 @@ defineExpose({ cetak })
     </div>
 
     <button
+      v-if="showPrintButton"
       @click="cetak"
       class="mt-4 w-full flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
     >

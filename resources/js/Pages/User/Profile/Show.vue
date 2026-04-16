@@ -1,8 +1,10 @@
 <script setup>
 import { router } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import Base from '../../../Layouts/Base.vue';
 import ReadonlyField from '@/Components/Form/ReadonlyField.vue'
 import UserIcon from '@/Icons/UserIcon.vue'
+import ChangePasswordModal from './ChangePasswordModal.vue'
 
 const props = defineProps({
     user: {
@@ -10,6 +12,16 @@ const props = defineProps({
         required: true
     }
 })
+
+const isModalOpen = ref(false)
+
+const openPasswordModal = () => {
+    isModalOpen.value = true
+}
+
+const closePasswordModal = () => {
+    isModalOpen.value = false
+}
 </script>
 
 <template>
@@ -34,12 +46,18 @@ const props = defineProps({
                                 <UserIcon class="w-16 h-16 text-gray-400" style="width: 64px; height: 64px;" />
                             </div>
                         </div>
-                        <div class="w-full sm:w-auto ml-auto text-center sm:text-right self-end">
+                        <div class="w-full sm:w-auto ml-auto text-center sm:text-right self-end flex gap-3 flex-col sm:flex-row">
                             <button
                                 @click="router.visit('/user/profile/edit')"
                                 class="px-6 py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-orange-600 transition-colors"
                             >
                                 Edit Profil
+                            </button>
+                            <button
+                                @click="openPasswordModal"
+                                class="px-6 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
+                            >
+                                Ubah Password
                             </button>
                         </div>
                     </div>
@@ -55,5 +73,8 @@ const props = defineProps({
                 </div>
             </div>
         </div>
+
+        <!-- Change Password Modal Component -->
+        <ChangePasswordModal :is-open="isModalOpen" @close="closePasswordModal" />
     </Base>
 </template>

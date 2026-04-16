@@ -24,6 +24,7 @@ class UserFinancingController extends Controller
         $query = Financing::query()
             ->with(['loan.paymentSchedules'])
             ->where('user_id', $user->id)
+            ->whereIn('status', ['Lunas', 'Angsuran Berjalan'])
             ->when($search !== '', function ($q) use ($search) {
                 $searchLower = mb_strtolower($search);
                 $q->where(function ($sub) use ($searchLower) {
@@ -41,6 +42,7 @@ class UserFinancingController extends Controller
 
         $productTypes = Financing::query()
             ->where('user_id', $user->id)
+            ->whereIn('status', ['Lunas', 'Angsuran Berjalan'])
             ->whereNotNull('product_type')
             ->where('product_type', '!=', '')
             ->select('product_type')

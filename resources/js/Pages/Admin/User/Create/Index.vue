@@ -78,13 +78,13 @@ const genderOptions = [
 
 const { errors } = useUserValidation(form, { requireEmail: false })
 const { onlyLetters, onlyNumbers } = useInputSanitizers()
-const { ktpPreviewUrl, kkPreviewUrl, pickFile, setFile } = useImageUploadPreview(form)
+const { ktpPreviewUrl, kkPreviewUrl, setFile } = useImageUploadPreview(form)
 
 const getFieldError = (field, fallback = '') => {
 	return form.errors[field] || fallback
 }
 
-const openImageOptions = (target) => {
+const openImageOptions = (target, onReplace) => {
 	const previewUrl = target === 'ktp' ? ktpPreviewUrl.value : kkPreviewUrl.value
 	const selectedFile = target === 'ktp' ? form.ktp_photo : form.kk_photo
 
@@ -116,7 +116,7 @@ const openImageOptions = (target) => {
 		}
 
 		if (result.isDenied) {
-			pickFile(target)
+			onReplace?.()
 		}
 	})
 }

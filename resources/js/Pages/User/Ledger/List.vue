@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount } from 'vue'
+import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import BaseLayout from '../../../Layouts/Base.vue'
-import FieldRow from '../../../Components/Form/FieldRow.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
 import Ringkasan from './Ringkasan.vue'
 import Table from './Table.vue'
+import { formatCurrency } from '../../../utils/currency'
 
 defineOptions({
-    layout: BaseLayout,
+    layout: (h: any, page: any) => h(BaseLayout, { title: 'Buku Besar Personal' }, () => page),
 })
 
 const props = withDefaults(defineProps<{
@@ -27,11 +27,11 @@ const props = withDefaults(defineProps<{
         status: string
         tanggal_bergabung: string
     }
-    savings?: {
-        simpanan_pokok: number
-        simpanan_wajib: number
-        simpanan_sukarela: number
-    }
+    savings?: Record<string, number>
+    savingMeta?: Record<string, {
+        maturity_date?: string | null
+        minimum_target?: number | null
+    }>
     filters?: {
         search: string
         month: string
@@ -55,7 +55,18 @@ const props = withDefaults(defineProps<{
     savings: () => ({
         simpanan_pokok: 0,
         simpanan_wajib: 0,
-        simpanan_sukarela: 0,
+        tabungan_anggota: 0,
+        tabungan_berjangka: 0,
+        tabungan_ibadah: 0,
+        tabungan_sosial: 0,
+    }),
+    savingMeta: () => ({
+        tabungan_berjangka: {
+            maturity_date: null,
+        },
+        tabungan_ibadah: {
+            minimum_target: null,
+        },
     }),
     filters: () => ({
         search: '',
@@ -70,9 +81,8 @@ const columns = [
     { key: 'jenis', label: 'Jenis' },
     { key: 'metode', label: 'Metode' },
     { key: 'petugas', label: 'Petugas' },
-    { key: 'debit', label: 'Debit' },
-    { key: 'kredit', label: 'Kredit' },
-    { key: 'saldo', label: 'Saldo' },
+    { key: 'nominal', label: 'Nominal' },
+    { key: 'aksi', label: 'Aksi' },
 ]
 
 const filters = ref({
@@ -100,12 +110,28 @@ const months = computed(() => {
 const selectFilters = [
     {
         key: 'month',
-        label: 'Semua Bulan',
+        label: 'Semua',
         options: months.value,
         optionLabel: 'label',
         optionValue: 'key',
     }
 ]
+
+const totalSavings = computed(() => {
+    return Object.values(props.savings ?? {}).reduce((total, amount) => total + (amount || 0), 0)
+})
+
+const savingTypeCount = computed(() => {
+    return Object.values(props.savings ?? {}).filter((amount) => (amount || 0) > 0).length
+})
+
+const transactionCount = computed(() => props.transactions?.total ?? 0)
+
+const memberStatusLabel = computed(() => {
+    if (!props.memberInfo?.status) return '-'
+    const lower = String(props.memberInfo.status).toLowerCase()
+    return lower.charAt(0).toUpperCase() + lower.slice(1)
+})
 
 const applyFilters = () => {
     router.get('/user/ledger', {
@@ -118,17 +144,9 @@ const applyFilters = () => {
     })
 }
 
-let timeout: ReturnType<typeof setTimeout> | null = null
-
 const handleSearch = (value: string) => {
     filters.value.search = value
-    if (timeout) clearTimeout(timeout)
-    timeout = setTimeout(applyFilters, 500)
 }
-
-onBeforeUnmount(() => {
-    if (timeout) clearTimeout(timeout)
-})
 
 const handleExport = () => {
     const params = new URLSearchParams()
@@ -145,77 +163,94 @@ const handleExport = () => {
 }
 </script>
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 pb-12 max-w-8xl px-4 sm:px-6 lg:px-8">
-        <div class="space-y-6 p-6">
-            <!-- Anggota Info -->
-            <div v-if="memberInfo" class="mb-8 w-full">
-                <h1 class="text-3xl font-bold font-head text-blue-900 dark:text-blue-600 mb-8">
-                    Personal Ledger
+    <div class="min-h-screen bg-[#f5f7f6] dark:bg-gray-900 pt-24 pb-12 max-w-8xl px-4 sm:px-6 lg:px-8">
+        <div class="space-y-8 p-2 sm:p-4 lg:p-6">
+            <div v-if="memberInfo" class="w-full">
+                <h1 class="text-3xl font-bold font-head text-emerald-800 dark:text-emerald-500 mb-4">
+                    Buku Besar Personal
                 </h1>
 
-                <div class="space-y-2 font-head text-black dark:text-white">
-                    <FieldRow label="Nama Anggota" :value="memberInfo.nama" />
-                    <FieldRow label="No Anggota" :value="memberInfo.no_anggota" />
-                    <FieldRow label="Status" :value="memberInfo.status" />
-                    <FieldRow label="Tanggal Bergabung" :value="memberInfo.tanggal_bergabung" />
-                </div>
-            </div>
-
-            <!-- Ringkasan Simpanan -->
-            <div class="w-full mb-8">
-                <h2 class="text-xl font-bold font-head text-gray-800 dark:text-white mb-4">
-                    Ringkasan
-                </h2>
-                <Ringkasan :savings="savings" />
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden w-full">
-                <div class="border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1">
-                            <BaseFunctionality
-                                :search="filters.search"
-                                :per-page="filters.per_page"
-                                :filters="{ month: filters.month }"
-                                :selects="selectFilters"
-                                :search-tooltip="['Produk', 'Jenis', 'Metode']"
-                                :show-border="false"
-                                @update:search="handleSearch"
-                                @update:perPage="val => { filters.per_page = val; applyFilters() }"
-                                @update:filters="val => { filters.month = val.month; applyFilters() }"
-                            />
+                <div class="rounded-xl bg-accent text-emerald-900 shadow-sm overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-4">
+                        <div class="px-4 py-4">
+                            <p class="text-md font-body text-emerald-700">Halo,</p>
+                            <p class="text-2xl font-head font-bold leading-tight mt-1">{{ memberInfo.nama }}</p>
+                            <p class="text-md font-body text-emerald-700 mt-1">
+                                {{ memberInfo.no_anggota }} · {{ memberStatusLabel }} sejak {{ memberInfo.tanggal_bergabung }}
+                            </p>
                         </div>
-                        
-                        <div class="px-4">
-                            <button
-                                @click="handleExport"
-                                class="inline-flex items-center gap-2 px-4 py-2 
-                                    bg-blue-800 hover:bg-blue-900 
-                                    text-white text-sm font-medium rounded-lg
-                                    transition-colors duration-200
-                                    focus:outline-none focus:ring-2 focus:ring-blue-800 focus:ring-offset-2"
-                            >
-                                <span class="icon-[mdi--file-download]" style="color: white;"></span>
-                                Export
-                            </button>
+
+                        <div class="px-4 py-4 md:border-l border-emerald-700/20 flex flex-col justify-center text-center">
+                            <p class="text-2xl font-head font-bold">{{ savingTypeCount }}</p>
+                            <p class="text-md font-body text-emerald-700 mt-1">Total Jenis Simpanan</p>
+                        </div>
+
+                        <div class="px-4 py-4 md:border-l border-emerald-700/30 flex flex-col justify-center text-center">
+                            <p class="text-2xl font-head font-bold">{{ transactionCount }}</p>
+                            <p class="text-md font-body text-emerald-700 mt-1">Transaksi</p>
+                        </div>
+
+                        <div class="px-4 py-4 md:border-l border-emerald-700/30 flex flex-col justify-center text-center">
+                            <p class="text-2xl font-head font-bold">{{ formatCurrency(totalSavings) }}</p>
+                            <p class="text-md font-body text-emerald-700 mt-1">Total Saldo</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- Table -->
-                <div class="px-8 py-6">
-                    <Table
-                        :transactions="transactions.data"
-                        :columns="columns"
-                    />
-
-                    <!-- Pagination -->
-                    <Pagination
-                        :links="transactions.links"
-                        :total="transactions.total"
-                    />
-                </div>    
             </div>
+
+            <div class="w-full">
+                <h2 class="text-2xl font-bold font-head text-gray-900 dark:text-white mb-4">
+                    Ringkasan Saldo
+                </h2>
+                <Ringkasan :savings="savings" :saving-meta="savingMeta" />
+            </div>
+
+            <section class="w-full">
+                <h2 class="text-2xl font-bold font-head text-gray-900 dark:text-white mb-4">
+                    Riwayat Transaksi
+                </h2>
+
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden w-full">
+                    <div class="border-b border-gray-200 dark:border-gray-700">
+                        <BaseFunctionality
+                            :search="filters.search"
+                            :per-page="filters.per_page"
+                            :filters="{ month: filters.month }"
+                            :selects="selectFilters"
+                            :search-tooltip="['Produk', 'Jenis', 'Metode']"
+                            :show-search-button="true"
+                            :show-border="false"
+                            @update:search="handleSearch"
+                            @submit:search="applyFilters"
+                            @update:perPage="val => { filters.per_page = val; applyFilters() }"
+                            @update:filters="val => { filters.month = val.month; applyFilters() }"
+                        >
+                            <template #actions>
+                                <button
+                                    @click="handleExport"
+                                    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
+                                >
+                                    <span class="icon-[mdi--file-download]" style="color: white;"></span>
+                                    Export XLS
+                                </button>
+                            </template>
+                        </BaseFunctionality>
+                    </div>
+
+                    <div class="px-3 sm:px-5 lg:px-6 py-4 sm:py-5">
+                        <Table
+                            :transactions="transactions.data"
+                            :columns="columns"
+                            :member-info="memberInfo"
+                        />
+
+                        <Pagination
+                            :links="transactions.links"
+                            :total="transactions.total"
+                        />
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </template>

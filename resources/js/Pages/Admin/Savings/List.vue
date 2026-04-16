@@ -170,7 +170,7 @@ const handleAction = (type) => {
     if (type === 'setor') {
         router.visit('/admin/simpanan/penyetoran')
     } else {
-        router.visit('/admin/simpanan/penarikan')
+        router.visit('/admin/savings/penarikan')
     }
 }
 </script>

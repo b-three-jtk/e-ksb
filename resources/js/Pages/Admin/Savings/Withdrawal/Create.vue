@@ -7,7 +7,7 @@ import DetailSection from './DetailSection.vue'
 import ConfirmationModal from '@/Components/Savings/ConfirmationModal.vue'
 import Struk from '@/Components/Savings/Struk.vue'
 import { Icon } from '@iconify/vue'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { toast } from 'vue3-toastify'
 import { getTodayYmd } from '@/utils/date'
@@ -32,6 +32,26 @@ const withdrawalFormRef = ref(null)
 const currentFormData = ref({})
 const showConfirmation = ref(false)
 const showStruk = ref(showStrukInitial.value)
+
+async function handleFlashReceipt(struk) {
+  if (!struk) return
+
+  dataStruk.value = struk
+  showStruk.value = true
+
+  toast('Penarikan simpanan berhasil disimpan!', {
+    type: 'success',
+    position: 'bottom-right',
+  })
+}
+
+watch(
+  () => page.props.flash?.struk,
+  (struk) => {
+    handleFlashReceipt(struk)
+  },
+  { immediate: true }
+)
 
 const isFormValid = computed(() => {
   if (!selectedMember.value || !selectedSaving.value) return false
@@ -110,10 +130,7 @@ function submitWithdrawal() {
   router.post('/admin/savings/penarikan', formData, {
     forceFormData: true,
     preserveScroll: true,
-    onSuccess: (resp) => {
-      toast('Penarikan simpanan berhasil disimpan!', { type: 'success', position: 'bottom-right' })
-      dataStruk.value = resp.props.flash?.struk || null
-      showStruk.value = true
+    onSuccess: () => {
       showConfirmation.value = false
       reset()
     },

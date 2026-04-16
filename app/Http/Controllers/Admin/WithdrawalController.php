@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\User;
 use App\Models\Account;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
+use App\Models\SavingTransactionDoc;
 use App\Enums\TransactionStatus;
 use App\Enums\UserStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -164,6 +167,7 @@ class WithdrawalController extends Controller
 
             // Prepare receipt data
             $strukData = [
+                'transaction_id' => $transaction->id,
                 'no_transaksi' => str_pad($transaction->id, 6, '0', STR_PAD_LEFT),
                 'tanggal' => $transaction->transaction_date,
                 'pengurus' => $namaAdmin,
@@ -179,6 +183,8 @@ class WithdrawalController extends Controller
                 'account_number' => $validated['account_number'] ?? '',
             ];
 
+            $this->storeReceiptPdf($transaction, $strukData);
+
             return redirect()
                 ->route('admin.withdrawal.create')
                 ->with('success', 'Penarikan simpanan berhasil disimpan')
@@ -190,6 +196,41 @@ class WithdrawalController extends Controller
             return back()
                 ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Generate and store withdrawal receipt as PDF into saving_transaction_docs.
+     */
+    private function storeReceiptPdf(SavingTransaction $transaction, array $strukData): void
+    {
+        $pdf = Pdf::loadView('exports.withdrawal_receipt', [
+            'struk' => $strukData,
+        ])->setPaper([0, 0, 226.77, 650]);
+
+        $directory = 'saving-transactions/' . now()->format('Y-m');
+        $filename = 'struk-withdrawal-' . $transaction->id . '.pdf';
+        $path = $directory . '/' . $filename;
+
+        Storage::disk('public')->put($path, $pdf->output());
+
+        $existingDoc = SavingTransactionDoc::query()
+            ->where('transaction_id', $transaction->id)
+            ->where('name', 'Struk Penarikan')
+            ->first();
+
+        if ($existingDoc && $existingDoc->attachment) {
+            Storage::disk('public')->delete($existingDoc->attachment);
+        }
+
+        SavingTransactionDoc::updateOrCreate(
+            [
+                'transaction_id' => $transaction->id,
+                'name' => 'Struk Penarikan',
+            ],
+            [
+                'attachment' => $path,
+            ]
+        );
     }
 
     /**

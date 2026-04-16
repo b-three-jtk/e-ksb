@@ -1,87 +1,143 @@
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
+import { computed } from 'vue'
 import { formatCurrency } from '../../../utils/currency'
 
-interface SavingData {
-    simpanan_pokok: number
-    simpanan_wajib: number
-    simpanan_sukarela: number
-}
+type SavingData = Record<string, number>
+type SavingMeta = Record<string, {
+    maturity_date?: string | null
+    minimum_target?: number | null
+}>
 
 const props = withDefaults(defineProps<{
     savings?: SavingData
+    savingMeta?: SavingMeta
 }>(), {
     savings: () => ({
         simpanan_pokok: 0,
         simpanan_wajib: 0,
-        simpanan_sukarela: 0,
+        tabungan_anggota: 0,
+        tabungan_berjangka: 0,
+        tabungan_ibadah: 0,
+        tabungan_sosial: 0,
+    }),
+    savingMeta: () => ({
+        tabungan_berjangka: {
+            maturity_date: null,
+        },
+        tabungan_ibadah: {
+            minimum_target: null,
+        },
     }),
 })
 
-const savingItems = [
-    {
-        label: 'Total Simpanan Pokok',
-        key: 'simpanan_pokok',
-        color: 'blue',
-        icon: 'mdi--bank',
-    },
-    {
-        label: 'Total Simpanan Wajib',
-        key: 'simpanan_wajib',
-        color: 'green',
-        icon: 'mdi--check-circle',
-    },
-    {
-        label: 'Total Simpanan Sukarela',
-        key: 'simpanan_sukarela',
-        color: 'purple',
-        icon: 'mdi--heart',
-    },
-]
+const labelMap: Record<string, string> = {
+    simpanan_pokok: 'Simpanan Pokok',
+    simpanan_wajib: 'Simpanan Wajib',
+    simpanan_sukarela: 'Tabungan Anggota',
+    tabungan_anggota: 'Tabungan Anggota',
+    tabungan_berjangka: 'Tabungan Berjangka',
+    tabungan_ibadah: 'Tabungan Ibadah',
+    tabungan_sosial: 'Tabungan Sosial',
+}
+
+const noteMap: Record<string, string> = {
+    simpanan_pokok: 'Dicairkan saat keluar',
+    simpanan_wajib: 'Dicairkan saat keluar',
+    simpanan_sukarela: 'Dapat ditarik kapan saja',
+    tabungan_anggota: 'Dapat ditarik kapan saja',
+    tabungan_berjangka: 'Tidak dapat ditarik sebelum jatuh tempo',
+    tabungan_ibadah: 'Bisa diambil saat target tabungan tercapai',
+    tabungan_sosial: 'Dapat ditarik kapan saja',
+}
+const accentBorderClass = 'border-emerald-300 dark:border-emerald-600'
+
+const formatDate = (dateValue?: string | null) => {
+    if (!dateValue) return null
+
+    const date = new Date(dateValue)
+    if (Number.isNaN(date.getTime())) return null
+
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+    })
+}
+
+const getItemNote = (key: string) => {
+    if (key === 'tabungan_berjangka') {
+        const maturityDate = formatDate(props.savingMeta?.tabungan_berjangka?.maturity_date)
+        if (maturityDate) {
+            return `Dapat ditarik setelah tanggal ${maturityDate}`
+        }
+    }
+
+    if (key === 'tabungan_ibadah') {
+        const minimumTarget = Number(props.savingMeta?.tabungan_ibadah?.minimum_target ?? 0)
+        if (minimumTarget > 0) {
+            return `Minimal capai ${formatCurrency(minimumTarget)} agar bisa diambil`
+        }
+    }
+
+    return noteMap[key] ?? 'Saldo simpanan aktif'
+}
+
+const formatLabel = (key: string) => {
+    if (labelMap[key]) return labelMap[key]
+
+    return key
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+const orderedSavingKeys = computed(() => {
+    const knownOrder = [
+        'simpanan_pokok',
+        'simpanan_wajib',
+        'tabungan_anggota',
+        'tabungan_berjangka',
+        'tabungan_ibadah',
+        'tabungan_sosial',
+        'simpanan_sukarela',
+    ]
+
+    const available = Object.keys(props.savings ?? {})
+    const known = knownOrder.filter((key) => available.includes(key))
+    const unknown = available.filter((key) => !knownOrder.includes(key))
+
+    return [...known, ...unknown]
+})
+
+const savingItems = computed(() => {
+    return orderedSavingKeys.value.map((key) => ({
+        key,
+        label: formatLabel(key),
+        note: getItemNote(key),
+        amount: props.savings?.[key] ?? 0,
+        borderColor: accentBorderClass,
+    }))
+})
 </script>
 
 <template>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-        <div
-            v-for="item in savingItems"
-            :key="item.key"
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4"
-            :class="{
-                'border-l-blue-600': item.color === 'blue',
-                'border-l-green-600': item.color === 'green',
-                'border-l-purple-600': item.color === 'purple',
-            }"
-        >
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium font-body text-gray-600 dark:text-gray-400">
+    <div class="w-full overflow-x-auto pb-2 [scrollbar-width:thin]">
+        <div class="flex gap-4 w-max min-w-full pr-1">
+            <div
+                v-for="item in savingItems"
+                :key="item.key"
+                class="w-[240px] sm:w-[260px] rounded-2xl border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 p-4 sm:p-5 shadow-sm shrink-0"
+                :class="item.borderColor"
+            >
+                <h3 class="text-sm font-medium font-body text-gray-500 dark:text-gray-300">
                     {{ item.label }}
                 </h3>
-                <div
-                    class="p-2 rounded-lg"
-                    :class="{
-                        'bg-blue-100 dark:bg-blue-900': item.color === 'blue',
-                        'bg-green-100 dark:bg-green-900': item.color === 'green',
-                        'bg-purple-100 dark:bg-purple-900': item.color === 'purple',
-                    }"
-                >
-                    <Icon
-                        :icon="item.icon"
-                        width="1.5rem"
-                        height="1.5rem"
-                        :class="{
-                            'text-blue-600 dark:text-blue-300': item.color === 'blue',
-                            'text-green-600 dark:text-green-300': item.color === 'green',
-                            'text-purple-600 dark:text-purple-300': item.color === 'purple',
-                        }"
-                    />
-                </div>
+                <p class="text-2xl font-bold font-head text-gray-900 dark:text-white mt-2">
+                    {{ formatCurrency(item.amount) }}
+                </p>
+                <p class="text-xs text-gray-500 font-body dark:text-gray-400 mt-1">
+                    {{ item.note }}
+                </p>
             </div>
-            <p class="text-2xl font-bold font-head text-gray-900 dark:text-white">
-                {{ formatCurrency(props.savings?.[item.key as keyof SavingData] ?? 0) }}
-            </p>
-            <p class="text-xs text-gray-500 font-body dark:text-gray-500 mt-2">
-                Saldo simpanan Anda
-            </p>
         </div>
     </div>
 </template>
