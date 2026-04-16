@@ -34,7 +34,6 @@ class FinancingSeeder extends Seeder
             'status' => FinancingReqStatus::ACTIVE_INSTALLMENTS->value,
             'isWakalah' => true,
             'down_payment' => 3000000,
-            'market_price' => 20000000,
             'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
             'updated_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'user_id' => User::where('member_number', 'KSP002')->first()?->id,

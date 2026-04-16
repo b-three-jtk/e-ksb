@@ -14,6 +14,7 @@ class Financial extends Model
         'user_id',
         'financial_type',
         'amount',
+        'category',
     ];
 
     public function user()

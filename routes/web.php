@@ -89,7 +89,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::get('/savings/list', [SavingController::class, 'index'])->name('savings.index');
     Route::get('/savings/export/csv', [SavingController::class, 'exportCsv'])->name('savings.export.csv');
     Route::get('/savings/export/pdf', [SavingController::class, 'exportPdf'])->name('savings.export.pdf');
-    
+
     Route::get('/savings/penarikan', [WithdrawalController::class, 'create'])->name('withdrawal.create');
     Route::post('/savings/penarikan', [WithdrawalController::class, 'store'])->name('withdrawal.store');
 
@@ -116,7 +116,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::get('/resignation/{id}', [ResignationController::class, 'validation'])->name('resignations.validation');
     Route::put('/resignation/{id}', [ResignationController::class, 'validate'])->name('resignations.validate');
 
+    // financing routes
     Route::get('/financing/show/{id}', [FinancingController::class, 'show'])->name('financing.show');
+    Route::get('/financing/create', [FinancingController::class, 'create'])->name('financing.create');
+    Route::get('/members/search', [UserController::class, 'searchMembers'])->name('admin.members.search');
+    Route::get('/suppliers/search', [FinancingController::class, 'searchSuppliers'])->name('admin.suppliers.search');
+    Route::post('/financing/store', [FinancingController::class, 'store'])->name('financing.store');
+    Route::post('/financing/store/draft', [FinancingController::class, 'storeDraft'])->name('financing.storeDraft');
 
     Route::get('/simpanan/penyetoran', [SimpananController::class, 'createDeposit'])->name('deposit.create');
     Route::post('/simpanan/penyetoran', [SimpananController::class, 'storeDeposit'])->name('deposit.store');

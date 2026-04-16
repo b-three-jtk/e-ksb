@@ -13,7 +13,7 @@ defineProps({
 <template>
     <ThemeProvider>
         <Head>
-            <title>{{ title }} - Koperasi Syariah Warga Polban</title>
+            <title>{{ title }} - Koperasi Syariah Berkah</title>
         </Head>
         <SidebarProvider>
             <Base>

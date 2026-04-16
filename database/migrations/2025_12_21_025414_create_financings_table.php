@@ -28,7 +28,6 @@ return new class extends Migration
             $table->integer('qty');
             $table->boolean('isWakalah')->nullable();
             $table->decimal('down_payment', 15, 2)->nullable();
-            $table->decimal('market_price', 15, 2)->nullable();
             $table->date('akad_date')->nullable();
             $table->enum('status', array_column(FinancingReqStatus::cases(), 'value'));
             $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null');

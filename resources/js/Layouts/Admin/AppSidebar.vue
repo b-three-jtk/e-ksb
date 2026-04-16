@@ -131,7 +131,7 @@ const endTransition = (el) => {
                     <img class="max-h-12" src="/public/images/logo/logo-icon.svg" alt="Logo">
                     <span
                         class="self-center text-2xl text-brand-950 font-semibold whitespace-nowrap dark:text-white">KS<span
-                            class="text-accent">WP</span> Admin</span>
+                            class="text-accent">B</span> Admin</span>
                 </div>
                 <img v-else src="/public/images/logo/logo-icon.svg" alt="Logo" width="32" height="32" />
             </Link>

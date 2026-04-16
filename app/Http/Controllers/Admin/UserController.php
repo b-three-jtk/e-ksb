@@ -17,7 +17,6 @@ use App\Models\SavingAccount;
 use App\Models\User;
 use App\Services\Admin\RegisterMemberService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use RuntimeException;
@@ -380,5 +379,48 @@ class UserController extends Controller
 
             return $redirect;
         }
+    }
+
+    public function searchMembers(Request $request)
+    {
+        $query = $request->get('q');
+
+        $members = User::query()
+            ->with('financials', 'heirs')
+            ->whereHas('role', fn($q) => $q->where('name', 'Anggota'))
+            ->whereNotNull('joined_date')
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'ILIKE', "%{$query}%")
+                    ->orWhere('member_number', 'ILIKE', "%{$query}%");
+            })
+            ->where('status', UserStatus::ACTIVE->value)
+            ->limit(5)
+            ->get()
+            ->map(function ($member) {
+                $financials = $member->financials ?? collect();
+
+                return [
+                    'id' => $member->id,
+                    'member_number' => $member->member_number,
+                    'name' => $member->name,
+                    'email' => $member->email,
+                    'nik' => $member->nik,
+                    'phone_number' => $member->phone_number,
+                    'gender' => $member->gender,
+                    'marital_status' => $member->marital_status,
+                    'last_education' => $member->last_education,
+                    'dependents' => $member->dependents,
+                    'birth_place' => $member->birth_place,
+                    'birth_date' => $member->birth_date,
+                    'address' => $member->address,
+                    'residential_address' => $member->residential_address,
+
+                    'incomes' => $financials->where('category', true)->values(),
+                    'expenses' => $financials->where('category', false)->values(),
+                    'heirs' => $member->heirs ?? collect(),
+                ];
+            });
+
+        return response()->json($members);
     }
 }

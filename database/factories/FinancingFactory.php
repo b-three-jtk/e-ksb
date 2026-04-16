@@ -35,7 +35,6 @@ class FinancingFactory extends Factory
             'status' => $this->faker->randomElement(FinancingReqStatus::cases())->value,
             'isWakalah' => $this->faker->boolean(),
             'down_payment' => $this->faker->numberBetween(50000, 5000000),
-            'market_price' => $this->faker->numberBetween(150000, 12000000),
             'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
             'updated_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),

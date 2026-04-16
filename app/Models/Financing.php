@@ -27,7 +27,6 @@ class Financing extends Model
         'status',
         'isWakalah',
         'down_payment',
-        'market_price',
         'supplier_id',
         'updated_by',
         'akad_date',

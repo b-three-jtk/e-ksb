@@ -31,6 +31,7 @@ class User extends Authenticatable
         'birth_date',
         'gender',
         'marital_status',
+        'spouse_name',
         'address',
         'residential_address',
         'phone_number',
