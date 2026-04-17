@@ -284,7 +284,7 @@ console.log(props.data.financing.loan.payment_schedules[props.data.total_paid_in
                         <li class="flex lg:flex-row flex-col gap-2 justify-between">
                             <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Anggota</span>
                             <span class="font-medium text-dark-text dark:text-white">{{
-                                props.data.financing.user.member_number }}</span>
+                                props.data.financing.user.member_code }}</span>
                         </li>
                         <li class="flex lg:flex-row flex-col gap-2 justify-between">
                             <span class="text-sm text-gray-500 dark:text-gray-300">Nama Anggota</span>

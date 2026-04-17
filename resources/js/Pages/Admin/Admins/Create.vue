@@ -13,7 +13,7 @@ const form = useForm({
     nik: '',
     role_id: '',
     name: '',
-    address: '',
+    domicile_address: '',
     phone_number: '',
     gender: '',
     birth_place: '',
@@ -114,7 +114,7 @@ const submitForm = () => {
 
                     <!-- Posisi -->
                     <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
-                        :selectables="roles.map(role => ({ value: role.id, text: role.name }))" :error="errors.role_id">
+                        :selectables="roles.map(role => ({ value: role.id, text: role.role_name }))" :error="errors.role_id">
                     </BaseInputAdmin>
 
                     <!-- Email -->
@@ -122,13 +122,13 @@ const submitForm = () => {
                         placeholder="Masukkan email" :error="errors.email"></BaseInputAdmin>
 
                     <!-- No. Telp -->
-                    <BaseInputAdmin v-model="form.phone_number" label="Nomor Telepon" type="text"
+                    <BaseInputAdmin v-model="form.phone_number" max="20" required label="Nomor Telepon" type="text"
                         placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number">
                     </BaseInputAdmin>
 
                     <!-- Alamat (full width) -->
-                    <BaseInputAdmin v-model="form.address" label="Alamat" type="textarea"
-                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.address">
+                    <BaseInputAdmin v-model="form.domicile_address" label="Alamat" type="textarea"
+                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.domicile_address">
                     </BaseInputAdmin>
 
                     <!-- Alamat Domisili (full width) -->

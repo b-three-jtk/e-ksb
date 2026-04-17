@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use LogicException;
-use App\Models\Financing;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Models\Financing;
 use Illuminate\Support\Facades\Request;
-use App\Enums\LoanPaymentScheduleStatus;
+use LogicException;
 
 class RepaymentController extends Controller
 {
@@ -16,11 +16,11 @@ class RepaymentController extends Controller
         $data['financing'] = Financing::
             with('user', 'loan.paymentSchedules.payment')
             ->whereHas('loan.paymentSchedules', function ($query) use ($id) {
-                $query->where('status', LoanPaymentScheduleStatus::PENDING->value)->orderBy('installment_number', 'asc');
+                $query->where('status', InstallmentPaymentScheduleStatusEnum::PENDING->value)->orderBy('installment_number', 'asc');
             })
             ->findOrFail($id);
 
-        $data['total_paid_installments'] = $data['financing']->loan->paymentSchedules->where('status', LoanPaymentScheduleStatus::PAID->value)->count();
+        $data['total_paid_installments'] = $data['financing']->loan->paymentSchedules->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
 
         // Selisih harga cicilan dan tsaman naqdy
         $marginDiff = $data['financing']->loan->total_loan - $data['financing']->tsaman_naqdy;
@@ -32,7 +32,7 @@ class RepaymentController extends Controller
         }
 
         $data['qimah_haliyyah'] = $data['financing']->tsaman_naqdy + ($data['margin_diff_per_month'] * ($data['total_paid_installments'] + 1)); // tambah satu untuk installment saat ini
-        $data['payment_total'] = $data['financing']->loan->paymentSchedules->where('status', LoanPaymentScheduleStatus::PAID->value)->sum('total_amount');
+        $data['payment_total'] = $data['financing']->loan->paymentSchedules->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->sum('total_amount');
         $data['repayment_total'] = $data['qimah_haliyyah'] - $data['payment_total'];
 
         return inertia('Admin/Repayment/Validation', [
@@ -49,17 +49,17 @@ class RepaymentController extends Controller
         if ($request->input('action') === 'accept') {
             // Logic to accept the repayment validation
             $financing->loan->paymentSchedules()
-                ->where('status', LoanPaymentScheduleStatus::PENDING->value)
+                ->where('status', InstallmentPaymentScheduleStatusEnum::PENDING->value)
                 ->orderBy('installment_number', 'asc')
                 ->first()
-                ->update(['status' => LoanPaymentScheduleStatus::SCHEDULED->value]);
+                ->update(['status' => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value]);
         } elseif ($request->input('action') === 'reject') {
             // Logic to reject the repayment validation
             $financing->loan->paymentSchedules()
-                ->where('status', LoanPaymentScheduleStatus::PENDING->value)
+                ->where('status', InstallmentPaymentScheduleStatusEnum::PENDING->value)
                 ->orderBy('installment_number', 'asc')
                 ->first()
-                ->update(['status' => LoanPaymentScheduleStatus::REJECTED->value]);
+                ->update(['status' => InstallmentPaymentScheduleStatusEnum::REJECTED->value]);
         } else {
             throw new LogicException('Invalid action specified.');
         }

@@ -14,6 +14,7 @@ class FinancingProduct extends Model
         'qty',
         'condition',
         'cost_price',
+        'margin_amount',
         'product_id',
         'purchase_receipt',
     ];
@@ -21,5 +22,10 @@ class FinancingProduct extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function financing()
+    {
+        return $this->belongsTo(Financing::class);
     }
 }

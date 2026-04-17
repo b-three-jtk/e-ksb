@@ -9,7 +9,6 @@ use App\Models\LoanPaymentSchedule;
 use DB;
 use Illuminate\Http\Request;
 use App\Enums\LoanPaymentStatus;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Enums\LoanPaymentScheduleStatus;
 use App\Http\Requests\CreateRepaymentRequest;

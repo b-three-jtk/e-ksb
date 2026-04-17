@@ -19,7 +19,7 @@ const form = useForm({
     name: props.admin.name || '',
     email: props.admin.email || '',
     role_id: props.admin.role_id || '',
-    address: props.admin.address || '',
+    domicile_address: props.admin.domicile_address || '',
     phone_number: props.admin.phone_number || '',
     last_education: props.admin.last_education || '',
     birth_place: props.admin.birth_place || '',
@@ -96,7 +96,7 @@ const submitForm = () => {
 
                     <div class="flex gap-6">
                         <!-- Tempat Lahir -->
-                        <BaseInputAdmin v-model="form.birth_place" label="Tempat Lahir" type="text"
+                        <BaseInputAdmin v-model="form.birth_place" max="150" label="Tempat Lahir" type="text"
                             placeholder="Masukkan tempat lahir" :error="errors.birth_place">
                         </BaseInputAdmin>
                         <!-- Tanggal Lahir -->
@@ -113,7 +113,7 @@ const submitForm = () => {
 
                     <!-- Posisi -->
                     <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
-                        :selectables="roles.map(role => ({ value: role.id, text: role.name }))" :error="errors.role_id">
+                        :selectables="roles.map(role => ({ value: role.id, text: role.role_name }))" :error="errors.role_id">
                     </BaseInputAdmin>
 
                     <!-- Email -->
@@ -121,13 +121,13 @@ const submitForm = () => {
                         placeholder="Masukkan email" :error="errors.email"></BaseInputAdmin>
 
                     <!-- No. Telp -->
-                    <BaseInputAdmin v-model="form.phone_number" label="Nomor Telepon" type="text"
+                    <BaseInputAdmin v-model="form.phone_number" max="20" required label="Nomor Telepon" type="text"
                         placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number">
                     </BaseInputAdmin>
 
                     <!-- Alamat (full width) -->
-                    <BaseInputAdmin v-model="form.address" label="Alamat" type="textarea"
-                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.address">
+                    <BaseInputAdmin v-model="form.domicile_address" label="Alamat" type="textarea"
+                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.domicile_address">
                     </BaseInputAdmin>
 
                     <!-- Alamat Domisili (full width) -->

@@ -19,7 +19,7 @@ class RegisterMemberService
      * Register a new member with heir and optional documents.
      *
      * @param array<string, mixed> $validated
-     * @return array{name: mixed, member_number: string, initial_password: string, phone_number: mixed}
+     * @return array{name: mixed, member_code: string, initial_password: string, phone_number: mixed}
      */
     public function register(array $validated, Request $request): array
     {
@@ -41,7 +41,7 @@ class RegisterMemberService
 
         return [
             'name' => $validated['name'],
-            'member_number' => $memberNumber,
+            'member_code' => $memberNumber,
             'initial_password' => $initialPassword,
             'phone_number' => $validated['phone_number'],
         ];
@@ -50,8 +50,8 @@ class RegisterMemberService
     private function generateMemberNumber(): string
     {
         $lastNumeric = User::query()
-            ->where('member_number', 'like', 'KSP%')
-            ->selectRaw("MAX(CAST(REGEXP_REPLACE(member_number, '[^0-9]', '', 'g') AS INTEGER)) as max_number")
+            ->where('member_code', 'like', 'KSP%')
+            ->selectRaw("MAX(CAST(REGEXP_REPLACE(member_code, '[^0-9]', '', 'g') AS INTEGER)) as max_number")
             ->value('max_number');
 
         $nextNumber = ((int) ($lastNumeric ?? 0)) + 1;
@@ -67,7 +67,7 @@ class RegisterMemberService
         $email = $validated['email'] ?? null;
 
         return User::create([
-            'member_number' => $memberNumber,
+            'member_code' => $memberNumber,
             'name' => $validated['name'],
             'nik' => $validated['nik'],
             'birth_place' => $validated['birth_place'],

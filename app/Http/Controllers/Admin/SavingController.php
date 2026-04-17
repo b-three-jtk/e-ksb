@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\SavingType;
+use App\Enums\SavingTypeEnum;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Models\SavingAccount;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Enums\TransactionStatus;
 use App\Models\SavingTransaction;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreSavingTransactionValidationRequest;
 
 class SavingController extends Controller
 {
@@ -24,23 +21,21 @@ class SavingController extends Controller
     {
         $search = $request->input('search');
         $tab    = $request->input('tab', 'semua');
-    
+
         $typeMap = [
-            'pokok'              => SavingType::SIMPANAN_POKOK->value,
-            'wajib'              => SavingType::SIMPANAN_WAJIB->value,
-            'tabungan_anggota'   => SavingType::TABUNGAN_ANGGOTA->value,
-            'tabungan_berjangka' => SavingType::TABUNGAN_BERJANGKA->value,
-            'tabungan_ibadah'    => SavingType::TABUNGAN_IBADAH->value,
-            'tabungan_sosial'    => SavingType::TABUNGAN_SOSIAL->value,
+            'pokok'              => SavingTypeEnum::SIMPANAN_POKOK->value,
+            'wajib'              => SavingTypeEnum::SIMPANAN_WAJIB->value,
+            'tabungan_anggota'   => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'tabungan_berjangka' => SavingTypeEnum::TABUNGAN_BERJANGKA->value,
+            'tabungan_ibadah'    => SavingTypeEnum::TABUNGAN_IBADAH->value,
         ];
-    
+
         return SavingTransaction::with(['savingAccount.user'])
-            ->where('status', TransactionStatus::COMPLETED)
             ->when($search, function ($q) use ($search) {
                 $q->whereHas('savingAccount.user', function ($u) use ($search) {
                     $u->where('name', 'like', "%{$search}%")
                     ->orWhere('nik', 'like', "%{$search}%")
-                    ->orWhere('member_number', 'like', "%{$search}%");
+                    ->orWhere('member_code', 'like', "%{$search}%");
                 });
             })
             ->when(isset($typeMap[$tab]), function ($q) use ($typeMap, $tab) {
@@ -48,22 +43,21 @@ class SavingController extends Controller
                     $sa->where('type', $typeMap[$tab]);
                 });
             })
-            // Filter grup: 'simpanan' → 3 tipe simpanan
+            // Filter grup: 'simpanan' → 2 tipe simpanan
             ->when($tab === 'simpanan', function ($q) {
                 $q->whereHas('savingAccount', function ($sa) {
                     $sa->whereIn('type', [
-                        SavingType::SIMPANAN_POKOK->value,
-                        SavingType::SIMPANAN_WAJIB->value,
+                        SavingTypeEnum::SIMPANAN_POKOK->value,
+                        SavingTypeEnum::SIMPANAN_WAJIB->value,
                     ]);
                 });
             })
             ->when($tab === 'tabungan', function ($q) {
                 $q->whereHas('savingAccount', function ($sa) {
                     $sa->whereIn('type', [
-                        SavingType::TABUNGAN_ANGGOTA->value,
-                        SavingType::TABUNGAN_BERJANGKA->value,
-                        SavingType::TABUNGAN_IBADAH->value,
-                        SavingType::TABUNGAN_SOSIAL->value,
+                        SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+                        SavingTypeEnum::TABUNGAN_BERJANGKA->value,
+                        SavingTypeEnum::TABUNGAN_IBADAH->value,
                     ]);
                 });
             });
@@ -76,38 +70,38 @@ class SavingController extends Controller
         $tab     = $request->input('tab', 'semua');
         $sortBy  = $request->input('sort_by', 'transaction_date');
         $sortDir = $request->input('sort_dir', 'desc');
-    
+
         $allowedSorts = ['transaction_date'];
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'transaction_date';
         }
-    
+
         $query = $this->baseQuery($request)->orderBy($sortBy, $sortDir);
-    
+
         $transactions = $query
             ->paginate($perPage)
             ->withQueryString()
             ->through(function ($trx) {
                 return [
                     'id'           => $trx->id,
-                    'no_transaksi' => str_pad($trx->id, 6, '0', STR_PAD_LEFT),
+                    'no_transaksi' => str_pad($trx->saving_transaction_code, 6, '0', STR_PAD_LEFT),
                     'tanggal'      => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                    'anggota'      => $trx->savingAccount->user->member_number
+                    'anggota'      => $trx->savingAccount->user->member_code
                                     . ' - '
                                     . $trx->savingAccount->user->name,
-                    'nominal'      => $trx->type === 'Penarikan'
-                                    ? -$trx->amount
-                                    : $trx->amount,
-                    'produk'       => $trx->savingAccount->type, // nama lengkap
-                    'jenis'        => $trx->type,
+                    'nominal'      => $trx->transaction_type === 'Penarikan'
+                                    ? -$trx->saving_amount
+                                    : $trx->saving_amount,
+                    'produk'       => $trx->savingAccount->saving_type, // nama lengkap
+                    'jenis'        => $trx->saving_type,
                 ];
             });
-    
+
         $summaryBase     = $this->baseQuery($request);
-        $totalMasuk      = (clone $summaryBase)->where('type', 'Penyetoran')->sum('amount');
-        $totalKeluar     = (clone $summaryBase)->where('type', 'Penarikan')->sum('amount');
+        $totalMasuk      = (clone $summaryBase)->where('transaction_type', 'Penyetoran')->sum('saving_amount');
+        $totalKeluar     = (clone $summaryBase)->where('transaction_type', 'Penarikan')->sum('saving_amount');
         $totalPerputaran = $totalMasuk + $totalKeluar;
-    
+
         $summary = [
             [
                 'title'      => 'Total Kas',
@@ -131,7 +125,7 @@ class SavingController extends Controller
                     : 0,
             ],
         ];
-    
+
         return Inertia::render('Admin/Savings/List', [
             'transactions' => $transactions,
             'summary'      => $summary,
@@ -144,7 +138,7 @@ class SavingController extends Controller
             ],
         ]);
     }
-    
+
 
     private function exportTitle(string $tab): string
     {
@@ -152,69 +146,67 @@ class SavingController extends Controller
             'simpanan'           => 'Data Semua Simpanan',
             'pokok'              => 'Data Simpanan Pokok',
             'wajib'              => 'Data Simpanan Wajib',
-            'sukarela'           => 'Data Simpanan Sukarela',
             'tabungan'           => 'Data Semua Tabungan',
             'tabungan_anggota'   => 'Data Tabungan Anggota',
             'tabungan_berjangka' => 'Data Tabungan Berjangka',
             'tabungan_ibadah'    => 'Data Tabungan Ibadah',
-            'tabungan_sosial'    => 'Data Tabungan Sosial',
             default              => 'Data Simpanan & Tabungan',
         };
     }
-    
+
     public function exportCsv(Request $request)
     {
         $tab      = $request->input('tab', 'semua');
         $title    = $this->exportTitle($tab);
         $filename = Str::slug($title) . '_' . now()->format('Ymd_His') . '.csv';
-    
+
         $transactions = $this->baseQuery($request)
             ->orderBy('transaction_date', 'desc')
             ->get();
-    
+
         $headers = [
             'Content-Type'        => 'text/csv',
             'Content-Disposition' => "attachment; filename={$filename}",
         ];
-    
+
         $callback = function () use ($transactions, $title) {
             $handle = fopen('php://output', 'w');
-    
+
             fputcsv($handle, [$title]);
             fputcsv($handle, []);
             fputcsv($handle, ['No Transaksi', 'Tanggal', 'Anggota', 'Produk', 'Jenis', 'Nominal']);
-    
+
             foreach ($transactions as $trx) {
                 fputcsv($handle, [
                     str_pad($trx->id, 6, '0', STR_PAD_LEFT),
                     $trx->transaction_date->format('d/m/Y'),
-                    $trx->savingAccount->user->member_number . ' - ' . $trx->savingAccount->user->name,
-                    $trx->savingAccount->type,
-                    $trx->type,
-                    $trx->type === 'Penarikan' ? -$trx->amount : $trx->amount,
+                    $trx->savingAccount->user->member_code . ' - ' . $trx->savingAccount->user->name,
+                    $trx->savingAccount->saving_type,
+                    $trx->transaction_type,
+                    $trx->transaction_type === 'Penarikan' ? -$trx->saving_amount : $trx->saving_amount,
                 ]);
             }
-    
+
             fclose($handle);
         };
-    
+
         return response()->stream($callback, 200, $headers);
     }
-    
+
     public function exportPdf(Request $request)
     {
         $tab   = $request->input('tab', 'semua');
         $title = $this->exportTitle($tab);
-    
+
         $transactions = $this->baseQuery($request)
             ->orderBy('transaction_date', 'desc')
             ->get();
-    
+
         $pdf = Pdf::loadView('exports.saving', [
             'transactions' => $transactions,
             'title'        => $title,
         ])->setPaper('a4', 'landscape');
-    
+
         return $pdf->download(
             Str::slug($title) . '_' . now()->format('Ymd_His') . '.pdf'
         );
@@ -225,45 +217,10 @@ class SavingController extends Controller
      */
     public function show(string $id)
     {
-        $data = SavingTransaction::with('savingAccount.user', 'account', 'savingTransactionDoc')->find($id);
-
-        if ($data->savingTransactionDoc && $data->savingTransactionDoc->isNotEmpty()) {
-            $firstDoc = $data->savingTransactionDoc->first();
-            if ($firstDoc && $firstDoc->attachment) {
-                $firstDoc->attachment = asset('storage/' . $firstDoc->attachment);
-            }
-        }
+        $data = SavingTransaction::with('savingAccount.user', 'account')->find($id);
 
         return inertia('Admin/Savings/Show', [
             'data' => $data,
         ]);
-    }
-
-    public function validateRequest(StoreSavingTransactionValidationRequest $request, string $id)
-    {
-        try {
-            $data = $request->validated();
-
-            $transaction = SavingTransaction::findOrFail($id);
-
-            if ($data['status'] === 'accepted') {
-                $transaction->status = TransactionStatus::COMPLETED;
-            } elseif ($data['status'] === 'rejected') {
-                $transaction->status = TransactionStatus::REJECTED;
-                $transaction->description = $data['description'] ?? null;
-            }
-
-            $transaction->save();
-            $account = SavingAccount::find($transaction->saving_account_id);
-            if ($account) {
-                $account->update(
-                    ['balance' => $account->balance + ($transaction->type === 'Penarikan' ? -$transaction->amount : $transaction->amount)]
-                );
-            }
-
-            return redirect()->back();
-        } catch (\Exception $e) {
-            return redirect()->back();
-        }
     }
 }

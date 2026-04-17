@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Enums\Condition;
 use App\Enums\ConditionEnum;
 use App\Enums\FinancingPaymentMethodEnum;
-use App\Enums\FinancingReqStatus;
 use App\Enums\FinancingReqStatusEnum;
 use App\Models\Financing;
 use App\Models\FinancingProduct;
@@ -39,6 +37,7 @@ class FinancingSeeder extends Seeder
             'product_id' => $product->id,
             'condition' => ConditionEnum::NEW->value,
             'cost_price' => 15000000,
+            'margin_amount' => 2000000,
             'qty' => 1,
             'request_description' => 'Pembelian laptop untuk keperluan kuliah',
         ]);

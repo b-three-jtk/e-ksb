@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\Education;
+use App\Enums\EducationEnum;
 use App\Enums\UserRoleEnum;
-use App\Enums\UserStatus;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdminRequest;
@@ -85,8 +84,8 @@ class AdminController extends Controller
      */
     public function create()
     {
-        $roles = Role::where('name', '!=', 'Anggota')->get();
-        $educations = array_column(Education::cases(), 'value');
+        $roles = Role::where('role_name', '!=', UserRoleEnum::ANGGOTA->value)->get();
+        $educations = array_column(EducationEnum::cases(), 'value');
 
         return inertia('Admin/Admins/Create', [
             'roles' => $roles,
@@ -105,9 +104,9 @@ class AdminController extends Controller
 
             User::create([
                 ...$data,
-                'member_number' => 'KSP' . $data['role_id'] . (User::count() + 1),
+                'member_code' => 'KSP' . $data['role_id'] . (User::count() + 1),
                 'password' => bcrypt('Password123'),
-                'status' => UserStatus::ACTIVE->value,
+                'status' => UserStatusEnum::ACTIVE->value,
             ]);
 
             DB::commit();
@@ -142,8 +141,8 @@ class AdminController extends Controller
     public function edit(string $id)
     {
         $admin = User::with('role')->findOrFail($id);
-        $roles = Role::where('name', '!=', 'Anggota')->get();
-        $educations = array_column(Education::cases(), 'value');
+        $roles = Role::where('role_name', '!=', UserRoleEnum::ANGGOTA->value)->get();
+        $educations = array_column(EducationEnum::cases(), 'value');
 
         return inertia('Admin/Admins/Edit', [
             'admin' => $admin,

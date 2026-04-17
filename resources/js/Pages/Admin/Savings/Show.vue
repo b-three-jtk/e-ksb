@@ -6,7 +6,6 @@ import Swal from 'sweetalert2'
 import { toast } from "vue3-toastify";
 import dateParser from '@/Composables/dateParser'
 import moneyParser from '@/Composables/moneyParser'
-import ModalDocument from '@/Components/ModalDocument.vue';
 import Button from '@/Components/Form/Button.vue';
 import { ref } from 'vue'
 
@@ -62,56 +61,6 @@ const acceptTransaction = () => {
     })
 }
 
-const rejectTransaction = () => {
-    form.status = 'rejected'
-    Swal.fire({
-        title: 'Konfirmasi',
-        text: 'Apakah Anda yakin ingin menolak transaksi ini?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, tolak',
-        cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            hideModal()
-            form.put('/admin/savings/validate/' + props.data.id, {
-                onSuccess: () => {
-                    toast("Transaksi berhasil ditolak!", {
-                        "type": "success",
-                        "position": "bottom-right",
-                        "transition": "slide",
-                        "dangerouslyHTMLString": true
-                    }).then(() => {
-                        router.visit(route('admin.dashboard'))
-                    })
-                },
-                onError: () => {
-                    toast("Gagal menolak transaksi.", {
-                        "type": "error",
-                        "position": "bottom-right",
-                        "transition": "slide",
-                        "dangerouslyHTMLString": true
-                    })
-                }
-            })
-        }
-    })
-}
-
-const getStatusClass = () => {
-    const baseClass = 'font-semibold rounded-2xl px-4 text-theme-sm py-1'
-
-    switch (props.data.status) {
-        case 'Selesai':
-            return `${baseClass} text-green-600 bg-green-50`
-        case 'Ditolak dengan alasan':
-            return `${baseClass} text-yellow-600 bg-yellow-50`
-        default:
-            return `${baseClass} text-gray-600 bg-gray-100`
-    }
-}
-
 const breadcrumbItems = [
     {name: 'Dashboard', link: '/admin'},
     {name: 'Pengelolaan Simpanan', link: '/admin/savings/list'},
@@ -126,15 +75,14 @@ const openModalBukti = () => modalRef.value?.openModal()
     <AdminLayout title="Detail Transaksi Simpanan">
         <div class="flex flex-col">
             <PageBreadcrumb
-                :page-title="data.status != 'Belum Ditinjau' ? 'Detail Simpanan' : 'Validasi Permohonan Simpanan'" :items="breadcrumbItems" />
+                :page-title="'Detail Simpanan'" :items="breadcrumbItems" />
             <div class="flex flex-col gap-4">
                 <div class="card-layout flex justify-between">
                     <div class="flex gap-2 items-center">
-                        <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{ data.transaction_code }}
+                        <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{ data.saving_transaction_code }}
                         </h1>
-                        <span :class="getStatusClass()">{{ data.status }}</span>
                     </div>
-                    <div v-if="data.account_number" class="flex items-center gap-4">
+                    <div v-if="data.saving_account_code" class="flex items-center gap-4">
                         <Button @click="openModalBukti()" variant="info">Lihat Bukti</Button>
                     </div>
                 </div>
@@ -145,12 +93,12 @@ const openModalBukti = () => modalRef.value?.openModal()
                             <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nominal Simpanan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ moneyParser(data.amount)
+                                    <span class="font-medium text-dark-text dark:text-white">{{ moneyParser(data.saving_amount)
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Kategori Simpanan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_account.type
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_account.saving_type
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
@@ -161,7 +109,7 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jenis Transaksi</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.type }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.transaction_type }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Transaksi</span>
@@ -171,11 +119,11 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Metode Pembayaran</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.method }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_payment_method }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Keterangan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.description ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_description ?? '-'
                                     }}</span>
                                 </li>
                             </ul>
@@ -196,7 +144,7 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Anggota</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.user.member_number }}</span>
+                                        data.saving_account.user.member_code }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Anggota</span>
@@ -234,18 +182,6 @@ const openModalBukti = () => modalRef.value?.openModal()
                 </div>
             </div>
         </div>
-        <div id="modal" @click.self="hideModal()" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-96">
-                <h2 class="text-lg font-semibold mb-4 text-dark-text dark:text-white">Alasan Penolakan</h2>
-                <textarea rows="4" v-model="form.description"
-                    class="w-full p-2 border font-body border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder="Masukkan alasan penolakan..."></textarea>
-                <div class="flex justify-end mt-4 gap-2">
-                    <Button @click="hideModal()" variant="light" size="small">Batal</Button>
-                    <Button @click="rejectTransaction()" size="small">Simpan</Button>
-                </div>
-            </div>
-        </div>
-        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="data.saving_transaction_doc[0]?.name" :attachment="data.saving_transaction_doc[0]?.attachment" />
+        <!-- <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="data.saving_transaction_doc[0]?.name" :attachment="data.saving_transaction_doc[0]?.attachment" /> -->
     </AdminLayout>
 </template>

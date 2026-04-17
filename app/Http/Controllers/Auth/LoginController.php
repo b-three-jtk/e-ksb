@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\UserStatus;
+use App\Enums\UserRoleEnum;
+use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,41 +21,37 @@ class LoginController extends Controller
     public function store(Request $request)
     {
         $credentials = $request->validate([
-            'member_number' => ['required'],
+            'member_code' => ['required'],
             'password' => ['required'],
         ]);
 
-        $user = User::with('role')->where('member_number', $credentials['member_number'])->first();
-
+        $user = User::with('role')->where('member_code', $credentials['member_code'])->first();
         if (! $user) {
             throw ValidationException::withMessages([
-                'member_number' => 'Nomor anggota atau password tidak sesuai.',
+                'member_code' => 'Nomor anggota atau password tidak sesuai.',
             ]);
         }
 
-        if ($user->status !== UserStatus::ACTIVE->value) {
+        if ($user->status !== UserStatusEnum::ACTIVE->value) {
             $messages = [
-                UserStatus::INREVIEW->value => 'Pengajuan keanggotaan Anda masih dalam peninjauan.',
-                UserStatus::REJECTED->value => 'Pengajuan keanggotaan ditolak. Silakan hubungi admin.',
-                UserStatus::INACTIVE->value => 'Akun Anda tidak aktif. Hubungi admin untuk mengaktifkan kembali.',
-                UserStatus::RESIGNED->value => 'Anda sudah tidak terdaftar sebagai anggota.',
+                UserStatusEnum::INACTIVE->value => 'Akun Anda tidak aktif. Hubungi admin untuk mengaktifkan kembali.',
             ];
 
             throw ValidationException::withMessages([
-                'member_number' => $messages[$user->status] ?? 'Akun Anda belum aktif.',
+                'member_code' => $messages[$user->status] ?? 'Akun Anda belum aktif.',
             ]);
         }
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
-                'member_number' => 'Nomor anggota atau password tidak sesuai.',
+                'member_code' => 'Nomor anggota atau password tidak sesuai.',
             ]);
         }
 
         $request->session()->regenerate();
 
         // Redirect based on user role
-        if ($user->role->name !== 'Anggota') {
+        if ($user->role->role_name !== UserRoleEnum::ANGGOTA->value) {
             return redirect()->intended('/admin/dashboard');
         }
 

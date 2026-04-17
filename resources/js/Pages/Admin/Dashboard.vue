@@ -163,7 +163,7 @@ const applyFilter = () => {
                                             </p>
                                         </td>
                                         <td v-if="user.role?.name === 'Admin'" class="py-5 px-2 whitespace-nowrap">
-                                            <Button :href="`/admin/verifikasi/${data.member_number}`" size="small" variant="accent">
+                                            <Button :href="`/admin/verifikasi/${data.member_code}`" size="small" variant="accent">
                                                 <ReviewIcon width="16px" height="16px" />
                                                 Tinjau
                                             </Button>
@@ -303,7 +303,7 @@ const applyFilter = () => {
                             <div class="flex flex-col">
                                 <p>Nomor Anggota</p>
                                 <h1 class="font-semibold font-body text-lg">{{
-                                    financing_data[activeIndex]?.member_number ?? '' }}</h1>
+                                    financing_data[activeIndex]?.member_code ?? '' }}</h1>
                             </div>
                             <div class="flex flex-col">
                                 <p>Status</p>

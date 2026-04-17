@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\User;
@@ -9,8 +10,6 @@ use App\Models\Account;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Models\SavingTransactionDoc;
-use App\Enums\TransactionStatus;
-use App\Enums\UserStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -31,18 +30,18 @@ class WithdrawalController extends Controller
                     $q->latest();
                 }
             ])
-            ->where('status', UserStatus::ACTIVE->value)
+            ->where('status', UserStatusEnum::ACTIVE->value)
             ->get()
             ->map(function ($user) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'member_number' => $user->member_number,
+                    'member_code' => $user->member_code,
                     'savingAccounts' => $user->savingAccounts->map(function ($acc) {
                         return [
                             'id' => $acc->id,
                             'type' => $acc->type,
-                            'balance' => $acc->balance,
+                            'balance' => DB::table('get_saving_account_balance')->where('saving_account_id', $acc->id)->value('total_balance') ?? 0,
                             'tenor_months' => $acc->tenor_months,
                             'target_amount' => $acc->target_amount,
                             'opened_at' => optional($acc->created_at)->toDateString(),
@@ -82,6 +81,7 @@ class WithdrawalController extends Controller
 
         $member = User::findOrFail($validated['member_id']);
         $savingAccount = SavingAccount::findOrFail($validated['saving_account_id']);
+        $savingBalance = DB::table('get_saving_account_balance')->where('saving_account_id', $savingAccount->id)->value('total_balance') ?? 0;
 
         // Verify that the saving account belongs to the member
         if ($savingAccount->user_id !== $member->id) {
@@ -90,7 +90,7 @@ class WithdrawalController extends Controller
         }
 
         // Verify balance is sufficient
-        if ($savingAccount->balance < $validated['amount']) {
+        if ($savingBalance < $validated['amount']) {
             return back()
                 ->withErrors(['amount' => 'Saldo tidak cukup untuk penarikan sebesar Rp ' . number_format($validated['amount'])]);
         }
@@ -126,14 +126,13 @@ class WithdrawalController extends Controller
 
                 $transaction = SavingTransaction::create([
                     'id' => Str::uuid(),
-                    'transaction_code' => $this->generateTransactionCode(),
+                    'saving_transaction_code' => $this->generateTransactionCode(),
                     'saving_account_id' => $savingAccount->id,
-                    'amount' => $validated['amount'],
-                    'type' => 'Penarikan',
-                    'status' => TransactionStatus::COMPLETED->value,
-                    'method' => $validated['method'],
+                    'saving_amount' => $validated['amount'],
+                    'transaction_type' => 'Penarikan',
+                    'saving_payment_method' => $validated['method'],
                     'transaction_date' => $validated['withdrawal_date'],
-                    'description' => $validated['notes'] ?? '',
+                    'saving_description' => $validated['notes'] ?? '',
                     'updated_by' => auth()->id(),
                 ]);
 
@@ -172,7 +171,7 @@ class WithdrawalController extends Controller
                 'tanggal' => $transaction->transaction_date,
                 'pengurus' => $namaAdmin,
                 'nama_anggota' => $member->name,
-                'no_anggota' => $member->member_number,
+                'no_anggota' => $member->member_code,
                 'jenis' => $savingAccount->type,
                 'metode' => $validated['method'],
                 'nominal' => $validated['amount'],
@@ -213,10 +212,7 @@ class WithdrawalController extends Controller
 
         Storage::disk('public')->put($path, $pdf->output());
 
-        $existingDoc = SavingTransactionDoc::query()
-            ->where('transaction_id', $transaction->id)
-            ->where('name', 'Struk Penarikan')
-            ->first();
+        $existingDoc = $transaction->receipt;
 
         if ($existingDoc && $existingDoc->attachment) {
             Storage::disk('public')->delete($existingDoc->attachment);

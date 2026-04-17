@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
-use App\Models\Loan;
-use App\Models\User;
-use App\Enums\UserStatus;
-use App\Models\Financing;
-use Illuminate\Http\Request;
-use App\Models\SavingAccount;
-use App\Models\SavingTransaction;
+use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Models\Financing;
+use App\Models\SavingTransaction;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -28,20 +27,28 @@ class DashboardController extends Controller
         // Get previous period dates
         [$prevStartDate, $prevEndDate] = $this->getPreviousPeriod($startDate, $filterBy);
 
-        $totalFinancingAmount = Loan::whereBetween('created_at', [$startDate, $endDate])->sum('total_loan') ?? '0';
-        $activeUserCount = User::where('status', UserStatus::ACTIVE->value)->where('created_at', '<=', $endDate)->count();
+        // Total financing amount from view
+        $totalFinancingAmountQuery = DB::table('get_total_financing');
+
+        if ($startDate && $endDate) {
+            $totalFinancingAmountQuery->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        $totalFinancingAmount = $totalFinancingAmountQuery->sum('total_financing');
+
+        $activeUserCount = User::where('status', UserStatusEnum::ACTIVE->value)->where('created_at', '<=', $endDate)->count();
 
         return inertia('Admin/Dashboard', [
             'active_user_count' => $activeUserCount,
             'active_user_percentage' => $this->calculatePercentage(
                 $activeUserCount,
-                User::where('status', UserStatus::ACTIVE->value)->where('created_at', '<=', $prevEndDate)->count()
+                User::where('status', UserStatusEnum::ACTIVE->value)->where('created_at', '<=', $prevEndDate)->count()
             ),
-            'total_saving_amount' => SavingAccount::sum('balance') ?? '0',
+            'total_saving_amount' => DB::table('get_saving_account_balance')->sum('saldo_akhir') ?? '0',
             'total_financing_amount' => $totalFinancingAmount,
             'total_financing_percentage' => $this->calculatePercentage(
                 $totalFinancingAmount,
-                Loan::whereBetween('created_at', [$prevStartDate, $prevEndDate])->sum('total_loan') ?? 0
+                $totalFinancingAmountQuery->whereBetween('created_at', [$prevStartDate, $prevEndDate])->sum('total_financing') ?? 0
             ),
             'transaction_data' => $this->getRecentTransactions(),
             'registration_data' => $this->getPendingRegistrations(),
@@ -79,7 +86,7 @@ class DashboardController extends Controller
             ->latest()->take(5)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
-                'transaction_code' => $t->transaction_code,
+                'transaction_code' => $t->saving_transaction_code,
                 'user_name' => $t->savingAccount->user->name,
                 'amount' => $t->amount,
                 'type' => $t->type,
@@ -89,10 +96,10 @@ class DashboardController extends Controller
 
     private function getPendingRegistrations()
     {
-        return User::where('status', UserStatus::INREVIEW->value)
+        return User::where('status', UserStatusEnum::RESIGNED_REQUESTED->value)
             ->latest()->take(5)->get()
             ->map(fn($u) => [
-                'member_number' => $u->member_number,
+                'member_code' => $u->member_code,
                 'name' => $u->name,
                 'email' => $u->email,
                 'created_at' => $u->created_at,
@@ -101,14 +108,14 @@ class DashboardController extends Controller
 
     private function getRecentFinancings()
     {
-        return Financing::with('user')
+        return Financing::with('user', 'financingProduct.product')
             ->latest()->take(5)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
-                'transaction_code' => $f->transaction_code,
-                'product_name' => $f->product_name,
+                'transaction_code' => $f->financing_transaction_code,
+                'product_name' => $f->financingProduct->product->product_name ?? '-',
                 'status' => $f->status,
-                'member_number' => $f->user->member_number,
+                'member_code' => $f->user->member_code,
                 'user_name' => $f->user->name,
                 'created_at' => $f->created_at,
             ]);

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\User;
-use App\Enums\UserStatus;
-use App\Models\Financing;
-use Illuminate\Http\Request;
-use App\Enums\FinancingReqStatus;
+use App\Enums\FinancingReqStatusEnum;
+use App\Enums\UserRoleEnum;
+use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Cache;
+use App\Models\Financing;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 class ResignationController extends Controller
 {
@@ -23,12 +23,12 @@ class ResignationController extends Controller
         $sort_dir = $request->input('sort_dir', 'desc');
 
         $query = User::whereHas('role', function ($q) {
-                $q->where('name', 'Anggota');
+                $q->where('role_name', UserRoleEnum::ANGGOTA->value);
             })
-            ->where('status', UserStatus::RESIGNED_REQUESTED)
+            ->where('status', UserStatusEnum::RESIGNED_REQUESTED)
             ->when($search, function ($q) use ($search) {
                 return $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('member_number', 'like', "%{$search}%")
+                    ->orWhere('member_code', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
             });
 
@@ -55,20 +55,20 @@ class ResignationController extends Controller
     public function validation(string $id)
     {
         $data = [];
-        $data['user'] = User::with('userDocs', 'savingAccounts')->where('status', UserStatus::RESIGNED_REQUESTED)->findOrFail($id);
+        $data['user'] = User::with('userDocs', 'savingAccounts')->where('status', UserStatusEnum::RESIGNED_REQUESTED)->findOrFail($id);
         $data['user']->userDocs->where('name', 'Dokumen Pengunduran Diri')->first();
 
         $resignationDoc = $data['user']->userDocs?->first()?->attachment ? asset('storage/' . $data['user']->userDocs->first()->attachment) : 0;
 
         $totalSavings = $data['user']->savingAccounts()->sum('balance');
-        $totalObligation = Financing::with('loan')->where('user_id', $data['user']->id)
-            ->where('status', FinancingReqStatus::ACTIVE_INSTALLMENTS->value)
+        $totalObligation = Financing::with('installment.paymentSchedules.payment')->where('user_id', $data['user']->id)
+            ->where('financing_status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->get()
             ->sum(function ($financing) {
-                $loan = $financing->loan;
-                if (!$loan) return 0;
-
-                $totalUnpaid = $loan->remaining_principal + $loan->remaining_margin;
+                $installment = $financing->installment;
+                if (!$installment) return 0;
+                // TODO: fix calculation
+                $totalUnpaid = $installment->remaining_principal + $installment->remaining_margin;
 
                 return $totalUnpaid;
         });
@@ -85,8 +85,8 @@ class ResignationController extends Controller
 
     public function validate(Request $request, string $id)
     {
-        $user = User::where('status', UserStatus::RESIGNED_REQUESTED)->findOrFail($id);
-        $request->status === 'reject' ? $user->status = UserStatus::RESIGNED_REJECTED : $user->status = UserStatus::INACTIVE;
+        $user = User::where('status', UserStatusEnum::RESIGNED_REQUESTED)->findOrFail($id);
+        $request->status === 'reject' ? $user->status = UserStatusEnum::RESIGNED_REJECTED : $user->status = UserStatusEnum::INACTIVE;
         $user->save();
 
         return to_route('admin.resignations.index')->with('success', 'Pengunduran diri berhasil divalidasi.');

@@ -34,7 +34,7 @@ const breadcrumbItems = [
                         <div class="flex flex-col justify-center gap-1">
                             <h1 class="card-title">{{ user.name }}</h1>
                             <p class="text-gray-500">
-                                {{ user.role.name }}
+                                {{ user.role.role_name }}
                             </p>
                         </div>
                     </div>
@@ -65,7 +65,7 @@ const breadcrumbItems = [
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tempat, Tanggal Lahir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.birth_place ?? '-' }}, {{ user.birth_date ?? '-' }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ (user.birth_place && user.birth_date) ? (user.birth_place + ', ' + user.birth_date) : '-' }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Pendidikan Terakhir</span>
@@ -91,7 +91,7 @@ const breadcrumbItems = [
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Sesuai KTP</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.address ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.domicile_address ?? '-'
                                         }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">

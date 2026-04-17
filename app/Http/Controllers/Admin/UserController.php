@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\Education;
-use App\Enums\Heir as HeirEnum;
-use App\Enums\LoanPaymentScheduleStatus;
-use App\Enums\MaritalStatus;
-use App\Enums\TransactionStatus;
-use App\Enums\UserStatus;
+use App\Enums\EducationEnum;
+use App\Enums\FinancialCategoryEnum;
+use App\Enums\HeirEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
+use App\Enums\MaritalStatusEnum;
+use App\Enums\UserRoleEnum;
+use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMemberRequest;
 use App\Mail\ApprovalNotificationMail;
@@ -17,18 +18,19 @@ use App\Models\SavingAccount;
 use App\Models\User;
 use App\Services\Admin\RegisterMemberService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use RuntimeException;
 use Inertia\Inertia;
+use RuntimeException;
 
 class UserController extends Controller
 {
     public function create()
     {
         return Inertia::render('Admin/User/Create/Index', [
-            'educationOptions' => $this->enumOptions(Education::cases()),
-            'maritalStatusOptions' => $this->enumOptions(MaritalStatus::cases()),
+            'educationOptions' => $this->enumOptions(EducationEnum::cases()),
+            'maritalStatusOptions' => $this->enumOptions(MaritalStatusEnum::cases()),
             'heirRelationshipOptions' => $this->enumOptions(HeirEnum::cases()),
         ]);
     }
@@ -77,22 +79,19 @@ class UserController extends Controller
             : 'joined_date';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $query = User::with([
-            'savingAccounts.transactions' => fn($q) =>
-                $q->where('status', TransactionStatus::COMPLETED)
-        ])
+        $query = User::with('savingAccounts.transactions')
             ->whereHas(
                 'role',
                 fn($q) =>
-                $q->where('name', 'Anggota')
+                $q->where('role_name', UserRoleEnum::ANGGOTA->value)
             )
             ->whereNotNull('joined_date')
-            ->whereNotNull('member_number');
+            ->whereNotNull('member_code');
 
         $memberBaseQuery = User::whereHas(
             'role',
             fn($q) =>
-            $q->where('name', 'Anggota')
+            $q->where('role_name', UserRoleEnum::ANGGOTA->value)
         );
 
         $verifiedMembersQuery = (clone $memberBaseQuery)
@@ -101,7 +100,7 @@ class UserController extends Controller
         $totalVerifiedMembers = $verifiedMembersQuery->count();
 
         $activeMembers = (clone $verifiedMembersQuery)
-            ->where('status', UserStatus::ACTIVE)
+            ->where('status', UserStatusEnum::ACTIVE)
             ->count();
 
         $newThisMonth = (clone $verifiedMembersQuery)
@@ -109,16 +108,11 @@ class UserController extends Controller
             ->whereYear('joined_date', now()->year)
             ->count();
 
-        $inReview = (clone $memberBaseQuery)
-            ->where('status', UserStatus::INREVIEW)
-            ->whereNull('joined_date')
-            ->count();
-
         if ($search) {
             $query->where(
                 fn($q) =>
                 $q->where('name', 'ILIKE', "%{$search}%")
-                    ->orWhere('member_number', 'ILIKE', "%{$search}%")
+                    ->orWhere('member_code', 'ILIKE', "%{$search}%")
                     ->orWhere('phone_number', 'ILIKE', "%{$search}%")
             );
         }
@@ -133,7 +127,7 @@ class UserController extends Controller
             ->withQueryString()
             ->through(fn($user) => [
                 'id' => $user->id,
-                'no_anggota' => $user->member_number,
+                'no_anggota' => $user->member_code,
                 'name' => $user->name,
                 'joined_at' => $user->joined_date
                     ? \Carbon\Carbon::parse($user->joined_date)->format('d/m/Y')
@@ -141,18 +135,7 @@ class UserController extends Controller
                 'phone' => $user->phone_number,
                 'status' => $user->status,
                 'total_simpanan' => 'Rp ' . number_format(
-                    $user->savingAccounts
-                        ->flatMap(fn($account) => $account->transactions)
-                        ->sum(
-                            fn($trx) =>
-                            $trx->type === 'Penarikan'
-                            ? -$trx->amount
-                            : $trx->amount
-                        ),
-                    0,
-                    ',',
-                    '.'
-                ),
+                    DB::table('get_saving_account_balance')->where('user_id', $user->id)->sum('total_balance') ?? 0, 0, ',', '.'),
                 'avatar' => $user->profile_picture
                     ? asset('storage/' . $user->profile_picture)
                     : null,
@@ -172,7 +155,6 @@ class UserController extends Controller
 
                 'active' => $activeMembers,
                 'new_this_month' => $newThisMonth,
-                'in_review' => $inReview,
 
                 'active_percent' => $totalVerifiedMembers > 0
                     ? round(($activeMembers / $totalVerifiedMembers) * 100)
@@ -181,12 +163,8 @@ class UserController extends Controller
                 'new_percent' => $totalVerifiedMembers > 0
                     ? round(($newThisMonth / $totalVerifiedMembers) * 100)
                     : 0,
-
-                'in_review_percent' => ($memberBaseQuery->count()) > 0
-                    ? round(($inReview / $memberBaseQuery->count()) * 100)
-                    : 0,
             ],
-            'statuses' => array_column(UserStatus::cases(), 'value')
+            'statuses' => array_column(UserStatusEnum::cases(), 'value')
         ]);
     }
 
@@ -198,14 +176,9 @@ class UserController extends Controller
         $user = User::with([
             'userDocs',
             'role',
-            'savingAccounts.transactions'
-            => function ($query) {
-                $query->latest('created_at')
-                    ->where('status', TransactionStatus::COMPLETED)
-                    ->take(1);
-            },
+            'savingAccounts.transactions',
             'heirs',
-            'financings.loan.paymentSchedules',
+            'financings.installment.paymentSchedules',
         ])->findOrFail($id);
 
         $user->profile_picture = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
@@ -213,11 +186,11 @@ class UserController extends Controller
         $kkDoc = $user->userDocs->firstWhere('name', 'kk');
 
         $user->financings->each(function ($financing) {
-            $financing->loan_payment_paid_count = $financing->loan->paymentSchedules
-                ->where('status', LoanPaymentScheduleStatus::PAID->value)
+            $financing->installment_payment_paid_count = $financing->installment->paymentSchedules
+                ->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)
                 ->count();
-            $financing->next_payment = $financing->loan->paymentSchedules
-                ->where('status', LoanPaymentScheduleStatus::SCHEDULED->value)
+            $financing->next_payment = $financing->installment->paymentSchedules
+                ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
                 ->sortBy('due_date')
                 ->first();
         });
@@ -241,10 +214,10 @@ class UserController extends Controller
     public function getRiwayat($financingId)
     {
         $financing = Financing::with([
-            'loan.paymentSchedules.payment' => fn($q) => $q->latest('payment_date')
+            'installment.paymentSchedules.payment' => fn($q) => $q->latest('payment_date')
         ])->findOrFail($financingId);
 
-        return response()->json($financing->loan->paymentSchedules);
+        return response()->json($financing->installment->paymentSchedules);
     }
 
     public function verificationDetail(User $user)
@@ -259,7 +232,7 @@ class UserController extends Controller
         return Inertia::render('Admin/User/Verification/Show', [
             'member' => [
                 'id' => $user->id,
-                'member_number' => $user->member_number,
+                'member_code' => $user->member_code,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'email' => $user->email,
@@ -273,7 +246,7 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->update([
-            'status' => UserStatus::INACTIVE,
+            'status' => UserStatusEnum::INACTIVE,
         ]);
 
         return redirect()->back();
@@ -293,7 +266,7 @@ class UserController extends Controller
         }
 
         $members = User::query()
-            ->where('status', UserStatus::INREVIEW)
+            ->where('status', UserStatusEnum::RESIGNED_REQUESTED->value)
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -306,7 +279,7 @@ class UserController extends Controller
             ->withQueryString()
             ->through(fn($user) => [
                 'id' => $user->id,
-                'member_number' => $user->member_number,
+                'member_code' => $user->member_code,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'email' => $user->email,
@@ -391,9 +364,9 @@ class UserController extends Controller
             ->whereNotNull('joined_date')
             ->where(function ($q) use ($query) {
                 $q->where('name', 'ILIKE', "%{$query}%")
-                    ->orWhere('member_number', 'ILIKE', "%{$query}%");
+                    ->orWhere('member_code', 'ILIKE', "%{$query}%");
             })
-            ->where('status', UserStatus::ACTIVE->value)
+            ->where('status', UserStatusEnum::ACTIVE->value)
             ->limit(5)
             ->get()
             ->map(function ($member) {
@@ -401,7 +374,7 @@ class UserController extends Controller
 
                 return [
                     'id' => $member->id,
-                    'member_number' => $member->member_number,
+                    'member_code' => $member->member_code,
                     'name' => $member->name,
                     'email' => $member->email,
                     'nik' => $member->nik,
@@ -412,11 +385,11 @@ class UserController extends Controller
                     'dependents' => $member->dependents,
                     'birth_place' => $member->birth_place,
                     'birth_date' => $member->birth_date,
-                    'address' => $member->address,
+                    'domicile_address' => $member->domicile_address,
                     'residential_address' => $member->residential_address,
 
-                    'incomes' => $financials->where('category', true)->values(),
-                    'expenses' => $financials->where('category', false)->values(),
+                    'incomes' => $financials->where('category', FinancialCategoryEnum::INCOME->value)->values(),
+                    'expenses' => $financials->where('category', FinancialCategoryEnum::EXPENSE->value)->values(),
                     'heirs' => $member->heirs ?? collect(),
                 ];
             });

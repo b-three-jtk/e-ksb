@@ -68,14 +68,6 @@ const filters = reactive({
     sort_dir: page.props.filters?.sort_dir ?? 'desc',
 })
 
-const activeGroup = computed(() => {
-    for (const grp of tabGroups) {
-        if (grp.key === filters.tab) return grp.key
-        if (grp.children.some(c => c.key === filters.tab)) return grp.key
-    }
-    return 'semua'
-})
-
 const exportQuery = computed(() => {
     const params = {}
     if (filters.search) params.search = filters.search
@@ -111,7 +103,6 @@ const tableTitle = computed(() => {
         tabungan_anggota:    'Data Tabungan Anggota',
         tabungan_berjangka:  'Data Tabungan Berjangka',
         tabungan_ibadah:     'Data Tabungan Ibadah',
-        tabungan_sosial:     'Data Tabungan Sosial',
     }
     return map[filters.tab] ?? 'Data Simpanan & Tabungan'
 })
@@ -121,11 +112,9 @@ const getProductColor = (produk) => {
     const key = produk.toLowerCase()
     if (key.includes('pokok'))      return { bg: 'bg-blue-100 dark:bg-blue-900/40',   text: 'text-blue-700 dark:text-blue-200' }
     if (key.includes('wajib'))      return { bg: 'bg-green-100 dark:bg-green-900/40',  text: 'text-green-700 dark:text-green-200' }
-    if (key.includes('sukarela'))   return { bg: 'bg-purple-100 dark:bg-purple-900/40',text: 'text-purple-700 dark:text-purple-200' }
     if (key.includes('anggota'))    return { bg: 'bg-amber-100 dark:bg-amber-900/40',  text: 'text-amber-700 dark:text-amber-200' }
     if (key.includes('berjangka'))  return { bg: 'bg-orange-100 dark:bg-orange-900/40',text: 'text-orange-700 dark:text-orange-200' }
     if (key.includes('ibadah'))     return { bg: 'bg-teal-100 dark:bg-teal-900/40',   text: 'text-teal-700 dark:text-teal-200' }
-    if (key.includes('sosial'))     return { bg: 'bg-pink-100 dark:bg-pink-900/40',   text: 'text-pink-700 dark:text-pink-200' }
     return { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-700 dark:text-slate-100' }
 }
 

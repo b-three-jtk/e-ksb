@@ -40,7 +40,7 @@ class SavingAccountSeeder extends Seeder
                 ]);
 
                 SavingTransaction::create([
-                    'saving_transaction_code' => 'ST' . random_int(100000, 999999),
+                    'saving_transaction_code' => 'ST' . random_int(100000, 939999),
                     'saving_account_id' => $account->id,
                     'saving_amount' => fake()->numberBetween(50000, 500000),
                     'saving_payment_method' => $transactionMethods[array_rand($transactionMethods)],

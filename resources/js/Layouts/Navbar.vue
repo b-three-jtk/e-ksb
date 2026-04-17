@@ -138,7 +138,7 @@ const logout = () => {
                             <div class="flex flex-col text-left">
                                 <span class="block mr-1 font-medium text-theme-sm">{{ user.name }}</span>
                                 <span class="mt-0.5 block text-theme-xs text-accent">
-                                    {{ user.member_number }}
+                                    {{ user.member_code }}
                                 </span>
                             </div>
 

@@ -24,6 +24,7 @@ class FinancingProductFactory extends Factory
             'qty' => fake()->numberBetween(1, 100),
             'condition' => fake()->randomElement(ConditionEnum::cases())->value,
             'cost_price' => fake()->numberBetween(10000, 1000000),
+            'margin_amount' => fake()->numberBetween(5000, 500000),
             'purchase_receipt' => fake()->optional()->imageUrl(),
         ];
     }

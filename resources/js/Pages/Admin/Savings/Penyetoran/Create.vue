@@ -22,7 +22,7 @@ const memberSuggestions = computed(() => {
   return members.value
     .filter(m =>
       m.name?.toLowerCase().includes(q) ||
-      m.member_number?.toLowerCase().includes(q)
+      m.member_code?.toLowerCase().includes(q)
     )
     .slice(0, 6)
 })
@@ -182,7 +182,7 @@ function removeFile() {
   if (fileInput.value) fileInput.value.value = ''
 }
 
-// Jenis simpanan 
+// Jenis simpanan
 const allJenis = [
   'Simpanan Pokok',
   'Simpanan Wajib',
@@ -203,7 +203,7 @@ const selectedAccount = computed(() => {
 
 const isNewAccount = computed(() => !selectedAccount.value)
 
-// Validasi 
+// Validasi
 const errorsForm = computed(() => {
   const e = {}
   if (!selectedMember.value) e.anggota = 'Pilih anggota dulu'
@@ -234,7 +234,7 @@ const isFormValid = computed(() => Object.keys(errorsForm.value).length === 0)
 const showStruk = ref(false)
 const dataStruk = ref(null)
 
-// Submit 
+// Submit
 function bukaDialog() {
   if (!isFormValid.value) {
     toast('Lengkapi data yang wajib diisi', { type: 'warning' })
@@ -245,7 +245,7 @@ function bukaDialog() {
 
 const confirmationData = computed(() => ({
   memberName: selectedMember.value?.name,
-  memberNumber: selectedMember.value?.member_number,
+  memberNumber: selectedMember.value?.member_code,
   savingType: jenisSimpanan.value,
   method: depositMethod.value,
   amount: nominalRaw.value,
@@ -387,7 +387,7 @@ const akadType = computed(() => {
                   </div>
                   <div>
                     <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ m.name }}</div>
-                    <div class="text-xs text-gray-500">{{ m.member_number }}</div>
+                    <div class="text-xs text-gray-500">{{ m.member_code }}</div>
                   </div>
                 </button>
               </div>
@@ -406,7 +406,7 @@ const akadType = computed(() => {
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
-                  <div class="text-sm text-gray-500">{{ selectedMember.member_number }}</div>
+                  <div class="text-sm text-gray-500">{{ selectedMember.member_code }}</div>
                 </div>
                 <button @click="resetAnggota" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
                   <Icon icon="mdi:close" width="20" />

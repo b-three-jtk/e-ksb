@@ -145,7 +145,7 @@ const breadcrumbItems = [
                                 <span :class="getStatusClass()">{{ user.status }}</span>
                             </div>
                             <p class="text-gray-500">
-                                {{ user.role.name }} - {{ user.member_number }}
+                                {{ user.role.name }} - {{ user.member_code }}
                             </p>
                         </div>
                     </div>
@@ -348,7 +348,7 @@ const breadcrumbItems = [
                                             <div class="progress-bar"
                                                 :style="{ width: (Math.min(((financing.loan?.tenor ?? 0) > 0
                                                     ? (((financing.loan?.payment_schedules?.length ?? 0) / (financing.loan?.tenor ?? 0)) * 100)
-                                                    : 0), 100)) + '%' }">  
+                                                    : 0), 100)) + '%' }">
                                             </div>
                                         </div>
                                     </li>

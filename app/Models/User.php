@@ -128,7 +128,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Use member_number for route model binding
+     * Use member_code for route model binding
      */
     public function getRouteKeyName()
     {

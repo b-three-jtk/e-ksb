@@ -25,7 +25,7 @@ class StoreFinancingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'member.member_number' => 'required|exists:users,member_number',
+            'member.member_code' => 'required|exists:users,member_code',
             'member.name' => 'required|string|max:255',
             'member.nik' => 'required|string|digits:16',
             'member.birth_place' => 'nullable|string|max:255',
@@ -33,7 +33,7 @@ class StoreFinancingRequest extends FormRequest
             'member.gender' => 'nullable|in:'. implode(',', array_column(Gender::cases(), 'value')),
             'member.marital_status' => 'nullable|in:' . implode(',', array_column(MaritalStatus::cases(), 'value')),
             'member.last_education' => 'nullable|in:' . implode(',', array_column(Education::cases(), 'value')),
-            'member.address' => 'nullable|string|max:500',
+            'member.domicile_address' => 'nullable|string|max:500',
             'member.residential_address' => 'nullable|string|max:500',
             'member.phone_number' => 'nullable|string|max:20',
             'member.email' => 'nullable|email|max:255',

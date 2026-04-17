@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\Education;
+use App\Enums\EducationEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EditProfileAdminRequest;
 
@@ -16,7 +16,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = auth()->user();
-        $educations = array_column(Education::cases(), 'value');
+        $educations = array_column(EducationEnum::cases(), 'value');
 
         return inertia('Admin/Profile/Edit', [
             'user' => $user,

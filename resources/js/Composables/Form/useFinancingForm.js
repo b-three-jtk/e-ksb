@@ -19,14 +19,14 @@ export function useFinancingForm() {
 
     const form = useForm({
         member: {
-            member_number: '',
+            member_code: '',
             name: '',
             nik: '',
             gender: '',
             birth_place: '',
             birth_date: '',
             last_education: '',
-            address: '',
+            domicile_address: '',
             residential_address: '',
             email: '',
             phone_number: '',
@@ -90,7 +90,7 @@ export function useFinancingForm() {
         selectedMember.value = member
         searchQuery.value = member.name
 
-        form.member.member_number = member.member_number
+        form.member.member_code = member.member_code
         form.member.name = member.name
         form.member.nik = member.nik
         form.member.email = member.email
@@ -99,7 +99,7 @@ export function useFinancingForm() {
         form.member.birth_place = member.birth_place || ''
         form.member.birth_date = member.birth_date || ''
         form.member.last_education = member.last_education || ''
-        form.member.address = member.address || ''
+        form.member.domicile_address = member.domicile_address || ''
         form.member.residential_address = member.residential_address || ''
         form.member.marital_status = member.marital_status || ''
         form.member.dependents = member.dependents || ''
@@ -115,7 +115,7 @@ export function useFinancingForm() {
     const filteredMembers = computed(() => {
         return memberResults.value.filter(m =>
             m.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            m.member_number.includes(searchQuery.value)
+            m.member_code.includes(searchQuery.value)
         )
     })
 
@@ -123,7 +123,7 @@ export function useFinancingForm() {
         selectedMember.value = null
         searchQuery.value = ''
         form.member = {
-            member_number: '',
+            member_code: '',
             name: '',
             nik: '',
             email: '',
@@ -132,7 +132,7 @@ export function useFinancingForm() {
             birth_place: '',
             birth_date: '',
             last_education: '',
-            address: '',
+            domicile_address: '',
             residential_address: '',
             marital_status: '',
             dependents: '',

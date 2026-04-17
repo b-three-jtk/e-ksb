@@ -9,12 +9,9 @@ use App\Models\SavingTransactionDoc;
 use App\Models\Account;
 use App\Enums\SavingType;
 use App\Enums\TransactionStatus;
-use App\Http\Controllers\Admin\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Enums\TransactionType;
@@ -27,13 +24,13 @@ class SimpananController extends Controller
 
         $members = User::where('role_id', 9)
             ->where('status', 'Aktif')
-            ->select('id', 'member_number', 'name')
+            ->select('id', 'member_code', 'name')
             ->with(['savingAccounts:id,user_id,type,balance'])
             ->get()
             ->map(function ($user) {
                 return [
                     'id' => $user->id,
-                    'member_number' => $user->member_number,
+                    'member_code' => $user->member_code,
                     'name' => $user->name,
                     'savingAccounts' => $user->savingAccounts->map(fn($acc) => [
                         'type' => $acc->type,
@@ -155,7 +152,7 @@ class SimpananController extends Controller
             ->map(function ($user) {
                 return [
                     'id' => $user->id,
-                    'member_number' => $user->member_number,
+                    'member_code' => $user->member_code,
                     'name' => $user->name,
                     'savingAccounts' => $user->savingAccounts->map(fn($acc) => [
                         'type' => $acc->type,
@@ -178,7 +175,7 @@ class SimpananController extends Controller
                 'tanggal'       => $transaction->created_at,
                 'pengurus'      => Auth::user()->name,
                 'nama_anggota'  => $member->name,
-                'no_anggota'    => $member->member_number,
+                'no_anggota'    => $member->member_code,
                 'jenis'         => $savingAccount->type,
                 'metode'        => $transaction->method,
                 'nominal'       => $transaction->amount,

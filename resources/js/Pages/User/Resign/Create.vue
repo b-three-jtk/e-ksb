@@ -211,7 +211,7 @@ const submitResignation = () => {
 
                         <ReadonlyField
                             label="Nomor Anggota"
-                            :modelValue="memberData.member_number"
+                            :modelValue="memberData.member_code"
                         />
 
                         <ReadonlyField

@@ -6,7 +6,7 @@ import Logo from '@/Components/Logo.vue'
 import { toast } from 'vue3-toastify'
 
 const form = useForm({
-  member_number: '',
+  member_code: '',
   password: '',
 })
 
@@ -41,11 +41,11 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="space-y-8">
                 <BaseInput
-                  v-model="form.member_number"
+                  v-model="form.member_code"
                   label="Nomor Anggota"
                   type="text"
                   required
-                  :error="form.errors.member_number"
+                  :error="form.errors.member_code"
                 />
 
                 <div class="space-y-4">
@@ -65,7 +65,7 @@ const submit = () => {
                           Lupa password?
                       </Link>
                   </div>
-                  
+
                   <button
                     type="submit"
                     class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-semibold font-head py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"

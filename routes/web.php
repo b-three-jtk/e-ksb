@@ -71,12 +71,6 @@ Route::post('/auth/logout', [LoginController::class, 'destroy'])
     ->name('auth.logout');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'revalidate'])->group(function () {
-    Route::get('/users/verification', [UserController::class, 'prospectiveMembers'])
-        ->name('users.prospective');
-
-    Route::post('/verifikasi/{user:member_number}/approval', [UserController::class, 'submitApproval'])
-        ->name('users.verification.submit');
-
     Route::get('/list', [AdminController::class, 'index'])->name('index');
     Route::get('/create', [AdminController::class, 'create']);
     Route::post('/store', [AdminController::class, 'store']);

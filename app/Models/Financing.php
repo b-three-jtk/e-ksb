@@ -31,14 +31,9 @@ class Financing extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function loan()
+    public function installment()
     {
-        return $this->hasOne(Loan::class);
-    }
-
-    public function supplier()
-    {
-        return $this->belongsTo(Supplier::class);
+        return $this->hasOne(Installment::class);
     }
 
     public function financingProduct()

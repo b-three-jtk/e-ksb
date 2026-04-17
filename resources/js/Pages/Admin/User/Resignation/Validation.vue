@@ -120,7 +120,7 @@ const rejectTransaction = () => {
                     <h1 class="card-title border-b border-b-stroke px-6 pb-6">Detail Data Pengunduran Diri Anggota</h1>
                     <div class="grid grid-cols-2 gap-6 p-8 pb-6">
                         <BaseInputAdmin label="Nama" type="text" v-model="props.data.name" isDisabled />
-                        <BaseInputAdmin label="Nomor Anggota" type="text" v-model="props.data.member_number" isDisabled />
+                        <BaseInputAdmin label="Nomor Anggota" type="text" v-model="props.data.member_code" isDisabled />
                         <BaseInputAdmin label="Tanggal Bergabung" type="date" v-model="props.data.joined_date" isDisabled />
                         <BaseInputAdmin label="Email" type="email" v-model="props.data.email" isDisabled />
                         <div class="grid grid-cols-2 col-span-2 gap-6">

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('qty');
             $table->enum('condition', array_column(ConditionEnum::cases(), 'value'));
             $table->decimal('cost_price', 10, 2)->nullable();
+            $table->decimal('margin_amount', 10, 2)->nullable();
             $table->string('purchase_receipt')->nullable();
 
             $table->foreignId('product_id')->references('id')->on('products')->onDelete('set null');
