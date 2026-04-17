@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Enums\UserStatus;
+use App\Enums\UserStatusEnum;
 use Illuminate\Database\Seeder;
 class UserSeeder extends Seeder
 {
@@ -15,86 +15,95 @@ class UserSeeder extends Seeder
     {
         User::factory()->count(100)->create();
         User::create([
-            'member_number' => 'KSP0231',
+            'member_code' => 'KSP0231',
             'nik' => '0000000099',
             'name' => 'DPS',
             'email' => 'dps@example.com',
             'password' => bcrypt('password'),
-            'status' => UserStatus::ACTIVE->value,
-            'role_id' => Role::where('name', 'Dewan Pengawas Syariah')->first()->id,
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Dewan Pengawas Syariah')->first()->id,
+            'phone_number' => '081234567890',
         ]);
         User::create([
-            'member_number' => 'KSP0897',
+            'member_code' => 'KSP0897',
             'nik' => '0000000000000001',
             'name' => 'Pengawas',
             'email' => 'pengawas@example.com',
             'password' => bcrypt('password'),
-            'status' => UserStatus::ACTIVE->value,
-            'role_id' => Role::where('name', 'Pengawas')->first()->id,
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Pengawas')->first()->id,
+            'phone_number' => '081234567893',
         ]);
         User::create([
-            'member_number' => 'KSP001',
+            'member_code' => 'KSP001',
             'nik' => '1234567890123456',
             'name' => 'Ketua',
             'email' => 'ketua@example.com',
             'password' => bcrypt('password'),
-            'status' => UserStatus::ACTIVE->value,
-            'role_id' => Role::where('name', 'Ketua')->first()->id,
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Ketua')->first()->id,
+            'phone_number' => '081234566290',
         ]);
         User::create([
-            'member_number' => 'KSP002',
+            'member_code' => 'KSP002',
             'nik' => '6543210987654321',
             'name' => 'Anggota',
             'email' => 'contactsims11@gmail.com',
             'password' => bcrypt('password'),
-            'status' => UserStatus::ACTIVE->value,
-            'role_id' => Role::where('name', 'Anggota')->first()->id,
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Anggota')->first()->id,
+            'phone_number' => '081234568590',
             'joined_date' => now()->subDays(30),
         ]);
         User::create([
-            'member_number' => 'KSP003',
+            'member_code' => 'KSP003',
             'nik' => '1122334455667788',
             'name' => 'Sekretaris',
             'email' => 'sekretaris@example.com',
             'password' => bcrypt('password'),
-            'status' => UserStatus::ACTIVE->value,
-            'role_id' => Role::where('name', 'Sekretaris')->first()->id,
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Sekretaris')->first()->id,
+            'phone_number' => '081234562490',
         ]);
         User::create([
-            'member_number' => 'KSP004',
+            'member_code' => 'KSP004',
             'nik' => '8877665544332211',
             'name' => 'Bendahara',
             'email' => 'bendahara@example.com',
             'password' => bcrypt('password'),
-            'status' => UserStatus::ACTIVE->value,
-            'role_id' => Role::where('name', 'Bendahara')->first()->id,
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Bendahara')->first()->id,
+            'phone_number' => '0812387567890',
         ]);
         User::create([
-            'member_number' => 'KSP005',
+            'member_code' => 'KSP005',
             'nik' => '1234432112344321',
             'name' => 'Seksi Murabahah',
             'email' => 'seksimurabah@example.com',
             'password' => bcrypt('password'),
-            'status' => UserStatus::ACTIVE->value,
-            'role_id' => Role::where('name', 'Seksi Murabahah')->first()->id,
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Ketua Murabahah')->first()->id,
+            'phone_number' => '081232327890',
         ]);
         User::create([
-            'member_number' => 'KSP006',
+            'member_code' => 'KSP006',
             'nik' => '4321123443211234',
             'name' => 'Seksi AMDK',
             'email' => 'seksiamdk@example.com',
             'password' => bcrypt('password'),
-            'status' => UserStatus::ACTIVE->value,
-            'role_id' => Role::where('name', 'Seksi AMDK')->first()->id,
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Ketua AMDK')->first()->id,
+            'phone_number' => '081238667890',
         ]);
         User::create([
-            'member_number' => 'KSP007',
+            'member_code' => 'KSP007',
             'nik' => '5678123456781234',
             'name' => 'Penanggung Jawab Anggota',
             'email' => 'pjanggota@example.com',
             'password' => bcrypt('password'),
-            'status' => UserStatus::ACTIVE->value,
-            'role_id' => Role::where('name', 'Penanggung Jawab Anggota')->first()->id,
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Penanggung Jawab Anggota')->first()->id,
+            'phone_number' => '08123412890',
         ]);
     }
 }

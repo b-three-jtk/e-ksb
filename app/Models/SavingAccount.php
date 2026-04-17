@@ -11,10 +11,9 @@ class SavingAccount extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'account_number',
-        'balance',
-        'type',
-        'tenor_months',
+        'saving_account_code',
+        'saving_type',
+        'saving_tenor',
         'target_amount',
         'user_id',
     ];

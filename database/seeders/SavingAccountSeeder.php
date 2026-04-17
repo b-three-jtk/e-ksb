@@ -2,15 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Enums\SavingType;
+use App\Enums\PaymentMethodsEnum;
+use App\Enums\SavingTypeEnum;
+use App\Enums\TransactionTypeEnum;
 use App\Models\SavingAccount;
-use App\Enums\TransactionType;
-use Illuminate\Database\Seeder;
-use App\Enums\TransactionStatus;
-use App\Enums\TransactionMethods;
 use App\Models\SavingTransaction;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class SavingAccountSeeder extends Seeder
 {
@@ -21,36 +19,34 @@ class SavingAccountSeeder extends Seeder
     {
         $users = User::all();
         $savingTypes = [
-            SavingType::SIMPANAN_POKOK->value,
-            SavingType::SIMPANAN_WAJIB->value,
-            SavingType::TABUNGAN_ANGGOTA->value,
-            SavingType::TABUNGAN_BERJANGKA->value,
-            SavingType::TABUNGAN_IBADAH->value,
-            SavingType::TABUNGAN_SOSIAL->value,
+            SavingTypeEnum::SIMPANAN_POKOK->value,
+            SavingTypeEnum::SIMPANAN_WAJIB->value,
+            SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            SavingTypeEnum::TABUNGAN_BERJANGKA->value,
+            SavingTypeEnum::TABUNGAN_IBADAH->value,
         ];
 
-        $transactionMethods = collect(TransactionMethods::cases())->map(fn($m) => $m->value)->all();
-        $transactionTypes = collect(TransactionType::cases())->map(fn($t) => $t->value)->all();
-        $transactionStatus = collect(TransactionStatus::cases())->map(fn($t) => $t->value)->all();
+        $transactionMethods = collect(PaymentMethodsEnum::cases())->map(fn($m) => $m->value)->all();
+        $transactionTypes = collect(TransactionTypeEnum::cases())->map(fn($t) => $t->value)->all();
 
         foreach ($users as $user) {
             foreach ($savingTypes as $type) {
                 $account = SavingAccount::create([
-                    'account_number' => 'SA' . strtoupper(uniqid()),
-                    'balance' => rand(100000, 1000000),
-                    'type' => $type,
+                    'saving_account_code' => 'SA' . random_int(100000, 999999),
+                    'saving_tenor' => $type === SavingTypeEnum::TABUNGAN_BERJANGKA->value ? fake()->numberBetween(6, 24) : null,
+                    'target_amount' => $type === SavingTypeEnum::TABUNGAN_IBADAH->value ? fake()->numberBetween(1000000, 10000000) : null,
+                    'saving_type' => $type,
                     'user_id' => $user->id,
                 ]);
 
                 SavingTransaction::create([
-                    'transaction_code' => 'ST' . strtoupper(uniqid()),
+                    'saving_transaction_code' => 'ST' . random_int(100000, 999999),
                     'saving_account_id' => $account->id,
-                    'amount' => $account->balance,
-                    'method' => $transactionMethods[array_rand($transactionMethods)],
-                    'type' => $transactionTypes[array_rand($transactionTypes)],
-                    'status' => $transactionStatus[array_rand($transactionStatus)],
+                    'saving_amount' => fake()->numberBetween(50000, 500000),
+                    'saving_payment_method' => $transactionMethods[array_rand($transactionMethods)],
+                    'transaction_type' => $transactionTypes[array_rand($transactionTypes)],
                     'transaction_date' => now(),
-                    'description' => 'Initial deposit for ' . $type,
+                    'saving_description' => 'Initial deposit for ' . $type,
                     'updated_by' => User::inRandomOrder()->first()->id,
                     'account_number' => null,
                 ]);

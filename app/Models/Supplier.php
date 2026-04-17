@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Financing;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -12,14 +11,14 @@ class Supplier extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'supplier_name',
         'contact',
         'address',
-        'link_address',
+        'website_url',
     ];
 
-    public function financings()
+    public function products()
     {
-        return $this->hasMany(Financing::class);
+        return $this->hasMany(Product::class);
     }
 }

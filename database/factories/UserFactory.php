@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\Education;
-use App\Enums\Gender;
-use App\Enums\UserStatus;
+use App\Enums\EducationEnum;
+use App\Enums\GenderEnum;
+use App\Enums\MaritalStatusEnum;
+use App\Enums\UserStatusEnum;
 use Illuminate\Support\Str;
-use App\Enums\MaritalStatus;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -28,18 +28,19 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'member_number' => 'KSP' . fake()->unique()->numberBetween(100, 999),
+            'member_code' => 'KSP' . fake()->unique()->numberBetween(100, 999),
             'nik' => fake()->unique()->numerify('################'),
             'name' => fake()->name(),
+            'birth_place' => fake()->city(),
             'birth_date' => fake()->date(),
-            'gender' => fake()->randomElement(Gender::cases())->value,
-            'marital_status' => fake()->randomElement(MaritalStatus::cases())->value,
-            'address' => fake()->address(),
+            'gender' => fake()->randomElement(GenderEnum::cases())->value,
+            'marital_status' => fake()->randomElement(MaritalStatusEnum::cases())->value,
+            'domicile_address' => fake()->address(),
             'residential_address' => fake()->address(),
             'phone_number' => fake()->unique()->numerify('08##########'),
-            'last_education' => fake()->randomElement(Education::cases())->value,
+            'last_education' => fake()->randomElement(EducationEnum::cases())->value,
             'dependents' => fake()->numberBetween(0, 5),
-            'status' => fake()->randomElement(UserStatus::cases())->value,
+            'status' => fake()->randomElement(UserStatusEnum::cases())->value,
             'spouse_name' => fake()->optional()->name(),
             'joined_date' => fake()->date(),
             'email' => fake()->unique()->safeEmail(),

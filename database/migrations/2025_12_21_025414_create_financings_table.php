@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\Condition;
-use App\Enums\FinancingReqStatus;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use App\Enums\FinancingPaymentMethodEnum;
+use App\Enums\FinancingReqStatusEnum;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -15,27 +15,22 @@ return new class extends Migration
     {
         Schema::create('financings', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('transaction_code')->unique();
-            $table->string('product_name');
-            $table->string('product_type');
-            $table->string('brand')->nullable();
-            $table->string('color')->nullable();
-            $table->enum('condition', array_column(Condition::cases(), 'value'))->nullable();
-            $table->text('description');
-            $table->decimal('cost_price', 15, 2)->nullable();
-            $table->decimal('margin', 15, 2)->nullable();
-            $table->decimal('tsaman_naqdy', 15, 2)->nullable();
-            $table->integer('qty');
-            $table->boolean('isWakalah')->nullable();
+            $table->string('financing_transaction_code')->unique();
+            $table->boolean('is_wakalah')->nullable();
             $table->decimal('down_payment', 15, 2)->nullable();
             $table->date('akad_date')->nullable();
-            $table->enum('status', array_column(FinancingReqStatus::cases(), 'value'));
-            $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null');
+            $table->date('paid_date')->nullable();
+            $table->enum('financing_status', array_column(FinancingReqStatusEnum::cases(), 'value'))->default(FinancingReqStatusEnum::WAITING_DOCUMENTS->value);
+            $table->enum('payment_method', array_column(FinancingPaymentMethodEnum::cases(), 'value'))->nullable();
+            $table->string('signed_akad_document')->nullable();
+
+            // set null so that if the user is deleted, the financing record will not be deleted but the id fk will be set to null
             $table->foreignUuid('user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignUuid('updated_by')->constrained('users');
+            $table->foreignUuid('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('financing_product_id')->nullable()->constrained('financing_products')->onDelete('set null');
             $table->timestamps();
 
-            $table->index('transaction_code');
+            $table->index('financing_transaction_code');
         });
     }
 

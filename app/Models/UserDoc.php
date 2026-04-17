@@ -12,8 +12,8 @@ class UserDoc extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'name',
-        'attachment',
+        'doc_name',
+        'doc_attachment',
         'user_id',
     ];
 

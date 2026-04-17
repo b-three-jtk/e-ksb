@@ -13,20 +13,16 @@ class SavingTransaction extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'transaction_code',
-        'amount',
-        'type',
-        'status',
-        'method',
-        'description',
-        'transaction_date',
+        'saving_transaction_code',
+        'saving_amount',
+        'transaction_type',
+        'saving_payment_method',
+        'saving_description',
+
         'updated_by',
         'saving_account_id',
         'account_number',
-    ];
-
-    protected $casts = [
-        'transaction_date' => 'datetime',
+        'point_id',
     ];
 
     public function user()
@@ -49,8 +45,8 @@ class SavingTransaction extends Model
         return $this->belongsTo(Account::class, 'account_number', 'account_number');
     }
 
-    public function savingTransactionDoc()
+    public function pointTransaction()
     {
-        return $this->hasMany(SavingTransactionDoc::class, 'transaction_id', 'id');
+        return $this->belongsTo(PointTransaction::class, 'point_id');
     }
 }

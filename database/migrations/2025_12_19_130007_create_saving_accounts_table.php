@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\SavingType;
+use App\Enums\SavingTypeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,11 +14,11 @@ return new class extends Migration
     {
         Schema::create('saving_accounts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('account_number')->unique();
-            $table->decimal('balance', 15, 2);
-            $table->enum('type', array_column(SavingType::cases(), 'value'));
-            $table->integer('tenor_months')->nullable();
+            $table->string('saving_account_code', 20)->unique();
+            $table->enum('saving_type', array_column(SavingTypeEnum::cases(), 'value'));
+            $table->integer('saving_tenor')->nullable();
             $table->decimal('target_amount', 15, 2)->nullable();
+            
             $table->foreignUuid('user_id')->constrained('users')->onDelete('set null');
             $table->timestamps();
         });

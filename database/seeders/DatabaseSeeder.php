@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Seeder;
-use Database\Seeders\UserSeeder;
+use Database\Seeders\InstallmentSeeder;
 use Database\Seeders\SupplierSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             FinancialSeeder::class,
             AccountSeeder::class,
             FinancingSeeder::class,
-            LoanSeeder::class,
+            InstallmentSeeder::class,
             HeirSeeder::class,
             SavingAccountSeeder::class,
         ]);

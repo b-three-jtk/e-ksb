@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('user_docs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
-            $table->string('attachment');
+            $table->string('doc_name');
+            $table->string('doc_attachment');
+            
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

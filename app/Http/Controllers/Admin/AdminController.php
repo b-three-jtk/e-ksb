@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Education;
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatus;
+use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdminRequest;
 use App\Http\Requests\UpdateAdminRequest;
@@ -27,14 +29,13 @@ class AdminController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
         $allowedAdminStatuses = [
-            'Aktif',
-            'Tidak Aktif',
-            'Mengundurkan Diri',
+            UserStatusEnum::ACTIVE->value,
+            UserStatusEnum::INACTIVE->value,
         ];
 
         $admins = User::with('role')
             ->whereHas('role', fn ($q) =>
-                $q->whereNotIn('name', ['User', 'Anggota'])
+                $q->whereNotIn('role_name', [UserRoleEnum::ANGGOTA->value])
             )
             ->whereIn('status', $allowedAdminStatuses)
             ->when($request->search, function ($q) use ($request) {
@@ -48,10 +49,10 @@ class AdminController extends Controller
                 $request->status && in_array($request->status, $allowedAdminStatuses),
                 fn($q) => $q->where('status', $request->status)
             )
-            ->when($request->role && !in_array($request->role, ['User', 'Anggota']),
+            ->when($request->role && !in_array($request->role, [UserRoleEnum::ANGGOTA->value]),
                 fn ($q) =>
                     $q->whereHas('role', fn ($r) =>
-                        $r->where('name', $request->role)
+                        $r->where('role_name', $request->role)
                     )
             )
             ->orderBy($sortBy, $sortDir)
@@ -62,7 +63,7 @@ class AdminController extends Controller
                 'nik' => $user->nik,
                 'name' => $user->name,
                 'email' => $user->email,
-                'posisi' => $user->role->name,
+                'posisi' => $user->role->role_name,
                 'status' => $user->status,
                 'avatar' => $user->profile_picture
                     ? asset('storage/' . $user->profile_picture)
@@ -72,8 +73,8 @@ class AdminController extends Controller
         return inertia('Admin/Admins/List', [
             'admins' => $admins,
             'roles' => Role::whereHas('users')
-                ->whereNotIn('name', ['User', 'Anggota'])
-                ->pluck('name'),
+                ->whereNotIn('role_name', [UserRoleEnum::ANGGOTA->value])
+                ->pluck('role_name'),
             'filters' => $request->only(['search', 'status', 'role', 'per_page', 'sort_by', 'sort_dir']),
             'title' => 'Pengelolaan Admin'
         ]);
@@ -98,7 +99,7 @@ class AdminController extends Controller
      */
     public function store(StoreAdminRequest $request)
     {
-        DB::beginTransaction();
+        DB::begin();
         try {
             $data = $request->validated();
 
@@ -156,7 +157,7 @@ class AdminController extends Controller
      */
     public function update(UpdateAdminRequest $request, string $id)
     {
-        DB::beginTransaction();
+        DB::begin();
         try {
             $data = $request->validated();
 

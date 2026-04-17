@@ -23,24 +23,23 @@ class User extends Authenticatable
     public $incrementing = false;
 
     protected $fillable = [
-        'member_number',
+        'member_code',
         'profile_picture',
         'nik',
         'name',
+        'gender',
         'birth_place',
         'birth_date',
-        'gender',
+        'status',
+        'domicile_address',
+        'residential_address',
         'marital_status',
         'spouse_name',
-        'address',
-        'residential_address',
-        'phone_number',
         'last_education',
         'dependents',
-        'status',
-        'joined_date',
-        'member_number',
         'email',
+        'phone_number',
+        'joined_date',
         'password',
         'role_id',
     ];
@@ -118,11 +117,21 @@ class User extends Authenticatable
         return $this->hasMany(Financing::class);
     }
 
+    public function userJobs()
+    {
+        return $this->hasMany(UserJob::class);
+    }
+
+    public function pointTransactions()
+    {
+        return $this->hasMany(PointTransaction::class);
+    }
+
     /**
      * Use member_number for route model binding
      */
     public function getRouteKeyName()
     {
-        return 'member_number';
+        return 'member_code';
     }
 }

@@ -8,14 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Heir extends Model
 {
     use HasFactory;
+
+    protected $primaryKey = 'heir_nik';
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
-        'nik',
-        'name',
+        'heir_nik',
+        'heir_name',
         'relationship',
-        'contact',
+        'heir_contact',
         'user_id',
     ];
 

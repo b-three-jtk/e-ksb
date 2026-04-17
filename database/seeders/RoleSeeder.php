@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\UserRole;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Enums\UserRoleEnum;
 use Illuminate\Database\Seeder;
 use App\Models\Role;
 
@@ -14,12 +14,12 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $roles = UserRole::cases();
+        $roles = UserRoleEnum::cases();
 
         foreach ($roles as $role) {
             Role::firstOrCreate(
-                ['name' => $role->value],
-                ['name' => $role->value]
+                ['role_name' => $role->value],
+                ['role_name' => $role->value]
             );
         }
     }

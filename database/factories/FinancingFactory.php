@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\FinancingPaymentMethodEnum;
+use App\Enums\FinancingReqStatusEnum;
+use App\Models\FinancingProduct;
 use App\Models\User;
-use App\Enums\Condition;
-use App\Models\Supplier;
-use App\Enums\FinancingReqStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,21 +21,16 @@ class FinancingFactory extends Factory
     public function definition(): array
     {
         return [
-            'transaction_code' => $this->faker->unique()->numerify('PM########'),
-            'product_name' => $this->faker->word(),
-            'product_type' => $this->faker->randomElement(['Electronics', 'Furniture', 'Vehicle', 'Appliance']),
-            'brand' => $this->faker->company(),
-            'color' => $this->faker->safeColorName(),
-            'condition' => $this->faker->randomElement(Condition::cases())->value,
-            'description' => $this->faker->sentence(),
-            'cost_price' => $this->faker->numberBetween(100000, 10000000),
-            'qty' => $this->faker->numberBetween(1, 10),
-            'margin' => $this->faker->numberBetween(10000, 500000),
-            'tsaman_naqdy' => $this->faker->numberBetween(10000, 500000),
-            'status' => $this->faker->randomElement(FinancingReqStatus::cases())->value,
-            'isWakalah' => $this->faker->boolean(),
+            'financing_transaction_code' => $this->faker->unique()->numerify('PM########'),
+            'financing_status' => $this->faker->randomElement(FinancingReqStatusEnum::cases())->value,
+            'is_wakalah' => $this->faker->boolean(),
             'down_payment' => $this->faker->numberBetween(50000, 5000000),
-            'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
+            'akad_date' => $this->faker->date(),
+            'paid_date' => $this->faker->date(),
+            'payment_method' => $this->faker->randomElement(FinancingPaymentMethodEnum::cases())->value,
+            'signed_akad_document' => $this->faker->optional()->url(),
+
+            'financing_product_id' => FinancingProduct::inRandomOrder()->first()?->id ?? FinancingProduct::factory(),
             'updated_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'created_at' => $this->faker->dateTimeBetween('-6 months', 'now'),

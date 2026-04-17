@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\Heir;
+use App\Enums\HeirEnum;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,10 +19,10 @@ class HeirFactory extends Factory
     public function definition(): array
     {
         return [
-            'nik' => $this->faker->unique()->numerify('##################'),
-            'name' => $this->faker->name(),
-            'relationship' => $this->faker->randomElement(Heir::cases())->value,
-            'contact' => $this->faker->phoneNumber(),
+            'heir_nik' => $this->faker->unique()->numerify('################'),
+            'heir_name' => $this->faker->name(),
+            'relationship' => $this->faker->randomElement(HeirEnum::cases())->value,
+            'heir_contact' => $this->faker->phoneNumber(),
             'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
         ];
     }

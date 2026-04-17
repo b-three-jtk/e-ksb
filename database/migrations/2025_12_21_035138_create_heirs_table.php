@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\Heir;
+use App\Enums\HeirEnum;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -13,10 +13,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('heirs', function (Blueprint $table) {
-            $table->string('nik')->primary();
-            $table->string('name');
-            $table->enum('relationship', array_column(Heir::cases(), 'value'));
-            $table->string('contact');
+            $table->string('heir_nik', 16)->primary();
+            $table->string('heir_name');
+            $table->enum('relationship', array_column(HeirEnum::cases(), 'value'));
+            $table->string('heir_contact', 20)->nullable();
+            
             $table->foreignUuid('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
