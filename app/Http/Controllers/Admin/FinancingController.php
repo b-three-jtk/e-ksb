@@ -45,8 +45,12 @@ class FinancingController extends Controller
             }
         ])
         ->when($search, function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-                ->orWhere('member_code', 'like', "%{$search}%");
+            $q->whereHas('user', function ($userQuery) use ($search) {
+                $userQuery->where(function ($userSearchQuery) use ($search) {
+                    $userSearchQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('member_code', 'like', "%{$search}%");
+                });
+            });
         })
         ->when($tab === 'request', function ($q) {
             $q->whereIn('financing_status', [
