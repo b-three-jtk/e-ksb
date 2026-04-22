@@ -24,12 +24,116 @@ use Illuminate\Validation\ValidationException;
 
 class FinancingController extends Controller
 {
+    private function baseQuery(Request $request)
+    {
+        $search = $request->input('search');
+        $tab = $request->input('tab', 'all');
+
+        return Financing::with([
+            'user' => function ($query) {
+                $query->select('id', 'name', 'member_code');
+            },
+            'installment' => function ($query) {
+                $query->withCount([
+                    'paymentSchedules' => function ($q) {
+                        $q->where('installment_schedule_status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value);
+                    }
+                ]);
+            },
+            'financingProduct.product.productType' => function ($query) {
+                $query->select('product_types.id', 'product_types.product_type_name');
+            }
+        ])
+        ->when($search, function ($q) use ($search) {
+            $q->whereHas('user', function ($userQuery) use ($search) {
+                $userQuery->where(function ($userSearchQuery) use ($search) {
+                    $userSearchQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('member_code', 'like', "%{$search}%");
+                });
+            });
+        })
+        ->when($tab === 'request', function ($q) {
+            $q->whereIn('financing_status', [
+                FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                FinancingReqStatusEnum::PENDING_REVIEW->value,
+            ]);
+        })
+        ->when($tab === 'paid_early_request', function ($q) {
+            $q->where(
+                'financing_status',
+                FinancingReqStatusEnum::PAID_EARLY_REQUESTED->value,
+            );
+        })
+        ->when($tab === 'active', function ($q) {
+            $q->where(
+                'financing_status',
+                FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            );
+        });
+    }
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $perPage = $request->input('per_page', 10);
+        $search = $request->input('search');
+        $tab = $request->input('tab', 'all');
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
+        $query = $this->baseQuery($request)->orderBy($sortBy, $sortDir);
+
+        $financings = $query
+            ->paginate($perPage)
+            ->withQueryString()
+            ->through(function ($f) {
+                return [
+                    'id' => $f->id,
+                    'financing_transaction_code' => $f->financing_transaction_code,
+                    'akad_date' => $f->akad_date,
+                    'user' => $f->user
+                        ? ($f->user?->member_code . ' - ' . $f->user?->name)
+                        : '-',
+                    'tenor_left' => $f->installment ? $f->installment->payment_schedules_count : 0,
+                    'product_type' => $f->financingProduct?->product?->productType?->product_type_name,
+                    'financing_status' => $f->financing_status,
+                ];
+            });
+
+        $totalRequest = Financing::whereIn('financing_status', [
+            FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+            FinancingReqStatusEnum::PENDING_REVIEW->value,
+        ])->count();
+        $totalActive = Financing::where('financing_status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->count();
+        $totalPaidEarlyRequest = Financing::where('financing_status', FinancingReqStatusEnum::PAID_EARLY_REQUESTED->value)->count();
+
+        $summary = [
+            [
+                'title' => 'Total Pengajuan Pembiayaan Murabahah',
+                'value' => $totalRequest,
+            ],
+            [
+                'title' => 'Total Pembiayaan Berlangsung',
+                'value' => $totalActive,
+            ],
+            [
+                'title' => 'Total Pengajuan Pelunasan Sebelum Jatuh Tempo',
+                'value' => $totalPaidEarlyRequest,
+            ],
+        ];
+
+        return inertia('Admin/Financing/Index', [
+            'financings' => $financings,
+            'summary' => $summary,
+            'filters' => [
+                'search' => $search,
+                'per_page' => $perPage,
+                'tab' => $tab,
+                'sort_by' => $sortBy,
+                'sort_dir' => $sortDir,
+            ],
+        ]);
     }
 
     /**

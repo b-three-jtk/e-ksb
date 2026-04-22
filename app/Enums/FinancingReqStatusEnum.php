@@ -10,5 +10,7 @@ enum FinancingReqStatusEnum: string
     case REJECTED              = 'Ditolak';
     case WAITING_DOCUMENTS     = 'Menunggu Kelengkapan Dokumen';
     case ACTIVE_INSTALLMENTS = 'Angsuran Berjalan';
+    case PAID_EARLY_REQUESTED = 'Permintaan Pelunasan Diajukan';
+    case PAID_EARLY = 'Lunas Dipercepat';
     case PAID = 'Lunas';
 }

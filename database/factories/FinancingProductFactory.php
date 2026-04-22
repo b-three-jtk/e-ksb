@@ -19,7 +19,7 @@ class FinancingProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id' => Product::factory(),
+            'product_id' => Product::inRandomOrder()->first()?->id ?? Product::factory(),
             'request_description' => fake()->sentence(),
             'qty' => fake()->numberBetween(1, 100),
             'condition' => fake()->randomElement(ConditionEnum::cases())->value,

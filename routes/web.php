@@ -110,6 +110,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::put('/resignation/{id}', [ResignationController::class, 'validate'])->name('resignations.validate');
 
     // financing routes
+    Route::get('/financing', [FinancingController::class, 'index'])->name('financing.index');
     Route::get('/financing/show/{id}', [FinancingController::class, 'show'])->name('financing.show');
     Route::get('/financing/create', [FinancingController::class, 'create'])->name('financing.create');
     Route::get('/members/search', [UserController::class, 'searchMembers'])->name('admin.members.search');

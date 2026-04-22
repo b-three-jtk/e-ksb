@@ -3,6 +3,16 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Account;
+use App\Models\Financial;
+use App\Models\Financing;
+use App\Models\Heir;
+use App\Models\PointTransaction;
+use App\Models\Role;
+use App\Models\SavingAccount;
+use App\Models\SavingTransaction;
+use App\Models\UserDoc;
+use App\Models\UserJob;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
