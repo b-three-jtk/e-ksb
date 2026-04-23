@@ -46,7 +46,7 @@ const infoMenu = [
                 </div>
                 <div class="text-center py-40 pb-20 px-4">
                     <h1 class="text-4xl font-semibold text-white mb-4">Produk <span class="text-accent">Koperasi
-                            Syariah</span></h1>
+                            Syariah Berkah</span></h1>
                     <p class="text-lg font-body md:text-xl text-white">Solusi keuangan syariah untuk kesejahteraan
                         bersama</p>
                 </div>
