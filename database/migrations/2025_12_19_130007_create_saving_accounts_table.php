@@ -16,9 +16,10 @@ return new class extends Migration
             $table->string('saving_account_code', 20)->unique();
             $table->integer('saving_tenor')->nullable();
             $table->decimal('target_amount', 15, 2)->nullable();
+            $table->unsignedBigInteger('member_id')->nullable();
 
             $table->foreignId('saving_product_id')->constrained('saving_products')->onDelete('set null');
-            $table->foreign('member_code')->constrained('members')->onDelete('set null');
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('set null');
             $table->timestamps();
         });
     }

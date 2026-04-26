@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Models\FinancingProduct;
+use App\Models\Member;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -32,7 +33,7 @@ class FinancingFactory extends Factory
 
             'financing_product_id' => FinancingProduct::inRandomOrder()->first()?->id ?? FinancingProduct::factory(),
             'updated_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
-            'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'member_id' => Member::inRandomOrder()->first()?->id ?? Member::factory(),
             'created_at' => $this->faker->dateTimeBetween('-6 months', 'now'),
         ];
     }

@@ -5,10 +5,12 @@ namespace App\Models;
 use App\Models\JournalEntry;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FinancialTransaction extends Model
 {
+    use HasFactory;
     use HasUuids;
 
     protected $keyType = 'string';

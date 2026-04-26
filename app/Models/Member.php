@@ -16,10 +16,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Member extends Model
 {
-    protected $keyType = 'string';
-    public $incrementing = false;
     protected $fillable = [
-        'member_code',
+        'user_id',
         'gender',
         'birth_place',
         'birth_date',
@@ -30,7 +28,6 @@ class Member extends Model
         'spouse_name',
         'last_education',
         'dependents',
-        'user_id',
     ];
 
     // Simpanan

@@ -13,7 +13,7 @@ use Inertia\Inertia;
 
 class LoginController extends Controller
 {
-    public function create()
+    public function loginPage()
     {
         return Inertia::render('Auth/Login');
     }
@@ -25,7 +25,7 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        $user = User::with('role')->where('member_code', $credentials['member_code'])->first();
+        $user = User::with('role', 'member')->where('member_code', $credentials['member_code'])->first();
         if (! $user) {
             throw ValidationException::withMessages([
                 'member_code' => 'Nomor anggota atau password tidak sesuai.',

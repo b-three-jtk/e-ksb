@@ -43,10 +43,10 @@ Route::prefix('auth')
     ->middleware('guest')
     ->group(function () {
 
-        Route::get('/login', [LoginController::class, 'create'])
+        Route::get('/login', [LoginController::class, 'loginPage'])
             ->name('login');
 
-        Route::post('/login', [LoginController::class, 'store'])
+        Route::post('/login', [LoginController::class, 'login'])
             ->name('login.store');
 
         Route::get('/forgot-password', [ForgotPasswordController::class, 'index'])
@@ -65,7 +65,7 @@ Route::prefix('auth')
 
 Route::redirect('/login', '/auth/login')->middleware('guest')->name('login');
 
-Route::post('/auth/logout', [LoginController::class, 'destroy'])
+Route::post('/auth/logout', [LoginController::class, 'logout'])
     ->middleware('auth')
     ->name('auth.logout');
 

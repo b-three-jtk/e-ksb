@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\HeirEnum;
-use App\Models\User;
+use App\Models\Member;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +23,7 @@ class HeirFactory extends Factory
             'heir_name' => $this->faker->name(),
             'relationship' => $this->faker->randomElement(HeirEnum::cases())->value,
             'heir_contact' => $this->faker->phoneNumber(),
-            'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'member_id' => Member::factory(),
         ];
     }
 }

@@ -26,7 +26,7 @@ class Financing extends Model
         'financing_status',
         'payment_method',
         'signed_akad_document',
-        'member_code',
+        'member_id',
         'updated_by',
         'financing_item_id'
     ];

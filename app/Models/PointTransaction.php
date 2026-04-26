@@ -6,10 +6,13 @@ use App\Models\AmdkTransaction;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\SavingTransaction;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PointTransaction extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'amount_earned',
         'activity_description',

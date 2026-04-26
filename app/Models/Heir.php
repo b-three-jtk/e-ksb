@@ -19,11 +19,11 @@ class Heir extends Model
         'heir_name',
         'relationship',
         'heir_contact',
-        'member_code',
+        'member_id',
     ];
 
     public function member()
     {
-        return $this->belongsTo(Member::class, 'member_code');
+        return $this->belongsTo(Member::class, 'member_id', 'member_id');
     }
 }

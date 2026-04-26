@@ -25,11 +25,12 @@ return new class extends Migration
             $table->string('signed_akad_document')->nullable();
 
             // set null so that if the user is deleted, the financing record will not be deleted but the id fk will be set to null
-            $table->foreign('member_code')->nullable()->constrained('members')->onDelete('set null');
+            $table->unsignedBigInteger('member_id')->nullable();
             $table->foreignUuid('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('financing_item_id')->nullable()->constrained('financing_items')->onDelete('set null');
             $table->timestamps();
 
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('set null');
             $table->index('financing_transaction_code');
         });
     }

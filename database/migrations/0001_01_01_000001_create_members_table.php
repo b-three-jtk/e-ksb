@@ -16,7 +16,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('members', function (Blueprint $table) {
-            $table->string('member_code', 10)->primary();
+            $table->id();
+            $table->uuid('user_id');
             $table->enum('gender', array_column(GenderEnum::cases(), 'value'))->nullable();
             $table->string('birth_place', 150)->nullable();
             $table->date('birth_date')->nullable();
@@ -27,10 +28,10 @@ return new class extends Migration
             $table->enum('last_education', array_column(EducationEnum::cases(), 'value'))->nullable();
             $table->integer('dependents')->nullable();
             $table->enum('status', array_column(MemberStatusEnum::cases(), 'value'))->default('Menunggu Pembayaran');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
 
-            $table->index('member_code');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->index('user_id');
         });
     }
 

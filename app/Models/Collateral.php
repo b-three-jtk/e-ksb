@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Models\Financing;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Collateral extends Model
 {
+    use HasFactory;
     //
     protected $fillable = [
         'financing_id',

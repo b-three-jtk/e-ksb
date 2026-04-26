@@ -5,10 +5,12 @@ namespace App\Models;
 use App\Models\Member;
 use App\Models\SavingTransaction;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SavingAccount extends Model
 {
+    use HasFactory;
     use HasUuids;
     protected $keyType = 'string';
     public $incrementing = false;
@@ -17,12 +19,12 @@ class SavingAccount extends Model
         'saving_product_id',
         'saving_tenor',
         'target_amount',
-        'member_code',
+        'member_id',
     ];
 
     public function member()
     {
-        return $this->belongsTo(Member::class, 'member_code', 'user_code');
+        return $this->belongsTo(Member::class);
     }
 
     public function transactions()

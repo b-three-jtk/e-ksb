@@ -4,11 +4,12 @@ namespace App\Models;
 
 use App\Models\AmdkProduct;
 use App\Models\AmdkTransaction;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AmdkTransactionItem extends Model
 {
-    //
+    use HasFactory;
     protected $fillable = [
         'invoice_id',
         'amdk_product_id',

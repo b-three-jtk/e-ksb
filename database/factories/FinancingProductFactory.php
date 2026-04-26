@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Enums\ConditionEnum;
-use App\Models\Product;
+use App\Models\FinancingProduct;
+use App\Models\ProductType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class FinancingProductFactory extends Factory
 {
+    protected $model = FinancingProduct::class;
+
     /**
      * Define the model's default state.
      *
@@ -19,13 +21,11 @@ class FinancingProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id' => Product::inRandomOrder()->first()?->id ?? Product::factory(),
-            'request_description' => fake()->sentence(),
-            'qty' => fake()->numberBetween(1, 100),
-            'condition' => fake()->randomElement(ConditionEnum::cases())->value,
-            'cost_price' => fake()->numberBetween(10000, 1000000),
-            'margin_amount' => fake()->numberBetween(5000, 500000),
-            'purchase_receipt' => fake()->optional()->imageUrl(),
+            'product_code' => 'FP' . str_pad($this->faker->unique()->numberBetween(1, 999), 3, '0', STR_PAD_LEFT),
+            'name' => $this->faker->word(),
+            'brand' => $this->faker->company(),
+            'specification' => $this->faker->sentence(),
+            'type_id' => ProductType::factory(),
         ];
     }
 }

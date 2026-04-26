@@ -19,9 +19,10 @@ return new class extends Migration
             $table->enum('payment_method', array_column(PaymentMethodsEnum::cases(), 'value'));
             $table->enum('buyer_type', array_column(BuyerTypeEnum::cases(), 'value'));
             $table->string('invoice_receipt')->nullable();
+            $table->unsignedBigInteger('member_id')->nullable();
 
             $table->foreignId('point_id')->nullable()->constrained('point_transactions')->onDelete('set null');
-            $table->foreign('member_code')->nullable()->constrained('members')->onDelete('set null');
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('set null');
             $table->foreignUuid('stokist_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignUuid('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();

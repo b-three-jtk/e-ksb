@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Models\Member;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class MemberJob extends Model
 {
+    use HasFactory;
     protected $fillable = [
-        'member_code',
+        'member_id',
         'job_title',
         'company_or_business_name',
         'business_field',

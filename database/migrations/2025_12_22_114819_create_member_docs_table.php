@@ -15,8 +15,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('doc_name');
             $table->string('doc_attachment');
+            $table->unsignedBigInteger('member_id');
 
-            $table->foreign('member_code')->constrained('members')->onDelete('cascade');
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
             $table->timestamps();
         });
     }

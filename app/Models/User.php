@@ -30,6 +30,7 @@ class User extends Authenticatable
     public $incrementing = false;
 
     protected $fillable = [
+        'user_code',
         'profile_picture',
         'nik',
         'name',

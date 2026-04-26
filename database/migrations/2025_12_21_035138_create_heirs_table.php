@@ -17,8 +17,9 @@ return new class extends Migration
             $table->string('heir_name');
             $table->enum('relationship', array_column(HeirEnum::cases(), 'value'));
             $table->string('heir_contact', 20)->nullable();
+            $table->unsignedBigInteger('member_id');
 
-            $table->foreign('member_code')->constrained('members')->onDelete('cascade');
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
             $table->timestamps();
         });
     }

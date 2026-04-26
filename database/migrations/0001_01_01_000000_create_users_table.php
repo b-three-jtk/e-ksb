@@ -13,6 +13,7 @@ return new class extends Migration {
     {
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('user_code', 20)->unique();
             $table->string('profile_picture')->nullable();
             $table->string('nik', 16)->unique();
             $table->string('name');
@@ -28,6 +29,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->index('name');
+            $table->index('user_code');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

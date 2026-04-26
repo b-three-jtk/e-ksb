@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class InstallmentPaymentSchedule extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'due_date',
         'installment_number',

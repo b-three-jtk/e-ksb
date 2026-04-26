@@ -15,7 +15,7 @@ class MemberDoc extends Model
     protected $fillable = [
         'doc_name',
         'doc_attachment',
-        'member_code',
+        'member_id',
     ];
 
     public function member(): BelongsTo

@@ -15,12 +15,13 @@ return new class extends Migration
     {
         Schema::create('financials', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('member_id');
             $table->enum('financial_type', array_column(FinancialTypeEnum::cases(), 'value'));
             $table->enum('category', array_column(FinancialCategoryEnum::cases(), 'value'));
             $table->decimal('amount', 15, 2);
 
-            $table->foreign('member_code')->constrained('members')->onDelete('cascade');
-            $table->unique(['member_code', 'financial_type']);
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
+            $table->unique(['member_id', 'financial_type']);
             $table->timestamps();
         });
     }
