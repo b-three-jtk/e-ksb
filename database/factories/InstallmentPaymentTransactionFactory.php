@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Enums\PaymentMethodsEnum;
 use App\Models\InstallmentPaymentSchedule;
 use App\Models\InstallmentPaymentTransaction;
-use App\Models\PointTransaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -24,7 +23,6 @@ class InstallmentPaymentTransactionFactory extends Factory
             'payment_date' => $this->faker->dateTime(),
             'schedule_id' => InstallmentPaymentSchedule::factory(),
             'updated_by' => User::factory(),
-            'point_id' => PointTransaction::factory(),
             'installment_payment_receipt' => $this->faker->optional()->filePath(),
         ];
     }

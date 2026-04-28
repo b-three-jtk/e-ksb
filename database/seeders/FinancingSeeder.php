@@ -2,14 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ConditionEnum;
 use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
+use App\Enums\PaymentMethodsEnum;
 use App\Models\Financing;
-use App\Models\FinancingProduct;
-use App\Models\Product;
-use App\Models\ProductType;
-use App\Models\Supplier;
+use App\Models\Installment;
+use App\Models\InstallmentPaymentSchedule;
+use App\Models\InstallmentPaymentTransaction;
+use App\Models\Member;
+use App\Models\PointTransaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -20,38 +22,58 @@ class FinancingSeeder extends Seeder
      */
     public function run(): void
     {
-        ProductType::factory()->count(5)->create();
-        Product::factory()->count(20)->create();
         Financing::factory()->count(100)->create();
-        // simulation
-        $product = Product::create([
-            'product_code' => 'PRD001',
-            'product_name' => 'Laptop',
-            'brand' => 'Dell',
-            'specification' => 'Intel Core i7, 16GB RAM, 512GB SSD',
-            'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
-            'type_id' => 1,
-        ]);
 
-        $financingProduct = FinancingProduct::create([
-            'product_id' => $product->id,
-            'condition' => ConditionEnum::NEW->value,
-            'cost_price' => 15000000,
-            'margin_amount' => 2000000,
-            'qty' => 1,
-            'request_description' => 'Pembelian laptop untuk keperluan kuliah',
-        ]);
+        // SIMULATION - Complete Financing with Installment, Schedule, and Transaction
+        $member = Member::first() ?? Member::factory()->create();
 
-        Financing::create([
+        $financing = Financing::create([
             'financing_transaction_code' => 'PM00000001',
             'financing_status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
             'is_wakalah' => true,
             'down_payment' => 3000000,
-            'financing_product_id' => $financingProduct->id,
             'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
+            'akad_date' => now()->subMonths(3)->format('Y-m-d'),
             'updated_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
-            'user_id' => User::where('member_code', 'KSP002')->first()?->id,
-            'created_at' => now(),
+            'member_id' => $member->id,
         ]);
+
+        // Create Installment
+        $tenor = 12; // 12 bulan
+        $installment = Installment::create([
+            'tenor' => $tenor,
+            'financing_id' => $financing->id,
+        ]);
+
+        $point = PointTransaction::factory()->create();
+        // dd($point->id);
+
+        // Create Installment Payment Schedules
+        $monthlyPayment = ($financing->down_payment + 500000) / $tenor; // Assume total 500k margin
+
+        for ($i = 1; $i <= $tenor; $i++) {
+            $dueDate = now()->addMonths($i)->format('Y-m-d');
+
+            $schedule = InstallmentPaymentSchedule::create([
+                'installment_id' => $installment->id,
+                'installment_number' => $i,
+                'due_date' => $dueDate,
+                'installment_schedule_status' => $i <= 2 ? InstallmentPaymentScheduleStatusEnum::PAID->value : InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            ]);
+
+            // Create Payment Transaction for paid schedules
+            if ($i <= 2) {
+                InstallmentPaymentTransaction::create([
+                    'installment_trans_code' => 'LP' . str_pad($i, 8, '0', STR_PAD_LEFT),
+                    'principal_paid' => $monthlyPayment * 0.8,
+                    'margin_paid' => $monthlyPayment * 0.2,
+                    'installment_payment_method' => PaymentMethodsEnum::CASH->value,
+                    'is_early_repayment' => false,
+                    'schedule_id' => $schedule->id,
+                    'payment_date' => $dueDate,
+                    'updated_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
+                ]);
+            }
+        }
     }
 }

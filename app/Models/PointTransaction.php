@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\AmdkTransaction;
-use App\Models\InstallmentPaymentTransaction;
 use App\Models\SavingTransaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,11 +26,6 @@ class PointTransaction extends Model
     public function savingTransactions()
     {
         return $this->hasOne(SavingTransaction::class, 'point_id');
-    }
-
-    public function installmentPaymentTransactions()
-    {
-        return $this->hasOne(InstallmentPaymentTransaction::class, 'point_id');
     }
 
     public function amdkTransactions()

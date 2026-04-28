@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('purchase_receipt')->nullable();
 
             $table->foreignId('product_id')->references('id')->on('financing_products')->onDelete('set null');
+            $table->foreignId('supplier_id')->references('id')->on('suppliers')->onDelete('set null');
+            $table->foreignUuid('financing_id')->references('id')->on('financings')->onDelete('cascade');
             $table->timestamps();
         });
     }

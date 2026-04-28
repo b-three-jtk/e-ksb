@@ -28,7 +28,6 @@ class Financing extends Model
         'signed_akad_document',
         'member_id',
         'updated_by',
-        'financing_item_id'
     ];
 
     public function member()
@@ -50,7 +49,7 @@ class Financing extends Model
     // Objek Pembiayaan
     public function financingItem()
     {
-        return $this->belongsTo(FinancingItem::class);
+        return $this->hasOne(FinancingItem::class);
     }
 
     // Rahn atau Jaminan

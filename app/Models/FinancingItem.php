@@ -20,17 +20,18 @@ class FinancingItem extends Model
         'margin_amount',
         'product_id',
         'purchase_receipt',
-        'supplier_id'
+        'supplier_id',
+        'financing_id',
     ];
-
-    public function product()
-    {
-        return $this->belongsTo(FinancingProduct::class);
-    }
 
     public function financing()
     {
         return $this->belongsTo(Financing::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(FinancingProduct::class);
     }
 
     public function supplier()

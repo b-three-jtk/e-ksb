@@ -87,6 +87,11 @@ class User extends Authenticatable
         return $this->hasMany(PointTransaction::class);
     }
 
+    public function globalSettings()
+    {
+        return $this->hasMany(GlobalSetting::class, 'updated_by');
+    }
+
     // Is-a
     public function member()
     {

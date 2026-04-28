@@ -11,7 +11,7 @@ class SavingProduct extends Model
     use HasFactory;
 
     protected $fillable = [
-        'saving_product_name',
+        'name',
         'amount',
         'due_date',
     ];

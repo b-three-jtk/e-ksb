@@ -23,11 +23,11 @@ return new class extends Migration
             $table->enum('financing_status', array_column(FinancingReqStatusEnum::cases(), 'value'))->default(FinancingReqStatusEnum::WAITING_DOCUMENTS->value);
             $table->enum('payment_method', array_column(FinancingPaymentMethodEnum::cases(), 'value'))->nullable();
             $table->string('signed_akad_document')->nullable();
+            $table->text('notes')->nullable();
 
             // set null so that if the user is deleted, the financing record will not be deleted but the id fk will be set to null
             $table->unsignedBigInteger('member_id')->nullable();
             $table->foreignUuid('updated_by')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignId('financing_item_id')->nullable()->constrained('financing_items')->onDelete('set null');
             $table->timestamps();
 
             $table->foreign('member_id')->references('id')->on('members')->onDelete('set null');

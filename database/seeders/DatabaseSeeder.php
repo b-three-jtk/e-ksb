@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\AmdkStockIncomingSeeder;
 use Database\Seeders\InstallmentSeeder;
 use Database\Seeders\SupplierSeeder;
 use Database\Seeders\UserSeeder;
@@ -23,11 +24,11 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SupplierSeeder::class,
             FinancialSeeder::class,
-            AccountSeeder::class,
             FinancingSeeder::class,
             InstallmentSeeder::class,
             HeirSeeder::class,
             SavingAccountSeeder::class,
+            AmdkStockIncomingSeeder::class,
         ]);
     }
 }

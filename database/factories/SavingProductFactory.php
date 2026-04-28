@@ -13,9 +13,9 @@ class SavingProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'saving_product_name' => $this->faker->randomElement(SavingTypeEnum::cases())->value,
-            'amount' => $this->faker->numberBetween(100000, 10000000),
-            'due_date' => $this->faker->numberBetween(12, 60),
+            'name' => $this->faker->randomElement(SavingTypeEnum::cases())->value,
+            'nominal' => $this->faker->numberBetween(100000, 10000000),
+            'due_date' => $this->faker->numberBetween(1, 31),
         ];
     }
 }

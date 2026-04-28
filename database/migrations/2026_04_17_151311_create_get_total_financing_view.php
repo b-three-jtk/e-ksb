@@ -11,13 +11,13 @@ return new class extends Migration {
     {
         DB::statement("CREATE VIEW get_total_financing AS
             SELECT
-            financings.user_id,
-            financing_products.created_at,
+            financings.member_id,
+            financing_items.created_at,
             financings.financing_status,
             SUM(margin_amount) + SUM(cost_price) AS total_financing
-        FROM financing_products
-        JOIN financings ON financing_products.id = financings.financing_product_id
-        GROUP BY financings.user_id, financing_products.created_at, financings.financing_status");
+        FROM financing_items
+        JOIN financings ON financing_items.financing_id = financings.id
+        GROUP BY financings.member_id, financing_items.created_at, financings.financing_status");
     }
 
     /**

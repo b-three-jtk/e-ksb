@@ -22,7 +22,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
-            $table->index(['source_type', 'source_id']);
         });
     }
 

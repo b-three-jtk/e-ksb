@@ -22,7 +22,6 @@ return new class extends Migration
             $table->datetime('payment_date');
             $table->string('installment_payment_receipt')->nullable();
 
-            $table->foreignId('point_id')->constrained('point_transactions')->onDelete('cascade');
             $table->foreignId('schedule_id')->constrained('installment_payment_schedules')->onDelete('set null');
             $table->foreignUuid('updated_by')->constrained('users')->onDelete('set null');
             $table->timestamps();

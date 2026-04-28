@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Enums\UserStatusEnum;
 use Illuminate\Database\Seeder;
+
 class UserSeeder extends Seeder
 {
     /**
@@ -14,8 +15,10 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::factory()->count(100)->create();
+        
+        // SIMULATION FOR DEFAULT USERS
         User::create([
-            'member_code' => 'KSP0231',
+            'user_code' => 'KSP0231',
             'nik' => '0000000099',
             'name' => 'DPS',
             'email' => 'dps@example.com',
@@ -25,7 +28,7 @@ class UserSeeder extends Seeder
             'phone_number' => '081234567890',
         ]);
         User::create([
-            'member_code' => 'KSP0897',
+            'user_code' => 'KSP0897',
             'nik' => '0000000000000001',
             'name' => 'Pengawas',
             'email' => 'pengawas@example.com',
@@ -35,7 +38,7 @@ class UserSeeder extends Seeder
             'phone_number' => '081234567893',
         ]);
         User::create([
-            'member_code' => 'KSP001',
+            'user_code' => 'KSP001',
             'nik' => '1234567890123456',
             'name' => 'Ketua',
             'email' => 'ketua@example.com',
@@ -45,7 +48,7 @@ class UserSeeder extends Seeder
             'phone_number' => '081234566290',
         ]);
         User::create([
-            'member_code' => 'KSP002',
+            'user_code' => 'KSP002',
             'nik' => '6543210987654321',
             'name' => 'Anggota',
             'email' => 'contactsims11@gmail.com',
@@ -56,7 +59,7 @@ class UserSeeder extends Seeder
             'joined_date' => now()->subDays(30),
         ]);
         User::create([
-            'member_code' => 'KSP003',
+            'user_code' => 'KSP003',
             'nik' => '1122334455667788',
             'name' => 'Sekretaris',
             'email' => 'sekretaris@example.com',
@@ -66,7 +69,7 @@ class UserSeeder extends Seeder
             'phone_number' => '081234562490',
         ]);
         User::create([
-            'member_code' => 'KSP004',
+            'user_code' => 'KSP004',
             'nik' => '8877665544332211',
             'name' => 'Bendahara',
             'email' => 'bendahara@example.com',
@@ -76,7 +79,7 @@ class UserSeeder extends Seeder
             'phone_number' => '0812387567890',
         ]);
         User::create([
-            'member_code' => 'KSP005',
+            'user_code' => 'KSP005',
             'nik' => '1234432112344321',
             'name' => 'Seksi Murabahah',
             'email' => 'seksimurabah@example.com',
@@ -86,7 +89,7 @@ class UserSeeder extends Seeder
             'phone_number' => '081232327890',
         ]);
         User::create([
-            'member_code' => 'KSP006',
+            'user_code' => 'KSP006',
             'nik' => '4321123443211234',
             'name' => 'Seksi AMDK',
             'email' => 'seksiamdk@example.com',
@@ -96,7 +99,7 @@ class UserSeeder extends Seeder
             'phone_number' => '081238667890',
         ]);
         User::create([
-            'member_code' => 'KSP007',
+            'user_code' => 'KSP007',
             'nik' => '5678123456781234',
             'name' => 'Penanggung Jawab Anggota',
             'email' => 'pjanggota@example.com',

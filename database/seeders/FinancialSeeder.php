@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Enums\FinancialCategoryEnum;
 use App\Enums\FinancialTypeEnum;
 use App\Models\Financial;
-use App\Models\User;
+use App\Models\Member;
 use Illuminate\Database\Seeder;
 
 class FinancialSeeder extends Seeder
@@ -15,16 +15,16 @@ class FinancialSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::all();
+        $members = Member::all();
         $types = FinancialTypeEnum::cases();
 
-        foreach ($users as $user) {
+        foreach ($members as $member) {
             foreach ($types as $type) {
                 Financial::create([
-                    'user_id' => $user->id,
+                    'member_id' => $member->id,
                     'financial_type' => $type->value,
-                    'category' => fake()->randomElement(FinancialCategoryEnum::cases())->value,
                     'amount' => fake()->numberBetween(500000, 20000000),
+                    'category' => fake()->randomElement(FinancialCategoryEnum::cases())->value,
                 ]);
             }
         }

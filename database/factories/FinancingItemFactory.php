@@ -6,6 +6,7 @@ use App\Enums\ConditionEnum;
 use App\Models\FinancingItem;
 use App\Models\FinancingProduct;
 use App\Models\Supplier;
+use Database\Factories\FinancingFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FinancingItemFactory extends Factory
@@ -23,6 +24,7 @@ class FinancingItemFactory extends Factory
             'product_id' => FinancingProduct::factory(),
             'purchase_receipt' => $this->faker->optional()->filePath(),
             'supplier_id' => Supplier::factory(),
+            'financing_id' => FinancingFactory::factory(),
         ];
     }
 }

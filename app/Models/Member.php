@@ -12,10 +12,13 @@ use App\Models\MemberDoc;
 use App\Models\MemberJob;
 use App\Models\SavingAccount;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Member extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'gender',

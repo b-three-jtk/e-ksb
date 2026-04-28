@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('saving_products', function (Blueprint $table) {
+        Schema::create('global_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->integer('due_date');
-            $table->decimal('nominal', 15, 2);
+            $table->string('key')->unique();
+            $table->text('value')->nullable();
+            $table->date('effective_date')->nullable();
+            $table->text('description')->nullable();
+            $table->foreignUuid('updated_by')->constrained('users')->onDelete('restrict');
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('saving_products');
+        Schema::dropIfExists('global_settings');
     }
 };

@@ -22,7 +22,6 @@ class InstallmentPaymentTransaction extends Model
         'payment_date',
         'schedule_id',
         'updated_by',
-        'point_id',
         'installment_payment_receipt'
     ];
 

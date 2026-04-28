@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stokist_products', function (Blueprint $table) {
-            $table->foreignUuid('stokist_id')->constrained('users')->onDelete('cascade');
+        Schema::create('amdk_stock_incoming_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('amdk_stock_incoming_id')->constrained('amdk_stock_incomings')->onDelete('cascade');
             $table->foreignId('amdk_product_id')->constrained('amdk_products')->onDelete('cascade');
-            $table->decimal('non_member_price', 10, 2);
-            $table->integer('stock')->default(0);
+            $table->integer('quantity');
+            $table->string('unit_measure');
             $table->timestamps();
 
-            $table->primary(['stokist_id', 'amdk_product_id']);
+            $table->unique(['amdk_stock_incoming_id', 'amdk_product_id']);
+            $table->index('amdk_product_id');
         });
     }
 
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stokist_products');
+        Schema::dropIfExists('amdk_stock_incoming_items');
     }
 };
