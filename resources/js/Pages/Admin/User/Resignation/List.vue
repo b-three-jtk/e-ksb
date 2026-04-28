@@ -18,7 +18,7 @@ const props = defineProps({
 
 const columns = [
     { key: 'no', label: 'No' },
-    { key: 'member_code', label: 'Nomor Anggota' },
+    { key: 'user_code', label: 'Nomor Anggota' },
     { key: 'name', label: 'Nama' },
     { key: 'email', label: 'Email' },
     { key: 'aksi', label: 'Aksi' },
@@ -125,8 +125,8 @@ const breadcrumbItems = [
                     {{ (members.current_page - 1) * members.per_page + index + 1 }}
                 </template>
 
-                <template #cell-member_code="{ row }">
-                    {{ row.member_code }}
+                <template #cell-user_code="{ row }">
+                    {{ row.user_code }}
                 </template>
 
                 <template #cell-name="{ row }">

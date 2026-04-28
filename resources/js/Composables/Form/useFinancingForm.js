@@ -19,7 +19,7 @@ export function useFinancingForm() {
 
     const form = useForm({
         member: {
-            member_code: '',
+            user_code: '',
             name: '',
             nik: '',
             gender: '',
@@ -90,7 +90,7 @@ export function useFinancingForm() {
         selectedMember.value = member
         searchQuery.value = member.name
 
-        form.member.member_code = member.member_code
+        form.member.user_code = member.user_code
         form.member.name = member.name
         form.member.nik = member.nik
         form.member.email = member.email
@@ -115,7 +115,7 @@ export function useFinancingForm() {
     const filteredMembers = computed(() => {
         return memberResults.value.filter(m =>
             m.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            m.member_code.includes(searchQuery.value)
+            m.user_code.includes(searchQuery.value)
         )
     })
 
@@ -123,7 +123,7 @@ export function useFinancingForm() {
         selectedMember.value = null
         searchQuery.value = ''
         form.member = {
-            member_code: '',
+            user_code: '',
             name: '',
             nik: '',
             email: '',

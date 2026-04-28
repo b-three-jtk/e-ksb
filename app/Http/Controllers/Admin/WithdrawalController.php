@@ -35,7 +35,7 @@ class WithdrawalController extends Controller
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'member_code' => $user->member_code,
+                    'user_code' => $user->user_code,
                     'savingAccounts' => $user->savingAccounts->map(function ($acc) {
                         return [
                             'id' => $acc->id,
@@ -169,7 +169,7 @@ class WithdrawalController extends Controller
                 'tanggal' => $transaction->transaction_date,
                 'pengurus' => $namaAdmin,
                 'nama_anggota' => $member->name,
-                'no_anggota' => $member->member_code,
+                'no_anggota' => $member->user_code,
                 'jenis' => $savingAccount->type,
                 'metode' => $validated['method'],
                 'nominal' => $validated['amount'],

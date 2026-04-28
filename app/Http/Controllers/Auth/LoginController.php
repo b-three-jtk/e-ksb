@@ -18,17 +18,17 @@ class LoginController extends Controller
         return Inertia::render('Auth/Login');
     }
 
-    public function store(Request $request)
+    public function login(Request $request)
     {
         $credentials = $request->validate([
-            'member_code' => ['required'],
+            'user_code' => ['required'],
             'password' => ['required'],
         ]);
 
-        $user = User::with('role', 'member')->where('member_code', $credentials['member_code'])->first();
-        if (! $user) {
+        $user = User::with('role')->where('user_code', $credentials['user_code'])->first();
+        if (!$user) {
             throw ValidationException::withMessages([
-                'member_code' => 'Nomor anggota atau password tidak sesuai.',
+                'user_code' => 'Nomor anggota atau password tidak sesuai.',
             ]);
         }
 
@@ -38,13 +38,13 @@ class LoginController extends Controller
             ];
 
             throw ValidationException::withMessages([
-                'member_code' => $messages[$user->status] ?? 'Akun Anda belum aktif.',
+                'user_code' => $messages[$user->status] ?? 'Akun Anda belum aktif.',
             ]);
         }
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
-                'member_code' => 'Nomor anggota atau password tidak sesuai.',
+                'user_code' => 'Nomor anggota atau password tidak sesuai.',
             ]);
         }
 
@@ -58,7 +58,7 @@ class LoginController extends Controller
         return redirect()->intended('/user/dashboard');
     }
 
-    public function destroy(Request $request)
+    public function logout(Request $request)
     {
         Auth::guard('web')->logout();
 

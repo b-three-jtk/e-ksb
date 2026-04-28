@@ -27,7 +27,7 @@ const memberCredentials = ref(null)
 const isSekretaris = computed(() => page.props.auth?.user?.role?.name === 'Sekretaris')
 
 const showNewMemberCredentials = async () => {
-    if (!memberCredentials.value?.member_code || !memberCredentials.value?.initial_password) {
+    if (!memberCredentials.value?.user_code || !memberCredentials.value?.initial_password) {
         return
     }
 
@@ -36,7 +36,7 @@ const showNewMemberCredentials = async () => {
         html: `
             <div style="text-align:left;font-size:14px;line-height:1.8">
                 <div><strong>Nama:</strong> ${memberCredentials.value.name ?? '-'}</div>
-                <div><strong>Nomor Anggota:</strong> ${memberCredentials.value.member_code}</div>
+                <div><strong>Nomor Anggota:</strong> ${memberCredentials.value.user_code}</div>
                 <div><strong>Password Awal:</strong> ${memberCredentials.value.initial_password}</div>
             </div>
         `,

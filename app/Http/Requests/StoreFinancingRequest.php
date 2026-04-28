@@ -25,7 +25,7 @@ class StoreFinancingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'member.member_code' => 'required|exists:users,member_code',
+            'member.user_code' => 'required|exists:users,user_code',
             'member.name' => 'required|string|max:255',
             'member.nik' => 'required|string|digits:16',
             'member.birth_place' => 'nullable|string|max:255',

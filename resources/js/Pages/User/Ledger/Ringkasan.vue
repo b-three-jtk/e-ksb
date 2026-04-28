@@ -18,7 +18,6 @@ const props = withDefaults(defineProps<{
         tabungan_anggota: 0,
         tabungan_berjangka: 0,
         tabungan_ibadah: 0,
-        tabungan_sosial: 0,
     }),
     savingMeta: () => ({
         tabungan_berjangka: {
@@ -37,7 +36,6 @@ const labelMap: Record<string, string> = {
     tabungan_anggota: 'Tabungan Anggota',
     tabungan_berjangka: 'Tabungan Berjangka',
     tabungan_ibadah: 'Tabungan Ibadah',
-    tabungan_sosial: 'Tabungan Sosial',
 }
 
 const noteMap: Record<string, string> = {
@@ -47,7 +45,6 @@ const noteMap: Record<string, string> = {
     tabungan_anggota: 'Dapat ditarik kapan saja',
     tabungan_berjangka: 'Tidak dapat ditarik sebelum jatuh tempo',
     tabungan_ibadah: 'Bisa diambil saat target tabungan tercapai',
-    tabungan_sosial: 'Dapat ditarik kapan saja',
 }
 const accentBorderClass = 'border-emerald-300 dark:border-emerald-600'
 
@@ -97,7 +94,6 @@ const orderedSavingKeys = computed(() => {
         'tabungan_anggota',
         'tabungan_berjangka',
         'tabungan_ibadah',
-        'tabungan_sosial',
         'simpanan_sukarela',
     ]
 

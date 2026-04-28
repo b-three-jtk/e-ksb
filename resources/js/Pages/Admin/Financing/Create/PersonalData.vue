@@ -55,7 +55,7 @@ const heirInput = ref({
                 <div v-else class="flex items-center justify-between bg-light-bg border border-green-200 rounded-lg p-4">
                     <div>
                         <p class="text-green-700 font-medium">{{ form.member.name }}</p>
-                        <p class="text-sm text-green-600">{{ form.member.member_code }}</p>
+                        <p class="text-sm text-green-600">{{ form.member.user_code }}</p>
                     </div>
                     <Button
                         variant="secondary"
@@ -72,7 +72,7 @@ const heirInput = ref({
                     <div v-for="member in filteredMembers" :key="member.id" @click="$emit('selectMember', member)"
                         class="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b last:border-0">
                         <div class="font-medium text-dark-text">{{ member.name }}</div>
-                        <div class="text-sm text-gray-500">{{ member.member_code }} • {{ member.email }}</div>
+                        <div class="text-sm text-gray-500">{{ member.user_code }} • {{ member.email }}</div>
                     </div>
                 </div>
 
@@ -88,10 +88,10 @@ const heirInput = ref({
                 label="Nomor Anggota"
                 placeholder="Masukkan nomor anggota"
                 max="10"
-                :model-value="form.member.member_code"
+                :model-value="form.member.user_code"
                 :isDisabled="true"
                 required
-                :errors="errors.member_code"
+                :errors="errors.user_code"
             />
             <BaseInputAdmin
                 label="Nama Lengkap"

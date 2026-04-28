@@ -11,16 +11,12 @@ use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMemberRequest;
-use App\Mail\ApprovalNotificationMail;
-use App\Mail\RejectionNotificationMail;
 use App\Models\Financing;
 use App\Models\SavingAccount;
 use App\Models\User;
 use App\Services\Admin\RegisterMemberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use RuntimeException;
 
@@ -79,16 +75,16 @@ class UserController extends Controller
             : 'joined_date';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $query = User::with('savingAccounts.transactions')
+        $query = User::with('member.savingAccounts')
             ->whereHas(
                 'role',
                 fn($q) =>
                 $q->where('role_name', UserRoleEnum::ANGGOTA->value)
             )
             ->whereNotNull('joined_date')
-            ->whereNotNull('member_code');
+            ->whereNotNull('user_code');
 
-        $memberBaseQuery = User::whereHas(
+        $memberBaseQuery = User::with('member.savingAccounts')->whereHas(
             'role',
             fn($q) =>
             $q->where('role_name', UserRoleEnum::ANGGOTA->value)
@@ -112,7 +108,7 @@ class UserController extends Controller
             $query->where(
                 fn($q) =>
                 $q->where('name', 'ILIKE', "%{$search}%")
-                    ->orWhere('member_code', 'ILIKE', "%{$search}%")
+                    ->orWhere('user_code', 'ILIKE', "%{$search}%")
                     ->orWhere('phone_number', 'ILIKE', "%{$search}%")
             );
         }
@@ -127,7 +123,7 @@ class UserController extends Controller
             ->withQueryString()
             ->through(fn($user) => [
                 'id' => $user->id,
-                'no_anggota' => $user->member_code,
+                'no_anggota' => $user->user_code,
                 'name' => $user->name,
                 'joined_at' => $user->joined_date
                     ? \Carbon\Carbon::parse($user->joined_date)->format('d/m/Y')
@@ -135,7 +131,7 @@ class UserController extends Controller
                 'phone' => $user->phone_number,
                 'status' => $user->status,
                 'total_simpanan' => 'Rp ' . number_format(
-                    DB::table('get_saving_account_balance')->where('user_id', $user->id)->sum('total_balance') ?? 0, 0, ',', '.'),
+                    DB::table('get_saving_account_balance')->where('member_id', $user->member->id)->sum('total_balance') ?? 0, 0, ',', '.'),
                 'avatar' => $user->profile_picture
                     ? asset('storage/' . $user->profile_picture)
                     : null,
@@ -174,18 +170,18 @@ class UserController extends Controller
     public function show(string $id)
     {
         $user = User::with([
-            'userDocs',
+            'member.memberDocs',
             'role',
-            'savingAccounts.transactions',
-            'heirs',
-            'financings.installment.paymentSchedules',
+            'member.savingAccounts.transactions',
+            'member.heirs',
+            'member.financings.installment.paymentSchedules',
         ])->findOrFail($id);
 
         $user->profile_picture = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-        $ktpDoc = $user->userDocs->firstWhere('name', 'ktp');
-        $kkDoc = $user->userDocs->firstWhere('name', 'kk');
+        $ktpDoc = $user->member->memberDocs->firstWhere('name', 'ktp');
+        $kkDoc = $user->member->memberDocs->firstWhere('name', 'kk');
 
-        $user->financings->each(function ($financing) {
+        $user->member->financings->each(function ($financing) {
             $financing->installment_payment_paid_count = $financing->installment->paymentSchedules
                 ->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)
                 ->count();
@@ -232,7 +228,7 @@ class UserController extends Controller
         return Inertia::render('Admin/User/Verification/Show', [
             'member' => [
                 'id' => $user->id,
-                'member_code' => $user->member_code,
+                'user_code' => $user->user_code,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'email' => $user->email,
@@ -252,108 +248,6 @@ class UserController extends Controller
         return redirect()->back();
     }
 
-    public function prospectiveMembers(Request $request)
-    {
-        $perPage = $request->input('per_page', 10);
-
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortDir = $request->input('sort_dir', 'desc');
-
-        $allowedSorts = ['name', 'created_at'];
-
-        if (!in_array($sortBy, $allowedSorts)) {
-            $sortBy = 'created_at';
-        }
-
-        $members = User::query()
-            ->where('status', UserStatusEnum::RESIGNED_REQUESTED->value)
-            ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('nik', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                });
-            })
-            ->orderBy($sortBy, $sortDir)
-            ->paginate($perPage)
-            ->withQueryString()
-            ->through(fn($user) => [
-                'id' => $user->id,
-                'member_code' => $user->member_code,
-                'name' => $user->name,
-                'nik' => $user->nik,
-                'email' => $user->email,
-            ]);
-
-        return Inertia::render('Admin/User/Verification/List', [
-            'prospectiveMembers' => $members,
-            'filters' => [
-                'search' => $request->search,
-                'per_page' => $perPage,
-                'sort_by' => $sortBy,
-                'sort_dir' => $sortDir,
-            ],
-            'title' => 'Verifikasi Calon Anggota',
-        ]);
-    }
-
-    public function submitApproval(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'decision' => 'required|in:approved,rejected',
-            'note' => 'nullable|string',
-        ]);
-
-        $emailSent = true;
-
-        if ($validated['decision'] === 'approved') {
-            // Update status user menjadi Aktif
-            $user->update(['status' => 'Aktif']);
-
-            try {
-                Mail::to($user->email)->send(new ApprovalNotificationMail($user));
-            } catch (\Throwable $e) {
-                $emailSent = false;
-                Log::error('Failed sending approval notification email', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-
-            $redirect = redirect()->route('admin.users.prospective')
-                ->with('success', 'Status berhasil diperbarui menjadi Aktif untuk ' . $user->name . '.');
-
-            if (!$emailSent) {
-                $redirect->with('warning', 'Status berhasil diperbarui, tetapi email notifikasi tidak dapat dikirim. Silakan coba lagi nanti.');
-            }
-
-            return $redirect;
-        } else {
-            $user->update(['status' => 'Ditolak dengan alasan']);
-
-            try {
-                Mail::to($user->email)->send(new RejectionNotificationMail($user, $validated['note'] ?? ''));
-            } catch (\Throwable $e) {
-                $emailSent = false;
-                Log::error('Failed sending rejection notification email', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-
-            $redirect = redirect()->route('admin.users.prospective')
-                ->with('success', 'Status berhasil diperbarui menjadi Ditolak untuk ' . $user->name . '.');
-
-            if (!$emailSent) {
-                $redirect->with('warning', 'Status berhasil diperbarui, tetapi email pemberitahuan tidak dapat dikirim. Silakan coba lagi nanti.');
-            }
-
-            return $redirect;
-        }
-    }
-
     public function searchMembers(Request $request)
     {
         $query = $request->get('q');
@@ -364,7 +258,7 @@ class UserController extends Controller
             ->whereNotNull('joined_date')
             ->where(function ($q) use ($query) {
                 $q->where('name', 'ILIKE', "%{$query}%")
-                    ->orWhere('member_code', 'ILIKE', "%{$query}%");
+                    ->orWhere('user_code', 'ILIKE', "%{$query}%");
             })
             ->where('status', UserStatusEnum::ACTIVE->value)
             ->limit(5)
@@ -374,7 +268,7 @@ class UserController extends Controller
 
                 return [
                     'id' => $member->id,
-                    'member_code' => $member->member_code,
+                    'user_code' => $member->user_code,
                     'name' => $member->name,
                     'email' => $member->email,
                     'nik' => $member->nik,

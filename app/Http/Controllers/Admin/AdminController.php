@@ -104,7 +104,7 @@ class AdminController extends Controller
 
             User::create([
                 ...$data,
-                'member_code' => 'KSP' . $data['role_id'] . (User::count() + 1),
+                'user_code' => 'KSP' . $data['role_id'] . (User::count() + 1),
                 'password' => bcrypt('Password123'),
                 'status' => UserStatusEnum::ACTIVE->value,
             ]);

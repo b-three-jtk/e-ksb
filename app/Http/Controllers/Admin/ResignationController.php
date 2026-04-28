@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\FinancingReqStatusEnum;
+use App\Enums\MemberStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
@@ -25,10 +26,12 @@ class ResignationController extends Controller
         $query = User::whereHas('role', function ($q) {
                 $q->where('role_name', UserRoleEnum::ANGGOTA->value);
             })
-            ->where('status', UserStatusEnum::RESIGNED_REQUESTED)
+            ->whereHas('member', function ($q) {
+                $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
+            })
             ->when($search, function ($q) use ($search) {
                 return $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('member_code', 'like', "%{$search}%")
+                    ->orWhere('user_code', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
             });
 

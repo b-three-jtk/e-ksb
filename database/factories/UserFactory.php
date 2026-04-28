@@ -3,9 +3,10 @@
 namespace Database\Factories;
 
 use App\Enums\UserStatusEnum;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -34,7 +35,7 @@ class UserFactory extends Factory
             'status' => fake()->randomElement(UserStatusEnum::cases())->value,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role_id' => fake()->numberBetween(1, 4),
+            'role_id' => Role::where('role_name', 'Anggota')->first()->id,
         ];
     }
 

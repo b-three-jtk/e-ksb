@@ -30,8 +30,8 @@ class FinancingController extends Controller
         $tab = $request->input('tab', 'all');
 
         return Financing::with([
-            'user' => function ($query) {
-                $query->select('id', 'name', 'member_code');
+            'member.user' => function ($query) {
+                $query->select('id', 'name', 'user_code');
             },
             'installment' => function ($query) {
                 $query->withCount([
@@ -40,15 +40,15 @@ class FinancingController extends Controller
                     }
                 ]);
             },
-            'financingProduct.product.productType' => function ($query) {
+            'financingItem.product.productType' => function ($query) {
                 $query->select('product_types.id', 'product_types.product_type_name');
             }
         ])
         ->when($search, function ($q) use ($search) {
-            $q->whereHas('user', function ($userQuery) use ($search) {
+            $q->whereHas('member.user', function ($userQuery) use ($search) {
                 $userQuery->where(function ($userSearchQuery) use ($search) {
                     $userSearchQuery->where('name', 'like', "%{$search}%")
-                        ->orWhere('member_code', 'like', "%{$search}%");
+                        ->orWhere('user_code', 'like', "%{$search}%");
                 });
             });
         })
@@ -92,11 +92,11 @@ class FinancingController extends Controller
                     'id' => $f->id,
                     'financing_transaction_code' => $f->financing_transaction_code,
                     'akad_date' => $f->akad_date,
-                    'user' => $f->user
-                        ? ($f->user?->member_code . ' - ' . $f->user?->name)
+                    'user' => $f->member->user
+                        ? ($f->member->user->user_code . ' - ' . $f->member->user->name)
                         : '-',
                     'tenor_left' => $f->installment ? $f->installment->payment_schedules_count : 0,
-                    'product_type' => $f->financingProduct?->product?->productType?->product_type_name,
+                    'product_type' => $f->financingItem?->product?->productType?->product_type_name,
                     'financing_status' => $f->financing_status,
                 ];
             });
@@ -170,7 +170,7 @@ class FinancingController extends Controller
             $verifier = auth()->user();
 
             // data pemohon
-            $user = User::with('heirs', 'financials', 'userDocs')->where('member_code', $validated['member']['member_code'])->first();
+            $user = User::with('heirs', 'financials', 'userDocs')->where('user_code', $validated['member']['user_code'])->first();
             $user->update([
                 'name' => $validated['member']['name'],
                 'nik' => $validated['member']['nik'],
@@ -255,8 +255,8 @@ class FinancingController extends Controller
         try {
             $validated = $request->validated();
 
-            // Cari user berdasarkan member_code
-            $user = User::where('member_code', $validated['member']['member_code'])->first();
+            // Cari user berdasarkan user_code
+            $user = User::where('user_code', $validated['member']['user_code'])->first();
 
             // Update user data
             $user->update([

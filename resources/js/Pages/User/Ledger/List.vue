@@ -58,7 +58,6 @@ const props = withDefaults(defineProps<{
         tabungan_anggota: 0,
         tabungan_berjangka: 0,
         tabungan_ibadah: 0,
-        tabungan_sosial: 0,
     }),
     savingMeta: () => ({
         tabungan_berjangka: {
@@ -94,7 +93,7 @@ const filters = ref({
 const months = computed(() => {
     const list: { key: string; label: string }[] = []
     const now = new Date()
-    
+
     for (let i = 0; i < 12; i++) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
         const year = date.getFullYear()
@@ -103,7 +102,7 @@ const months = computed(() => {
         const label = date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
         list.push({ key, label })
     }
-    
+
     return list
 })
 
@@ -150,15 +149,15 @@ const handleSearch = (value: string) => {
 
 const handleExport = () => {
     const params = new URLSearchParams()
-    
+
     if (filters.value.search) {
         params.append('search', filters.value.search)
     }
-    
+
     if (filters.value.month) {
         params.append('month', filters.value.month)
     }
-    
+
     window.location.href = `/user/ledger/export?${params.toString()}`
 }
 </script>

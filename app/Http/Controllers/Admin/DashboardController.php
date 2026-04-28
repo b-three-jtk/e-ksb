@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\MemberStatusEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Financing;
@@ -82,12 +83,12 @@ class DashboardController extends Controller
 
     private function getRecentTransactions()
     {
-        return SavingTransaction::with('savingAccount.user')
+        return SavingTransaction::with('savingAccount.member.user')
             ->latest()->take(5)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
                 'transaction_code' => $t->saving_transaction_code,
-                'user_name' => $t->savingAccount->user->name,
+                'user_name' => $t->savingAccount->member->user->name,
                 'amount' => $t->amount,
                 'type' => $t->type,
                 'created_at' => $t->created_at->toDateTimeString(),
@@ -96,10 +97,12 @@ class DashboardController extends Controller
 
     private function getPendingRegistrations()
     {
-        return User::where('status', UserStatusEnum::RESIGNED_REQUESTED->value)
+        return User::with(['member' => function ($query) {
+                $query->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
+            }])
             ->latest()->take(5)->get()
             ->map(fn($u) => [
-                'member_code' => $u->member_code,
+                'user_code' => $u->user_code,
                 'name' => $u->name,
                 'email' => $u->email,
                 'created_at' => $u->created_at,
@@ -108,15 +111,15 @@ class DashboardController extends Controller
 
     private function getRecentFinancings()
     {
-        return Financing::with('user', 'financingProduct.product')
+        return Financing::with('member.user', 'financingItem.product')
             ->latest()->take(5)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
                 'transaction_code' => $f->financing_transaction_code,
-                'product_name' => $f->financingProduct->product->product_name ?? '-',
-                'status' => $f->status,
-                'member_code' => $f->user->member_code,
-                'user_name' => $f->user->name,
+                'product_name' => $f->financingItem->product->product_name ?? '-',
+                'status' => $f->financing_status,
+                'user_code' => $f->member->user->user_code,
+                'user_name' => $f->member->user->name,
                 'created_at' => $f->created_at,
             ]);
     }

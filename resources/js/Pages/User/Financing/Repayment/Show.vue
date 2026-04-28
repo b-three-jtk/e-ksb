@@ -96,7 +96,7 @@ const submitForm = () => {
                 <div class="card-layout mx-8 mt-8">
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                         <li>
-                            <Info label="Nomor Anggota KSPPS" :value="props.data.financing.user.member_code" />
+                            <Info label="Nomor Anggota KSPPS" :value="props.data.financing.user.user_code" />
                         </li>
                         <li>
                             <Info label="Nama Lengkap" :value="props.data.financing.user.name" />

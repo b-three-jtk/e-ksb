@@ -31,7 +31,7 @@
 
                         <p>
                             <strong>Detail Akun Anda:</strong><br>
-                            Nomor Anggota: {{ $user->member_code }}
+                            Nomor Anggota: {{ $user->user_code }}
                         </p>
 
                         <p>

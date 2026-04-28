@@ -51,7 +51,7 @@ class LedgerController extends Controller
                 'metode' => $transaction->method ?? 'N/A',
                 'petugas' => $transaction->updatedBy?->name ?? 'System',
                 'nama_anggota' => $transaction->savingAccount?->user?->name ?? '-',
-                'no_anggota' => $transaction->savingAccount?->user?->member_code ?? '-',
+                'no_anggota' => $transaction->savingAccount?->user?->user_code ?? '-',
                 'debit' => $isDeposit ? $amount : 0,
                 'kredit' => !$isDeposit ? $amount : 0,
                 'saldo' => $saldoSesudah,
@@ -209,7 +209,7 @@ class LedgerController extends Controller
         $member = auth()->user();
         $memberInfo = [
             'nama' => $member->name,
-            'no_anggota' => $member->member_code,
+            'no_anggota' => $member->user_code,
             'status' => $member->status,
             'tanggal_bergabung' => optional($member->created_at)->format('d F Y'),
         ];
@@ -245,7 +245,7 @@ class LedgerController extends Controller
         $rows = $this->transformTransactions($transactions, false);
         $member = auth()->user();
 
-        $filename = 'ledger_' . $member->member_code . '_' . now()->format('Ymd_His') . '.xls';
+        $filename = 'ledger_' . $member->user_code . '_' . now()->format('Ymd_His') . '.xls';
 
         $headers = [
             'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
@@ -274,7 +274,7 @@ class LedgerController extends Controller
             echo '<table>';
             echo '<tr><th colspan="6" style="background:#d9f99d;color:#065f46;font-size:16px;">Buku Besar Personal</th></tr>';
             echo '<tr><td colspan="6"><strong>Nama Anggota:</strong> ' . htmlspecialchars((string) $member->name) . '</td></tr>';
-            echo '<tr><td colspan="6"><strong>No Anggota:</strong> ' . htmlspecialchars((string) $member->member_code) . '</td></tr>';
+            echo '<tr><td colspan="6"><strong>No Anggota:</strong> ' . htmlspecialchars((string) $member->user_code) . '</td></tr>';
             echo '<tr><td colspan="6"><strong>Tanggal Export:</strong> ' . now()->format('d/m/Y H:i') . '</td></tr>';
             echo '<tr><td colspan="6"></td></tr>';
 

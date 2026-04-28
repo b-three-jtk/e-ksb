@@ -97,14 +97,6 @@ const products = {
             icon: 'ibadah',
             link: '#'
         },
-        {
-            title: 'Tabungan Sosial',
-            desc: 'Dana kebajikan anggota untuk pembiayaan Qardhul Hasan',
-            iconBg: '#FBEAF0',
-            iconColor: '#993556',
-            icon: 'sosial',
-            link: '#'
-        },
     ],
     pembiayaan: [
         {
@@ -402,16 +394,6 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
                                 <path d="M16 4C16 4 8 9 8 17a8 8 0 0 0 16 0c0-8-8-13-8-13z" :stroke="p.iconColor"
                                     stroke-width="1.5" stroke-linejoin="round" />
                                 <path d="M12 17h8M16 13v8" :stroke="p.iconColor" stroke-width="1.5"
-                                    stroke-linecap="round" />
-                            </svg>
-                            <!-- Tabungan Sosial -->
-                            <svg v-else-if="p.icon === 'sosial'" width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                <path d="M16 6a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" :stroke="p.iconColor" stroke-width="1.5" />
-                                <path d="M8 26c0-4.4 3.6-8 8-8s8 3.6 8 8" :stroke="p.iconColor" stroke-width="1.5"
-                                    stroke-linecap="round" />
-                                <path d="M22 14a4 4 0 1 0 0-8" :stroke="p.iconColor" stroke-width="1.5"
-                                    stroke-linecap="round" />
-                                <path d="M26 26c0-3.3-1.8-6.2-4.5-7.7" :stroke="p.iconColor" stroke-width="1.5"
                                     stroke-linecap="round" />
                             </svg>
                             <!-- AMDK -->

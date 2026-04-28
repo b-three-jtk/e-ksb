@@ -6,7 +6,7 @@ import Logo from '@/Components/Logo.vue'
 import { toast } from 'vue3-toastify'
 
 const form = useForm({
-  member_code: '',
+  user_code: '',
   password: '',
 })
 
@@ -41,11 +41,11 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="space-y-8">
                 <BaseInput
-                  v-model="form.member_code"
+                  v-model="form.user_code"
                   label="Nomor Anggota"
                   type="text"
                   required
-                  :error="form.errors.member_code"
+                  :error="form.errors.user_code"
                 />
 
                 <div class="space-y-4">

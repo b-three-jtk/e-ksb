@@ -34,7 +34,6 @@ const tabGroups = [
             { key: 'tabungan_anggota',   label: 'Anggota' },
             { key: 'tabungan_berjangka', label: 'Berjangka' },
             { key: 'tabungan_ibadah',    label: 'Ibadah' },
-            { key: 'tabungan_sosial',    label: 'Sosial' },
         ],
     },
 ]

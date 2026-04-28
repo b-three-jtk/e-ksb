@@ -23,7 +23,7 @@ class UserProfileController extends Controller
         return Inertia::render('User/Profile/Show', [
             'user' => [
                 'id' => $user->id,
-                'member_code' => $user->member_code,
+                'user_code' => $user->user_code,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'birth_date' => $user->birth_date,
@@ -47,7 +47,7 @@ class UserProfileController extends Controller
         return Inertia::render('User/Profile/Edit', [
             'user' => [
                 'id' => $user->id,
-                'member_code' => $user->member_code,
+                'user_code' => $user->user_code,
                 'name' => $user->name,
                 'nik' => $user->nik,
                 'birth_date' => $user->birth_date,

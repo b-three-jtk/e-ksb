@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserStatusEnum;
+use App\Models\Member;
 use App\Models\Role;
 use App\Models\User;
-use App\Enums\UserStatusEnum;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -14,8 +15,8 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->count(100)->create();
-        
+        Member::factory()->count(100)->create();
+
         // SIMULATION FOR DEFAULT USERS
         User::create([
             'user_code' => 'KSP0231',
@@ -47,7 +48,7 @@ class UserSeeder extends Seeder
             'role_id' => Role::where('role_name', 'Ketua')->first()->id,
             'phone_number' => '081234566290',
         ]);
-        User::create([
+        $anggota = User::create([
             'user_code' => 'KSP002',
             'nik' => '6543210987654321',
             'name' => 'Anggota',
@@ -57,6 +58,9 @@ class UserSeeder extends Seeder
             'role_id' => Role::where('role_name', 'Anggota')->first()->id,
             'phone_number' => '081234568590',
             'joined_date' => now()->subDays(30),
+        ]);
+        Member::factory()->create([
+            'user_id' => $anggota->id,
         ]);
         User::create([
             'user_code' => 'KSP003',

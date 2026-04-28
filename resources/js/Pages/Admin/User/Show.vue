@@ -145,7 +145,7 @@ const breadcrumbItems = [
                                 <span :class="getStatusClass()">{{ user.status }}</span>
                             </div>
                             <p class="text-gray-500">
-                                {{ user.role.name }} - {{ user.member_code }}
+                                {{ user.role.name }} - {{ user.user_code }}
                             </p>
                         </div>
                     </div>
@@ -168,35 +168,35 @@ const breadcrumbItems = [
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jenis Kelamin</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.gender ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.gender ?? '-'
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Lahir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.birth_date ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.birth_date ?? '-'
                                         }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Pendidikan Terakhir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.last_education ??
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.last_education ??
                                         '-'
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Status Pernikahan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.marital_status ??
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.marital_status ??
                                         '-'
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pasangan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.spouse_name ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.spouse_name ?? '-'
                                         }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jumlah Tanggungan
                                         Keluarga</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.dependents ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.dependents ?? '-'
                                         }}</span>
                                 </li>
                             </ul>
@@ -237,12 +237,12 @@ const breadcrumbItems = [
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Sesuai KTP</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.address ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.residential_address ?? '-'
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Domisili</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.residential_address
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.domicile_address
                                         ?? '-'
                                     }}</span>
                                 </li>
@@ -254,18 +254,18 @@ const breadcrumbItems = [
                             <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Ahli Waris</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.heirs.name ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.heirs.name ?? '-'
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Hubungan Keluarga</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.heirs.relationship
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.heirs.relationship
                                         ?? '-'
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Kontak Ahli Waris</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.heirs.contact ??
+                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.heirs.contact ??
                                         '-'
                                     }}</span>
                                 </li>
@@ -275,10 +275,10 @@ const breadcrumbItems = [
                 </div>
                 <div class="card-layout flex flex-col gap-4">
                     <h1 class="card-title">Akun</h1>
-                    <div v-if="user.saving_accounts?.length && user.saving_accounts?.length"
+                    <div v-if="user.member.saving_accounts?.length && user.member.saving_accounts?.length"
                         class="flex flex-col gap-4">
                         <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
-                            <div v-for="account in user.saving_accounts" class="card-layout flex flex-col gap-12">
+                            <div v-for="account in user.member.saving_accounts" class="card-layout flex flex-col gap-12">
                                 <h1 class="card-title">{{ account.type }}</h1>
                                 <ul class="grid sm:grid-cols-2 grid-cols-1 gap-6">
                                     <li class="flex flex-col gap-2">
@@ -313,7 +313,7 @@ const breadcrumbItems = [
                             </div>
                         </div>
                         <div class="grid xl:grid-cols-2 grid-cols-1 gap-4">
-                            <div v-for="financing in user.financings" class="card-layout flex flex-col gap-12 px-0!">
+                            <div v-for="financing in user.member.financings" class="card-layout flex flex-col gap-12 px-0!">
                                 <div class="border-b-2 border-gray-200 dark:border-gray-700 pb-4 px-8">
                                     <h1 class="font-semibold text-dark-text dark:text-white/90">Pembiayaan Murabahah
                                     </h1>

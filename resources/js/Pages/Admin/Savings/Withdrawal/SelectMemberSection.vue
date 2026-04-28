@@ -36,7 +36,7 @@ const memberSuggestions = computed(() => {
   return memberList.value
     .filter((m) => {
       const name = normalizeSearchValue(m?.name)
-      const memberNumber = normalizeSearchValue(m?.member_code)
+      const memberNumber = normalizeSearchValue(m?.user_code)
 
       return name.includes(q) || memberNumber.includes(q)
     })
@@ -135,7 +135,7 @@ watch(
             </div>
             <div>
               <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ member.name }}</div>
-              <div class="text-xs text-gray-500">{{ member.member_code }}</div>
+              <div class="text-xs text-gray-500">{{ member.user_code }}</div>
             </div>
           </button>
         </div>
@@ -152,7 +152,7 @@ watch(
           </div>
           <div class="flex-1 min-w-0">
             <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
-            <div class="text-sm text-gray-500">{{ selectedMember.member_code }}</div>
+            <div class="text-sm text-gray-500">{{ selectedMember.user_code }}</div>
           </div>
           <button @click="resetSelection" type="button" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
             <Icon icon="mdi:close" width="20" />
