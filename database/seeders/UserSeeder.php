@@ -85,12 +85,22 @@ class UserSeeder extends Seeder
         User::create([
             'user_code' => 'KSP005',
             'nik' => '1234432112344321',
-            'name' => 'Seksi Murabahah',
-            'email' => 'seksimurabah@example.com',
+            'name' => 'Ketua Murabahah',
+            'email' => 'ketuamurabah@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
             'role_id' => Role::where('role_name', 'Ketua Murabahah')->first()->id,
             'phone_number' => '081232327890',
+        ]);
+        User::create([
+            'user_code' => 'KSP045',
+            'nik' => '1234432112344391',
+            'name' => 'Staf Murabahah',
+            'email' => 'seksimurabah@example.com',
+            'password' => bcrypt('password'),
+            'status' => UserStatusEnum::ACTIVE->value,
+            'role_id' => Role::where('role_name', 'Staf Murabahah')->first()->id,
+            'phone_number' => '081232827890',
         ]);
         User::create([
             'user_code' => 'KSP006',

@@ -10,7 +10,7 @@ import PersonalData from './Create/PersonalData.vue'
 import FinancialData from './Create/FinancialData.vue'
 import FinancingObjectData from './Create/FinancingObjectData.vue'
 import ProcurementData from './Create/ProcurementData.vue'
-import FinalizationData from './Create/Finalization.vue'
+import Finalization from './Create/Finalization.vue'
 import Stepper from './Create/Stepper.vue'
 import Documents from './Create/Documents.vue'
 
@@ -56,6 +56,7 @@ const {
     addHeir,
     removeHeir,
     resetMemberSelection,
+    resetSupplierSelection,
     submit,
 } = useFinancingForm(props.financing)
 
@@ -69,6 +70,10 @@ const prevStep = () => {
     activeStep.value--
 }
 
+const goToStep = (step) => {
+    activeStep.value = step
+}
+
 const isStep1Valid = computed(() => isMemberSelected.value)
 
 const isStep2Valid = computed(() =>
@@ -77,11 +82,12 @@ const isStep2Valid = computed(() =>
 
 const isStep3Valid = computed(() =>
     form.financing.name &&
-    form.financing.product_type_id &&
     form.financing.financing_status !== 'Menunggu Kelengkapan Dokumen'
 )
 
-const isStep4Valid = computed(() => isSupplierSelected.value)
+console.log('Financing status in form:', form.financing.financing_status) // Debugging line to check financing status
+
+const isStep4Valid = computed(() => form.supplier || form.financing.cost_price)
 
 </script>
 
@@ -104,9 +110,9 @@ const isStep4Valid = computed(() => isSupplierSelected.value)
                 <ProcurementData v-if="activeStep === 4" :form="form" :search-supplier-query="searchSupplierQuery"
                     :is-loading-search-supplier="isLoadingSearchSupplier" :is-supplier-selected="isSupplierSelected"
                     :filtered-suppliers="filteredSuppliers" @update:search-supplier-query="searchSupplierQuery = $event"
-                    @selectSupplier="selectSupplier" />
+                    @selectSupplier="selectSupplier" @resetSupplierSelection="resetSupplierSelection" />
 
-                <FinalizationData v-if="activeStep === 5" :form="form" />
+                <Finalization v-if="activeStep === 5" :form="form" />
 
                 <div :class="activeStep === 1 ? 'justify-end' : 'justify-between'" class="flex gap-4 p-4">
                     <Button v-if="activeStep > 1" @click="prevStep" variant="gray">
@@ -114,7 +120,7 @@ const isStep4Valid = computed(() => isSupplierSelected.value)
                     </Button>
                     <div class="flex items-center gap-4 justify-end">
                         <Button v-if="activeStep < totalSteps" variant="light"
-                            @click="submit('Menunggu Kelengkapan Dokumen')">
+                            @click="submit()">
                             Simpan Sementara
                         </Button>
 
@@ -126,8 +132,12 @@ const isStep4Valid = computed(() => isSupplierSelected.value)
                             Selanjutnya
                         </Button>
 
-                        <Button v-else-if="activeStep === 3 && form.financing.financing_status === 'Menunggu Kelengkapan Dokumen'" type="submit" @click="submit('Belum Ditinjau')" variant="secondary">
+                        <Button v-if="activeStep === 3 && form.financing.financing_status === 'Menunggu Kelengkapan Dokumen'" type="submit" @click="submit('PENDING_REVIEW')" variant="secondary">
                             Ajukan Permohonan
+                        </Button>
+
+                        <Button v-if="activeStep === 5 && form.financing.financing_status === 'Disetujui'" type="submit" @click="submit('FINAL')" variant="secondary">
+                            Finalisasi Pembiayaan
                         </Button>
                     </div>
                 </div>

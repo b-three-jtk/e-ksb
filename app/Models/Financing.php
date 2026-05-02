@@ -30,6 +30,17 @@ class Financing extends Model
         'updated_by',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->financing_transaction_code) {
+                $model->financing_transaction_code = 'PM' . strtoupper(uniqid());
+            }
+        });
+    }
+
     public function member()
     {
         return $this->belongsTo(Member::class);

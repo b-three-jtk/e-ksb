@@ -61,7 +61,6 @@ const submit = () => {
 
     const statusMapping = {
         'approved': 'Disetujui',
-        'approved_with_notes': 'Disetujui Dengan Catatan',
         'rejected': 'Ditolak',
     }
 

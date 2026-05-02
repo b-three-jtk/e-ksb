@@ -44,7 +44,7 @@ const toggleSort = (field: string) => {
                         :key="col.key"
                         @click="col.sortable && toggleSort(col.key)"
                         class="px-6 py-3 text-sm font-medium
-                               text-gray-700 dark:text-gray-200"
+                            text-gray-700 dark:text-gray-200"
                         :class="[
                             col.align === 'center' && 'text-center',
                             col.align === 'right' && 'text-right',
@@ -94,7 +94,7 @@ const toggleSort = (field: string) => {
                     </td>
                 </tr>
 
-                <template v-else>               
+                <template v-else>
                     <tr
                         v-for="(row, index) in data"
                         :key="row.id ?? index"

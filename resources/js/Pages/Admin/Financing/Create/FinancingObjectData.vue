@@ -30,7 +30,7 @@ const handleProductTypeChange = (value) => {
     } else {
         showNewProductTypeInput.value = false
         props.form.financing.product_type_id = value
-        console.log('Product type selected:', value, props.form.financing.product_type_id)  // ← Debug
+        console.log('Product type selected:', value, props.form.financing.product_type_id) 
     }
 }
 
@@ -74,13 +74,12 @@ const closeModal = () => {
             <div>
                 <BaseInputAdmin :model-value="form.financing.product_type_id" label="Kategori Produk" type="select"
                     :selectables="productTypeSelectables" @update:modelValue="handleProductTypeChange" />
-                <!-- <small class="text-gray-500">Selected: {{ form.financing.product_type_id }}</small> -->
             </div>
 
             <BaseInputAdmin v-model="form.financing.brand" label="Merek" placeholder="Masukkan merek produk" />
             <BaseInputAdmin v-model="form.financing.condition" label="Kondisi" type="select"
                 :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
-            <BaseInputAdmin v-model="form.financing.qty" label="Jumlah" type="number" min="1" />
+            <BaseInputAdmin v-model="form.financing.qty" label="Jumlah" type="number" />
             <BaseInputAdmin v-model="form.financing.request_description" label="Deskripsi" type="textarea" rows="4"
                 placeholder="Masukkan deskripsi produk" />
         </div>

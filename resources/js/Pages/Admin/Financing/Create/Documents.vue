@@ -1,6 +1,4 @@
 <script setup>
-import { computed } from 'vue'
-
 const props = defineProps({
     form: Object,
 })
@@ -14,21 +12,6 @@ const documentsList = [
     { key: 'akad_document', label: 'Dokumen Akad' },
     { key: 'collateral_proof', label: 'Bukti Jaminan' },
 ]
-
-const hasDocuments = computed(() => {
-    return documentsList.some(doc => props.form?.documents?.[doc.key])
-})
-
-const handleDownload = (url, label) => {
-    if (!url) return
-
-    const link = document.createElement('a')
-    link.href = url
-    link.download = label || 'document'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-}
 </script>
 
 <template>
@@ -40,7 +23,6 @@ const handleDownload = (url, label) => {
             <a
                 v-for="doc in documentsList"
                 v-show="props.form?.documents?.[doc.key]"
-                :key="doc.key"
                 :href="props.form?.documents?.[doc.key]"
                 target="_blank"
                 rel="noopener noreferrer"

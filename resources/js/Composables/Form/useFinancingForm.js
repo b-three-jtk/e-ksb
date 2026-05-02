@@ -50,14 +50,14 @@ export function useFinancingForm(initialData = null) {
             product_type_id: initialData?.financing?.product_type_id || null,
             brand: initialData?.financing?.brand || '',
             condition: initialData?.financing?.condition || '',
-            qty: initialData?.financing?.qty || 0,
+            qty: initialData?.financing?.qty || null,
             request_description: initialData?.financing?.request_description || '',
-            cost_price: initialData?.financing?.cost_price || 0,
-            margin_amount: initialData?.financing?.margin_amount || 0,
+            cost_price: initialData?.financing?.cost_price || null,
+            margin_amount: initialData?.financing?.margin_amount || null,
             is_wakalah: initialData?.financing?.is_wakalah || false,
             payment_method: initialData?.financing?.payment_method || '',
             akad_date: initialData?.financing?.akad_date || '',
-            down_payment: initialData?.financing?.down_payment || 0,
+            down_payment: initialData?.financing?.down_payment || null,
             notes: initialData?.financing?.notes || '',
             financing_status: initialData?.financing?.financing_status || 'Menunggu Kelengkapan Dokumen',
         },
@@ -84,6 +84,9 @@ export function useFinancingForm(initialData = null) {
             website_url: initialData?.supplier?.website_url || '',
         },
         // Local state untuk temporary input
+        tenor: null,
+        monthly_installment: null,
+        monthly_income: null,
         income_type: '',
         income_amount: '',
         expense_type: '',
@@ -93,6 +96,7 @@ export function useFinancingForm(initialData = null) {
         bank_book_file: null,
         procurement_proof_file: null,
         akad_document_file: null,
+        akad_wakalah_file: null
     })
 
 
@@ -176,11 +180,11 @@ export function useFinancingForm(initialData = null) {
             domicile_address: '',
             residential_address: '',
             marital_status: '',
-            dependents: 0,
+            dependents: null,
             job_title: '',
             company_or_business_name: '',
             business_field: '',
-            tenure_year: 0,
+            tenure_year: null,
             workplace_address: '',
             workplace_contact: '',
             heirs: [],
@@ -192,21 +196,21 @@ export function useFinancingForm(initialData = null) {
             product_type_id: null,
             brand: '',
             condition: '',
-            qty: 0,
+            qty: null,
             request_description: '',
-            cost_price: 0,
-            margin_amount: 0,
+            cost_price: null,
+            margin_amount: null,
             is_wakalah: false,
             payment_method: '',
             akad_date: '',
-            down_payment: 0,
+            down_payment: null,
             notes: '',
             financing_status: ''
         }
         form.collateral = {
             collateral_type: '',
             owner_name: '',
-            estimated_market_value: 0,
+            estimated_market_value: null,
             collateral_location: '',
         }
         form.supplier = {
@@ -230,8 +234,7 @@ export function useFinancingForm(initialData = null) {
             const response = await axios.get('/admin/suppliers/search', {
                 params: { q: query }
             })
-            // Ensure we're setting an array
-            supplierResults.value = Array.isArray(response.data) ? response.data : response.data?.data || []
+            supplierResults.value = response.data.suppliers
         } catch (error) {
             console.error('Error searching suppliers:', error)
             supplierResults.value = []
@@ -257,6 +260,18 @@ export function useFinancingForm(initialData = null) {
     const filteredSuppliers = computed(() => {
         return Array.isArray(supplierResults.value) ? supplierResults.value : []
     })
+
+    const resetSupplierSelection = () => {
+        selectedSupplier.value = null
+        searchSupplierQuery.value = ''
+        form.supplier = {
+            supplier_name: '',
+            contact: '',
+            address: '',
+            website_url: '',
+        }
+        isSupplierSelected.value = false
+    }
 
     // Income & Expense
     const addIncome = () => {
@@ -340,8 +355,18 @@ export function useFinancingForm(initialData = null) {
     })
 
     const submit = (status) => {
-        form.financing.financing_status = status === 'WAITING_DOCUMENTS' ? 'Menunggu Kelengkapan Dokumen' : 'Belum Ditinjau'
-        console.log('Submitting form with status:', form.financing.financing_status)
+        if (form.financing.financing_status === 'Menunggu Kelengkapan Dokumen' && status === 'PENDING_REVIEW') {
+            form.financing.financing_status = 'Belum Ditinjau'
+        }
+
+        if (form.financing.financing_status === 'Disetujui' && status === 'FINAL') {
+            if (form.financing.payment_method === 'Cicilan') {
+                form.financing.financing_status = 'Angsuran Berjalan'
+            } else {
+                form.financing.financing_status = 'Lunas'
+            }
+        }
+
         Swal.fire({
             title: 'Konfirmasi',
             text: 'Apakah Anda yakin ingin menyimpan permohonan ini?',
@@ -411,6 +436,7 @@ export function useFinancingForm(initialData = null) {
         isSupplierSelected,
         filteredSuppliers,
         // Methods
+        resetSupplierSelection,
         resetMemberSelection,
         selectMember,
         selectSupplier,

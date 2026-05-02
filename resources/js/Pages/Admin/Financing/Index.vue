@@ -9,6 +9,16 @@ import CardInfo from '@/Components/CardInfo.vue';
 import { usePage, Link, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 import Button from '@/Components/Form/Button.vue';
+import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
+import ReviewIcon from '@/Icons/ReviewIcon.vue'
+
+const page = usePage();
+
+const user = computed(() => page.props.auth?.user || {
+    name: 'User',
+    email: 'user@example.com',
+    profile_picture: '/public/images/user/owner.jpg',
+})
 
 const isLoading = ref(false);
 
@@ -27,17 +37,13 @@ const columns = computed(() => {
         { key: 'financing_transaction_code', label: 'No. Transaksi', align: 'center' },
         { key: 'akad_date', label: 'Tanggal Akad', align: 'center' },
         { key: 'user', label: 'Anggota', align: 'center' },
-        { key: 'product_type', label: 'Kategori Produk', align: 'center' },
+        { key: 'product_name', label: 'Nama Produk', align: 'center' },
+        { key: 'financing_status', label: 'Status', align:'center' },
+        { key: 'aksi', label: 'Aksi', align:'center'}
     ]
 
     if (filters.tab === 'active') {
         baseColumns.splice(3, 0, { key: 'tenor_left', label: 'Sisa Tenor', align: 'center' })
-    }
-
-    if (filters.tab === 'request') {
-        baseColumns.splice(3, 0, { key: 'review', label: 'Aksi', align: 'center' })
-    } else {
-        baseColumns.push({ key: 'show', label: 'Aksi', align: 'center' })
     }
 
     return baseColumns
@@ -46,8 +52,8 @@ const columns = computed(() => {
 const tabs = [
     { key: 'all', label: 'Semua' },
     { key: 'request', label: 'Permohonan Pembiayaan Murabahah' },
+    { key: 'validated', label: 'Permohonan Tervalidasi' },
     { key: 'active', label: 'Pembiayaan Aktif' },
-    { key: 'paid_early_request', label: 'Pengajuan Pelunasan Sebelum Jatuh Tempo' },
 ]
 
 const tableTitle = computed(() => {
@@ -55,12 +61,9 @@ const tableTitle = computed(() => {
         all: 'Data Pembiayaan Murabahah',
         request: 'Data Permintaan Pembiayaan',
         active: 'Data Pembiayaan Aktif',
-        paid_early_request: 'Data Pengajuan Pelunasan Sebelum Jatuh Tempo',
     }
     return map[filters.tab] ?? 'Data Pembiayaan Murabahah'
 })
-
-const page = usePage()
 
 const filters = reactive({
     search: page.props.filters?.search ?? '',
@@ -176,44 +179,34 @@ watch(() => filters.tab, applyFilters)
                 </BaseFunctionality>
 
                 <!-- Table -->
-                <BaseTable :columns="columns" :data="transactions.data" :is-loading="isLoading"
+                <BaseTable :columns="columns" :align="center" :data="transactions.data" :is-loading="isLoading"
                     :pagination="transactions" :sort-by="filters.sort_by" :sort-dir="filters.sort_dir"
                     @sort="toggleSort">
-                    <template #cell-financing_transaction_code="{ row }">
-                        {{ row.financing_transaction_code }}
+
+                    <template #cell-financing_status="{ row }">
+                        <span :class="useFinancingStatus(row.financing_status)">
+                            {{ getStatusLabel(row.financing_status) }}
+                        </span>
                     </template>
 
-                    <template #cell-akad_date="{ row }">
-                        {{ row.akad_date }}
-                    </template>
-
-                    <template #cell-user="{ row }">
-                        {{ row.user }}
-                    </template>
-
-                    <template #cell-tenor_left="{ row }">
-                        {{ row.tenor_left }}
-                    </template>
-
-                    <template #cell-product_type="{ row }">
-                        {{ row.product_type }}
-                    </template>
-
-                    <template #cell-show="{ row }">
+                    <template #cell-aksi="{ row }">
                         <div class="flex justify-center">
-                            <Button :href="`/admin/financing/show/${row.id}`" size="small" variant="secondary">
+
+                            <Button v-if="row.financing_status === 'Angsuran Berjalan' || row.financing_status === 'Ditolak' && user.role.role_name !== 'Staf Murabahah' || row.financing_status === 'Lunas' || row.financing_status === 'Menunggu Kelengkapan Dokumen' && user.role.role_name === 'Ketua'" :href="`/admin/financing/show/${row.id}`" size="small" variant="secondary">
                                 <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                                 Lihat Detail
                             </Button>
-                        </div>
-                    </template>
 
-                    <template #cell-review="{ row }">
-                        <div class="flex justify-center">
-                            <Button :href="`/admin/financing/show/${row.id}`" size="small" variant="secondary">
-                                <span class="icon-[pajamas--review-checkmark]"></span>
+                            <Button v-else-if="row.financing_status === 'Menunggu Kelengkapan Dokumen' || row.financing_status === 'Disetujui' || row.financing_status === 'Ditolak' && user.role.role_name === 'Staf Murabahah'" :href="`/admin/financing/draft/${row.id}`" size="small" variant="info">
+                                <ReviewIcon width="18px" height="18px" />
+                                Lanjutkan
+                            </Button>
+
+                            <Button v-else-if="row.financing_status === 'Belum Ditinjau'" :href="`/admin/financing/validation/${row.id}`" size="small" variant="warning">
+                                <ReviewIcon width="18px" height="18px" />
                                 Tinjau
                             </Button>
+
                         </div>
                     </template>
                 </BaseTable>

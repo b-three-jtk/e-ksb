@@ -136,14 +136,6 @@ defineProps({
                             <div class="flex items-center gap-2">
                                 <input
                                     type="radio"
-                                    value="approved_with_notes"
-                                    v-model="form.final_decision_status"
-                                >
-                                <span>Disetujui dengan Catatan</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <input
-                                    type="radio"
                                     value="rejected"
                                     v-model="form.final_decision_status"
                                 >
