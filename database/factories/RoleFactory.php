@@ -14,6 +14,7 @@ class RoleFactory extends Factory
     {
         return [
             'name' => $this->faker->randomElement(UserRoleEnum::cases())->value,
+            'guard_name' => 'web',
         ];
     }
 }
