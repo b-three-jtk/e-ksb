@@ -101,7 +101,7 @@ const orderedSavingKeys = computed(() => {
     const known = knownOrder.filter((key) => available.includes(key))
     const unknown = available.filter((key) => !knownOrder.includes(key))
 
-    return [...known, ...unknown]
+    return [...known, ...unknown].filter((key) => key !== 'total_saldo')
 })
 
 const savingItems = computed(() => {
@@ -117,7 +117,10 @@ const savingItems = computed(() => {
 
 <template>
     <div class="w-full overflow-x-auto pb-2 [scrollbar-width:thin]">
-        <div class="flex gap-4 w-max min-w-full pr-1">
+        <div v-if="savingItems.length === 0" class="rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-6 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+            Tidak ada simpanan aktif yang bisa ditampilkan.
+        </div>
+        <div v-else class="flex gap-4 w-max min-w-full pr-1">
             <div
                 v-for="item in savingItems"
                 :key="item.key"

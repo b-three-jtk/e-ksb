@@ -32,6 +32,10 @@ const props = defineProps({
             officerName: '',
         }),
     },
+    loading: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const emit = defineEmits(['confirm', 'close'])
@@ -103,12 +107,13 @@ function initials(name = '') {
 }
 
 function confirm() {
-    if (!agreed.value) return
+    if (!agreed.value || props.loading) return
     emit('confirm')
     agreed.value = false
 }
 
 function close() {
+    if (props.loading) return
     emit('close')
     agreed.value = false
 }
@@ -236,14 +241,14 @@ function close() {
                     </div>
 
                     <div class="px-5 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-                        <button @click="close"
+                        <button @click="close" :disabled="loading"
                             class="px-5 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             Batal
                         </button>
-                        <button @click="confirm" :disabled="!agreed"
+                        <button @click="confirm" :disabled="!agreed || loading"
                             class="px-6 py-2 text-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             :class="buttonClass">
-                            Posting Sekarang
+                            {{ loading ? 'Memproses...' : 'Posting Sekarang' }}
                         </button>
                     </div>
                 </div>
