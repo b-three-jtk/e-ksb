@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LedgerController extends Controller
 {
@@ -240,7 +241,7 @@ class LedgerController extends Controller
     }
 
     /**
-     * Export ledger data to XLS
+     * Export ledger data to PDF (bank statement format)
      */
     public function export(Request $request)
     {
@@ -249,78 +250,40 @@ class LedgerController extends Controller
         $search = $request->get('search');
 
         $query = $this->buildLedgerTransactionQuery($userId, $month, $search);
-        $query->orderBy('transaction_date', 'desc');
+        $query->orderBy('transaction_date', 'asc');
 
         $transactions = $query->get();
         $rows = $this->transformTransactions($transactions, false);
         $member = auth()->user();
 
-        $filename = 'ledger_' . $member->user_code . '_' . now()->format('Ymd_His') . '.xls';
+        // Calculate summary data
+        $totalDebit = $rows->sum('debit');
+        $totalKredit = $rows->sum('kredit');
+        $endingBalance = $rows->last()['saldo'] ?? 0;
 
-        $headers = [
-            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
+        // Determine date range
+        $startDate = $rows->min('tanggal_raw') ? Carbon::parse($rows->min('tanggal_raw')) : now();
+        $endDate = $rows->max('tanggal_raw') ? Carbon::parse($rows->max('tanggal_raw')) : now();
+
+        $memberInfo = [
+            'nama' => $member->name,
+            'no_anggota' => $member->user_code,
+            'status' => $member->status,
+            'tanggal_bergabung' => optional($member->created_at)->format('d F Y'),
         ];
 
-        return response()->stream(function () use ($rows, $member) {
-            echo "\xEF\xBB\xBF";
-            echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
-            echo '<head>';
-            echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
-            echo '<style>';
-            echo 'table { border-collapse: collapse; font-family: Arial, sans-serif; width: 100%; }';
-            echo 'th, td { border: 1px solid #d1d5db; padding: 6px; text-align: left; font-size: 11px; }';
-            echo 'th { background-color: #f3f4f6; font-weight: bold; }';
-            echo '.num { text-align: right; }';
-            echo '.pos { color: #059669; }';
-            echo '.neg { color: #dc2626; }';
-            echo '</style>';
-            echo '</head>';
-            echo '<body>';
+        $filename = 'Mutasi_Simpanan_' . $member->user_code . '_' . now()->format('Ymd_His') . '.pdf';
 
-            echo '<table>';
-            echo '<tr><th colspan="6" style="background:#d9f99d;color:#065f46;font-size:16px;">Buku Besar Personal</th></tr>';
-            echo '<tr><td colspan="6"><strong>Nama Anggota:</strong> ' . htmlspecialchars((string) $member->name) . '</td></tr>';
-            echo '<tr><td colspan="6"><strong>No Anggota:</strong> ' . htmlspecialchars((string) $member->user_code) . '</td></tr>';
-            echo '<tr><td colspan="6"><strong>Tanggal Export:</strong> ' . now()->format('d/m/Y H:i') . '</td></tr>';
-            echo '<tr><td colspan="6"></td></tr>';
+        $pdf = Pdf::loadView('exports.ledger_statement', [
+            'transactions' => $rows,
+            'member' => $memberInfo,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'totalDebit' => $totalDebit,
+            'totalKredit' => $totalKredit,
+            'endingBalance' => $endingBalance,
+        ]);
 
-            echo '<tr>';
-            echo '<th>Tanggal</th>';
-            echo '<th>Produk</th>';
-            echo '<th>Jenis</th>';
-            echo '<th>Metode</th>';
-            echo '<th>Petugas</th>';
-            echo '<th>Nominal</th>';
-            echo '</tr>';
-
-            foreach ($rows as $row) {
-                $debit = (float) ($row['debit'] ?? 0);
-                $kredit = (float) ($row['kredit'] ?? 0);
-                $nominal = $debit - $kredit;
-                $nominalClass = $nominal > 0 ? 'pos' : ($nominal < 0 ? 'neg' : '');
-                $nominalText = $nominal > 0
-                    ? '+ ' . number_format($nominal, 0, ',', '.')
-                    : ($nominal < 0
-                        ? '- ' . number_format(abs($nominal), 0, ',', '.')
-                        : '-');
-
-                echo '<tr>';
-                echo '<td>' . htmlspecialchars((string) ($row['tanggal'] ?? '-')) . '</td>';
-                echo '<td>' . htmlspecialchars((string) ($row['produk'] ?? '-')) . '</td>';
-                echo '<td>' . htmlspecialchars((string) ($row['jenis'] ?? '-')) . '</td>';
-                echo '<td>' . htmlspecialchars((string) ($row['metode'] ?? '-')) . '</td>';
-                echo '<td>' . htmlspecialchars((string) ($row['petugas'] ?? '-')) . '</td>';
-                echo '<td class="num ' . $nominalClass . '">' . $nominalText . '</td>';
-                echo '</tr>';
-            }
-
-            echo '</table>';
-            echo '</body>';
-            echo '</html>';
-        }, 200, $headers);
+        return $pdf->download($filename);
     }
 }

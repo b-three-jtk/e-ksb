@@ -234,7 +234,7 @@ const handleExport = () => {
                                     class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
                                 >
                                     <span class="icon-[mdi--file-download]" style="color: white;"></span>
-                                    Export XLS
+                                    Export PDF
                                 </button>
                             </template>
                         </BaseFunctionality>
