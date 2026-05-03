@@ -280,7 +280,7 @@ class WithdrawalController extends Controller
     private function generateTransactionCode(): string
     {
         $date = Carbon::now()->format('d');
-        $prefix = 'W' . $date;
+        $prefix = 'ST' . $date;
 
         $latestTransaction = SavingTransaction::where('transaction_type', TransactionTypeEnum::WITHDRAWAL->value)
             ->whereDate('created_at', Carbon::today())
