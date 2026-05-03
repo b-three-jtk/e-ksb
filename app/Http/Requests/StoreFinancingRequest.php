@@ -28,6 +28,7 @@ class StoreFinancingRequest extends FormRequest
             'member.birth_date' => 'nullable|date',
             'member.gender' => 'nullable|in:' . implode(',', array_column(GenderEnum::cases(), 'value')),
             'member.marital_status' => 'nullable|in:' . implode(',', array_column(MaritalStatusEnum::cases(), 'value')),
+            'member.spouse_name' => 'nullable|string|max:255',
             'member.last_education' => 'nullable|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
             'member.domicile_address' => 'nullable|string|max:500',
             'member.residential_address' => 'nullable|string|max:500',

@@ -33,6 +33,7 @@ export function useFinancingForm(initialData = null) {
             domicile_address: initialData?.member?.domicile_address || '',
             residential_address: initialData?.member?.residential_address || '',
             marital_status: initialData?.member?.marital_status || '',
+            spouse_name: initialData?.member?.spouse_name || '',
             dependents: initialData?.member?.dependents || 0,
             job_title: initialData?.member?.job_title || '',
             company_or_business_name: initialData?.member?.company_or_business_name || '',
@@ -138,6 +139,7 @@ export function useFinancingForm(initialData = null) {
         form.member.domicile_address = member.domicile_address || ''
         form.member.residential_address = member.residential_address || ''
         form.member.marital_status = member.marital_status || ''
+        form.member.spouse_name = member.spouse_name || ''
         form.member.dependents = member.dependents || 0
         form.member.job_title = member.job_title || ''
         form.member.company_or_business_name = member.company_or_business_name || ''
@@ -177,6 +179,7 @@ export function useFinancingForm(initialData = null) {
             domicile_address: '',
             residential_address: '',
             marital_status: '',
+            spouse_name: '',
             dependents: null,
             job_title: '',
             company_or_business_name: '',

@@ -193,6 +193,7 @@ class FinancingController extends Controller
             'birth_place' => $member->birth_place,
             'birth_date' => $member->birth_date,
             'marital_status' => $member->marital_status,
+            'spouse_name' => $member->spouse_name,
             'last_education' => $member->last_education,
             'dependents' => $member->dependents,
             'domicile_address' => $member->domicile_address,
@@ -468,6 +469,7 @@ class FinancingController extends Controller
                 'last_education' => $validated['member']['last_education'] ?? $user->member->last_education,
                 'domicile_address' => $validated['member']['domicile_address'] ?? $user->member->domicile_address,
                 'residential_address' => $validated['member']['residential_address'] ?? $user->member->residential_address,
+                'spouse_name' => $validated['member']['spouse_name'] ?? $user->member->spouse_name,
                 'marital_status' => $validated['member']['marital_status'] ?? $user->member->marital_status,
                 'dependents' => $validated['member']['dependents'] ?? $user->member->dependents,
             ]);

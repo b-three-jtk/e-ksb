@@ -102,6 +102,7 @@ const heirInput = ref({
                 :error="errors.last_education" />
             <BaseInputAdmin v-model="form.member.marital_status" label="Status Perkawinan" type="select"
                 :selectables="data.marriageStatuses.map(unit => ({ value: unit, text: unit }))" />
+            <BaseInputAdmin label="Nama Pasangan" placeholder="Masukkan nama pasangan" :model-value="form.member.spouse_name" />
             <BaseInputAdmin v-model="form.member.dependents" label="Jumlah Tanggungan Keluarga" type="number" />
         </div>
 
