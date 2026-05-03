@@ -66,8 +66,8 @@ const closePasswordModal = () => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <ReadonlyField label="Nama Anggota" :model-value="user.name || '-'" />
                             <ReadonlyField label="NIK" :model-value="user.nik || '-'" />
-                            <ReadonlyField label="Tanggal Lahir" :model-value="user.birth_date || '-'" />
-                            <ReadonlyField label="Jenis Kelamin" :model-value="user.gender || '-'" />
+                            <ReadonlyField label="Email" :model-value="user.email || '-'" />
+                            <ReadonlyField label="Nomor Telepon" :model-value="user.phone_number || '-'" />
                         </div>
                     </div>
                 </div>

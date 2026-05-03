@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Models\Account;
+use App\Models\Member;
+use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Models\User;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,30 +23,34 @@ class WithdrawalController extends Controller
      */
     public function create()
     {
-        $members = User::with([
-                'savingAccounts',
-                'accounts' => function ($q) {
+        $members = Member::query()
+            ->with([
+                'user',
+                'savingAccounts.savingProduct',
+                'bankAccounts' => function ($q) {
                     $q->latest();
-                }
+                },
             ])
-            ->where('status', UserStatusEnum::ACTIVE->value)
+            ->whereHas('user', function ($q) {
+                $q->where('status', UserStatusEnum::ACTIVE->value);
+            })
             ->get()
-            ->map(function ($user) {
+            ->map(function ($member) {
                 return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'user_code' => $user->user_code,
-                    'savingAccounts' => $user->savingAccounts->map(function ($acc) {
+                    'id' => $member->id,
+                    'name' => $member->user?->name,
+                    'user_code' => $member->user?->user_code,
+                    'savingAccounts' => $member->savingAccounts->map(function ($acc) {
                         return [
                             'id' => $acc->id,
-                            'type' => $acc->type,
+                            'type' => $acc->savingProduct?->name ?? '-',
                             'balance' => DB::table('get_saving_account_balance')->where('saving_account_id', $acc->id)->value('total_balance') ?? 0,
-                            'tenor_months' => $acc->tenor_months,
+                            'tenor_months' => $acc->saving_tenor,
                             'target_amount' => $acc->target_amount,
                             'opened_at' => optional($acc->created_at)->toDateString(),
                         ];
                     })->toArray(),
-                    'accounts' => $user->accounts->map(function ($acc) {
+                    'accounts' => $member->bankAccounts->map(function ($acc) {
                         return [
                             'bank_name' => $acc->bank_name,
                             'account_name' => $acc->account_name,
@@ -67,7 +71,7 @@ class WithdrawalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'member_id' => 'required|exists:users,id',
+            'member_id' => 'required|exists:members,id',
             'saving_account_id' => 'required|exists:saving_accounts,id',
             'amount' => 'required|numeric|min:1',
             'withdrawal_date' => 'required|date|before_or_equal:today',
@@ -78,12 +82,12 @@ class WithdrawalController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $member = User::findOrFail($validated['member_id']);
+        $member = Member::with('user')->findOrFail($validated['member_id']);
         $savingAccount = SavingAccount::findOrFail($validated['saving_account_id']);
         $savingBalance = DB::table('get_saving_account_balance')->where('saving_account_id', $savingAccount->id)->value('total_balance') ?? 0;
 
         // Verify that the saving account belongs to the member
-        if ($savingAccount->user_id !== $member->id) {
+        if ((int) $savingAccount->member_id !== (int) $member->id) {
             return back()
                 ->withErrors(['saving_account_id' => 'Rekening simpanan tidak ditemukan untuk anggota ini']);
         }
@@ -94,11 +98,12 @@ class WithdrawalController extends Controller
                 ->withErrors(['amount' => 'Saldo tidak cukup untuk penarikan sebesar Rp ' . number_format($validated['amount'])]);
         }
 
-        $typeLower = mb_strtolower((string) $savingAccount->type);
+        $savingType = (string) ($savingAccount->savingProduct?->name ?? '');
+        $typeLower = mb_strtolower($savingType);
 
         // Berjangka can only be withdrawn after maturity date.
         if (str_contains($typeLower, 'berjangka')) {
-            $tenorMonths = (int) ($savingAccount->tenor_months ?? 0);
+            $tenorMonths = (int) ($savingAccount->saving_tenor ?? 0);
             if ($tenorMonths > 0 && $savingAccount->created_at) {
                 $maturityDate = Carbon::parse($savingAccount->created_at)->addMonths($tenorMonths)->startOfDay();
                 if (Carbon::today()->lt($maturityDate)) {
@@ -112,7 +117,7 @@ class WithdrawalController extends Controller
         // Ibadah can be withdrawn only when target amount has been reached.
         if (str_contains($typeLower, 'ibadah')) {
             $targetAmount = (float) ($savingAccount->target_amount ?? 0);
-            if ($targetAmount > 0 && (float) $savingAccount->balance < $targetAmount) {
+            if ($targetAmount > 0 && (float) $savingBalance < $targetAmount) {
                 return back()->withErrors([
                     'saving_account_id' => 'Tabungan ibadah belum mencapai target minimal Rp ' . number_format($targetAmount, 0, ',', '.'),
                 ]);
@@ -121,23 +126,42 @@ class WithdrawalController extends Controller
 
         try {
             [$transaction, $saldoSebelum] = DB::transaction(function () use ($validated, $member, $savingAccount) {
-                $saldoSebelum = $savingAccount->balance;
+                $lockedSavingAccount = SavingAccount::query()
+                    ->whereKey($savingAccount->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                // Get latest balance from database view (source of truth)
+                $saldoSebelum = DB::table('get_saving_account_balance')
+                    ->where('saving_account_id', $lockedSavingAccount->id)
+                    ->value('total_balance');
+
+                if ($saldoSebelum === null) {
+                    // fallback to model field if view not available
+                    $saldoSebelum = (float) ($lockedSavingAccount->balance ?? 0);
+                } else {
+                    $saldoSebelum = (float) $saldoSebelum;
+                }
+
+                if ($saldoSebelum < (float) $validated['amount']) {
+                    throw new \RuntimeException('Saldo tidak cukup untuk penarikan.');
+                }
 
                 $transaction = SavingTransaction::create([
                     'saving_transaction_code' => $this->generateTransactionCode(),
-                    'saving_account_id' => $savingAccount->id,
+                    'saving_account_id' => $lockedSavingAccount->id,
                     'saving_amount' => $validated['amount'],
                     'transaction_type' => TransactionTypeEnum::WITHDRAWAL->value,
                     'saving_payment_method' => $validated['method'],
-                    'transaction_date' => now(),
+                    'transaction_date' => $validated['withdrawal_date'],
                     'saving_description' => $validated['notes'] ?? '',
                     'updated_by' => auth()->id(),
                 ]);
 
                 if ($validated['method'] === 'Non-Tunai') {
-                    Account::updateOrCreate(
+                    MemberBankAccount::updateOrCreate(
                         [
-                            'user_id' => $member->id,
+                            'member_id' => $member->id,
                             'account_number' => $validated['account_number'],
                         ],
                         [
@@ -151,7 +175,7 @@ class WithdrawalController extends Controller
                     ]);
                 }
 
-                $savingAccount->update([
+                $lockedSavingAccount->update([
                     'balance' => $saldoSebelum - $validated['amount'],
                 ]);
 
@@ -165,12 +189,12 @@ class WithdrawalController extends Controller
             // Prepare receipt data
             $strukData = [
                 'transaction_id' => $transaction->id,
-                'no_transaksi' => str_pad($transaction->id, 6, '0', STR_PAD_LEFT),
+                'no_transaksi' => $transaction->saving_transaction_code,
                 'tanggal' => $transaction->transaction_date,
                 'pengurus' => $namaAdmin,
-                'nama_anggota' => $member->name,
-                'no_anggota' => $member->user_code,
-                'jenis' => $savingAccount->type,
+                'nama_anggota' => $member->user?->name ?? '-',
+                'no_anggota' => $member->user?->user_code ?? '-',
+                'jenis' => $savingType !== '' ? $savingType : '-',
                 'metode' => $validated['method'],
                 'nominal' => $validated['amount'],
                 'saldo_sebelum' => $saldoSebelum,
@@ -180,7 +204,17 @@ class WithdrawalController extends Controller
                 'account_number' => $validated['account_number'] ?? '',
             ];
 
-            $this->storeReceiptPdf($transaction, $strukData);
+            try {
+                $receiptPath = $this->storeReceiptImage($transaction, $strukData);
+                if ($receiptPath) {
+                    $transaction->update([
+                        'saving_transaction_receipt' => $receiptPath,
+                    ]);
+                }
+            } catch (\Throwable $receiptException) {
+                // Receipt generation should not break successful withdrawal posting.
+                report($receiptException);
+            }
 
             return redirect()
                 ->route('admin.withdrawal.create')
@@ -195,45 +229,72 @@ class WithdrawalController extends Controller
         }
     }
 
-    /**
-     * Generate and store withdrawal receipt as PDF into saving_transaction_docs.
-     */
-    private function storeReceiptPdf(SavingTransaction $transaction, array $strukData): void
+    private function storeReceiptImage(SavingTransaction $transaction, array $strukData): ?string
     {
-        $pdf = Pdf::loadView('exports.withdrawal_receipt', [
-            'struk' => $strukData,
-        ])->setPaper([0, 0, 226.77, 650]);
+        return $this->storeReceiptViaPdf($transaction, $strukData);
+    }
 
-        $directory = 'saving-transactions/' . now()->format('Y-m');
-        $filename = 'struk-withdrawal-' . $transaction->id . '.pdf';
-        $path = $directory . '/' . $filename;
+    /**
+     * Generate receipt via dompdf and save as PDF.
+     */
+    private function storeReceiptViaPdf(SavingTransaction $transaction, array $strukData): ?string
+    {
+        try {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.withdrawal_receipt', [
+                'struk' => $strukData,
+            ])->setPaper('A6', 'portrait');
 
-        Storage::disk('public')->put($path, $pdf->output());
+            $directory = 'saving-transactions/receipts/' . now()->format('Y-m');
+            $filename = 'struk-withdrawal-' . $transaction->id . '.pdf';
+            $path = $directory . '/' . $filename;
 
-        $existingDoc = $transaction->receipt;
+            Storage::disk('public')->put($path, $pdf->output());
 
-        if ($existingDoc && $existingDoc->attachment) {
-            Storage::disk('public')->delete($existingDoc->attachment);
+            // verify file saved
+            if (!Storage::disk('public')->exists($path)) {
+                try {
+                    $full = storage_path('app/public/' . $path);
+                    $dir = dirname($full);
+                    if (!is_dir($dir)) {
+                        mkdir($dir, 0755, true);
+                    }
+                    file_put_contents($full, $pdf->output());
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+
+            if (Storage::disk('public')->exists($path) || file_exists(storage_path('app/public/' . $path))) {
+                return $path;
+            }
+        } catch (\Throwable $e) {
+            report($e);
         }
+
+        return null;
     }
 
     /**
      * Generate unique transaction code
      */
-    private function generateTransactionCode()
+    private function generateTransactionCode(): string
     {
         $date = Carbon::now()->format('d');
-        $latestTransaction = SavingTransaction::where('transaction_type', 'Penarikan')
+        $prefix = 'ST' . $date;
+
+        $latestTransaction = SavingTransaction::where('transaction_type', TransactionTypeEnum::WITHDRAWAL->value)
             ->whereDate('created_at', Carbon::today())
-            ->latest()
+            ->where('saving_transaction_code', 'like', $prefix . '%')
+            ->lockForUpdate()
+            ->orderByDesc('saving_transaction_code')
             ->first();
 
+        $lastNumber = 0;
         if ($latestTransaction) {
-            $codeNumber = intval(substr($latestTransaction->transaction_code, -4)) + 1;
-        } else {
-            $codeNumber = 1;
+            preg_match('/(\d{4})$/', (string) $latestTransaction->saving_transaction_code, $matches);
+            $lastNumber = (int) ($matches[1] ?? 0);
         }
 
-        return 'W' . $date . str_pad($codeNumber, 4, '0', STR_PAD_LEFT);
+        return $prefix . str_pad((string) ($lastNumber + 1), 4, '0', STR_PAD_LEFT);
     }
 }

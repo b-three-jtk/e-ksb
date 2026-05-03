@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+defineOptions({
+  inheritAttrs: false,
+})
+
 const props = defineProps<{
   modelValue: string
   label: string
@@ -29,6 +33,7 @@ const isPasswordField = computed(() => props.type === 'password')
   <div>
     <div class="relative h-12">
       <input
+      v-bind="$attrs"
       :type="inputType"
       :value="modelValue"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"

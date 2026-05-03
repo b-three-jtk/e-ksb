@@ -102,7 +102,7 @@ onUnmounted(() => {
                         </AccordionPanel>
                     </div>
 
-                    <!-- Penjualan AMDK Section -->
+                    <!-- Penjualan AMDK Section
                     <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-stroke dark:border-gray-700 rounded-xl p-4 md:p-6 grid gap-4">
                         <div class="flex items-center justify-between gap-4 border-b border-stroke dark:border-gray-700 pb-3">
                             <h1 class="text-xl font-head font-bold text-green-800 dark:text-green-500">Penjualan AMDK</h1>
@@ -136,7 +136,7 @@ onUnmounted(() => {
                                 Detail pembayaran dan pengambilan produk akan disesuaikan dengan ketentuan yang berlaku.
                             </p>
                         </AccordionPanel>
-                    </div>
+                    </div> -->
 
                     <!-- Produk Pembiayaan Section -->
                     <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-stroke dark:border-gray-700 rounded-xl p-4 md:p-6 grid gap-4">

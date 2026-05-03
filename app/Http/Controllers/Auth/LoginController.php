@@ -33,13 +33,10 @@ class LoginController extends Controller
             ]);
         }
 
-        if ($user->status !== UserStatusEnum::ACTIVE->value) {
-            $messages = [
-                UserStatusEnum::INACTIVE->value => 'Akun Anda tidak aktif. Hubungi admin untuk mengaktifkan kembali.',
-            ];
-
+        // Allow users to login for non-inactive statuses (e.g., resigned requests/rejections)
+        if ($user->status === UserStatusEnum::INACTIVE->value) {
             throw ValidationException::withMessages([
-                'user_code' => $messages[$user->status] ?? 'Akun Anda belum aktif.',
+                'user_code' => 'Akun Anda tidak aktif. Hubungi pengurus koperasi untuk mengaktifkan kembali.',
             ]);
         }
 

@@ -26,8 +26,8 @@ class UserProfileController extends Controller
                 'user_code' => $user->user_code,
                 'name' => $user->name,
                 'nik' => $user->nik,
-                'birth_date' => $user->birth_date,
-                'gender' => $user->gender,
+                'email' => $user->email,
+                'phone_number' => $user->phone_number,
                 'profile_picture' => $user->profile_picture,
                 'photo_url' => $photoUrl,
             ]
@@ -50,8 +50,8 @@ class UserProfileController extends Controller
                 'user_code' => $user->user_code,
                 'name' => $user->name,
                 'nik' => $user->nik,
-                'birth_date' => $user->birth_date,
-                'gender' => $user->gender,
+                'email' => $user->email,
+                'phone_number' => $user->phone_number,
                 'profile_picture' => $user->profile_picture,
                 'photo_url' => $photoUrl,
             ]
@@ -74,14 +74,18 @@ class UserProfileController extends Controller
                 'size:16',
                 \Illuminate\Validation\Rule::unique('users', 'nik')->ignore($user->id, 'id'),
             ],
-            'birth_date' => 'nullable|date|before_or_equal:today|after_or_equal:1900-01-01',
-            'gender' => 'nullable|string|in:Laki-laki,Perempuan',
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user->id, 'id'),
+            ],
+            'phone_number' => 'nullable|string|max:20',
         ]);
 
         $user->update($validated);
 
-        return redirect()->route('user.profile.show')
-            ->with('success', 'Profil berhasil diperbarui');
+        return redirect()->route('user.profile.show');
     }
 
     /**
@@ -111,7 +115,7 @@ class UserProfileController extends Controller
             'profile_picture' => $path
         ]);
 
-        return redirect()->back()->with('success', 'Foto profil berhasil diperbarui');
+        return redirect()->back();
     }
 
     /**
@@ -129,7 +133,7 @@ class UserProfileController extends Controller
             'profile_picture' => null
         ]);
 
-        return redirect()->back()->with('success', 'Foto profil berhasil dihapus');
+        return redirect()->back();
     }
 
     /**

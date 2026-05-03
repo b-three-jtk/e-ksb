@@ -6,7 +6,6 @@ import BaseLayout from '../../../Layouts/Base.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
 import dateParser from '../../../Composables/dateParser.js'
-import moneyParser from '../../../Composables/moneyParser.js'
 
 defineOptions({
 	layout: (h: any, page: any) => h(BaseLayout, { title: 'List Pembiayaan' }, () => page),
@@ -24,8 +23,8 @@ type FinancingItem = {
 	id: string
 	transaction_code?: string
 	akad_date?: string
-	product_type?: string
 	product_name?: string
+	product_brand?: string
 	status?: string
 	remaining_balance?: number
 	loan?: LoanInfo | null
@@ -43,10 +42,10 @@ type FinancingPagination = {
 const props = withDefaults(defineProps<{
 	financings?: FinancingPagination
 	activeFinancing?: FinancingItem | null
-	productTypes?: string[]
+	productNames?: string[]
 	filters?: {
 		search?: string
-		product_type?: string
+		product_name?: string
 		per_page?: number
 	}
 }>(), {
@@ -59,32 +58,32 @@ const props = withDefaults(defineProps<{
 		links: [],
 	}),
 	activeFinancing: null,
-	productTypes: () => [],
+	productNames: () => [],
 	filters: () => ({
 		search: '',
-		product_type: '',
+		product_name: '',
 		per_page: 10,
 	}),
 })
 
 const filterState = ref({
 	search: props.filters?.search ?? '',
-	product_type: props.filters?.product_type ?? '',
+	product_name: props.filters?.product_name ?? '',
 	per_page: props.filters?.per_page ?? 10,
 })
 
-const productTypeOptions = computed(() => {
-	return props.productTypes.map((productType) => ({
-		key: productType,
-		label: productType,
+const productNameOptions = computed(() => {
+	return props.productNames.map((productName) => ({
+		key: productName,
+		label: productName,
 	}))
 })
 
 const selectFilters = computed(() => ([
 	{
-		key: 'product_type',
-		label: 'Semua Kategori Produk',
-		options: productTypeOptions.value,
+		key: 'product_name',
+		label: 'Semua Produk',
+		options: productNameOptions.value,
 		optionLabel: 'label',
 		optionValue: 'key',
 	},
@@ -101,29 +100,21 @@ const currentFinancing = computed(() => {
 })
 
 const currentTenor = computed(() => {
-	const tenor = Number(currentFinancing.value?.loan?.tenor ?? 0)
-	return tenor > 0 ? `${tenor} bulan` : '-'
+	return '-'
 })
 
 const currentInstallment = computed(() => {
-	return moneyParser(currentFinancing.value?.loan?.monthly_installment ?? 0)
+	return '-'
 })
 
 const currentRemaining = computed(() => {
-	const remaining = Number(currentFinancing.value?.remaining_balance ?? 0)
-	if (remaining > 0) return moneyParser(remaining)
-
-	const remainingFromLoan =
-		Number(currentFinancing.value?.loan?.remaining_margin ?? 0) +
-		Number(currentFinancing.value?.loan?.remaining_principal ?? 0)
-
-	return moneyParser(remainingFromLoan)
+	return '-'
 })
 
 const applyFilters = () => {
 	router.get('/user/financing', {
 		search: filterState.value.search || undefined,
-		product_type: filterState.value.product_type || undefined,
+		product_name: filterState.value.product_name || undefined,
 		per_page: filterState.value.per_page,
 	}, {
 		preserveScroll: true,
@@ -175,13 +166,11 @@ const getStatusClass = (status?: string) => {
 								{{ currentFinancing.status || 'Status tidak tersedia' }}
 							</span>
 							<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-								{{ currentFinancing.transaction_code || '-' }} - {{ currentFinancing.product_type || currentFinancing.product_name || '-' }}
+								{{ currentFinancing.transaction_code || '-' }} - {{ currentFinancing.product_name || '-' }}
 							</h2>
 						</div>
 						<p class="text-sm text-gray-500 dark:text-gray-400">
 							Tanggal Akad: {{ dateParser(currentFinancing.akad_date) }}
-							<span class="mx-2">•</span>
-							Sisa tenor: {{ currentTenor }}
 						</p>
 					</div>
 
@@ -192,21 +181,6 @@ const getStatusClass = (status?: string) => {
 						<Icon icon="mdi:eye-outline" class="w-4 h-4" />
 						Lihat Detail
 					</Link>
-				</div>
-
-				<div class="border-t border-gray-100 dark:border-gray-700 px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div>
-						<div class="text-xs text-gray-500 dark:text-gray-400">Angsuran/bulan</div>
-						<div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ currentInstallment }}</div>
-					</div>
-					<div>
-						<div class="text-xs text-gray-500 dark:text-gray-400">Jatuh Tempo</div>
-						<div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ dateParser(currentFinancing.loan?.next_due_date) }}</div>
-					</div>
-					<div>
-						<div class="text-xs text-gray-500 dark:text-gray-400">Sisa angsuran</div>
-						<div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ currentRemaining }}</div>
-					</div>
 				</div>
 			</div>
 
@@ -220,7 +194,7 @@ const getStatusClass = (status?: string) => {
 				<BaseFunctionality
 					:search="filterState.search"
 					:per-page="filterState.per_page"
-					:filters="{ product_type: filterState.product_type }"
+					:filters="{ product_name: filterState.product_name }"
 					:selects="selectFilters"
 					:search-tooltip="['No Transaksi', 'Tanggal Akad']"
 					:show-search-button="true"
@@ -228,7 +202,7 @@ const getStatusClass = (status?: string) => {
 					@update:search="handleSearch"
 					@submit:search="applyFilters"
 					@update:perPage="val => { filterState.per_page = val; applyFilters() }"
-					@update:filters="val => { filterState.product_type = val.product_type; applyFilters() }"
+					@update:filters="val => { filterState.product_name = val.product_name; applyFilters() }"
 				/>
 
 				<div class="px-6 py-6 overflow-x-auto">
@@ -238,7 +212,7 @@ const getStatusClass = (status?: string) => {
 								<th class="px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-200">No</th>
 								<th class="px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-200">No Transaksi</th>
 								<th class="px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-200">Tanggal Akad</th>
-								<th class="px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-200">Kategori Produk</th>
+								<th class="px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-200">Nama Produk</th>
 								<th class="px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-200">Status</th>
 								<th class="px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-200">Aksi</th>
 							</tr>
@@ -266,7 +240,7 @@ const getStatusClass = (status?: string) => {
 									{{ dateParser(item.akad_date) }}
 								</td>
 								<td class="px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-200">
-									{{ item.product_type || item.product_name || '-' }}
+									{{ item.product_name || '-' }}
 								</td>
 								<td class="px-4 py-3 text-center text-sm">
 									<span :class="getStatusClass(item.status)">

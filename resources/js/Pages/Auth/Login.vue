@@ -2,7 +2,6 @@
 import { Link, useForm, router } from '@inertiajs/vue3'
 import AuthLayout from '@/Layouts/AuthLayout.vue'
 import BaseInput from '@/Components/Form/BaseInput.vue'
-import Logo from '@/Components/Logo.vue'
 import { toast } from 'vue3-toastify'
 
 const form = useForm({
@@ -36,7 +35,7 @@ const submit = () => {
       <div class="max-w-xl mx-auto bg-white/95 dark:bg-gray-800 border border-white/60 dark:border-gray-700 shadow-xl rounded-2xl backdrop-blur">
         <div class="p-8 space-y-8">
             <div class="flex justify-center mb-12">
-                <Logo class="h-16 mx-auto" />
+                <img class="max-h-24" src="/public/images/logo/logo-icon.svg" alt="Logo">
             </div>
 
             <form @submit.prevent="submit" class="space-y-8">

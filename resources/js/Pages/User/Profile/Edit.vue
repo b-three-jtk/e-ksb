@@ -5,8 +5,6 @@ import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify'
 import Base from '../../../Layouts/Base.vue'
 import BaseInput from '@/Components/Form/BaseInput.vue'
-import BaseSelect from '@/Components/Form/BaseSelect.vue'
-import ReadonlyField from '@/Components/Form/ReadonlyField.vue'
 import UserIcon from '@/Icons/UserIcon.vue'
 
 const props = defineProps({
@@ -16,16 +14,11 @@ const props = defineProps({
     }
 })
 
-const genderOptions = [
-    { value: 'Laki-laki', label: 'Laki-laki' },
-    { value: 'Perempuan', label: 'Perempuan' }
-]
-
 const form = useForm({
     name: props.user.name || '',
     nik: props.user.nik || '',
-    birth_date: props.user.birth_date || '',
-    gender: props.user.gender || '',
+    email: props.user.email || '',
+    phone_number: props.user.phone_number || '',
 })
 
 const fileInput = ref(null)
@@ -37,22 +30,61 @@ const previewUrl = ref(props.user.photo_url || null)
 const initialData = {
     name: props.user.name || '',
     nik: props.user.nik || '',
-    birth_date: props.user.birth_date || '',
-    gender: props.user.gender || '',
+    email: props.user.email || '',
+    phone_number: props.user.phone_number || '',
 }
 
 const hasDataChanged = computed(() => {
     return (
         form.name !== initialData.name ||
         form.nik !== initialData.nik ||
-        form.birth_date !== initialData.birth_date ||
-        form.gender !== initialData.gender ||
+        form.email !== initialData.email ||
+        form.phone_number !== initialData.phone_number ||
         selectedFile.value !== null
     )
 })
 
 const handleChangePicture = () => {
     fileInput.value.click()
+}
+
+const updatePhoneNumber = (value) => {
+    form.phone_number = String(value ?? '').replace(/\D/g, '')
+}
+
+const handlePhoneKeydown = (event) => {
+    const allowedKeys = [
+        'Backspace',
+        'Delete',
+        'Tab',
+        'Enter',
+        'Escape',
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+        'Home',
+        'End',
+    ]
+
+    if (allowedKeys.includes(event.key) || event.ctrlKey || event.metaKey) {
+        return
+    }
+
+    if (!/^[0-9]$/.test(event.key)) {
+        event.preventDefault()
+    }
+}
+
+const finishSaveSuccess = () => {
+    toast.success('Profil berhasil diperbarui', {
+        autoClose: 2000,
+        position: 'bottom-right'
+    })
+
+    setTimeout(() => {
+        router.visit('/user/profile')
+    }, 150)
 }
 
 const onFileChange = (event) => {
@@ -162,11 +194,7 @@ const submit = () => {
                             onSuccess: () => {
                                 uploading.value = false
                                 selectedFile.value = null
-                                toast.success('Profil dan foto berhasil disimpan', {
-                                    autoClose: 2000,
-                                    position: 'bottom-right'
-                                })
-                                router.visit('/user/profile')
+                                finishSaveSuccess()
                             },
                             onError: () => {
                                 uploading.value = false
@@ -182,11 +210,7 @@ const submit = () => {
                         router.delete('/user/profile/picture', {
                             onSuccess: () => {
                                 deleting.value = false
-                                toast.success('Profil berhasil disimpan dan foto dihapus', {
-                                    autoClose: 2000,
-                                    position: 'bottom-right'
-                                })
-                                router.visit('/user/profile')
+                                finishSaveSuccess()
                             },
                             onError: () => {
                                 deleting.value = false
@@ -197,11 +221,7 @@ const submit = () => {
                             }
                         })
                     } else {
-                        toast.success('Profil berhasil disimpan', {
-                            autoClose: 2000,
-                            position: 'bottom-right'
-                        })
-                        router.visit('/user/profile')
+                        finishSaveSuccess()
                     }
                 },
                 onError: () => {
@@ -285,27 +305,29 @@ const submit = () => {
                                 <BaseInput
                                     label="NIK"
                                     v-model="form.nik"
-                                    :disabled="form.processing"
+                                    :disabled="true"
                                     :error="form.errors.nik"
                                     required
                                 />
                                 <BaseInput
-                                    label="Tanggal Lahir"
-                                    v-model="form.birth_date"
-                                    type="date"
+                                    label="Email"
+                                    v-model="form.email"
+                                    type="email"
                                     :disabled="form.processing"
-                                    :error="form.errors.birth_date"
+                                    :error="form.errors.email"
+                                    required
                                 />
-                                <BaseSelect
-                                    label="Jenis Kelamin"
-                                    v-model="form.gender"
+                                <BaseInput
+                                    label="Nomor Telepon"
+                                    v-model="form.phone_number"
+                                    type="text"
+                                    inputmode="numeric"
+                                    maxlength="20"
+                                    @keydown="handlePhoneKeydown"
+                                    @update:model-value="updatePhoneNumber"
                                     :disabled="form.processing"
-                                    :error="form.errors.gender"
-                                >
-                                    <option v-for="option in genderOptions" :key="option.value" :value="option.value">
-                                        {{ option.label }}
-                                    </option>
-                                </BaseSelect>
+                                    :error="form.errors.phone_number"
+                                />
                             </div>
                         </div>
 

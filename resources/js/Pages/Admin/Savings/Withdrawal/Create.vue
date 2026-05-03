@@ -32,6 +32,7 @@ const withdrawalFormRef = ref(null)
 const currentFormData = ref({})
 const showConfirmation = ref(false)
 const showStruk = ref(showStrukInitial.value)
+const isSubmitting = ref(false)
 
 async function handleFlashReceipt(struk) {
   if (!struk) return
@@ -113,6 +114,10 @@ function openConfirmation() {
 }
 
 function submitWithdrawal() {
+  if (isSubmitting.value) return
+
+  isSubmitting.value = true
+
   const formData = new FormData()
   formData.append('member_id', selectedMember.value.id)
   formData.append('saving_account_id', selectedSaving.value.id)
@@ -138,6 +143,9 @@ function submitWithdrawal() {
       showConfirmation.value = false
       const msg = Object.values(errors).flat().join('\n')
       toast(msg || 'Gagal menyimpan', { type: 'error', position: 'bottom-right' })
+    },
+    onFinish: () => {
+      isSubmitting.value = false
     },
   })
 }
@@ -173,6 +181,7 @@ function reset() {
           :is-open="showConfirmation"
           type="withdrawal"
           :data="confirmationData"
+          :loading="isSubmitting"
           @confirm="submitWithdrawal"
           @close="showConfirmation = false"
         />
