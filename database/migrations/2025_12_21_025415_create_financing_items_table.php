@@ -14,6 +14,8 @@ return new class extends Migration
     {
         Schema::create('financing_items', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('brand')->nullable();
             $table->text('request_description');
             $table->integer('qty');
             $table->enum('condition', array_column(ConditionEnum::cases(), 'value'));
@@ -21,8 +23,8 @@ return new class extends Migration
             $table->decimal('margin_amount', 10, 2)->nullable();
             $table->string('purchase_receipt')->nullable();
 
-            $table->foreignId('product_id')->references('id')->on('financing_products')->onDelete('set null');
-            $table->foreignId('supplier_id')->references('id')->on('suppliers')->onDelete('set null');
+            $table->foreignId('product_type_id')->nullable()->references('id')->on('product_types')->onDelete('set null');
+            $table->foreignId('supplier_id')->nullable()->references('id')->on('suppliers')->onDelete('set null');
             $table->foreignUuid('financing_id')->references('id')->on('financings')->onDelete('cascade');
             $table->timestamps();
         });

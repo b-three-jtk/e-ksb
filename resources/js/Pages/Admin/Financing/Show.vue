@@ -9,6 +9,7 @@ import dateParser from '../../../Composables/dateParser.js';
 import EyeIcon from '../../../Icons/EyeIcon.vue';
 import FinancingChart from '../../../Components/FinancingChart.vue';
 import NoArchiveIcon from '../../../Icons/NoArchiveIcon.vue';
+import useFinancingStatus from '@/Composables/useFinancingStatus.js';
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -18,32 +19,6 @@ const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
     { name: 'Pengelolaan Pembiayaan' },
 ];
-
-const getStatusClass = () => {
-    const baseClass = 'font-semibold rounded-2xl px-4 text-theme-sm py-1'
-    const status = props.data.status
-
-    switch (status) {
-        case 'Belum Ditinjau':
-            return `${baseClass} text-gray-600 bg-gray-100`
-        case 'Disetujui':
-            return `${baseClass} text-green-600 bg-green-50`
-        case 'Disetujui Dengan Catatan':
-            return `${baseClass} text-blue-600 bg-blue-50`
-        case 'Ditolak':
-            return `${baseClass} text-red-600 bg-red-50`
-        case 'Menunggu Kelengkapan Dokumen':
-            return `${baseClass} text-yellow-600 bg-yellow-50`
-        case 'Barang Diterima':
-            return `${baseClass} text-purple-600 bg-purple-50`
-        case 'Angsuran Berjalan':
-            return `${baseClass} text-blue-600 bg-blue-50`
-        case 'Lunas':
-            return `${baseClass} text-green-600 bg-green-50`
-        default:
-            return `${baseClass} text-gray-600 bg-gray-100`
-    }
-}
 
 const getScheduleStatusClass = (status) => {
     const baseClass = 'font-semibold rounded-lg px-3 py-1 text-xs'
@@ -76,7 +51,7 @@ const getScheduleStatusClass = (status) => {
                     <h1 class="uppercase font-medium text-lg">Detail Pembiayaan Murabahah</h1>
                     <p class="text-sm font-light text-gray-500">No. Pembiayaan: {{ data.transaction_code }}</p>
                 </div>
-                <span class="my-auto" :class="getStatusClass()">{{ data.status }}</span>
+                <span class="my-auto" :class="useFinancingStatus(data.financing_status)">{{ data.financing_status }}</span>
             </div>
             <div class="flex flex-col px-12 pb-2 pt-4 gap-2">
                 <h1>Detail Objek Pembiayaan Murabahah</h1>

@@ -15,7 +15,6 @@ class MemberJob extends Model
         'company_or_business_name',
         'business_field',
         'tenure_year',
-        'business_field',
         'workplace_address',
         'workplace_contact',
     ];

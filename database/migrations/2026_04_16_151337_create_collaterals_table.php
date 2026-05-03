@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->foreignUuid('financing_id')->constrained()->onDelete('cascade');
             $table->string('collateral_type');
-            $table->string('collateral_proof')->nullable();
             $table->string('owner_name');
             $table->string('collateral_location')->nullable();
             $table->decimal('estimated_market_value', 15, 2)->nullable();

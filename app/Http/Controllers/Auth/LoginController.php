@@ -25,7 +25,8 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        $user = User::with('role')->where('user_code', $credentials['user_code'])->first();
+        $user = User::where('user_code', $credentials['user_code'])->first();
+
         if (!$user) {
             throw ValidationException::withMessages([
                 'user_code' => 'Nomor anggota atau password tidak sesuai.',
@@ -42,7 +43,7 @@ class LoginController extends Controller
             ]);
         }
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
                 'user_code' => 'Nomor anggota atau password tidak sesuai.',
             ]);
@@ -50,8 +51,9 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirect based on user role
-        if ($user->role->role_name !== UserRoleEnum::ANGGOTA->value) {
+        $userRoles = $user->getRoleNames();
+
+        if (!$userRoles->contains(UserRoleEnum::ANGGOTA->value)) {
             return redirect()->intended('/admin/dashboard');
         }
 

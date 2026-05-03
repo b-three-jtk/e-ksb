@@ -4,7 +4,7 @@ namespace App\Services\Admin;
 
 use App\Enums\UserStatus;
 use App\Models\Heir;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 use App\Models\User;
 use App\Models\UserDoc;
 use Illuminate\Http\Request;

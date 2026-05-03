@@ -7,11 +7,11 @@ defineProps({
 </script>
 
 <template>
-    <div class="card-layout col-span-2 flex flex-col h-fit gap-4">
+    <div class="card-layout flex flex-col h-fit gap-4">
         <h1 class="card-title">Tahapan</h1>
 
         <div class="flex items-center gap-4">
-            <div :class="activeStep === 1 ? 'bg-primary text-white' : 'bg-white border border-stroke'"
+            <div @click="$emit('goToStep', 1)" :class="activeStep === 1 ? 'bg-primary text-white' : 'bg-white border border-stroke'"
                 class="rounded-full flex items-center justify-center h-11 w-11">
                 <UserIcon class="w-5 h-5" />
             </div>

@@ -67,7 +67,7 @@ class Member extends Model
 
     public function memberJobs()
     {
-        return $this->hasMany(MemberJob::class);
+        return $this->hasOne(MemberJob::class);
     }
 
     // Murabahah

@@ -18,6 +18,8 @@ const user = computed(() => {
     return page.props.auth?.user || null
 })
 
+const can = computed(() => page.props.auth.can)
+
 const props = defineProps({
     active_user_count: Number,
     active_user_percentage: Number,
@@ -114,7 +116,7 @@ const applyFilter = () => {
                                 <h3 class="card-title">Permohonan Registrasi Terbaru</h3>
                             </div>
                             <Button
-                                :href="user.role?.name === 'Admin' ? '/admin/users/verification' : '/admin/users/list'"
+                                :href="can['edit_anggota'] ? '/admin/users/verification' : '/admin/users/list'"
                                 variant="light" size="small">
                                 See all
                             </Button>

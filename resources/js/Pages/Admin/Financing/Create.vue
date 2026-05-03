@@ -1,7 +1,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Button from '@/Components/Form/Button.vue'
 import { useUserValidation } from '@/Composables/Validation/useUserValidation'
 import { useFinancingForm } from '@/Composables/Form/useFinancingForm'
@@ -10,25 +10,22 @@ import PersonalData from './Create/PersonalData.vue'
 import FinancialData from './Create/FinancialData.vue'
 import FinancingObjectData from './Create/FinancingObjectData.vue'
 import ProcurementData from './Create/ProcurementData.vue'
-import FinalizationData from './Create/Finalization.vue'
+import Finalization from './Create/Finalization.vue'
 import Stepper from './Create/Stepper.vue'
+import Documents from './Create/Documents.vue'
 
 const activeStep = ref(1)
 const totalSteps = 5
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financing/list' },
+    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financing' },
     { name: 'Permohonan Pembiayaan Murabahah' },
 ]
 
 const props = defineProps({
-    educations: Array,
-    marriageStatuses: Array,
-    income_types: Array,
-    expense_types: Array,
-    relationships: Array,
-    conditions: Array,
+    data: Object,
+    financing: Object,
 })
 
 const {
@@ -57,8 +54,9 @@ const {
     addHeir,
     removeHeir,
     resetMemberSelection,
-    submitDraft,
-} = useFinancingForm()
+    resetSupplierSelection,
+    submit,
+} = useFinancingForm(props.financing)
 
 const { errors } = useUserValidation(form)
 
@@ -69,51 +67,90 @@ const nextStep = () => {
 const prevStep = () => {
     activeStep.value--
 }
+
+const goToStep = (step) => {
+    activeStep.value = step
+}
+
+const isStep1Valid = computed(() => isMemberSelected.value && form.member.heirs.length > 0 && (form.family_card_file || form.documents?.family_card))
+
+const isStep2Valid = computed(() =>
+    form.member.incomes.length > 0 && form.member.expenses.length > 0 && (form.documents?.income_slip || form.income_slip_file) && (form.documents?.bank_book || form.bank_book_file) && form.member.job_title && form.member.company_or_business_name && form.member.business_field && form.member.tenure_year && form.member.workplace_contact && form.member.workplace_address
+)
+
+const isStep3Valid = computed(() =>
+    form.financing.name && form.collateral.collateral_type &&
+    form.financing.financing_status !== 'Menunggu Kelengkapan Dokumen' && form.financing.financing_status !== 'Ditolak'
+)
+
+const isStep4Valid = computed(() => form.supplier && form.financing.cost_price && (form.purchase_receipt_file || form.documents.purchase_receipt))
+
+const isRequestValid = computed(() => isStep1Valid.value && isStep2Valid.value && form.financing.name && form.collateral.collateral_type)
+
+const isFinalizationValid = computed(() => form.financing.financing_status === 'Disetujui' && form.financing.akad_date && (form.akad_document_file || form.documents.akad_document) && form.financing.payment_method)
+
 </script>
 
 <template>
     <AdminLayout title="Permohonan Pembiayaan Murabahah">
         <PageBreadcrumb page-title="Permohonan Pembiayaan Murabahah" :items="breadcrumbItems" />
         <div class="grid grid-cols-6 gap-6">
-            <div class="card-layout col-span-4 px-0!">
+            <div class="card-layout justify-between flex flex-col col-span-4 px-0!">
                 <PersonalData v-if="activeStep === 1" :form="form" :search-query="searchQuery"
                     :is-loading-search="isLoadingSearch" :is-member-selected="isMemberSelected"
-                    :filtered-members="filteredMembers" :educations="educations" :relationships="relationships"
-                    :errors="errors" @update:search-query="searchQuery = $event" @selectMember="selectMember"
-                    @addHeir="addHeir" @removeHeir="removeHeir" @resetMemberSelection="resetMemberSelection" />
+                    :filtered-members="filteredMembers" :data="props.data" :errors="errors"
+                    @update:search-query="searchQuery = $event" @selectMember="selectMember" @addHeir="addHeir"
+                    @removeHeir="removeHeir" @resetMemberSelection="resetMemberSelection" />
 
-                <FinancialData v-if="activeStep === 2" :form="form" :marriage-statuses="marriageStatuses"
-                    :income_types="income_types" :expense_types="expense_types" :total-income="totalIncome"
-                    :total-expense="totalExpense" :net-income="netIncome" @addIncome="addIncome"
+                <FinancialData v-if="activeStep === 2" :form="form" :data="props.data" @addIncome="addIncome"
                     @removeIncome="removeIncome" @addExpense="addExpense" @removeExpense="removeExpense" />
 
-                <FinancingObjectData v-if="activeStep === 3" :form="form" :conditions="conditions" />
+                <FinancingObjectData v-if="activeStep === 3" :form="form" :data="props.data" />
 
                 <ProcurementData v-if="activeStep === 4" :form="form" :search-supplier-query="searchSupplierQuery"
                     :is-loading-search-supplier="isLoadingSearchSupplier" :is-supplier-selected="isSupplierSelected"
                     :filtered-suppliers="filteredSuppliers" @update:search-supplier-query="searchSupplierQuery = $event"
-                    @selectSupplier="selectSupplier" />
+                    @selectSupplier="selectSupplier" @resetSupplierSelection="resetSupplierSelection" />
 
-                <FinalizationData v-if="activeStep === 5" :form="form" />
+                <Finalization v-if="activeStep === 5" :form="form" />
 
-                <div :class="activeStep === 1 ? 'justify-end' : 'justify-between' " class="flex gap-4 p-4">
+                <div :class="activeStep === 1 ? 'justify-end' : 'justify-between'" class="flex gap-4 p-4">
                     <Button v-if="activeStep > 1" @click="prevStep" variant="gray">
                         Kembali
                     </Button>
                     <div class="flex items-center gap-4 justify-end">
-                        <Button v-if="activeStep > 2" variant="light" @click="submitDraft">
+                        <Button v-if="activeStep < totalSteps" variant="light"
+                            @click="submit()" :disabled="(activeStep === 1 && !isStep1Valid) ||
+                            (activeStep === 2 && !isStep2Valid) ||
+                            (activeStep === 3 && !isStep3Valid) ||
+                            (activeStep === 4 && !isStep4Valid)
+                            ">
                             Simpan Sementara
                         </Button>
-                        <Button v-if="activeStep < totalSteps && activeStep !== 5" @click="nextStep" variant="primary"
-                            :disabled="(activeStep === 1 && !isMemberSelected) || (activeStep === 2 && form.member.incomes.length === 0) || (activeStep === 2 && form.member.expenses.length === 0) || (activeStep === 3 && !form.financing_object.object_name) || (activeStep === 4 && !form.financing.cost_price)">
+
+                        <Button v-if="activeStep < totalSteps" @click="nextStep" variant="primary" :disabled="(activeStep === 1 && !isStep1Valid) ||
+                            (activeStep === 2 && !isStep2Valid) ||
+                            (activeStep === 3 && !isStep3Valid) ||
+                            (activeStep === 4 && !isStep4Valid)
+                            ">
                             Selanjutnya
                         </Button>
-                        <Button v-else-if="activeStep === totalSteps" type="submit" variant="secondary">Ajukan Permohonan</Button>
+
+                        <Button :disabled="!isRequestValid" v-if="activeStep === 3 && (form.financing.financing_status === 'Menunggu Kelengkapan Dokumen' || form.financing.financing_status === 'Ditolak')" type="submit" @click="submit('PENDING_REVIEW')" variant="secondary">
+                            Ajukan Permohonan
+                        </Button>
+
+                        <Button :disabled="!isFinalizationValid"  v-if="activeStep === 5" type="submit" @click="submit('FINAL')" variant="secondary">
+                            Finalisasi Pembiayaan
+                        </Button>
                     </div>
                 </div>
             </div>
 
-            <Stepper :active-step="activeStep" />
+            <div class="flex flex-col w-full col-span-2 gap-6">
+                <Stepper :active-step="activeStep" />
+                <Documents :form="form" />
+            </div>
         </div>
     </AdminLayout>
 </template>

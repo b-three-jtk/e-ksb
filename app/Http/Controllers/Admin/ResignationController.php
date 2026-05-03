@@ -24,7 +24,7 @@ class ResignationController extends Controller
         $sort_dir = $request->input('sort_dir', 'desc');
 
         $query = User::whereHas('role', function ($q) {
-                $q->where('role_name', UserRoleEnum::ANGGOTA->value);
+                $q->where('name', UserRoleEnum::ANGGOTA->value);
             })
             ->whereHas('member', function ($q) {
                 $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);

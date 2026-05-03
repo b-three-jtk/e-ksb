@@ -13,8 +13,6 @@ const props = defineProps({
     data: { type: Object, required: true },
 });
 
-console.log(props.data.total_obligations)
-
 const showModal = () => {
     document.getElementById('modal').classList.remove('hidden');
 };

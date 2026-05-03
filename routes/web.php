@@ -1,8 +1,10 @@
 <?php
 
+use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinancingController;
+use App\Http\Controllers\Admin\ProductTypeController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ResignationController;
 use App\Http\Controllers\Admin\SavingController;
@@ -11,13 +13,23 @@ use App\Http\Controllers\Admin\WithdrawalController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\LedgerController;
+use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\UserFinancingController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\User\UserRepaymentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+$adminRoles = [
+    UserRoleEnum::KETUA->value,
+    UserRoleEnum::SEKRETARIS->value,
+    UserRoleEnum::PENGAWAS->value,
+    UserRoleEnum::BENDAHARA->value,
+    UserRoleEnum::DPS->value,
+    UserRoleEnum::KETUAMURABAHAH->value,
+    UserRoleEnum::STAFMURABAHAH->value,
+];
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
@@ -69,7 +81,7 @@ Route::post('/auth/logout', [LoginController::class, 'logout'])
     ->middleware('auth')
     ->name('auth.logout');
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'revalidate'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'revalidate'])->group(function () {
     Route::get('/list', [AdminController::class, 'index'])->name('index');
     Route::get('/create', [AdminController::class, 'create']);
     Route::post('/store', [AdminController::class, 'store']);
@@ -113,10 +125,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'reval
     Route::get('/financing', [FinancingController::class, 'index'])->name('financing.index');
     Route::get('/financing/show/{id}', [FinancingController::class, 'show'])->name('financing.show');
     Route::get('/financing/create', [FinancingController::class, 'create'])->name('financing.create');
-    Route::get('/members/search', [UserController::class, 'searchMembers'])->name('admin.members.search');
-    Route::get('/suppliers/search', [FinancingController::class, 'searchSuppliers'])->name('admin.suppliers.search');
+    Route::get('/members/search', [FinancingController::class, 'searchMembers'])->name('members.search');
+    Route::get('/suppliers/search', [FinancingController::class, 'searchSuppliers'])->name('suppliers.search');
     Route::post('/financing/store', [FinancingController::class, 'store'])->name('financing.store');
-    Route::post('/financing/store/draft', [FinancingController::class, 'storeDraft'])->name('financing.storeDraft');
+    Route::resource('product-types', ProductTypeController::class);
+    Route::get('/financing/draft/{id}', [FinancingController::class, 'loadDraft'])->name('financing.load-draft');
+    Route::get('/financing/validation/{id}', [FinancingController::class, 'showValidation'])->name('financing.validation');
+    Route::put('/financing/validate/{id}', [FinancingController::class, 'validate'])->name('financing.validation.submit');
 
     Route::get('/saving/deposit', [SavingController::class, 'createDeposit'])->name('deposit.create');
     Route::post('/saving/deposit', [SavingController::class, 'storeDeposit'])->name('deposit.store');

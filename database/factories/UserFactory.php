@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -35,8 +35,18 @@ class UserFactory extends Factory
             'status' => fake()->randomElement(UserStatusEnum::cases())->value,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role_id' => Role::where('role_name', 'Anggota')->first()->id,
         ];
+    }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $role = fake()->randomElement(UserRoleEnum::cases());
+            $user->assignRole($role->value);
+        });
     }
 
     /**
@@ -47,5 +57,15 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Create user with specific role.
+     */
+    public function withRole(string $role): static
+    {
+        return $this->afterCreating(function ($user) use ($role) {
+            $user->assignRole($role);
+        });
     }
 }

@@ -17,21 +17,10 @@ class EnsureUserRole
     {
         $user = $request->user();
 
-        if (!$user || !$user->role) {
-            return redirect('/auth/login');
-        }
+        $roles = explode('|', $role);
 
-        // Redirect based on role
-        if ($role === 'admin' && $user->role->role_name === 'Anggota') {
-            return redirect('/user/dashboard')->with('error', 'Anda tidak memiliki akses ke halaman admin.');
-        }
-
-        if ($role === 'user' && ($user->role->role_name !== 'Anggota')) {
-            return redirect('/admin/dashboard')->with('error', 'Admin harus menggunakan dashboard admin.');
-        }
-
-        if ($role === 'sekretaris' && $user->role->role_name !== 'Sekretaris') {
-            return redirect('/admin/dashboard')->with('error', 'Hanya sekretaris yang dapat mengakses halaman ini.');
+        if (!$user->hasAnyRole($roles)) {
+            abort(403, 'Unauthorized');
         }
 
         return $next($request);

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\EducationEnum;
-use App\Enums\FinancialCategoryEnum;
 use App\Enums\HeirEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
@@ -79,7 +78,7 @@ class UserController extends Controller
             ->whereHas(
                 'role',
                 fn($q) =>
-                $q->where('role_name', UserRoleEnum::ANGGOTA->value)
+                $q->where('name', UserRoleEnum::ANGGOTA->value)
             )
             ->whereNotNull('joined_date')
             ->whereNotNull('user_code');
@@ -87,7 +86,7 @@ class UserController extends Controller
         $memberBaseQuery = User::with('member.savingAccounts')->whereHas(
             'role',
             fn($q) =>
-            $q->where('role_name', UserRoleEnum::ANGGOTA->value)
+            $q->where('name', UserRoleEnum::ANGGOTA->value)
         );
 
         $verifiedMembersQuery = (clone $memberBaseQuery)
@@ -131,7 +130,11 @@ class UserController extends Controller
                 'phone' => $user->phone_number,
                 'status' => $user->status,
                 'total_simpanan' => 'Rp ' . number_format(
-                    DB::table('get_saving_account_balance')->where('member_id', $user->member->id)->sum('total_balance') ?? 0, 0, ',', '.'),
+                    DB::table('get_saving_account_balance')->where('member_id', $user->member->id)->sum('total_balance') ?? 0,
+                    0,
+                    ',',
+                    '.'
+                ),
                 'avatar' => $user->profile_picture
                     ? asset('storage/' . $user->profile_picture)
                     : null,
@@ -246,48 +249,5 @@ class UserController extends Controller
         ]);
 
         return redirect()->back();
-    }
-
-    public function searchMembers(Request $request)
-    {
-        $query = $request->get('q');
-
-        $members = User::query()
-            ->with('financials', 'heirs')
-            ->whereHas('role', fn($q) => $q->where('name', 'Anggota'))
-            ->whereNotNull('joined_date')
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'ILIKE', "%{$query}%")
-                    ->orWhere('user_code', 'ILIKE', "%{$query}%");
-            })
-            ->where('status', UserStatusEnum::ACTIVE->value)
-            ->limit(5)
-            ->get()
-            ->map(function ($member) {
-                $financials = $member->financials ?? collect();
-
-                return [
-                    'id' => $member->id,
-                    'user_code' => $member->user_code,
-                    'name' => $member->name,
-                    'email' => $member->email,
-                    'nik' => $member->nik,
-                    'phone_number' => $member->phone_number,
-                    'gender' => $member->gender,
-                    'marital_status' => $member->marital_status,
-                    'last_education' => $member->last_education,
-                    'dependents' => $member->dependents,
-                    'birth_place' => $member->birth_place,
-                    'birth_date' => $member->birth_date,
-                    'domicile_address' => $member->domicile_address,
-                    'residential_address' => $member->residential_address,
-
-                    'incomes' => $financials->where('category', FinancialCategoryEnum::INCOME->value)->values(),
-                    'expenses' => $financials->where('category', FinancialCategoryEnum::EXPENSE->value)->values(),
-                    'heirs' => $member->heirs ?? collect(),
-                ];
-            });
-
-        return response()->json($members);
     }
 }

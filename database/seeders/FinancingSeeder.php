@@ -7,11 +7,11 @@ use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PaymentMethodsEnum;
 use App\Models\Financing;
+use App\Models\FinancingItem;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentSchedule;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Member;
-use App\Models\PointTransaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -22,10 +22,12 @@ class FinancingSeeder extends Seeder
      */
     public function run(): void
     {
-        Financing::factory()->count(100)->create();
+        FinancingItem::factory()->count(100)->create();
 
         // SIMULATION - Complete Financing with Installment, Schedule, and Transaction
-        $member = Member::first() ?? Member::factory()->create();
+        $member = Member::with('user')->whereHas('user', function ($query) {
+            $query->where('name', 'Anggota');
+        })->first();
 
         $financing = Financing::create([
             'financing_transaction_code' => 'PM00000001',
@@ -44,9 +46,6 @@ class FinancingSeeder extends Seeder
             'tenor' => $tenor,
             'financing_id' => $financing->id,
         ]);
-
-        $point = PointTransaction::factory()->create();
-        // dd($point->id);
 
         // Create Installment Payment Schedules
         $monthlyPayment = ($financing->down_payment + 500000) / $tenor; // Assume total 500k margin

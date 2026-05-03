@@ -8,17 +8,17 @@ use App\Models\Financing;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Member;
 use App\Models\PointTransaction;
-use App\Models\Role;
 use App\Models\SavingTransaction;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasUuids;
+    use HasFactory, Notifiable, HasUuids, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -77,11 +77,6 @@ class User extends Authenticatable
     }
 
     // universal relation
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-
     public function pointTransactions()
     {
         return $this->hasMany(PointTransaction::class);

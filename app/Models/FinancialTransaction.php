@@ -10,11 +10,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinancialTransaction extends Model
 {
-    use HasFactory;
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $keyType = 'string';
-    protected $incrementing = false;
+    public $incrementing = false;
     protected $fillable = [
         'receipt_number',
         'transaction_date',

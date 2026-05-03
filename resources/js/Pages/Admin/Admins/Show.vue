@@ -34,7 +34,7 @@ const breadcrumbItems = [
                         <div class="flex flex-col justify-center gap-1">
                             <h1 class="card-title">{{ user.name }}</h1>
                             <p class="text-gray-500">
-                                {{ user.role.role_name }}
+                                {{ user.role.name }}
                             </p>
                         </div>
                     </div>

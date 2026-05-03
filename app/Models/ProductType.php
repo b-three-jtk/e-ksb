@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\FinancingProduct;
+use App\Models\FinancingItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,8 +14,8 @@ class ProductType extends Model
         'product_type_name',
     ];
 
-    public function financingProducts()
+    public function financingItems()
     {
-        return $this->hasMany(FinancingProduct::class);
+        return $this->hasMany(FinancingItem::class);
     }
 }

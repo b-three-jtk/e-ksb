@@ -1,10 +1,64 @@
 <script setup>
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
+import { ref, computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     form: Object,
-    conditions: Array,
+    data: Object,
 })
+
+const showNewProductTypeInput = ref(false)
+const newProductTypeName = ref('')
+const isCreatingProductType = ref(false)
+
+const productTypeSelectables = computed(() => {
+    const items = props.data.productTypes.map((pt) => ({
+        value: pt.id,
+        text: pt.product_type_name
+    }))
+
+    return [
+        ...items,
+        { value: 'NEW', text: '+ Tambah Kategori Baru', isAction: true }
+    ]
+})
+
+const handleProductTypeChange = (value) => {
+    if (value === 'NEW') {
+        showNewProductTypeInput.value = true
+        props.form.financing.product_type_id = null
+    } else {
+        showNewProductTypeInput.value = false
+        props.form.financing.product_type_id = value
+    }
+}
+
+const createNewProductType = async () => {
+    if (!newProductTypeName.value.trim()) return
+
+    isCreatingProductType.value = true
+    try {
+        const response = await axios.post('/admin/product-types', {
+            product_type_name: newProductTypeName.value
+        })
+
+        props.data.productTypes.push(response.data)
+        props.form.financing.product_type_id = response.data.id
+
+        newProductTypeName.value = ''
+        showNewProductTypeInput.value = false
+    } catch (error) {
+        console.error('Error creating product type:', error)
+        alert('Gagal membuat kategori produk')
+    } finally {
+        isCreatingProductType.value = false
+    }
+}
+
+const closeModal = () => {
+    showNewProductTypeInput.value = false
+    newProductTypeName.value = ''
+}
 </script>
 
 <template>
@@ -13,17 +67,65 @@ defineProps({
             <h1 class="card-title">Objek Pembiayaan</h1>
         </div>
         <div class="grid grid-cols-2 gap-4 p-4">
-            <BaseInputAdmin v-model="form.product_name" label="Nama Produk" placeholder="Masukkan nama produk" required />
-            <BaseInputAdmin v-model="form.product_type" label="Kategori Produk" />
-            <BaseInputAdmin v-model="form.brand" label="Merek" placeholder="Masukkan merek produk" />
-            <BaseInputAdmin v-model="form.color" label="Warna" placeholder="Masukkan warna produk" />
-            <BaseInputAdmin v-model="form.condition" label="Kondisi" type="select"
-                :selectables="conditions.map((c) => ({ value: c, text: c }))" />
-            <BaseInputAdmin v-model="form.qty" label="Jumlah" type="number" min="1" />
-            <BaseInputAdmin v-model="form.description" label="Deskripsi" type="textarea" rows="4"
+            <BaseInputAdmin v-model="form.financing.name" label="Nama Produk" placeholder="Masukkan nama produk"
+                required />
+
+            <div>
+                <BaseInputAdmin :model-value="form.financing.product_type_id" label="Kategori Produk" type="select"
+                    :selectables="productTypeSelectables" @update:modelValue="handleProductTypeChange" />
+            </div>
+
+            <BaseInputAdmin v-model="form.financing.brand" label="Merek" placeholder="Masukkan merek produk" />
+            <BaseInputAdmin v-model="form.financing.condition" label="Kondisi" type="select"
+                :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
+            <BaseInputAdmin v-model="form.financing.qty" label="Jumlah" type="number" />
+            <BaseInputAdmin v-model="form.financing.request_description" label="Deskripsi" type="textarea" rows="4"
                 placeholder="Masukkan deskripsi produk" />
-            <BaseInputAdmin v-model="form.down_payment" label="Uang Muka" isMoney
-                placeholder="Masukkan jumlah uang muka" />
+        </div>
+        <div class="border-y border-gray-200 px-8 py-4">
+            <h1 class="card-title">Jaminan (Rahn)</h1>
+        </div>
+        <div class="grid grid-cols-2 gap-4 p-4">
+            <BaseInputAdmin v-model="form.collateral.collateral_type" label="Jenis Agunan"
+                placeholder="Masukkan jenis agunan" required />
+            <BaseInputAdmin v-model="form.collateral.owner_name" required label="Atas Nama" placeholder="Masukkan nama pemilik" />
+            <BaseInputAdmin v-model="form.collateral.estimated_market_value" label="Nilai Perkiraan Pasar"
+                placeholder="Masukkan nilai perkiraan pasar" />
+            <BaseInputAdmin v-model="form.collateral.collateral_location" label="Lokasi/Kondisi Agunan" type="textarea"
+                rows="4" placeholder="Masukkan lokasi atau kondisi agunan" />
         </div>
     </section>
+
+    <!-- Modal -->
+    <Teleport to="body">
+        <div v-if="showNewProductTypeInput" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                <h2 class="text-lg font-bold text-gray-900 mb-4">Tambah Kategori Produk Baru</h2>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Kategori</label>
+                    <input v-model="newProductTypeName" type="text" placeholder="Masukkan nama kategori..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
+                        @keyup.enter="createNewProductType" />
+                </div>
+
+                <div class="flex gap-3 justify-end">
+                    <button @click="closeModal"
+                        class="px-4 py-2 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400 transition font-medium">
+                        Batal
+                    </button>
+                    <button @click="createNewProductType"
+                        :disabled="isCreatingProductType || !newProductTypeName.trim()"
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium">
+                        <span v-if="!isCreatingProductType">Buat</span>
+                        <span v-else class="flex items-center gap-2">
+                            <div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full">
+                            </div>
+                            Membuat...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </Teleport>
 </template>

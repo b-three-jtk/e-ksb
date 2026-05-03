@@ -34,7 +34,6 @@ const getStatusClass = () => {
             return `${baseClass} text-gray-600 bg-gray-100`
     }
 }
-console.log(props.data.financing.loan.payment_schedules[props.data.total_paid_installments]);
 </script>
 
 <template>

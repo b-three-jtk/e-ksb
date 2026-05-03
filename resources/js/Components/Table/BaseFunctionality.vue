@@ -10,7 +10,7 @@ type SelectFilter = {
 }
 
 const props = defineProps<{
-    perPage?: number
+    perPage?: number | string
     search?: string
     filters?: Record<string, any>
     perPageOptions?: number[]

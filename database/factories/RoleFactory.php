@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\UserRoleEnum;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class RoleFactory extends Factory
@@ -13,7 +13,8 @@ class RoleFactory extends Factory
     public function definition(): array
     {
         return [
-            'role_name' => $this->faker->randomElement(UserRoleEnum::cases())->value,
+            'name' => $this->faker->randomElement(UserRoleEnum::cases())->value,
+            'guard_name' => 'web',
         ];
     }
 }

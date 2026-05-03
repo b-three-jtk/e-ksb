@@ -18,6 +18,8 @@ const user = computed(() => page.props.auth?.user || {
     profile_picture: '/public/images/user/owner.jpg',
 })
 
+const userRole = computed(() => page.props.auth?.role || 'User')
+
 const photoUrl = computed(() => {
     if (user.value?.profile_picture) {
         return `/storage/${user.value.profile_picture}`
@@ -68,7 +70,7 @@ onUnmounted(() => {
             <div class="flex flex-col text-left">
                 <span class="block mr-1 font-medium text-theme-sm">{{ user.name }}</span>
                 <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-                    {{ user.role.name }}
+                    {{ userRole }}
                 </span>
             </div>
 
@@ -83,7 +85,7 @@ onUnmounted(() => {
                     {{ user.name }}
                 </span>
                 <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-                    {{ user.role.name }}
+                    {{ userRole }}
                 </span>
             </div>
 

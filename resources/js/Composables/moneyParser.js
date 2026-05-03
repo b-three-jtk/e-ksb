@@ -1,13 +1,25 @@
-function parseCurrencyAmount(str) {
-    const num = parseFloat(str);
-    if (Number.isNaN(num)) {
-        return '';
+export default function moneyParser(value) {
+    if (value === null || value === undefined || value === '') {
+        return 'Rp 0'
     }
+
+    let num
+    if (typeof value === 'string') {
+        num = parseFloat(value.replace(/[^\d.-]/g, ''))
+    } else {
+        num = parseFloat(value)
+    }
+
+    if (isNaN(num)) {
+        return 'Rp 0'
+    }
+
     const formatter = new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
-    });
-    return formatter.format(num);
-}
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    })
 
-export default parseCurrencyAmount;
+    return formatter.format(num)
+}

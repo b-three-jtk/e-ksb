@@ -113,7 +113,7 @@ const submitForm = () => {
 
                     <!-- Posisi -->
                     <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
-                        :selectables="roles.map(role => ({ value: role.id, text: role.role_name }))" :error="errors.role_id">
+                        :selectables="roles.map(role => ({ value: role.id, text: role.name }))" :error="errors.role_id">
                     </BaseInputAdmin>
 
                     <!-- Email -->
