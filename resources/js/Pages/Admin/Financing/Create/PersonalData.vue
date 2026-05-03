@@ -95,8 +95,8 @@ const heirInput = ref({
                 :error="errors.birth_date" />
             <BaseInputAdmin :model-value="form.member.residential_address" label="Alamat" type="textarea"
                 placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address" />
-            <BaseInputAdmin :model-value="form.member.residential_address" label="Alamat Domisili" type="textarea"
-                placeholder="Masukkan alamat domisili" rows="4" :error="errors.residential_address" />
+            <BaseInputAdmin :model-value="form.member.domicile_address" label="Alamat Domisili" type="textarea"
+                placeholder="Masukkan alamat domisili" rows="4" :error="errors.domicile_address" />
             <BaseInputAdmin :model-value="form.member.last_education" label="Pendidikan Terakhir" type="select"
                 :selectables="data.educations.map(unit => ({ value: unit, text: unit }))"
                 :error="errors.last_education" />

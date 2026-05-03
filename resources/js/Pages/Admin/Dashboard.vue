@@ -116,7 +116,7 @@ const applyFilter = () => {
                                 <h3 class="card-title">Permohonan Registrasi Terbaru</h3>
                             </div>
                             <Button
-                                :href="can['edit.anggota'] ? '/admin/users/verification' : '/admin/users/list'"
+                                :href="can['edit_anggota'] ? '/admin/users/verification' : '/admin/users/list'"
                                 variant="light" size="small">
                                 See all
                             </Button>

@@ -27,7 +27,6 @@ $adminRoles = [
     UserRoleEnum::PENGAWAS->value,
     UserRoleEnum::BENDAHARA->value,
     UserRoleEnum::DPS->value,
-    UserRoleEnum::PENGAWAS->value,
     UserRoleEnum::KETUAMURABAHAH->value,
     UserRoleEnum::STAFMURABAHAH->value,
 ];
@@ -126,8 +125,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/financing', [FinancingController::class, 'index'])->name('financing.index');
     Route::get('/financing/show/{id}', [FinancingController::class, 'show'])->name('financing.show');
     Route::get('/financing/create', [FinancingController::class, 'create'])->name('financing.create');
-    Route::get('/members/search', [FinancingController::class, 'searchMembers'])->name('admin.members.search');
-    Route::get('/suppliers/search', [FinancingController::class, 'searchSuppliers'])->name('admin.suppliers.search');
+    Route::get('/members/search', [FinancingController::class, 'searchMembers'])->name('members.search');
+    Route::get('/suppliers/search', [FinancingController::class, 'searchSuppliers'])->name('suppliers.search');
     Route::post('/financing/store', [FinancingController::class, 'store'])->name('financing.store');
     Route::resource('product-types', ProductTypeController::class);
     Route::get('/financing/draft/{id}', [FinancingController::class, 'loadDraft'])->name('financing.load-draft');
