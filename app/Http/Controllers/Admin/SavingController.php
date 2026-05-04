@@ -13,6 +13,7 @@ use App\Models\Member;
 use App\Models\MemberBankAccount;
 use App\Models\SavingProduct;
 use App\Models\User;
+use App\Models\MemberDoc;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -269,7 +270,7 @@ class SavingController extends Controller
             return Inertia::render('Admin/Savings/Penyetoran/Create', [
             'members' => $members,
             'accounts' => $accounts,
-            'saving_types' => SavingProduct::pluck('name'), // ✅ FIX
+            'saving_types' => collect(SavingTypeEnum::cases())->map(fn($case) => $case->value),
             'pengurus' => [
                 'name' => Auth::user()->name ?? 'Pengurus',
             ],
@@ -322,6 +323,18 @@ class SavingController extends Controller
                         'account_name' => $request->account_name,
                     ]
                 );
+            }
+
+            if ($request->hasFile('payment_proof')) {
+                $file = $request->file('payment_proof');
+
+                $path = $file->store('member_docs/payment_proof', 'public');
+
+                MemberDoc::create([
+                    'member_id' => $member->id,
+                    'doc_name' => 'Bukti Pembayaran Setoran',
+                    'doc_attachment' => $path,
+                ]);
             }
 
             $trx = SavingTransaction::create([
