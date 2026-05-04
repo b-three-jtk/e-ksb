@@ -91,16 +91,16 @@ class SavingController extends Controller
             ->through(function ($trx) {
                 return [
                     'id'           => $trx->id,
-                    'no_transaksi' => $trx->transaction_code, 
+                    'no_transaksi' => $trx->saving_transaction_code, 
                     'tanggal'      => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                    'anggota'      => $trx->savingAccount->user->member_number
+                    'anggota'      => $trx->savingAccount->member->user->user_code
                                     . ' - '
-                                    . $trx->savingAccount->user->name,
-                    'nominal'      => $trx->type === 'Penarikan'
-                                    ? -$trx->amount
-                                    : $trx->amount,
-                    'produk'       => $trx->savingAccount->type, // nama lengkap
-                    'jenis'        => $trx->type,
+                                    . $trx->savingAccount->member->user->name,
+                    'nominal'      => $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
+                                    ? -$trx->saving_amount
+                                    : $trx->saving_amount,
+                    'produk'       => $trx->savingAccount->savingProduct->name,
+                    'jenis'        => $trx->transaction_type,
                 ];
             });
 
@@ -185,12 +185,15 @@ class SavingController extends Controller
 
             foreach ($transactions as $trx) {
                 fputcsv($handle, [
-                    str_pad($trx->id, 6, '0', STR_PAD_LEFT),
-                    $trx->transaction_date->format('d/m/Y'),
-                    $trx->savingAccount->user->user_code . ' - ' . $trx->savingAccount->user->name,
-                    $trx->savingAccount->saving_type,
+                    $trx->saving_transaction_code,
+                    \Carbon\Carbon::parse($trx->transaction_date)->format('d/m/Y'),
+                    $trx->savingAccount->member->user->user_code . ' - ' .
+                    $trx->savingAccount->member->user->name,
+                    $trx->savingAccount->savingProduct->name ?? '-',
                     $trx->transaction_type,
-                    $trx->transaction_type === 'Penarikan' ? -$trx->saving_amount : $trx->saving_amount,
+                    $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
+                        ? -$trx->saving_amount
+                        : $trx->saving_amount,
                 ]);
             }
 
