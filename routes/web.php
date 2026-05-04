@@ -29,6 +29,7 @@ $adminRoles = [
     UserRoleEnum::DPS->value,
     UserRoleEnum::KETUAMURABAHAH->value,
     UserRoleEnum::STAFMURABAHAH->value,
+    UserRoleEnum::PJANGGOTA->value,
 ];
 
 Route::get('/', function () {
@@ -138,7 +139,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 });
 
 // User Routes
-Route::prefix('user')->name('user.')->middleware(['auth', 'role:user', 'revalidate'])->group(function () {
+Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'revalidate'])->group(function () {
     Route::get('/dashboard', [MemberController::class, 'index'])->name('userDashboard');
 
     Route::get('/profile', [UserProfileController::class, 'show'])->name('profile.show');
