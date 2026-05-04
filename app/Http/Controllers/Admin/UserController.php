@@ -11,6 +11,7 @@ use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMemberRequest;
 use App\Models\Financing;
+use App\Models\InstallmentPaymentTransaction;
 use App\Models\SavingAccount;
 use App\Models\User;
 use App\Services\Admin\RegisterMemberService;
@@ -174,10 +175,12 @@ class UserController extends Controller
     {
         $user = User::with([
             'member.memberDocs',
-            'role',
+            'roles',
             'member.savingAccounts.transactions',
+            'member.savingAccounts.savingProduct',
             'member.heirs',
             'member.financings.installment.paymentSchedules',
+            'member.financings.financingItem',
         ])->findOrFail($id);
 
         $user->profile_picture = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
@@ -192,6 +195,15 @@ class UserController extends Controller
                 ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
                 ->sortBy('due_date')
                 ->first();
+            $financing->total_price = $financing->financing_item?->cost_price + $financing->financing_item?->margin_amount;
+            $financing->remaining_principal = $financing->financing_item?->cost_price - InstallmentPaymentTransaction::whereHas('installmentPaymentSchedule', function ($q) use ($financing) {
+                $q->where('installment_id', $financing->installment->id);
+            })->sum('principal_paid');
+            $financing->remaining_margin = $financing->financing_item?->margin_amount - InstallmentPaymentTransaction::whereHas('installmentPaymentSchedule', function ($q) use ($financing) {
+                $q->where('installment_id', $financing->installment->id);
+            })->sum('margin_paid');
+            $financing->remaining_total = $financing->remaining_principal + $financing->remaining_margin;
+            $financing->monthly_installment = $financing->total_price / $financing->installment->tenor;
         });
 
         return inertia('Admin/User/Show', [

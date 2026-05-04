@@ -30,6 +30,7 @@ class SavingAccountSeeder extends Seeder
                 'saving_tenor' => fake()->numberBetween(6, 24),
                 'target_amount' => fake()->numberBetween(1000000, 10000000),
                 'member_id' => $member->id,
+                'balance' => fake()->numberBetween(500000, 5000000),
             ]);
 
             SavingTransaction::create([

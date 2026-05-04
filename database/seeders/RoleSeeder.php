@@ -50,6 +50,12 @@ public function run(): void
                 case UserRoleEnum::KETUA:
                     $role->givePermissionTo(['view_anggota', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'approve_murabahah']);
                     break;
+                case UserRoleEnum::SEKRETARIS:
+                    $role->givePermissionTo(['view_anggota', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'create_anggota', 'edit_anggota', 'delete_anggota']);
+                    break;
+                case UserRoleEnum::BENDAHARA:
+                    $role->givePermissionTo(['view_anggota', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'deposit_simpanan', 'withdraw_simpanan']);
+                    break;
                 case UserRoleEnum::ANGGOTA:
                     $role->givePermissionTo(['view_murabahah', 'view_simpanan']);
                     break;

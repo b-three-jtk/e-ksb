@@ -24,7 +24,7 @@ const page = usePage()
 const { sendCredentialsToWhatsApp } = useWhatsAppCredentials(toast)
 const memberCredentials = ref(null)
 
-const isSekretaris = computed(() => page.props.auth?.user?.role?.name === 'Sekretaris')
+const can = computed(() => page.props.auth.can);
 
 const showNewMemberCredentials = async () => {
     if (!memberCredentials.value?.user_code || !memberCredentials.value?.initial_password) {
@@ -178,7 +178,7 @@ const breadcrumbItems = [
                 </div>
 
                 <Link
-                    v-if="isSekretaris"
+                    v-if="can['create_anggota']"
                     href="/admin/users/create"
                     class="bg-green-500 hover:bg-green-600 text-white font-semibold font-head px-5 py-2 rounded-xl shadow-sm"
                 >

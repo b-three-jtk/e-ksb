@@ -145,7 +145,7 @@ const breadcrumbItems = [
                                 <span :class="getStatusClass()">{{ user.status }}</span>
                             </div>
                             <p class="text-gray-500">
-                                {{ user.role.name }} - {{ user.user_code }}
+                                {{ user.roles.name }} - {{ user.user_code }}
                             </p>
                         </div>
                     </div>
@@ -279,7 +279,7 @@ const breadcrumbItems = [
                         class="flex flex-col gap-4">
                         <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
                             <div v-for="account in user.member.saving_accounts" class="card-layout flex flex-col gap-12">
-                                <h1 class="card-title">{{ account.type }}</h1>
+                                <h1 class="card-title">{{ account.saving_product?.name }}</h1>
                                 <ul class="grid sm:grid-cols-2 grid-cols-1 gap-6">
                                     <li class="flex flex-col gap-2">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Saldo</span>
@@ -298,7 +298,7 @@ const breadcrumbItems = [
                                             :class="account.transactions[0]?.type == 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
                                             class="font-medium text-dark-text dark:text-white">{{
                                                 account.transactions[0]?.type == 'Penyetoran' ? '+' : '-' }}
-                                            {{ parseCurrencyAmount(account.transactions[0]?.amount) ?? '-' }}</span>
+                                            {{ parseCurrencyAmount(account.transactions[0]?.saving_amount) ?? '-' }}</span>
                                     </li>
                                     <li class="flex flex-col gap-2">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Transaksi</span>
@@ -322,12 +322,12 @@ const breadcrumbItems = [
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Objek Pembiayaan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            financing.product_name }}</span>
+                                            financing.financing_item?.name }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Harga Pembiayaan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(financing.loan?.total_loan) }}</span>
+                                            parseCurrencyAmount(financing.total_price) }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir
@@ -340,14 +340,13 @@ const breadcrumbItems = [
                                             <span class="text-sm text-gray-500 dark:text-gray-300">Sisa
                                                 Pembiayaan</span>
                                             <span class="font-medium text-dark-text dark:text-white">
-                                                {{ parseCurrencyAmount((parseFloat(financing.loan?.remaining_principal)
-                                                    || 0) + (parseFloat(financing.loan?.remaining_margin) || 0)) }}
+                                                {{ parseCurrencyAmount(financing.remaining_total) }}
                                             </span>
                                         </div>
                                         <div class="progress-container">
                                             <div class="progress-bar"
-                                                :style="{ width: (Math.min(((financing.loan?.tenor ?? 0) > 0
-                                                    ? (((financing.loan?.payment_schedules?.length ?? 0) / (financing.loan?.tenor ?? 0)) * 100)
+                                                :style="{ width: (Math.min(((financing.installment?.tenor ?? 0) > 0
+                                                    ? (((financing.installment?.payment_schedules?.length ?? 0) / (financing.installment?.tenor ?? 0)) * 100)
                                                     : 0), 100)) + '%' }">
                                             </div>
                                         </div>
@@ -355,7 +354,7 @@ const breadcrumbItems = [
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(financing.loan?.monthly_installment) }}</span>
+                                            parseCurrencyAmount(financing.monthly_installment) }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Jatuh Tempo
@@ -366,7 +365,7 @@ const breadcrumbItems = [
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Posisi Angsuran</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            financing.loan_payment_paid_count ?? 0 }} dari {{ financing.loan?.tenor ?? 0
+                                            financing.installment?.payment_schedules?.length ?? 0 }} dari {{ financing.installment?.tenor ?? 0
                                             }}</span>
                                     </li>
                                 </ul>
