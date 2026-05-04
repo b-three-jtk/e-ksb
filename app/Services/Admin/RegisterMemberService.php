@@ -94,6 +94,7 @@ class RegisterMemberService
             'birth_date' => $validated['birth_date'],
             'marital_status' => $validated['marital_status'],
             'domicile_address' => $validated['domicile_address'],
+            'spouse_name' => $validated['spouse_name'] ?? null,
             'residential_address' => $validated['residential_address'] ?? null,
             'last_education' => $validated['last_education'],
             'status' => MemberStatusEnum::PAYMENT_PENDING->value,
