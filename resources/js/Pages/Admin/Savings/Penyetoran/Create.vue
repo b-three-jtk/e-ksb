@@ -161,7 +161,10 @@ const bankOptions = ['BCA','BNI','BRI','Mandiri','BTN','CIMB Niaga','Permata','D
 
 const filteredAccounts = computed(() => {
   if (!selectedMember.value) return []
-  return props.accounts.filter(a => a.user_id === selectedMember.value.id)
+
+  return props.accounts.filter(
+    acc => acc.member_id === selectedMember.value.id
+  )
 })
 
 const accountNameOptions   = computed(() => filteredAccounts.value.map(a => a.account_name))
@@ -185,13 +188,17 @@ function removeFile() {
 }
 
 const selectedAccount = computed(() => {
-  if (!selectedMember.value || !jenisSimpanan.value) return null
+  if (!selectedMember.value) return null
+
   return (selectedMember.value.savingAccounts || []).find(
-    acc => acc.saving_type === jenisSimpanan.value
-  ) || null
+    acc => acc.type === jenisSimpanan.value
+  )
 })
 
-const isNewAccount = computed(() => !selectedAccount.value)
+const isNewAccount = computed(() => {
+  if (!selectedMember.value) return false
+  return !selectedAccount.value
+})
 
 // Validasi
 const errorsForm = computed(() => {
@@ -242,7 +249,7 @@ const confirmationData = computed(() => ({
   date: tanggalSetor.value,
   tenorMonths: tenorMonths.value,
   targetAmount: targetAmount.value,
-  officerName: props.pengurus.value?.name,
+  officerName: props.pengurus?.name,
 }))
 
 function handleConfirm() {
@@ -252,7 +259,7 @@ function handleConfirm() {
   formData.append('saving_category', jenisSimpanan.value)
   formData.append('amount', nominalRaw.value)
   formData.append('date', tanggalSetor.value)
-  formData.append('method', depositMethod.value)
+  formData.append('saving_payment_method', depositMethod.value)
   formData.append('notes', catatan.value)
 
   if (isNewAccount.value) {
