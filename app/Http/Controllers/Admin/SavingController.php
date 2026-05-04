@@ -308,7 +308,7 @@ class SavingController extends Controller
 
         $prevBalance = $savingAccount->balance;
 
-        $transaction = DB::transaction(function () use ($request, $savingAccount, $member) {
+        $transaction = DB::transaction(function () use ($request, $savingAccount, $member, $savingProduct, $prevBalance) {
 
             $account = null;
 
@@ -350,6 +350,32 @@ class SavingController extends Controller
             ]);
 
             $savingAccount->increment('balance', $request->amount);
+
+            $strukData = [
+                'no_transaksi' => $trx->saving_transaction_code,
+                'tanggal' => $trx->transaction_date,
+                'pengurus' => Auth::user()->name,
+
+                'nama_anggota' => $member->user->name,
+                'no_anggota' => $member->user->user_code,
+
+                'jenis' => $savingProduct->name,
+                'metode' => $trx->saving_payment_method,
+
+                'nominal' => $trx->saving_amount,
+
+                'saldo_sebelum' => $prevBalance,
+                'saldo_sesudah' => $prevBalance + $trx->saving_amount,
+
+                'tenor' => $savingAccount->saving_tenor,
+                'target' => $savingAccount->target_amount,
+
+                'bank_name' => $request->bank_name ?? '',
+                'account_name' => $request->account_name ?? '',
+                'account_number' => $request->account_number ?? '',
+            ];
+
+            $this->storeReceiptDepositPdf($trx, $strukData, $member->id);
 
             return $trx;
         });
@@ -407,5 +433,36 @@ class SavingController extends Controller
                 'target' => $savingAccount->target_amount,
             ]
         ]);
+    }
+
+    private function storeReceiptDepositPdf($transaction, array $strukData, $memberId): ?string
+    {
+        try {
+            $pdf = Pdf::loadView('exports.deposit_receipt', [
+                'struk' => $strukData,
+            ])->setPaper([0, 0, 226.77, 600], 'portrait');
+
+            $directory = 'member_docs/receipts/' . now()->format('Y-m');
+            $filename = 'struk-deposit-' . $transaction->id . '.pdf';
+            $path = $directory . '/' . $filename;
+
+            Storage::disk('public')->put($path, $pdf->output());
+
+            if (Storage::disk('public')->exists($path)) {
+                // simpan ke member_docs
+                MemberDoc::create([
+                    'member_id' => $memberId,
+                    'doc_name' => 'Struk Penyetoran',
+                    'doc_attachment' => $path,
+                ]);
+
+                return $path;
+            }
+
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return null;
     }
 }
