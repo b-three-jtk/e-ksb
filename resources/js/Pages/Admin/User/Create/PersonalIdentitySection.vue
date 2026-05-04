@@ -90,6 +90,17 @@ defineProps({
 				:error="getFieldError('marital_status', errors.marital_status)"
 			/>
 
+			<!-- Nama Pasangan, tampil ketika status = Kawin -->
+			<BaseInputAdmin
+				v-if="form.marital_status === 'Kawin'"
+				v-model="form.spouse_name"
+				label="Nama Pasangan"
+				type="text"
+				placeholder="Isi nama pasangan"
+				@input="form.spouse_name = onlyLetters(form.spouse_name)"
+				:error="getFieldError('spouse_name', errors.spouse_name)"
+			/>
+
 			<BaseInputAdmin
 				v-model="form.last_education"
 				label="Pendidikan Terakhir"

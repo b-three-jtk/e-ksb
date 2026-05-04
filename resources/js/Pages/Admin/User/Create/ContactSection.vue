@@ -45,13 +45,13 @@ defineProps({
 			/>
 
 			<BaseInputAdmin
-				v-model="form.address"
+				v-model="form.domicile_address"
 				class="md:col-span-2"
 				label="Alamat Sesuai KTP"
 				type="text"
 				placeholder="Isi dengan huruf dan angka"
 				required
-				:error="getFieldError('address', errors.address)"
+				:error="getFieldError('domicile_address', errors.domicile_address)"
 			/>
 
 			<BaseInputAdmin
