@@ -252,6 +252,8 @@ const confirmationData = computed(() => ({
   officerName: props.pengurus?.name,
 }))
 
+const konfirmasiChecked = ref(false)
+
 function handleConfirm() {
   const formData = new FormData()
 
@@ -510,7 +512,7 @@ const akadType = computed(() => {
                         class="w-full px-4 py-2.5 pr-20 border rounded-lg
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                                focus:outline-none focus:ring-2 transition-colors"
-                        :class="errorsForm.tenor
+                        :class="errorsForm.value.tenor
                           ? 'border-red-400 focus:ring-red-400 dark:border-red-500'
                           : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
                       />
@@ -518,9 +520,9 @@ const akadType = computed(() => {
                         bulan
                       </span>
                     </div>
-                    <p v-if="errorsForm.tenor" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                    <p v-if="errorsForm.value.tenor" class="mt-1 text-xs text-red-500 flex items-center gap-1">
                       <Icon icon="mdi:alert-circle-outline" width="13" />
-                      {{ errorsForm.tenor }}
+                      {{ errorsForm.value.tenor }}
                     </p>
                     <p v-else-if="tenorMonths && Number(tenorMonths) > 0" class="mt-1 text-xs text-gray-400">
                       {{ tenorHint(tenorMonths) }}
