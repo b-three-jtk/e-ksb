@@ -145,7 +145,7 @@ const breadcrumbItems = [
                                 <span :class="getStatusClass()">{{ user.status }}</span>
                             </div>
                             <p class="text-gray-500">
-                                {{ user.roles.name }} - {{ user.user_code }}
+                                {{ user.roles[0].name }} - {{ user.user_code }}
                             </p>
                         </div>
                     </div>

@@ -14,6 +14,8 @@ const breadcrumbItems = [
     {name: 'Detail Admin'},
 ];
 
+console.log(props.user);
+
 </script>
 
 <template>
@@ -34,7 +36,7 @@ const breadcrumbItems = [
                         <div class="flex flex-col justify-center gap-1">
                             <h1 class="card-title">{{ user.name }}</h1>
                             <p class="text-gray-500">
-                                {{ user.role.name }}
+                                {{ user.roles[0].name }}
                             </p>
                         </div>
                     </div>

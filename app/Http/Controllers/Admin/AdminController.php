@@ -32,8 +32,8 @@ class AdminController extends Controller
             UserStatusEnum::INACTIVE->value,
         ];
 
-        $admins = User::with('role')
-            ->whereHas('role', fn ($q) =>
+        $admins = User::with('roles')
+            ->whereHas('roles', fn ($q) =>
                 $q->whereNotIn('name', [UserRoleEnum::ANGGOTA->value])
             )
             ->whereIn('status', $allowedAdminStatuses)
@@ -48,10 +48,10 @@ class AdminController extends Controller
                 $request->status && in_array($request->status, $allowedAdminStatuses),
                 fn($q) => $q->where('status', $request->status)
             )
-            ->when($request->role && !in_array($request->role, [UserRoleEnum::ANGGOTA->value]),
+            ->when($request->roles && !in_array($request->roles, [UserRoleEnum::ANGGOTA->value]),
                 fn ($q) =>
-                    $q->whereHas('role', fn ($r) =>
-                        $r->where('name', $request->role)
+                    $q->whereHas('roles', fn ($r) =>
+                        $r->where('name', $request->roles)
                     )
             )
             ->orderBy($sortBy, $sortDir)
@@ -62,7 +62,7 @@ class AdminController extends Controller
                 'nik' => $user->nik,
                 'name' => $user->name,
                 'email' => $user->email,
-                'posisi' => $user->role->name,
+                'posisi' => $user->getRoleNames()->first(),
                 'status' => $user->status,
                 'avatar' => $user->profile_picture
                     ? asset('storage/' . $user->profile_picture)
@@ -98,7 +98,7 @@ class AdminController extends Controller
      */
     public function store(StoreAdminRequest $request)
     {
-        DB::begin();
+        DB::beginTransaction();
         try {
             $data = $request->validated();
 
@@ -125,7 +125,7 @@ class AdminController extends Controller
      */
     public function show(string $id)
     {
-        $admin = User::with('role')->findOrFail($id);
+        $admin = User::with('roles')->findOrFail($id);
 
         $admin->profile_picture = $admin->profile_picture
             ? asset('storage/' . $admin->profile_picture)
@@ -142,7 +142,7 @@ class AdminController extends Controller
      */
     public function edit(string $id)
     {
-        $admin = User::with('role')->findOrFail($id);
+        $admin = User::with('roles')->findOrFail($id);
         $roles = Role::where('name', '!=', UserRoleEnum::ANGGOTA->value)->get();
         $educations = array_column(EducationEnum::cases(), 'value');
 

@@ -29,6 +29,7 @@ $adminRoles = [
     UserRoleEnum::DPS->value,
     UserRoleEnum::KETUAMURABAHAH->value,
     UserRoleEnum::STAFMURABAHAH->value,
+    UserRoleEnum::PJANGGOTA->value
 ];
 
 Route::get('/', function () {
@@ -86,7 +87,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/create', [AdminController::class, 'create']);
     Route::post('/store', [AdminController::class, 'store']);
     Route::get('/edit/{id}', [AdminController::class, 'edit']);
-    Route::put('/update/{id}', [AdminController::class, 'update'])->name('update');
+    Route::put('/update/{id}', [AdminController::class, 'update'])->name('update')->middleware('role:Sekretaris');
     Route::get('/show/{id}', [AdminController::class, 'show']);
 
     Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
