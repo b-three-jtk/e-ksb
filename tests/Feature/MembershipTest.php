@@ -3,6 +3,7 @@
 use App\Enums\EducationEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Models\Financing;
+use App\Models\Member;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -194,10 +195,11 @@ test('members cannot submit new resignation if there is an active pending reques
 });
 
 test('system verifies member has no pending financial or administrative obligations before resignation', function () {
-        $anggotaBiasa = User::factory()->create();
-        $anggotaBiasa->assignRole('Anggota');
+        $anggotaBiasa = Member::factory()->create();
+        $user = User::where('id', $anggotaBiasa->user_id)->first();
+        $user->assignRole('Anggota');
 
-        $responseAnggota = $this->actingAs($anggotaBiasa)
+        $responseAnggota = $this->actingAs($user)
                                 ->post('/user/resign', [
                                     'document' => UploadedFile::fake()->create('resign.pdf')
                                 ]);
@@ -206,9 +208,10 @@ test('system verifies member has no pending financial or administrative obligati
 });
 
 test('system rejects resignation and displays reason if obligations exist', function () {
-    $anggotaBiasa = User::factory()->create();
-        $anggotaBiasa->assignRole('Anggota');
-        $responseAnggota = $this->actingAs($anggotaBiasa)
+        $anggotaBiasa = Member::factory()->create();
+        $user = User::where('id', $anggotaBiasa->user_id)->first();
+        $user->assignRole('Anggota');
+        $responseAnggota = $this->actingAs($user)
                                 ->get('/admin/anggota/resign');
 
         $responseAnggota->assertStatus(200);

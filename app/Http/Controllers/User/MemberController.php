@@ -127,8 +127,8 @@ class MemberController extends Controller
         DB::beginTransaction();
         try {
             MemberDoc::create([
-                'name' => 'Dokumen Pengunduran Diri',
-                'attachment' => $path,
+                'doc_name' => 'Dokumen Pengunduran Diri',
+                'doc_attachment' => $path,
                 'member_id' => $user->member->id,
             ]);
             $user->member->status = MemberStatusEnum::RESIGNED_REQUESTED->value;
