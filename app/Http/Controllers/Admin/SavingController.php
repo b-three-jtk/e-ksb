@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 
 class SavingController extends Controller
 {
@@ -254,6 +255,7 @@ class SavingController extends Controller
                     'name' => $member->user->name,
                     'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
                         'type' => $acc->savingProduct->name ?? null,
+                        'balance' => $acc->balance ?? 0,
                     ]),
                 ];
             });
@@ -312,18 +314,18 @@ class SavingController extends Controller
 
             $account = null;
 
-            if ($request->saving_payment_method === 'Non-Tunai') {
-                $account = MemberBankAccount::updateOrCreate(
-                    [
-                        'account_number' => $request->account_number,
-                        'member_id' => $member->id,
-                    ],
-                    [
-                        'bank_name' => $request->bank_name,
-                        'account_name' => $request->account_name,
-                    ]
-                );
-            }
+            // if ($request->saving_payment_method === 'Non-Tunai') {
+            //     $account = MemberBankAccount::updateOrCreate(
+            //         [
+            //             'account_number' => $request->account_number,
+            //             'member_id' => $member->id,
+            //         ],
+            //         [
+            //             'bank_name' => $request->bank_name,
+            //             'account_name' => $request->account_name,
+            //         ]
+            //     );
+            // }
 
             if ($request->hasFile('payment_proof')) {
                 $file = $request->file('payment_proof');
@@ -346,7 +348,7 @@ class SavingController extends Controller
                 'transaction_date' => $request->date,
                 'updated_by' => Auth::id(),
                 'saving_account_id' => $savingAccount->id,
-                'account_number' => $account?->account_number,
+                'account_number' => null,
             ]);
 
             $savingAccount->increment('balance', $request->amount);
@@ -370,9 +372,9 @@ class SavingController extends Controller
                 'tenor' => $savingAccount->saving_tenor,
                 'target' => $savingAccount->target_amount,
 
-                'bank_name' => $request->bank_name ?? '',
-                'account_name' => $request->account_name ?? '',
-                'account_number' => $request->account_number ?? '',
+                // 'bank_name' => $request->bank_name ?? '',
+                // 'account_name' => $request->account_name ?? '',
+                // 'account_number' => $request->account_number ?? '',
             ];
 
             $this->storeReceiptDepositPdf($trx, $strukData, $member->id);
@@ -437,31 +439,29 @@ class SavingController extends Controller
 
     private function storeReceiptDepositPdf($transaction, array $strukData, $memberId): ?string
     {
-        try {
-            $pdf = Pdf::loadView('exports.deposit_receipt', [
-                'struk' => $strukData,
-            ])->setPaper([0, 0, 226.77, 600], 'portrait');
+        $pdf = Pdf::loadView('exports.deposit_receipt', [
+            'struk' => $strukData,
+        ])->setPaper([0, 0, 226.77, 600], 'portrait');
 
-            $directory = 'member_docs/receipts/' . now()->format('Y-m');
-            $filename = 'struk-deposit-' . $transaction->id . '.pdf';
-            $path = $directory . '/' . $filename;
+        $directory = 'member_docs/receipts/' . now()->format('Y-m');
+        Storage::disk('public')->makeDirectory($directory);
 
-            Storage::disk('public')->put($path, $pdf->output());
+        $filename = 'struk-deposit-' . $transaction->id . '.pdf';
+        $path = $directory . '/' . $filename;
 
-            if (Storage::disk('public')->exists($path)) {
-                // simpan ke member_docs
-                MemberDoc::create([
-                    'member_id' => $memberId,
-                    'doc_name' => 'Struk Penyetoran',
-                    'doc_attachment' => $path,
-                ]);
+        Storage::disk('public')->put($path, $pdf->output());
 
-                return $path;
-            }
+        if (Storage::disk('public')->exists($path)) {
+            MemberDoc::create([
+                'member_id' => $memberId,
+                'doc_name' => 'Struk Penyetoran',
+                'doc_attachment' => $path,
+            ]);
 
-        } catch (\Throwable $e) {
-            report($e);
+            return $path;
         }
+
+            throw new \Exception('File tidak berhasil disimpan');
 
         return null;
     }
