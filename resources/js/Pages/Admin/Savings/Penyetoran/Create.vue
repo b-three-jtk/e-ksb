@@ -15,6 +15,22 @@ const props = defineProps({
     pengurus: { type: Object, required: true }
 })
 
+const filteredSavingTypes = computed(() => {
+  if (!selectedMember.value) return []
+
+  let types = [...new Set(props.saving_types)]
+
+  if (selectedMember.value.status === 'Menunggu Pembayaran') {
+    return ['Simpanan Pokok']
+  }
+
+  if (selectedMember.value.status === 'Aktif') {
+    return types.filter(j => j !== 'Simpanan Pokok')
+  }
+
+  return []
+})
+
 const memberQuery   = ref('')
 const selectedMember = ref(null)
 
@@ -458,7 +474,7 @@ const akadType = computed(() => {
                          focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="" disabled>— Pilih jenis simpanan —</option>
-                  <option v-for="j in saving_types" :key="j" :value="j">{{ j }}</option>
+                  <option v-for="j in filteredSavingTypes" :key="j" :value="j">{{ j }}</option>
                 </select>
               </div>
 
