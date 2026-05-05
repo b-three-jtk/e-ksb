@@ -250,6 +250,7 @@ const confirmationData = computed(() => ({
   tenorMonths: tenorMonths.value,
   targetAmount: targetAmount.value,
   officerName: props.pengurus?.name,
+  balance: selectedAccount.value ? Number(selectedAccount.value.balance) : 0,
 }))
 
 const konfirmasiChecked = ref(false)
