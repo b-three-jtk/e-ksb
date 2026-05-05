@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
+use App\Enums\MemberStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\SavingAccount;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class SavingController extends Controller
 {
@@ -242,7 +244,10 @@ class SavingController extends Controller
     public function createDeposit(Request $request)
     {
 
-        $members = Member::where('status', 'Aktif')
+        $members = Member::whereIn('status', [
+            MemberStatusEnum::ACTIVE->value,
+            MemberStatusEnum::PAYMENT_PENDING->value
+        ])
             ->with([
                 'user:id,user_code,name',
                 'savingAccounts.savingProduct:id,name'
@@ -253,6 +258,7 @@ class SavingController extends Controller
                     'id' => $member->id,
                     'user_code' => $member->user->user_code,
                     'name' => $member->user->name,
+                    'status' => $member->status,
                     'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
                         'type' => $acc->savingProduct->name ?? null,
                         'balance' => $acc->balance ?? 0,
@@ -260,19 +266,19 @@ class SavingController extends Controller
                 ];
             });
 
-        $accounts = MemberBankAccount::select(
-            'account_number',
-            'bank_name',
-            'account_name',
-            'member_id'
-        )->get();
+        // $accounts = MemberBankAccount::select(
+        //     'account_number',
+        //     'bank_name',
+        //     'account_name',
+        //     'member_id'
+        // )->get();
 
         $pengurus = Auth::user();
 
             return Inertia::render('Admin/Savings/Penyetoran/Create', [
             'members' => $members,
-            'accounts' => $accounts,
-            'saving_types' => collect(SavingTypeEnum::cases())->map(fn($case) => $case->value),
+            // 'accounts' => $accounts,
+            'saving_types' => SavingProduct::pluck('name'),
             'pengurus' => [
                 'name' => Auth::user()->name ?? 'Pengurus',
             ],
@@ -292,6 +298,25 @@ class SavingController extends Controller
         $member = Member::with('user')->findOrFail($request->member_id);
 
         $savingProduct = SavingProduct::where('name', $request->saving_category)->firstOrFail();
+
+        if ($savingProduct->name === 'Simpanan Pokok') {
+            if ($member->status !== MemberStatusEnum::PAYMENT_PENDING->value) {
+                throw ValidationException::withMessages([
+                    'saving_category' => 'Simpanan pokok hanya untuk anggota baru (menunggu pembayaran).'
+                ]);
+            }
+
+            $alreadyPaid = SavingTransaction::whereHas('savingAccount', function ($q) use ($member, $savingProduct) {
+                $q->where('member_id', $member->id)
+                ->where('saving_product_id', $savingProduct->id);
+            })->exists();
+
+            if ($alreadyPaid) {
+                throw ValidationException::withMessages([
+                    'saving_category' => 'Simpanan pokok hanya boleh dibayar 1 kali.'
+                ]);
+            }
+        }
 
         $savingAccount = SavingAccount::where('member_id', $member->id)
             ->where('saving_product_id', $savingProduct->id)
@@ -352,6 +377,11 @@ class SavingController extends Controller
             ]);
 
             $savingAccount->increment('balance', $request->amount);
+            if ($savingProduct->name === 'Simpanan Pokok') {
+                $member->update([
+                    'status' => MemberStatusEnum::ACTIVE->value
+                ]);
+            }
 
             $strukData = [
                 'no_transaksi' => $trx->saving_transaction_code,
@@ -382,7 +412,10 @@ class SavingController extends Controller
             return $trx;
         });
 
-        $members = Member::where('status', 'Aktif')
+        $members = Member::whereIn('status', [
+            MemberStatusEnum::ACTIVE->value,
+            MemberStatusEnum::PAYMENT_PENDING->value
+        ])
             ->with([
                 'user:id,user_code,name',
                 'savingAccounts.savingProduct:id,name'
@@ -393,6 +426,7 @@ class SavingController extends Controller
                     'id' => $member->id,
                     'user_code' => $member->user->user_code,
                     'name' => $member->user->name,
+                    'status' => $member->status,
                     'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
                         'type' => $acc->savingProduct->name ?? null,
                         'balance' => $acc->balance ?? 0,
