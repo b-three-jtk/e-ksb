@@ -65,14 +65,14 @@ const tenorMonths  = ref('')
 const targetAmount = ref('')
 const targetDisplay = ref('')
 
-// Non-tunai
-const bankName      = ref('')
-const accountName   = ref('')
-const accountNumber = ref('')
-const paymentFile   = ref(null)
-const paymentProof  = ref(null)
-const errorFile     = ref('')
-const fileInput     = ref(null)
+//Non-tunai
+// const bankName      = ref('')
+// const accountName   = ref('')
+// const accountNumber = ref('')
+// const paymentFile   = ref(null)
+// const paymentProof  = ref(null)
+// const errorFile     = ref('')
+// const fileInput     = ref(null)
 
 // Dialog & konfirmasi
 const showDialog        = ref(false)
@@ -83,25 +83,25 @@ watch(jenisSimpanan, () => {
   targetDisplay.value = ''
 })
 
-watch(depositMethod, val => {
-  if (val === 'Tunai') resetNonTunai()
-})
+// watch(depositMethod, val => {
+//   if (val === 'Tunai') resetNonTunai()
+// })
 
-watch(accountName, val => {
-  const acc = filteredAccounts.value.find(a => a.account_name === val)
-  if (acc) {
-    accountNumber.value = acc.account_number
-    bankName.value      = acc.bank_name
-  }
-})
+// watch(accountName, val => {
+//   const acc = filteredAccounts.value.find(a => a.account_name === val)
+//   if (acc) {
+//     accountNumber.value = acc.account_number
+//     bankName.value      = acc.bank_name
+//   }
+// })
 
-watch(accountNumber, val => {
-  const acc = filteredAccounts.value.find(a => a.account_number === val)
-  if (acc) {
-    accountName.value = acc.account_name
-    bankName.value    = acc.bank_name
-  }
-})
+// watch(accountNumber, val => {
+//   const acc = filteredAccounts.value.find(a => a.account_number === val)
+//   if (acc) {
+//     accountName.value = acc.account_name
+//     bankName.value    = acc.bank_name
+//   }
+// })
 
 function today() {
   const d     = new Date()
@@ -150,12 +150,12 @@ function onTargetInput(e) {
   targetDisplay.value = raw ? formatRp(raw) : ''
 }
 
-function resetNonTunai() {
-  bankName.value = accountName.value = accountNumber.value = ''
-  paymentFile.value = paymentProof.value = null
-  errorFile.value = ''
-  if (fileInput.value) fileInput.value.value = ''
-}
+// function resetNonTunai() {
+//   bankName.value = accountName.value = accountNumber.value = ''
+//   paymentFile.value = paymentProof.value = null
+//   errorFile.value = ''
+//   if (fileInput.value) fileInput.value.value = ''
+// }
 
 const bankOptions = ['BCA','BNI','BRI','Mandiri','BTN','CIMB Niaga','Permata','Danamon','BSI','BJB']
 
@@ -216,12 +216,12 @@ const errorsForm = computed(() => {
       e.target = 'Target wajib diisi'
   }
 
-  if (depositMethod.value === 'Non-Tunai') {
-    if (!bankName.value)      e.bank          = 'Pilih bank'
-    if (!accountNumber.value) e.accountNumber = 'Isi nomor rekening'
-    if (!accountName.value)   e.accountName   = 'Isi atas nama'
-    if (!paymentFile.value)   e.bukti         = 'Upload bukti pembayaran'
-  }
+  // if (depositMethod.value === 'Non-Tunai') {
+  //   if (!bankName.value)      e.bank          = 'Pilih bank'
+  //   if (!accountNumber.value) e.accountNumber = 'Isi nomor rekening'
+  //   if (!accountName.value)   e.accountName   = 'Isi atas nama'
+  //   if (!paymentFile.value)   e.bukti         = 'Upload bukti pembayaran'
+  // }
   return e
 })
 
@@ -270,12 +270,12 @@ function handleConfirm() {
     formData.append('target_amount', targetAmount.value)
   }
 
-  if (depositMethod.value === 'Non-Tunai') {
-    formData.append('bank_name', bankName.value)
-    formData.append('account_name', accountName.value)
-    formData.append('account_number', accountNumber.value)
-    formData.append('payment_proof', paymentFile.value)
-  }
+  // if (depositMethod.value === 'Non-Tunai') {
+  //   formData.append('bank_name', bankName.value)
+  //   formData.append('account_name', accountName.value)
+  //   formData.append('account_number', accountNumber.value)
+  //   formData.append('payment_proof', paymentFile.value)
+  // }
 
   router.post('/admin/saving/deposit', formData, {
     forceFormData: true,
@@ -307,7 +307,7 @@ function resetForm() {
   tenorMonths.value    = ''
   targetAmount.value   = ''
   targetDisplay.value  = ''
-  resetNonTunai()
+  // resetNonTunai()
 }
 
 const breadcrumbItems = [
@@ -648,14 +648,14 @@ const akadType = computed(() => {
               </div>
 
               <!-- Non-Tunai fields -->
-              <Transition name="slide">
+              <!-- <Transition name="slide">
                 <div
                   v-if="depositMethod === 'Non-Tunai'"
                   class="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700"
                 >
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4"> -->
                     <!-- Bank -->
-                    <div>
+                    <!-- <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
                         Bank <span class="text-red-500">*</span>
                       </label>
@@ -668,10 +668,10 @@ const akadType = computed(() => {
                         <option value="" disabled>— Pilih —</option>
                         <option v-for="b in bankOptions" :key="b">{{ b }}</option>
                       </select>
-                    </div>
+                    </div> -->
 
                     <!-- No. Rekening -->
-                    <div>
+                    <!-- <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
                         No. Rekening <span class="text-red-500">*</span>
                       </label>
@@ -685,10 +685,10 @@ const akadType = computed(() => {
                       <datalist id="norekList">
                         <option v-for="n in accountNumberOptions" :key="n" :value="n" />
                       </datalist>
-                    </div>
+                    </div> -->
 
                     <!-- Atas Nama -->
-                    <div>
+                    <!-- <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
                         Atas Nama <span class="text-red-500">*</span>
                       </label>
@@ -703,10 +703,10 @@ const akadType = computed(() => {
                         <option v-for="n in accountNameOptions" :key="n" :value="n" />
                       </datalist>
                     </div>
-                  </div>
+                  </div> -->
 
                   <!-- Upload bukti -->
-                  <div>
+                  <!-- <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
                       Bukti Transfer <span class="text-red-500">*</span>
                     </label>
@@ -741,7 +741,7 @@ const akadType = computed(() => {
                     <p v-if="errorFile" class="mt-1 text-xs text-red-600">{{ errorFile }}</p>
                   </div>
                 </div>
-              </Transition>
+              </Transition> -->
 
             </fieldset>
             <!-- Akhir fieldset -->
