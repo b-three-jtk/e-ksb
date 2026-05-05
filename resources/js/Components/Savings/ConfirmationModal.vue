@@ -213,7 +213,7 @@ function close() {
                         </div>
 
                         <!-- Untuk enarikan non-tunai) -->
-                        <div v-if="data.method === 'Non-Tunai'"
+                        <div v-if="!isDeposit && data.method === 'Non-Tunai'"
                             class="border-b border-gray-100 dark:border-gray-700 pb-4">
                             <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Rekening Tujuan</div>
                             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded text-sm space-y-1">
