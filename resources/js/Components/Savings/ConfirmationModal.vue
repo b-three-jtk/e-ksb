@@ -65,10 +65,13 @@ const buttonClass = computed(() =>
         : 'bg-green-600 text-white hover:bg-green-700'
 )
 
-const remainingBalance = computed(() => {
-    const balance = Number(props.data.balance || 0)
-    const amount = Number(props.data.amount || 0)
-    return balance - amount
+const finalBalance = computed(() => {
+  const balance = Number(props.data.balance ?? 0)
+  const amount = Number(props.data.amount ?? 0)
+
+  return isDeposit.value
+    ? balance + amount
+    : balance - amount
 })
 
 watch(() => props.isOpen, (isOpen) => {
@@ -131,107 +134,103 @@ function close() {
                     </div>
 
                     <div class="p-5 space-y-4">
-                        <div v-if="isDeposit"
-                            class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div
-                                class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-700 dark:text-blue-300 font-bold shrink-0">
-                                {{ initials(data.memberName) }}
-                            </div>
-                            <div class="min-w-0">
-                                <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ data.memberName }}
-                                </div>
-                                <div class="text-sm text-gray-500">{{ data.memberNumber }}</div>
-                            </div>
-                        </div>
 
-                        <div v-else class="border-b border-gray-100 dark:border-gray-700 pb-4">
+                        <!-- Anggota -->
+                        <div class="border-b border-gray-100 dark:border-gray-700 pb-4">
                             <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Anggota</div>
-                            <div class="font-semibold text-gray-900 dark:text-gray-100">{{ data.memberName }}</div>
-                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ data.memberNumber }}</div>
+                            <div class="font-semibold text-gray-900 dark:text-gray-100">
+                                {{ data.memberName }}
+                            </div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ data.memberNumber }}
+                            </div>
                         </div>
 
-                        <table v-if="isDeposit" class="w-full text-sm">
+                        <!-- Detail -->
+                        <table class="w-full text-sm border-b border-gray-100 dark:border-gray-700 pb-2">
                             <tbody>
-                                <tr class="border-b border-gray-100 dark:border-gray-700">
-                                    <td class="py-2 text-gray-500">Jenis</td>
-                                    <td class="text-right font-medium text-gray-900 dark:text-gray-100">{{
-                                        data.savingType }}</td>
-                                </tr>
-                                <tr v-if="data.tenorMonths" class="border-b border-gray-100 dark:border-gray-700">
-                                    <td class="py-2 text-gray-500">Jangka Waktu</td>
-                                    <td class="text-right text-gray-900 dark:text-gray-100">{{ data.tenorMonths }} bulan
-                                    </td>
-                                </tr>
-                                <tr v-if="data.targetAmount" class="border-b border-gray-100 dark:border-gray-700">
-                                    <td class="py-2 text-gray-500">Target</td>
-                                    <td class="text-right text-gray-900 dark:text-gray-100">{{
-                                        formatRp(data.targetAmount) }}</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 dark:border-gray-700">
-                                    <td class="py-2 text-gray-500">Nominal</td>
-                                    <td class="text-right font-bold text-gray-900 dark:text-gray-100">{{
-                                        formatRp(data.amount) }}</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 dark:border-gray-700">
-                                    <td class="py-2 text-gray-500">Metode</td>
-                                    <td class="text-right text-gray-900 dark:text-gray-100">{{ data.method }}</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 dark:border-gray-700">
-                                    <td class="py-2 text-gray-500">Tanggal</td>
-                                    <td class="text-right text-gray-900 dark:text-gray-100">{{ formatDate(data.date) }}
-                                    </td>
-                                </tr>
                                 <tr>
+                                    <td class="py-2 text-gray-500">Jenis Simpanan</td>
+                                    <td class="text-right font-medium">{{ data.savingType }}</td>
+                                </tr>
+
+                                <tr v-if="data.tenorMonths">
+                                    <td class="py-2 text-gray-500">Jangka Waktu</td>
+                                    <td class="text-right">{{ data.tenorMonths }} bulan</td>
+                                </tr>
+
+                                <tr v-if="data.targetAmount">
+                                    <td class="py-2 text-gray-500">Target</td>
+                                    <td class="text-right">{{ formatRp(data.targetAmount) }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td class="py-2 text-gray-500">Metode</td>
+                                    <td class="text-right">{{ data.method }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td class="py-2 text-gray-500">
+                                        {{ isDeposit ? 'Tanggal Setor' : 'Tanggal Penarikan' }}
+                                    </td>
+                                    <td class="text-right">{{ formatDate(data.date) }}</td>
+                                </tr>
+
+                                <tr v-if="data.officerName">
                                     <td class="py-2 text-gray-500">Oleh</td>
-                                    <td class="text-right text-gray-900 dark:text-gray-100">{{ data.officerName }}</td>
+                                    <td class="text-right">{{ data.officerName }}</td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <template v-else>
-                            <table class="w-full text-sm border-b border-gray-100 dark:border-gray-700 pb-2">
-                                <tbody>
-                                    <tr>
-                                        <td class="py-2 text-gray-500">Jenis Simpanan</td>
-                                        <td class="text-right font-medium text-gray-900 dark:text-gray-100">{{
-                                            data.savingType }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-gray-500">Metode</td>
-                                        <td class="text-right text-gray-900 dark:text-gray-100">{{ data.method }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-gray-500">Tanggal Penarikan</td>
-                                        <td class="text-right text-gray-900 dark:text-gray-100">{{ formatDate(data.date)
-                                            }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <div class="border-b border-gray-100 dark:border-gray-700 pb-4">
-                                <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Nominal Penarikan</div>
-                                <div class="text-3xl font-bold text-green-600">{{ formatRp(data.amount) }}</div>
-                                <div class="text-xs text-gray-500 mt-2">Saldo Setelah Penarikan: {{
-                                    formatRp(remainingBalance) }}</div>
+                        <!-- Nominal -->
+                        <div class="border-b border-gray-100 dark:border-gray-700 pb-4">
+                            <div class="text-sm text-gray-600 mb-1">
+                                {{ isDeposit ? 'Nominal Setoran' : 'Nominal Penarikan' }}
                             </div>
 
-                            <div v-if="data.method === 'Non-Tunai'"
-                                class="border-b border-gray-100 dark:border-gray-700 pb-4">
-                                <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Rekening Tujuan</div>
-                                <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded text-sm space-y-1">
-                                    <div><span class="text-gray-600 dark:text-gray-400">Bank:</span> <span
-                                            class="font-medium text-gray-900 dark:text-gray-100">{{ data.bankName
-                                            }}</span></div>
-                                    <div><span class="text-gray-600 dark:text-gray-400">Atas Nama:</span> <span
-                                            class="font-medium text-gray-900 dark:text-gray-100">{{ data.accountName
-                                            }}</span></div>
-                                    <div><span class="text-gray-600 dark:text-gray-400">No. Rekening:</span> <span
-                                            class="font-medium text-gray-900 dark:text-gray-100">{{ data.accountNumber
-                                            }}</span></div>
+                            <div
+                                class="text-3xl font-bold"
+                                :class="isDeposit ? 'text-green-600' : 'text-green-600'"
+                            >
+                                {{ formatRp(data.amount) }}
+                            </div>
+
+                            <div class="text-xs text-gray-500 mt-2">
+                                <template v-if="data.balance">
+                                    {{
+                                    isDeposit
+                                        ? 'Saldo Setelah Penyetoran'
+                                        : 'Saldo Setelah Penarikan'
+                                    }}:
+                                    {{ formatRp(finalBalance) }}
+                                </template>
+
+                                <template v-else>
+                                    Saldo Awal: {{ formatRp(data.balance) }}
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Untuk enarikan non-tunai) -->
+                        <div v-if="data.method === 'Non-Tunai'"
+                            class="border-b border-gray-100 dark:border-gray-700 pb-4">
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Rekening Tujuan</div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded text-sm space-y-1">
+                                <div>
+                                    <span class="text-gray-600 dark:text-gray-400">Bank:</span> 
+                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ data.bankName }}</span>
+                                </div>
+                                    <div>
+                                        <span class="text-gray-600 dark:text-gray-400">Atas Nama:</span> 
+                                        <span class="font-medium text-gray-900 dark:text-gray-100">{{ data.accountName }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-600 dark:text-gray-400">No. Rekening:</span> 
+                                        <span class="font-medium text-gray-900 dark:text-gray-100">{{ data.accountNumber }}</span>
                                 </div>
                             </div>
-                        </template>
+                        </div>
 
                         <label
                             class="flex items-start gap-3 cursor-pointer p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
