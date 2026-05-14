@@ -22,20 +22,15 @@ class StoreDepositRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|exists:users,id',
-            'saving_category' => 'required|string|in:' . implode(',', array_column(SavingTypeEnum::cases(), 'value')),
+            'member_id' => 'required|exists:members,id',
+            'saving_category' => 'required|exists:'. implode(',', array_column(SavingTypeEnum::cases(), 'value')),
             'amount' => 'required|numeric|min:1',
             'date' => 'required|date|before_or_equal:today',
             'saving_payment_method' => 'required|in:Tunai,Non-Tunai',
-            'notes' => 'nullable|string|max:500',
-            'tenor_months' => 'nullable|integer|min:1',
-            'target_amount' => 'nullable|numeric|min:1',
-
-            // non-tunai
-            'bank_name' => 'required_if:method,Non-Tunai|string|max:100',
-            'account_name' => 'required_if:method,Non-Tunai|string|max:150',
-            'account_number' => 'required_if:method,Non-Tunai|string|max:50',
-            'payment_proof' => 'required_if:method,Non-Tunai|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'notes' => 'nullable|string|max:255',
+            'purpose' => 'nullable|string|max:255',
+            'tenor_months' => 'nullable|integer|min:1|max:360',
+            'target_amount' => 'nullable|numeric|min:0',
         ];
     }
 }

@@ -153,7 +153,7 @@ const breadcrumbItems = [
          <PageBreadcrumb page-title="Pengelolaan Data Anggota" :items="breadcrumbItems" />
 
         <!-- Ringkasan -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6">
+        <!-- <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6">
             <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Ringkasan</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -168,7 +168,7 @@ const breadcrumbItems = [
                     :percentage="summary.new_percent"
                 />
             </div>
-        </div>
+        </div> -->
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
             <!-- Card Header -->
