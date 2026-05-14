@@ -18,7 +18,7 @@ const props = defineProps({
 const filteredSavingTypes = computed(() => {
   if (!selectedMember.value) return []
 
-  let types = [...new Set(props.saving_types)]
+  let types = props.saving_types
 
   if (selectedMember.value.status === 'Menunggu Pembayaran') {
     return ['Simpanan Pokok']
@@ -68,6 +68,9 @@ watch(memberQuery, val => {
 })
 
 const jenisSimpanan  = ref('')
+const selectedPurpose = ref('')
+const isCreatingNew   = ref(false)
+const purposeInput    = ref('')
 const nominalRaw     = ref('')
 const nominalDisplay = ref('')
 const tanggalSetor   = ref(today())
@@ -94,10 +97,24 @@ const targetDisplay = ref('')
 const showDialog        = ref(false)
 
 watch(jenisSimpanan, () => {
+  selectedPurpose.value = ''
+  isCreatingNew.value   = false
+  purposeInput.value    = ''
   tenorMonths.value   = ''
   targetAmount.value  = ''
   targetDisplay.value = ''
 })
+
+const existingAccounts = computed(() => {
+  if (!selectedMember.value) return []
+  const accounts = selectedMember.value.savingAccounts || []
+  if (!['Tabungan Ibadah', 'Tabungan Berjangka'].includes(jenisSimpanan.value)) return []
+  return accounts.filter(acc => acc.type === jenisSimpanan.value)
+})
+
+const isMultiAccountType = computed(() =>
+  ['Tabungan Ibadah', 'Tabungan Berjangka'].includes(jenisSimpanan.value)
+)
 
 // watch(depositMethod, val => {
 //   if (val === 'Tunai') resetNonTunai()
@@ -173,46 +190,52 @@ function onTargetInput(e) {
 //   if (fileInput.value) fileInput.value.value = ''
 // }
 
-const bankOptions = ['BCA','BNI','BRI','Mandiri','BTN','CIMB Niaga','Permata','Danamon','BSI','BJB']
+// const bankOptions = ['BCA','BNI','BRI','Mandiri','BTN','CIMB Niaga','Permata','Danamon','BSI','BJB']
 
-const filteredAccounts = computed(() => {
-  if (!selectedMember.value) return []
+// const filteredAccounts = computed(() => {
+//   if (!selectedMember.value) return []
 
-  return props.accounts.filter(
-    acc => acc.member_id === selectedMember.value.id
-  )
-})
+//   return props.accounts.filter(
+//     acc => acc.member_id === selectedMember.value.id
+//   )
+// })
 
-const accountNameOptions   = computed(() => filteredAccounts.value.map(a => a.account_name))
-const accountNumberOptions = computed(() => filteredAccounts.value.map(a => a.account_number))
+// const accountNameOptions   = computed(() => filteredAccounts.value.map(a => a.account_name))
+// const accountNumberOptions = computed(() => filteredAccounts.value.map(a => a.account_number))
 
-function handleFileUpload(e) {
-  const file  = e.target.files[0]
-  if (!file) return
-  const valid = ['image/jpeg','image/png','image/jpg','application/pdf']
-  if (!valid.includes(file.type)) { errorFile.value = 'Hanya JPG, PNG, atau PDF'; return }
-  if (file.size > 2 * 1024 * 1024) { errorFile.value = 'Maksimal 2 MB'; return }
-  paymentFile.value  = file
-  paymentProof.value = URL.createObjectURL(file)
-  errorFile.value    = ''
-}
+// function handleFileUpload(e) {
+//   const file  = e.target.files[0]
+//   if (!file) return
+//   const valid = ['image/jpeg','image/png','image/jpg','application/pdf']
+//   if (!valid.includes(file.type)) { errorFile.value = 'Hanya JPG, PNG, atau PDF'; return }
+//   if (file.size > 2 * 1024 * 1024) { errorFile.value = 'Maksimal 2 MB'; return }
+//   paymentFile.value  = file
+//   paymentProof.value = URL.createObjectURL(file)
+//   errorFile.value    = ''
+// }
 
-function removeFile() {
-  paymentFile.value = paymentProof.value = null
-  errorFile.value   = ''
-  if (fileInput.value) fileInput.value.value = ''
-}
+// function removeFile() {
+//   paymentFile.value = paymentProof.value = null
+//   errorFile.value   = ''
+//   if (fileInput.value) fileInput.value.value = ''
+// }
 
 const selectedAccount = computed(() => {
   if (!selectedMember.value) return null
-
+  if (isMultiAccountType.value) {
+    if (isCreatingNew.value || !selectedPurpose.value) return null
+    return (selectedMember.value.savingAccounts || []).find(
+      acc => acc.type === jenisSimpanan.value && acc.purpose === selectedPurpose.value
+    )
+  }
   return (selectedMember.value.savingAccounts || []).find(
     acc => acc.type === jenisSimpanan.value
   )
 })
 
 const isNewAccount = computed(() => {
-  if (!selectedMember.value) return false
+  if (!selectedMember.value || !jenisSimpanan.value) return false
+  if (isMultiAccountType.value) return isCreatingNew.value
   return !selectedAccount.value
 })
 
@@ -225,7 +248,17 @@ const errorsForm = computed(() => {
   if (!tanggalSetor.value)           e.tanggal = 'Pilih tanggal'
   if (tanggalSetor.value > today())  e.tanggal = 'Tanggal tidak boleh di masa depan'
 
-  if (isNewAccount.value) {
+  if (isMultiAccountType.value) {
+    if (!isCreatingNew.value && !selectedPurpose.value)
+      e.purpose = 'Pilih tujuan tabungan atau buat baru'
+    if (isCreatingNew.value) {
+      if (!purposeInput.value) e.purpose = 'Tujuan tabungan wajib diisi'
+      if (jenisSimpanan.value === 'Tabungan Berjangka' && !tenorMonths.value)
+        e.tenor = 'Jatuh tempo wajib diisi'
+      if (jenisSimpanan.value === 'Tabungan Ibadah' && !targetAmount.value)
+        e.target = 'Target wajib diisi'
+    }
+  } else if (isNewAccount.value) {
     if (jenisSimpanan.value === 'Tabungan Berjangka' && !tenorMonths.value)
       e.tenor = 'Jangka waktu wajib diisi'
     if (jenisSimpanan.value === 'Tabungan Ibadah' && !targetAmount.value)
@@ -272,6 +305,8 @@ const confirmationData = computed(() => ({
 const konfirmasiChecked = ref(false)
 
 function handleConfirm() {
+  if (!selectedMember.value) return
+
   const formData = new FormData()
 
   formData.append('member_id', selectedMember.value.id)
@@ -279,19 +314,21 @@ function handleConfirm() {
   formData.append('amount', nominalRaw.value)
   formData.append('date', tanggalSetor.value)
   formData.append('saving_payment_method', depositMethod.value)
-  formData.append('notes', catatan.value)
+  formData.append('notes', catatan.value || '')
 
-  if (isNewAccount.value) {
-    formData.append('tenor_months', tenorMonths.value)
-    formData.append('target_amount', targetAmount.value)
+  // Purpose handling yang benar
+  if (isMultiAccountType.value) {
+    const purposeVal = isCreatingNew.value ? purposeInput.value : selectedPurpose.value
+    if (purposeVal) {
+      formData.append('purpose', purposeVal)
+    }
   }
 
-  // if (depositMethod.value === 'Non-Tunai') {
-  //   formData.append('bank_name', bankName.value)
-  //   formData.append('account_name', accountName.value)
-  //   formData.append('account_number', accountNumber.value)
-  //   formData.append('payment_proof', paymentFile.value)
-  // }
+  // Field untuk akun baru
+  if (isNewAccount.value) {
+    if (tenorMonths.value) formData.append('tenor_months', tenorMonths.value)
+    if (targetAmount.value) formData.append('target_amount', targetAmount.value)
+  }
 
   router.post('/admin/saving/deposit', formData, {
     forceFormData: true,
@@ -305,8 +342,9 @@ function handleConfirm() {
     },
     onError: (errors) => {
       showDialog.value = false
+      console.log('Validation Errors:', errors) // ← tambahkan ini untuk debug
       const msg = Object.values(errors).flat().join('\n')
-      toast(msg || 'Gagal menyimpan', { type: 'error' })
+      toast(msg || 'Gagal menyimpan data', { type: 'error' })
     }
   })
 }
@@ -323,6 +361,9 @@ function resetForm() {
   tenorMonths.value    = ''
   targetAmount.value   = ''
   targetDisplay.value  = ''
+  selectedPurpose.value = ''
+  isCreatingNew.value   = false
+  purposeInput.value    = ''
   // resetNonTunai()
 }
 
@@ -512,9 +553,173 @@ const akadType = computed(() => {
 
               <!-- Field dinamis: Tenor & Target -->
               <Transition name="fade">
-                <div v-if="isNewAccount && jenisSimpanan" class="space-y-4">
+                <div v-if="isMultiAccountType && jenisSimpanan" class="space-y-4">
 
-                  <!-- Tabungan Berjangka — Tenor -->
+                  <!-- Pilih akun existing atau buat baru -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 font-head">
+                      Pilih Tabungan <span class="text-red-500">*</span>
+                    </label>
+
+                    <div class="space-y-2">
+                      <!-- Existing accounts -->
+                      <label
+                        v-for="acc in existingAccounts"
+                        :key="acc.purpose"
+                        class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
+                        :class="selectedPurpose === acc.purpose && !isCreatingNew
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-blue-300'"
+                      >
+                        <input
+                          type="radio"
+                          :value="acc.purpose"
+                          v-model="selectedPurpose"
+                          @change="isCreatingNew = false"
+                          class="mt-0.5 text-blue-600"
+                        />
+                        <div class="flex-1 min-w-0">
+                          <div class="font-medium text-sm text-gray-800 dark:text-gray-200">{{ acc.purpose }}</div>
+                          <div class="text-xs text-gray-500 mt-0.5 flex gap-3">
+                            <span>Saldo: Rp {{ formatRp(acc.balance) }}</span>
+                            <span v-if="acc.target_amount">· Target: Rp {{ formatRp(acc.target_amount) }}</span>
+                            <span v-if="acc.matured_at">· Jatuh Tempo: {{ acc.matured_at }}</span>
+                          </div>
+                          <!-- Badge frozen / matured -->
+                          <span
+                            v-if="acc.is_frozen"
+                            class="inline-flex items-center gap-1 mt-1 text-xs text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full"
+                          >
+                            <Icon icon="mdi:lock-outline" width="12" /> Target tercapai — dibekukan
+                          </span>
+                          <span
+                            v-else-if="acc.is_matured"
+                            class="inline-flex items-center gap-1 mt-1 text-xs text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-full"
+                          >
+                            <Icon icon="mdi:clock-alert-outline" width="12" /> Jatuh tempo — segera cairkan
+                          </span>
+                        </div>
+                      </label>
+
+                      <!-- Tombol buat baru -->
+                      <label
+                        class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
+                        :class="isCreatingNew
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-300'"
+                      >
+                        <input
+                          type="radio"
+                          :value="true"
+                          v-model="isCreatingNew"
+                          @change="selectedPurpose = ''"
+                          class="text-blue-600"
+                        />
+                        <div class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-medium">
+                          <Icon icon="mdi:plus-circle-outline" width="18" />
+                          Buat tabungan baru
+                        </div>
+                      </label>
+                    </div>
+
+                    <p v-if="errorsForm.purpose" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                      <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.purpose }}
+                    </p>
+                  </div>
+
+                  <!-- Field untuk akun baru -->
+                  <Transition name="fade">
+                    <div v-if="isCreatingNew" class="space-y-4 pl-4 border-l-2 border-blue-200 dark:border-blue-700">
+
+                      <!-- Tujuan tabungan -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
+                          Tujuan Tabungan <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                          v-model="purposeInput"
+                          type="text"
+                          placeholder="Contoh: Haji 2027, Umroh bersama keluarga..."
+                          class="w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700
+                                text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors"
+                          :class="errorsForm.purpose
+                            ? 'border-red-400 focus:ring-red-400'
+                            : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
+                        />
+                      </div>
+
+                      <!-- Tabungan Berjangka — Jatuh Tempo -->
+                      <div v-if="jenisSimpanan === 'Tabungan Berjangka'">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
+                          Jatuh Tempo <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                          <input
+                            v-model="tenorMonths"
+                            type="number" min="1" max="360"
+                            placeholder="Contoh: 12"
+                            class="w-full px-4 py-2.5 pr-20 border rounded-lg bg-white dark:bg-gray-700
+                                  text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors"
+                            :class="errorsForm.tenor
+                              ? 'border-red-400 focus:ring-red-400'
+                              : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
+                          />
+                          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none">bulan</span>
+                        </div>
+                        <p v-if="errorsForm.tenor" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                          <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.tenor }}
+                        </p>
+                        <p v-else-if="tenorMonths && Number(tenorMonths) > 0" class="mt-1 text-xs text-gray-400">
+                          {{ tenorHint(tenorMonths) }}
+                        </p>
+                      </div>
+
+                      <!-- Tabungan Ibadah — Target -->
+                      <div v-if="jenisSimpanan === 'Tabungan Ibadah'">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
+                          Target Tabungan <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 pointer-events-none">Rp</span>
+                          <input
+                            :value="targetDisplay"
+                            @input="onTargetInput"
+                            type="text" inputmode="numeric" placeholder="0"
+                            class="w-full pl-10 pr-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700
+                                  text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors"
+                            :class="errorsForm.target
+                              ? 'border-red-400 focus:ring-red-400'
+                              : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
+                          />
+                        </div>
+                        <p v-if="errorsForm.target" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                          <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.target }}
+                        </p>
+                        <p v-else-if="targetAmount" class="mt-1 text-xs text-gray-400">Target: Rp {{ formatRp(targetAmount) }}</p>
+                        <p v-if="errorTarget" class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                          <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorTarget }}
+                        </p>
+                      </div>
+
+                      <!-- Info rekening baru -->
+                      <div class="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20
+                                  border border-amber-200 dark:border-amber-700 rounded-lg">
+                        <Icon icon="mdi:information-outline" class="text-amber-500 mt-0.5 shrink-0" width="16" />
+                        <p class="text-xs text-amber-600 dark:text-amber-400">
+                          Rekening simpanan akan dibuat otomatis saat transaksi diposting.
+                        </p>
+                      </div>
+
+                    </div>
+                  </Transition>
+
+                </div>
+              </Transition>
+
+              <!-- Field dinamis untuk non-multi (existing behavior) -->
+              <Transition name="fade">
+                <div v-if="!isMultiAccountType && isNewAccount && jenisSimpanan" class="space-y-4">
+
                   <div v-if="jenisSimpanan === 'Tabungan Berjangka'">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
                       Jangka Waktu <span class="text-red-500">*</span>
@@ -522,14 +727,11 @@ const akadType = computed(() => {
                     <div class="relative">
                       <input
                         v-model="tenorMonths"
-                        type="number"
-                        min="1"
-                        max="360"
+                        type="number" min="1" max="360"
                         placeholder="Contoh: 12"
-                        class="w-full px-4 py-2.5 pr-20 border rounded-lg
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                               focus:outline-none focus:ring-2 transition-colors"
-                        :class="errorsForm.value.tenor
+                        class="w-full px-4 py-2.5 pr-20 border rounded-lg bg-white dark:bg-gray-700
+                              text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors"
+                        :class="errorsForm.tenor
                           ? 'border-red-400 focus:ring-red-400 dark:border-red-500'
                           : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
                       />
@@ -537,57 +739,39 @@ const akadType = computed(() => {
                         bulan
                       </span>
                     </div>
-                    <p v-if="errorsForm.value.tenor" class="mt-1 text-xs text-red-500 flex items-center gap-1">
-                      <Icon icon="mdi:alert-circle-outline" width="13" />
-                      {{ errorsForm.value.tenor }}
+                    <p v-if="errorsForm.tenor" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                      <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.tenor }}
                     </p>
                     <p v-else-if="tenorMonths && Number(tenorMonths) > 0" class="mt-1 text-xs text-gray-400">
                       {{ tenorHint(tenorMonths) }}
                     </p>
                   </div>
 
-                  <!-- Tabungan Ibadah — Target -->
                   <div v-if="jenisSimpanan === 'Tabungan Ibadah'">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
                       Target Tabungan <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 pointer-events-none">
-                        Rp
-                      </span>
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 pointer-events-none">Rp</span>
                       <input
                         :value="targetDisplay"
                         @input="onTargetInput"
-                        type="text"
-                        inputmode="numeric"
-                        placeholder="0"
-                        class="w-full pl-10 pr-4 py-2.5 border rounded-lg
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                               focus:outline-none focus:ring-2 transition-colors"
+                        type="text" inputmode="numeric" placeholder="0"
+                        class="w-full pl-10 pr-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700
+                              text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors"
                         :class="errorsForm.target
                           ? 'border-red-400 focus:ring-red-400 dark:border-red-500'
                           : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
                       />
                     </div>
                     <p v-if="errorsForm.target" class="mt-1 text-xs text-red-500 flex items-center gap-1">
-                      <Icon icon="mdi:alert-circle-outline" width="13" />
-                      {{ errorsForm.target }}
+                      <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.target }}
                     </p>
                     <p v-else-if="targetAmount" class="mt-1 text-xs text-gray-400">
                       Target: Rp {{ formatRp(targetAmount) }}
                     </p>
                     <p v-if="errorTarget" class="mt-1 text-xs text-red-600 flex items-center gap-1">
-                    <Icon icon="mdi:alert-circle-outline" width="13" />
-                    {{ errorTarget }}
-                  </p>
-                  </div>
-
-                  <!-- Info rekening baru -->
-                  <div class="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20
-                              border border-amber-200 dark:border-amber-700 rounded-lg">
-                    <Icon icon="mdi:information-outline" class="text-amber-500 mt-0.5 shrink-0" width="16" />
-                    <p class="text-xs text-amber-600 dark:text-amber-400">
-                      Rekening simpanan akan dibuat otomatis saat transaksi diposting.
+                      <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorTarget }}
                     </p>
                   </div>
 
