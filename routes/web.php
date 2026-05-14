@@ -82,7 +82,7 @@ Route::post('/auth/logout', [LoginController::class, 'logout'])
     ->name('auth.logout');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'revalidate'])->group(function () {
-    Route::get('/list', [AdminController::class, 'index'])->name('index');
+    Route::get('/list', [AdminController::class, 'index'])->name('index')->middleware('role:Sekretaris|Ketua');
     Route::get('/create', [AdminController::class, 'create'])->middleware('role:Sekretaris');
     Route::post('/store', [AdminController::class, 'store'])->middleware('role:Sekretaris');
     Route::get('/edit/{id}', [AdminController::class, 'edit'])->middleware('role:Sekretaris');;
@@ -114,7 +114,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/users/store', [UserController::class, 'store'])
         ->middleware('role:Sekretaris')
         ->name('users.store');
-    Route::get('/users/list', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/list', [UserController::class, 'index'])->name('users.index')->middleware('role:Sekretaris|Ketua');
     Route::put('/users/{id}/nonactive', [UserController::class, 'updateStatusToInactive'])->name('users.nonactive');
 
     // Resignation Routes

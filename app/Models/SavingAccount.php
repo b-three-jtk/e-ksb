@@ -16,9 +16,7 @@ class SavingAccount extends Model
     public $incrementing = false;
     protected $fillable = [
         'saving_account_code',
-        'saving_product_id',
-        'saving_tenor',
-        'target_amount',
+        'saving_type',
         'balance',
         'member_id',
     ];
@@ -31,10 +29,5 @@ class SavingAccount extends Model
     public function transactions()
     {
         return $this->hasMany(SavingTransaction::class);
-    }
-
-    public function savingProduct()
-    {
-        return $this->belongsTo(SavingProduct::class);
     }
 }

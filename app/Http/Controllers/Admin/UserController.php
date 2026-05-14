@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\EducationEnum;
 use App\Enums\HeirEnum;
-use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMemberRequest;
 use App\Models\Financing;
-use App\Models\InstallmentPaymentTransaction;
 use App\Models\SavingAccount;
 use App\Models\User;
 use App\Services\Admin\RegisterMemberService;
@@ -131,7 +129,7 @@ class UserController extends Controller
                 'phone' => $user->phone_number,
                 'status' => $user->status,
                 'total_simpanan' => 'Rp ' . number_format(
-                    DB::table('get_saving_account_balance')->where('member_id', $user->member->id)->sum('total_balance') ?? 0,
+                    DB::table('saving_accounts')->where('member_id', $user->member?->id)->sum('balance') ?? 0,
                     0,
                     ',',
                     '.'
@@ -173,38 +171,39 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
+        $ktpDoc = null;
+        $kkDoc = null;
+
         $user = User::with([
             'member.memberDocs',
             'roles',
             'member.savingAccounts.transactions',
-            'member.savingAccounts.savingProduct',
+            'member.savingAccounts',
             'member.heirs',
-            'member.financings.installment.paymentSchedules',
+            'member.financings.installment.payment',
             'member.financings.financingItem',
         ])->findOrFail($id);
 
         $user->profile_picture = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-        $ktpDoc = $user->member->memberDocs->firstWhere('name', 'ktp');
-        $kkDoc = $user->member->memberDocs->firstWhere('name', 'kk');
+        if ($user->member) {
+            $ktpDoc = $user->member->memberDocs?->firstWhere('name', 'ktp');
+            $kkDoc = $user->member->memberDocs?->firstWhere('name', 'kk');
 
-        $user->member->financings->each(function ($financing) {
-            $financing->installment_payment_paid_count = $financing->installment->paymentSchedules
-                ->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)
-                ->count();
-            $financing->next_payment = $financing->installment->paymentSchedules
-                ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
-                ->sortBy('due_date')
-                ->first();
-            $financing->total_price = $financing->financing_item?->cost_price + $financing->financing_item?->margin_amount;
-            $financing->remaining_principal = $financing->financing_item?->cost_price - InstallmentPaymentTransaction::whereHas('installmentPaymentSchedule', function ($q) use ($financing) {
-                $q->where('installment_id', $financing->installment->id);
-            })->sum('principal_paid');
-            $financing->remaining_margin = $financing->financing_item?->margin_amount - InstallmentPaymentTransaction::whereHas('installmentPaymentSchedule', function ($q) use ($financing) {
-                $q->where('installment_id', $financing->installment->id);
-            })->sum('margin_paid');
-            $financing->remaining_total = $financing->remaining_principal + $financing->remaining_margin;
-            $financing->monthly_installment = $financing->total_price / $financing->installment->tenor;
-        });
+            if ($user->member->financings) {
+                $user->member->financings->each(function ($financing) {
+                    $financing->installment_payment_paid_count = $financing->installment->payment
+                        ->count();
+                    $financing->next_payment = $financing->installment
+                        ->sortBy('payment_date')
+                        ->first();
+                    $financing->total_price = $financing->cost_price + $financing->margin_amount - $financing->down_payment;
+                    $financing->monthly_installment = $financing->installment->tenor > 0
+                        ? ($financing->cost_price + $financing->margin_amount) / $financing->installment->tenor
+                        : null;
+                    $financing->remaining_total = $financing->total_price - ($financing->installment_payment_paid_count * ($financing->monthly_installment ?? 0));
+                });
+            }
+        }
 
         return inertia('Admin/User/Show', [
             'user' => $user,

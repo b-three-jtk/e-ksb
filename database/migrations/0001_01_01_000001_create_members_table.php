@@ -24,7 +24,6 @@ return new class extends Migration
             $table->text('domicile_address')->nullable();
             $table->text('residential_address')->nullable();
             $table->enum('marital_status', array_column(MaritalStatusEnum::cases(), 'value'))->nullable();
-            $table->string('spouse_name')->nullable();
             $table->enum('last_education', array_column(EducationEnum::cases(), 'value'))->nullable();
             $table->integer('dependents')->nullable();
             $table->enum('status', array_column(MemberStatusEnum::cases(), 'value'))->default('Menunggu Pembayaran');

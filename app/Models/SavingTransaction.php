@@ -19,6 +19,7 @@ class SavingTransaction extends Model
     protected $fillable = [
         'saving_transaction_code',
         'saving_amount',
+        'balance_after_transaction',
         'transaction_type',
         'saving_payment_method',
         'saving_description',

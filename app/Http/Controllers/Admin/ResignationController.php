@@ -66,7 +66,7 @@ class ResignationController extends Controller
 
         $totalSavings = $data['user']->savingAccounts()->sum('balance');
         $totalObligation = Financing::with('installment.paymentSchedules.payment')->where('user_id', $data['user']->id)
-            ->where('financing_status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->get()
             ->sum(function ($financing) {
                 $installment = $financing->installment;

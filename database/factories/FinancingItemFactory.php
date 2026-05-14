@@ -17,16 +17,15 @@ class FinancingItemFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'brand' => $this->faker->company(),
-            'request_description' => $this->faker->sentence(),
+            'specification' => $this->faker->sentence(),
             'qty' => $this->faker->numberBetween(1, 10),
             'condition' => $this->faker->randomElement(ConditionEnum::cases())->value,
-            'cost_price' => $this->faker->numberBetween(100000, 50000000),
-            'margin_amount' => $this->faker->numberBetween(10000, 5000000),
-            'product_type_id' => ProductType::factory(),
-            'purchase_receipt' => $this->faker->optional()->filePath(),
-            'supplier_id' => Supplier::factory(),
+            'price_per_unit' => $this->faker->numberBetween(100000, 50000000),
+            'purchase_receipt' => null,
+            'product_type_id' => ProductType::inRandomOrder()->first()?->id ?? ProductType::factory(),
+            'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
             'financing_id' => Financing::factory(),
         ];
     }
 }
+

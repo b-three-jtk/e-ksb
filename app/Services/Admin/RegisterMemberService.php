@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Log;
-use RuntimeException;
-use Spatie\Permission\Models\Role;
 
 class RegisterMemberService
 {
@@ -26,17 +24,11 @@ class RegisterMemberService
      */
     public function register(array $validated, Request $request): array
     {
-        $memberRole = Role::where('name', 'Anggota')->first();
-
-        if (!$memberRole) {
-            throw new RuntimeException('Role Anggota tidak ditemukan. Hubungi administrator.');
-        }
-
         $memberNumber = $this->generateMemberNumber();
         $initialPassword = Str::upper(Str::random(4)) . random_int(1000, 9999);
 
-        DB::transaction(function () use ($validated, $request, $memberRole, $memberNumber, $initialPassword) {
-            $user = $this->createUser($validated, $memberRole->id, $memberNumber, $initialPassword);
+        DB::transaction(function () use ($validated, $request, $memberNumber, $initialPassword) {
+            $user = $this->createUser($validated, $memberNumber, $initialPassword);
             $member = $this->createMember($validated, $user->id);
 
             $user->assignRole('Anggota');
@@ -69,7 +61,7 @@ class RegisterMemberService
     /**
      * @param array<string, mixed> $validated
      */
-    private function createUser(array $validated, string $roleId, string $memberNumber, string $initialPassword): User
+    private function createUser(array $validated, string $memberNumber, string $initialPassword): User
     {
         $email = $validated['email'] ?? null;
 
@@ -94,7 +86,6 @@ class RegisterMemberService
             'birth_date' => $validated['birth_date'],
             'marital_status' => $validated['marital_status'],
             'domicile_address' => $validated['domicile_address'],
-            'spouse_name' => $validated['spouse_name'] ?? null,
             'residential_address' => $validated['residential_address'] ?? null,
             'last_education' => $validated['last_education'],
             'status' => MemberStatusEnum::PAYMENT_PENDING->value,

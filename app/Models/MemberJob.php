@@ -11,6 +11,7 @@ class MemberJob extends Model
     use HasFactory;
     protected $fillable = [
         'member_id',
+        'employment_status',
         'job_title',
         'company_or_business_name',
         'business_field',

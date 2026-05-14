@@ -25,9 +25,29 @@ class MemberFactory extends Factory
             'domicile_address' => $this->faker->address(),
             'residential_address' => $this->faker->address(),
             'marital_status' => $this->faker->randomElement(MaritalStatusEnum::cases())->value,
-            'spouse_name' => $this->faker->optional()->name(),
             'last_education' => $this->faker->randomElement(EducationEnum::cases())->value,
             'dependents' => $this->faker->numberBetween(0, 5),
         ];
     }
+
+    /**
+     * Indicate that the member is waiting for payment.
+     */
+    public function waitingPayment(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => MemberStatusEnum::PAYMENT_PENDING->value,
+        ]);
+    }
+
+    /**
+     * Indicate that the member is active.
+     */
+    public function active(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ]);
+    }
 }
+

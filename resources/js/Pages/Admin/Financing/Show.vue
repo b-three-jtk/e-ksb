@@ -52,7 +52,7 @@ const getScheduleStatusClass = (status) => {
                     <p class="text-sm font-light text-gray-500">No. Pembiayaan: {{ data.financing_transaction_code }}
                     </p>
                 </div>
-                <span class="my-auto" :class="useFinancingStatus(data.financing_status)">{{ data.financing_status
+                <span class="my-auto" :class="useFinancingStatus(data.status)">{{ data.status
                     }}</span>
             </div>
             <div class="flex flex-col px-12 pb-2 pt-4 gap-2">
@@ -81,7 +81,7 @@ const getScheduleStatusClass = (status) => {
                 <div class="flex justify-between items-center">
                     <h1>Ringkasan Pembiayaan</h1>
                     <div class="flex items-center gap-4">
-                        <Button v-if="data.installment && data.financing_status == 'Angsuran Berjalan'" :href="`/admin/financing/repayment/${data.id}`" variant="secondary" size="small">
+                        <Button v-if="data.installment && data.status == 'Angsuran Berjalan'" :href="`/admin/financing/repayment/${data.id}`" variant="secondary" size="small">
                             <span class="icon-[tabler--moneybag-move]" style="width: 18px; height: 18px;"></span>
                             Pelunasan Dipercepat
                         </Button>

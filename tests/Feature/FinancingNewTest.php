@@ -86,7 +86,7 @@ describe('TC-FIN-01: Permohonan Pembiayaan Murabahah', function () {
                 'member' => ['user_code' => $member->user->user_code, 'name' => $member->user->name, 'nik' => $member->user->nik],
                 'financing' => [
                     'name' => 'Motor',
-                    'financing_status' => 'Menunggu Kelengkapan Dokumen', // Status Draft
+                    'status' => 'Menunggu Kelengkapan Dokumen', // Status Draft
                     'request_description' => 'Draft permohonan pembiayaan untuk motor.',
                     'qty' => 1,
                     'condition' => 'Baru',
@@ -95,7 +95,7 @@ describe('TC-FIN-01: Permohonan Pembiayaan Murabahah', function () {
 
         $response->assertStatus(302);
         $this->assertDatabaseHas('financings', [
-            'financing_status' => 'Menunggu Kelengkapan Dokumen'
+            'status' => 'Menunggu Kelengkapan Dokumen'
         ]);
     });
 });
@@ -106,19 +106,19 @@ describe('TC-FIN-02: Persetujuan (Approval) Pembiayaan', function () {
         $ketuaMurabahah->assignRole('Ketua Murabahah');
 
         $financing = Financing::factory()->create([
-            'financing_status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
+            'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
         ]);
 
         $response = $this->actingAs($ketuaMurabahah)
             ->put("/admin/financing/validate/{$financing->id}", [
-                'financing_status' => 'Disetujui',
+                'status' => 'Disetujui',
                 'notes' => 'Permohonan disetujui, riwayat kredit baik.',
             ]);
 
         $response->assertStatus(302);
         $this->assertDatabaseHas('financings', [
             'id' => $financing->id,
-            'financing_status' => 'Disetujui',
+            'status' => 'Disetujui',
             'notes' => 'Permohonan disetujui, riwayat kredit baik.',
         ]);
     });
@@ -128,18 +128,18 @@ describe('TC-FIN-02: Persetujuan (Approval) Pembiayaan', function () {
         $ketuaMurabahah->assignRole('Ketua Murabahah');
 
         $financing = Financing::factory()->create([
-            'financing_status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
+            'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
         ]);
 
         $this->actingAs($ketuaMurabahah)
             ->put("/admin/financing/validate/{$financing->id}", [
-                'financing_status' => FinancingReqStatusEnum::REJECTED->value,
+                'status' => FinancingReqStatusEnum::REJECTED->value,
                 'notes' => 'Penghasilan bersih tidak mencukupi untuk bayar angsuran.',
             ]);
 
         $this->assertDatabaseHas('financings', [
             'id' => $financing->id,
-            'financing_status' => FinancingReqStatusEnum::REJECTED->value,
+            'status' => FinancingReqStatusEnum::REJECTED->value,
             'notes' => 'Penghasilan bersih tidak mencukupi untuk bayar angsuran.',
         ]);
     });
@@ -151,7 +151,7 @@ describe('TC-FIN-03 & 04: Akad Wakalah & Finalisasi Pembiayaan', function () {
         $staffMurabahah->assignRole('Staf Murabahah');
         $financing = Financing::factory()->create([
             'is_wakalah' => true,
-            'financing_status' => 'Disetujui',
+            'status' => 'Disetujui',
         ]);
 
         $response = $this->actingAs($staffMurabahah)
@@ -165,7 +165,7 @@ describe('TC-FIN-03 & 04: Akad Wakalah & Finalisasi Pembiayaan', function () {
     it('[REQ-F-22, REQ-F-25] Staf Murabahah dapat melakukan finalisasi dengan menambah pemasok, bukti pengadaan, tenor, dan dokumen akad', function () {
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $staffMurabahah->assignRole('Staf Murabahah');
-        $financing = Financing::factory()->create(['financing_status' => 'Disetujui']);
+        $financing = Financing::factory()->create(['status' => 'Disetujui']);
 
         $response = $this->actingAs($staffMurabahah)
             ->post("/admin/financing/store", [
@@ -188,7 +188,7 @@ describe('TC-FIN-05 & 06: Pelunasan Awal & Pembayaran Angsuran', function () {
     it('[REQ-F-26] Staf Murabahah dapat memproses permohonan pelunasan sebelum jatuh tempo', function () {
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $staffMurabahah->assignRole('Staf Murabahah');
-        $financing = Financing::factory()->create(['financing_status' => 'Cicilan Berjalan']);
+        $financing = Financing::factory()->create(['status' => 'Cicilan Berjalan']);
 
         $response = $this->actingAs($staffMurabahah)
             ->post("/admin/financing/{$financing->id}/early-payoff", [
@@ -202,7 +202,7 @@ describe('TC-FIN-05 & 06: Pelunasan Awal & Pembayaran Angsuran', function () {
     it('[REQ-F-29, REQ-F-31] Staf murabahah dapat mencatat pembayaran angsuran dan sistem dapat menghasilkan struk pembayaran', function () {
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $staffMurabahah->assignRole('Staf Murabahah');
-        $financing = Financing::factory()->create(['financing_status' => 'Cicilan Berjalan']);
+        $financing = Financing::factory()->create(['status' => 'Cicilan Berjalan']);
 
         // Test Pencatatan
         $responseStore = $this->actingAs($staffMurabahah)
@@ -225,7 +225,7 @@ describe('TC-FIN-07: Daftar dan Riwayat Pembiayaan', function () {
     it('[REQ-F-32, REQ-F-33] Ketua/Staf Murabahah dapat melihat daftar pembiayaan aktif dan riwayat semua anggota', function () {
         $ketuaMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $ketuaMurabahah->assignRole('Ketua Murabahah');
-        Financing::factory()->count(3)->create(['financing_status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value]);
+        Financing::factory()->count(3)->create(['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value]);
 
         $responseActive = $this->actingAs($ketuaMurabahah)->get('/admin/financing');
         $responseActive->assertStatus(200);
@@ -242,13 +242,13 @@ describe('TC-FIN-07: Daftar dan Riwayat Pembiayaan', function () {
         // Pembiayaan berjalan
         Financing::factory()->create([
             'member_id' => $member->id,
-            'financing_status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
         ]);
 
         // Pembiayaan lunas (Riwayat)
         Financing::factory()->create([
             'member_id' => $member->id,
-            'financing_status' => 'Lunas',
+            'status' => 'Lunas',
         ]);
 
         $response = $this->actingAs($user)->get('/user/financing');

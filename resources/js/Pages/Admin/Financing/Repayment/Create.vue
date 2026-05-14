@@ -7,15 +7,13 @@ import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue';
 import Button from '@/Components/Form/Button.vue';
 import Struk from '@/Components/Savings/Struk.vue'
 import { Icon } from '@iconify/vue'
-import { toast } from 'vue3-toastify';
 import Tooltip from '@/Components/Form/Tooltip.vue';
-import { useForm, usePage } from '@inertiaj
-import Struk from '@/Components/Financings/Struk.vue';
+import { useForm, usePage } from '@inertiajs/vue3'
 
 const showStruk = ref(false)
-const dataStruk = ref(null)s/vue3';
-import { ref, computed, watch } from '
-    struk: Objectvue';
+const dataStruk = ref(null)
+import { ref, computed, watch } from 'vue'
+import { toast } from 'vue3-toastify'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 
 const page = usePage()
@@ -29,10 +27,6 @@ const breadcrumbItems = [
     { name: 'Detail Pembiayaan', link: `/admin/financing/${props.data.financing.id}` },
     { name: 'Permohonan Pelunasan' },
 ];
-
-const initialStruk = computed(() => page.props.flash?.struk || null)
-const showStruk = ref(!!initialStruk.value)
-const dataStruk = ref(initialStruk.value)
 
 const showModal = () => {
     document.getElementById('modal').classList.remove('hidden');
@@ -79,17 +73,6 @@ watch(
 )
 
 const submitForm = () => {
-    // Validasi checkbox persetujuan
-    if (form.isAgreed !== true) {
-        toast("Anda harus menyetujui persyaratan terlebih dahulu!", {
-            "type": "error",
-            "positiondataStruk.value = props.struk
-            showStruk.value = true "type": "error",
-            "position": "bottom-right",
-            "transition": "slide",
-        })
-        return;
-    }
     form.post('/admin/financing/repayment', {
         forceFormData: true,
         onSuccess: () => {
@@ -393,12 +376,7 @@ const submitForm = () => {
                     </p>
                     <div class="flex justify-between items-center mt-6">
                         <label class="flex items-start space-x-3 cursor-pointer">
-                            <input v-model="fo
-        <div v-if="showStruk && dataStruk" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div class="bg-white rounded-xl shadow-lg p-4 max-w-sm w-full relative">
-                <Struk :transaksi="dataStruk" mode="deposit" />
-            </div>
-        </div>rm.isAgreed" type="checkbox"
+                            <input v-model="form.isAgreed" type="checkbox"
                                 class="mt-1 h-4 w-4 text-secondary rounded accent-secondary focus:ring-secondary" />
                             <span class="text-secondary dark:text-gray-300">
                                 Saya menyetujui persyaratan di atas
@@ -437,9 +415,4 @@ const submitForm = () => {
             </div>
         </Transition>
     </AdminLayout>
-
-    <style scoped>
-    .modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
-    .modal-enter-from, .modal-leave-to { opacity: 0; }
-    </style>
 </template>

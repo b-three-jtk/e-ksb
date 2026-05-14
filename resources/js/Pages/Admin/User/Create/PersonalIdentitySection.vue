@@ -60,6 +60,7 @@ defineProps({
 				type="text"
 				placeholder="Isi dengan angka"
 				required
+                max="16"
 				@input="form.nik = onlyNumbers(form.nik)"
 				:error="getFieldError('nik', errors.nik)"
 			/>
@@ -88,17 +89,6 @@ defineProps({
 				required
 				:selectables="maritalStatusOptions"
 				:error="getFieldError('marital_status', errors.marital_status)"
-			/>
-
-			<!-- Nama Pasangan, tampil ketika status = Kawin -->
-			<BaseInputAdmin
-				v-if="form.marital_status === 'Kawin'"
-				v-model="form.spouse_name"
-				label="Nama Pasangan"
-				type="text"
-				placeholder="Isi nama pasangan"
-				@input="form.spouse_name = onlyLetters(form.spouse_name)"
-				:error="getFieldError('spouse_name', errors.spouse_name)"
 			/>
 
 			<BaseInputAdmin

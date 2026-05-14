@@ -4,17 +4,21 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('installments', function (Blueprint $table) {
+        Schema::create('berjangka_accounts', function (Blueprint $table) {
             $table->id();
             $table->integer('tenor');
-            $table->integer('due_day');
-            $table->foreignUuid('financing_id')->nullable()->constrained('financings')->onDelete('set null');
+            $table->string('objective');
+            $table->uuid('saving_account_id');
+
+            $table->foreign('saving_account_id')->references('id')->on('saving_accounts')->onDelete('cascade');
+
             $table->timestamps();
         });
     }
@@ -24,6 +28,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('loans');
+        Schema::dropIfExists('berjangka_accounts');
     }
 };

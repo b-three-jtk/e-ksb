@@ -189,11 +189,6 @@ const breadcrumbItems = [
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pasangan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.spouse_name ?? '-'
-                                        }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jumlah Tanggungan
                                         Keluarga</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.member.dependents ?? '-'

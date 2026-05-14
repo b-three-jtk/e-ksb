@@ -16,17 +16,18 @@ class Financing extends Model
     use HasUuids, HasFactory;
 
     protected $keyType = 'string';
-    public $incrementing = false;
     protected $fillable = [
         'financing_transaction_code',
-        'is_wakalah',
         'down_payment',
+        'cost_price',
+        'margin_amount',
+        'requested_date',
         'akad_date',
-        'notes',
         'paid_date',
-        'financing_status',
+        'status',
         'payment_method',
         'signed_akad_document',
+
         'member_id',
         'updated_by',
     ];

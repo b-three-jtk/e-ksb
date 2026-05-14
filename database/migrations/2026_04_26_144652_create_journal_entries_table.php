@@ -13,20 +13,16 @@ return new class extends Migration
     {
         Schema::create('journal_entries', function (Blueprint $table) {
             $table->id();
-            $table->uuid('fin_trans_id');
-            $table->string('account_code');
-            $table->uuid('user_id');
+            $table->string('no_ref_account');
             $table->enum('position', ['Debit', 'Credit']);
             $table->decimal('nominal', 15, 2);
+            $table->date('transaction_date');
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
 
-            $table->foreign('fin_trans_id')->references('id')->on('financial_transactions')->onDelete('cascade');
-            $table->foreign('account_code')->references('account_code')->on('accounts')->onDelete('restrict');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('no_ref_account')->references('no_ref_account')->on('accounts')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
-
-            $table->index(['fin_trans_id', 'account_code']);
+            $table->index('no_ref_account');
         });
     }
 

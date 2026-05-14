@@ -15,14 +15,13 @@ return new class extends Migration
         Schema::create('installment_payment_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('installment_trans_code', 10)->unique();
-            $table->decimal('principal_paid', 15, 2);
-            $table->decimal('margin_paid', 15, 2);
-            $table->enum('installment_payment_method', array_column(PaymentMethodsEnum::cases(), 'value'));
+            $table->decimal('nominal', 15, 2);
+            $table->enum('payment_method', array_column(PaymentMethodsEnum::cases(), 'value'));
             $table->boolean('is_early_repayment')->default(false);
             $table->datetime('payment_date');
             $table->string('installment_payment_receipt')->nullable();
 
-            $table->foreignId('installment_payment_schedule_id')->constrained('installment_payment_schedules')->onDelete('set null');
+            $table->foreignId('installment_id')->nullable()->references('id')->on('installments')->onDelete('set null');
             $table->foreignUuid('updated_by')->constrained('users')->onDelete('set null');
             $table->timestamps();
         });

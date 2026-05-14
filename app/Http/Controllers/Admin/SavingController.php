@@ -6,6 +6,7 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreDepositRequest;
 use App\Models\Account;
 use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
@@ -268,43 +269,28 @@ class SavingController extends Controller
         ]);
     }
 
-    public function storeDeposit(Request $request)
+    public function storeDeposit(StoreDepositRequest $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'saving_category' => 'required|string|in:' . implode(',', array_column(SavingTypeEnum::cases(), 'value')),
-            'amount' => 'required|numeric|min:1',
-            'date' => 'required|date|before_or_equal:today',
-            'saving_payment_method' => 'required|in:Tunai,Non-Tunai',
-            'notes' => 'nullable|string|max:500',
-            'tenor_months' => 'nullable|integer|min:1',
-            'target_amount' => 'nullable|numeric|min:1',
-
-            // non-tunai
-            'bank_name' => 'required_if:method,Non-Tunai|string|max:100',
-            'account_name' => 'required_if:method,Non-Tunai|string|max:150',
-            'account_number' => 'required_if:method,Non-Tunai|string|max:50',
-            'payment_proof' => 'required_if:method,Non-Tunai|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ]);
+        $data = $request->validated();
 
         $user = User::findOrFail($request->user_id)->with('member')->first();
 
         $savingAccount = SavingAccount::where('member_id', $user->member?->id)
-            ->whereHas('savingProduct', function ($q) use ($request) {
-                $q->where('name', $request->saving_category);
+            ->whereHas('savingProduct', function ($q) use ($data) {
+                $q->where('name', $data['saving_category']);
             })
             ->first();
 
         if (!$savingAccount) {
-            if ($request->saving_category === 'Tabungan Berjangka' && !$request->tenor_months) {
+            if ($data['saving_category'] === 'Tabungan Berjangka' && !$data['tenor_months']) {
                 return back()->withErrors(['tenor_months' => 'Tenor wajib diisi']);
             }
 
-            if ($request->saving_category === 'Tabungan Ibadah' && !$request->target_amount) {
+            if ($data['saving_category'] === 'Tabungan Ibadah' && !$data['target_amount']) {
                 return back()->withErrors(['target_amount' => 'Target wajib diisi']);
             }
 
-            if ($request->saving_category === 'Tabungan Ibadah') {
+            if ($data['saving_category'] === 'Tabungan Ibadah') {
                 $existingIbadah = SavingAccount::where('user_id', $user->id)
                     ->whereHas('savingProduct', function ($q) {
                         $q->where('name', SavingTypeEnum::TABUNGAN_IBADAH->value);
@@ -319,9 +305,7 @@ class SavingController extends Controller
 
             $savingAccount = SavingAccount::create([
                 'saving_account_code' => 'SA-' . strtoupper(Str::random(8)),
-                'saving_product_id' => SavingProduct::where('name', $request->saving_category)->first()->id,
-                'tenor_months' => $request->tenor_months,
-                'target_amount' => $request->target_amount,
+                'saving_type' => $data['saving_category'],
                 'member_id' => $user->member->id,
             ]);
         }

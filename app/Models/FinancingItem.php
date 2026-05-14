@@ -14,13 +14,12 @@ class FinancingItem extends Model
     //
     protected $fillable = [
         'name',
-        'brand',
-        'request_description',
+        'specification',
         'qty',
         'condition',
-        'cost_price',
-        'margin_amount',
+        'price_per_unit',
         'purchase_receipt',
+        
         'supplier_id',
         'financing_id',
         'product_type_id'

@@ -26,7 +26,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_code' => 'KSP' . fake()->unique()->numberBetween(100, 999),
+            'user_code' => 'KSP' . fake()->unique()->numerify('######'),
             'nik' => fake()->unique()->numerify('################'),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),

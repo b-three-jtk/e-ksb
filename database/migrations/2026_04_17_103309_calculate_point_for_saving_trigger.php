@@ -18,7 +18,7 @@ return new class extends Migration {
                 activity_desc TEXT;
             BEGIN
                 IF NEW.transaction_type = \'Penarikan\' AND NEW.saving_amount > 100000 THEN
-                    points_earned := FLOOR(NEW.saving_amount / 100000);
+                    points_earned := FLOOR(NEW.balance_after_transaction / 100000);
                     activity_desc := \'Mendapatkan \' || points_earned || \' poin untuk penarikan sebesar \' || NEW.saving_amount;
                     INSERT INTO point_transactions (amount_earned, activity_description, user_id, created_at, updated_at)
                     VALUES (points_earned, activity_desc, (SELECT user_id FROM members WHERE id = (SELECT member_id FROM saving_accounts WHERE id = NEW.saving_account_id)), NOW(), NOW());

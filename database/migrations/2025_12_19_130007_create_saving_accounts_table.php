@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SavingTypeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,12 +15,10 @@ return new class extends Migration
         Schema::create('saving_accounts', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('saving_account_code', 20)->unique();
-            $table->integer('saving_tenor')->nullable();
-            $table->decimal('target_amount', 15, 2)->nullable();
             $table->decimal('balance', 15, 2)->default(0);
+            $table->enum('saving_type', array_column(SavingTypeEnum::cases(), 'value'));
             $table->unsignedBigInteger('member_id')->nullable();
 
-            $table->foreignId('saving_product_id')->constrained('saving_products')->onDelete('set null');
             $table->foreign('member_id')->references('id')->on('members')->onDelete('set null');
             $table->timestamps();
         });

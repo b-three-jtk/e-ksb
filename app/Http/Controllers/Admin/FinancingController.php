@@ -63,26 +63,26 @@ class FinancingController extends Controller
             ->when($tab === 'request', function ($q) use ($verifier) {
                 if (in_array($verifier->getRoleNames()->first(), ['Ketua Murabahah'])) {
                     $q->where(
-                        'financing_status',
+                        'status',
                         FinancingReqStatusEnum::PENDING_REVIEW->value,
                     );
                 } else if (in_array($verifier->getRoleNames()->first(), ['Staf Murabahah'])) {
-                    $q->whereIn('financing_status', [
+                    $q->whereIn('status', [
                         FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                     ]);
                 } else {
-                    $q->where('financing_status', FinancingReqStatusEnum::WAITING_DOCUMENTS->value);
+                    $q->where('status', FinancingReqStatusEnum::WAITING_DOCUMENTS->value);
                 }
             })
             ->when($tab === 'validated', function ($q) {
-                $q->whereIn('financing_status', [
+                $q->whereIn('status', [
                     FinancingReqStatusEnum::APPROVED->value,
                     FinancingReqStatusEnum::REJECTED->value,
                 ]);
             })
             ->when($tab === 'active', function ($q) {
                 $q->where(
-                    'financing_status',
+                    'status',
                     FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
                 );
             })->latest('updated_at');
@@ -116,19 +116,19 @@ class FinancingController extends Controller
                         : '-',
                     'tenor_left' => $f->installment?->payment_schedules_count ?? 0,
                     'product_name' => $f->financingItem?->name,
-                    'financing_status' => $f->financing_status,
+                    'status' => $f->status,
                 ];
             });
 
         $summary = [
             [
                 'title' => 'Total Pengajuan Pembiayaan Murabahah',
-                'value' => Financing::whereIn('financing_status', [
+                'value' => Financing::whereIn('status', [
                     FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                     FinancingReqStatusEnum::PENDING_REVIEW->value,
                 ])->count()
             ],
-            ['title' => 'Total Pembiayaan Berlangsung', 'value' => Financing::where('financing_status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->count()],
+            ['title' => 'Total Pembiayaan Berlangsung', 'value' => Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->count()],
             ['title' => 'Total Modal Belum Diputar', 'value' => $this->getModalBelumDiputar()],
         ];
 
@@ -197,7 +197,6 @@ class FinancingController extends Controller
             'birth_place' => $member->birth_place,
             'birth_date' => $member->birth_date,
             'marital_status' => $member->marital_status,
-            'spouse_name' => $member->spouse_name,
             'last_education' => $member->last_education,
             'dependents' => $member->dependents,
             'domicile_address' => $member->domicile_address,
@@ -279,7 +278,7 @@ class FinancingController extends Controller
     public function loadDraft(string $id)
     {
         $financing = Financing::where('id', $id)
-            ->whereIn('financing_status', [
+            ->whereIn('status', [
                 FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                 FinancingReqStatusEnum::APPROVED->value,
                 FinancingReqStatusEnum::REJECTED->value,
@@ -324,7 +323,7 @@ class FinancingController extends Controller
                     'payment_method' => $financing->payment_method,
                     'akad_date' => $financing->akad_date,
                     'notes' => $financing->notes,
-                    'financing_status' => $financing->financing_status,
+                    'status' => $financing->status,
                 ],
                 'collateral' => [
                     'collateral_type' => $financing->collateral?->collateral_type,
@@ -358,7 +357,7 @@ class FinancingController extends Controller
     public function showValidation(string $id)
     {
         $financing = Financing::where('id', $id)
-            ->where('financing_status', FinancingReqStatusEnum::PENDING_REVIEW->value)
+            ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
             ->with([
                 'member.user',
                 'member.financials',
@@ -395,7 +394,7 @@ class FinancingController extends Controller
                     'payment_method' => $financing->payment_method,
                     'akad_date' => $financing->akad_date,
                     'notes' => $financing->notes,
-                    'financing_status' => $financing->financing_status,
+                    'status' => $financing->status,
                     'product_type' => $financing->financingItem->productType?->product_type_name,
                 ],
                 'collateral' => [
@@ -425,17 +424,17 @@ class FinancingController extends Controller
     public function validate(Request $request, string $id)
     {
         $validated = $request->validate([
-            'financing_status' => 'required',
+            'status' => 'required',
             'notes' => 'nullable|string',
         ]);
 
         try {
             $financing = Financing::where('id', $id)
-                ->where('financing_status', FinancingReqStatusEnum::PENDING_REVIEW->value)
+                ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
                 ->firstOrFail();
 
             $fi = $financing->update([
-                'financing_status' => $validated['financing_status'],
+                'status' => $validated['status'],
                 'notes' => $validated['notes'] ?? null,
             ]);
 
@@ -476,7 +475,6 @@ class FinancingController extends Controller
                 'last_education' => $validated['member']['last_education'] ?? $user->member->last_education,
                 'domicile_address' => $validated['member']['domicile_address'] ?? $user->member->domicile_address,
                 'residential_address' => $validated['member']['residential_address'] ?? $user->member->residential_address,
-                'spouse_name' => $validated['member']['spouse_name'] ?? $user->member->spouse_name,
                 'marital_status' => $validated['member']['marital_status'] ?? $user->member->marital_status,
                 'dependents' => $validated['member']['dependents'] ?? $user->member->dependents,
             ]);
@@ -546,7 +544,7 @@ class FinancingController extends Controller
                         'is_wakalah' => $validated['financing']['is_wakalah'] ?? null,
                         'payment_method' => $validated['financing']['payment_method'] ?? null,
                         'updated_by' => $verifier->id,
-                        'financing_status' => $validated['financing']['financing_status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                        'status' => $validated['financing']['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                     ]
                 );
 

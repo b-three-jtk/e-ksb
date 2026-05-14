@@ -77,7 +77,7 @@ const submit = () => {
     }).then((result) => {
         if (result.isConfirmed) {
             const submitForm = useForm({
-                financing_status: finalStatus,
+                status: finalStatus,
                 notes: form.notes,
             })
 
@@ -120,8 +120,8 @@ const submit = () => {
                     <h1 class="font-semibold text-white">{{ data.financing.name }}</h1>
                     <div class="flex items-center gap-4">
                         <p class="text-white">No. Transaksi : #{{ data.financing.financing_transaction_code }}</p>
-                        <span :class="useFinancingStatus(data.financing.financing_status)">
-                            {{ getStatusLabel(data.financing.financing_status) }}
+                        <span :class="useFinancingStatus(data.financing.status)">
+                            {{ getStatusLabel(data.financing.status) }}
                         </span>
                     </div>
                 </div>

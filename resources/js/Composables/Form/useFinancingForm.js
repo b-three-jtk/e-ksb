@@ -33,7 +33,6 @@ export function useFinancingForm(initialData = null) {
             domicile_address: initialData?.member?.domicile_address || '',
             residential_address: initialData?.member?.residential_address || '',
             marital_status: initialData?.member?.marital_status || '',
-            spouse_name: initialData?.member?.spouse_name || '',
             dependents: initialData?.member?.dependents || 0,
             job_title: initialData?.member?.job_title || '',
             company_or_business_name: initialData?.member?.company_or_business_name || '',
@@ -60,7 +59,7 @@ export function useFinancingForm(initialData = null) {
             akad_date: initialData?.financing?.akad_date || '',
             down_payment: initialData?.financing?.down_payment || null,
             notes: initialData?.financing?.notes || '',
-            financing_status: initialData?.financing?.financing_status || 'Menunggu Kelengkapan Dokumen',
+            status: initialData?.financing?.status || 'Menunggu Kelengkapan Dokumen',
             purchase_receipt: initialData?.financing?.purchase_receipt || null
         },
         collateral: {
@@ -139,7 +138,6 @@ export function useFinancingForm(initialData = null) {
         form.member.domicile_address = member.domicile_address || ''
         form.member.residential_address = member.residential_address || ''
         form.member.marital_status = member.marital_status || ''
-        form.member.spouse_name = member.spouse_name || ''
         form.member.dependents = member.dependents || 0
         form.member.job_title = member.job_title || ''
         form.member.company_or_business_name = member.company_or_business_name || ''
@@ -179,7 +177,6 @@ export function useFinancingForm(initialData = null) {
             domicile_address: '',
             residential_address: '',
             marital_status: '',
-            spouse_name: '',
             dependents: null,
             job_title: '',
             company_or_business_name: '',
@@ -205,7 +202,7 @@ export function useFinancingForm(initialData = null) {
             akad_date: '',
             down_payment: null,
             notes: '',
-            financing_status: ''
+            status: ''
         }
         form.collateral = {
             collateral_type: '',
@@ -355,15 +352,15 @@ export function useFinancingForm(initialData = null) {
     })
 
     const submit = (status) => {
-        if ((form.financing.financing_status === 'Menunggu Kelengkapan Dokumen' || form.financing.financing_status === 'Ditolak') && status === 'PENDING_REVIEW') {
-            form.financing.financing_status = 'Belum Ditinjau'
+        if ((form.financing.status === 'Menunggu Kelengkapan Dokumen' || form.financing.status === 'Ditolak') && status === 'PENDING_REVIEW') {
+            form.financing.status = 'Belum Ditinjau'
         }
 
-        if (form.financing.financing_status === 'Disetujui' && status === 'FINAL') {
+        if (form.financing.status === 'Disetujui' && status === 'FINAL') {
             if (form.financing.payment_method === 'Cicilan') {
-                form.financing.financing_status = 'Angsuran Berjalan'
+                form.financing.status = 'Angsuran Berjalan'
             } else {
-                form.financing.financing_status = 'Lunas'
+                form.financing.status = 'Lunas'
             }
         }
 

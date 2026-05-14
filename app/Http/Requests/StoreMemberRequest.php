@@ -45,7 +45,6 @@ class StoreMemberRequest extends FormRequest
             'email' => 'nullable|email|max:255|unique:users,email',
             'domicile_address' => 'required|string|max:500',
             'residential_address' => 'nullable|string|max:500',
-            'spouse_name' => 'nullable|string|max:255',
             'last_education' => 'required|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
             'heir_nik' => 'required|digits:16|unique:heirs,heir_nik',
             'heir_name' => 'required|string|max:255',
