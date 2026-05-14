@@ -49,9 +49,11 @@ const getScheduleStatusClass = (status) => {
             <div class="flex justify-between border-b border-gray-200 pb-4 px-8">
                 <div class="flex flex-col">
                     <h1 class="uppercase font-medium text-lg">Detail Pembiayaan Murabahah</h1>
-                    <p class="text-sm font-light text-gray-500">No. Pembiayaan: {{ data.financing_transaction_code }}</p>
+                    <p class="text-sm font-light text-gray-500">No. Pembiayaan: {{ data.financing_transaction_code }}
+                    </p>
                 </div>
-                <span class="my-auto" :class="useFinancingStatus(data.financing_status)">{{ data.financing_status }}</span>
+                <span class="my-auto" :class="useFinancingStatus(data.financing_status)">{{ data.financing_status
+                    }}</span>
             </div>
             <div class="flex flex-col px-12 pb-2 pt-4 gap-2">
                 <h1>Detail Objek Pembiayaan Murabahah</h1>
@@ -63,15 +65,31 @@ const getScheduleStatusClass = (status) => {
                     <Info label="Merek" :value="data.financing_item?.brand" />
                     <Info label="Kondisi" :value="data.financing_item?.condition" />
                     <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.request_description" />
+                    <Info label="Supplier" :value="data.financing_item.supplier?.supplier_name" />
+                </div>
+            </div>
+            <div v-if="data.collateral" class="flex flex-col px-12 pb-2 pt-4 gap-2">
+                <h1>Detail Jaminan</h1>
+                <div class="card-layout grid grid-cols-2 gap-6">
+                    <Info label="Tipe Jaminan" :value="data.collateral.collateral_type" />
+                    <Info label="Nama Pemilik" :value="data.collateral.owner_name" />
+                    <Info label="Lokasi Jaminan" :value="data.collateral.collateral_location" />
+                    <Info label="Nilai Pasar Estimasi" :value="moneyParser(data.collateral.estimated_market_value)" />
                 </div>
             </div>
             <div class="flex flex-col px-12 py-2 gap-2">
                 <div class="flex justify-between items-center">
                     <h1>Ringkasan Pembiayaan</h1>
-                    <Button variant="secondary" size="small">
-                        <span class="icon-[tabler--credit-card-pay]" style="width: 24px; height: 24px;"></span>
-                        Bayar Tagihan
-                    </Button>
+                    <div class="flex items-center gap-4">
+                        <Button v-if="data.installment && data.financing_status == 'Angsuran Berjalan'" :href="`/admin/financing/repayment/${data.id}`" variant="secondary" size="small">
+                            <span class="icon-[tabler--moneybag-move]" style="width: 18px; height: 18px;"></span>
+                            Pelunasan Dipercepat
+                        </Button>
+                        <Button variant="info" size="small">
+                            <span class="icon-[tabler--credit-card-pay]" style="width: 18px; height: 18px;"></span>
+                            Bayar Tagihan
+                        </Button>
+                    </div>
                 </div>
                 <div class="card-layout px-0!">
                     <div class="grid grid-cols-2 gap-6 border-b border-gray-200 pb-4 px-8">
@@ -82,7 +100,8 @@ const getScheduleStatusClass = (status) => {
                         <Info label="Total Dibayar" :value="moneyParser(data.total_paid)" />
                         <Info label="Sisa Tagihan" :value="moneyParser(data.remaining_balance)" />
                         <Info label="Angsuran/Bulan" :value="moneyParser(data.installment_per_month)" />
-                        <Info v-if="data.installment?.tenor" label="Tenor" :value="data.installment?.tenor + ' Bulan'" />
+                        <Info v-if="data.installment?.tenor" label="Tenor"
+                            :value="data.installment?.tenor + ' Bulan'" />
                     </div>
                     <div class="py-8 px-8" v-if="data.installment?.payment_schedules">
                         <h3 class="font-semibold mb-4">Status Angsuran</h3>
@@ -113,39 +132,41 @@ const getScheduleStatusClass = (status) => {
                                 </th>
                             </tr>
                         </thead>
-                        <tbody v-if="data.installment?.payment_schedules && data.installment?.payment_schedules?.length > 0">
-                            <tr v-for="data in data.installment?.payment_schedules"
+                        <tbody
+                            v-if="data.installment?.payment_schedules && data.installment?.payment_schedules?.length > 0">
+                            <tr v-for="i in data.installment?.payment_schedules"
                                 class="border-t border-gray-100 dark:border-gray-500 font-body">
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                        {{ data.installment_number }}
+                                        {{ i.installment_number }}
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                        {{ dateParser(data.due_date) }}
+                                        {{ dateParser(i.due_date) }}
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                        {{ moneyParser(data.total_amount) }}
+                                        {{ moneyParser(data.total_monthly_payment) }}
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
-                                    <span :class="getScheduleStatusClass(data.status)">
-                                        {{ data.status }}
+                                    <span :class="getScheduleStatusClass(i.installment_schedule_status)">
+                                        {{ i.installment_schedule_status }}
                                     </span>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap flex justify-center">
                                     <div
-                                        v-if="data.status != 'Dibayar' && data.status != 'Terlambat' && data.status != 'Ditolak'">
+                                        v-if="i.installment_schedule_status != 'Dibayar' && i.installment_schedule_status != 'Terlambat' && i.installment_schedule_status != 'Ditolak'">
                                         <Button size="small" variant="gray" disabled>
                                             <EyeIcon width="18px" height="18px" />
                                             Lihat Bukti
                                         </Button>
                                     </div>
                                     <div v-else>
-                                        <Button size="small" variant="info" :href="`/admin/savings/show/${data.payment.id}`">
+                                        <Button size="small" variant="info"
+                                            :href="`/admin/savings/show/${i.payment.id}`">
                                             <EyeIcon width="18px" height="18px" />
                                             Lihat Bukti
                                         </Button>

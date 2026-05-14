@@ -17,7 +17,6 @@ use App\Http\Controllers\User\LedgerController;
 use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\UserFinancingController;
 use App\Http\Controllers\User\UserProfileController;
-use App\Http\Controllers\User\UserRepaymentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -84,9 +83,9 @@ Route::post('/auth/logout', [LoginController::class, 'logout'])
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'revalidate'])->group(function () {
     Route::get('/list', [AdminController::class, 'index'])->name('index');
-    Route::get('/create', [AdminController::class, 'create']);
-    Route::post('/store', [AdminController::class, 'store']);
-    Route::get('/edit/{id}', [AdminController::class, 'edit']);
+    Route::get('/create', [AdminController::class, 'create'])->middleware('role:Sekretaris');
+    Route::post('/store', [AdminController::class, 'store'])->middleware('role:Sekretaris');
+    Route::get('/edit/{id}', [AdminController::class, 'edit'])->middleware('role:Sekretaris');;
     Route::put('/update/{id}', [AdminController::class, 'update'])->name('update')->middleware('role:Sekretaris');
     Route::get('/show/{id}', [AdminController::class, 'show']);
     Route::get('members', [AdminController::class, 'searchMember'])->name('members.search');
@@ -97,8 +96,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/savings/export/csv', [SavingController::class, 'exportCsv'])->name('savings.export.csv');
     Route::get('/savings/export/pdf', [SavingController::class, 'exportPdf'])->name('savings.export.pdf');
 
-    Route::get('/saving/withdrawal', [WithdrawalController::class, 'create'])->name('withdrawal.create');
-    Route::post('/saving/withdrawal', [WithdrawalController::class, 'store'])->name('withdrawal.store');
+    Route::get('/saving/withdrawal', [WithdrawalController::class, 'create'])->name('withdrawal.create')->middleware('role:Penanggung Jawab Anggota');
+    Route::post('/saving/withdrawal', [WithdrawalController::class, 'store'])->name('withdrawal.store')->middleware('role:Penanggung Jawab Anggota');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -134,9 +133,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/financing/draft/{id}', [FinancingController::class, 'loadDraft'])->name('financing.load-draft');
     Route::get('/financing/validation/{id}', [FinancingController::class, 'showValidation'])->name('financing.validation');
     Route::put('/financing/validate/{id}', [FinancingController::class, 'validate'])->name('financing.validation.submit');
+    Route::get('/financing/repayment/{id}', [FinancingController::class, 'showRepayment'])->name('financing.repayment');
+    Route::post('/financing/repayment', [FinancingController::class, 'storeRepayment'])->name('financing.repayment.request');
+    Route::get('repayment/{id}/receipt', [FinancingController::class, 'viewRepaymentReceipt'])->name('financing.repayment.view');
+    Route::get('repayment/{id}/download', [FinancingController::class, 'downloadRepaymentReceipt'])->name('financing.repayment.download');
 
-    Route::get('/saving/deposit', [SavingController::class, 'createDeposit'])->name('deposit.create');
-    Route::post('/saving/deposit', [SavingController::class, 'storeDeposit'])->name('deposit.store');
+    Route::get('/saving/deposit', [SavingController::class, 'createDeposit'])->name('deposit.create')->middleware('role:Penanggung Jawab Anggota');
+    Route::post('/saving/deposit', [SavingController::class, 'storeDeposit'])->name('deposit.store')->middleware('role:Penanggung Jawab Anggota');
 });
 
 // User Routes
@@ -159,7 +162,5 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'reval
 
     // Pembiayaan
     Route::get('/financing', [UserFinancingController::class, 'index'])->name('financing.index');
-    Route::get('/financing/repayment/show/{id}', [UserRepaymentController::class, 'show'])->name('financing.repayment.show');
-    Route::post('/financing/repayment/submit', [UserRepaymentController::class, 'sendRequest'])->name('financing.repayment.request');
     Route::get('/financing/show/{id}', [UserFinancingController::class, 'show'])->name('financing.show');
 });

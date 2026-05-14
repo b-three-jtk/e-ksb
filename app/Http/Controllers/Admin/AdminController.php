@@ -174,18 +174,18 @@ class AdminController extends Controller
      */
     public function update(UpdateAdminRequest $request, string $id)
     {
-        DB::begin();
-        try {
+        // DB::begin();
+        // try {
             $data = $request->validated();
 
             $admin = User::findOrFail($id);
             $admin->update($data);
-            DB::commit();
+            // DB::commit();
             return redirect()->route('admin.index');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->withInput();
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     return redirect()->back()->withInput();
+        // }
     }
 
     public function searchMember(Request $request)

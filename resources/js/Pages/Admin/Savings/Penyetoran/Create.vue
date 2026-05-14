@@ -248,11 +248,11 @@ const confirmationData = computed(() => ({
 function handleConfirm() {
   const formData = new FormData()
 
-  formData.append('member_id', selectedMember.value.id)
+  formData.append('user_id', selectedMember.value.id)
   formData.append('saving_category', jenisSimpanan.value)
   formData.append('amount', nominalRaw.value)
   formData.append('date', tanggalSetor.value)
-  formData.append('method', depositMethod.value)
+  formData.append('saving_payment_method', depositMethod.value)
   formData.append('notes', catatan.value)
 
   if (isNewAccount.value) {
@@ -280,6 +280,7 @@ function handleConfirm() {
     onError: (errors) => {
       showDialog.value = false
       const msg = Object.values(errors).flat().join('\n')
+      console.error('Form errors:', errors)
       toast(msg || 'Gagal menyimpan', { type: 'error' })
     }
   })

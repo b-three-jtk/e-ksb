@@ -6,12 +6,15 @@ use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PaymentMethodsEnum;
+use App\Models\Collateral;
 use App\Models\Financing;
 use App\Models\FinancingItem;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentSchedule;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Member;
+use App\Models\ProductType;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -40,6 +43,34 @@ class FinancingSeeder extends Seeder
             'member_id' => $member->id,
         ]);
 
+        $productType = ProductType::create([
+            'product_type_name' => 'Motor',
+        ]);
+
+        $supplier = Supplier::create([
+            'supplier_name' => 'PT. Motorindo',
+        ]);
+
+        Collateral::create([
+            'collateral_type' => 'BPKB',
+            'estimated_market_value' => 4000000,
+            'owner_name' => $member->user->name,
+            'collateral_location' => 'Bandung',
+            'financing_id' => $financing->id,
+        ]);
+
+        $financingItem = FinancingItem::create([
+            'name' => 'Motor Yamaha NMAX',
+            'cost_price' => 3500000,
+            'margin_amount' => 280000,
+            'financing_id' => $financing->id,
+            'request_description' => 'Pembelian motor untuk kebutuhan sehari-hari',
+            'qty' => 1,
+            'condition' => 'Baru',
+            'product_type_id' => $productType->id,
+            'supplier_id' => $supplier->id,
+        ]);
+
         // Create Installment
         $tenor = 12; // 12 bulan
         $installment = Installment::create([
@@ -48,7 +79,7 @@ class FinancingSeeder extends Seeder
         ]);
 
         // Create Installment Payment Schedules
-        $monthlyPayment = ($financing->down_payment + 500000) / $tenor; // Assume total 500k margin
+        $monthlyPayment = ($financing->down_payment + $financingItem->margin_amount) / $tenor; 
 
         for ($i = 1; $i <= $tenor; $i++) {
             $dueDate = now()->addMonths($i)->format('Y-m-d');

@@ -8,11 +8,13 @@ use App\Models\SavingProduct;
 use App\Models\SavingTransaction;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\SavingProductSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
+    $this->seed(SavingProductSeeder::class);
 });
 
 // FR 1
@@ -546,14 +548,16 @@ test('Aplikasi harus menghentikan penerimaan setoran tambahan pada rekening Tabu
 
     $response = $this->actingAs($pjanggota)
         ->post('/admin/saving/deposit', [
-            'member_id' => $member->user_id,
+            'member_id' => $member->id,
             'saving_category' => SavingTypeEnum::TABUNGAN_IBADAH->value,
             'amount' => 100000,
             'date' => now()->format('Y-m-d'),
             'saving_payment_method' => 'Tunai',
         ]);
 
-    $response->assertSessionHasErrors();
+    $response->assertSessionHasErrors([
+        'target_reached' => 'Tabungan Ibadah sudah mencapai target, tidak bisa melakukan penyetoran.',
+    ]);
 });
 
 test('Aplikasi harus mewajibkan anggota mencairkan seluruh dana Tabungan Ibadah sebelum membuka yang baru', function () {
@@ -566,7 +570,7 @@ test('Aplikasi harus mewajibkan anggota mencairkan seluruh dana Tabungan Ibadah 
 
     $member = Member::factory()->create();
 
-    $savingAccount1 = SavingAccount::factory()->create([
+    SavingAccount::factory()->create([
         'member_id' => $member->id,
         'saving_product_id' => $savingProduct->id,
         'balance' => 5000000,
@@ -576,7 +580,7 @@ test('Aplikasi harus mewajibkan anggota mencairkan seluruh dana Tabungan Ibadah 
     // Try to open another Tabungan Ibadah
     $response = $this->actingAs($pjanggota)
         ->post('/admin/saving/deposit', [
-            'member_id' => $member->user_id,
+            'user_id' => $member->user_id,
             'saving_category' => SavingTypeEnum::TABUNGAN_IBADAH->value,
             'amount' => 1000000,
             'date' => now()->format('Y-m-d'),
@@ -584,5 +588,7 @@ test('Aplikasi harus mewajibkan anggota mencairkan seluruh dana Tabungan Ibadah 
             'target_amount' => 10000000,
         ]);
 
-    $response->assertSessionHasErrors();
+    $response->assertSessionHasErrors([
+        'existing_ibadah' => 'Anda harus mencairkan Tabungan Ibadah yang lama sebelum membuka yang baru.',
+    ]);
 });

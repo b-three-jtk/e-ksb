@@ -22,6 +22,7 @@ class Financing extends Model
         'is_wakalah',
         'down_payment',
         'akad_date',
+        'notes',
         'paid_date',
         'financing_status',
         'payment_method',

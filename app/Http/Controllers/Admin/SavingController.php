@@ -7,7 +7,9 @@ use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
+use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
+use App\Models\SavingProduct;
 use App\Models\SavingTransaction;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -234,23 +236,24 @@ class SavingController extends Controller
     public function createDeposit(Request $request)
     {
 
-        $members = User::where('role_id', 9)
-            ->where('status', 'Aktif')
+        $members = User::where('status', 'Aktif')
             ->select('id', 'user_code', 'name')
-            ->with(['savingAccounts:id,user_id,saving_type'])
+            ->with(['member.savingAccounts.savingProduct', 'roles' => function ($q) {
+                $q->where('name', 'Anggota');
+            }])
             ->get()
             ->map(function ($user) {
                 return [
                     'id' => $user->id,
                     'user_code' => $user->user_code,
                     'name' => $user->name,
-                    'savingAccounts' => $user->savingAccounts->map(fn($acc) => [
-                        'type' => $acc->saving_type,
+                    'savingAccounts' => $user->member?->savingAccounts?->map(fn($acc) => [
+                        'type' => $acc->savingProduct->name,
                     ]),
                 ];
             });
 
-        $accounts = Account::select('account_number', 'bank_name', 'account_name', 'user_id')
+        $accounts = MemberBankAccount::select('account_number', 'bank_name', 'account_name', 'member_id')
             ->get();
 
         $pengurus = Auth::user();
@@ -268,7 +271,7 @@ class SavingController extends Controller
     public function storeDeposit(Request $request)
     {
         $request->validate([
-            'member_id' => 'required|uuid|exists:users,id',
+            'user_id' => 'required|exists:users,id',
             'saving_category' => 'required|string|in:' . implode(',', array_column(SavingTypeEnum::cases(), 'value')),
             'amount' => 'required|numeric|min:1',
             'date' => 'required|date|before_or_equal:today',
@@ -284,10 +287,12 @@ class SavingController extends Controller
             'payment_proof' => 'required_if:method,Non-Tunai|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        $member = User::findOrFail($request->member_id);
+        $user = User::findOrFail($request->user_id)->with('member')->first();
 
-        $savingAccount = SavingAccount::where('user_id', $member->id)
-            ->where('saving_type', $request->saving_category)
+        $savingAccount = SavingAccount::where('member_id', $user->member?->id)
+            ->whereHas('savingProduct', function ($q) use ($request) {
+                $q->where('name', $request->saving_category);
+            })
             ->first();
 
         if (!$savingAccount) {
@@ -299,18 +304,33 @@ class SavingController extends Controller
                 return back()->withErrors(['target_amount' => 'Target wajib diisi']);
             }
 
+            if ($request->saving_category === 'Tabungan Ibadah') {
+                $existingIbadah = SavingAccount::where('user_id', $user->id)
+                    ->whereHas('savingProduct', function ($q) {
+                        $q->where('name', SavingTypeEnum::TABUNGAN_IBADAH->value);
+                    })
+                    ->where('balance', '>', 0)
+                    ->first();
+
+                if ($existingIbadah) {
+                    return back()->withErrors(['existing_ibadah' => 'Anda harus mencairkan Tabungan Ibadah yang lama sebelum membuka yang baru.']);
+                }
+            }
+
             $savingAccount = SavingAccount::create([
                 'saving_account_code' => 'SA-' . strtoupper(Str::random(8)),
-                'saving_type' => $request->saving_category,
+                'saving_product_id' => SavingProduct::where('name', $request->saving_category)->first()->id,
                 'tenor_months' => $request->tenor_months,
                 'target_amount' => $request->target_amount,
-                'user_id' => $member->id,
+                'member_id' => $user->member->id,
             ]);
         }
 
-        $prevBalance = DB::table('get_saving_account_balance')
-            ->where('saving_account_id', $savingAccount->id)
-            ->value('total_balance') ?? 0;
+        $prevBalance = $savingAccount->balance;
+
+        if ($request->saving_category === 'Tabungan Ibadah' && ($savingAccount->balance === $savingAccount->target_amount)) {
+            return back()->withErrors(['target_reached' => 'Tabungan Ibadah sudah mencapai target, tidak bisa melakukan penyetoran.']);
+        }
 
         $transaction = DB::transaction(function () use ($request, $savingAccount) {
 
@@ -346,23 +366,24 @@ class SavingController extends Controller
             return $transaction;
         });
 
-        $members = User::where('role_id', 11)
-            ->where('status', UserStatusEnum::ACTIVE->value)
-            ->with('savingAccounts')
+        $members = User::where('status', UserStatusEnum::ACTIVE->value)
+            ->with(['member.savingAccounts.savingProduct', 'roles' => function ($q) {
+                $q->where('name', 'Anggota');
+            }])
             ->get()
             ->map(function ($user) {
                 return [
                     'id' => $user->id,
                     'user_code' => $user->user_code,
                     'name' => $user->name,
-                    'savingAccounts' => $user->savingAccounts->map(fn($acc) => [
+                    'savingAccounts' => $user->member?->savingAccounts->map(fn($acc) => [
                         'type' => $acc->type,
                         'balance' => $acc->balance,
                     ]),
                 ];
             });
 
-        $accounts = Account::select('account_number', 'bank_name', 'account_name', 'user_id')->get();
+        $accounts = MemberBankAccount::select('account_number', 'bank_name', 'account_name', 'member_id')->get();
 
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
             'members' => $members,
@@ -375,9 +396,9 @@ class SavingController extends Controller
                 'no_transaksi' => $transaction->transaction_code,
                 'tanggal' => $transaction->created_at,
                 'pengurus' => Auth::user()->name,
-                'nama_anggota' => $member->name,
-                'no_anggota' => $member->user_code,
-                'jenis' => $savingAccount->saving_type,
+                'nama_anggota' => $user->name,
+                'no_anggota' => $user->user_code,
+                'jenis' => $savingAccount->saving_product?->name,
                 'metode' => $transaction->saving_payment_method,
                 'nominal' => $transaction->saving_amount,
                 'saldo_sebelum' => $savingAccount->prevBalance - $transaction->saving_amount,

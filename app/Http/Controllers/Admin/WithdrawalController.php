@@ -44,7 +44,7 @@ class WithdrawalController extends Controller
                         return [
                             'id' => $acc->id,
                             'type' => $acc->savingProduct?->name ?? '-',
-                            'balance' => DB::table('get_saving_account_balance')->where('saving_account_id', $acc->id)->value('total_balance') ?? 0,
+                            'balance' => $acc->balance ?? 0,
                             'tenor_months' => $acc->saving_tenor,
                             'target_amount' => $acc->target_amount,
                             'opened_at' => optional($acc->created_at)->toDateString(),
@@ -84,7 +84,7 @@ class WithdrawalController extends Controller
 
         $member = Member::with('user')->findOrFail($validated['member_id']);
         $savingAccount = SavingAccount::findOrFail($validated['saving_account_id']);
-        $savingBalance = DB::table('get_saving_account_balance')->where('saving_account_id', $savingAccount->id)->value('total_balance') ?? 0;
+        $savingBalance = $savingAccount->balance;
 
         // Verify that the saving account belongs to the member
         if ((int) $savingAccount->member_id !== (int) $member->id) {
@@ -132,9 +132,7 @@ class WithdrawalController extends Controller
                     ->firstOrFail();
 
                 // Get latest balance from database view (source of truth)
-                $saldoSebelum = DB::table('get_saving_account_balance')
-                    ->where('saving_account_id', $lockedSavingAccount->id)
-                    ->value('total_balance');
+                $saldoSebelum = $lockedSavingAccount->balance;
 
                 if ($saldoSebelum === null) {
                     // fallback to model field if view not available

@@ -145,9 +145,7 @@ class LedgerController extends Controller
 
         foreach ($savingAccounts as $account) {
             $accountType = Str::lower((string) ($account->savingProduct?->name ?? ''));
-            $rawBalance = (float) (DB::table('get_saving_account_balance')
-                ->where('saving_account_id', $account->id)
-                ->value('total_balance') ?? 0);
+            $rawBalance = (float) ($account->balance ?? 0);
             $currentBalance = max(0, $rawBalance);
 
             $savingSummary['total_saldo'] += $currentBalance;
