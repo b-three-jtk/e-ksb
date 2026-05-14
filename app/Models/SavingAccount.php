@@ -19,6 +19,7 @@ class SavingAccount extends Model
         'saving_product_id',
         'saving_tenor',
         'target_amount',
+        'purpose',
         'balance',
         'member_id',
     ];
