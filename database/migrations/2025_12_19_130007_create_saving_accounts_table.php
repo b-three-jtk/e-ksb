@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('saving_account_code', 20)->unique();
             $table->integer('saving_tenor')->nullable();
             $table->decimal('target_amount', 15, 2)->nullable();
+            $table->string('purpose')->nullable();
             $table->decimal('balance', 15, 2)->default(0);
             $table->unsignedBigInteger('member_id')->nullable();
 
