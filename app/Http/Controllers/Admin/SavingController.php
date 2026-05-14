@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
+use App\Enums\MemberStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
+use App\Models\Member;
+use App\Models\MemberBankAccount;
+use App\Models\SavingProduct;
 use App\Models\User;
+use App\Models\MemberDoc;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -17,6 +22,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class SavingController extends Controller
 {
@@ -90,17 +97,17 @@ class SavingController extends Controller
             ->withQueryString()
             ->through(function ($trx) {
                 return [
-                    'id' => $trx->id,
-                    'no_transaksi' => str_pad($trx->saving_transaction_code, 6, '0', STR_PAD_LEFT),
-                    'tanggal' => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                    'anggota' => $trx->savingAccount->member->user->user_code
-                        . ' - '
-                        . $trx->savingAccount->member->user->name,
-                    'nominal' => $trx->transaction_type === 'Penarikan'
-                        ? -$trx->saving_amount
-                        : $trx->saving_amount,
-                    'produk' => $trx->savingAccount->savingProduct->name, // nama lengkap
-                    'jenis' => $trx->savingAccount->savingProduct->name,
+                    'id'           => $trx->id,
+                    'no_transaksi' => $trx->saving_transaction_code, 
+                    'tanggal'      => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
+                    'anggota'      => $trx->savingAccount->member->user->user_code
+                                    . ' - '
+                                    . $trx->savingAccount->member->user->name,
+                    'nominal'      => $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
+                                    ? -$trx->saving_amount
+                                    : $trx->saving_amount,
+                    'produk'       => $trx->savingAccount->savingProduct->name,
+                    'jenis'        => $trx->transaction_type,
                 ];
             });
 
@@ -185,12 +192,15 @@ class SavingController extends Controller
 
             foreach ($transactions as $trx) {
                 fputcsv($handle, [
-                    str_pad($trx->id, 6, '0', STR_PAD_LEFT),
-                    $trx->transaction_date->format('d/m/Y'),
-                    $trx->savingAccount->user->user_code . ' - ' . $trx->savingAccount->user->name,
-                    $trx->savingAccount->saving_type,
+                    $trx->saving_transaction_code,
+                    \Carbon\Carbon::parse($trx->transaction_date)->format('d/m/Y'),
+                    $trx->savingAccount->member->user->user_code . ' - ' .
+                    $trx->savingAccount->member->user->name,
+                    $trx->savingAccount->savingProduct->name ?? '-',
                     $trx->transaction_type,
-                    $trx->transaction_type === 'Penarikan' ? -$trx->saving_amount : $trx->saving_amount,
+                    $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
+                        ? -$trx->saving_amount
+                        : $trx->saving_amount,
                 ]);
             }
 
@@ -233,158 +243,206 @@ class SavingController extends Controller
 
     public function createDeposit(Request $request)
     {
-
-        $members = User::where('role_id', 9)
-            ->where('status', 'Aktif')
-            ->select('id', 'user_code', 'name')
-            ->with(['savingAccounts:id,user_id,saving_type'])
+        $members = Member::whereIn('status', [
+            MemberStatusEnum::ACTIVE->value,
+            MemberStatusEnum::PAYMENT_PENDING->value
+        ])
+            ->with(['user:id,user_code,name', 'savingAccounts.savingProduct:id,name'])
             ->get()
-            ->map(function ($user) {
+            ->map(function ($member) {
                 return [
-                    'id' => $user->id,
-                    'user_code' => $user->user_code,
-                    'name' => $user->name,
-                    'savingAccounts' => $user->savingAccounts->map(fn($acc) => [
-                        'type' => $acc->saving_type,
+                    'id' => $member->id,
+                    'user_code' => $member->user->user_code,
+                    'name' => $member->user->name,
+                    'status' => $member->status,
+                    'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
+                        'type' => $acc->savingProduct->name ?? null,
+                        'purpose' => $acc->purpose ?? null,
+                        'balance' => $acc->balance ?? 0,
+                        'target_amount' => $acc->target_amount ?? null,
+                        'matured_at' => $acc->saving_tenor && $acc->created_at
+                            ? $acc->created_at->copy()->addMonths($acc->saving_tenor)->format('d M Y')
+                            : null,
+                        'is_frozen'  => !is_null($acc->target_amount) && $acc->balance >= $acc->target_amount,
+                        'is_matured' => $acc->saving_tenor && $acc->created_at 
+                            ? now()->gte($acc->created_at->copy()->addMonths($acc->saving_tenor))
+                            : false,
                     ]),
                 ];
             });
 
-        $accounts = Account::select('account_number', 'bank_name', 'account_name', 'user_id')
-            ->get();
-
-        $pengurus = Auth::user();
-
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
             'members' => $members,
-            'accounts' => $accounts,
-            'saving_types' => array_column(SavingTypeEnum::cases(), 'value'),
-            'pengurus' => [
-                'name' => $pengurus->name ?? 'Pengurus',
-            ],
+            'saving_types' => SavingProduct::pluck('name'),   // ← Ubah ke ini
+            'pengurus' => ['name' => Auth::user()->name ?? 'Pengurus'],
         ]);
     }
 
     public function storeDeposit(Request $request)
     {
         $request->validate([
-            'member_id' => 'required|uuid|exists:users,id',
-            'saving_category' => 'required|string|in:' . implode(',', array_column(SavingTypeEnum::cases(), 'value')),
+            'member_id' => 'required|exists:members,id',
+            'saving_category' => 'required|exists:saving_products,name',
             'amount' => 'required|numeric|min:1',
             'date' => 'required|date|before_or_equal:today',
             'saving_payment_method' => 'required|in:Tunai,Non-Tunai',
-            'notes' => 'nullable|string|max:500',
-            'tenor_months' => 'nullable|integer|min:1',
-            'target_amount' => 'nullable|numeric|min:1',
-
-            // non-tunai
-            'bank_name' => 'required_if:method,Non-Tunai|string|max:100',
-            'account_name' => 'required_if:method,Non-Tunai|string|max:150',
-            'account_number' => 'required_if:method,Non-Tunai|string|max:50',
-            'payment_proof' => 'required_if:method,Non-Tunai|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'notes' => 'nullable|string|max:255',
+            'purpose' => 'nullable|string|max:255',
+            'tenor_months' => 'nullable|integer|min:1|max:360',
+            'target_amount' => 'nullable|numeric|min:0',
         ]);
 
-        $member = User::findOrFail($request->member_id);
+        $member = Member::with('user')->findOrFail($request->member_id);
+        $product = SavingProduct::where('name', $request->saving_category)->firstOrFail();
 
-        $savingAccount = SavingAccount::where('user_id', $member->id)
-            ->where('saving_type', $request->saving_category)
-            ->first();
-
-        if (!$savingAccount) {
-            if ($request->saving_category === 'Tabungan Berjangka' && !$request->tenor_months) {
-                return back()->withErrors(['tenor_months' => 'Tenor wajib diisi']);
+        $purpose = null;
+            if (in_array($product->name, ['Tabungan Ibadah', 'Tabungan Berjangka'])) {
+                $purpose = $request->purpose;
             }
 
-            if ($request->saving_category === 'Tabungan Ibadah' && !$request->target_amount) {
-                return back()->withErrors(['target_amount' => 'Target wajib diisi']);
-            }
-
-            $savingAccount = SavingAccount::create([
+       $savingAccount = SavingAccount::firstOrCreate(
+            [
+                'member_id' => $member->id,
+                'saving_product_id' => $product->id,
+                'purpose' => $purpose,
+            ],
+            [
                 'saving_account_code' => 'SA-' . strtoupper(Str::random(8)),
-                'saving_type' => $request->saving_category,
-                'tenor_months' => $request->tenor_months,
+                'saving_tenor' => $request->tenor_months,
                 'target_amount' => $request->target_amount,
-                'user_id' => $member->id,
-            ]);
+                'balance' => 0,
+            ]
+        );
+
+        if ($product->name === 'Simpanan Pokok') {
+            if ($member->status !== MemberStatusEnum::PAYMENT_PENDING->value) {
+                throw ValidationException::withMessages([
+                    'saving_category' => 'Simpanan Pokok hanya untuk anggota dengan status Menunggu Pembayaran.'
+                ]);
+            }
+            if (SavingTransaction::where('saving_account_id', $savingAccount->id)->exists()) {
+                throw ValidationException::withMessages([
+                    'saving_category' => 'Simpanan Pokok hanya boleh dibayar sekali.'
+                ]);
+            }
         }
 
-        $prevBalance = DB::table('get_saving_account_balance')
-            ->where('saving_account_id', $savingAccount->id)
-            ->value('total_balance') ?? 0;
-
-        $transaction = DB::transaction(function () use ($request, $savingAccount) {
-
-            $account = null;
-
-            if ($request->saving_payment_method === 'Non-Tunai') {
-                $account = Account::updateOrCreate(
-                    [
-                        'account_number' => $request->account_number,
-                        'user_id' => $request->member_id,
-                    ],
-                    [
-                        'bank_name' => $request->bank_name,
-                        'account_name' => $request->account_name,
-                    ]
-                );
+        if ($product->name === 'Tabungan Ibadah' && $savingAccount->wasRecentlyCreated === false) {
+            if (!$savingAccount->target_amount) {
+                throw ValidationException::withMessages(['target_amount' => 'Target tabungan wajib diisi.']);
             }
+            if ($savingAccount->balance >= $savingAccount->target_amount) {
+                throw ValidationException::withMessages(['saving_category' => 'Tabungan Ibadah sudah mencapai target dan dibekukan.']);
+            }
+        }
 
-            $transaction = SavingTransaction::create([
-                'saving_transaction_code' => 'ST' . Str::upper(Str::random(8)),
+        if ($product->name === 'Tabungan Berjangka' && !$savingAccount->saving_tenor) {
+            throw ValidationException::withMessages(['tenor_months' => 'Tenor bulan wajib diisi untuk Tabungan Berjangka.']);
+        }
+
+        $prevBalance = $savingAccount->balance;
+
+        $transaction = DB::transaction(function () use ($request, $savingAccount, $member, $product) {
+            $trx = SavingTransaction::create([
+                'saving_transaction_code' => 'ST' . strtoupper(Str::random(8)),
                 'saving_amount' => $request->amount,
                 'transaction_type' => TransactionTypeEnum::DEPOSIT->value,
                 'saving_payment_method' => $request->saving_payment_method,
-                'saving_description' => $request->notes ?? 'Penyetoran oleh pengurus',
+                'saving_description' => $request->notes ?? 'Penyetoran',
                 'transaction_date' => $request->date,
                 'updated_by' => Auth::id(),
                 'saving_account_id' => $savingAccount->id,
-                'account_number' => $account?->account_number,
             ]);
 
             $savingAccount->increment('balance', $request->amount);
 
-            return $transaction;
+            if ($product->name === 'Simpanan Pokok') {
+                $member->update(['status' => MemberStatusEnum::ACTIVE->value]);
+            }
+
+            return $trx;
         });
 
-        $members = User::where('role_id', 11)
-            ->where('status', UserStatusEnum::ACTIVE->value)
-            ->with('savingAccounts')
-            ->get()
-            ->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'user_code' => $user->user_code,
-                    'name' => $user->name,
-                    'savingAccounts' => $user->savingAccounts->map(fn($acc) => [
-                        'type' => $acc->type,
-                        'balance' => $acc->balance,
-                    ]),
-                ];
-            });
+        $strukData = [
+            'no_transaksi' => $transaction->saving_transaction_code,
+            'tanggal' => $transaction->transaction_date,
+            'pengurus' => Auth::user()->name,
+            'nama_anggota' => $member->user->name,
+            'no_anggota' => $member->user->user_code,
+            'jenis' => $product->name,
+            'metode' => $transaction->saving_payment_method,
+            'nominal' => $transaction->saving_amount,
+            'saldo_sebelum' => $prevBalance,
+            'saldo_sesudah' => $prevBalance + $request->amount,
+            'purpose' => $purpose,
+        ];
 
-        $accounts = Account::select('account_number', 'bank_name', 'account_name', 'user_id')->get();
+        $this->storeReceiptDepositPdf($transaction, $strukData, $member->id);
 
+        // Return dengan data fresh
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
-            'members' => $members,
-            'accounts' => $accounts,
-            'pengurus' => [
-                'name' => Auth::user()->name ?? 'Pengurus',
-            ],
-
-            'struk' => [
-                'no_transaksi' => $transaction->transaction_code,
-                'tanggal' => $transaction->created_at,
-                'pengurus' => Auth::user()->name,
-                'nama_anggota' => $member->name,
-                'no_anggota' => $member->user_code,
-                'jenis' => $savingAccount->saving_type,
-                'metode' => $transaction->saving_payment_method,
-                'nominal' => $transaction->saving_amount,
-                'saldo_sebelum' => $savingAccount->prevBalance - $transaction->saving_amount,
-                'saldo_sesudah' => $savingAccount->prevBalance + $transaction->saving_amount,
-                'tenor' => $savingAccount->tenor_months,
-                'target' => $savingAccount->target_amount,
-            ]
+            'members' => $this->getMembersForDeposit(), // extract ke method
+            'saving_types' => SavingProduct::pluck('name'),
+            'pengurus' => ['name' => Auth::user()->name ?? 'Pengurus'],
+            'struk' => $strukData,
         ]);
+    }
+
+    // Helper baru
+    private function getMembersForDeposit()
+    {
+        return Member::whereIn('status', [
+            MemberStatusEnum::ACTIVE->value,
+            MemberStatusEnum::PAYMENT_PENDING->value
+        ])
+            ->with(['user:id,user_code,name', 'savingAccounts.savingProduct:id,name'])
+            ->get()
+            ->map(fn($member) => [
+                'id' => $member->id,
+                'user_code' => $member->user->user_code,
+                'name' => $member->user->name,
+                'status' => $member->status,
+                'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
+                    'type' => $acc->savingProduct->name ?? null,
+                    'purpose' => $acc->purpose ?? null,
+                    'balance' => $acc->balance ?? 0,
+                    'target_amount' => $acc->target_amount ?? null,
+                    'matured_at' => $acc->saving_tenor && $acc->created_at
+                        ? $acc->created_at->copy()->addMonths($acc->saving_tenor)->format('d M Y')
+                        : null,
+                    // tambahkan flag jika perlu
+                    'is_frozen' => $acc->target_amount && $acc->balance >= $acc->target_amount,
+                    'is_matured' => false, // logic sesuai kebutuhan
+                ]),
+            ]);
+    }
+
+    private function storeReceiptDepositPdf($transaction, array $strukData, $memberId): string
+    {
+        $pdf = Pdf::loadView('exports.deposit_receipt', [
+            'struk' => $strukData,
+        ])->setPaper([0, 0, 226.77, 600], 'portrait');
+
+        $directory = 'member_docs/receipts/' . now()->format('Y-m');
+        Storage::disk('public')->makeDirectory($directory);
+
+        $filename = 'struk-deposit-' . $transaction->id . '.pdf';
+        $path = $directory . '/' . $filename;
+
+        Storage::disk('public')->put($path, $pdf->output());
+
+        if (Storage::disk('public')->exists($path)) {
+            MemberDoc::create([
+                'member_id' => $memberId,
+                'doc_name' => 'Struk Penyetoran',
+                'doc_attachment' => $path,
+            ]);
+
+            return $path;
+        }
+
+            throw new \Exception('File tidak berhasil disimpan');
+
+        return null;
     }
 }
