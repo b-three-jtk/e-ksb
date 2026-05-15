@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('berjangka_accounts', function (Blueprint $table) {
             $table->id();
             $table->integer('tenor');
-            $table->string('objective');
+            $table->string('purpose');
             $table->uuid('saving_account_id');
 
             $table->foreign('saving_account_id')->references('id')->on('saving_accounts')->onDelete('cascade');

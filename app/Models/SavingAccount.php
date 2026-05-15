@@ -30,4 +30,14 @@ class SavingAccount extends Model
     {
         return $this->hasMany(SavingTransaction::class);
     }
+
+    public function ibadah()
+    {
+        return $this->hasOne(IbadahAccount::class);
+    }
+
+    public function berjangka()
+    {
+        return $this->hasOne(BerjangkaAccount::class);
+    }
 }

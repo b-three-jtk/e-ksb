@@ -2,6 +2,7 @@
 
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
+use App\Models\IbadahAccount;
 use App\Models\Member;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
@@ -15,13 +16,36 @@ beforeEach(function () {
 });
 
 describe('FR-12 Aplikasi harus menyediakan pencatatan transaksi simpanan anggota oleh penanggung jawab.', function () {
-
-    it('PJA dapat mencatat transaksi penyetoran simpanan anggota dengan data yang valid', function () {
+    it('PJ dapat mencatat transaksi penyetoran simpanan anggota dengan data yang valid', function () {
         $pjanggota = User::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
         $pjanggota->assignRole('Penanggung Jawab Anggota');
         $member = Member::factory()->create();
 
-        $response = $this->actingAs($pjanggota)
+        $res = $this->actingAs($pjanggota)
+            ->post('/admin/saving/deposit', [
+                'member_id' => $member->id,
+                'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+                'amount' => 500000,
+                'date' => now()->format('Y-m-d'),
+                'saving_payment_method' => 'Tunai',
+                'notes' => 'Setoran tabungan anggota baru',
+            ]);
+
+        $res->assertStatus(200);
+        $this->assertDatabaseHas('saving_transactions', [
+            'saving_amount' => 500000,
+            'saving_description' => 'Setoran tabungan anggota baru',
+        ]);
+    });
+
+    it('PJ tidak dapat memproses transaksi simpanan pokok untuk anggota yang berstatus aktif', function () {
+        $pjanggota = User::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
+        $pjanggota->assignRole('Penanggung Jawab Anggota');
+        $member = Member::factory([
+            'status' => 'Aktif'
+        ])->create();
+
+        $res = $this->actingAs($pjanggota)
             ->post('/admin/saving/deposit', [
                 'member_id' => $member->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
@@ -31,14 +55,106 @@ describe('FR-12 Aplikasi harus menyediakan pencatatan transaksi simpanan anggota
                 'notes' => 'Setoran pokok anggota baru',
             ]);
 
-        $response->assertStatus(302);
-        $this->assertDatabaseHas('saving_transactions', [
-            'saving_amount' => 500000,
-            'saving_description' => 'Setoran pokok anggota baru',
+        $res->assertSessionHasErrors([
+            'saving_category' => 'Simpanan Pokok hanya untuk anggota dengan status Menunggu Pembayaran.'
         ]);
     });
 
+    it('PJ tidak dapat memproses transaksi simpanan pokok lebih dari satu kali', function () {
+        $pjanggota = User::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
+        $pjanggota->assignRole('Penanggung Jawab Anggota');
+        $member = Member::factory([
+            'status' => 'Menunggu Pembayaran'
+        ])->create();
 
+        $sa = SavingAccount::factory()->create([
+            'member_id' => $member->id,
+            'saving_type' => SavingTypeEnum::SIMPANAN_POKOK->value,
+            'balance' => 500000,
+        ]);
+
+        SavingTransaction::factory()->create([
+            'saving_account_id' => $sa->id,
+            'saving_amount' => 500000,
+            'saving_description' => 'Setoran pokok anggota baru',
+        ]);
+
+        $member->update([
+            'status' => 'Menunggu Pembayaran'
+        ]);
+
+        $res = $this->actingAs($pjanggota)
+            ->post('/admin/saving/deposit', [
+                'member_id' => $member->id,
+                'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
+                'amount' => 500000,
+                'date' => now()->format('Y-m-d'),
+                'saving_payment_method' => 'Tunai',
+                'notes' => 'Setoran pokok anggota lagi',
+            ]);
+
+        $res->assertSessionHasErrors([
+            'saving_category' => 'Simpanan Pokok hanya boleh dibayar sekali.'
+        ]);
+    });
+
+    it('Transaksi tabungan ibadah yang sudah mencapai target tidak bisa menerima setoran tambahan', function () {
+        $pjanggota = User::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
+        $pjanggota->assignRole('Penanggung Jawab Anggota');
+        $member = Member::factory()->create();
+
+        $sa = SavingAccount::factory()->create([
+            'member_id' => $member->id,
+            'saving_type' => SavingTypeEnum::TABUNGAN_IBADAH->value,
+            'balance' => 5000000,
+        ]);
+
+        $ia = IbadahAccount::create([
+            'tenor' => 12,
+            'target_amount' => 5000000,
+            'saving_account_id' => $sa->id,
+        ]);
+
+        $res = $this->actingAs($pjanggota)
+            ->post('/admin/saving/deposit', [
+                'member_id' => $member->id,
+                'saving_category' => SavingTypeEnum::TABUNGAN_IBADAH->value,
+                'amount' => 100000,
+                'tenor_months' => $ia->tenor,
+                'target_amount' => $ia->target_amount,
+                'date' => now()->format('Y-m-d'),
+                'saving_payment_method' => 'Tunai',
+                'notes' => 'Setoran tambahan tabungan ibadah',
+            ]);
+
+        $res->assertSessionHasErrors([
+            'saving_category' => 'Tabungan Ibadah sudah mencapai target dan dibekukan.'
+        ]);
+    });
+});
+
+test('FR-13 Aplikasi harus menyediakan detail transaksi simpanan beserta perolehan poinnya.', function () {
+    $pjanggota = User::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
+    $pjanggota->assignRole('Penanggung Jawab Anggota');
+    $member = Member::factory()->create();
+
+    $sa = SavingAccount::factory()->create([
+        'member_id' => $member->id,
+        'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+        'balance' => 500000,
+    ]);
+
+    $st = SavingTransaction::factory()->create([
+        'saving_account_id' => $sa->id,
+        'saving_amount' => 500000,
+        'saving_description' => 'Setoran tabungan anggota baru',
+    ]);
+
+    $res = $this->actingAs($pjanggota)
+        ->get("/admin/saving/transaction/{$st->id}");
+
+    $res->assertStatus(200);
+    $res->assertSee('Setoran tabungan anggota baru');
 });
 
 // describe('TC-14: Hak Akses, Saldo, dan Ledger Simpanan', function () {

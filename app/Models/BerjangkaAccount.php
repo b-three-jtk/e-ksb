@@ -10,7 +10,7 @@ class BerjangkaAccount extends Model
     protected $fillable = [
         'member_id',
         'tenor',
-        'objective',
+        'purpose',
         'saving_account_id',
     ];
 

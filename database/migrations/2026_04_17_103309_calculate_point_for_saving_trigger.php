@@ -9,20 +9,25 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        // postgreSQL trigger to calculate points for saving transactions
         DB::unprepared('
             CREATE OR REPLACE FUNCTION calculate_point_for_saving()
             RETURNS TRIGGER AS $$
             DECLARE
                 points_earned INTEGER;
                 activity_desc TEXT;
+                v_user_id UUID;
+                v_point_trans_id INTEGER;
             BEGIN
-                IF NEW.transaction_type = \'Penarikan\' AND NEW.saving_amount > 100000 THEN
-                    points_earned := FLOOR(NEW.balance_after_transaction / 100000);
-                    activity_desc := \'Mendapatkan \' || points_earned || \' poin untuk penarikan sebesar \' || NEW.saving_amount;
-                    INSERT INTO point_transactions (amount_earned, activity_description, user_id, created_at, updated_at)
-                    VALUES (points_earned, activity_desc, (SELECT user_id FROM members WHERE id = (SELECT member_id FROM saving_accounts WHERE id = NEW.saving_account_id)), NOW(), NOW());
-                END IF;
+                points_earned := FLOOR(NEW.balance_after_transaction / 100000);
+                activity_desc := \'Mendapatkan \' || points_earned || \' poin dari transaksi sebesar \' || NEW.saving_amount;
+
+                SELECT user_id INTO v_user_id FROM members WHERE id = (SELECT member_id FROM saving_accounts WHERE id = NEW.saving_account_id);
+
+                INSERT INTO point_transactions (amount_earned, activity_description, user_id, created_at, updated_at)
+                VALUES (points_earned, activity_desc, v_user_id, NOW(), NOW())
+                RETURNING id INTO v_point_trans_id;
+
+                NEW.point_id := v_point_trans_id;
 
                 RETURN NEW;
             END;
