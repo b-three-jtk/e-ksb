@@ -120,7 +120,7 @@ class RegisterMemberService
         if ($request->hasFile('kk_photo')) {
             $kkPath = $request->file('kk_photo')->store('documents', 'public');
             MemberDoc::create([
-                'doc_name' => 'kk',
+                'doc_name' => 'kartu_keluarga',
                 'doc_attachment' => $kkPath,
                 'member_id' => $memberId,
             ]);

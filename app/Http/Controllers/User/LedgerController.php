@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -49,9 +48,9 @@ class LedgerController extends Controller
                 'no_transaksi' => $transaction->saving_transaction_code,
                 'tanggal_raw' => $transactionDate?->toISOString(),
                 'tanggal' => $transactionDate?->format('d/m/Y') ?? '-',
-                'produk' => $transaction->savingAccount?->savingProduct?->name ?? 'N/A',
+                'produk' => $transaction->savingAccount?->saving_type ?? 'N/A',
                 'jenis' => $transaction->transaction_type,
-                'jenis_simpanan' => $transaction->savingAccount?->savingProduct?->name ?? 'N/A',
+                'jenis_simpanan' => $transaction->savingAccount?->saving_type ?? 'N/A',
                 'metode' => $transaction->saving_payment_method ?? 'N/A',
                 'petugas' => $transaction->updatedBy?->name ?? 'System',
                 'nama_anggota' => $transaction->savingAccount?->member?->user?->name ?? '-',
@@ -85,7 +84,7 @@ class LedgerController extends Controller
     private function buildLedgerTransactionQuery(int|string $userId, ?string $month, ?string $search)
     {
         $query = SavingTransaction::query()
-            ->with(['savingAccount.member.bankAccounts', 'savingAccount.savingProduct', 'updatedBy', 'memberBankAccount'])
+            ->with(['savingAccount.member.bankAccounts', 'savingAccount', 'updatedBy', 'memberBankAccount'])
             ->whereHas('savingAccount.member', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             });
@@ -114,8 +113,8 @@ class LedgerController extends Controller
             $query->where(function ($q) use ($searchLower) {
                 $q->whereRaw('LOWER(transaction_type) LIKE ?', ['%' . $searchLower . '%'])
                     ->orWhereRaw('LOWER(saving_payment_method) LIKE ?', ['%' . $searchLower . '%'])
-                    ->orWhereHas('savingAccount.savingProduct', function ($subQ) use ($searchLower) {
-                        $subQ->whereRaw('LOWER(name) LIKE ?', ['%' . $searchLower . '%']);
+                    ->orWhereHas('savingAccount', function ($subQ) use ($searchLower) {
+                        $subQ->whereRaw('LOWER(saving_type) LIKE ?', ['%' . $searchLower . '%']);
                     });
             });
         }
@@ -129,7 +128,6 @@ class LedgerController extends Controller
             ->whereHas('member', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             })
-            ->with('savingProduct')
             ->get();
         $savingSummary = [
             'total_saldo' => 0,
@@ -144,7 +142,7 @@ class LedgerController extends Controller
         ];
 
         foreach ($savingAccounts as $account) {
-            $accountType = Str::lower((string) ($account->savingProduct?->name ?? ''));
+            $accountType = Str::lower((string) ($account->saving_type ?? ''));
             $rawBalance = (float) ($account->balance ?? 0);
             $currentBalance = max(0, $rawBalance);
 

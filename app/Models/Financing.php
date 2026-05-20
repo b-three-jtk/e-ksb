@@ -70,4 +70,10 @@ class Financing extends Model
     {
         return $this->hasOne(Collateral::class);
     }
+
+    // Wakalah
+    public function wakalah()
+    {
+        return $this->hasOne(Wakalah::class);
+    }
 }

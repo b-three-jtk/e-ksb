@@ -6,29 +6,28 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 ChartJS.register(ArcElement, Tooltip, Legend)
 
 const props = defineProps({
-    paymentSchedules: {
+    data: {
         type: Array,
+        default: () => []
+    },
+    totalPrice: {
+        type: Number,
+        default: 0
+    },
+    totalPaid: {
+        type: Number,
+        default: 0
     }
 })
 
 // Hitung status count
 const statusCounts = computed(() => {
-    const counts = {
-        'Dibayar': 0,
-        'Terjadwal': 0,
-        'Menunggu Konfirmasi': 0,
-        'Terlambat': 0,
-        'Ditolak': 0,
-        'Dibatalkan': 0,
+    const remaining = Math.max((props.totalPrice || 0) - (props.totalPaid || 0), 0)
+
+    return {
+        'Total Dibayar': props.totalPaid || 0,
+        'Sisa Tagihan': remaining,
     }
-
-    props.paymentSchedule?.forEach(schedule => {
-        if (counts.hasOwnProperty(schedule.status)) {
-            counts[schedule.status]++
-        }
-    })
-
-    return counts
 })
 
 // Chart data
@@ -39,11 +38,7 @@ const chartData = computed(() => ({
             data: Object.values(statusCounts.value),
             backgroundColor: [
                 '#10b981', // Dibayar - green
-                '#3b82f6', // Terjadwal - blue
-                '#f59e0b', // Menunggu Konfirmasi - amber
-                '#ef4444', // Terlambat - red
-                '#dc2626', // Ditolak - dark red
-                '#9ca3af', // Dibatalkan - gray
+                '#9ca3af', // Sisa - gray
             ],
             borderColor: '#ffffff',
             borderWidth: 2,

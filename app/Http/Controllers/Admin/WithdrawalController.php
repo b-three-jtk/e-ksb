@@ -5,13 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreWithdrawalRequest;
 use App\Models\Member;
 use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
-use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -26,7 +25,7 @@ class WithdrawalController extends Controller
         $members = Member::query()
             ->with([
                 'user',
-                'savingAccounts.savingProduct',
+                'savingAccounts',
                 'bankAccounts' => function ($q) {
                     $q->latest();
                 },
@@ -43,7 +42,7 @@ class WithdrawalController extends Controller
                     'savingAccounts' => $member->savingAccounts->map(function ($acc) {
                         return [
                             'id' => $acc->id,
-                            'type' => $acc->savingProduct?->name ?? '-',
+                            'type' => $acc->saving_type ?? '-',
                             'balance' => $acc->balance ?? 0,
                             'tenor_months' => $acc->saving_tenor,
                             'target_amount' => $acc->target_amount,
@@ -68,19 +67,9 @@ class WithdrawalController extends Controller
     /**
      * Store withdrawal transaction
      */
-    public function store(Request $request)
+    public function store(StoreWithdrawalRequest $request)
     {
-        $validated = $request->validate([
-            'member_id' => 'required|exists:members,id',
-            'saving_account_id' => 'required|exists:saving_accounts,id',
-            'amount' => 'required|numeric|min:1',
-            'withdrawal_date' => 'required|date|before_or_equal:today',
-            'method' => 'required|in:Tunai,Non-Tunai',
-            'bank_name' => 'required_if:method,Non-Tunai|nullable|string',
-            'account_name' => 'required_if:method,Non-Tunai|nullable|string',
-            'account_number' => 'required_if:method,Non-Tunai|nullable|string',
-            'notes' => 'nullable|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         $member = Member::with('user')->findOrFail($validated['member_id']);
         $savingAccount = SavingAccount::findOrFail($validated['saving_account_id']);
@@ -98,7 +87,7 @@ class WithdrawalController extends Controller
                 ->withErrors(['amount' => 'Saldo tidak cukup untuk penarikan sebesar Rp ' . number_format($validated['amount'])]);
         }
 
-        $savingType = (string) ($savingAccount->savingProduct?->name ?? '');
+        $savingType = (string) ($savingAccount->saving_type ?? '');
         $typeLower = mb_strtolower($savingType);
 
         // Berjangka can only be withdrawn after maturity date.
@@ -148,6 +137,7 @@ class WithdrawalController extends Controller
                 $transaction = SavingTransaction::create([
                     'saving_transaction_code' => $this->generateTransactionCode(),
                     'saving_account_id' => $lockedSavingAccount->id,
+                    'balance_after_transaction' => $saldoSebelum - $validated['amount'],
                     'saving_amount' => $validated['amount'],
                     'transaction_type' => TransactionTypeEnum::WITHDRAWAL->value,
                     'saving_payment_method' => $validated['method'],

@@ -47,7 +47,7 @@ class SavingTransaction extends Model
         return $this->belongsTo(MemberBankAccount::class, 'account_number', 'account_number');
     }
 
-    public function pointTransaction()
+    public function point()
     {
         return $this->belongsTo(PointTransaction::class, 'point_id');
     }

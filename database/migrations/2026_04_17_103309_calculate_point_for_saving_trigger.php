@@ -18,6 +18,9 @@ return new class extends Migration {
                 v_user_id UUID;
                 v_point_trans_id INTEGER;
             BEGIN
+            IF NEW.balance_after_transaction < 100000 THEN
+                RETURN NEW;
+            ELSE
                 points_earned := FLOOR(NEW.balance_after_transaction / 100000);
                 activity_desc := \'Mendapatkan \' || points_earned || \' poin dari transaksi sebesar \' || NEW.saving_amount;
 
@@ -30,6 +33,7 @@ return new class extends Migration {
                 NEW.point_id := v_point_trans_id;
 
                 RETURN NEW;
+            END IF;
             END;
             $$ LANGUAGE plpgsql;
         ');

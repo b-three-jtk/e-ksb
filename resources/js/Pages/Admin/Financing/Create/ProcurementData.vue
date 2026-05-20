@@ -12,9 +12,12 @@ const props = defineProps({
     filteredSuppliers: Array,
 })
 
-watch(() => props.form.financing.cost_price, () => {
-    const costPrice = parseFloat(props.form.financing.cost_price) || 0
+console.log('Form:', props.form);
+
+watch(() => props.form.financing.price_per_unit, () => {
+    const costPrice = (parseFloat(props.form.financing.price_per_unit) || 0) * (parseFloat(props.form.financing.qty) || 0)
     const marginAmount = costPrice * 0.08
+    props.form.financing.cost_price = costPrice
     props.form.financing.margin_amount = marginAmount
 }, { immediate: true })
 
@@ -77,11 +80,8 @@ const totalPrice = computed(() => {
                         Pemasok tidak ditemukan
                     </div>
                 </div>
-                <BaseInputAdmin v-model="form.supplier.contact" label="Kontak" placeholder="Masukkan kontak pemasok" />
                 <BaseInputAdmin v-model="form.supplier.address" label="Alamat" type="textarea" rows="3"
                     placeholder="Masukkan alamat pemasok" />
-                <BaseInputAdmin v-model="form.supplier.website_url" label="Alamat URL"
-                    placeholder="Masukkan link terkait pemasok" />
             </div>
         </div>
         <div class="card-layout mx-4">
@@ -93,10 +93,12 @@ const totalPrice = computed(() => {
                     placeholder="Masukkan uang muka" />
                 <BaseInputAdmin v-model.number="form.financing.cost_price" label="Harga Perolehan Barang" type="number"
                     placeholder="Masukkan harga perolehan barang" />
+                <BaseInputAdmin v-model.number="form.financing.price_per_unit" label="Harga Per Item" type="number"
+                    placeholder="Masukkan harga per item" />
                 <Info label="Margin (8%)" :value="parseCurrencyAmount(form.financing.margin_amount)" />
             </div>
             <div class="bg-light-bg flex justify-between border px-8 py-4 mt-6 rounded-lg">
-                <div class="font-semibold text-primary">Total Harga Murabahah</div>
+                <div class="font-semibold text-primary">Total Harga Jual Murabahah</div>
                 <div class="font-semibold text-primary">{{ parseCurrencyAmount(totalPrice) }}</div>
             </div>
             <div class="col-span-2 grid grid-cols-2 mt-6">
@@ -106,7 +108,7 @@ const totalPrice = computed(() => {
                     <label for="wakalah" class="text-sm text-gray-700">Pengadaan dengan Skema Wakalah</label>
                 </div>
             </div>
-            <div class="col-span-2 grid grid-cols-2 items-end gap-6 mt-4" v-if="form.is_wakalah">
+            <div class="col-span-2 grid grid-cols-2 items-end gap-6 mt-4" v-if="form.is_wakalah || form.financing.nominal_wakalah">
                 <a href="/docs/AkadWakalah.docx" target="_blank"
                     class="border border-gray-300 flex justify-between rounded-lg p-4">
                     <div class="text-sm text-primary hover:underline">
@@ -119,9 +121,12 @@ const totalPrice = computed(() => {
                         v-model="form.akad_wakalah_file" accept=".jpg,.jpeg,.png, application/pdf" required />
                     <div class="flex justify-between text-xs text-gray-400">
                         <p>Format: JPG, JPEG, PNG, PDF</p>
-                        <p>Max. 5 MB per file</p>
+                        <p>Max. 2 MB per file</p>
                     </div>
                 </div>
+                <BaseInputAdmin v-model.number="form.financing.nominal_wakalah" label="Dana Yang Dititipkan"
+                    type="number" placeholder="Masukkan dana titipan" />
+                <BaseInputAdmin v-model="form.financing.akad_wakalah_date" label="Tanggal Akad Wakalah" type="date" />
             </div>
         </div>
     </section>

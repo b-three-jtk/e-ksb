@@ -309,7 +309,7 @@ function handleConfirm() {
 
   const formData = new FormData()
 
-  formData.append('user_id', selectedMember.value.id)
+  formData.append('member_id', selectedMember.value.id)
   formData.append('saving_category', jenisSimpanan.value)
   formData.append('amount', nominalRaw.value)
   formData.append('date', tanggalSetor.value)

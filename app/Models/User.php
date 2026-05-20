@@ -37,7 +37,6 @@ class User extends Authenticatable
         'joined_date',
         'status',
         'password',
-        'role_id',
     ];
 
     /**
@@ -60,6 +59,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'joined_date' => 'date',
         ];
     }
 

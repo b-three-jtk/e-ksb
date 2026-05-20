@@ -8,7 +8,7 @@ defineProps({
     searchQuery: String,
     isLoadingSearch: Boolean,
     isMemberSelected: Boolean,
-    filteredMembers: Array,
+    memberResults: Array,
     data: Object,
     errors: Object,
 })
@@ -27,6 +27,14 @@ const heirInput = ref({
     <section>
         <div class="border-b border-gray-200 px-8 pb-4">
             <h1 class="card-title">Identitas Pribadi & Ahli Waris</h1>
+        </div>
+        <!-- kalau dia gak eligible -->
+        <div v-if="form.member.is_have_eligible_saving || form.member.is_have_no_obligation" class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
+            <p>Pemohon tidak memenuhi syarat mengajukan pembiayaan murabahah:</p>
+            <ul class="list-disc list-inside mt-2">
+                <li v-if="form.member.is_have_eligible_saving">Memiliki tabungan yang memenuhi syarat</li>
+                <li v-if="form.member.is_have_no_obligation">Tidak memiliki kewajiban atau permohonan pembiayaan aktif</li>
+            </ul>
         </div>
         <div class="grid grid-cols-2 gap-6 p-4 border-b">
             <!-- Member search input -->
@@ -59,12 +67,12 @@ const heirInput = ref({
                 </div>
 
                 <!-- Search results dropdown -->
-                <div v-if="filteredMembers.length > 0 && !isMemberSelected"
+                <div v-if="memberResults.length > 0 && !isMemberSelected"
                     class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
-                    <div v-for="member in filteredMembers" :key="member.id" @click="$emit('selectMember', member)"
+                    <div v-for="member in memberResults" :key="member.id" @click="$emit('selectMember', member)"
                         class="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b last:border-0">
-                        <div class="font-medium text-dark-text">{{ member.name }}</div>
-                        <div class="text-sm text-gray-500">{{ member.user_code }} • {{ member.email }}</div>
+                        <div class="font-medium text-dark-text">{{ member.user.name }}</div>
+                        <div class="text-sm text-gray-500">{{ member.user.user_code }} | {{ member.user.email }}</div>
                     </div>
                 </div>
 
@@ -150,14 +158,6 @@ const heirInput = ref({
                     </tr>
                 </tbody>
             </table>
-        </div>
-        <div class="flex flex-col gap-4 w-full p-4 border-b border-gray-200">
-            <BaseInputAdmin type="file" label="Foto Kartu Keluarga" v-model="form.family_card_file"
-                accept=".jpg,.jpeg,.png, application/pdf" required />
-            <div class="flex justify-between text-xs text-gray-400">
-                <p>Format: JPG, JPEG, PNG, PDF</p>
-                <p>Max. 5 MB per file</p>
-            </div>
         </div>
     </section>
 </template>

@@ -19,27 +19,6 @@ const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
     { name: 'Pengelolaan Pembiayaan' },
 ];
-
-const getScheduleStatusClass = (status) => {
-    const baseClass = 'font-semibold rounded-lg px-3 py-1 text-xs'
-
-    switch (status) {
-        case 'Dibayar':
-            return `${baseClass} text-green-600 bg-green-50`
-        case 'Menunggu Konfirmasi':
-            return `${baseClass} text-yellow-600 bg-yellow-50`
-        case 'Dibatalkan':
-            return `${baseClass} text-gray-600 bg-gray-50`
-        case 'Terlambat':
-            return `${baseClass} text-red-600 bg-red-50`
-        case 'Terjadwal':
-            return `${baseClass} text-blue-600 bg-blue-50`
-        case 'Ditolak':
-            return `${baseClass} text-red-600 bg-red-50`
-        default:
-            return `${baseClass} text-gray-600 bg-gray-50`
-    }
-}
 </script>
 
 <template>
@@ -62,9 +41,8 @@ const getScheduleStatusClass = (status) => {
                     <Info label="Nama Produk" :value="data.financing_item?.name" />
                     <Info label="Tanggal Akad" :value="data.akad_date" />
                     <Info label="Jumlah/Kuantitas" :value="data.financing_item?.qty" />
-                    <Info label="Merek" :value="data.financing_item?.brand" />
                     <Info label="Kondisi" :value="data.financing_item?.condition" />
-                    <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.request_description" />
+                    <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.specification" />
                     <Info label="Supplier" :value="data.financing_item.supplier?.supplier_name" />
                 </div>
             </div>
@@ -93,39 +71,42 @@ const getScheduleStatusClass = (status) => {
                 </div>
                 <div class="card-layout px-0!">
                     <div class="grid grid-cols-2 gap-6 border-b border-gray-200 pb-4 px-8">
-                        <Info label="Harga Pokok" :value="moneyParser(data.financing_item?.cost_price)" />
-                        <Info label="Margin" :value="moneyParser(data.financing_item?.margin_amount)" />
+                        <Info label="Harga Pokok" :value="moneyParser(data.cost_price)" />
+                        <Info label="Margin" :value="moneyParser(data.margin_amount)" />
                         <Info label="Uang Muka" :value="moneyParser(data.down_payment)" />
                         <Info label="Total Pembiayaan" :value="moneyParser(data.total_price)" />
                         <Info label="Total Dibayar" :value="moneyParser(data.total_paid)" />
                         <Info label="Sisa Tagihan" :value="moneyParser(data.remaining_balance)" />
-                        <Info label="Angsuran/Bulan" :value="moneyParser(data.installment_per_month)" />
+                                                <Info label="Angsuran/Bulan" :value="moneyParser(data.installment_per_month)" />
                         <Info v-if="data.installment?.tenor" label="Tenor"
                             :value="data.installment?.tenor + ' Bulan'" />
+                        <Info v-if="data.next_due_date" label="Jatuh Tempo Terdekat" :value="dateParser(data.next_due_date)" />
                     </div>
-                    <div class="py-8 px-8" v-if="data.installment?.payment_schedules">
-                        <h3 class="font-semibold mb-4">Status Angsuran</h3>
-                        <FinancingChart :payment-schedules="data.installment?.payment_schedules" />
+                    <div class="py-8 px-8" v-if="data.total_price">
+                    </div>
+                    <div class="py-8 px-8" v-if="data.installment?.payment && data.installment?.payment?.length > 0">
+                        <h3 class="font-semibold mb-4">Progres Angsuran</h3>
+                        <FinancingChart :data="data.installment?.payment" :total-price="Number(data.total_price)" :total-paid="Number(data.total_paid)" />
                     </div>
                 </div>
             </div>
             <div class="flex flex-col px-12 py-2 gap-2">
-                <h1>Jadwal dan Riwayat Angsuran</h1>
+                <h1>Riwayat Angsuran</h1>
                 <div class="card-layout p-0!">
                     <table class="min-w-full text-center">
                         <thead>
                             <tr class="text-gray-500 text-md font-medium dark:text-gray-400">
                                 <th class="py-5 px-2">
-                                    Angsuran ke-
+                                    No. Transaksi
                                 </th>
                                 <th class="py-5 px-2">
-                                    Tanggal Jatuh Tempo
+                                    Tanggal Pembayaran
                                 </th>
                                 <th class="py-5 px-2">
                                     Nominal
                                 </th>
                                 <th class="py-5 px-2">
-                                    Status
+                                    Keterangan
                                 </th>
                                 <th class="py-5 px-2">
                                     Aksi
@@ -133,40 +114,39 @@ const getScheduleStatusClass = (status) => {
                             </tr>
                         </thead>
                         <tbody
-                            v-if="data.installment?.payment_schedules && data.installment?.payment_schedules?.length > 0">
-                            <tr v-for="i in data.installment?.payment_schedules"
+                            v-if="data.installment?.payment && data.installment?.payment?.length > 0">
+                            <tr v-for="i in data.installment?.payment"
                                 class="border-t border-gray-100 dark:border-gray-500 font-body">
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                        {{ i.installment_number }}
+                                        {{ i.installment_trans_code }}
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                        {{ dateParser(i.due_date) }}
+                                        {{ dateParser(i.payment_date) }}
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                        {{ moneyParser(data.total_monthly_payment) }}
+                                        {{ moneyParser(i.nominal) }}
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
-                                    <span :class="getScheduleStatusClass(i.installment_schedule_status)">
-                                        {{ i.installment_schedule_status }}
+                                    <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="i.is_early_repayment ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'">
+                                        {{ i.is_early_repayment ? 'Pelunasan Dipercepat' : 'Reguler' }}
                                     </span>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap flex justify-center">
-                                    <div
-                                        v-if="i.installment_schedule_status != 'Dibayar' && i.installment_schedule_status != 'Terlambat' && i.installment_schedule_status != 'Ditolak'">
-                                        <Button size="small" variant="gray" disabled>
+                                    <div v-if="i.installment_payment_receipt">
+                                        <Button size="small" variant="info" target="_blank"
+                                            :href="`/storage/${i.installment_payment_receipt}`">
                                             <EyeIcon width="18px" height="18px" />
                                             Lihat Bukti
                                         </Button>
                                     </div>
                                     <div v-else>
-                                        <Button size="small" variant="info"
-                                            :href="`/admin/savings/show/${i.payment.id}`">
+                                        <Button size="small" variant="gray" disabled>
                                             <EyeIcon width="18px" height="18px" />
                                             Lihat Bukti
                                         </Button>

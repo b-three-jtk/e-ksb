@@ -10,6 +10,7 @@ class Wakalah extends Model
     protected $fillable = [
         'nominal_wakalah',
         'akad_date',
+        'signed_akad_document',
 
         'financing_id',
         'updated_by',

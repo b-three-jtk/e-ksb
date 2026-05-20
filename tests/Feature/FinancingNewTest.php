@@ -49,7 +49,7 @@ describe('TC-FIN-01: Permohonan Pembiayaan Murabahah', function () {
                     'qty' => 1,
                     'condition' => 'Baru',
                     'akad_date' => '2024-01-01',
-                    'request_description' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
+                    'specification' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
                 'supplier' => [
                     'supplier_name' => 'PT. Supplier Jaya',
@@ -87,7 +87,7 @@ describe('TC-FIN-01: Permohonan Pembiayaan Murabahah', function () {
                 'financing' => [
                     'name' => 'Motor',
                     'status' => 'Menunggu Kelengkapan Dokumen', // Status Draft
-                    'request_description' => 'Draft permohonan pembiayaan untuk motor.',
+                    'specification' => 'Draft permohonan pembiayaan untuk motor.',
                     'qty' => 1,
                     'condition' => 'Baru',
                 ],

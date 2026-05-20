@@ -34,15 +34,27 @@ export function useFinancingForm(initialData = null) {
             residential_address: initialData?.member?.residential_address || '',
             marital_status: initialData?.member?.marital_status || '',
             dependents: initialData?.member?.dependents || 0,
+
+            employment_status: initialData?.member?.employment_status || '',
             job_title: initialData?.member?.job_title || '',
             company_or_business_name: initialData?.member?.company_or_business_name || '',
             business_field: initialData?.member?.business_field || '',
             tenure_year: initialData?.member?.tenure_year || 0,
             workplace_address: initialData?.member?.workplace_address || '',
             workplace_contact: initialData?.member?.workplace_contact || '',
+
+            gaji_pokok_amount: initialData?.member?.gaji_pokok_amount || '',
+            penghasilan_usaha_amount: initialData?.member?.penghasilan_usaha_amount || '',
+            penghasilan_pasangan_amount: initialData?.member?.penghasilan_pasangan_amount || '',
+            penghasilan_lainnya_amount: initialData?.member?.penghasilan_lainnya_amount || '',
+            biaya_hidup_keluarga_amount: initialData?.member?.biaya_hidup_keluarga_amount || '',
+            biaya_pendidikan_amount: initialData?.member?.biaya_pendidikan_amount || '',
+            jumlah_cicilan_amount: initialData?.member?.jumlah_cicilan_amount || '',
+            jumlah_biaya_lainnya_amount: initialData?.member?.jumlah_biaya_lainnya_amount || '',
+
+            is_have_eligible_saving: initialData?.member?.is_have_eligible_saving || '',
+            is_have_no_obligation: initialData?.member?.is_have_no_obligation || '',
             heirs: initialData?.member?.heirs || [],
-            incomes: initialData?.member?.incomes || [],
-            expenses: initialData?.member?.expenses || [],
         },
         // Financing data
         financing: {
@@ -51,16 +63,19 @@ export function useFinancingForm(initialData = null) {
             brand: initialData?.financing?.brand || '',
             condition: initialData?.financing?.condition || '',
             qty: initialData?.financing?.qty || null,
-            request_description: initialData?.financing?.request_description || '',
+            specification: initialData?.financing?.specification || '',
+            price_per_unit: initialData?.financing?.price_per_unit || '',
             cost_price: initialData?.financing?.cost_price || null,
             margin_amount: initialData?.financing?.margin_amount || null,
-            is_wakalah: initialData?.financing?.is_wakalah || false,
+            akad_wakalah_date: initialData?.financing?.akad_wakalah_date || null,
+            nominal_wakalah: initialData?.financing?.nominal_wakalah || null,
             payment_method: initialData?.financing?.payment_method || '',
             akad_date: initialData?.financing?.akad_date || '',
             down_payment: initialData?.financing?.down_payment || null,
             notes: initialData?.financing?.notes || '',
             status: initialData?.financing?.status || 'Menunggu Kelengkapan Dokumen',
-            purchase_receipt: initialData?.financing?.purchase_receipt || null
+            purchase_receipt: initialData?.financing?.purchase_receipt || null,
+            tenor: initialData?.financing?.tenor || null
         },
         collateral: {
             collateral_type: initialData?.collateral?.collateral_type || '',
@@ -74,23 +89,20 @@ export function useFinancingForm(initialData = null) {
             bank_book: initialData?.documents?.bank_book || null,
             purchase_receipt: initialData?.documents?.purchase_receipt || null,
             akad_document: initialData?.documents?.akad_document || null,
+            akad_wakalah_document: initialData?.documents?.akad_wakalah_document || null
         },
         // Supplier data
         supplier: {
             supplier_name: initialData?.supplier?.supplier_name || '',
-            contact: initialData?.supplier?.contact || '',
             address: initialData?.supplier?.address || '',
-            website_url: initialData?.supplier?.website_url || '',
         },
         // Local state untuk temporary input
-        tenor: null,
         monthly_installment: null,
         monthly_income: null,
         income_type: '',
         income_amount: '',
         expense_type: '',
         expense_amount: '',
-        family_card_file: null,
         income_slip_file: null,
         bank_book_file: null,
         purchase_receipt_file: null,
@@ -112,6 +124,7 @@ export function useFinancingForm(initialData = null) {
                 params: { q: query }
             })
             memberResults.value = response.data.members
+            console.log(memberResults);
         } catch (error) {
             console.error('Error searching members:', error)
             memberResults.value = []
@@ -125,12 +138,14 @@ export function useFinancingForm(initialData = null) {
         selectedMember.value = member
         searchQuery.value = member.name
 
+        console.log(member);
+
         // Update member form
-        form.member.user_code = member.user_code || ''
-        form.member.name = member.name || ''
-        form.member.nik = member.nik || ''
-        form.member.email = member.email || ''
-        form.member.phone_number = member.phone_number || ''
+        form.member.user_code = member.user.user_code || ''
+        form.member.name = member.user.name || ''
+        form.member.nik = member.user.nik || ''
+        form.member.email = member.user.email || ''
+        form.member.phone_number = member.user.phone_number || ''
         form.member.gender = member.gender || ''
         form.member.birth_place = member.birth_place || ''
         form.member.birth_date = member.birth_date || ''
@@ -139,27 +154,36 @@ export function useFinancingForm(initialData = null) {
         form.member.residential_address = member.residential_address || ''
         form.member.marital_status = member.marital_status || ''
         form.member.dependents = member.dependents || 0
-        form.member.job_title = member.job_title || ''
-        form.member.company_or_business_name = member.company_or_business_name || ''
-        form.member.business_field = member.business_field || ''
-        form.member.tenure_year = member.tenure_year || 0
-        form.member.workplace_address = member.workplace_address || ''
-        form.member.workplace_contact = member.workplace_contact || ''
-        form.member.incomes = member.incomes || []
-        form.member.expenses = member.expenses || []
+
+        form.member.employment_status = member.member_jobs?.employment_status || ''
+        form.member.job_title = member.member_jobs?.job_title || ''
+        form.member.company_or_business_name = member.member_jobs?.company_or_business_name || ''
+        form.member.business_field = member.member_jobs?.business_field || ''
+        form.member.tenure_year = member.member_jobs?.tenure_year || 0
+        form.member.workplace_address = member.member_jobs?.workplace_address || ''
+        form.member.workplace_contact = member.member_jobs?.workplace_contact || ''
+
+        form.member.gaji_pokok_amount = member.financials?.gaji_pokok_amount || ''
+        form.member.penghasilan_usaha_amount = member.financials?.penghasilan_usaha_amount || ''
+        form.member.penghasilan_pasangan_amount = member.financials?.penghasilan_pasangan_amount || ''
+        form.member.penghasilan_lainnya_amount = member.financials?.penghasilan_lainnya_amount || ''
+        form.member.biaya_hidup_keluarga_amount = member.financials?.biaya_hidup_keluarga_amount || ''
+        form.member.biaya_pendidikan_amount = member.financials?.biaya_pendidikan_amount || ''
+        form.member.jumlah_cicilan_amount = member.financials?.jumlah_cicilan_amount || ''
+        form.member.jumlah_biaya_lainnya_amount = member.financials?.jumlah_biaya_lainnya_amount || ''
+
+        form.member.is_have_eligible_saving = member.is_have_eligible_saving || ''
+        form.member.is_have_no_obligation = member.is_have_no_obligation || ''
+
+        form.documents.family_card = member.family_card || null,
+        form.documents.income_slip = member.income_slip || null,
+        form.documents.bank_book = member.bank_book || null,
+
         form.member.heirs = member.heirs || []
 
         memberResults.value = []
         isMemberSelected.value = true
     }
-
-    // Filter members
-    const filteredMembers = computed(() => {
-        return memberResults.value.filter(m =>
-            m.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            m.user_code.includes(searchQuery.value)
-        )
-    })
 
     const resetMemberSelection = () => {
         selectedMember.value = null
@@ -178,15 +202,28 @@ export function useFinancingForm(initialData = null) {
             residential_address: '',
             marital_status: '',
             dependents: null,
+
+            employment_status: '',
             job_title: '',
             company_or_business_name: '',
             business_field: '',
             tenure_year: null,
             workplace_address: '',
             workplace_contact: '',
+
+            gaji_pokok_amount: '',
+            penghasilan_usaha_amount: '',
+            penghasilan_pasangan_amount: '',
+            penghasilan_lainnya_amount: '',
+            biaya_hidup_keluarga_amount: '',
+            biaya_pendidikan_amount: '',
+            jumlah_cicilan_amount: '',
+            jumlah_biaya_lainnya_amount: '',
+
+            is_have_eligible_saving: '',
+            is_have_no_obligation: '',
+
             heirs: [],
-            incomes: [],
-            expenses: [],
         }
         form.financing = {
             name: '',
@@ -194,7 +231,7 @@ export function useFinancingForm(initialData = null) {
             brand: '',
             condition: '',
             qty: null,
-            request_description: '',
+            specification: '',
             cost_price: null,
             margin_amount: null,
             is_wakalah: false,
@@ -212,9 +249,7 @@ export function useFinancingForm(initialData = null) {
         }
         form.supplier = {
             supplier_name: '',
-            contact: '',
             address: '',
-            website_url: '',
         }
         isMemberSelected.value = false
     }
@@ -246,9 +281,7 @@ export function useFinancingForm(initialData = null) {
         searchSupplierQuery.value = supplier.supplier_name
 
         form.supplier.supplier_name = supplier.supplier_name || ''
-        form.supplier.contact = supplier.contact || ''
         form.supplier.address = supplier.address || ''
-        form.supplier.website_url = supplier.website_url || ''
 
         supplierResults.value = []
         isSupplierSelected.value = true
@@ -263,60 +296,9 @@ export function useFinancingForm(initialData = null) {
         searchSupplierQuery.value = ''
         form.supplier = {
             supplier_name: '',
-            contact: '',
             address: '',
-            website_url: '',
         }
         isSupplierSelected.value = false
-    }
-
-    // Income & Expense
-    const addIncome = () => {
-        if (!form.income_type || !form.income_amount) {
-            alert('Isi jenis dan jumlah penghasilan!')
-            return
-        }
-
-        const existingIncome = form.member.incomes.find(i => i.financial_type === form.income_type)
-        if (existingIncome) {
-            existingIncome.amount = form.income_amount
-        } else {
-            form.member.incomes.push({
-                financial_type: form.income_type,
-                amount: form.income_amount
-            })
-        }
-
-        form.income_type = ''
-        form.income_amount = ''
-    }
-
-    const removeIncome = (index) => {
-        form.member.incomes.splice(index, 1)
-    }
-
-    const addExpense = () => {
-        if (!form.expense_type || !form.expense_amount) {
-            alert('Isi jenis dan jumlah pengeluaran!')
-            return
-        }
-
-        const existingExpense = form.member.expenses.find(e => e.financial_type === form.expense_type)
-        if (existingExpense) {
-            existingExpense.amount = form.expense_amount
-        } else {
-            form.member.expenses.push({
-                financial_type: form.expense_type,
-                amount: form.expense_amount
-            })
-        }
-
-        form.expense_type = ''
-        form.expense_amount = ''
-    }
-
-    const removeExpense = (index) => {
-        form.member.expenses.splice(index, 1)
     }
 
     // Heirs
@@ -337,19 +319,6 @@ export function useFinancingForm(initialData = null) {
     const removeHeir = (index) => {
         form.member.heirs.splice(index, 1)
     }
-
-    // Totals
-    const totalIncome = computed(() => {
-        return form.member.incomes.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
-    })
-
-    const totalExpense = computed(() => {
-        return form.member.expenses.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
-    })
-
-    const netIncome = computed(() => {
-        return totalIncome.value - totalExpense.value
-    })
 
     const submit = (status) => {
         if ((form.financing.status === 'Menunggu Kelengkapan Dokumen' || form.financing.status === 'Ditolak') && status === 'PENDING_REVIEW') {
@@ -420,10 +389,6 @@ export function useFinancingForm(initialData = null) {
         isLoadingSearch,
         selectedMember,
         isMemberSelected,
-        filteredMembers,
-        totalIncome,
-        totalExpense,
-        netIncome,
         searchSupplierQuery,
         supplierResults,
         isLoadingSearchSupplier,
@@ -435,10 +400,6 @@ export function useFinancingForm(initialData = null) {
         resetMemberSelection,
         selectMember,
         selectSupplier,
-        addIncome,
-        removeIncome,
-        addExpense,
-        removeExpense,
         addHeir,
         removeHeir,
         submit,

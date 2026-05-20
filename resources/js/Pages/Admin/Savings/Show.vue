@@ -20,47 +20,6 @@ const hideModal = () => {
     document.getElementById('modal').classList.add('hidden');
 };
 
-const form = useForm({
-    description: '',
-    status: '',
-})
-
-const acceptTransaction = () => {
-    form.status = 'accepted'
-    Swal.fire({
-        title: 'Konfirmasi',
-        text: 'Apakah Anda yakin ingin menerima transaksi ini?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, terima',
-        cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            form.put('/admin/savings/validate/' + props.data.id, {
-                onSuccess: () => {
-                    toast("Transaksi berhasil diterima!", {
-                        "type": "success",
-                        "position": "bottom-right",
-                        "transition": "slide",
-                        "dangerouslyHTMLString": true
-                    }).then(() => {
-                        router.visit(route('admin.dashboard'))
-                    })
-                },
-                onError: () => {
-                    toast("Gagal menerima transaksi.", {
-                        "type": "error",
-                        "position": "bottom-right",
-                        "transition": "slide",
-                        "dangerouslyHTMLString": true
-                    })
-                }
-            })
-        }
-    })
-}
-
 const breadcrumbItems = [
     {name: 'Dashboard', link: '/admin'},
     {name: 'Pengelolaan Simpanan', link: '/admin/savings/list'},
@@ -82,7 +41,7 @@ const openModalBukti = () => modalRef.value?.openModal()
                         <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{ data.saving_transaction_code }}
                         </h1>
                     </div>
-                    <div v-if="data.saving_account_code" class="flex items-center gap-4">
+                    <div v-if="data.saving_transaction_receipt" class="flex items-center gap-4">
                         <Button @click="openModalBukti()" variant="info">Lihat Bukti</Button>
                     </div>
                 </div>
@@ -126,15 +85,12 @@ const openModalBukti = () => modalRef.value?.openModal()
                                     <span class="font-medium text-dark-text dark:text-white">{{ data.saving_description ?? '-'
                                     }}</span>
                                 </li>
+                                <li class="flex flex-col gap-2">
+                                    <span class="text-sm text-gray-500 dark:text-gray-300">Poin Didapatkan</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.point.amount_earned ?? '-'
+                                    }}</span>
+                                </li>
                             </ul>
-                        </div>
-                        <div v-if="data.status == 'Belum Ditinjau'" class="flex items-center gap-4 justify-end mt-4">
-                            <Button @click="acceptTransaction()" variant="success">
-                                Terima
-                            </Button>
-                            <Button @click="showModal()" variant="danger">
-                                Tolak
-                            </Button>
                         </div>
                     </div>
                     <div class="flex flex-col col-span-1 lg:col-span-2 gap-2">
@@ -144,17 +100,17 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Anggota</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.user.user_code }}</span>
+                                        data.saving_account.member.user.user_code }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Anggota</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.user.name }}</span>
+                                        data.saving_account.member.user.name }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Status Keanggotaan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.user.status }}</span>
+                                        data.saving_account.member.user.status }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -164,17 +120,17 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Rekening</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.account_number }}</span>
+                                        data.member_bank_account?.account_number }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pemilik Rekening</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.account?.account_name }}</span>
+                                        data.member_bank_account?.account_name }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Bank</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.account?.bank_name }}</span>
+                                        data.member_bank_account?.bank_name }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -182,6 +138,6 @@ const openModalBukti = () => modalRef.value?.openModal()
                 </div>
             </div>
         </div>
-        <!-- <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="data.saving_transaction_doc[0]?.name" :attachment="data.saving_transaction_doc[0]?.attachment" /> -->
+        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="data.saving_transaction_receipt" :attachment="data.saving_transaction_receipt" />
     </AdminLayout>
 </template>

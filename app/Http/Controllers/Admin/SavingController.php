@@ -10,7 +10,6 @@ use App\Http\Requests\StoreDepositRequest;
 use App\Models\BerjangkaAccount;
 use App\Models\IbadahAccount;
 use App\Models\Member;
-use App\Models\MemberDoc;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -43,7 +42,7 @@ class SavingController extends Controller
             'tabungan_ibadah' => SavingTypeEnum::TABUNGAN_IBADAH->value,
         ];
 
-        return SavingTransaction::with(['savingAccount.member.user', 'savingAccount.savingProduct'])
+        return SavingTransaction::with(['savingAccount.member.user', 'savingAccount'])
             ->when($search, function ($q) use ($search) {
                 $q->whereHas('savingAccount.member.user', function ($m) use ($search) {
                     $m->where('name', 'like', "%{$search}%")
@@ -52,22 +51,22 @@ class SavingController extends Controller
                 });
             })
             ->when(isset($typeMap[$tab]), function ($q) use ($typeMap, $tab) {
-                $q->whereHas('savingAccount.savingProduct', function ($sa) use ($typeMap, $tab) {
-                    $sa->where('name', $typeMap[$tab]);
+                $q->whereHas('savingAccount', function ($sa) use ($typeMap, $tab) {
+                    $sa->where('saving_type', $typeMap[$tab]);
                 });
             })
             // Filter grup: 'simpanan' → 2 tipe simpanan
             ->when($tab === 'simpanan', function ($q) {
-                $q->whereHas('savingAccount.savingProduct', function ($sa) {
-                    $sa->whereIn('name', [
+                $q->whereHas('savingAccount', function ($sa) {
+                    $sa->whereIn('saving_type', [
                         SavingTypeEnum::SIMPANAN_POKOK->value,
                         SavingTypeEnum::SIMPANAN_WAJIB->value,
                     ]);
                 });
             })
             ->when($tab === 'tabungan', function ($q) {
-                $q->whereHas('savingAccount.savingProduct', function ($sa) {
-                    $sa->whereIn('name', [
+                $q->whereHas('savingAccount', function ($sa) {
+                    $sa->whereIn('saving_type', [
                         SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                         SavingTypeEnum::TABUNGAN_BERJANGKA->value,
                         SavingTypeEnum::TABUNGAN_IBADAH->value,
@@ -105,7 +104,7 @@ class SavingController extends Controller
                     'nominal'      => $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
                                     ? -$trx->saving_amount
                                     : $trx->saving_amount,
-                    'produk'       => $trx->savingAccount->savingProduct->name,
+                    'produk'       => $trx->savingAccount->saving_type,
                     'jenis'        => $trx->transaction_type,
                 ];
             });
@@ -195,7 +194,7 @@ class SavingController extends Controller
                     Carbon::parse($trx->transaction_date)->format('d/m/Y'),
                     $trx->savingAccount->member->user->user_code . ' - ' .
                     $trx->savingAccount->member->user->name,
-                    $trx->savingAccount->savingProduct->name ?? '-',
+                    $trx->savingAccount->saving_type ?? '-',
                     $trx->transaction_type,
                     $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
                         ? -$trx->saving_amount
@@ -233,7 +232,7 @@ class SavingController extends Controller
      */
     public function show(string $id)
     {
-        $data = SavingTransaction::with('savingAccount.user', 'account')->find($id);
+        $data = SavingTransaction::with('savingAccount.member.user', 'memberBankAccount', 'point')->find($id);
 
         return inertia('Admin/Savings/Show', [
             'data' => $data,
@@ -246,7 +245,7 @@ class SavingController extends Controller
             MemberStatusEnum::ACTIVE->value,
             MemberStatusEnum::PAYMENT_PENDING->value
         ])
-            ->with(['user:id,user_code,name', 'savingAccounts.savingProduct:id,name'])
+            ->with(['user:id,user_code,name', 'savingAccounts'])
             ->get()
             ->map(function ($member) {
                 return [
@@ -255,7 +254,7 @@ class SavingController extends Controller
                     'name' => $member->user->name,
                     'status' => $member->status,
                     'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
-                        'type' => $acc->savingProduct->name ?? null,
+                        'type' => $acc->saving_type ?? null,
                         'purpose' => $acc->purpose ?? null,
                         'balance' => $acc->balance ?? 0,
                         'target_amount' => $acc->target_amount ?? null,
@@ -443,11 +442,7 @@ class SavingController extends Controller
         Storage::disk('public')->put($path, $pdf->output());
 
         if (Storage::disk('public')->exists($path)) {
-            MemberDoc::create([
-                'member_id' => $memberId,
-                'doc_name' => 'Struk Penyetoran',
-                'doc_attachment' => $path,
-            ]);
+            SavingTransaction::where('id', $transaction->id)->update(['saving_transaction_receipt' => $path]);
 
             return $path;
         }

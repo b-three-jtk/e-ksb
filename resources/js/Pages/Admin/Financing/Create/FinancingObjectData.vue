@@ -75,11 +75,10 @@ const closeModal = () => {
                     :selectables="productTypeSelectables" @update:modelValue="handleProductTypeChange" />
             </div>
 
-            <BaseInputAdmin v-model="form.financing.brand" label="Merek" placeholder="Masukkan merek produk" />
-            <BaseInputAdmin v-model="form.financing.condition" label="Kondisi" type="select"
+            <BaseInputAdmin required v-model="form.financing.condition" label="Kondisi" type="select"
                 :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
-            <BaseInputAdmin v-model="form.financing.qty" label="Jumlah" type="number" />
-            <BaseInputAdmin v-model="form.financing.request_description" label="Deskripsi" type="textarea" rows="4"
+            <BaseInputAdmin required v-model="form.financing.qty" label="Jumlah" type="number" />
+            <BaseInputAdmin v-model="form.financing.specification" label="Deskripsi" type="textarea" rows="4"
                 placeholder="Masukkan deskripsi produk" />
         </div>
         <div class="border-y border-gray-200 px-8 py-4">

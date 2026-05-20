@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             ProductTypeSeeder::class,
+            SavingProductSeeder::class,
+            MurabahaProductSeeder::class,
         ]);
 
         // Seed demo members

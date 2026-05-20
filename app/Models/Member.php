@@ -44,7 +44,7 @@ class Member extends Model
 
     public function financials()
     {
-        return $this->hasMany(Financial::class);
+        return $this->hasOne(Financial::class);
     }
 
     public function bankAccounts()

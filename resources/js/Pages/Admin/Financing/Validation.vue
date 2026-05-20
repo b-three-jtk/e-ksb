@@ -126,8 +126,7 @@ const submit = () => {
                     </div>
                 </div>
                 <div class="bg-white grid grid-cols-3 gap-6 p-6 rounded-2xl">
-                    <Info label="Spesifikasi Produk" :value="data.financing.request_description" />
-                    <Info label="Merek" :value="data.financing.brand" />
+                    <Info label="Spesifikasi Produk" :value="data.financing.specification" />
                     <Info label="Kategori Produk" :value="data.financing.product_type" />
                     <Info label="Kondisi" :value="data.financing.condition" />
                     <Info label="Kuantitas" :value="data.financing.qty" />

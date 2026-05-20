@@ -12,7 +12,7 @@ import { useForm, usePage } from '@inertiajs/vue3'
 
 const showStruk = ref(false)
 const dataStruk = ref(null)
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { toast } from 'vue3-toastify'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 
@@ -51,31 +51,10 @@ const togglePanel = () => {
     showPanel.value = !showPanel.value;
 }
 
-// Handle flash struk
-async function handleFlashReceipt(struk) {
-    if (!struk) return
-
-    dataStruk.value = struk
-    showStruk.value = true
-
-    toast('Pelunasan pembiayaan berhasil disimpan!', {
-        type: 'success',
-        position: 'bottom-right',
-    })
-}
-
-watch(
-    () => page.props.flash?.struk,
-    (struk) => {
-        handleFlashReceipt(struk)
-    },
-    { immediate: true }
-)
-
 const submitForm = () => {
     form.post('/admin/financing/repayment', {
         forceFormData: true,
-        onSuccess: () => {
+        onSuccess: () => { 
             toast("Permohonan berhasil dikirim!", {
                 "type": "success",
                 "position": "bottom-right",
@@ -117,8 +96,7 @@ const submitForm = () => {
                             <Info label="Tanggal Akad" :value="dateParser(props.data.financing.akad_date)" />
                         </li>
                         <li>
-
-                                       <Info label="Nomor Transaksi" :value="props.data.financing.financing_transaction_code" />
+                            <Info label="Nomor Transaksi" :value="props.data.financing.financing_transaction_code" />
                         </li>
                         <li>
                             <Info label="Objek Pembiayaan" :value="props.data.financing.financing_item.name" />
@@ -144,7 +122,7 @@ const submitForm = () => {
                                 </td>
                                 <td class="py-5 px-2 flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data.financing.financing_item.cost_price) }}
+                                        {{ moneyParser(props.data.financing.cost_price) }}
                                     </p>
                                 </td>
                             </tr>
@@ -156,7 +134,7 @@ const submitForm = () => {
                                 </td>
                                 <td class="py-5 px-2 flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data.financing.financing_item.margin_amount) }}
+                                        {{ moneyParser(props.data.financing.margin_amount) }}
                                     </p>
                                 </td>
                             </tr>
@@ -186,7 +164,7 @@ const submitForm = () => {
                                         <div class="grid grid-cols-2 gap-2">
                                             <span class="font-head">Harga Perolehan </span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data.financing.financing_item.cost_price) }}
+                                                {{ moneyParser(props.data.financing.cost_price) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
@@ -224,7 +202,7 @@ const submitForm = () => {
                                         <div class="grid grid-cols-2 gap-2">
                                             <span class="font-head">Harga Perolehan </span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data.financing.financing_item.cost_price) }}
+                                                {{ moneyParser(props.data.financing.cost_price) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
@@ -236,7 +214,7 @@ const submitForm = () => {
                                         <div class="grid grid-cols-2 gap-2">
                                             <span class="font-head">Margin</span>
                                             <span class="font-medium text-blue-500 border-b border-b-gray-300">
-                                                {{ moneyParser(props.data.financing.financing_item.margin_amount) }}
+                                                {{ moneyParser(props.data.financing.margin_amount) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-1.5">

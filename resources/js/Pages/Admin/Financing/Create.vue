@@ -35,7 +35,6 @@ const {
     isLoadingSearch,
     selectedMember,
     isMemberSelected,
-    filteredMembers,
     searchSupplierQuery,
     supplierResults,
     isLoadingSearchSupplier,
@@ -72,10 +71,10 @@ const goToStep = (step) => {
     activeStep.value = step
 }
 
-const isStep1Valid = computed(() => isMemberSelected.value && form.member.heirs.length > 0 && (form.family_card_file || form.documents?.family_card))
+const isStep1Valid = computed(() => isMemberSelected.value && form.member.heirs.length > 0)
 
 const isStep2Valid = computed(() =>
-    form.member.incomes.length > 0 && form.member.expenses.length > 0 && (form.documents?.income_slip || form.income_slip_file) && (form.documents?.bank_book || form.bank_book_file) && form.member.job_title && form.member.company_or_business_name && form.member.business_field && form.member.tenure_year && form.member.workplace_contact && form.member.workplace_address
+    (form.documents?.income_slip || form.income_slip_file) && (form.documents?.bank_book || form.bank_book_file) && form.member.job_title && form.member.company_or_business_name && form.member.business_field && form.member.tenure_year && form.member.workplace_contact && form.member.workplace_address
 )
 
 const isStep3Valid = computed(() =>
@@ -83,7 +82,7 @@ const isStep3Valid = computed(() =>
     form.financing.status !== 'Menunggu Kelengkapan Dokumen' && form.financing.status !== 'Ditolak'
 )
 
-const isStep4Valid = computed(() => form.supplier && form.financing.cost_price && (form.purchase_receipt_file || form.documents.purchase_receipt))
+const isStep4Valid = computed(() => form.supplier.supplier_name && form.financing.cost_price && (form.purchase_receipt_file || form.documents.purchase_receipt))
 
 const isRequestValid = computed(() => isStep1Valid.value && isStep2Valid.value && form.financing.name && form.collateral.collateral_type)
 
@@ -98,7 +97,7 @@ const isFinalizationValid = computed(() => form.financing.status === 'Disetujui'
             <div class="card-layout justify-between flex flex-col col-span-4 px-0!">
                 <PersonalData v-if="activeStep === 1" :form="form" :search-query="searchQuery"
                     :is-loading-search="isLoadingSearch" :is-member-selected="isMemberSelected"
-                    :filtered-members="filteredMembers" :data="props.data" :errors="errors"
+                    :member-results="memberResults" :data="props.data" :errors="errors"
                     @update:search-query="searchQuery = $event" @selectMember="selectMember" @addHeir="addHeir"
                     @removeHeir="removeHeir" @resetMemberSelection="resetMemberSelection" />
 

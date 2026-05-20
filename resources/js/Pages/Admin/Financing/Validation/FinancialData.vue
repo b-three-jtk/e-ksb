@@ -7,17 +7,30 @@ const props = defineProps({
     data: Object,
 })
 
+const incomes = computed(() => [
+    { label: 'Gaji Pokok & Tunjangan', model: 'gaji_pokok_amount' },
+    { label: 'Penghasilan Usaha', model: 'penghasilan_usaha_amount' },
+    { label: 'Penghasilan Pasangan', model: 'penghasilan_pasangan_amount' },
+    { label: 'Penghasilan Lainnya', model: 'penghasilan_lainnya_amount' },
+])
+
+const expenses = computed(() => [
+    { label: 'Biaya Hidup Keluarga', model: 'biaya_hidup_keluarga_amount' },
+    { label: 'Biaya Pendidikan', model: 'biaya_pendidikan_amount' },
+    { label: 'Jumlah Cicilan Lainnya', model: 'jumlah_cicilan_amount' },
+    { label: 'Jumlah Biaya Lainnya', model: 'jumlah_biaya_lainnya_amount' },
+])
+
 const totalIncome = computed(() => {
-    return props.data.member.incomes.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
+    return incomes.value.reduce((total, item) => total + (Number(props.data.member[item.model]) || 0), 0)
 })
 
 const totalExpense = computed(() => {
-    return props.data.member.expenses.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
+    return expenses.value.reduce((total, item) => total + (Number(props.data.member[item.model]) || 0), 0)
 })
 
-const netIncome = computed(() => {
-    return totalIncome.value - totalExpense.value
-})
+const netIncome = computed(() => totalIncome.value - totalExpense.value)
+
 </script>
 
 <template>
@@ -25,6 +38,7 @@ const netIncome = computed(() => {
         <div>
             <h1 class="card-title">Informasi Pekerjaan</h1>
             <div class="grid grid-cols-2 gap-6 mt-8">
+                <Info label="Status Pekerjaan" :value="data.member.employment_status" />
                 <Info label="Jabatan" :value="data.member.job_title" />
                 <Info label="Nama Perusahaan atau Bisnis" :value="data.member.company_or_business_name" />
                 <Info label="Bidang Pekerjaan" :value="data.member.business_field" />
@@ -42,16 +56,15 @@ const netIncome = computed(() => {
                         <th class="py-4 text-right pl-6">Jumlah (Rp)</th>
                     </tr>
                 </thead>
-                <tbody v-if="data.member.incomes.length > 0">
-                    <tr v-for="(item, index) in data.member.incomes" :key="index"
+                <tbody>
+                    <tr v-for="item in incomes" :key="item.model"
                         class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
-                        <td class="py-4 text-left pl-6">{{ item.financial_type }}</td>
-                        <td class="py-4 text-right pl-6">{{ moneyParser(item.amount) }}</td>
+                        <td class="py-4 text-left pl-6">{{ item.label }}</td>
+                        <td class="py-4 text-right pl-6">{{ moneyParser(data.member[item.model]) }}</td>
                     </tr>
-                </tbody>
-                <tbody v-else>
-                    <tr class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
-                        <td colspan="3" class="py-4 text-center">Tidak ada data penghasilan</td>
+                    <tr class="font-semibold text-dark-text">
+                        <td class="pt-4 text-left pl-6">Total Penghasilan Bulanan</td>
+                        <td class="pt-4 text-right pr-6">{{ moneyParser(totalIncome) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -65,16 +78,15 @@ const netIncome = computed(() => {
                         <th class="py-4 text-right pl-6">Jumlah (Rp)</th>
                     </tr>
                 </thead>
-                <tbody v-if="data.member.expenses.length > 0">
-                    <tr v-for="(item, index) in data.member.expenses" :key="index"
+                <tbody>
+                    <tr v-for="item in expenses" :key="item.model"
                         class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
-                        <td class="py-4 text-left pl-6">{{ item.financial_type }}</td>
-                        <td class="py-4 text-right pl-6">{{ moneyParser(item.amount) }}</td>
+                        <td class="py-4 text-left pl-6">{{ item.label }}</td>
+                        <td class="py-4 text-right pl-6">{{ moneyParser(data.member[item.model]) }}</td>
                     </tr>
-                </tbody>
-                <tbody v-else>
-                    <tr class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
-                        <td colspan="3" class="py-4 text-center">Tidak ada data penghasilan</td>
+                    <tr class="font-semibold text-dark-text">
+                        <td class="py-4 text-left pl-6">Total Pengeluaran Bulanan</td>
+                        <td class="py-4 text-right pr-6">{{ moneyParser(totalExpense) }}</td>
                     </tr>
                 </tbody>
             </table>

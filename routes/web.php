@@ -92,7 +92,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
     Route::put('/savings/validate/{id}', [SavingController::class, 'validateRequest'])->name('savings.validate');
-    Route::get('/savings/list', [SavingController::class, 'index'])->name('savings.index');
+    Route::get('/savings/list', [SavingController::class, 'index'])->name('savings.index')->middleware('role:Sekretaris|Ketua');
     Route::get('/savings/export/csv', [SavingController::class, 'exportCsv'])->name('savings.export.csv');
     Route::get('/savings/export/pdf', [SavingController::class, 'exportPdf'])->name('savings.export.pdf');
 

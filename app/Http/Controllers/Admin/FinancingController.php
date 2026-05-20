@@ -4,29 +4,35 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ConditionEnum;
 use App\Enums\EducationEnum;
-use App\Enums\FinancialCategoryEnum;
 use App\Enums\FinancialCostEnum;
 use App\Enums\FinancialIncomeEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\HeirEnum;
-use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
+use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateRepaymentRequest;
 use App\Http\Requests\StoreFinancingRequest;
+use App\Models\Financial;
 use App\Models\Financing;
-use App\Models\InstallmentPaymentSchedule;
+use App\Models\FinancingItem;
+use App\Models\FinancingVerification;
+use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\JournalEntry;
 use App\Models\Member;
+use App\Models\SavingAccount;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\Wakalah;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class FinancingController extends Controller
@@ -42,11 +48,7 @@ class FinancingController extends Controller
                 $query->select('id', 'name', 'user_code');
             },
             'installment' => function ($query) {
-                $query->withCount([
-                    'paymentSchedules' => function ($q) {
-                        $q->where('installment_schedule_status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value);
-                    }
-                ]);
+                $query->withCount('payment');
             },
             'financingItem.productType' => function ($query) {
                 $query->select('product_types.id', 'product_types.product_type_name');
@@ -126,6 +128,8 @@ class FinancingController extends Controller
                 'value' => Financing::whereIn('status', [
                     FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                     FinancingReqStatusEnum::PENDING_REVIEW->value,
+                    FinancingReqStatusEnum::APPROVED->value,
+                    FinancingReqStatusEnum::REJECTED->value,
                 ])->count()
             ],
             ['title' => 'Total Pembiayaan Berlangsung', 'value' => Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->count()],
@@ -183,8 +187,6 @@ class FinancingController extends Controller
      */
     private function formatMemberData(Member $member): array
     {
-        $financials = $member->financials ?? collect();
-        $job = $member->memberJobs;
 
         return [
             'id' => $member->id,
@@ -201,20 +203,21 @@ class FinancingController extends Controller
             'dependents' => $member->dependents,
             'domicile_address' => $member->domicile_address,
             'residential_address' => $member->residential_address,
-            'job_title' => $job?->job_title,
-            'company_or_business_name' => $job?->company_or_business_name,
-            'business_field' => $job?->business_field,
-            'tenure_year' => $job?->tenure_year,
-            'workplace_address' => $job?->workplace_address,
-            'workplace_contact' => $job?->workplace_contact,
-            'incomes' => $financials->where('category', FinancialCategoryEnum::INCOME->value)->map(fn($f) => [
-                'financial_type' => $f->financial_type,
-                'amount' => $f->amount,
-            ])->values(),
-            'expenses' => $financials->where('category', FinancialCategoryEnum::EXPENSE->value)->map(fn($f) => [
-                'financial_type' => $f->financial_type,
-                'amount' => $f->amount,
-            ])->values(),
+            'employment_status' => $member->memberJobs?->employment_status,
+            'job_title' => $member->memberJobs?->job_title,
+            'company_or_business_name' => $member->memberJobs?->company_or_business_name,
+            'business_field' => $member->memberJobs?->business_field,
+            'tenure_year' => $member->memberJobs?->tenure_year,
+            'workplace_address' => $member->memberJobs?->workplace_address,
+            'workplace_contact' => $member->memberJobs?->workplace_contact,
+            'gaji_pokok_amount' => $member->financials?->gaji_pokok_amount ?? 0,
+            'penghasilan_usaha_amount' => $member->financials?->penghasilan_usaha_amount ?? 0,
+            'penghasilan_pasangan_amount' => $member->financials?->penghasilan_pasangan_amount ?? 0,
+            'penghasilan_lainnya_amount' => $member->financials?->penghasilan_lainnya_amount ?? 0,
+            'biaya_hidup_keluarga_amount' => $member->financials?->biaya_hidup_keluarga_amount ?? 0,
+            'biaya_pendidikan_amount' => $member->financials?->biaya_pendidikan_amount ?? 0,
+            'jumlah_cicilan_amount' => $member->financials?->jumlah_cicilan_amount ?? 0,
+            'jumlah_biaya_lainnya_amount' => $member->financials?->jumlah_biaya_lainnya_amount ?? 0,
             'heirs' => $member->heirs->map(fn($h) => [
                 'heir_nik' => $h->heir_nik,
                 'heir_name' => $h->heir_name,
@@ -226,25 +229,21 @@ class FinancingController extends Controller
 
     public function show(string $id)
     {
-        $financing = Financing::with(['financingItem.productType', 'installment.paymentSchedules.payment', 'financingItem.supplier', 'collateral'])->findOrFail($id);
-        $financing->total_price = ($financing->financingItem->cost_price ?? 0) + ($financing->financingItem->margin_amount ?? 0) - ($financing->down_payment ?? 0);
+        $financing = Financing::with(['financingItem.productType', 'installment.payment', 'financingItem.supplier', 'collateral'])->findOrFail($id);
+        $financing->total_price = ($financing->cost_price ?? 0) + ($financing->margin_amount ?? 0) - ($financing->down_payment ?? 0);
 
         $installment = $financing->installment;
-        if ($installment && $installment->paymentSchedules?->count() > 0) {
-            $total_margin_paid = 0;
-            $total_principal_paid = 0;
 
-            foreach ($installment->paymentSchedules as $schedule) {
-                if ($schedule->payment && $schedule->payment->count() > 0) {
-                    $total_margin_paid += $schedule->payment->sum('margin_paid') ?? 0;
-                    $total_principal_paid += $schedule->payment->sum('principal_paid') ?? 0;
-                }
+        if ($installment && $installment->payment?->count() > 0) {
+            $total_paid = 0;
+
+            foreach ($installment->payment as $payment) {
+                $total_paid += $payment->nominal ?? 0;
             }
 
-            $financing->total_margin_paid = $total_margin_paid;
-            $financing->total_principal_paid = $total_principal_paid;
-            $financing->remaining_balance = $financing->total_price - ($total_margin_paid + $total_principal_paid);
-            $financing->total_monthly_payment = $financing->financingItem->margin_amount + $financing->financingItem->cost_price - $financing->down_payment / $financing->installment->tenor;
+            $financing->remaining_balance = $financing->total_price - $total_paid;
+            $financing->total_monthly_payment = $financing->margin_amount + $financing->cost_price - $financing->down_payment / $financing->installment->tenor;
+            $financing->total_paid = $total_paid;
 
             if ($financing->installment?->tenor) {
                 $financing->installment_per_month = ($financing->total_price) / $financing->installment->tenor;
@@ -252,9 +251,24 @@ class FinancingController extends Controller
                 $financing->installment_per_month = 0;
             }
         } else {
-            $financing->total_margin_paid = 0;
-            $financing->total_principal_paid = 0;
+            $financing->total_paid = 0;
+            if ($installment && $financing->installment?->tenor) {
+                $financing->installment_per_month = ($financing->total_price) / $financing->installment->tenor;
+            } else {
+                $financing->installment_per_month = 0;
+            }
             $financing->remaining_balance = $financing->total_price;
+        }
+
+        if ($installment && $financing->akad_date) {
+            $paid_count = $installment->payment ? $installment->payment->count() : 0;
+            if ($paid_count < $installment->tenor) {
+                $financing->next_due_date = Carbon::parse($financing->akad_date)
+                    ->addMonthsNoOverflow($paid_count + 1)
+                    ->format('Y-m-d');
+            } else {
+                $financing->next_due_date = null;
+            }
         }
 
         return inertia('Admin/Financing/Show', [
@@ -272,9 +286,6 @@ class FinancingController extends Controller
         ]);
     }
 
-    /**
-     * Load draft financing
-     */
     public function loadDraft(string $id)
     {
         $financing = Financing::where('id', $id)
@@ -292,17 +303,13 @@ class FinancingController extends Controller
                 'financingItem.productType',
                 'financingItem.supplier',
                 'collateral',
+                'wakalah',
             ])
             ->first();
 
         if (!$financing) {
-            return inertia('Admin/Financing/Create', [
-                'data' => $this->getCommonData(),
-                'financing' => null,
-            ]);
+            throw ValidationException::withMessages(['Data pembiayaan tidak ditemukan atau tidak dalam status yang valid untuk dimuat sebagai draft']);
         }
-
-        Log::info('Loading draft financing with ID: ' . asset($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment));
 
         return inertia('Admin/Financing/Create', [
             'data' => $this->getCommonData(),
@@ -311,19 +318,20 @@ class FinancingController extends Controller
                 'financing' => [
                     'name' => $financing->financingItem->name,
                     'product_type_id' => $financing->financingItem->product_type_id,
-                    'brand' => $financing->financingItem->brand,
                     'condition' => $financing->financingItem->condition,
                     'qty' => $financing->financingItem->qty,
-                    'request_description' => $financing->financingItem->request_description,
-                    'cost_price' => $financing->financingItem->cost_price,
-                    'margin_amount' => $financing->financingItem->margin_amount,
+                    'specification' => $financing->financingItem->specification,
+                    'price_per_unit' => $financing->financingItem->price_per_unit,
+                    'cost_price' => $financing->cost_price,
+                    'margin_amount' => $financing->margin_amount,
                     'supplier_id' => $financing->financingItem->supplier_id,
                     'down_payment' => $financing->down_payment,
-                    'is_wakalah' => $financing->is_wakalah,
                     'payment_method' => $financing->payment_method,
+                    'akad_wakalah_date' => $financing->wakalah?->akad_date,
+                    'nominal_wakalah' => $financing->wakalah?->nominal_wakalah,
                     'akad_date' => $financing->akad_date,
-                    'notes' => $financing->notes,
                     'status' => $financing->status,
+                    'tenor' => $financing->installment?->tenor,
                 ],
                 'collateral' => [
                     'collateral_type' => $financing->collateral?->collateral_type,
@@ -335,15 +343,13 @@ class FinancingController extends Controller
                     'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
-                    'down_payment_proof' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'down_payment_proof')->first()?->doc_attachment),
                     'purchase_receipt' => $this->getDocumentUrl($financing->financingItem->purchase_receipt),
                     'akad_document' => $this->getDocumentUrl($financing->signed_akad_document),
+                    'akad_wakalah_document' => $this->getDocumentUrl($financing->wakalah?->signed_akad_document),
                 ],
                 'supplier' => $financing->financingItem->supplier ? [
                     'supplier_name' => $financing->financingItem->supplier->supplier_name,
-                    'contact' => $financing->financingItem->supplier->contact,
                     'address' => $financing->financingItem->supplier->address,
-                    'website_url' => $financing->financingItem->supplier->website_url,
                 ] : null,
             ],
         ]);
@@ -382,18 +388,15 @@ class FinancingController extends Controller
                     'financing_transaction_code' => $financing->financing_transaction_code,
                     'name' => $financing->financingItem->name,
                     'product_type_id' => $financing->financingItem->product_type_id,
-                    'brand' => $financing->financingItem->brand,
                     'condition' => $financing->financingItem->condition,
                     'qty' => $financing->financingItem->qty,
-                    'request_description' => $financing->financingItem->request_description,
-                    'cost_price' => $financing->financingItem->cost_price,
-                    'margin_amount' => $financing->financingItem->margin_amount,
+                    'specification' => $financing->financingItem->specification,
+                    'cost_price' => $financing->cost_price,
+                    'margin_amount' => $financing->margin_amount,
                     'supplier_id' => $financing->financingItem->supplier_id,
                     'down_payment' => $financing->down_payment,
-                    'is_wakalah' => $financing->is_wakalah,
                     'payment_method' => $financing->payment_method,
                     'akad_date' => $financing->akad_date,
-                    'notes' => $financing->notes,
                     'status' => $financing->status,
                     'product_type' => $financing->financingItem->productType?->product_type_name,
                 ],
@@ -407,15 +410,10 @@ class FinancingController extends Controller
                     'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
-                    'purchase_receipt' => $this->getDocumentUrl($financing->financingItem->purchase_receipt),
-                    'akad_document' => $this->getDocumentUrl($financing->signed_akad_document),
-                    'collateral_proof' => $this->getDocumentUrl($financing->collateral?->collateral_proof),
                 ],
                 'supplier' => $financing->financingItem->supplier ? [
                     'supplier_name' => $financing->financingItem->supplier->supplier_name,
-                    'contact' => $financing->financingItem->supplier->contact,
                     'address' => $financing->financingItem->supplier->address,
-                    'website_url' => $financing->financingItem->supplier->website_url,
                 ] : null,
             ],
         ]);
@@ -433,12 +431,17 @@ class FinancingController extends Controller
                 ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
                 ->firstOrFail();
 
-            $fi = $financing->update([
+            $financing->update([
                 'status' => $validated['status'],
-                'notes' => $validated['notes'] ?? null,
             ]);
 
-            Log::info('Financing with ID ' . $id . ' updated with status: ' . $validated['notes']);
+            FinancingVerification::create([
+                'financing_id' => $financing->id,
+                'verified_by' => auth()->id(),
+                'final_verification_status' => $validated['status'],
+                'notes' => $validated['notes'] ?? null,
+                'verified_at' => now(),
+            ]);
 
             return redirect()->route('admin.financing.index')->with('success', 'Keputusan validasi berhasil disimpan');
         } catch (Exception $e) {
@@ -447,17 +450,32 @@ class FinancingController extends Controller
         }
     }
 
-    /**
-     * Store financing
-     */
+
     public function store(StoreFinancingRequest $request)
     {
         try {
             DB::beginTransaction();
 
             $validated = $request->validated();
-            $user = User::with('member')->where('user_code', $validated['member']['user_code'])->firstOrFail();
+            $user = User::with('member.savingAccounts')->where('user_code', $validated['member']['user_code'])->firstOrFail();
             $verifier = auth()->user();
+
+            // VALIDASI 1: PEMOHON HARUS DALAM STATUS AKTIF
+            if ($user->status !== UserStatusEnum::ACTIVE->value) {
+                throw ValidationException::withMessages(['member' => 'Pemohon harus dalam status aktif']);
+            }
+
+            // VALIDASI 2: PEMOHON HARUS MEMILIKI SIMPANAN AKTIF SATU BULAN
+            // $hasEligibleSaving = SavingAccount::where('member_id', $user->member->id)
+            //     ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+            //     ->where('created_at', '<=', now()->subMonth())
+            //     ->first();
+
+            // if (!$hasEligibleSaving) {
+            //     throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
+            // }
+
+            Log::info('storingfinancingdata', ['validated' => $validated, 'user' => $user->id]);
 
             // Update user
             $user->update([
@@ -481,14 +499,12 @@ class FinancingController extends Controller
 
             // Sync heirs
             $user->member->heirs()->delete();
-            Log::info('Syncing heirs: ' . !empty($validated['member']['heirs'] ?? []));
             if (!empty($validated['member']['heirs'] ?? [])) {
                 $user->member->heirs()->createMany($validated['member']['heirs']);
             }
 
             // Sync documents
             $documents = [
-                'kartu_keluarga' => 'family_card_file',
                 'slip_gaji' => 'income_slip_file',
                 'buku_tabungan' => 'bank_book_file',
             ];
@@ -503,29 +519,26 @@ class FinancingController extends Controller
 
             // Sync financials
             $user->member->financials()->delete();
-            if (!empty($validated['member']['incomes'] ?? [])) {
-                foreach ($validated['member']['incomes'] as $income) {
-                    $user->member->financials()->create([
-                        'financial_type' => $income['financial_type'],
-                        'amount' => $income['amount'],
-                        'category' => FinancialCategoryEnum::INCOME->value,
-                    ]);
-                }
-            }
-            if (!empty($validated['member']['expenses'] ?? [])) {
-                foreach ($validated['member']['expenses'] as $expense) {
-                    $user->member->financials()->create([
-                        'financial_type' => $expense['financial_type'],
-                        'amount' => $expense['amount'],
-                        'category' => FinancialCategoryEnum::EXPENSE->value,
-                    ]);
-                }
-            }
+            Financial::create(
+                [
+                    'member_id' => $user->member->id,
+                    'gaji_pokok_amount' => $validated['member']['gaji_pokok_amount'] ?? 0,
+                    'penghasilan_usaha_amount' => $validated['member']['penghasilan_usaha_amount'] ?? 0,
+                    'penghasilan_pasangan_amount' => $validated['member']['penghasilan_pasangan_amount'] ?? 0,
+                    'penghasilan_lainnya_amount' => $validated['member']['penghasilan_lainnya_amount'] ?? 0,
+                    'biaya_hidup_keluarga_amount' => $validated['member']['biaya_hidup_keluarga_amount'] ?? 0,
+                    'biaya_pendidikan_amount' => $validated['member']['biaya_pendidikan_amount'] ?? 0,
+                    'jumlah_cicilan_amount' => $validated['member']['jumlah_cicilan_amount'] ?? 0,
+                    'jumlah_tanggungan_amount' => $validated['member']['jumlah_tanggungan_amount'] ?? 0,
+                    'jumlah_biaya_lainnya_amount' => $validated['member']['jumlah_biaya_lainnya_amount'] ?? 0,
+                ]
+            );
 
             // Sync job
             $user->member->memberJobs()->delete();
             if (isset($validated['member']['job_title'])) {
                 $user->member->memberJobs()->create([
+                    'employment_status' => $validated['member']['employment_status'] ?? null,
                     'job_title' => $validated['member']['job_title'] ?? null,
                     'company_or_business_name' => $validated['member']['company_or_business_name'] ?? null,
                     'business_field' => $validated['member']['business_field'] ?? null,
@@ -541,41 +554,60 @@ class FinancingController extends Controller
                     [
                         'down_payment' => $validated['financing']['down_payment'] ?? 0,
                         'akad_date' => $validated['financing']['akad_date'] ?? null,
-                        'is_wakalah' => $validated['financing']['is_wakalah'] ?? null,
+                        'cost_price' => $validated['financing']['cost_price'] ?? null,
+                        'margin_amount' => $validated['financing']['margin_amount'] ?? null,
                         'payment_method' => $validated['financing']['payment_method'] ?? null,
                         'updated_by' => $verifier->id,
                         'status' => $validated['financing']['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                     ]
                 );
 
-                if (isset($validated['supplier'])) {
+                if ($financing->status === FinancingReqStatusEnum::PENDING_REVIEW->value) {
+                    $financing->update(['requested_date' => now()]);
+                }
+
+                if (isset($validated['supplier']['supplier_name'])) {
                     $supplier = Supplier::updateOrCreate(
                         ['supplier_name' => $validated['supplier']['supplier_name']],
                         [
-                            'contact' => $validated['supplier']['contact'] ?? null,
                             'address' => $validated['supplier']['address'] ?? null,
-                            'website_url' => $validated['supplier']['website_url'] ?? null,
                         ]
                     );
                 }
 
-                $financing->financingItem()->updateOrCreate(
+                $financingItem = FinancingItem::updateOrCreate(
                     ['financing_id' => $financing->id],
                     [
                         'name' => $validated['financing']['name'] ?? null,
-                        'brand' => $validated['financing']['brand'] ?? null,
-                        'request_description' => $validated['financing']['request_description'] ?? null,
+                        'specification' => $validated['financing']['specification'] ?? null,
                         'qty' => $validated['financing']['qty'] ?? null,
                         'condition' => $validated['financing']['condition'] ?? null,
-                        'cost_price' => $validated['financing']['cost_price'] ?? null,
-                        'margin_amount' => $validated['financing']['margin_amount'] ?? null,
+                        'price_per_unit' => $validated['financing']['price_per_unit'] ?? null,
                         'product_type_id' => $validated['financing']['product_type_id'] ?? null,
                         'supplier_id' => $supplier?->id ?? null,
-                        'purchase_receipt' => $request->hasFile('purchase_receipt_file')
-                            ? $request->file('purchase_receipt_file')->store('documents', 'public')
-                            : null,
                     ]
                 );
+
+                if (isset($validated['financing']['nominal_wakalah'])) {
+                    Log::info('Updating wakalah', [
+                        'financing_id' => $financing->id,
+                        'nominal_wakalah' => $validated['financing']['nominal_wakalah'] ?? null,
+                        'akad_date' => $validated['financing']['akad_wakalah_date'] ?? null,
+                    ]);
+                    $wakalah = Wakalah::updateOrCreate(
+                        ['financing_id' => $financing->id],
+                        [
+                            'nominal_wakalah' => $validated['financing']['nominal_wakalah'] ?? null,
+                            'akad_date' => $validated['financing']['akad_date'] ?? null,
+                        ]
+                    );
+
+                    if ($request->hasFile('akad_wakalah_file')) {
+                        $wakalah->update([
+                            'signed_akad_document' => $request->file('akad_wakalah_file')->store('documents', 'public'),
+                        ]);
+                    }
+                }
 
                 if (isset($validated['collateral']['collateral_type'])) {
                     $financing->collateral()->updateOrCreate(
@@ -589,19 +621,33 @@ class FinancingController extends Controller
                     );
                 }
 
+                // FILE UPLOADS
+                if($request->hasFile('purchase_receipt_file')) {
+                    $financingItem->update([
+                        'purchase_receipt' => $request->file('purchase_receipt_file')->store('documents', 'public'),
+                    ]);
+                }
+
                 if ($request->hasFile('akad_document_file')) {
                     $financing->update([
                         'signed_akad_document' => $request->file('akad_document_file')->store('documents', 'public'),
                     ]);
                 }
 
-                if (isset($validated['tenor'])) {
-                    $installment = $financing->installment()->create([
-                        'financing_id' => $financing->id,
-                        'tenor' => $validated['tenor'],
-                    ]);
+                if ($request->hasFile('akad_wakalah_file')) {
+                    $user->member->memberDocs()->updateOrCreate(
+                        ['doc_name' => 'akad_wakalah'],
+                        ['doc_attachment' => $request->file('akad_wakalah_file')->store('documents', 'public')]
+                    );
+                }
 
-                    $installment->generatePaymentSchedules($validated['tenor'], $validated['financing']['akad_date']);
+                // IF INSTALLMENT
+                if (isset($validated['financing']['tenor'])) {
+                    Installment::create([
+                        'financing_id' => $financing->id,
+                        'tenor' => $validated['financing']['tenor'],
+                        'due_day' => Carbon::parse($validated['financing']['akad_date'])->day,
+                    ]);
                 }
             }
 
@@ -616,21 +662,14 @@ class FinancingController extends Controller
         }
     }
 
-    /**
-     * Search members dengan optimized query
-     */
     public function searchMembers(Request $request)
     {
-        $query = $request->get('q');
-
-        if (strlen($query) < 2) {
-            return response()->json(['members' => []]);
-        }
+        $query = $request->input('q');
 
         $members = Member::query()
-            ->with(['user:id,user_code,name,email,nik,phone_number,role_id', 'memberDocs', 'financials', 'heirs', 'memberJobs'])
+            ->with(['user:id,user_code,name,email,nik,phone_number', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'financings:id,status', 'savingAccounts:id,balance,created_at'])
             ->whereHas('user', function ($q) use ($query) {
-                $q->whereHas('role', fn($roleQ) => $roleQ->where('name', 'Anggota'))
+                $q->whereHas('roles', fn($roleQ) => $roleQ->where('name', 'Anggota'))
                     ->where('status', UserStatusEnum::ACTIVE->value)
                     ->where(function ($searchQ) use ($query) {
                         $searchQ->where('name', 'ILIKE', "%{$query}%")
@@ -638,15 +677,37 @@ class FinancingController extends Controller
                     });
             })
             ->limit(5)
-            ->get()
-            ->map(fn($member) => $this->formatMemberData($member));
+            ->get();
+
+        $members->map(function ($member) {
+            $hasActiveFinancing = $member->financings?->whereIn(
+                'status',
+                [
+                    FinancingReqStatusEnum::PENDING_REVIEW->value,
+                    FinancingReqStatusEnum::REJECTED->value,
+                    FinancingReqStatusEnum::APPROVED->value,
+                    FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                    FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                ]
+            ) ?? false;
+            $member->is_have_no_obligation = !$hasActiveFinancing;
+
+            $hasEligibleSaving = $member->savingAccounts->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)->contains(function ($account) {
+                $hasBalance = $account->balance > 0;
+                $isOldEnough = $account->created_at->diffInMonths(now()) >= 1;
+                return $hasBalance && $isOldEnough;
+            });
+            $member->is_have_eligible_saving = $hasEligibleSaving;
+            $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
+            $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
+            $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
+
+            return $member;
+        });
 
         return response()->json(['members' => $members]);
     }
 
-    /**
-     * Search suppliers
-     */
     public function searchSuppliers(Request $request)
     {
         $query = $request->input('q');
@@ -656,8 +717,6 @@ class FinancingController extends Controller
             ->limit(5)
             ->get();
 
-        Log::info('Search suppliers with query: ' . $query . ', found: ' . $suppliers);
-
         return response()->json(['suppliers' => $suppliers]);
     }
 
@@ -665,16 +724,16 @@ class FinancingController extends Controller
     {
         $data = [];
         $data['financing'] = Financing::
-            with('member.user', 'installment.paymentSchedules.payment', 'financingItem.productType', 'financingItem.supplier', 'collateral')
+            with('member.user', 'installment.payment', 'financingItem.productType', 'financingItem.supplier', 'collateral')
             ->findOrFail($id);
 
-        $data['total_paid_installments'] = $data['financing']->installment->paymentSchedules->where('installment_schedule_status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
-        $data['principal_per_month'] = ($data['financing']->financingItem->cost_price - $data['financing']->down_payment) / $data['financing']->installment->tenor;
-        $data['margin_per_month'] = $data['financing']->financingItem->margin_amount / $data['financing']->installment->tenor;
-        $data['tsaman_naqdy'] = ($data['financing']->financingItem->cost_price - $data['financing']->down_payment) + ($data['financing']->financingItem->margin_amount / $data['financing']->installment->tenor);
-        $data['qimah_ismiyyah'] = ($data['financing']->financingItem->cost_price - $data['financing']->down_payment) + $data['financing']->financingItem->margin_amount;
+        $data['total_paid_installments'] = $data['financing']->installment->payment->count();
+        $data['principal_per_month'] = ($data['financing']->cost_price - $data['financing']->down_payment) / $data['financing']->installment->tenor;
+        $data['margin_per_month'] = $data['financing']->margin_amount / $data['financing']->installment->tenor;
+        $data['tsaman_naqdy'] = ($data['financing']->cost_price - $data['financing']->down_payment) + ($data['financing']->margin_amount / $data['financing']->installment->tenor);
+        $data['qimah_ismiyyah'] = ($data['financing']->cost_price - $data['financing']->down_payment) + $data['financing']->margin_amount;
         $data['margin_berjalan'] = $data['margin_per_month'] * $data['total_paid_installments'];
-        $data['installment_per_month'] = ($data['financing']->financingItem->cost_price + $data['financing']->financingItem->margin_amount - $data['financing']->down_payment) / $data['financing']->installment->tenor;
+        $data['installment_per_month'] = ($data['financing']->cost_price + $data['financing']->margin_amount - $data['financing']->down_payment) / $data['financing']->installment->tenor;
         $data['qimah_haliyyah'] = $data['tsaman_naqdy'] + ($data['margin_per_month'] * ($data['total_paid_installments']));
         $data['total_paid_amount'] = ($data['qimah_ismiyyah'] / $data['financing']->installment->tenor) * $data['total_paid_installments'];
         $data['repayment_total'] = $data['qimah_haliyyah'] - $data['total_paid_amount'];
@@ -694,34 +753,23 @@ class FinancingController extends Controller
 
         DB::beginTransaction();
         try {
-
-            $unPaidSchedules = InstallmentPaymentSchedule::with('installment.financing.member.user', 'installment.financing.financingItem')
-                ->where('installment_id', $data['installment_id'])
-                ->where('installment_schedule_status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)
-                ->orderBy('installment_number', 'asc')
-                ->get();
-
-            foreach ($unPaidSchedules as $schedule) {
-                $schedule->update([
-                    'installment_schedule_status' => InstallmentPaymentScheduleStatusEnum::CANCELLED->value
-                ]);
-            }
-
-            $firstSchedule = $unPaidSchedules->first();
-            $financing = $firstSchedule->installment->financing;
+            $installment = Installment::with('financing.member.user', 'financing.financingItem')->findOrFail($data['installment_id']);
+            $financing = $installment->financing;
             $member = $financing->member;
             $user = $member->user;
 
             $transaction = InstallmentPaymentTransaction::create([
                 'installment_trans_code' => 'LP' . str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT), // temporary
-                'principal_paid' => $data['principal_paid'],
-                'margin_paid' => $data['margin_paid'],
-                'installment_payment_method' => $data['method'],
+                'nominal' => $data['total_paid'],
+                'payment_method' => $data['method'],
                 'is_early_repayment' => true,
                 'payment_date' => now(),
-                'installment_payment_schedule_id' => $firstSchedule->id,
+                'installment_id' => $installment->id,
                 'updated_by' => auth()->id(),
             ]);
+
+            // Update status financing menjadi selesai/lunas - Asumsi status
+            $financing->update(['status' => FinancingReqStatusEnum::PAID->value]);
 
             DB::commit();
 
@@ -744,7 +792,7 @@ class FinancingController extends Controller
 
             return Inertia::render('Admin/Financing/Repayment/Create', [
                 'struk' => $strukturData,
-                'message' => 'Pelunasan berhasil diproses. Total pembayaran: ' . number_format($data['principal_paid'] + $data['margin_paid'], 0, ',', '.'),
+                'message' => 'Pelunasan berhasil diproses. Total pembayaran: ' . number_format($data['total_paid'], 0, ',', '.'),
             ]);
         } catch (Exception $e) {
             DB::rollBack();

@@ -26,6 +26,8 @@ const props = defineProps({
     filters: Object,
 });
 
+console.log('Financing data:', props.financings);
+
 const transactions = computed(() => page.props.financings ?? {
     data: [], current_page: 1, per_page: 10, total: 0, links: [],
 })
@@ -189,14 +191,14 @@ watch(() => filters.tab, applyFilters)
                                 Lanjutkan
                             </Button>
                             <Button
-                                v-else-if="can['view_murabahah'] || (role === 'Staf Murabahah' && (row.status === 'Lunas' || row.status === 'Angsuran Berjalan' || row.status === 'Belum Ditinjau')) || (role === 'Ketua Murabahah' && row.status !== 'Belum Ditinjau')"
+                                v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((row.status === 'Angsuran Berjalan') || (row.status === 'Belum Ditinjau') || (row.status === 'Lunas'))) || (role === 'Ketua Murabahah' && (row.status !== 'Belum Ditinjau')))"
                                 :href="`/admin/financing/show/${row.id}`" size="small" variant="secondary">
                                 <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                                 Lihat Detail
                             </Button>
 
                             <Button
-                                v-if="can['validate_murabahah'] && (role === 'Ketua Murabahah' && (row.status === 'Belum Ditinjau'))"
+                                v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (row.status === 'Belum Ditinjau'))"
                                 :href="`/admin/financing/validation/${row.id}`" size="small" variant="warning">
                                 <ReviewIcon width="18px" height="18px" />
                                 Tinjau
