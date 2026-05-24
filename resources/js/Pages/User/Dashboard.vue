@@ -134,7 +134,7 @@ const rupiah = (value) =>
                             </div>
                         </Link>
 
-                        <Link href="/user/financing" class="group">
+                        <Link href="/user/financings" class="group">
                             <div class="flex flex-col items-center gap-2">
                                 <div class="w-20 h-20 rounded-full bg-sky-400 flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
                                     <Icon icon="uil:credit-card" class="w-9 h-9" />

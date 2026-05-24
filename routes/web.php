@@ -82,64 +82,63 @@ Route::post('/auth/logout', [LoginController::class, 'logout'])
     ->name('auth.logout');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'revalidate'])->group(function () {
-    Route::get('/list', [AdminController::class, 'index'])->name('index')->middleware('role:Sekretaris|Ketua');
-    Route::get('/create', [AdminController::class, 'create'])->middleware('role:Sekretaris');
-    Route::post('/store', [AdminController::class, 'store'])->middleware('role:Sekretaris');
-    Route::get('/edit/{id}', [AdminController::class, 'edit'])->middleware('role:Sekretaris');;
-    Route::put('/update/{id}', [AdminController::class, 'update'])->name('update')->middleware('role:Sekretaris');
-    Route::get('/show/{id}', [AdminController::class, 'show']);
-    Route::get('members', [AdminController::class, 'searchMember'])->name('members.search');
+    //  Pengelolaan Anggota
+    Route::get('/users/list', [UserController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
+    Route::get('/users/create', [UserController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
+    Route::post('/users/store', [UserController::class, 'store'])->middleware('permission:create_anggota')->name('users.store');
+    Route::get('/users/show/{id}', [UserController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
+    Route::put('/users/{id}/disable', [UserController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
+    Route::get('/accounts/{id}/mutasi', [UserController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
+    Route::get('/financings/{id}/history', [UserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
 
-    Route::get('/savings/show/{id}', [SavingController::class, 'show'])->name('savings.show');
-    Route::put('/savings/validate/{id}', [SavingController::class, 'validateRequest'])->name('savings.validate');
-    Route::get('/savings/list', [SavingController::class, 'index'])->name('savings.index')->middleware('role:Sekretaris|Ketua');
-    Route::get('/savings/export/csv', [SavingController::class, 'exportCsv'])->name('savings.export.csv');
-    Route::get('/savings/export/pdf', [SavingController::class, 'exportPdf'])->name('savings.export.pdf');
+    // Pengelolaan Pengurus
+    Route::get('/list', [AdminController::class, 'index'])->middleware('permission:view_admin')->name('admin.index');
+    Route::get('/create', [AdminController::class, 'create'])->middleware('permission:create_admin')->name('admin.create');
+    Route::post('/store', [AdminController::class, 'store'])->middleware('permission:create_admin')->name('admin.store');
+    Route::get('/edit/{id}', [AdminController::class, 'edit'])->middleware('permission:edit_admin')->name('admin.edit');
+    Route::put('/update/{id}', [AdminController::class, 'update'])->middleware('permission:edit_admin')->name('admin.update');
+    Route::get('/show/{id}', [AdminController::class, 'show'])->middleware('permission:view_admin')->name('admin.show');
+    Route::get('members', [AdminController::class, 'searchMember'])->middleware('permission:view_anggota')->name('members.search');
 
-    Route::get('/saving/withdrawal', [WithdrawalController::class, 'create'])->name('withdrawal.create')->middleware('role:Penanggung Jawab Anggota');
-    Route::post('/saving/withdrawal', [WithdrawalController::class, 'store'])->name('withdrawal.store')->middleware('role:Penanggung Jawab Anggota');
+    // Pengelolaan Pengunduran Diri
+    Route::get('/resignations/list', [ResignationController::class, 'index'])->middleware('permission:view_pengunduran_diri')->name('resignations.index');
+    Route::get('/resignations/{id}', [ResignationController::class, 'validation'])->middleware('permission:edit_pengunduran_diri')->name('resignations.validation');
+    Route::put('/resignations/{id}', [ResignationController::class, 'validate'])->middleware('permission:edit_pengunduran_diri')->name('resignations.validate');
 
+    // Pengelolaan Simpanan
+    Route::get('/savings/list', [SavingController::class, 'index'])->middleware('permission:view_simpanan')->name('savings.index');
+    Route::get('/savings/withdrawal', [WithdrawalController::class, 'create'])->middleware('permission:create_penarikan')->name('savings.withdrawal.create');
+    Route::post('/savings/withdrawal', [WithdrawalController::class, 'store'])->middleware('permission:create_penarikan')->name('savings.withdrawal.store');
+    Route::get('/savings/deposit', [SavingController::class, 'createDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.create');
+    Route::post('/savings/deposit', [SavingController::class, 'storeDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.store');
+    Route::get('/savings/show/{id}', [SavingController::class, 'show'])->middleware('permission:view_simpanan')->name('savings.show');
+    Route::get('/savings/export/csv', [SavingController::class, 'exportCsv'])->middleware('permission:view_simpanan')->name('savings.export.csv');
+    Route::get('/savings/export/pdf', [SavingController::class, 'exportPdf'])->middleware('permission:view_simpanan')->name('savings.export.pdf');
+
+    // Pengelolaan Pembiayaan Murabahah
+    Route::get('/financings', [FinancingController::class, 'index'])->middleware('permission:view_murabahah')->name('financings.index');
+    Route::get('/financings/show/{id}', [FinancingController::class, 'show'])->middleware('permission:view_murabahah')->name('financings.show');
+    Route::get('/financings/create', [FinancingController::class, 'create'])->middleware('permission:create_murabahah')->name('financings.create');
+    Route::get('/members/search', [FinancingController::class, 'searchMembers'])->middleware('permission:create_murabahah')->name('members.search');
+    Route::get('/suppliers/search', [FinancingController::class, 'searchSuppliers'])->middleware('permission:create_murabahah')->name('suppliers.search');
+    Route::post('/financings/store', [FinancingController::class, 'store'])->middleware('permission:create_murabahah')->name('financings.store');
+    Route::resource('product-types', ProductTypeController::class)->middleware('permission:create_murabahah');
+    Route::get('/financings/draft/{id}', [FinancingController::class, 'loadDraft'])->middleware('permission:create_murabahah')->name('financings.load-draft');
+    Route::get('/financings/validation/{id}', [FinancingController::class, 'showValidation'])->middleware('permission:approve_murabahah')->name('financings.validation');
+    Route::put('/financings/validate/{id}', [FinancingController::class, 'validate'])->middleware('permission:approve_murabahah')->name('financings.validation.submit');
+    Route::get('/financings/repayment/{id}', [FinancingController::class, 'showRepayment'])->middleware('permission:edit_murabahah')->name('financings.repayment');
+    Route::post('/financings/repayment', [FinancingController::class, 'storeRepayment'])->middleware('permission:edit_murabahah')->name('financings.repayment.request');
+    Route::get('repayment/{id}/receipt', [FinancingController::class, 'viewRepaymentReceipt'])->middleware('permission:edit_murabahah')->name('financings.repayment.view');
+    Route::get('repayment/{id}/download', [FinancingController::class, 'downloadRepaymentReceipt'])->middleware('permission:edit_murabahah')->name('financings.repayment.download');
+
+    // Pengelolaan Kas
+    // Pengaturan Umum
+
+    // Personal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-
-    Route::get('/users/show/{id}', [UserController::class, 'show'])->name('users.show');
-    Route::get('/accounts/{id}/mutasi', [UserController::class, 'getMutasi']);
-    Route::get('/financings/{id}/riwayat', [UserController::class, 'getRiwayat']);
-    Route::get('/users/create', [UserController::class, 'create'])
-        ->middleware('role:Sekretaris')
-        ->name('users.create');
-    Route::post('/users/store', [UserController::class, 'store'])
-        ->middleware('role:Sekretaris')
-        ->name('users.store');
-    Route::get('/users/list', [UserController::class, 'index'])->name('users.index')->middleware('role:Sekretaris|Ketua');
-    Route::put('/users/{id}/nonactive', [UserController::class, 'updateStatusToInactive'])->name('users.nonactive');
-
-    // Resignation Routes
-    Route::get('/resignations/list', [ResignationController::class, 'index'])->name('resignations.index');
-    Route::get('/resignation/{id}', [ResignationController::class, 'validation'])->name('resignations.validation')->middleware('role:Ketua');
-    Route::put('/resignation/{id}', [ResignationController::class, 'validate'])->name('resignations.validate')->middleware('role:Ketua');
-
-    // financing routes
-    Route::get('/financing', [FinancingController::class, 'index'])->name('financing.index');
-    Route::get('/financing/show/{id}', [FinancingController::class, 'show'])->name('financing.show');
-    Route::get('/financing/create', [FinancingController::class, 'create'])->name('financing.create');
-    Route::get('/members/search', [FinancingController::class, 'searchMembers'])->name('members.search');
-    Route::get('/suppliers/search', [FinancingController::class, 'searchSuppliers'])->name('suppliers.search');
-    Route::post('/financing/store', [FinancingController::class, 'store'])->name('financing.store');
-    Route::resource('product-types', ProductTypeController::class);
-    Route::get('/financing/draft/{id}', [FinancingController::class, 'loadDraft'])->name('financing.load-draft');
-    Route::get('/financing/validation/{id}', [FinancingController::class, 'showValidation'])->name('financing.validation');
-    Route::put('/financing/validate/{id}', [FinancingController::class, 'validate'])->name('financing.validation.submit');
-    Route::get('/financing/repayment/{id}', [FinancingController::class, 'showRepayment'])->name('financing.repayment');
-    Route::post('/financing/repayment', [FinancingController::class, 'storeRepayment'])->name('financing.repayment.request');
-    Route::get('repayment/{id}/receipt', [FinancingController::class, 'viewRepaymentReceipt'])->name('financing.repayment.view');
-    Route::get('repayment/{id}/download', [FinancingController::class, 'downloadRepaymentReceipt'])->name('financing.repayment.download');
-
-    Route::get('/saving/deposit', [SavingController::class, 'createDeposit'])->name('deposit.create')->middleware('role:Penanggung Jawab Anggota');
-    Route::post('/saving/deposit', [SavingController::class, 'storeDeposit'])->name('deposit.store')->middleware('role:Penanggung Jawab Anggota');
 });
 
 // User Routes
@@ -156,11 +155,11 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'reval
     Route::get('/resign', [MemberController::class, 'createResign'])->name('resign.create');
     Route::post('/resign', [MemberController::class, 'storeResign'])->name('resign.store');
 
-    // Ledger Routes
+    // Ledger
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
     Route::get('/ledger/export', [LedgerController::class, 'export'])->name('ledger.export');
 
     // Pembiayaan
-    Route::get('/financing', [UserFinancingController::class, 'index'])->name('financing.index');
-    Route::get('/financing/show/{id}', [UserFinancingController::class, 'show'])->name('financing.show');
+    Route::get('/financings', [UserFinancingController::class, 'index'])->name('financing.index');
+    Route::get('/financings/show/{id}', [UserFinancingController::class, 'show'])->name('financing.show');
 });

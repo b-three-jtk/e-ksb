@@ -25,7 +25,7 @@ const openDocModal = () => buktiResignRef.value?.openModal()
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengunduran Diri Anggota', link: '/admin/resignation/list' },
+    { name: 'Pengunduran Diri Anggota', link: '/admin/resignations/list' },
     { name: 'Validasi' },
 ];
 
@@ -93,8 +93,8 @@ const acceptTransaction = () => {
                     <div class="flex flex-col items-center justify-center gap-4 mt-4 px-6">
                         <div
                             class="mx-auto flex w-60 aspect-square items-center justify-center rounded-lg border-2 bg-gray-50 dark:border-gray-700">
-                            <img v-if="form.photo_url" :src="form.photo_url" alt="Foto calon anggota"
-                                class="h-full w-full rounded-lg object-cover" />
+                            <!-- <img v-if="form.photo_url" :src="form.photo_url" alt="Foto calon anggota"
+                                class="h-full w-full rounded-lg object-cover" /> -->
                         </div>
                         <Button @click="openDocModal()" variant="secondary">Lihat Detail</Button>
                     </div>

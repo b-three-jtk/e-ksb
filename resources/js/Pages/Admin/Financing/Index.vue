@@ -1,7 +1,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue';
-import { defineProps, ref, reactive, computed, watch } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import BaseFunctionality from '@/Components/Table/BaseFunctionality.vue';
 import BaseTable from '@/Components/Table/BaseTable.vue';
 import Pagination from '@/Components/Table/Pagination.vue';
@@ -25,8 +25,6 @@ const props = defineProps({
     summary: Array,
     filters: Object,
 });
-
-console.log('Financing data:', props.financings);
 
 const transactions = computed(() => page.props.financings ?? {
     data: [], current_page: 1, per_page: 10, total: 0, links: [],
@@ -158,7 +156,7 @@ watch(() => filters.tab, applyFilters)
                             Lacak transaksi pembiayaan murabahah di sini
                         </p>
                     </div>
-                    <Button :href="`/admin/financing/create`" variant="secondary" size="small" class="mx-6">
+                    <Button :href="`/admin/financings/create`" variant="secondary" size="small" class="mx-6">
                         <Icon icon="mdi:plus" class="w-5 h-5 mr-1" />
                         Tambah Pembiayaan
                     </Button>
@@ -186,20 +184,20 @@ watch(() => filters.tab, applyFilters)
 
                             <Button
                                 v-if="can['edit_murabahah'] && (role === 'Staf Murabahah' && (row.status === 'Disetujui' || row.status === 'Ditolak' || row.status === 'Menunggu Kelengkapan Dokumen'))"
-                                :href="`/admin/financing/draft/${row.id}`" size="small" variant="info">
+                                :href="`/admin/financings/draft/${row.id}`" size="small" variant="info">
                                 <ReviewIcon width="18px" height="18px" />
                                 Lanjutkan
                             </Button>
                             <Button
                                 v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((row.status === 'Angsuran Berjalan') || (row.status === 'Belum Ditinjau') || (row.status === 'Lunas'))) || (role === 'Ketua Murabahah' && (row.status !== 'Belum Ditinjau')))"
-                                :href="`/admin/financing/show/${row.id}`" size="small" variant="secondary">
+                                :href="`/admin/financings/show/${row.id}`" size="small" variant="secondary">
                                 <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                                 Lihat Detail
                             </Button>
 
                             <Button
                                 v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (row.status === 'Belum Ditinjau'))"
-                                :href="`/admin/financing/validation/${row.id}`" size="small" variant="warning">
+                                :href="`/admin/financings/validation/${row.id}`" size="small" variant="warning">
                                 <ReviewIcon width="18px" height="18px" />
                                 Tinjau
                             </Button>

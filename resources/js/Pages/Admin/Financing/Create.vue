@@ -19,7 +19,7 @@ const totalSteps = 5
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financing' },
+    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financings' },
     { name: 'Permohonan Pembiayaan Murabahah' },
 ]
 

@@ -1,7 +1,6 @@
 <script setup>
 import Base from '@/Layouts/Base.vue';
 import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
-import { defineProps } from 'vue';
 import Info from '../../../Components/Form/Info.vue';
 import Button from '../../../Components/Form/Button.vue';
 import moneyParser from '../../../Composables/moneyParser.js';

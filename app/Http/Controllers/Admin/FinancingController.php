@@ -23,7 +23,6 @@ use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\JournalEntry;
 use App\Models\Member;
-use App\Models\SavingAccount;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;

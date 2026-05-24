@@ -16,7 +16,6 @@ class UserProfileController extends Controller
     public function show()
     {
         $user = auth()->user();
-        $user->load(['role']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
 
@@ -40,7 +39,6 @@ class UserProfileController extends Controller
     public function edit()
     {
         $user = auth()->user();
-        $user->load(['role']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
 

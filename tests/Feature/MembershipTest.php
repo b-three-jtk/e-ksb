@@ -241,7 +241,7 @@ describe('FR-05 Aplikasi harus menyediakan penanganan permohonan pengajuan diri 
         $user->assignRole('Anggota');
 
         $res = $this->actingAs($ketua)
-            ->put('/admin/resignation/' . $user->id);
+            ->put('/admin/resignations/' . $user->id);
 
         $res->assertStatus(302);
         $this->assertDatabaseHas('members', [
@@ -261,7 +261,7 @@ describe('FR-05 Aplikasi harus menyediakan penanganan permohonan pengajuan diri 
         $user->assignRole('Anggota');
 
         $res = $this->actingAs($anggota)
-            ->put('/admin/resignation/' . $user->id);
+            ->put('/admin/resignations/' . $user->id);
 
         $res->assertStatus(403);
     });

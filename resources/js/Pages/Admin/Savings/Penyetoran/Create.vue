@@ -328,7 +328,7 @@ function handleConfirm() {
     formData.append('payment_proof', paymentFile.value)
   }
 
-  router.post('/admin/saving/deposit', formData, {
+  router.post('/admin/savings/deposit', formData, {
     forceFormData: true,
     preserveScroll: true,
     onSuccess: (page) => {

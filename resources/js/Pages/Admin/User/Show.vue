@@ -108,7 +108,7 @@ const openRiwayatModal = async (financing) => {
     riwayatModalRef.value?.openModal()
 
     try {
-        const res = await axios.get(`/admin/financings/${financing.id}/riwayat`)
+        const res = await axios.get(`/admin/financings/${financing.id}/history`)
         riwayatData.value = res.data
     } catch (error) {
         console.error('Error fetching riwayat:', error)

@@ -38,7 +38,7 @@ describe('FR-19 Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaa
         ]);
 
         $res = $this->actingAs($staffMurabahah)
-            ->post('/admin/financing/store', [
+            ->post('/admin/financings/store', [
                 'member' => [
                     'user_code' => $member->user->user_code,
                     'name' => $member->user->name,
@@ -101,7 +101,7 @@ describe('FR-19 Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaa
         ]);
 
         $res = $this->actingAs($staffMurabahah)
-            ->post('/admin/financing/store', [
+            ->post('/admin/financings/store', [
                 'member' => ['user_code' => $member->user->user_code, 'name' => $member->user->name, 'nik' => $member->user->nik],
                 'financing' => [
                     'name' => 'Motor',
@@ -127,7 +127,7 @@ describe('FR-19 Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaa
         $member = Member::factory(['user_id' => $user->id])->create();
 
         $res = $this->actingAs($staffMurabahah)
-            ->post('/admin/financing/store', [
+            ->post('/admin/financings/store', [
                 'member' => ['user_code' => $member->user->user_code, 'name' => $member->user->name, 'nik' => $member->user->nik],
                 'financing' => [
                     'name' => 'Motor',
@@ -148,7 +148,7 @@ describe('FR-19 Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaa
         $member = Member::factory(['user_id' => $user->id])->create();
 
         $res = $this->actingAs($staffMurabahah)
-            ->post('/admin/financing/store', [
+            ->post('/admin/financings/store', [
                 'member' => ['user_code' => $member->user->user_code, 'name' => $member->user->name, 'nik' => $member->user->nik],
                 'financing' => [
                     'name' => 'Motor',
@@ -181,7 +181,7 @@ describe('FR-20 Aplikasi harus menyediakan pencatatan permohonan pembiayaan mura
         $file = UploadedFile::fake()->create('akad_wakalah.pdf', 100);
 
         $res = $this->actingAs($staffMurabahah)
-            ->post('/admin/financing/store', [
+            ->post('/admin/financings/store', [
                 'member' => ['user_code' => $member->user->user_code, 'name' => $member->user->name, 'nik' => $member->user->nik],
                 'financing' => [
                     'name' => 'Motor',
@@ -217,7 +217,7 @@ describe('FR-21 Aplikasi harus menyediakan verifikasi permohonan pembiayaan mura
         ]);
 
         $res = $this->actingAs($ketuaMurabahah)
-            ->put("/admin/financing/{$financing->id}/validate", [
+            ->put("/admin/financings/{$financing->id}/validate", [
                 'status' => FinancingReqStatusEnum::APPROVED->value,
                 'notes' => 'Disetujui karena berkas lengkap',
             ]);
@@ -252,7 +252,7 @@ describe('FR-22 Aplikasi harus menyediakan detail pembiayaan murabahah yang memu
             'tenor' => 10,
         ]);
 
-        $res = $this->actingAs($staffMurabahah)->get("/admin/financing/show/{$financing->id}");
+        $res = $this->actingAs($staffMurabahah)->get("/admin/financings/show/{$financing->id}");
 
         $res->assertStatus(200);
         $res->assertInertia(fn (\Inertia\Testing\AssertableInertia $page) => $page
@@ -281,7 +281,7 @@ describe('FR-23 Aplikasi harus menyediakan pencatatan permohonan pelunasan sebel
         ]);
 
         $res = $this->actingAs($staffMurabahah)
-            ->post('/admin/financing/repayment', [
+            ->post('/admin/financings/repayment', [
                 'installment_id' => $installment->id,
                 'method' => 'Non-Tunai',
                 'total_paid' => 10000000,
@@ -334,8 +334,8 @@ describe('FR-28 Aplikasi harus menyediakan informasi pembiayaan murabahah yang m
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value
         ]);
 
-        // Assuming endpoint /user/financing/show/{id} from routes
-        $res = $this->actingAs($anggota)->get("/user/financing/show/{$financing->id}");
+        // Assuming endpoint /user/financings/show/{id} from routes
+        $res = $this->actingAs($anggota)->get("/user/financings/show/{$financing->id}");
 
         $res->assertStatus(200);
         // Add assertInertia when the user component exists, or just assert successful access:

@@ -37,7 +37,7 @@ const isValidationComplete = computed(() => {
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financing' },
+    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financings' },
     { name: 'Validasi Permohonan Pembiayaan Murabahah' },
 ]
 
@@ -81,7 +81,7 @@ const submit = () => {
                 notes: form.notes,
             })
 
-            submitForm.put(`/admin/financing/validate/${props.data.financing.id}`, {
+            submitForm.put(`/admin/financings/validate/${props.data.financing.id}`, {
                 onSuccess: (page) => {
                     if (page.props.flash?.success) {
                         toast(page.props.flash.success, {

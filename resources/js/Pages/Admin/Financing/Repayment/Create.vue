@@ -12,19 +12,18 @@ import { useForm, usePage } from '@inertiajs/vue3'
 
 const showStruk = ref(false)
 const dataStruk = ref(null)
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { toast } from 'vue3-toastify'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 
-const page = usePage()
 const props = defineProps({
     data: Object,
 });
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
-    { name: 'Pengelolaan Pembiayaan', link: '/admin/financing' },
-    { name: 'Detail Pembiayaan', link: `/admin/financing/${props.data.financing.id}` },
+    { name: 'Pengelolaan Pembiayaan', link: '/admin/financings' },
+    { name: 'Detail Pembiayaan', link: `/admin/financings/${props.data.financing.id}` },
     { name: 'Permohonan Pelunasan' },
 ];
 
@@ -52,9 +51,9 @@ const togglePanel = () => {
 }
 
 const submitForm = () => {
-    form.post('/admin/financing/repayment', {
+    form.post('/admin/financings/repayment', {
         forceFormData: true,
-        onSuccess: () => { 
+        onSuccess: () => {
             toast("Permohonan berhasil dikirim!", {
                 "type": "success",
                 "position": "bottom-right",

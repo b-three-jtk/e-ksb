@@ -25,7 +25,7 @@ describe('TC-FIN-01: Permohonan Pembiayaan Murabahah', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
 
         $response = $this->actingAs($staffMurabahah)
-            ->post('/admin/financing/store', [
+            ->post('/admin/financings/store', [
                 'member' => [
                     'user_code' => $member->user->user_code,
                     'name' => $member->user->name,
@@ -82,7 +82,7 @@ describe('TC-FIN-01: Permohonan Pembiayaan Murabahah', function () {
         $member = Member::factory()->create();
 
         $response = $this->actingAs($staffMurabahah)
-            ->post('/admin/financing/store', [
+            ->post('/admin/financings/store', [
                 'member' => ['user_code' => $member->user->user_code, 'name' => $member->user->name, 'nik' => $member->user->nik],
                 'financing' => [
                     'name' => 'Motor',
@@ -110,7 +110,7 @@ describe('TC-FIN-02: Persetujuan (Approval) Pembiayaan', function () {
         ]);
 
         $response = $this->actingAs($ketuaMurabahah)
-            ->put("/admin/financing/validate/{$financing->id}", [
+            ->put("/admin/financings/validate/{$financing->id}", [
                 'status' => 'Disetujui',
                 'notes' => 'Permohonan disetujui, riwayat kredit baik.',
             ]);
@@ -132,7 +132,7 @@ describe('TC-FIN-02: Persetujuan (Approval) Pembiayaan', function () {
         ]);
 
         $this->actingAs($ketuaMurabahah)
-            ->put("/admin/financing/validate/{$financing->id}", [
+            ->put("/admin/financings/validate/{$financing->id}", [
                 'status' => FinancingReqStatusEnum::REJECTED->value,
                 'notes' => 'Penghasilan bersih tidak mencukupi untuk bayar angsuran.',
             ]);
@@ -155,7 +155,7 @@ describe('TC-FIN-03 & 04: Akad Wakalah & Finalisasi Pembiayaan', function () {
         ]);
 
         $response = $this->actingAs($staffMurabahah)
-            ->post("/admin/financing/store", [
+            ->post("/admin/financings/store", [
                 'akad_wakalah_file' => UploadedFile::fake()->create('wakalah.pdf'),
             ]);
 
@@ -168,7 +168,7 @@ describe('TC-FIN-03 & 04: Akad Wakalah & Finalisasi Pembiayaan', function () {
         $financing = Financing::factory()->create(['status' => 'Disetujui']);
 
         $response = $this->actingAs($staffMurabahah)
-            ->post("/admin/financing/store", [
+            ->post("/admin/financings/store", [
                 'supplier' => [
                     'supplier_name' => 'PT. Supplier Jaya',
                     'contact' => '081234567890',
@@ -191,7 +191,7 @@ describe('TC-FIN-05 & 06: Pelunasan Awal & Pembayaran Angsuran', function () {
         $financing = Financing::factory()->create(['status' => 'Cicilan Berjalan']);
 
         $response = $this->actingAs($staffMurabahah)
-            ->post("/admin/financing/{$financing->id}/early-payoff", [
+            ->post("/admin/financings/{$financing->id}/early-payoff", [
                 'payoff_date' => now()->addMonths(6)->format('Y-m-d'),
                 'payoff_amount' => 40000000,
             ]);
@@ -206,7 +206,7 @@ describe('TC-FIN-05 & 06: Pelunasan Awal & Pembayaran Angsuran', function () {
 
         // Test Pencatatan
         $responseStore = $this->actingAs($staffMurabahah)
-            ->post("/admin/financing/{$financing->id}/record-payment", [
+            ->post("/admin/financings/{$financing->id}/record-payment", [
                 'schedule_id' => 1,
                 'payment_amount' => 1833333,
                 'payment_date' => now()->format('Y-m-d'),
@@ -216,7 +216,7 @@ describe('TC-FIN-05 & 06: Pelunasan Awal & Pembayaran Angsuran', function () {
 
         // Test Struk
         $responseReceipt = $this->actingAs($staffMurabahah)
-            ->get("/admin/financing/{$financing->id}/payment-receipt");
+            ->get("/admin/financings/{$financing->id}/payment-receipt");
         $responseReceipt->assertStatus(200);
     });
 });

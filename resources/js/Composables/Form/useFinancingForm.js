@@ -343,7 +343,7 @@ export function useFinancingForm(initialData = null) {
             confirmButtonColor: '#007943',
         }).then((result) => {
             if (result.isConfirmed) {
-                form.post('/admin/financing/store', {
+                form.post('/admin/financings/store', {
                     onSuccess: (page) => {
                         if (page.props.flash?.success) {
                             toast(page.props.flash.success, {

@@ -1,7 +1,6 @@
 <script setup>
 import AdminLayout from '../../../Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
-import { defineProps } from 'vue';
 import Info from '../../../Components/Form/Info.vue';
 import Button from '../../../Components/Form/Button.vue';
 import moneyParser from '../../../Composables/moneyParser.js';
@@ -59,7 +58,7 @@ const breadcrumbItems = [
                 <div class="flex justify-between items-center">
                     <h1>Ringkasan Pembiayaan</h1>
                     <div class="flex items-center gap-4">
-                        <Button v-if="data.installment && data.status == 'Angsuran Berjalan'" :href="`/admin/financing/repayment/${data.id}`" variant="secondary" size="small">
+                        <Button v-if="data.installment && data.status == 'Angsuran Berjalan'" :href="`/admin/financings/repayment/${data.id}`" variant="secondary" size="small">
                             <span class="icon-[tabler--moneybag-move]" style="width: 18px; height: 18px;"></span>
                             Pelunasan Dipercepat
                         </Button>

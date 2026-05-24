@@ -24,7 +24,7 @@ describe('FR-12 Aplikasi harus menyediakan pencatatan transaksi simpanan anggota
         $member = Member::factory()->create();
 
         $res = $this->actingAs($pjanggota)
-            ->post('/admin/saving/deposit', [
+            ->post('/admin/savings/deposit', [
                 'member_id' => $member->id,
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => 500000,
@@ -52,7 +52,7 @@ describe('FR-12 Aplikasi harus menyediakan pencatatan transaksi simpanan anggota
         ]);
 
         $res = $this->actingAs($pjanggota)
-            ->post('/admin/saving/withdrawal', [
+            ->post('/admin/savings/withdrawal', [
                 'member_id' => $member->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 100000,
@@ -79,7 +79,7 @@ describe('FR-12 Aplikasi harus menyediakan pencatatan transaksi simpanan anggota
         ]);
 
         $response = $this->actingAs($pjanggota)
-            ->post('/admin/saving/withdrawal', [
+            ->post('/admin/savings/withdrawal', [
                 'member_id' => $member->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 500000,
@@ -101,7 +101,7 @@ describe('FR-12 Aplikasi harus menyediakan pencatatan transaksi simpanan anggota
         ])->create();
 
         $res = $this->actingAs($pjanggota)
-            ->post('/admin/saving/deposit', [
+            ->post('/admin/savings/deposit', [
                 'member_id' => $member->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
@@ -139,7 +139,7 @@ describe('FR-12 Aplikasi harus menyediakan pencatatan transaksi simpanan anggota
         ]);
 
         $res = $this->actingAs($pjanggota)
-            ->post('/admin/saving/deposit', [
+            ->post('/admin/savings/deposit', [
                 'member_id' => $member->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
@@ -171,7 +171,7 @@ describe('FR-12 Aplikasi harus menyediakan pencatatan transaksi simpanan anggota
         ]);
 
         $res = $this->actingAs($pjanggota)
-            ->post('/admin/saving/deposit', [
+            ->post('/admin/savings/deposit', [
                 'member_id' => $member->id,
                 'saving_category' => SavingTypeEnum::TABUNGAN_IBADAH->value,
                 'amount' => 100000,
@@ -294,7 +294,7 @@ test('FR-18 Aplikasi harus dapat menghitung poin simpanan anggota berdasarkan to
     $pj->assignRole('Penanggung Jawab Anggota');
 
     $res = $this->actingAs($pj)
-    ->post('/admin/saving/deposit', [
+    ->post('/admin/savings/deposit', [
         'member_id' => $member->id,
         'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
         'amount' => 500000,
