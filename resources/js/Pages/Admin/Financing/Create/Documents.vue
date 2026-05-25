@@ -9,15 +9,14 @@ const documentsList = [
     { key: 'family_card', label: 'Kartu Keluarga' },
     { key: 'income_slip', label: 'Slip Gaji' },
     { key: 'bank_book', label: 'Buku Tabungan' },
-    { key: 'down_payment_proof', label: 'Bukti Pembayaran Uang Muka' },
+    { key: 'akad_wakalah_document', label: 'Dokumen Wakalah' },
     { key: 'purchase_receipt', label: 'Bukti Pembelian' },
     { key: 'akad_document', label: 'Dokumen Akad' },
-    { key: 'collateral_proof', label: 'Bukti Jaminan' },
 ]
 
 const availableDocuments = computed(() => {
     if (!props.form?.documents) return []
-    
+
     return documentsList.filter(doc => {
         const filePath = props.form.documents[doc.key]
         return filePath && filePath.trim() !== ''

@@ -111,7 +111,16 @@ class AdminController extends Controller
                 $user = User::findOrFail($data['user_id']);
                 $role = Role::findOrFail($data['role_id']);
 
+                $user->update([
+                    'name' => $data['name'],
+                    'nik' => $data['nik'],
+                    'email' => $data['email'],
+                    'phone_number' => $data['phone_number'],
+                ]);
+
                 $user->syncRoles([$role->name]);
+
+                $user->save();
 
                 DB::commit();
                 return redirect()->route('admin.index')->with('success', 'Pengurus berhasil ditambahkan dari member');
@@ -177,18 +186,18 @@ class AdminController extends Controller
      */
     public function update(UpdateAdminRequest $request, string $id)
     {
-        DB::begin();
-        try {
+        // DB::begin();
+        // try {
             $data = $request->validated();
 
             $admin = User::findOrFail($id);
             $admin->update($data);
-            DB::commit();
+            // DB::commit();
             return redirect()->route('admin.index');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->withInput();
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     return redirect()->back()->withInput();
+        // }
     }
 
     public function searchMember(Request $request)

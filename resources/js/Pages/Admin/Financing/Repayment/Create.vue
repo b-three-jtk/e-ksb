@@ -1,18 +1,31 @@
 <script setup>
-import Base from '@/Layouts/Base.vue';
+import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import Info from '@/Components/Form/Info.vue';
 import dateParser from '@/Composables/dateParser.js';
 import moneyParser from '@/Composables/moneyParser.js';
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue';
 import Button from '@/Components/Form/Button.vue';
-import { toast } from 'vue3-toastify';
+import Struk from '@/Components/Savings/Struk.vue'
+import { Icon } from '@iconify/vue'
 import Tooltip from '@/Components/Form/Tooltip.vue';
-import { useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { useForm, usePage } from '@inertiajs/vue3'
+
+const showStruk = ref(false)
+const dataStruk = ref(null)
+import { ref } from 'vue'
+import { toast } from 'vue3-toastify'
+import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 
 const props = defineProps({
     data: Object,
 });
+
+const breadcrumbItems = [
+    { name: 'Dashboard', link: '/admin/dashboard' },
+    { name: 'Pengelolaan Pembiayaan', link: '/admin/financings' },
+    { name: 'Detail Pembiayaan', link: `/admin/financings/${props.data.financing.id}` },
+    { name: 'Permohonan Pelunasan' },
+];
 
 const showModal = () => {
     document.getElementById('modal').classList.remove('hidden');
@@ -21,19 +34,15 @@ const hideModal = () => {
     document.getElementById('modal').classList.add('hidden');
 };
 
-const repaymentTotal = props.data.repayment_total ?? 0;
-const remainingPrincipal = props.data.financing.loan.remaining_principal ?? 0;
-const principalPaid = Math.min(remainingPrincipal, repaymentTotal);
-const marginPaid = Math.max(0, repaymentTotal - principalPaid);
-
 const form = useForm({
-    isAgreed: false,
-    loan_id: props.data.financing.loan.id,
     method: '',
-    installment_number: props.data.total_paid_installments + 1,
-    repayment_total: repaymentTotal,
-    principal_paid: principalPaid,
-    margin_paid: marginPaid,
+    total_paid: props.data.repayment_total || '',
+    tsaman_naqdy: props.data.tsaman_naqdy || '',
+    qimah_ismiyyah: props.data.qimah_ismiyyah || '',
+    qimah_haliyyah: props.data.qimah_haliyyah || '',
+    installment_id: props.data.financing.installment.id || '',
+    principal_paid: props.data.principal_paid || '',
+    margin_paid: props.data.margin_paid || '',
 });
 
 const showPanel = ref(false);
@@ -42,26 +51,7 @@ const togglePanel = () => {
 }
 
 const submitForm = () => {
-    // Validasi checkbox persetujuan
-    if (form.isAgreed !== true) {
-        toast("Anda harus menyetujui persyaratan terlebih dahulu!", {
-            "type": "error",
-            "position": "bottom-right",
-            "transition": "slide",
-        })
-        return;
-    }
-
-    // Validasi metode pelunasan
-    if (!form.method) {
-        toast("Pilih metode pelunasan terlebih dahulu!", {
-            "type": "error",
-            "position": "bottom-right",
-            "transition": "slide",
-        })
-        return;
-    }
-    form.post('/user/financing/repayment/submit', {
+    form.post('/admin/financings/repayment', {
         forceFormData: true,
         onSuccess: () => {
             toast("Permohonan berhasil dikirim!", {
@@ -70,7 +60,6 @@ const submitForm = () => {
                 "transition": "slide",
                 "dangerouslyHTMLString": true
             });
-            window.location.href = route('user.userDashboard');
         },
 
         onError: (errors) => {
@@ -86,8 +75,9 @@ const submitForm = () => {
 </script>
 
 <template>
-    <Base title="Permohonan Pelunasan Sebelum Jatuh Tempo">
-        <div class="pt-30 md:pb-20 px-0 md:px-72">
+    <AdminLayout title="Permohonan Pelunasan Sebelum Jatuh Tempo">
+        <PageBreadcrumb :page-title="'Permohonan Pelunasan Sebelum Jatuh Tempo'" :items="breadcrumbItems" />
+        <div>
             <div class="card-layout px-0!">
                 <div class="border-b border-b-stroke px-8 pb-4">
                     <h1 class="card-title">Permohonan Pelunasan Sebelum Jatuh Tempo</h1>
@@ -96,26 +86,26 @@ const submitForm = () => {
                 <div class="card-layout mx-8 mt-8">
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                         <li>
-                            <Info label="Nomor Anggota KSPPS" :value="props.data.financing.user.user_code" />
+                            <Info label="Nomor Anggota KSPPS" :value="props.data.financing.member.user.user_code" />
                         </li>
                         <li>
-                            <Info label="Nama Lengkap" :value="props.data.financing.user.name" />
+                            <Info label="Nama Lengkap" :value="props.data.financing.member.user.name" />
                         </li>
                         <li>
-                            <Info label="Tanggal Akad" :value="dateParser(props.data.financing.loan.created_at)" />
+                            <Info label="Tanggal Akad" :value="dateParser(props.data.financing.akad_date)" />
                         </li>
                         <li>
-                            <Info label="Nomor Transaksi" :value="props.data.financing.transaction_code" />
+                            <Info label="Nomor Transaksi" :value="props.data.financing.financing_transaction_code" />
                         </li>
                         <li>
-                            <Info label="Objek Pembiayaan" :value="props.data.financing.product_name" />
+                            <Info label="Objek Pembiayaan" :value="props.data.financing.financing_item.name" />
                         </li>
                         <li>
-                            <Info label="Kategori Objek Pembiayaan" :value="props.data.financing.product_type" />
+                            <Info label="Kategori Objek Pembiayaan" :value="props.data.financing.financing_item.product_type.product_type_name" />
                         </li>
                         <li>
                             <Info label="Informasi Cicilan"
-                                :value="props.data.total_paid_installments + ' dari ' + props.data.financing.loan.tenor + ' Bulan'" />
+                                :value="props.data.total_paid_installments + ' dari ' + props.data.financing.installment.tenor + ' Bulan'" />
                         </li>
                     </ul>
                 </div>
@@ -143,7 +133,7 @@ const submitForm = () => {
                                 </td>
                                 <td class="py-5 px-2 flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data.financing.margin) }}
+                                        {{ moneyParser(props.data.financing.margin_amount) }}
                                     </p>
                                 </td>
                             </tr>
@@ -164,31 +154,34 @@ const submitForm = () => {
                                     <p class="text-dark-text dark:text-gray-400">
                                         Tsaman Naqdy (Harga Jual Tunai)
                                     </p>
-
                                 </td>
                                 <td class="py-5 px-2 flex items-center gap-1 flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data.financing.tsaman_naqdy) }}
+                                        {{ moneyParser(props.data.tsaman_naqdy) }}
                                     </p>
                                     <Tooltip>
                                         <div class="grid grid-cols-2 gap-2">
-                                            <span class="font-head">Harga Perolehan - DP</span>
+                                            <span class="font-head">Harga Perolehan </span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data.financing.cost_price -
-                                                    props.data.financing.down_payment) }}
+                                                {{ moneyParser(props.data.financing.cost_price) }}
+                                            </span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <span class="font-head">Uang Muka </span>
+                                            <span class="font-medium text-blue-500">
+                                                {{ moneyParser(props.data.financing.down_payment) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
                                             <span class="font-head">Margin 1 Bulan</span>
                                             <span class="font-medium text-blue-500 border-b border-b-gray-300">
-                                                {{ moneyParser(props.data.financing.margin /
-                                                    props.data.financing.loan.tenor) }}
+                                                {{ moneyParser(props.data.margin_per_month) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-1.5">
                                             <span class="font-head"></span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data.financing.tsaman_naqdy) }}
+                                                {{ moneyParser(props.data.tsaman_naqdy) }}
                                             </span>
                                         </div>
                                     </Tooltip>
@@ -202,26 +195,31 @@ const submitForm = () => {
                                 </td>
                                 <td class="py-5 px-2 flex items-center gap-1 flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data.financing.loan.total_loan) }}
+                                        {{ moneyParser(props.data.qimah_ismiyyah) }}
                                     </p>
                                     <Tooltip>
                                         <div class="grid grid-cols-2 gap-2">
-                                            <span class="font-head">Harga Perolehan</span>
+                                            <span class="font-head">Harga Perolehan </span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data.financing.cost_price -
-                                                    props.data.financing.down_payment) }}
+                                                {{ moneyParser(props.data.financing.cost_price) }}
+                                            </span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <span class="font-head">Uang Muka </span>
+                                            <span class="font-medium text-blue-500">
+                                                {{ moneyParser(props.data.financing.down_payment) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
                                             <span class="font-head">Margin</span>
                                             <span class="font-medium text-blue-500 border-b border-b-gray-300">
-                                                {{ moneyParser(props.data.financing.margin) }}
+                                                {{ moneyParser(props.data.financing.margin_amount) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-1.5">
                                             <span class="font-head"></span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data.financing.loan.total_loan) }}
+                                                {{ moneyParser(props.data.qimah_ismiyyah) }}
                                             </span>
                                         </div>
                                     </Tooltip>
@@ -235,7 +233,7 @@ const submitForm = () => {
                                 </td>
                                 <td class="py-5 px-2 flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data.financing.loan.monthly_installment) }}
+                                        {{ moneyParser(props.data.installment_per_month) }}
                                     </p>
                                 </td>
                             </tr>
@@ -253,15 +251,14 @@ const submitForm = () => {
                                         <div class="grid grid-cols-2 gap-2">
                                             <span class="font-head">Tsaman Naqdy</span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data.financing.tsaman_naqdy) }}
+                                                {{ moneyParser(props.data.tsaman_naqdy) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
-                                            <span class="font-head">Margin {{ props.data.total_paid_installments + 1 }}
+                                            <span class="font-head">Margin {{ props.data.total_paid_installments }}
                                                 Bulan</span>
                                             <span class="font-medium text-blue-500 border-b border-b-gray-300">
-                                                {{ moneyParser(props.data.margin_diff_per_month *
-                                                    (props.data.total_paid_installments + 1)) }}
+                                                {{ moneyParser(props.data.margin_berjalan) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-1.5">
@@ -281,7 +278,7 @@ const submitForm = () => {
                                 </td>
                                 <td class="py-5 px-2 flex flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data.payment_total) }}
+                                        {{ moneyParser(props.data.total_paid_amount) }}
                                     </p>
                                 </td>
                             </tr>
@@ -311,9 +308,9 @@ const submitForm = () => {
                             </li>
                             <li class="flex justify-between border-b border-b-stroke py-4">
                                 <h1>Pembayaran Telah Dilakukan</h1>
-                                <p>{{ moneyParser(props.data.payment_total) }}</p>
+                                <p>{{ moneyParser(props.data.total_paid_amount) }}</p>
                             </li>
-                            <li class="flex justify-between border-b font-semibold border-b-stroke py-4">
+                            <li class="flex justify-between font-semibold border-b-stroke py-4">
                                 <h1>Total Pelunasan (Qimah Haliyyah - Pembayaran Telah Dilakukan)</h1>
                                 <p>{{ moneyParser(props.data.repayment_total) }}</p>
                             </li>
@@ -326,24 +323,17 @@ const submitForm = () => {
                         { value: 'Non-Tunai', text: 'Non-Tunai' }
                     ]">
                     </BaseInputAdmin>
-                    <!-- <div class="space-y-6 w-1/2 mt-4" v-if="form.method === 'Non-Tunai'">
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                Bukti Pembayaran
-                            </label>
-                            <input type="file"
-                                class="focus:border-ring-brand-300 font-body w-full h-11 w-fit overflow-hidden rounded-lg border border-gray-300 bg-transparent text-sm text-gray-500 shadow-theme-xs transition-colors file:mr-5 file:border-collapse file:cursor-pointer file:rounded-l-lg file:border-0 file:border-r file:border-solid file:border-gray-200 file:bg-gray-200 file:py-3 file:pl-3.5 file:pr-3 file:text-sm file:text-gray-700 placeholder:text-gray-400 hover:file:bg-gray-100 focus:outline-hidden focus:file:ring-brand-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:text-white/90 dark:file:border-gray-800 dark:file:bg-white/[0.03] dark:file:text-gray-400 dark:placeholder:text-gray-400" />
-                        </div>
-                    </div> -->
                     <div class="self-end mt-4">
                         <Button @click="showModal" variant="secondary">Kirim</Button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Confirmation Modal -->
         <div id="modal" @click.self="hideModal()"
-            class="fixed inset-0 bg-black/50 flex items-center justify-center hidden">
-            <div class="bg-blue-accent dark:bg-gray-800 rounded-lg w-125">
+            class="fixed inset-0 bg-black/50 items-center justify-center hidden z-40" :class="{ 'flex': document.getElementById('modal')?.classList.contains('hidden') === false }">
+            <div class="bg-accent dark:bg-gray-800 rounded-lg w-125">
                 <h1 class="card-title text-white! p-8">Persetujuan Pengguna</h1>
                 <div class="bg-white dark:bg-gray-800 rounded-lg p-6">
                     <p class="text-justify font-body">
@@ -374,5 +364,32 @@ const submitForm = () => {
                 </div>
             </div>
         </div>
-    </Base>
+
+        <!-- Struk Popup Modal -->
+        <Transition name="modal">
+            <div
+                v-if="showStruk && dataStruk"
+                class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50"
+                @click.self="showStruk = false"
+            >
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-full max-w-sm">
+                    <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Transaksi Berhasil</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">Berikut struk pelunasan pembiayaan</p>
+                        </div>
+                        <button
+                            @click="showStruk = false"
+                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                        >
+                            <Icon icon="mdi:close" width="22" />
+                        </button>
+                    </div>
+                    <div class="overflow-y-auto max-h-[70vh] p-5 flex justify-center">
+                        <Struk mode="repayment" :transaksi="dataStruk" />
+                    </div>
+                </div>
+            </div>
+        </Transition>
+    </AdminLayout>
 </template>

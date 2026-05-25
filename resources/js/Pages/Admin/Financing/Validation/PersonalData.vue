@@ -20,7 +20,6 @@ defineProps({
                 <Info label="Alamat Domisili" :value="data.member.domicile_address" />
                 <Info label="Pendidikan Terakhir" :value="data.member.last_education" />
                 <Info label="Status Perkawinan" :value="data.member.marital_status" />
-                <Info label="Nama Pasangan" :value="data.member.spouse_name" />
                 <Info label="Jumlah Tanggungan Keluarga" :value="data.member.dependents" />
                 <Info label="Nomor Telepon" :value="data.member.phone_number" />
                 <Info label="Email" :value="data.member.email" />

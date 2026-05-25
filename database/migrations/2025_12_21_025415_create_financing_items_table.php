@@ -15,12 +15,10 @@ return new class extends Migration
         Schema::create('financing_items', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('brand')->nullable();
-            $table->text('request_description');
+            $table->text('specification')->nullable();
             $table->integer('qty');
             $table->enum('condition', array_column(ConditionEnum::cases(), 'value'));
-            $table->decimal('cost_price', 10, 2)->nullable();
-            $table->decimal('margin_amount', 10, 2)->nullable();
+            $table->decimal('price_per_unit', 15, 2)->nullable();
             $table->string('purchase_receipt')->nullable();
 
             $table->foreignId('product_type_id')->nullable()->references('id')->on('product_types')->onDelete('set null');

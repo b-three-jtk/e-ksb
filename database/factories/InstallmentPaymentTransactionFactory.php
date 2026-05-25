@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\PaymentMethodsEnum;
-use App\Models\InstallmentPaymentSchedule;
+use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -16,12 +16,11 @@ class InstallmentPaymentTransactionFactory extends Factory
     {
         return [
             'installment_trans_code' => $this->faker->unique()->numerify('IPT-#########'),
-            'installment_payment_method' => $this->faker->randomElement(PaymentMethodsEnum::cases())->value,
+            'payment_method' => $this->faker->randomElement(PaymentMethodsEnum::cases())->value,
             'is_early_repayment' => $this->faker->boolean(),
-            'principal_paid' => $this->faker->numberBetween(100000, 10000000),
-            'margin_paid' => $this->faker->numberBetween(10000, 1000000),
+            'nominal' => $this->faker->numberBetween(100000, 10000000),
             'payment_date' => $this->faker->dateTime(),
-            'installment_payment_schedule_id' => InstallmentPaymentSchedule::factory(),
+            'installment_id' => Installment::factory(),
             'updated_by' => User::factory(),
             'installment_payment_receipt' => $this->faker->optional()->filePath(),
         ];

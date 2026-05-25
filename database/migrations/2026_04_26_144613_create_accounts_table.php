@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('accounts', function (Blueprint $table) {
-            $table->string('account_code')->primary();
+            $table->string('no_ref_account')->primary();
             $table->string('account_name');
             $table->string('account_category');
             $table->timestamps();

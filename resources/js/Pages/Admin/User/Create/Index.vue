@@ -55,7 +55,6 @@ const form = useForm({
 	phone_number: '',
 	email: '',
 	domicile_address: '',
-	spouse_name: '',
 	last_education: '',
 	residential_address: '',
 	heir_nik: '',

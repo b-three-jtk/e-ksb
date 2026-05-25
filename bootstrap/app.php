@@ -1,11 +1,12 @@
 <?php
 
-use Illuminate\Foundation\Application;
 use App\Http\Middleware\EnsureUserRole;
-use App\Http\Middleware\PreventBackHistory;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\PreventBackHistory;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => EnsureUserRole::class,
+            'permission' => PermissionMiddleware::class,
             'revalidate' => PreventBackHistory::class,
         ]);
     })

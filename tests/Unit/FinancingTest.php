@@ -17,24 +17,40 @@ test('Menghitung simulasi estimasi cicilan per bulan', function () {
 test('Menghitung Qimah Haliyyah', function () {
     $costPrice = 1000000;
     $marginAmount = $costPrice * 0.08;
-    $tenor = 10;    
+    $tenor = 10;
 
+    $tsamanNaqdy = $costPrice + $marginAmount;
     $costPricePaid = ($costPrice / $tenor) * 5; // sudah bayar 5 bulan
     $remainingCostPrice = $costPrice - $costPricePaid;
-    $marginDiffPerMonth = $marginAmount / $tenor; // margin per bulan
-    
-    $qimahHaliyyah = $remainingCostPrice + $marginDiffPerMonth;
+
+    $qimahHaliyyah = $remainingCostPrice + $marginAmount;
+
+    $qimahHaliyyah = (int) $qimahHaliyyah;
+    expect($qimahHaliyyah)->toBe(508000);
+});
+
+test('Menghitung PU-PMJST', function () {
+    $costPrice = 1000000;
+    $marginAmount = $costPrice * 0.08;
+    $tenor = 10;
+
+    $tsamanNaqdy = $costPrice + $marginAmount;
+    $costPricePaid = ($costPrice / $tenor) * 5; // sudah bayar 5 bulan
+    $remainingCostPrice = $costPrice - $costPricePaid;
+
+    $qimahHaliyyah = $remainingCostPrice + $marginAmount;
 
     $qimahHaliyyah = (int) $qimahHaliyyah;
     expect($qimahHaliyyah)->toBe(508000);
 });
 
 test('Menghitung Qimah Ismiyyahh', function () {
-    $costPrice = 1000000;
-    $marginAmount = $costPrice * 0.08;
+    $costPrice = 19000000;
+    $margin1Bulan = $costPrice * 0.08;
+    $tenor = 10;
 
-    $qimahIsmiyyah = $costPrice + $marginAmount;
+    $qimahIsmiyyah = $costPrice + ($margin1Bulan * $tenor);
 
     $qimahIsmiyyah = (int) $qimahIsmiyyah;
-    expect($qimahIsmiyyah)->toBe(1080000);
+    expect($qimahIsmiyyah)->toBe(342);
 });

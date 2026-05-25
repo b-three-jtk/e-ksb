@@ -112,7 +112,7 @@ const currentRemaining = computed(() => {
 })
 
 const applyFilters = () => {
-	router.get('/user/financing', {
+	router.get('/user/financings', {
 		search: filterState.value.search || undefined,
 		product_name: filterState.value.product_name || undefined,
 		per_page: filterState.value.per_page,
@@ -175,7 +175,7 @@ const getStatusClass = (status?: string) => {
 					</div>
 
 					<Link
-						:href="`/user/financing/show/${currentFinancing.id}`"
+						:href="`/user/financings/show/${currentFinancing.id}`"
 						class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
 					>
 						<Icon icon="mdi:eye-outline" class="w-4 h-4" />
@@ -249,7 +249,7 @@ const getStatusClass = (status?: string) => {
 								</td>
 								<td class="px-4 py-3 text-center">
 									<Link
-										:href="`/user/financing/show/${item.id}`"
+										:href="`/user/financings/show/${item.id}`"
 										class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 transition-colors"
 									>
 										<Icon icon="mdi:eye-outline" class="w-4 h-4" />

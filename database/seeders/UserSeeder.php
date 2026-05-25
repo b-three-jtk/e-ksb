@@ -110,17 +110,6 @@ class UserSeeder extends Seeder
         ]);
         $stafMurabahah->assignRole(UserRoleEnum::STAFMURABAHAH->value);
 
-        $ketuaAMDK = User::create([
-            'user_code' => 'KSP006',
-            'nik' => '4321123443211234',
-            'name' => 'Seksi AMDK',
-            'email' => 'seksiamdk@example.com',
-            'password' => bcrypt('password'),
-            'status' => UserStatusEnum::ACTIVE->value,
-            'phone_number' => '081238667890',
-        ]);
-        $ketuaAMDK->assignRole(UserRoleEnum::KETUAAMDK->value);
-
         $pjAnggota = User::create([
             'user_code' => 'KSP007',
             'nik' => '5678123456781234',
@@ -132,15 +121,5 @@ class UserSeeder extends Seeder
         ]);
         $pjAnggota->assignRole(UserRoleEnum::PJANGGOTA->value);
 
-        $stokist = User::create([
-            'user_code' => 'KSP008',
-            'nik' => '5678123456781235',
-            'name' => 'Stokist',
-            'email' => 'stokist@example.com',
-            'password' => bcrypt('password'),
-            'status' => UserStatusEnum::ACTIVE->value,
-            'phone_number' => '081234567390',
-        ]);
-        $stokist->assignRole(UserRoleEnum::STOKIST->value);
     }
 }

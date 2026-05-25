@@ -1,6 +1,7 @@
 <script setup>
 import Info from '@/Components/Form/Info.vue'
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
+import moneyParser from '@/Composables/moneyParser'
 
 defineProps({
     data: Object,
@@ -11,9 +12,10 @@ defineProps({
 <template>
     <div class="gap-6 flex flex-col">
         <div class="card-layout">
+            <h1 class="card-title">Data Jaminan</h1>
             <div class="grid grid-cols-2 gap-6 mt-8">
                 <Info label="Jenis Jaminan" :value="data.collateral.collateral_type" />
-                <Info label="Nilai Estimasi Jaminan (Rp)" :value="data.collateral.estimated_market_value" />
+                <Info label="Nilai Estimasi Jaminan (Rp)" :value="moneyParser(data.collateral.estimated_market_value)" />
                 <Info label="Atas Nama" :value="data.collateral.owner_name" />
                 <Info label="Lokasi / Kondisi Jaminan" :value="data.collateral.collateral_location" />
             </div>

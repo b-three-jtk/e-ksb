@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('financial_transactions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('receipt_number')->unique();
-            $table->dateTime('transaction_date');
-            $table->text('description')->nullable();
-            $table->string('transaction_receipt')->nullable();
+        Schema::create('wakalahs', function (Blueprint $table) {
+            $table->id();
+            $table->decimal('nominal_wakalah', 15, 2);
+            $table->date('akad_date');
+            $table->string('signed_akad_document')->nullable();
+            $table->uuid('financing_id');
             $table->uuid('updated_by')->nullable();
-            $table->nullableMorphs('source');
             $table->timestamps();
 
+            $table->foreign('financing_id')->references('id')->on('financings')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('financial_transactions');
+        Schema::dropIfExists('wakalahs');
     }
 };

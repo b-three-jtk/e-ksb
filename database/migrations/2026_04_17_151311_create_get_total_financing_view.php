@@ -13,11 +13,11 @@ return new class extends Migration {
             SELECT
             financings.member_id,
             financing_items.created_at,
-            financings.financing_status,
+            financings.status,
             SUM(margin_amount) + SUM(cost_price) AS total_financing
         FROM financing_items
         JOIN financings ON financing_items.financing_id = financings.id
-        GROUP BY financings.member_id, financing_items.created_at, financings.financing_status");
+        GROUP BY financings.member_id, financing_items.created_at, financings.status");
     }
 
     /**

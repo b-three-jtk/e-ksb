@@ -40,6 +40,7 @@ defineProps({
 				type="text"
 				placeholder="Isi dengan angka"
 				required
+                max="16"
 				@input="form.heir_nik = onlyNumbers(form.heir_nik)"
 				:error="getFieldError('heir_nik', errors.heir_nik)"
 			/>

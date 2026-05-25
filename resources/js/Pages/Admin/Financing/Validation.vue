@@ -37,7 +37,7 @@ const isValidationComplete = computed(() => {
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financing' },
+    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financings' },
     { name: 'Validasi Permohonan Pembiayaan Murabahah' },
 ]
 
@@ -77,11 +77,11 @@ const submit = () => {
     }).then((result) => {
         if (result.isConfirmed) {
             const submitForm = useForm({
-                financing_status: finalStatus,
+                status: finalStatus,
                 notes: form.notes,
             })
 
-            submitForm.put(`/admin/financing/validate/${props.data.financing.id}`, {
+            submitForm.put(`/admin/financings/validate/${props.data.financing.id}`, {
                 onSuccess: (page) => {
                     if (page.props.flash?.success) {
                         toast(page.props.flash.success, {
@@ -120,14 +120,13 @@ const submit = () => {
                     <h1 class="font-semibold text-white">{{ data.financing.name }}</h1>
                     <div class="flex items-center gap-4">
                         <p class="text-white">No. Transaksi : #{{ data.financing.financing_transaction_code }}</p>
-                        <span :class="useFinancingStatus(data.financing.financing_status)">
-                            {{ getStatusLabel(data.financing.financing_status) }}
+                        <span :class="useFinancingStatus(data.financing.status)">
+                            {{ getStatusLabel(data.financing.status) }}
                         </span>
                     </div>
                 </div>
                 <div class="bg-white grid grid-cols-3 gap-6 p-6 rounded-2xl">
-                    <Info label="Spesifikasi Produk" :value="data.financing.request_description" />
-                    <Info label="Merek" :value="data.financing.brand" />
+                    <Info label="Spesifikasi Produk" :value="data.financing.specification" />
                     <Info label="Kategori Produk" :value="data.financing.product_type" />
                     <Info label="Kondisi" :value="data.financing.condition" />
                     <Info label="Kuantitas" :value="data.financing.qty" />

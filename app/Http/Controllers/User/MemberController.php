@@ -21,11 +21,11 @@ class MemberController extends Controller
     {
         $user = auth()->user()->load('member');
 
-        $totalSaving = DB::table('get_saving_account_balance')
+        $totalSaving = DB::table('saving_accounts')
             ->where('member_id', $user->member->id)
-            ->sum('total_balance');
+            ->sum('balance');
 
-        $totalInstallment = DB::table('get_total_financing')->where('member_id', $user->member->id)->where('financing_status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->sum('total_financing');
+        $totalInstallment = DB::table('get_total_financing')->where('member_id', $user->member->id)->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->sum('total_financing');
 
         $ledger = SavingTransaction::whereHas(
             'savingAccount.member',
@@ -45,7 +45,7 @@ class MemberController extends Controller
             });
 
         $activeMurabahahCount = Financing::where('member_id', $user->member->id)
-            ->where('financing_status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->count();
 
         return inertia('User/Dashboard', [
@@ -78,7 +78,7 @@ class MemberController extends Controller
                 END
             "));
 
-        $totalObligation = DB::table('get_total_financing')->where('member_id', $user->member->id)->where('financing_status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->sum('total_financing');
+        $totalObligation = DB::table('get_total_financing')->where('member_id', $user->member->id)->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->sum('total_financing');
 
         return inertia('User/Resign/Create', [
             'member' => [
@@ -111,7 +111,7 @@ class MemberController extends Controller
         }
 
         $hasObligation = Financing::where('member_id', $user->member->id)
-            ->where('financing_status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->exists();
 
         if ($hasObligation) {
@@ -137,8 +137,10 @@ class MemberController extends Controller
                 'doc_attachment' => $path,
                 'member_id' => $user->member->id,
             ]);
-            $user->member->status = MemberStatusEnum::RESIGNED_REQUESTED->value;
-            $user->save();
+
+            $member = $user->member;
+            $member->status = MemberStatusEnum::RESIGNED_REQUESTED->value;
+            $member->save();
 
             DB::commit();
 

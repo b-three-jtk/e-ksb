@@ -21,16 +21,30 @@ const monthlyInstallment = computed(() => {
     return totalPrice.value / tenor.value || 0
 })
 
+const incomes = computed(() => [
+    { label: 'Gaji Pokok & Tunjangan', model: 'gaji_pokok_amount' },
+    { label: 'Penghasilan Usaha', model: 'penghasilan_usaha_amount' },
+    { label: 'Penghasilan Pasangan', model: 'penghasilan_pasangan_amount' },
+    { label: 'Penghasilan Lainnya', model: 'penghasilan_lainnya_amount' },
+])
+
+const expenses = computed(() => [
+    { label: 'Biaya Hidup Keluarga', model: 'biaya_hidup_keluarga_amount' },
+    { label: 'Biaya Pendidikan', model: 'biaya_pendidikan_amount' },
+    { label: 'Jumlah Cicilan Lainnya', model: 'jumlah_cicilan_amount' },
+    { label: 'Jumlah Biaya Lainnya', model: 'jumlah_biaya_lainnya_amount' },
+])
+
+const totalIncome = computed(() => {
+    return incomes.value.reduce((total, item) => total + (Number(props.form.member[item.model]) || 0), 0)
+})
+
+const totalExpense = computed(() => {
+    return expenses.value.reduce((total, item) => total + (Number(props.form.member[item.model]) || 0), 0)
+})
+
 const monthlyIncome = computed(() => {
-    const totalIncome = props.form.member.incomes.reduce((sum, inc) => {
-        return sum + (parseFloat(inc.amount) || 0)
-    }, 0)
-
-    const totalExpense = props.form.member.expenses.reduce((sum, exp) => {
-        return sum + (parseFloat(exp.amount) || 0)
-    }, 0)
-
-    return (totalIncome - totalExpense) || 0
+    return (totalIncome.value - totalExpense.value) || 0
 })
 
 const remainingIncome = computed(() => {
@@ -38,9 +52,10 @@ const remainingIncome = computed(() => {
 })
 
 const firstDueDate = computed(() => {
-    const date = new Date()
-    date.setDate(date.getDate() + 30)
-    return date.toLocaleDateString('id-ID', {
+    const baseDate = props.form.financing.akad_date ? new Date(props.form.financing.akad_date) : new Date()
+    baseDate.setMonth(baseDate.getMonth() + 1)
+
+    return baseDate.toLocaleDateString('id-ID', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
@@ -48,20 +63,21 @@ const firstDueDate = computed(() => {
 })
 
 const lastDueDate = computed(() => {
-    const date = new Date()
-    date.setMonth(date.getMonth() + tenor.value)
-    return date.toLocaleDateString('id-ID', {
+    const baseDate = props.form.financing.akad_date ? new Date(props.form.financing.akad_date) : new Date()
+    baseDate.setMonth(baseDate.getMonth() + tenor.value)
+
+    return baseDate.toLocaleDateString('id-ID', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
     })
 })
 
-watch(tenor, (newTenor) => {
-    props.form.tenor = newTenor
+watch([tenor, monthlyInstallment, monthlyIncome], () => {
+    props.form.financing.tenor = tenor.value
     props.form.monthly_installment = monthlyInstallment.value
     props.form.monthly_income = monthlyIncome.value
-})
+}, { immediate: true })
 
 const paymentMethod = {
     Cicilan: 'Cicilan',
@@ -83,7 +99,7 @@ const paymentMethod = {
                 <Info label="Nama Barang" :value="form.financing.name" />
                 <Info label="Kualitas" :value="form.financing.condition" />
                 <Info label="Kuantitas" :value="form.financing.qty" />
-                <Info label="Detail Spesifikasi" :value="form.financing.request_description" />
+                <Info label="Detail Spesifikasi" :value="form.financing.specification" />
             </div>
         </section>
 

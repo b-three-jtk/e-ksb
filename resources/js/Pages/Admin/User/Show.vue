@@ -108,7 +108,7 @@ const openRiwayatModal = async (financing) => {
     riwayatModalRef.value?.openModal()
 
     try {
-        const res = await axios.get(`/admin/financings/${financing.id}/riwayat`)
+        const res = await axios.get(`/admin/financings/${financing.id}/history`)
         riwayatData.value = res.data
     } catch (error) {
         console.error('Error fetching riwayat:', error)
@@ -187,11 +187,6 @@ const breadcrumbItems = [
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.member.marital_status ??
                                         '-'
                                     }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pasangan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.spouse_name ?? '-'
-                                        }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jumlah Tanggungan

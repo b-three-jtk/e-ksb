@@ -18,9 +18,7 @@ class SupplierFactory extends Factory
     {
         return [
             'supplier_name' => fake()->company(),
-            'contact' => fake()->phoneNumber(),
             'address' => fake()->address(),
-            'website_url' => fake()->url(),
         ];
     }
 }

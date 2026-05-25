@@ -314,23 +314,21 @@ function handleConfirm() {
   formData.append('amount', nominalRaw.value)
   formData.append('date', tanggalSetor.value)
   formData.append('saving_payment_method', depositMethod.value)
-  formData.append('notes', catatan.value || '')
+  formData.append('notes', catatan.value)
 
-  // Purpose handling yang benar
-  if (isMultiAccountType.value) {
-    const purposeVal = isCreatingNew.value ? purposeInput.value : selectedPurpose.value
-    if (purposeVal) {
-      formData.append('purpose', purposeVal)
-    }
-  }
-
-  // Field untuk akun baru
   if (isNewAccount.value) {
-    if (tenorMonths.value) formData.append('tenor_months', tenorMonths.value)
-    if (targetAmount.value) formData.append('target_amount', targetAmount.value)
+    formData.append('tenor_months', tenorMonths.value)
+    formData.append('target_amount', targetAmount.value)
   }
 
-  router.post('/admin/saving/deposit', formData, {
+  if (depositMethod.value === 'Non-Tunai') {
+    formData.append('bank_name', bankName.value)
+    formData.append('account_name', accountName.value)
+    formData.append('account_number', accountNumber.value)
+    formData.append('payment_proof', paymentFile.value)
+  }
+
+  router.post('/admin/savings/deposit', formData, {
     forceFormData: true,
     preserveScroll: true,
     onSuccess: (page) => {
@@ -344,7 +342,8 @@ function handleConfirm() {
       showDialog.value = false
       console.log('Validation Errors:', errors) // ← tambahkan ini untuk debug
       const msg = Object.values(errors).flat().join('\n')
-      toast(msg || 'Gagal menyimpan data', { type: 'error' })
+      console.error('Form errors:', errors)
+      toast(msg || 'Gagal menyimpan', { type: 'error' })
     }
   })
 }

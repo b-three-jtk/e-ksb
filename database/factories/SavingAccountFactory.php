@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\SavingTypeEnum;
 use App\Models\Member;
 use App\Models\SavingAccount;
-use App\Models\SavingProduct;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SavingAccountFactory extends Factory
@@ -15,9 +15,7 @@ class SavingAccountFactory extends Factory
     {
         return [
             'saving_account_code' => $this->faker->unique()->numerify('SAV-######'),
-            'saving_product_id' => SavingProduct::factory(),
-            'saving_tenor' => $this->faker->numberBetween(12, 60),
-            'target_amount' => $this->faker->numberBetween(1000000, 100000000),
+            'saving_type' => $this->faker->randomElement(SavingTypeEnum::cases())->value,
             'balance' => $this->faker->numberBetween(0, 100000000),
             'member_id' => Member::factory(),
         ];

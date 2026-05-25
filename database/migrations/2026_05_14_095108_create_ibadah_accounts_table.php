@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('saving_products', function (Blueprint $table) {
+        Schema::create('ibadah_accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->integer('due_date');
-            $table->decimal('nominal', 15, 2);
+            $table->integer('tenor');
+            $table->decimal('target_amount', 15, 2);
+            $table->uuid('saving_account_id');
+
+            $table->foreign('saving_account_id')->references('id')->on('saving_accounts')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('saving_products');
+        Schema::dropIfExists('ibadah_accounts');
     }
 };

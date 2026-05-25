@@ -132,7 +132,7 @@ function submitWithdrawal() {
     formData.append('account_number', currentFormData.value.accountNumber)
   }
 
-  router.post('/admin/saving/withdrawal', formData, {
+  router.post('/admin/savings/withdrawal', formData, {
     forceFormData: true,
     preserveScroll: true,
     onSuccess: () => {

@@ -9,19 +9,31 @@ const props = defineProps({
     data: Object,
 })
 
-const emit = defineEmits(['addIncome', 'removeIncome', 'addExpense', 'removeExpense', 'update:form'])
+const emit = defineEmits('update:form')
+
+const incomes = computed(() => [
+    { label: 'Gaji Pokok & Tunjangan', model: 'gaji_pokok_amount' },
+    { label: 'Penghasilan Usaha', model: 'penghasilan_usaha_amount' },
+    { label: 'Penghasilan Pasangan', model: 'penghasilan_pasangan_amount' },
+    { label: 'Penghasilan Lainnya', model: 'penghasilan_lainnya_amount' },
+])
+
+const expenses = computed(() => [
+    { label: 'Biaya Hidup Keluarga', model: 'biaya_hidup_keluarga_amount' },
+    { label: 'Biaya Pendidikan', model: 'biaya_pendidikan_amount' },
+    { label: 'Jumlah Cicilan Lainnya', model: 'jumlah_cicilan_amount' },
+    { label: 'Jumlah Biaya Lainnya', model: 'jumlah_biaya_lainnya_amount' },
+])
 
 const totalIncome = computed(() => {
-    return props.form.member.incomes.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
+    return incomes.value.reduce((total, item) => total + (Number(props.form.member[item.model]) || 0), 0)
 })
 
 const totalExpense = computed(() => {
-    return props.form.member.expenses.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
+    return expenses.value.reduce((total, item) => total + (Number(props.form.member[item.model]) || 0), 0)
 })
 
-const netIncome = computed(() => {
-    return totalIncome.value - totalExpense.value
-})
+const netIncome = computed(() => totalIncome.value - totalExpense.value)
 </script>
 
 <template>
@@ -32,6 +44,7 @@ const netIncome = computed(() => {
 
         <div class="flex flex-col">
             <div class="border-b border-gray-200 grid grid-cols-2 gap-4 p-4">
+                <BaseInputAdmin v-model="form.member.employment_status" required label="Status Pekerjaan" placeholder="Masukkan status pekerjaan, contoh: Karyawan Swasta" />
                 <BaseInputAdmin v-model="form.member.job_title" required label="Jabatan" placeholder="Masukkan jabatan" />
                 <BaseInputAdmin v-model="form.member.company_or_business_name" required label="Nama Perusahaan atau Bisnis"
                     placeholder="Masukkan nama perusahaan atau bisnis" />
@@ -47,15 +60,6 @@ const netIncome = computed(() => {
 
             <!-- Penghasilan -->
             <div class="grid grid-cols-5 gap-4 items-end p-4 border-b border-gray-200">
-                <div class="col-span-2">
-                    <BaseInputAdmin v-model="form.income_type" label="Data Penghasilan" type="select"
-                        :selectables="data.incomes.map(unit => ({ value: unit, text: unit }))" />
-                </div>
-                <div class="col-span-2 flex gap-4">
-                    <BaseInputAdmin v-model="form.income_amount" placeholder="Jumlah" required />
-                    <Button size="small" variant="primary" @click="$emit('addIncome')">Tambah</Button>
-                </div>
-
                 <!-- Tabel Penghasilan -->
                 <div class="col-span-5">
                     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -63,27 +67,20 @@ const netIncome = computed(() => {
                             <tr>
                                 <th class="py-4 text-left pl-6">Jenis Penghasilan</th>
                                 <th class="py-4 text-right pr-6">Jumlah (Rp)</th>
-                                <th class="py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody v-if="form.member.incomes.length > 0">
-                            <tr v-for="(item, index) in form.member.incomes" :key="index"
+                        <tbody>
+                            <tr v-for="income in incomes" :key="income.model"
                                 class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
-                                <td class="py-2 text-left pl-6">{{ item.financial_type }}</td>
-                                <td class="py-2 text-right pr-6">{{ moneyParser(item.amount) }}</td>
-                                <td class="py-2 text-center flex justify-center">
-                                    <Button size="small" variant="light"
-                                        @click="$emit('removeIncome', index)">-</Button>
+                                <td class="py-2 text-left pl-6">{{ income.label }}</td>
+                                <td class="py-2 text-right pr-6">
+                                    <BaseInputAdmin v-model="form.member[income.model]" type="number" placeholder="0"
+                                        input-class="text-right" />
                                 </td>
                             </tr>
                             <tr class="font-semibold text-dark-text">
                                 <td class="pt-4 text-left pl-6">Total Penghasilan Bulanan</td>
-                                <td colspan="2" class="pt-4 text-right pr-6">{{ moneyParser(totalIncome) }}</td>
-                            </tr>
-                        </tbody>
-                        <tbody v-else>
-                            <tr class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
-                                <td colspan="3" class="py-4 text-center text-gray-400">Belum ada data penghasilan</td>
+                                <td class="pt-4 text-right pr-6">{{ moneyParser(totalIncome) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -92,14 +89,6 @@ const netIncome = computed(() => {
 
             <!-- Pengeluaran -->
             <div class="grid grid-cols-5 gap-4 items-end p-4 border-b border-gray-200">
-                <div class="col-span-2">
-                    <BaseInputAdmin v-model="form.expense_type" label="Data Pengeluaran" type="select"
-                        :selectables="data.expenses.map(unit => ({ value: unit, text: unit }))" />
-                </div>
-                <div class="col-span-2 flex gap-4">
-                    <BaseInputAdmin v-model="form.expense_amount" placeholder="Jumlah" required />
-                    <Button size="small" variant="primary" @click="$emit('addExpense')">Tambah</Button>
-                </div>
 
                 <!-- Tabel Pengeluaran -->
                 <div class="col-span-5">
@@ -111,24 +100,18 @@ const netIncome = computed(() => {
                                 <th class="py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody v-if="form.member.expenses.length > 0">
-                            <tr v-for="(item, index) in form.member.expenses" :key="index"
+                        <tbody>
+                            <tr v-for="expense in expenses" :key="expense.model"
                                 class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
-                                <td class="py-2 text-left pl-6">{{ item.financial_type }}</td>
-                                <td class="py-2 text-right pr-6">{{ moneyParser(item.amount) }}</td>
-                                <td class="py-2 text-center flex justify-center">
-                                    <Button size="small" variant="light"
-                                        @click="$emit('removeExpense', index)">-</Button>
+                                <td class="py-2 text-left pl-6">{{ expense.label }}</td>
+                                <td class="py-2 text-right pr-6">
+                                    <BaseInputAdmin v-model="form.member[expense.model]" type="number" placeholder="0"
+                                        input-class="text-right" />
                                 </td>
                             </tr>
                             <tr class="font-semibold text-dark-text">
                                 <td class="py-4 text-left pl-6">Total Pengeluaran Bulanan</td>
-                                <td colspan="2" class="py-4 text-right pr-6">{{ moneyParser(totalExpense) }}</td>
-                            </tr>
-                        </tbody>
-                        <tbody v-else>
-                            <tr class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
-                                <td colspan="3" class="py-4 text-center text-gray-400">Belum ada data pengeluaran</td>
+                                <td class="py-4 text-right pr-6">{{ moneyParser(totalExpense) }}</td>
                             </tr>
                         </tbody>
                     </table>

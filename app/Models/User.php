@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\AmdkTransaction;
-use App\Models\FinancialTransaction;
 use App\Models\Financing;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Member;
@@ -30,8 +28,8 @@ class User extends Authenticatable
     public $incrementing = false;
 
     protected $fillable = [
-        'user_code',
         'profile_picture',
+        'user_code',
         'nik',
         'name',
         'email',
@@ -39,7 +37,6 @@ class User extends Authenticatable
         'joined_date',
         'status',
         'password',
-        'role_id',
     ];
 
     /**
@@ -62,6 +59,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'joined_date' => 'date',
         ];
     }
 
@@ -94,11 +92,6 @@ class User extends Authenticatable
     }
 
     // Verifies if the user has a specific role
-    public function amdkTransactions()
-    {
-        return $this->hasMany(AmdkTransaction::class);
-    }
-
     public function financing()
     {
         return $this->hasMany(Financing::class);
@@ -112,10 +105,5 @@ class User extends Authenticatable
     public function installmentPayments()
     {
         return $this->hasMany(InstallmentPaymentTransaction::class);
-    }
-
-    public function financialTransactions()
-    {
-        return $this->hasMany(FinancialTransaction::class);
     }
 }

@@ -45,7 +45,7 @@ class UserFinancingController extends Controller
         $query = Financing::query()
             ->with(['financingItem.productType'])
             ->where('member_id', $member->id)
-            ->whereIn('financing_status', ['Lunas', 'Angsuran Berjalan'])
+            ->whereIn('status', ['Lunas', 'Angsuran Berjalan'])
             ->when($search !== '', function ($q) use ($search) {
                 $searchLower = mb_strtolower($search);
                 $q->where(function ($sub) use ($searchLower) {
@@ -57,7 +57,7 @@ class UserFinancingController extends Controller
 
         $productNames = Financing::query()
             ->where('member_id', $member->id)
-            ->whereIn('financing_status', ['Lunas', 'Angsuran Berjalan'])
+            ->whereIn('status', ['Lunas', 'Angsuran Berjalan'])
             ->with('financingItem')
             ->get()
             ->filter(fn($f) => $f->financingItem && $f->financingItem->product)
@@ -74,7 +74,7 @@ class UserFinancingController extends Controller
         $activeFinancingModel = Financing::query()
             ->with(['financingItem.productType'])
             ->where('member_id', $member->id)
-            ->where('financing_status', 'Angsuran Berjalan')
+            ->where('status', 'Angsuran Berjalan')
             ->orderByDesc('akad_date')
             ->orderByDesc('created_at')
             ->first();
@@ -107,7 +107,7 @@ class UserFinancingController extends Controller
             'akad_date' => $financing->akad_date,
             'product_name' => $productName,
             'product_brand' => $productBrand,
-            'status' => $financing->financing_status,
+            'status' => $financing->status,
             'remaining_balance' => 0,
             'loan' => null,
         ];

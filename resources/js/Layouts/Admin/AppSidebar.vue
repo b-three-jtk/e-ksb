@@ -1,13 +1,17 @@
 <script setup>
 import { computed } from "vue";
 import { Link, usePage } from '@inertiajs/vue3'
-import GridIcon from "../../Icons/GridIcon.vue";
-import UserIcon from "../../Icons/UserIcon.vue";
-import ProductIcon from "../../Icons/ProductIcon.vue";
-import ChevronDownIcon from "../../Icons/ChevronDownIcon.vue";
-import SettingsIcon from "../../Icons/SettingsIcon.vue";
 import { useSidebar } from "@/Composables/useSidebar";
+
+// Icons
+import GridIcon from "@/Icons/GridIcon.vue";
+import ChevronDownIcon from "@/Icons/ChevronDownIcon.vue";
+import SettingsIcon from "@/Icons/SettingsIcon.vue";
 import HorizontalDots from "@/Icons/HorizontalDots.vue";
+import MoneyIcon from "@/Icons/MoneyIcon.vue";
+import EmployeeIcon from "@/Icons/EmployeeIcon.vue";
+import MembersIcon from "@/Icons/MembersIcon.vue";
+import SavingsIcon from "@/Icons/SavingsIcon.vue";
 
 const page = usePage()
 
@@ -37,22 +41,46 @@ const menuGroups = [
                 path: "/admin/dashboard",
             },
             {
+                icon: MembersIcon,
                 name: "Keanggotaan",
-                icon: UserIcon,
-                subItems: [
-                    { name: "Anggota", path: "/admin/users/list", pro: false, },
-                    { name: "Pengunduran Diri", path: "/admin/resignations/list", pro: false, },
-                    { name: "Admin", path: "/admin/list", pro: false },
-                ],
+                path: "/admin/users/list",
+                permission: "view_anggota"
             },
             {
-                name: "Produk",
-                icon: ProductIcon,
-                subItems: [
-                    { name: "Simpanan", path: "/admin/savings/list", pro: false, },
-                    { name: "Pembiayaan Murabahah", path: "/admin/financing", pro: false, },
-                ],
+                icon: GridIcon,
+                name: "Pengunduran Diri",
+                path: "/admin/resignations/list",
+                permission: "view_anggota"
             },
+            {
+                icon: EmployeeIcon,
+                name: "Pengurus",
+                path: "/admin/list",
+                permission: "view_pengurus"
+            },
+            {
+                icon: MoneyIcon,
+                name: "Pengelolaan Kas",
+                path: "/admin",
+                permission: "view_kas"
+            },
+        ],
+    },
+    {
+        title: "Produk",
+        items: [
+            {
+                icon: SavingsIcon,
+                name: "Simpanan",
+                path: "/admin/savings/list",
+                permission: "view_simpanan"
+            },
+            {
+                icon: MoneyIcon,
+                name: "Pembiayaan Murabahah",
+                path: "/admin/financings",
+                permission: "view_murabahah"
+            }
         ],
     },
     {
@@ -62,6 +90,7 @@ const menuGroups = [
                 icon: SettingsIcon,
                 name: "Pengaturan",
                 path: "/admin/settings",
+                permission: "view_pengaturan"
             }
         ],
     }
@@ -106,8 +135,12 @@ const startTransition = (el) => {
 const endTransition = (el) => {
     el.style.height = "";
 };
-</script>
 
+const hasPermission = (permission) => {
+    if (!permission) return true;
+    return page.props.auth?.can?.[permission];
+};
+</script>
 
 <template>
     <aside :class="[
@@ -151,7 +184,7 @@ const endTransition = (el) => {
                             <HorizontalDots v-else />
                         </h2>
                         <ul class="flex flex-col gap-4">
-                            <li v-for="(item, index) in menuGroup.items" :key="item.name">
+                            <li v-for="(item, index) in menuGroup.items" :v-if="hasPermission(item.permission)" :key="item.name">
                                 <button v-if="item.subItems && isItemVisible(item)"
                                     @click="toggleSubmenu(groupIndex, index)" :class="[
                                         'menu-item group w-full',
@@ -182,7 +215,7 @@ const endTransition = (el) => {
                                         },
                                     ]" />
                                 </button>
-                                <Link v-else-if="item.path && isItemVisible(item)" :href="item.path" :class="[
+                                <Link v-else-if="item.path && isItemVisible(item) && hasPermission(item.permission)" :href="item.path" :class="[
                                     'menu-item group',
                                     {
                                         'menu-item-active': isActive(item.path),
@@ -206,7 +239,7 @@ const endTransition = (el) => {
                                         ">
                                         <ul class="mt-2 space-y-1 ml-9">
                                             <template v-for="subItem in item.subItems" :key="subItem.name">
-                                                <li v-if="isSubItemVisible(subItem)">
+                                                <li v-if="isSubItemVisible(subItem) && hasPermission(subItem.permission)">
                                                     <Link :href="subItem.path" :class="[
                                                         'menu-dropdown-item',
                                                         {
@@ -258,7 +291,6 @@ const endTransition = (el) => {
                     </div>
                 </div>
             </nav>
-            <!-- <SidebarWidget v-if="isExpanded || isHovered || isMobileOpen" /> -->
         </div>
     </aside>
 </template>

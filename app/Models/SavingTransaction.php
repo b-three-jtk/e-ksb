@@ -19,6 +19,7 @@ class SavingTransaction extends Model
     protected $fillable = [
         'saving_transaction_code',
         'saving_amount',
+        'balance_after_transaction',
         'transaction_type',
         'saving_payment_method',
         'saving_description',
@@ -46,7 +47,7 @@ class SavingTransaction extends Model
         return $this->belongsTo(MemberBankAccount::class, 'account_number', 'account_number');
     }
 
-    public function pointTransaction()
+    public function point()
     {
         return $this->belongsTo(PointTransaction::class, 'point_id');
     }

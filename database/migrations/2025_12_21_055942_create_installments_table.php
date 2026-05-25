@@ -13,6 +13,7 @@ return new class extends Migration {
         Schema::create('installments', function (Blueprint $table) {
             $table->id();
             $table->integer('tenor');
+            $table->integer('due_day');
             $table->foreignUuid('financing_id')->nullable()->constrained('financings')->onDelete('set null');
             $table->timestamps();
         });

@@ -59,14 +59,16 @@ class ResignationController extends Controller
     public function validation(string $id)
     {
         $data = [];
-        $data['user'] = User::with('userDocs', 'savingAccounts')->where('status', UserStatusEnum::RESIGNED_REQUESTED)->findOrFail($id);
-        $data['user']->userDocs->where('name', 'Dokumen Pengunduran Diri')->first();
+        $data['user'] = User::with(['member' => function ($q) {
+            $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
+        }, 'member.memberDocs'])->findOrFail($id);
+        $data['user']->member->memberDocs->where('name', 'Dokumen Pengunduran Diri')->first();
 
-        $resignationDoc = $data['user']->userDocs?->first()?->attachment ? asset('storage/' . $data['user']->userDocs->first()->attachment) : 0;
+        $resignationDoc = $data['user']->member->memberDocs?->first()?->attachment ? asset('storage/' . $data['user']->member->memberDocs->first()->attachment) : 0;
 
-        $totalSavings = $data['user']->savingAccounts()->sum('balance');
-        $totalObligation = Financing::with('installment.paymentSchedules.payment')->where('user_id', $data['user']->id)
-            ->where('financing_status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+        $totalSavings = $data['user']->member->savingAccounts()->sum('balance');
+        $totalObligation = Financing::with('installment.paymentSchedules.payment')->where('member_id', $data['user']->member->id)
+            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->get()
             ->sum(function ($financing) {
                 $installment = $financing->installment;

@@ -14,6 +14,7 @@ class MemberJobFactory extends Factory
     {
         return [
             'member_id' => Member::factory(),
+            'employment_status' => $this->faker->randomElement(['Employed', 'Self-Employed', 'Unemployed', 'Student', 'Retired']),
             'job_title' => $this->faker->jobTitle(),
             'company_or_business_name' => $this->faker->company(),
             'business_field' => $this->faker->randomElement(['Manufacturing', 'Retail', 'Services', 'Technology', 'Agriculture']),

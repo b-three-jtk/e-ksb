@@ -2,8 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\FinancialCategoryEnum;
-use App\Enums\FinancialTypeEnum;
 use App\Models\Financial;
 use App\Models\Member;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -16,9 +14,14 @@ class FinancialFactory extends Factory
     {
         return [
             'member_id' => Member::factory(),
-            'financial_type' => $this->faker->randomElement(FinancialTypeEnum::cases())->value,
-            'amount' => $this->faker->numberBetween(100000, 50000000),
-            'category' => FinancialCategoryEnum::INCOME->value,
+            'gaji_pokok_amount' => $this->faker->numberBetween(1000000, 10000000),
+            'penghasilan_usaha_amount' => $this->faker->numberBetween(1000000, 10000000),
+            'penghasilan_pasangan_amount' => $this->faker->numberBetween(1000000, 10000000),
+            'penghasilan_lainnya_amount' => $this->faker->numberBetween(1000000, 10000000),
+            'biaya_hidup_keluarga_amount' => $this->faker->numberBetween(100000, 1000000),
+            'biaya_pendidikan_amount' => $this->faker->numberBetween(100000, 1000000),
+            'jumlah_cicilan_amount' => $this->faker->numberBetween(100000, 1000000),
+            'jumlah_biaya_lainnya_amount' => $this->faker->numberBetween(100000, 1000000),
         ];
     }
 }

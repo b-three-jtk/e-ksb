@@ -29,8 +29,6 @@ const photoUrl = computed(() => {
 
 const menuItems = [
     { href: '/admin/profile', icon: UserIcon, text: 'Profil' },
-    { href: '/settings', icon: SettingsIcon, text: 'Pengaturan Akun' },
-    { href: '/support', icon: InfoCircleIcon, text: 'Dukungan' },
 ]
 
 const toggleDropdown = () => {

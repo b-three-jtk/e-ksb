@@ -156,9 +156,9 @@ const handleAction = (type) => {
     openActionDropdown.value = false
 
     if (type === 'setor') {
-        router.visit('/admin/saving/deposit')
+        router.visit('/admin/savings/deposit')
     } else {
-        router.visit('/admin/saving/withdrawal')
+        router.visit('/admin/savings/withdrawal')
     }
 }
 </script>

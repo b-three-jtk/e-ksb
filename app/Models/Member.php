@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\AmdkTransaction;
 use App\Models\Financial;
 use App\Models\Financing;
-use App\Models\GallonLoan;
 use App\Models\Heir;
 use App\Models\MemberBankAccount;
 use App\Models\MemberDoc;
@@ -28,7 +26,6 @@ class Member extends Model
         'domicile_address',
         'residential_address',
         'marital_status',
-        'spouse_name',
         'last_education',
         'dependents',
     ];
@@ -47,7 +44,7 @@ class Member extends Model
 
     public function financials()
     {
-        return $this->hasMany(Financial::class);
+        return $this->hasOne(Financial::class);
     }
 
     public function bankAccounts()
@@ -74,16 +71,5 @@ class Member extends Model
     public function financings()
     {
         return $this->hasMany(Financing::class);
-    }
-
-    // AMDK
-    public function gallonLoans()
-    {
-        return $this->hasMany(GallonLoan::class);
-    }
-
-    public function amdkTransactions()
-    {
-        return $this->hasMany(AmdkTransaction::class);
     }
 }
