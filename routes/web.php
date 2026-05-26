@@ -92,12 +92,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/financings/{id}/history', [UserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
 
     // Pengelolaan Pengurus
-    Route::get('/list', [AdminController::class, 'index'])->middleware('permission:view_admin')->name('admin.index');
-    Route::get('/create', [AdminController::class, 'create'])->middleware('permission:create_admin')->name('admin.create');
-    Route::post('/store', [AdminController::class, 'store'])->middleware('permission:create_admin')->name('admin.store');
-    Route::get('/edit/{id}', [AdminController::class, 'edit'])->middleware('permission:edit_admin')->name('admin.edit');
-    Route::put('/update/{id}', [AdminController::class, 'update'])->middleware('permission:edit_admin')->name('admin.update');
-    Route::get('/show/{id}', [AdminController::class, 'show'])->middleware('permission:view_admin')->name('admin.show');
+    Route::get('/list', [AdminController::class, 'index'])->middleware('permission:view_pengurus')->name('admin.index');
+    Route::get('/create', [AdminController::class, 'create'])->middleware('permission:create_pengurus')->name('admin.create');
+    Route::post('/store', [AdminController::class, 'store'])->middleware('permission:create_pengurus')->name('admin.store');
+    Route::get('/edit/{id}', [AdminController::class, 'edit'])->middleware('permission:edit_pengurus')->name('admin.edit');
+    Route::put('/update/{id}', [AdminController::class, 'update'])->middleware('permission:edit_pengurus')->name('admin.update');
+    Route::get('/show/{id}', [AdminController::class, 'show'])->middleware('permission:view_pengurus')->name('admin.show');
     Route::get('members', [AdminController::class, 'searchMember'])->middleware('permission:view_anggota')->name('members.search');
 
     // Pengelolaan Pengunduran Diri
