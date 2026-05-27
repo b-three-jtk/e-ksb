@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Kwitansi Penarikan</title>
+    <title>Kuitansi Penarikan</title>
     <style>
         @page { size: 80mm auto; margin: 4mm; }
 
@@ -118,7 +118,7 @@
 <body>
     @php
         $trxDate = \Carbon\Carbon::parse($struk['tanggal'] ?? now())->locale('id');
-        $tanggalFormatted = $trxDate->translatedFormat('d M Y') . '  ' . $trxDate->format('H:i');
+        $tanggalFormatted = $trxDate->translatedFormat('d M Y');
         $waktuCetak = now()->locale('id')->translatedFormat('d/m/Y H:i') . ' WIB';
     @endphp
 
@@ -131,7 +131,7 @@
         <hr>
 
         <div class="center">
-            <span class="badge">KWITANSI PENARIKAN SIMPANAN</span>
+            <span class="badge">KUITANSI PENARIKAN SIMPANAN</span>
         </div>
 
         <hr>
@@ -178,7 +178,7 @@
 
         <div class="footer">
             <div>Terima kasih atas kepercayaan Anda</div>
-            <div>Simpan kwitansi ini sebagai bukti transaksi</div>
+            <div>Simpan kuitansi ini sebagai bukti transaksi</div>
             <div class="printed-at">Dicetak: {{ $waktuCetak }}</div>
         </div>
     </div>

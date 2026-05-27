@@ -43,7 +43,7 @@ function cetak() {
   win.document.write(`<!DOCTYPE html><html>
 <head>
   <meta charset="utf-8">
-  <title>Kwitansi ${props.transaksi.no_transaksi}</title>
+  <title>Kuitansi ${props.transaksi.no_transaksi}</title>
   <style>
     @page { size: 80mm auto; margin: 4mm; }
     body  { margin:0; font-family:'Courier New',Courier,monospace;
@@ -93,7 +93,7 @@ defineExpose({ cetak })
 
       <div class="text-center mb-1.5">
         <span class="inline-block bg-gray-900 text-white text-[10px] px-2 py-0.5 rounded-sm tracking-wide">
-          KWITANSI PENYETORAN SIMPANAN
+          KUITANSI PENYETORAN SIMPANAN
         </span>
       </div>
 
@@ -180,7 +180,7 @@ defineExpose({ cetak })
       <!-- Footer -->
       <div class="text-center text-[10px] text-gray-500 leading-relaxed">
         <p>Terima kasih atas kepercayaan Anda</p>
-        <p>Simpan kwitansi ini sebagai bukti transaksi</p>
+        <p>Simpan kuitansi ini sebagai bukti transaksi</p>
         <p class="text-[9px] text-gray-400 mt-1">Dicetak: {{ waktuCetak }}</p>
       </div>
     </div>
@@ -197,7 +197,7 @@ defineExpose({ cetak })
         <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
         <rect x="6" y="14" width="12" height="8" rx="1"/>
       </svg>
-      Cetak Kwitansi
+      Cetak Kuitansi
     </button>
     <p class="mt-1.5 text-xs text-gray-400 text-center">
       Atur ukuran kertas ke 80mm di printer settings

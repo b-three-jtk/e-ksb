@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Kwitansi Penyetoran</title>
+    <title>Kuitansi Penyetoran</title>
     <style>
         @page { size: 80mm auto; margin: 4mm; }
 
@@ -131,7 +131,7 @@
         <hr>
 
         <div class="center">
-            <span class="badge">KWITANSI PENYETORAN SIMPANAN</span>
+            <span class="badge">KUITANSI PENYETORAN SIMPANAN</span>
         </div>
 
         <hr>
@@ -178,7 +178,7 @@
 
         <div class="footer">
             <div>Terima kasih atas setoran Anda</div>
-            <div>Simpan kwitansi ini sebagai bukti transaksi</div>
+            <div>Simpan kuitansi ini sebagai bukti transaksi</div>
             <div class="printed-at">Dicetak: {{ $waktuCetak }}</div>
         </div>
     </div>

@@ -227,7 +227,7 @@ function reset() {
               <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div>
                   <h3 class="font-semibold text-gray-900 dark:text-gray-100">Transaksi Berhasil</h3>
-                  <p class="text-sm text-gray-500 mt-0.5">Berikut kwitansi penarikan</p>
+                  <p class="text-sm text-gray-500 mt-0.5">Berikut kuitansi penarikan</p>
                 </div>
                 <button
                   @click="showStruk = false"

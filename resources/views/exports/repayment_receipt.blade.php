@@ -123,7 +123,7 @@
             </tr>
         </table>
 
-        <div class="kwitansi-title">KWITANSI</div>
+        <div class="kwitansi-title">KUITANSI</div>
 
         <table class="detail-table">
             <tr>
