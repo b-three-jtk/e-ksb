@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 
 class UserProfileController extends Controller
 {
@@ -16,8 +17,24 @@ class UserProfileController extends Controller
     public function show()
     {
         $user = auth()->user();
+        $member = $user->member?->loadMissing(['heirs', 'memberDocs']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
+        $heirs = $member?->heirs?->map(function ($heir) {
+            return [
+                'heir_nik' => $heir->heir_nik,
+                'heir_name' => $heir->heir_name,
+                'relationship' => $heir->relationship,
+                'heir_contact' => $heir->heir_contact,
+            ];
+        })->values() ?? collect();
+
+        $spouseHeir = $heirs->first(function ($heir) {
+            return in_array($heir['relationship'] ?? '', ['Suami', 'Istri'], true);
+        });
+
+        $ktpDocument = $member?->memberDocs?->firstWhere('doc_name', 'ktp');
+        $kkDocument = $member?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga');
 
         return Inertia::render('User/Profile/Show', [
             'user' => [
@@ -29,6 +46,26 @@ class UserProfileController extends Controller
                 'phone_number' => $user->phone_number,
                 'profile_picture' => $user->profile_picture,
                 'photo_url' => $photoUrl,
+                'role_name' => $user->getRoleNames()->first() ?? 'Anggota',
+                'member' => [
+                    'gender' => $member?->gender,
+                    'birth_place' => $member?->birth_place,
+                    'birth_date' => $member?->birth_date
+                        ? Carbon::parse($member->birth_date)->translatedFormat('d M Y')
+                        : null,
+                    'status' => $member?->status,
+                    'domicile_address' => $member?->domicile_address,
+                    'residential_address' => $member?->residential_address,
+                    'marital_status' => $member?->marital_status,
+                    'last_education' => $member?->last_education,
+                    'dependents' => $member?->dependents,
+                    'spouse_name' => $member?->spouse_name ?? $spouseHeir['heir_name'] ?? null,
+                    'heirs' => $heirs,
+                    'documents' => [
+                        'ktp' => $ktpDocument?->doc_attachment ? asset('storage/' . $ktpDocument->doc_attachment) : null,
+                        'kk' => $kkDocument?->doc_attachment ? asset('storage/' . $kkDocument->doc_attachment) : null,
+                    ],
+                ],
             ]
         ]);
     }
@@ -39,8 +76,24 @@ class UserProfileController extends Controller
     public function edit()
     {
         $user = auth()->user();
+        $member = $user->member?->loadMissing(['heirs', 'memberDocs']);
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
+        $heirs = $member?->heirs?->map(function ($heir) {
+            return [
+                'heir_nik' => $heir->heir_nik,
+                'heir_name' => $heir->heir_name,
+                'relationship' => $heir->relationship,
+                'heir_contact' => $heir->heir_contact,
+            ];
+        })->values() ?? collect();
+
+        $spouseHeir = $heirs->first(function ($heir) {
+            return in_array($heir['relationship'] ?? '', ['Suami', 'Istri'], true);
+        });
+
+        $ktpDocument = $member?->memberDocs?->firstWhere('doc_name', 'ktp');
+        $kkDocument = $member?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga');
 
         return Inertia::render('User/Profile/Edit', [
             'user' => [
@@ -52,6 +105,25 @@ class UserProfileController extends Controller
                 'phone_number' => $user->phone_number,
                 'profile_picture' => $user->profile_picture,
                 'photo_url' => $photoUrl,
+                'member' => [
+                    'gender' => $member?->gender,
+                    'birth_place' => $member?->birth_place,
+                    'birth_date' => $member?->birth_date
+                        ? Carbon::parse($member->birth_date)->translatedFormat('d M Y')
+                        : null,
+                    'status' => $member?->status,
+                    'domicile_address' => $member?->domicile_address,
+                    'residential_address' => $member?->residential_address,
+                    'marital_status' => $member?->marital_status,
+                    'last_education' => $member?->last_education,
+                    'dependents' => $member?->dependents,
+                    'spouse_name' => $member?->spouse_name ?? $spouseHeir['heir_name'] ?? null,
+                    'heirs' => $heirs,
+                    'documents' => [
+                        'ktp' => $ktpDocument?->doc_attachment ? asset('storage/' . $ktpDocument->doc_attachment) : null,
+                        'kk' => $kkDocument?->doc_attachment ? asset('storage/' . $kkDocument->doc_attachment) : null,
+                    ],
+                ],
             ]
         ]);
     }
@@ -65,7 +137,6 @@ class UserProfileController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            // Ensure NIK is unique except for current user
             'nik' => [
                 'required',
                 'string',
@@ -79,9 +150,22 @@ class UserProfileController extends Controller
                 \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user->id, 'id'),
             ],
             'phone_number' => 'nullable|string|max:20',
+            'last_education' => 'nullable|string|max:255',
+            'residential_address' => 'nullable|string|max:1000',
         ]);
 
-        $user->update($validated);
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? null,
+            'phone_number' => $validated['phone_number'] ?? null,
+        ]);
+
+        if ($user->member) {
+            $user->member->update([
+                'last_education' => $validated['last_education'] ?? null,
+                'residential_address' => $validated['residential_address'] ?? null,
+            ]);
+        }
 
         return redirect()->route('user.profile.show');
     }
