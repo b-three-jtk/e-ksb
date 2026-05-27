@@ -22,6 +22,7 @@ class Member extends Model
         'gender',
         'birth_place',
         'birth_date',
+        'spouse_name',
         'status',
         'domicile_address',
         'residential_address',
