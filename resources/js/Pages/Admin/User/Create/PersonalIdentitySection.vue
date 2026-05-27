@@ -92,6 +92,17 @@ defineProps({
 			/>
 
 			<BaseInputAdmin
+				v-if="form.marital_status === 'Kawin'"
+				v-model="form.spouse_name"
+				label="Nama Pasangan"
+				type="text"
+				placeholder="Isi dengan huruf"
+				required
+				@input="form.spouse_name = onlyLetters(form.spouse_name)"
+				:error="getFieldError('spouse_name', errors.spouse_name)"
+			/>
+
+			<BaseInputAdmin
 				v-model="form.last_education"
 				label="Pendidikan Terakhir"
 				type="select"
