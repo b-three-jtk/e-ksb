@@ -205,7 +205,7 @@ class WithdrawalController extends Controller
             }
 
             return redirect()
-                ->route('admin.withdrawal.create')
+                ->route('admin.savings.withdrawal.create')
                 ->with('success', 'Penarikan simpanan berhasil disimpan')
                 ->with('struk', $strukData);
 
@@ -230,9 +230,11 @@ class WithdrawalController extends Controller
         try {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.withdrawal_receipt', [
                 'struk' => $strukData,
-            ])->setPaper('A6', 'portrait');
+            ])->setPaper([0, 0, 226.77, 600], 'portrait');
 
-            $directory = 'saving-transactions/receipts/' . now()->format('Y-m');
+            $directory = 'member_docs/receipts/' . now()->format('Y-m');
+            Storage::disk('public')->makeDirectory($directory);
+
             $filename = 'struk-withdrawal-' . $transaction->id . '.pdf';
             $path = $directory . '/' . $filename;
 

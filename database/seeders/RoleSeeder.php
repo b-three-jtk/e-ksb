@@ -37,7 +37,7 @@ public function run(): void
         }
 
         foreach (UserRoleEnum::cases() as $case) {
-            $role = Role::create([
+            $role = Role::firstOrCreate([
                 'name' => $case->value,
                 'guard_name' => 'web'
             ]);

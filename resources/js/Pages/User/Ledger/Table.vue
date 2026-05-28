@@ -68,12 +68,14 @@ const sortedTransactions = computed(() => {
         .map((entry) => entry.row)
 })
 
-const strukAttachmentUrl = computed(() => {
-    return selectedTransaction.value?.struk_attachment || ''
+const receiptAttachmentUrl = computed(() => {
+    return selectedTransaction.value?.saving_transaction_receipt
+        || selectedTransaction.value?.struk_attachment
+        || ''
 })
 
 const attachmentExtension = computed(() => {
-    const url = String(strukAttachmentUrl.value || '').split('?')[0].toLowerCase()
+    const url = String(receiptAttachmentUrl.value || '').split('?')[0].toLowerCase()
     return url.split('.').pop() || ''
 })
 
@@ -83,7 +85,7 @@ const isImageAttachment = computed(() => {
 
 const isPdfAttachment = computed(() => attachmentExtension.value === 'pdf')
 
-const hasStoredAttachment = computed(() => Boolean(strukAttachmentUrl.value))
+const hasStoredAttachment = computed(() => Boolean(receiptAttachmentUrl.value))
 
 const openDetail = (row: Transaction) => {
     selectedTransaction.value = row
@@ -93,11 +95,6 @@ const openDetail = (row: Transaction) => {
 const closeDetail = () => {
     selectedTransaction.value = null
     document.body.classList.remove('overflow-hidden')
-}
-
-const openAttachmentInNewTab = () => {
-    if (!strukAttachmentUrl.value) return
-    window.open(strukAttachmentUrl.value, '_blank', 'noopener,noreferrer')
 }
 </script>
 
@@ -163,7 +160,7 @@ const openAttachmentInNewTab = () => {
                                 @click="openDetail(row)"
                                 class="inline-flex items-center px-3 py-1.5 rounded-md border border-emerald-300 text-emerald-700 text-xs font-medium hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-900/30 transition-colors"
                             >
-                                Lihat Kwitansi
+                                Lihat Kuitansi
                             </button>
 
                             <span v-else>{{ col.formatter ? col.formatter(row[col.key]) : row[col.key] }}</span>
@@ -182,7 +179,7 @@ const openAttachmentInNewTab = () => {
         <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div>
-                    <h3 class="font-semibold text-gray-900 dark:text-gray-100">Kwitansi Transaksi</h3>
+                    <h3 class="font-semibold text-gray-900 dark:text-gray-100">Kuitansi Transaksi</h3>
                     <p class="text-sm text-gray-500 mt-0.5">Riwayat transaksi simpanan anggota</p>
                 </div>
                 <button
@@ -198,14 +195,14 @@ const openAttachmentInNewTab = () => {
                 <div v-if="hasStoredAttachment" class="space-y-3">
                     <img
                         v-if="isImageAttachment"
-                        :src="strukAttachmentUrl"
-                        alt="Kwitansi transaksi"
+                        :src="receiptAttachmentUrl"
+                        alt="Kuitansi transaksi"
                         class="w-full h-auto rounded-lg border border-gray-200 dark:border-gray-700"
                     >
 
                     <iframe
                         v-else-if="isPdfAttachment"
-                        :src="strukAttachmentUrl"
+                        :src="receiptAttachmentUrl"
                         class="w-full min-h-[60vh] rounded-lg border border-gray-200 dark:border-gray-700"
                     />
 
@@ -215,21 +212,13 @@ const openAttachmentInNewTab = () => {
                     >
                         Format lampiran tidak didukung untuk preview langsung.
                     </div>
-
-                    <button
-                        type="button"
-                        @click="openAttachmentInNewTab"
-                        class="w-full inline-flex items-center justify-center px-4 py-2 rounded-lg border border-emerald-300 text-emerald-700 text-sm font-medium hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-900/30 transition-colors"
-                    >
-                        Buka Lampiran Asli
-                    </button>
                 </div>
 
                 <div
                     v-else
                     class="rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-sm text-gray-600 dark:text-gray-300"
                 >
-                    Lampiran kwitansi belum tersedia untuk transaksi ini.
+                    Lampiran kuitansi belum tersedia untuk transaksi ini.
                 </div>
             </div>
         </div>
