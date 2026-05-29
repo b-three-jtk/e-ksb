@@ -157,7 +157,7 @@
                 <td>Petugas</td>
 
                 <td>
-                    {{ $receipt['organization']['name'] }}
+                    {{ $receipt['petugas'] }}
                 </td>
             </tr>
         </table>
