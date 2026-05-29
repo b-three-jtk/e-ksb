@@ -945,6 +945,8 @@ class FinancingController extends Controller
                 ]);
             }
 
+            \Carbon\Carbon::setLocale('id');
+
             $logoPath = public_path(
                 'images/logo/logo-icon.svg'
             );
