@@ -14,10 +14,10 @@
 
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12px;
-            line-height: 1.5;
+            font-size: 11px;
+            line-height: 1.2;
             background: white;
-            padding: 20px;
+            padding: 12px;
         }
 
         table {
@@ -31,9 +31,9 @@
         }
 
         .container {
-            border: 2px solid black;
-            padding: 20px;
-            max-width: 700px;
+            border: 1px solid black;
+            padding: 12px;
+            max-width: 100%;
             margin: auto;
         }
 
@@ -42,12 +42,12 @@
             font-weight: bold;
             font-size: 14px;
             text-decoration: underline;
-            margin: 15px 0;
+            margin: 25px 0;
         }
 
         .detail-table td {
-            padding: 4px 0;
-            font-size: 12px;
+            padding: 2px 0;
+            font-size: 11px;
         }
 
         .detail-table td:first-child {
@@ -69,8 +69,8 @@
         }
 
         .rincian-table td {
-            padding: 3px 0;
-            font-size: 11px;
+            padding: 2px 0;
+            font-size: 10px;
         }
 
         .rincian-table td:nth-child(2) {
@@ -84,7 +84,7 @@
 
         .catatan-box {
             margin-top: 15px;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         @media print {
@@ -110,7 +110,7 @@
             <tr>
                 <td rowspan="4" style="width: 80px">
                     <img
-                        style="width: 70px"
+                        style="width: 55px"
                         src="{{ $receipt['logo'] }}"
                         alt="Logo"
                     >
