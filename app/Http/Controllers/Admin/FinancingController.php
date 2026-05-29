@@ -36,7 +36,6 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
-use Riskihajar\Terbilang\Facades\Terbilang;
 
 class FinancingController extends Controller
 {
