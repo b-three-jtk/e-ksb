@@ -53,7 +53,12 @@ const toggleSort = (field: string) => {
                         ]"
                     >
                         <div class="flex items-center gap-1">
-                            {{ col.label }}
+                            <slot
+                                :name="`header-${col.key}`"
+                                :column="col"
+                            >
+                                {{ col.label }}
+                            </slot>
 
                             <template v-if="col.sortable">
                                 <Icon
@@ -84,13 +89,15 @@ const toggleSort = (field: string) => {
                         :colspan="columns.length"
                         class="px-6 py-10 text-center text-gray-500 dark:text-gray-400"
                     >
-                        <div class="flex items-center justify-center gap-3">
-                            <Icon
-                                icon="tabler:loader-2"
-                                class="w-5 h-5 animate-spin"
-                            />
-                            Memuat data...
-                        </div>
+                        <slot name="loading">
+                            <div class="flex items-center justify-center gap-3">
+                                <Icon
+                                    icon="tabler:loader-2"
+                                    class="w-5 h-5 animate-spin"
+                                />
+                                Memuat data...
+                            </div>
+                        </slot>
                     </td>
                 </tr>
 
@@ -133,7 +140,9 @@ const toggleSort = (field: string) => {
                             :colspan="columns.length"
                             class="font-head px-6 py-8 text-center text-gray-500 dark:text-gray-400"
                         >
-                            Tidak ada data
+                            <slot name="empty">
+                                Tidak ada data
+                            </slot>
                         </td>
                     </tr>
                 </template>
