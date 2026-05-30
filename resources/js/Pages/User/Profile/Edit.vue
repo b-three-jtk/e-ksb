@@ -5,6 +5,7 @@ import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify'
 import Base from '../../../Layouts/Base.vue'
 import BaseInput from '@/Components/Form/BaseInput.vue'
+import BaseSelect from '@/Components/Form/BaseSelect.vue'
 import Button from '@/Components/Form/Button.vue'
 import EyeIcon from '@/Icons/EyeIcon.vue'
 import UserIcon from '@/Icons/UserIcon.vue'
@@ -13,7 +14,11 @@ const props = defineProps({
     user: {
         type: Object,
         required: true
-    }
+    },
+    educationOptions: {
+        type: Array,
+        default: () => []
+    },
 })
 
 const user = computed(() => props.user || {})
@@ -363,14 +368,21 @@ const submit = () => {
                                         :key="field.label"
                                         class="flex flex-col gap-2"
                                     >
-                                        <BaseInput
+                                        <BaseSelect
                                             v-if="field.label === 'Pendidikan Terakhir'"
                                             v-model="form.last_education"
                                             :label="field.label"
-                                            type="text"
                                             :disabled="form.processing"
                                             :error="form.errors.last_education"
-                                        />
+                                        >
+                                            <option
+                                                v-for="education in props.educationOptions"
+                                                :key="education"
+                                                :value="education"
+                                            >
+                                                {{ education }}
+                                            </option>
+                                        </BaseSelect>
                                         <BaseInput
                                             v-else
                                             :label="field.label"
