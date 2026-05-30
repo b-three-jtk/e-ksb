@@ -85,7 +85,6 @@ class RegisterMemberService
             'birth_place' => $validated['birth_place'],
             'birth_date' => $validated['birth_date'],
             'marital_status' => $validated['marital_status'],
-            'spouse_name' => $validated['spouse_name'] ?? null,
             'domicile_address' => $validated['domicile_address'],
             'residential_address' => $validated['residential_address'] ?? null,
             'last_education' => $validated['last_education'],

@@ -60,9 +60,6 @@ const identityFields = computed(() => [
     { label: 'Tempat Lahir', value: displayValue(member.value.birth_place) },
     { label: 'Pendidikan Terakhir', value: displayValue(member.value.last_education) },
     { label: 'Status Pernikahan', value: displayValue(member.value.marital_status) },
-    ...(member.value.marital_status === 'Kawin' && member.value.spouse_name
-        ? [{ label: 'Nama Pasangan', value: displayValue(member.value.spouse_name) }]
-        : []),
 ])
 
 const contactFields = computed(() => [
