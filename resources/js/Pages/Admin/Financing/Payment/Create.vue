@@ -35,10 +35,6 @@ const nextInstallmentNumber = ref(
     props.financing.next_installment_number
 )
 
-const nextDueDate = ref(
-    props.financing.next_due_date
-)
-
 const tanggalPembayaran = ref(today())
 
 function today() {
@@ -58,9 +54,11 @@ const rescheduleDate = ref('')
 
 function openReschedule() {
     if (selectedFinancing.value) {
-        rescheduleInstallmentNumber.value = selectedFinancing.value.next_installment_number
+        rescheduleInstallmentNumber.value =
+            selectedFinancing.value.next_installment_number
+        rescheduleDate.value =
+            selectedFinancing.value.next_due_date
     }
-    rescheduleDate.value = ''
     showRescheduleModal.value = true
 }
 
@@ -73,17 +71,14 @@ const rescheduleLoading = ref(false)
 function submitReschedule() {
 
     if (!rescheduleDate.value) {
-
         toast(
             'Tanggal reschedule wajib diisi',
             {
                 type: 'error',
             },
         )
-
         return
     }
-
     rescheduleLoading.value = true
 
     router.post(
@@ -91,25 +86,21 @@ function submitReschedule() {
         {
             installment_id:
                 selectedFinancing.value.installment_id,
-
-            reschedule_date:
+            due_date:
                 rescheduleDate.value,
         },
         {
             preserveScroll: true,
 
             onSuccess: () => {
-
+                selectedFinancing.value.next_due_date =
+                    rescheduleDate.value
                 toast(
                     'Jadwal pembayaran berhasil diperbarui',
                     {
                         type: 'success',
                     },
                 )
-
-                nextDueDate.value =
-                    rescheduleDate.value
-
                 closeReschedule()
             },
 
@@ -484,9 +475,10 @@ function handleSubmit() {
                                 </label>
 
                                 <input
-                                    v-model="nextDueDate"
+                                    :value="selectedFinancing.next_due_date"
                                     type="date"
-                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300"
+                                    readonly
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />
                             </div>
                         </div>
@@ -581,14 +573,11 @@ function handleSubmit() {
                             <label class="block text-sm text-gray-600 mb-1">
                                 Pemberlakuan Kembali Pembiayaan
                             </label>
-                            <div class="relative">
-                                <input
-                                    v-model="rescheduleDate"
-                                    type="date"
-                                    placeholder="Pilih Jenis Simpanan"
-                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
-                                />
-                            </div>
+                            <input
+                                v-model="rescheduleDate"
+                                type="date"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
+                            />
                         </div>
                     </div>
                     <div class="flex justify-end mt-6">
