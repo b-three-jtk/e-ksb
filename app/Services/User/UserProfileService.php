@@ -28,7 +28,7 @@ class UserProfileService
 
         $runningPointTotal = 0;
         $pointHistory = $pointTransactions
-            ->map(function (PointTransaction $transaction) use (&$runningPointTotal) {
+            ->map(function (PointTransaction $transaction) use (&$runningPointTotal, $getSnapshotValue) {
                 $runningPointTotal += (int) $transaction->amount_earned;
 
                 return [
