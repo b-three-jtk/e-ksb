@@ -2,7 +2,7 @@
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import { Icon } from '@iconify/vue'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { toast } from 'vue3-toastify'
 
@@ -29,10 +29,6 @@ function formatRp(value) {
 // Form
 const nominalDisplay = ref(
     formatRp(props.financing.installment_per_month)
-)
-
-const nextInstallmentNumber = ref(
-    props.financing.next_installment_number
 )
 
 const tanggalPembayaran = ref(today())
@@ -126,48 +122,6 @@ function submitReschedule() {
 // Metode Pembayaran
 const depositMethod = ref('Tunai')
 
-const bankName = ref('')
-const accountNumber = ref('')
-const accountName = ref('')
-
-const bankOptions = [
-    'BCA',
-    'BNI',
-    'BRI',
-    'Mandiri',
-    'BSI',
-]
-
-// File
-const paymentFile = ref(null)
-const fileInput = ref(null)
-
-function handleFileUpload(event) {
-    const file = event.target.files[0]
-
-    if (!file) return
-
-    paymentFile.value = file
-}
-
-function removeFile() {
-    paymentFile.value = null
-
-    if (fileInput.value) {
-        fileInput.value.value = ''
-    }
-}
-
-function resetPembiayaan() {
-    nominalDisplay.value = formatRp(
-        props.financing.installment_per_month
-    )
-
-    tanggalPembayaran.value = today()
-
-    depositMethod.value = 'Tunai'
-}
-
 // Submit
 function handleSubmit() {
     router.post(
@@ -208,8 +162,6 @@ function handleSubmit() {
                 if (pdfUrl) {
                     window.open(pdfUrl, '_blank')
                 }
-
-                resetPembiayaan()
             },
 
             onError: (errors) => {
@@ -430,7 +382,7 @@ function handleSubmit() {
                             </label>
 
                             <input
-                                :value="nextInstallmentNumber"
+                                :value="selectedFinancing.next_installment_number"
                                 readonly
                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                             />
@@ -528,14 +480,6 @@ function handleSubmit() {
 
                 <!-- BUTTON -->
                 <div class="flex justify-center gap-4 pb-10">
-                    <button
-                        @click="resetPembiayaan"
-                        type="button"
-                        class="px-8 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50"
-                    >
-                        Reset
-                    </button>
-
                     <button
                         @click="handleSubmit"
                         type="button"
