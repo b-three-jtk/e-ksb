@@ -16,6 +16,7 @@ const props = defineProps({
 
 const user = computed(() => props.user || {})
 const member = computed(() => user.value.member || {})
+const points = computed(() => user.value.points || { summary: {}, history: [] })
 const photoUrl = computed(() => user.value.photo_url || (user.value.profile_picture ? `/storage/${user.value.profile_picture}` : null))
 const documents = computed(() => member.value.documents || {})
 
@@ -77,6 +78,21 @@ const documentFields = computed(() => [
 ])
 
 const hasDocument = (url) => Boolean(url)
+
+const pointSummary = computed(() => points.value.summary || {})
+const pointHistory = computed(() => points.value.history || [])
+
+const formatCurrency = (value) => {
+    const numericValue = Number(value ?? 0)
+
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+    }).format(Number.isFinite(numericValue) ? numericValue : 0)
+}
+
+const formatPoint = (value) => `${Number(value ?? 0).toLocaleString('id-ID')}`
 </script>
 
 <template>
@@ -198,6 +214,86 @@ const hasDocument = (url) => Boolean(url)
                             <p v-else class="rounded-2xl border border-dashed border-stroke px-4 py-5 text-sm text-gray-500">
                                 Belum ada data ahli waris.
                             </p>
+                        </div>
+                    </div>
+
+                    <div class="card-layout grid gap-5">
+                        <div class="card-layout py-0!">
+                            <div class="mb-6 flex items-center justify-between gap-4">
+                                <h1 class="card-title">Riwayat Poin</h1>
+                            </div>
+
+                            <div class="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
+                                <div class="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+                                    <div class="flex h-full flex-col justify-between gap-6">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Total Poin</p>
+                                            <div class="mt-2 text-5xl font-semibold leading-none text-[#00a04a]">
+                                                {{ formatPoint(pointSummary.total_points) }}
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <p class="text-gray-500">Terakhir diperbarui</p>
+                                                <p class="mt-1 font-medium text-dark-text dark:text-white">
+                                                    {{ pointSummary.latest_calculated_at || '-' }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Poin Terakhir</p>
+                                                <p class="mt-1 font-medium text-dark-text dark:text-white">
+                                                    +{{ formatPoint(pointSummary.latest_points_earned) }} Poin
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Total Simpanan Terakhir</p>
+                                                <p class="mt-1 font-medium text-dark-text dark:text-white">
+                                                    {{ formatCurrency(pointSummary.latest_total_simpanan) }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Tanggal Pendapatan Poin</p>
+                                                <p class="mt-1 font-medium text-dark-text dark:text-white">
+                                                    {{ pointSummary.latest_calculated_at || '-' }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="overflow-hidden rounded-2xl border border-stroke bg-white shadow-sm">
+                                    <div class="border-b border-stroke px-5 py-4">
+                                        <h2 class="text-base font-semibold text-dark-text dark:text-white">Riwayat Poin Saya</h2>
+                                    </div>
+
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-stroke text-left text-sm">
+                                            <thead class="bg-gray-50">
+                                                <tr class="text-gray-500">
+                                                    <th class="px-5 py-3 font-medium">Tanggal</th>
+                                                    <th class="px-5 py-3 font-medium">Total Simpanan</th>
+                                                    <th class="px-5 py-3 font-medium">Poin Diperoleh</th>
+                                                    <th class="px-5 py-3 font-medium">Total Poin</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-stroke">
+                                                <tr v-if="pointHistory.length === 0">
+                                                    <td colspan="4" class="px-5 py-8 text-center text-gray-500">
+                                                        Belum ada riwayat poin.
+                                                    </td>
+                                                </tr>
+                                                <tr v-for="row in pointHistory" :key="row.id" class="hover:bg-gray-50/70">
+                                                    <td class="px-5 py-4 font-medium text-dark-text dark:text-white">{{ row.calculation_date }}</td>
+                                                    <td class="px-5 py-4 text-dark-text dark:text-white">{{ formatCurrency(row.total_simpanan) }}</td>
+                                                    <td class="px-5 py-4 font-medium text-[#00a04a]">+{{ formatPoint(row.points_earned) }}</td>
+                                                    <td class="px-5 py-4 font-medium text-dark-text dark:text-white">{{ formatPoint(row.total_points) }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
