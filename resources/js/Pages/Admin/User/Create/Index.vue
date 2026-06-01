@@ -43,7 +43,6 @@ const requiredMemberFields = computed(() => [
 	'heir_name',
 	'heir_relationship',
 	'heir_contact',
-	...(form.marital_status === 'Kawin' ? ['spouse_name'] : []),
 ])
 
 const form = useForm({
@@ -58,7 +57,6 @@ const form = useForm({
 	domicile_address: '',
 	last_education: '',
 	residential_address: '',
-	spouse_name: '',
 	heir_nik: '',
 	heir_name: '',
 	heir_relationship: '',
