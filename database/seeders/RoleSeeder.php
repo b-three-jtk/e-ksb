@@ -37,7 +37,7 @@ public function run(): void
         }
 
         foreach (UserRoleEnum::cases() as $case) {
-            $role = Role::create([
+            $role = Role::firstOrCreate([
                 'name' => $case->value,
                 'guard_name' => 'web'
             ]);
@@ -51,7 +51,7 @@ public function run(): void
                     $role->givePermissionTo(['view_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan']);
                     break;
                 case UserRoleEnum::KETUA:
-                    $role->givePermissionTo(['view_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'edit_pengunduran_diri', 'create_pengaturan', 'edit_pengaturan', 'approve_murabahah']);
+                    $role->givePermissionTo(['view_anggota', 'edit_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'edit_pengunduran_diri', 'create_pengaturan', 'edit_pengaturan', 'approve_murabahah']);
                     break;
                 case UserRoleEnum::SEKRETARIS:
                     $role->givePermissionTo(['create_anggota', 'view_anggota', 'edit_anggota', 'create_pengurus', 'view_pengurus', 'edit_pengurus', 'view_pengaturan']);

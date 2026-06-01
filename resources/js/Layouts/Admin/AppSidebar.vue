@@ -12,6 +12,8 @@ import MoneyIcon from "@/Icons/MoneyIcon.vue";
 import EmployeeIcon from "@/Icons/EmployeeIcon.vue";
 import MembersIcon from "@/Icons/MembersIcon.vue";
 import SavingsIcon from "@/Icons/SavingsIcon.vue";
+import PersonAlertIcon from "@/Icons/PersonAlertIcon.vue";
+import FinanceIcon from "@/Icons/FinanceIcon.vue";
 
 const page = usePage()
 
@@ -47,7 +49,13 @@ const menuGroups = [
                 permission: "view_anggota"
             },
             {
-                icon: GridIcon,
+                icon: MembersIcon,
+                name: "Alokasi Penanggung Jawab",
+                path: "/admin/users/allocation",
+                permission: "edit_anggota"
+            },
+            {
+                icon: PersonAlertIcon,
                 name: "Pengunduran Diri",
                 path: "/admin/resignations/list",
                 permission: "view_anggota"
@@ -59,7 +67,7 @@ const menuGroups = [
                 permission: "view_pengurus"
             },
             {
-                icon: MoneyIcon,
+                icon: FinanceIcon,
                 name: "Pengelolaan Kas",
                 path: "/admin",
                 permission: "view_kas"

@@ -19,9 +19,11 @@ class Member extends Model
 
     protected $fillable = [
         'user_id',
+        'pj_user_id',
         'gender',
         'birth_place',
         'birth_date',
+        'spouse_name',
         'status',
         'domicile_address',
         'residential_address',
@@ -40,6 +42,11 @@ class Member extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function penanggungJawab()
+    {
+        return $this->belongsTo(User::class, 'pj_user_id');
     }
 
     public function financials()

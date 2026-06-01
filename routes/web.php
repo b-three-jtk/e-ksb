@@ -8,15 +8,14 @@ use App\Http\Controllers\Admin\ProductTypeController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ResignationController;
 use App\Http\Controllers\Admin\SavingController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\WithdrawalController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\User\LedgerController;
+use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
+use App\Http\Controllers\User\UserController as UserUserController;
 use App\Http\Controllers\User\UserFinancingController;
-use App\Http\Controllers\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -83,21 +82,30 @@ Route::post('/auth/logout', [LoginController::class, 'logout'])
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'revalidate'])->group(function () {
     //  Pengelolaan Anggota
+    Route::get('/users/list', [AdminUserController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
+    Route::get('/users/create', [AdminUserController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
+    Route::post('/users/store', [AdminUserController::class, 'store'])->middleware('permission:create_anggota')->name('users.store');
+    Route::get('/users/show/{id}', [AdminUserController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
+    Route::put('/users/{id}/disable', [AdminUserController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
+    Route::get('/accounts/{id}/mutasi', [AdminUserController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
+    Route::get('/financings/{id}/history', [AdminUserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
     Route::get('/users/list', [UserController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
     Route::post('/users/store', [UserController::class, 'store'])->middleware('permission:create_anggota')->name('users.store');
     Route::get('/users/show/{id}', [UserController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
+    Route::get('/users/allocation', [UserController::class, 'allocation'])->middleware('permission:edit_anggota')->name('users.allocation');
+    Route::post('/users/allocation', [UserController::class, 'storeAllocation'])->middleware('permission:edit_anggota')->name('users.allocation.store');
     Route::put('/users/{id}/disable', [UserController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
     Route::get('/accounts/{id}/mutasi', [UserController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
     Route::get('/financings/{id}/history', [UserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
 
     // Pengelolaan Pengurus
-    Route::get('/list', [AdminController::class, 'index'])->middleware('permission:view_admin')->name('admin.index');
-    Route::get('/create', [AdminController::class, 'create'])->middleware('permission:create_admin')->name('admin.create');
-    Route::post('/store', [AdminController::class, 'store'])->middleware('permission:create_admin')->name('admin.store');
-    Route::get('/edit/{id}', [AdminController::class, 'edit'])->middleware('permission:edit_admin')->name('admin.edit');
-    Route::put('/update/{id}', [AdminController::class, 'update'])->middleware('permission:edit_admin')->name('admin.update');
-    Route::get('/show/{id}', [AdminController::class, 'show'])->middleware('permission:view_admin')->name('admin.show');
+    Route::get('/list', [AdminController::class, 'index'])->middleware('permission:view_pengurus')->name('admin.index');
+    Route::get('/create', [AdminController::class, 'create'])->middleware('permission:create_pengurus')->name('admin.create');
+    Route::post('/store', [AdminController::class, 'store'])->middleware('permission:create_pengurus')->name('admin.store');
+    Route::get('/edit/{id}', [AdminController::class, 'edit'])->middleware('permission:edit_pengurus')->name('admin.edit');
+    Route::put('/update/{id}', [AdminController::class, 'update'])->middleware('permission:edit_pengurus')->name('admin.update');
+    Route::get('/show/{id}', [AdminController::class, 'show'])->middleware('permission:view_pengurus')->name('admin.show');
     Route::get('members', [AdminController::class, 'searchMember'])->middleware('permission:view_anggota')->name('members.search');
 
     // Pengelolaan Pengunduran Diri
@@ -107,8 +115,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     // Pengelolaan Simpanan
     Route::get('/savings/list', [SavingController::class, 'index'])->middleware('permission:view_simpanan')->name('savings.index');
-    Route::get('/savings/withdrawal', [WithdrawalController::class, 'create'])->middleware('permission:create_penarikan')->name('savings.withdrawal.create');
-    Route::post('/savings/withdrawal', [WithdrawalController::class, 'store'])->middleware('permission:create_penarikan')->name('savings.withdrawal.store');
+    Route::get('/savings/withdrawal', [SavingController::class, 'createWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.create');
+    Route::post('/savings/withdrawal', [SavingController::class, 'storeWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.store');
     Route::get('/savings/deposit', [SavingController::class, 'createDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.create');
     Route::post('/savings/deposit', [SavingController::class, 'storeDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.store');
     Route::get('/savings/show/{id}', [SavingController::class, 'show'])->middleware('permission:view_simpanan')->name('savings.show');
@@ -148,19 +156,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'revalidate'])->group(function () {
     Route::get('/dashboard', [MemberController::class, 'index'])->name('userDashboard');
 
-    Route::get('/profile', [UserProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile/edit', [UserProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [UserProfileController::class, 'update'])->name('profile.update');
-    Route::post('/profile/picture', [UserProfileController::class, 'updateProfilePicture'])->name('profile.picture.update');
-    Route::delete('/profile/picture', [UserProfileController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
-    Route::post('/profile/update-password', [UserProfileController::class, 'updatePassword'])->name('profile.update-password');
+    Route::get('/profile', [UserUserController::class, 'profileShow'])->name('profile.show');
+    Route::get('/profile/edit', [UserUserController::class, 'profileEdit'])->name('profile.edit');
+    Route::put('/profile', [UserUserController::class, 'profileUpdate'])->name('profile.update');
+    Route::post('/profile/picture', [UserUserController::class, 'updateProfilePicture'])->name('profile.picture.update');
+    Route::delete('/profile/picture', [UserUserController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
+    Route::post('/profile/update-password', [UserUserController::class, 'updatePassword'])->name('profile.update-password');
 
     Route::get('/resign', [MemberController::class, 'createResign'])->name('resign.create');
     Route::post('/resign', [MemberController::class, 'storeResign'])->name('resign.store');
 
     // Ledger
-    Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
-    Route::get('/ledger/export', [LedgerController::class, 'export'])->name('ledger.export');
+    Route::get('/ledger', [UserSavingController::class, 'index'])->name('ledger.index');
+    Route::get('/ledger/export', [UserSavingController::class, 'export'])->name('ledger.export');
 
     // Pembiayaan
     Route::get('/financings', [UserFinancingController::class, 'index'])->name('financing.index');

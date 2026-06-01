@@ -173,29 +173,29 @@ const handleExport = () => {
                     Buku Besar Personal
                 </h1>
 
-                <div class="rounded-xl bg-accent text-emerald-900 shadow-sm overflow-hidden">
+                <div class="rounded-xl bg-[#ecf3ff] dark:bg-gray-800 text-emerald-900 dark:text-emerald-300 shadow-sm overflow-hidden">
                     <div class="grid grid-cols-1 md:grid-cols-4">
                         <div class="px-4 py-4">
-                            <p class="text-md font-body text-emerald-700">Halo,</p>
+                            <p class="text-md font-body text-emerald-700 dark:text-emerald-300">Halo,</p>
                             <p class="text-2xl font-head font-bold leading-tight mt-1">{{ memberInfo.nama }}</p>
-                            <p class="text-md font-body text-emerald-700 mt-1">
+                            <p class="text-md font-body text-emerald-700 dark:text-emerald-300 mt-1">
                                 {{ memberInfo.no_anggota }} · {{ memberStatusLabel }} sejak {{ memberInfo.tanggal_bergabung }}
                             </p>
                         </div>
 
                         <div class="px-4 py-4 md:border-l border-emerald-700/20 flex flex-col justify-center text-center">
                             <p class="text-2xl font-head font-bold">{{ savingTypeCount }}</p>
-                            <p class="text-md font-body text-emerald-700 mt-1">Total Jenis Simpanan</p>
+                            <p class="text-md font-body text-emerald-700 dark:text-emerald-300 mt-1">Total Jenis Simpanan</p>
                         </div>
 
                         <div class="px-4 py-4 md:border-l border-emerald-700/30 flex flex-col justify-center text-center">
                             <p class="text-2xl font-head font-bold">{{ transactionCount }}</p>
-                            <p class="text-md font-body text-emerald-700 mt-1">Transaksi</p>
+                            <p class="text-md font-body text-emerald-700 dark:text-emerald-300 mt-1">Transaksi</p>
                         </div>
 
                         <div class="px-4 py-4 md:border-l border-emerald-700/30 flex flex-col justify-center text-center">
                             <p class="text-2xl font-head font-bold">{{ formatCurrency(totalSavings) }}</p>
-                            <p class="text-md font-body text-emerald-700 mt-1">Total Saldo</p>
+                            <p class="text-md font-body text-emerald-700 dark:text-emerald-300 mt-1">Total Saldo</p>
                         </div>
                     </div>
                 </div>

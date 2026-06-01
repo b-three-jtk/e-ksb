@@ -2,93 +2,68 @@
 
 namespace App\Http\Controllers\User;
 
-use Inertia\Inertia;
+use App\Enums\EducationEnum;
+use App\Http\Controllers\Controller;
+use App\Services\User\UserProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\Controller;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
-class UserProfileController extends Controller
+class UserController extends Controller
 {
+    public function __construct(private UserProfileService $userProfileService)
+    {
+    }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show()
+    public function profileShow()
     {
         $user = auth()->user();
-
-        $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
 
         return Inertia::render('User/Profile/Show', [
-            'user' => [
-                'id' => $user->id,
-                'user_code' => $user->user_code,
-                'name' => $user->name,
-                'nik' => $user->nik,
-                'email' => $user->email,
-                'phone_number' => $user->phone_number,
-                'profile_picture' => $user->profile_picture,
-                'photo_url' => $photoUrl,
-            ]
+            'user' => $this->userProfileService->buildProfilePayload($user),
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit()
+    public function profileEdit()
     {
         $user = auth()->user();
-
-        $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
+        $educationOptions = array_column(EducationEnum::cases(), 'value');
 
         return Inertia::render('User/Profile/Edit', [
-            'user' => [
-                'id' => $user->id,
-                'user_code' => $user->user_code,
-                'name' => $user->name,
-                'nik' => $user->nik,
-                'email' => $user->email,
-                'phone_number' => $user->phone_number,
-                'profile_picture' => $user->profile_picture,
-                'photo_url' => $photoUrl,
-            ]
+            'user' => $this->userProfileService->buildProfilePayload($user),
+            'educationOptions' => $educationOptions,
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request)
+    public function profileUpdate(Request $request)
     {
         $user = auth()->user();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            // Ensure NIK is unique except for current user
             'nik' => [
                 'required',
                 'string',
                 'size:16',
-                \Illuminate\Validation\Rule::unique('users', 'nik')->ignore($user->id, 'id'),
+                Rule::unique('users', 'nik')->ignore($user->id, 'id'),
             ],
             'email' => [
                 'nullable',
                 'email',
                 'max:255',
-                \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user->id, 'id'),
+                Rule::unique('users', 'email')->ignore($user->id, 'id'),
             ],
             'phone_number' => 'nullable|string|max:20',
+            'last_education' => 'nullable|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
+            'residential_address' => 'nullable|string|max:1000',
         ]);
 
-        $user->update($validated);
+        $this->userProfileService->updateProfile($user, $validated);
 
         return redirect()->route('user.profile.show');
     }
 
-    /**
-     * Update user's profile picture
-     */
     public function updateProfilePicture(Request $request)
     {
         $user = auth()->user();
@@ -102,41 +77,20 @@ class UserProfileController extends Controller
             return back()->withErrors(['profile_picture' => 'File tidak valid sebagai gambar.']);
         }
 
-        if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
-            \Storage::disk('public')->delete($user->profile_picture);
-        }
-
-        // Store new profile picture
-        $path = $request->file('profile_picture')->store('profile_pictures', 'public');
-
-        $user->update([
-            'profile_picture' => $path
-        ]);
+        $this->userProfileService->updateProfilePicture($user, $request->file('profile_picture'));
 
         return redirect()->back();
     }
 
-    /**
-     * Delete user's profile picture
-     */
     public function deleteProfilePicture()
     {
         $user = auth()->user();
 
-        if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
-            \Storage::disk('public')->delete($user->profile_picture);
-        }
-
-        $user->update([
-            'profile_picture' => null
-        ]);
+        $this->userProfileService->deleteProfilePicture($user);
 
         return redirect()->back();
     }
 
-    /**
-     * Update user's password
-     */
     public function updatePassword(Request $request)
     {
         $user = auth()->user();
@@ -167,9 +121,7 @@ class UserProfileController extends Controller
             'password.confirmed' => 'Konfirmasi password tidak sesuai dengan password baru.',
         ]);
 
-        $user->update([
-            'password' => Hash::make($validated['password']),
-        ]);
+        $this->userProfileService->updatePassword($user, $validated['password']);
 
         return redirect()->back()->with('success', 'Password berhasil diubah');
     }

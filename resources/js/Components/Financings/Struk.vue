@@ -126,7 +126,7 @@ const win = window.open('', '_blank', 'width=420,height=700')
 win.document.write(`<!DOCTYPE html><html>
 <head>
   <meta charset="utf-8">
-  <title>${isRepayment.value ? 'Struk Pelunasan' : 'Kwitansi'} ${escapeHtml(props.transaksi.no_transaksi)}</title>
+  <title>${isRepayment.value ? 'Struk Pelunasan' : 'Kuitansi'} ${escapeHtml(props.transaksi.no_transaksi)}</title>
   <style>
     @page { size: 80mm auto; margin: 4mm; }
     body  { margin:0; font-family:'Courier New',Courier,monospace;

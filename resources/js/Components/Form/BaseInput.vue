@@ -13,6 +13,9 @@ const props = defineProps<{
   max?: number
   error?: string
   disabled?: boolean
+  locked?: boolean
+  multiline?: boolean
+  rows?: number
 }>()
 
 defineEmits(['update:modelValue'])
@@ -27,38 +30,65 @@ const inputType = computed(() => {
 })
 
 const isPasswordField = computed(() => props.type === 'password')
+const isMultiline = computed(() => !!props.multiline)
+const isLocked = computed(() => !!props.locked)
+
+const fieldClass = computed(() => {
+  const baseClass = `peer w-full rounded-lg border px-4 text-sm text-gray-800 dark:text-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 ${isPasswordField.value ? 'pr-12' : ''} [&::-ms-reveal]:hidden`
+
+  if (isMultiline.value) {
+    return `${baseClass} min-h-28 pt-4 pb-3 resize-y`
+  }
+
+  return `${baseClass} h-12 pt-2 pb-2`
+})
+
+const lockedClass = computed(() => {
+  if (!isLocked.value) return ''
+
+  return 'border-gray-300 bg-gray-50 text-gray-600 placeholder:text-gray-400 cursor-not-allowed'
+})
 </script>
 
 <template>
   <div>
-    <div class="relative h-12">
+    <div :class="isMultiline ? 'relative' : 'relative h-12'">
+      <textarea
+        v-if="isMultiline"
+        v-bind="$attrs"
+        :value="modelValue"
+        @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
+        placeholder=" "
+        :required="required"
+        :disabled="disabled"
+        :aria-invalid="!!error"
+        :rows="rows ?? 3"
+        autocomplete="off"
+        :class="[fieldClass, lockedClass, disabled ? 'disabled:opacity-100' : '']"
+      />
       <input
-      v-bind="$attrs"
-      :type="inputType"
-      :value="modelValue"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-      placeholder=" "
-      :required="required"
-      :disabled="disabled"
-      :aria-invalid="!!error"
-      :maxlength="max"
-      autocomplete="off"
-      :class="`peer h-12 w-full rounded-lg border border-gray-300
-              bg-transparent px-4 pt-2 pb-2 text-sm
-              text-gray-800 dark:text-gray-200
-              focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20
-              ${isPasswordField ? 'pr-12' : ''}
-              [&::-ms-reveal]:hidden`"
+          v-else
+          v-bind="$attrs"
+          :type="inputType"
+          :value="modelValue"
+          @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+          placeholder=" "
+          :required="required"
+          :disabled="disabled"
+          :aria-invalid="!!error"
+          :maxlength="max"
+          autocomplete="off"
+          :class="[fieldClass, lockedClass, disabled ? 'disabled:opacity-100' : '']"
       />
 
       <label
-      class="pointer-events-none absolute left-3 top-1/2 z-10
-            -translate-y-1/2 px-1
-            bg-white dark:bg-gray-800 text-sm text-gray-400
-            transition-all duration-200
-            peer-focus:top-0 peer-focus:text-xs
-            peer-not-placeholder-shown:top-0
-            peer-not-placeholder-shown:text-xs"
+      :class="[
+        'pointer-events-none absolute left-3 z-10 px-1 bg-white dark:bg-gray-800 text-sm transition-all duration-200',
+        isLocked ? 'text-gray-400' : 'text-gray-400',
+        isMultiline
+          ? 'top-3 peer-focus:top-0 peer-focus:text-xs peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:text-xs'
+          : 'top-1/2 -translate-y-1/2 peer-focus:top-0 peer-focus:text-xs peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:text-xs',
+      ]"
       >
         {{ label }}
         <span v-if="required" class="text-error-500">*</span>

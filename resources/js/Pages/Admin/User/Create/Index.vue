@@ -29,7 +29,7 @@ const props = defineProps({
 	},
 })
 
-const requiredMemberFields = [
+const requiredMemberFields = computed(() => [
 	'name',
 	'gender',
 	'nik',
@@ -43,7 +43,7 @@ const requiredMemberFields = [
 	'heir_name',
 	'heir_relationship',
 	'heir_contact',
-]
+])
 
 const form = useForm({
 	name: '',
@@ -122,7 +122,7 @@ const openImageOptions = (target, onReplace) => {
 }
 
 const isSaveDisabled = computed(() => {
-	const hasEmptyRequiredFields = requiredMemberFields.some((field) => !String(form[field] ?? '').trim())
+	const hasEmptyRequiredFields = requiredMemberFields.value.some((field) => !String(form[field] ?? '').trim())
 	const hasMissingDocuments = !form.ktp_photo || !form.kk_photo
 
 	return form.processing || hasEmptyRequiredFields || hasMissingDocuments

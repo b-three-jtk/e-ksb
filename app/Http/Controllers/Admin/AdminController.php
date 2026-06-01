@@ -34,7 +34,7 @@ class AdminController extends Controller
             UserStatusEnum::INACTIVE->value,
         ];
 
-        $admins = User::with('roles')
+        $admins = User::with(['roles', 'member'])
             ->whereHas('roles', fn ($q) =>
                 $q->whereNotIn('name', [UserRoleEnum::ANGGOTA->value])
             )
@@ -65,7 +65,10 @@ class AdminController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'posisi' => $user->getRoleNames()->first(),
-                'status' => $user->status,
+                'status' => $user->member
+                    ? 'Member'
+                    : 'Non Member',
+
                 'avatar' => $user->profile_picture
                     ? asset('storage/' . $user->profile_picture)
                     : null,

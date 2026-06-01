@@ -20,13 +20,13 @@ use App\Models\Financing;
 use App\Models\FinancingItem;
 use App\Models\FinancingVerification;
 use App\Models\Installment;
-use App\Models\InstallmentPaymentTransaction;
 use App\Models\JournalEntry;
 use App\Models\Member;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
 use App\Models\MemberDoc;
+use App\Services\Admin\RepaymentService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -722,26 +722,18 @@ class FinancingController extends Controller
         return response()->json(['suppliers' => $suppliers]);
     }
 
-    public function showRepayment(string $id)
+    public function showRepayment(string $id, RepaymentService $repaymentService)
     {
-        $data = [];
-        $data['financing'] = Financing::
-            with('member.user', 'installment.payment', 'financingItem.productType', 'financingItem.supplier', 'collateral')
-            ->findOrFail($id);
+        $financing = Financing::with([
+            'member.user',
+            'installment.payment',
+            'financingItem.productType',
+            'financingItem.supplier',
+            'collateral'
+        ])->where('status', '!=', FinancingReqStatusEnum::PAID->value)->findOrFail($id);
 
-        $data['total_paid_installments'] = $data['financing']->installment->payment->count();
-        $data['principal_per_month'] = ($data['financing']->cost_price - $data['financing']->down_payment) / $data['financing']->installment->tenor;
-        $data['margin_per_month'] = $data['financing']->margin_amount / $data['financing']->installment->tenor;
-        $data['tsaman_naqdy'] = ($data['financing']->cost_price - $data['financing']->down_payment) + ($data['financing']->margin_amount / $data['financing']->installment->tenor);
-        $data['qimah_ismiyyah'] = ($data['financing']->cost_price - $data['financing']->down_payment) + $data['financing']->margin_amount;
-        $data['margin_berjalan'] = $data['margin_per_month'] * $data['total_paid_installments'];
-        $data['installment_per_month'] = ($data['financing']->cost_price + $data['financing']->margin_amount - $data['financing']->down_payment) / $data['financing']->installment->tenor;
-        $data['qimah_haliyyah'] = $data['tsaman_naqdy'] + ($data['margin_per_month'] * ($data['total_paid_installments']));
-        $data['total_paid_amount'] = ($data['qimah_ismiyyah'] / $data['financing']->installment->tenor) * $data['total_paid_installments'];
-        $data['repayment_total'] = $data['qimah_haliyyah'] - $data['total_paid_amount'];
+        $data = $repaymentService->calculateDetails($financing);
 
-        $data['principal_paid'] = $data['principal_per_month'] * $data['total_paid_installments'];
-        $data['margin_paid'] = $data['margin_per_month'] * $data['total_paid_installments'];
         $data['pengurus'] = auth()->user()->name;
 
         return inertia('Admin/Financing/Repayment/Create', [
@@ -749,57 +741,20 @@ class FinancingController extends Controller
         ]);
     }
 
-    public function storeRepayment(CreateRepaymentRequest $request)
+public function storeRepayment(CreateRepaymentRequest $request, RepaymentService $service)
     {
-        $data = $request->validated();
-
-        DB::beginTransaction();
         try {
-            $installment = Installment::with('financing.member.user', 'financing.financingItem')->findOrFail($data['installment_id']);
-            $financing = $installment->financing;
-            $member = $financing->member;
-            $user = $member->user;
+            $transaction = $service->processRepayment($request->validated(), auth()->id());
 
-            $transaction = InstallmentPaymentTransaction::create([
-                'installment_trans_code' => 'LP' . str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT), // temporary
-                'nominal' => $data['total_paid'],
-                'payment_method' => $data['method'],
-                'is_early_repayment' => true,
-                'payment_date' => now(),
-                'installment_id' => $installment->id,
-                'updated_by' => auth()->id(),
+            return inertia('Admin/Financing/Repayment/Result', [
+                'data' => $transaction,
             ]);
 
-            // Update status financing menjadi selesai/lunas - Asumsi status
-            $financing->update(['status' => FinancingReqStatusEnum::PAID->value]);
-
-            DB::commit();
-
-            $strukturData = [
-                'no_transaksi' => $transaction->installment_trans_code,
-                'tanggal' => $transaction->payment_date,
-                'no_anggota' => $user->user_code,
-                'nama_anggota' => $user->name,
-                'no_telp' => $user->phone_number,
-                'financing_code' => $financing->financing_transaction_code,
-                'product_name' => $financing->financingItem->name,
-                'principal_paid' => $data['principal_paid'],
-                'margin_paid' => $data['margin_paid'],
-                'metode' => $data['method'],
-                'pengurus' => auth()->user()->name,
-                'tsaman_naqdy' => $data['tsaman_naqdy'],
-                'qimah_ismiyyah' => $data['qimah_ismiyyah'],
-                'qimah_haliyyah' => $data['qimah_haliyyah'],
-            ];
-
-            return Inertia::render('Admin/Financing/Repayment/Create', [
-                'struk' => $strukturData,
-                'message' => 'Pelunasan berhasil diproses. Total pembayaran: ' . number_format($data['total_paid'], 0, ',', '.'),
-            ]);
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error('Error processing repayment: ' . $e->getMessage());
-            return back()->withErrors(['message' => 'Terdapat kesalahan saat memproses pelunasan: ' . $e->getMessage()]);
+            return inertia('Admin/Financing/Repayment/Result', [
+                'error' => 'Gagal memproses pembayaran: ' . $e->getMessage(),
+            ]);
         }
     }
 

@@ -13,7 +13,7 @@ import Button from '../../../Components/Form/Button.vue'
 const columns = [
     { key: 'no', label: 'No' },
     { key: 'nik', label: 'NIK' },
-    { key: 'name', label: 'Profil Admin', sortable: true },
+    { key: 'name', label: 'Profil Pengurus', sortable: true },
     { key: 'email', label: 'Email' },
     { key: 'posisi', label: 'Posisi' },
     { key: 'status', label: 'Status', align: 'center' },
@@ -100,24 +100,24 @@ const toggleSort = (column) => {
 
 const breadcrumbItems = [
     {name: 'Dashboard', link: '/admin'},
-    {name: 'Pengelolaan Admin'},
+    {name: 'Pengelolaan Pengurus'},
 ];
 </script>
 
 <template>
-    <AdminLayout title="Pengelolaan Admin">
+    <AdminLayout title="Pengelolaan Data Pengurus">
         <!-- Breadcrumb + Title -->
-        <PageBreadcrumb page-title="Pengelolaan Admin" :items="breadcrumbItems" />
+        <PageBreadcrumb page-title="Pengelolaan Data Pengurus" :items="breadcrumbItems" />
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
             <!-- Card Header -->
             <div class="flex justify-between items-center p-6 border-b">
                 <div>
-                    <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Admin</h2>
+                    <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Pengurus</h2>
                 </div>
                 <Button size="medium" variant="secondary" href="/admin/create">
                     <Icon icon="mdi:plus" class="w-5 h-5"/>
-                    Tambah Admin
+                    Tambah Pengurus
                 </Button>
             </div>
 
@@ -164,11 +164,13 @@ const breadcrumbItems = [
 
                 <template #cell-status="{ row }">
                     <span
-                        class="px-3 py-1 rounded-full text-xs"
+                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
                         :class="{
-                            'bg-green-100 text-green-700': row.status === 'Aktif',
-                            'bg-red-100 text-red-700': row.status === 'Tidak Aktif',
-                            'bg-orange-100 text-orange-700': row.status === 'Mengundurkan Diri',
+                            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
+                                row.status === 'Member',
+
+                            'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300':
+                                row.status === 'Non Member',
                         }"
                     >
                         {{ row.status }}
