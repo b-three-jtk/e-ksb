@@ -2,6 +2,7 @@
 
 namespace App\Services\User;
 
+use App\Models\PointTransaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
@@ -13,6 +14,38 @@ class UserProfileService
     public function buildProfilePayload(User $user): array
     {
         $member = $user->member?->loadMissing(['heirs', 'memberDocs']);
+        $pointTransactions = $user->pointTransactions()
+            ->with('savingTransactions')
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+
+        $getSnapshotValue = function (PointTransaction $transaction): float {
+            return (float) ($transaction->saving_balance_snapshot
+                ?? $transaction->savingTransactions?->balance_after_transaction
+                ?? 0);
+        };
+
+        $runningPointTotal = 0;
+        $pointHistory = $pointTransactions
+            ->map(function (PointTransaction $transaction) use (&$runningPointTotal) {
+                $runningPointTotal += (int) $transaction->amount_earned;
+
+                return [
+                    'id' => $transaction->id,
+                    'calculation_date' => $transaction->calculation_period
+                        ? Carbon::parse($transaction->calculation_period)->translatedFormat('d/m/Y')
+                        : Carbon::parse($transaction->created_at)->format('d/m/Y'),
+                    'total_simpanan' => $getSnapshotValue($transaction),
+                    'points_earned' => (int) $transaction->amount_earned,
+                    'total_points' => $runningPointTotal,
+                    'activity_description' => $transaction->activity_description,
+                ];
+            })
+            ->reverse()
+            ->values();
+
+        $latestPointTransaction = $pointTransactions->last();
 
         $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
         $heirs = $member?->heirs?->map(function ($heir) {
@@ -59,6 +92,21 @@ class UserProfileService
                     'ktp' => $ktpDocument?->doc_attachment ? asset('storage/' . $ktpDocument->doc_attachment) : null,
                     'kk' => $kkDocument?->doc_attachment ? asset('storage/' . $kkDocument->doc_attachment) : null,
                 ],
+            ],
+            'points' => [
+                'summary' => [
+                    'total_points' => (int) $pointTransactions->sum('amount_earned'),
+                    'latest_points_earned' => (int) ($latestPointTransaction?->amount_earned ?? 0),
+                    'latest_calculated_at' => $latestPointTransaction?->calculation_period
+                        ? Carbon::parse($latestPointTransaction->calculation_period)->translatedFormat('d/m/Y')
+                        : ($latestPointTransaction?->created_at
+                            ? Carbon::parse($latestPointTransaction->created_at)->format('d/m/Y')
+                            : null),
+                    'latest_total_simpanan' => $latestPointTransaction
+                        ? $getSnapshotValue($latestPointTransaction)
+                        : 0,
+                ],
+                'history' => $pointHistory,
             ],
         ];
     }
