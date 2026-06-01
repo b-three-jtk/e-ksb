@@ -12,7 +12,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\User\LedgerController;
+use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\UserController as UserUserController;
 use App\Http\Controllers\User\UserFinancingController;
@@ -164,8 +164,8 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'reval
     Route::post('/resign', [MemberController::class, 'storeResign'])->name('resign.store');
 
     // Ledger
-    Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
-    Route::get('/ledger/export', [LedgerController::class, 'export'])->name('ledger.export');
+    Route::get('/ledger', [UserSavingController::class, 'index'])->name('ledger.index');
+    Route::get('/ledger/export', [UserSavingController::class, 'export'])->name('ledger.export');
 
     // Pembiayaan
     Route::get('/financings', [UserFinancingController::class, 'index'])->name('financing.index');
