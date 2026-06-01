@@ -90,6 +90,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::put('/users/{id}/disable', [AdminUserController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
     Route::get('/accounts/{id}/mutasi', [AdminUserController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
     Route::get('/financings/{id}/history', [AdminUserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
+    Route::get('/users/list', [UserController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
+    Route::get('/users/create', [UserController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
+    Route::post('/users/store', [UserController::class, 'store'])->middleware('permission:create_anggota')->name('users.store');
+    Route::get('/users/show/{id}', [UserController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
+    Route::get('/users/allocation', [UserController::class, 'allocation'])->middleware('permission:edit_anggota')->name('users.allocation');
+    Route::post('/users/allocation', [UserController::class, 'storeAllocation'])->middleware('permission:edit_anggota')->name('users.allocation.store');
+    Route::put('/users/{id}/disable', [UserController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
+    Route::get('/accounts/{id}/mutasi', [UserController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
+    Route::get('/financings/{id}/history', [UserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
 
     // Pengelolaan Pengurus
     Route::get('/list', [AdminController::class, 'index'])->middleware('permission:view_pengurus')->name('admin.index');
@@ -107,8 +116,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     // Pengelolaan Simpanan
     Route::get('/savings/list', [SavingController::class, 'index'])->middleware('permission:view_simpanan')->name('savings.index');
-    Route::get('/savings/withdrawal', [WithdrawalController::class, 'create'])->middleware('permission:create_penarikan')->name('savings.withdrawal.create');
-    Route::post('/savings/withdrawal', [WithdrawalController::class, 'store'])->middleware('permission:create_penarikan')->name('savings.withdrawal.store');
+    Route::get('/savings/withdrawal', [WithdrawalController::class, 'create'])->middleware('permission:create_simpanan')->name('savings.withdrawal.create');
+    Route::post('/savings/withdrawal', [WithdrawalController::class, 'store'])->middleware('permission:create_simpanan')->name('savings.withdrawal.store');
     Route::get('/savings/deposit', [SavingController::class, 'createDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.create');
     Route::post('/savings/deposit', [SavingController::class, 'storeDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.store');
     Route::get('/savings/show/{id}', [SavingController::class, 'show'])->middleware('permission:view_simpanan')->name('savings.show');

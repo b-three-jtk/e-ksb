@@ -49,6 +49,12 @@ const menuGroups = [
                 permission: "view_anggota"
             },
             {
+                icon: MembersIcon,
+                name: "Alokasi Penanggung Jawab",
+                path: "/admin/users/allocation",
+                permission: "edit_anggota"
+            },
+            {
                 icon: PersonAlertIcon,
                 name: "Pengunduran Diri",
                 path: "/admin/resignations/list",

@@ -255,7 +255,7 @@ class LedgerController extends Controller
         // Calculate summary data
         $totalDebit = $rows->sum('debit');
         $totalKredit = $rows->sum('kredit');
-        $endingBalance = $rows->last()['saldo'] ?? 0;
+        $endingBalance = $totalDebit - $totalKredit;
 
         // Determine date range
         $startDate = $rows->min('tanggal_raw') ? Carbon::parse($rows->min('tanggal_raw')) : now();

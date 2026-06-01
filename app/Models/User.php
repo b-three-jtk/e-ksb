@@ -91,6 +91,11 @@ class User extends Authenticatable
         return $this->hasOne(Member::class);
     }
 
+    public function allocatedMembers()
+    {
+        return $this->hasMany(Member::class, 'pj_user_id');
+    }
+
     // Verifies if the user has a specific role
     public function financing()
     {
