@@ -8,10 +8,12 @@ use App\Enums\MaritalStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMemberAllocationRequest;
 use App\Http\Requests\StoreMemberRequest;
 use App\Models\Financing;
 use App\Models\SavingAccount;
 use App\Models\User;
+use App\Services\Admin\MemberAllocationService;
 use App\Services\Admin\RegisterMemberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +47,18 @@ class UserController extends Controller
             'success' => 'Anggota berhasil ditambahkan.',
             'member_credentials' => $memberCredentials,
         ]);
+    }
+
+    public function allocation(Request $request, MemberAllocationService $memberAllocationService)
+    {
+        return Inertia::render('Admin/User/Allocation/Index', $memberAllocationService->buildPageData($request));
+    }
+
+    public function storeAllocation(StoreMemberAllocationRequest $request, MemberAllocationService $memberAllocationService)
+    {
+        $memberAllocationService->allocate($request->validated());
+
+        return redirect()->route('admin.users.allocation')->with('success', 'Alokasi anggota berhasil disimpan.');
     }
 
     private function enumOptions(array $cases): array

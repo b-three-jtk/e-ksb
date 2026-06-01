@@ -41,6 +41,7 @@ class StoreMemberRequest extends FormRequest
             'birth_place' => 'required|string|max:255',
             'birth_date' => 'required|date',
             'marital_status' => 'required|in:' . implode(',', array_column(MaritalStatusEnum::cases(), 'value')),
+            'spouse_name' => 'nullable|required_if:marital_status,Kawin|string|max:255',
             'phone_number' => 'required|string|max:20|unique:users,phone_number',
             'email' => 'nullable|email|max:255|unique:users,email',
             'domicile_address' => 'required|string|max:500',
