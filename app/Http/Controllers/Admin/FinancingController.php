@@ -877,7 +877,13 @@ class FinancingController extends Controller
                         $paymentCount + 1,
 
                     'next_due_date' =>
-                        now()->addMonth()->format('Y-m-d'),
+                        $installment?->due_day
+                            ? now()
+                                ->startOfMonth()
+                                ->addMonth()
+                                ->setDay($installment->due_day)
+                                ->format('Y-m-d')
+                            : null,
 
                     'financing_id' =>
                         $financing->id,
@@ -1077,10 +1083,11 @@ class FinancingController extends Controller
 
             DB::commit();
 
-            return back()->with([
-                'success' => 'Pembayaran berhasil diproses',
-                'pdf_url' => asset('storage/' . $fileName),
-            ]);
+            return redirect("/admin/financings/show/{$financing->id}")
+                ->with([
+                    'success' => 'Pembayaran berhasil diproses',
+                    'pdf_url' => asset('storage/' . $fileName),
+                ]);
 
         } catch (\Throwable $th) {
 
@@ -1091,11 +1098,12 @@ class FinancingController extends Controller
             ]);
         }
     }
-    public function reschedulePayment(Request $request, Financing $financing) 
+
+    public function reschedulePayment(Request $request, Financing $financing)
     {
         $validated = $request->validate([
             'installment_id' => 'required|exists:installments,id',
-            'reschedule_date' => 'required|date',
+            'due_date' => 'required|date',
         ]);
 
         try {
@@ -1104,17 +1112,17 @@ class FinancingController extends Controller
                 $validated['installment_id']
             );
 
-            // update due_day
             $installment->update([
                 'due_day' => Carbon::parse(
-                    $validated['reschedule_date']
+                    $validated['due_date']
                 )->day,
             ]);
 
-            return back()->with(
-                'success',
-                'Jadwal pembayaran berhasil direschedule'
-            );
+            return redirect("/admin/financings/show/{$financing->id}")
+                ->with(
+                    'success',
+                    'Jadwal pembayaran berhasil diperbarui'
+                );
 
         } catch (\Throwable $th) {
 
