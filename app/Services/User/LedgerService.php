@@ -1,22 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Services\User;
 
-use App\Http\Controllers\Controller;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
-class LedgerController extends Controller
+class LedgerService
 {
-    /**
-     * running balance calculation
-     */
-    private function transformTransactions($transactions, $includeId = false)
+    public function transformTransactions(Collection $transactions, bool $includeId = false): Collection
     {
         $accountBalances = [];
 
@@ -81,7 +78,7 @@ class LedgerController extends Controller
         });
     }
 
-    private function buildLedgerTransactionQuery(int|string $userId, ?string $month, ?string $search)
+    public function buildLedgerTransactionQuery(int|string $userId, ?string $month, ?string $search): Builder
     {
         $query = SavingTransaction::query()
             ->with(['savingAccount.member.bankAccounts', 'savingAccount', 'updatedBy', 'memberBankAccount'])
@@ -122,13 +119,14 @@ class LedgerController extends Controller
         return $query;
     }
 
-    private function buildSavingSummaryAndMeta(int|string $userId): array
+    public function buildSavingSummaryAndMeta(int|string $userId): array
     {
         $savingAccounts = SavingAccount::query()
             ->whereHas('member', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             })
             ->get();
+
         $savingSummary = [
             'total_saldo' => 0,
         ];
@@ -191,73 +189,19 @@ class LedgerController extends Controller
         return [$savingSummary, $savingMeta];
     }
 
-    /**
-     * Display ledger page with transactions
-     */
-    public function index(Request $request)
+    public function exportLedgerPdf(int|string $userId, ?string $month, ?string $search): array
     {
-        $userId = auth()->id();
-        $month = $request->input('month');
-        $search = $request->input('search');
-        $perPage = (int) $request->input('per_page', 10);
-
-        $query = $this->buildLedgerTransactionQuery($userId, $month, $search);
-
-        // Sort berdasarkan tanggal
-        $query->orderBy('transaction_date', 'desc');
-
-        // Pagination
-        $transactions = $query->paginate($perPage)->withQueryString();
-
-        $data = $this->transformTransactions($transactions->getCollection(), true);
-        $transactions->setCollection($data);
-
-        // Get member info
-        $member = auth()->user();
-        $memberInfo = [
-            'nama' => $member->name,
-            'no_anggota' => $member->user_code,
-            'status' => $member->status,
-            'tanggal_bergabung' => $member->joined_date->format('d F Y'),
-        ];
-
-        [$savingSummary, $savingMeta] = $this->buildSavingSummaryAndMeta($userId);
-
-        return Inertia::render('User/Ledger/List', [
-            'transactions' => $transactions,
-            'memberInfo' => $memberInfo,
-            'savings' => $savingSummary,
-            'savingMeta' => $savingMeta,
-            'filters' => [
-                'search' => $search ?? '',
-                'month' => $month ?? '',
-                'per_page' => $perPage,
-            ],
-        ]);
-    }
-
-    /**
-     * Export ledger data to PDF (bank statement format)
-     */
-    public function export(Request $request)
-    {
-        $userId = auth()->id();
-        $month = $request->get('month');
-        $search = $request->get('search');
-
         $query = $this->buildLedgerTransactionQuery($userId, $month, $search);
         $query->orderBy('transaction_date', 'asc');
 
         $transactions = $query->get();
         $rows = $this->transformTransactions($transactions, false);
-        $member = auth()->user();
+        $member = Auth::user();
 
-        // Calculate summary data
         $totalDebit = $rows->sum('debit');
         $totalKredit = $rows->sum('kredit');
         $endingBalance = $totalDebit - $totalKredit;
 
-        // Determine date range
         $startDate = $rows->min('tanggal_raw') ? Carbon::parse($rows->min('tanggal_raw')) : now();
         $endDate = $rows->max('tanggal_raw') ? Carbon::parse($rows->max('tanggal_raw')) : now();
 
@@ -280,6 +224,9 @@ class LedgerController extends Controller
             'endingBalance' => $endingBalance,
         ]);
 
-        return $pdf->download($filename);
+        return [
+            'pdf' => $pdf,
+            'filename' => $filename,
+        ];
     }
 }

@@ -9,11 +9,10 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ResignationController;
 use App\Http\Controllers\Admin\SavingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\WithdrawalController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\User\LedgerController;
+use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\UserController as UserUserController;
 use App\Http\Controllers\User\UserFinancingController;
@@ -116,8 +115,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     // Pengelolaan Simpanan
     Route::get('/savings/list', [SavingController::class, 'index'])->middleware('permission:view_simpanan')->name('savings.index');
-    Route::get('/savings/withdrawal', [WithdrawalController::class, 'create'])->middleware('permission:create_simpanan')->name('savings.withdrawal.create');
-    Route::post('/savings/withdrawal', [WithdrawalController::class, 'store'])->middleware('permission:create_simpanan')->name('savings.withdrawal.store');
+    Route::get('/savings/withdrawal', [SavingController::class, 'createWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.create');
+    Route::post('/savings/withdrawal', [SavingController::class, 'storeWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.store');
     Route::get('/savings/deposit', [SavingController::class, 'createDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.create');
     Route::post('/savings/deposit', [SavingController::class, 'storeDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.store');
     Route::get('/savings/show/{id}', [SavingController::class, 'show'])->middleware('permission:view_simpanan')->name('savings.show');
@@ -165,8 +164,8 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'reval
     Route::post('/resign', [MemberController::class, 'storeResign'])->name('resign.store');
 
     // Ledger
-    Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
-    Route::get('/ledger/export', [LedgerController::class, 'export'])->name('ledger.export');
+    Route::get('/ledger', [UserSavingController::class, 'index'])->name('ledger.index');
+    Route::get('/ledger/export', [UserSavingController::class, 'export'])->name('ledger.export');
 
     // Pembiayaan
     Route::get('/financings', [UserFinancingController::class, 'index'])->name('financing.index');
