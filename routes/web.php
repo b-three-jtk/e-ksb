@@ -138,6 +138,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/financings/repayment', [FinancingController::class, 'storeRepayment'])->middleware('permission:edit_murabahah')->name('financings.repayment.request');
     Route::get('repayment/{id}/receipt', [FinancingController::class, 'viewRepaymentReceipt'])->middleware('permission:edit_murabahah')->name('financings.repayment.view');
     Route::get('repayment/{id}/download', [FinancingController::class, 'downloadRepaymentReceipt'])->middleware('permission:edit_murabahah')->name('financings.repayment.download');
+    Route::get('/financings/{financing}/payments/create',[FinancingController::class, 'createPayment'])->name('financing.payments.create');
+    Route::post('/financings/{financing}/payments', [FinancingController::class, 'storePayment'])->name('financing.payments.store');
+    Route::post('/financings/{financing}/reschedule', [FinancingController::class, 'reschedulePayment'])->name('financing.payments.reschedule');
 
     // Pengelolaan Kas
     // Pengaturan Umum

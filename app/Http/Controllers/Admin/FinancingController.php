@@ -25,6 +25,7 @@ use App\Models\Member;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
+use App\Models\MemberDoc;
 use App\Services\Admin\RepaymentService;
 use Carbon\Carbon;
 use Exception;
@@ -32,6 +33,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class FinancingController extends Controller
 {
@@ -754,4 +758,332 @@ public function storeRepayment(CreateRepaymentRequest $request, RepaymentService
         }
     }
 
+    public function createPayment(Financing $financing)
+    {
+        $financing->load([
+            'member.user',
+            'financingItem.productType',
+            'installment',
+        ]);
+
+        $installment = $financing->installment;
+
+        $paymentCount =
+            InstallmentPaymentTransaction::where(
+                'installment_id',
+                $installment?->id
+            )->count();
+
+        $hargaJual =
+            $financing->cost_price +
+            $financing->margin_amount;
+
+        $angsuranPerBulan =
+            $installment && $installment->tenor > 0
+                ? $hargaJual / $installment->tenor
+                : 0;
+
+        $totalTerbayar =
+            InstallmentPaymentTransaction::where(
+                'installment_id',
+                $installment?->id
+            )->sum('nominal');
+
+        $sisa = $hargaJual - $totalTerbayar;
+
+        return Inertia::render(
+            'Admin/Financing/Payment/Create',
+            [
+                'financing' => [
+                    'id' => $financing->id,
+
+                    'transaction_code' =>
+                        $financing->financing_transaction_code,
+
+                    'product_name' =>
+                        $financing->financingItem?->name,
+
+                    'product_type' =>
+                        $financing->financingItem?->productType?->product_type_name,
+
+                    'brand' =>
+                        $financing->financingItem?->specification,
+
+                    'color' => '-',
+
+                    'qty' =>
+                        $financing->financingItem?->qty,
+
+                    'user' => [
+                        'name' =>
+                            $financing->member?->user?->name,
+
+                        'user_code' =>
+                            $financing->member?->user?->user_code,
+                    ],
+
+                    'installment_per_month' =>
+                        round($angsuranPerBulan),
+
+                    'remaining_balance' =>
+                        max($sisa, 0),
+
+                    'next_installment_number' =>
+                        $paymentCount + 1,
+
+                    'next_due_date' =>
+                        $installment?->due_day
+                            ? now()
+                                ->startOfMonth()
+                                ->addMonth()
+                                ->setDay($installment->due_day)
+                                ->format('Y-m-d')
+                            : null,
+
+                    'financing_id' =>
+                        $financing->id,
+
+                    'installment_id' =>
+                        $installment?->id,
+                ],
+            ]
+        );
+    }
+
+    public function storePayment(Request $request)
+    {
+        $validated = $request->validate([
+            'installment_id' => 'required|exists:installments,id',
+            'financing_id' => 'required|exists:financings,id',
+            'payment_method' => 'required|string',
+            'nominal' => 'required|numeric|min:1',
+            'payment_date' => 'required|date',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+
+            $financing = Financing::with([
+                'member.user',
+                'financingItem.productType',
+                'installment',
+            ])->findOrFail($validated['financing_id']);
+
+            $paymentCount = InstallmentPaymentTransaction::where(
+                'installment_id',
+                $validated['installment_id']
+            )->count();
+
+            $payment = InstallmentPaymentTransaction::create([
+                // 'installment_trans_code' =>
+                //     'INS-' . strtoupper(uniqid()),
+                'installment_trans_code' =>
+                    'INS' . strtoupper(substr(uniqid(), -7)),
+                'payment_method' => $validated['payment_method'],
+                'is_early_repayment' => false,
+                'nominal' => $validated['nominal'],
+                'payment_date' => $validated['payment_date'],
+                'installment_id' => $validated['installment_id'],
+                'updated_by' => auth()->id(),
+            ]);
+
+            $hargaJual =
+                $financing->cost_price +
+                $financing->margin_amount;
+
+            $totalTerbayar =
+                InstallmentPaymentTransaction::where(
+                    'installment_id',
+                    $validated['installment_id']
+                )->sum('nominal');
+
+            $sisa = $hargaJual - $totalTerbayar;
+
+            if ($sisa <= 0) {
+                $financing->update([
+                    'status' => 'Lunas',
+                ]);
+            }
+
+            \Carbon\Carbon::setLocale('id');
+
+            $logoPath = public_path(
+                'images/logo/logo-icon.svg'
+            );
+
+            $logo = '';
+
+            if (file_exists($logoPath)) {
+
+                $logo =
+                    'data:image/svg+xml;base64,' .
+                    base64_encode(file_get_contents($logoPath));
+            }
+
+            $receipt = [
+                'logo' => $logo,
+
+                'payment_method' => $payment->payment_method,
+
+                'organization' => [
+                    'name' => 'Koperasi Syariah Berkah',
+                    'address' => 'Komplek Puri Cipageran Indah 2, RW 21, Desa Ngamprah, Kec. Tanimulya, Kabupaten Bandung Barat',
+                ],
+
+                'petugas' => auth()->user()->name,
+
+                'tanggal_angsuran' =>
+                    \Carbon\Carbon::parse(
+                        $payment->payment_date
+                    )->translatedFormat('d F Y'),
+
+                'nomor_pembiayaan' =>
+                    $financing->financing_transaction_code,
+
+                'no_anggota' =>
+                    $financing->member?->user?->user_code,
+
+                'diterima_dari' =>
+                    $financing->member?->user?->name,
+
+                'sejumlah_uang' =>
+                    $payment->nominal,
+
+                'terbilang' =>
+                    ucfirst(
+                        \Riskihajar\Terbilang\Facades\Terbilang::make(
+                            $payment->nominal
+                        )
+                    ) . ' rupiah',
+
+                'items' => [
+                    [
+                        'no' => 1,
+                        'keterangan' =>
+                            'Angsuran ke ' . ($paymentCount + 1),
+
+                        'jumlah' =>
+                            $payment->nominal,
+                    ],
+                ],
+
+                'harga_perolehan' =>
+                    $financing->cost_price,
+
+                'margin' =>
+                    $financing->margin_amount,
+
+                'harga_jual' =>
+                    $hargaJual,
+
+                'total_angsuran' =>
+                    $payment->nominal,
+
+                'sisa_hutang' =>
+                    max($sisa, 0),
+
+                'status' =>
+                    max($sisa, 0) <= 0
+                        ? 'Lunas'
+                        : 'Belum Lunas',
+
+                'jatuh_tempo' =>
+                    now()->addMonth()->translatedFormat('d F Y'),
+
+                'catatan' =>
+                    'Dasar akad yang digunakan adalah akad murabahah yang merupakan kontrak jual beli syariah.',
+
+                'tanggal_cetak' =>
+                    now()->translatedFormat('d F Y'),
+            ];
+
+            // Buat generate PDF kwitansi pembayaran
+            $pdf = Pdf::loadView(
+                'exports.financing_payment_receipt',
+                [
+                    'receipt' => $receipt,
+                ]
+            )->setPaper('a5', 'landscape');
+
+            $pdf->setOptions([
+                'isRemoteEnabled' => true,
+            ]);
+
+            $fileName =
+                'receipts/' .
+                $financing->member->id .
+                '/receipt-' .
+                time() .
+                '.pdf';
+
+            Storage::disk('public')->put(
+                $fileName,
+                $pdf->output()
+            );
+
+            // Buat simpan ke tabel member_docs sebagai bukti pembayaran
+            MemberDoc::create([
+                'member_id' => $financing->member_id,
+                'doc_name' =>
+                    'Kwitansi Pembayaran ' .
+                    $payment->installment_trans_code,
+                'doc_attachment' => $fileName,
+            ]);
+
+            // buat update ke tabel installment_payment_transactions (nyimpen path file kwitansi)
+            $payment->update([
+                'installment_payment_receipt' => $fileName,
+            ]);
+
+            DB::commit();
+
+            return redirect("/admin/financings/show/{$financing->id}")
+                ->with([
+                    'success' => 'Pembayaran berhasil diproses',
+                    'pdf_url' => asset('storage/' . $fileName),
+                ]);
+
+        } catch (\Throwable $th) {
+
+            DB::rollBack();
+
+            return back()->withErrors([
+                'message' => $th->getMessage(),
+            ]);
+        }
+    }
+
+    public function reschedulePayment(Request $request, Financing $financing)
+    {
+        $validated = $request->validate([
+            'installment_id' => 'required|exists:installments,id',
+            'due_date' => 'required|date',
+        ]);
+
+        try {
+
+            $installment = Installment::findOrFail(
+                $validated['installment_id']
+            );
+
+            $installment->update([
+                'due_day' => Carbon::parse(
+                    $validated['due_date']
+                )->day,
+            ]);
+
+            return redirect("/admin/financings/show/{$financing->id}")
+                ->with(
+                    'success',
+                    'Jadwal pembayaran berhasil diperbarui'
+                );
+
+        } catch (\Throwable $th) {
+
+            return back()->withErrors([
+                'message' => $th->getMessage(),
+            ]);
+        }
+    }
 }

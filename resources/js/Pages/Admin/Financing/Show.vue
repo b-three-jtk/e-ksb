@@ -62,7 +62,7 @@ const breadcrumbItems = [
                             <span class="icon-[tabler--moneybag-move]" style="width: 18px; height: 18px;"></span>
                             Pelunasan Dipercepat
                         </Button>
-                        <Button variant="info" size="small">
+                        <Button v-if="data.installment && data.status == 'Angsuran Berjalan'" :href="`/admin/financings/${data.id}/payments/create`" variant="info" size="small">
                             <span class="icon-[tabler--credit-card-pay]" style="width: 18px; height: 18px;"></span>
                             Bayar Tagihan
                         </Button>
