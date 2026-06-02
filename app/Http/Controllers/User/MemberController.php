@@ -87,6 +87,7 @@ class MemberController extends Controller
                 'total_obligation' => $totalObligation,
             ],
             'has_existing_resign' => $hasExistingResign,
+            'member_status' => $user->member->status,
         ]);
     }
 
@@ -110,11 +111,13 @@ class MemberController extends Controller
             ]);
         }
 
-        $hasObligation = Financing::where('member_id', $user->member->id)
+        $totalObligation = DB::table('get_total_financing')
+            ->where('member_id', $user->member->id)
             ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->exists();
+            ->sum('total_financing');
 
-        if ($hasObligation) {
+
+        if ($totalObligation > 0) {
             return back()->withErrors([
                 'resign' => 'Anda masih memiliki kewajiban finansial yang belum dilunasi. Silakan selesaikan kewajiban tersebut sebelum mengajukan pengunduran diri.',
             ]);
