@@ -71,6 +71,7 @@ function submitReschedule() {
             'Tanggal reschedule wajib diisi',
             {
                 type: 'error',
+                position: 'bottom-right',
             },
         )
         return
@@ -95,6 +96,7 @@ function submitReschedule() {
                     'Jadwal pembayaran berhasil diperbarui',
                     {
                         type: 'success',
+                        position: 'bottom-right',
                     },
                 )
                 closeReschedule()
@@ -108,6 +110,7 @@ function submitReschedule() {
                     'Gagal melakukan reschedule',
                     {
                         type: 'error',
+                        position: 'bottom-right',
                     },
                 )
             },
@@ -148,11 +151,13 @@ function handleSubmit() {
             preserveScroll: true,
 
             onSuccess: (page) => {
+                console.log(page.props.flash)
 
                 toast(
                     'Pembayaran berhasil diposting',
                     {
                         type: 'success',
+                        position: 'bottom-right',
                     },
                 )
 
@@ -172,6 +177,7 @@ function handleSubmit() {
                     'Terjadi kesalahan saat memproses pembayaran',
                     {
                         type: 'error',
+                        position: 'bottom-right',
                     },
                 )
             },

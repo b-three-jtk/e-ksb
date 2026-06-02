@@ -14,6 +14,7 @@ import MembersIcon from "@/Icons/MembersIcon.vue";
 import SavingsIcon from "@/Icons/SavingsIcon.vue";
 import PersonAlertIcon from "@/Icons/PersonAlertIcon.vue";
 import FinanceIcon from "@/Icons/FinanceIcon.vue";
+import AccountIcon from "@/Icons/AccountIcon.vue";
 
 const page = usePage()
 
@@ -65,6 +66,12 @@ const menuGroups = [
                 name: "Pengurus",
                 path: "/admin/list",
                 permission: "view_pengurus"
+            },
+            {
+                icon: AccountIcon,
+                name: "Pengelolaan Akun",
+                path: "/admin/accounts/list",
+                permission: "view_kas"
             },
             {
                 icon: FinanceIcon,

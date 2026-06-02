@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
+use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\User\UserController as UserUserController;
 use App\Http\Controllers\User\UserFinancingController;
 use Illuminate\Support\Facades\Route;
@@ -143,6 +144,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/financings/{financing}/reschedule', [FinancingController::class, 'reschedulePayment'])->name('financing.payments.reschedule');
 
     // Pengelolaan Kas
+    Route::get('/accounts/list', [AccountController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
+    Route::post('/accounts/create', [AccountController::class, 'store'])->middleware('permission:create_kas')->name('accounts.create');
+    Route::patch('/accounts/{id}/status', [AccountController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
     // Pengaturan Umum
 
     // Personal

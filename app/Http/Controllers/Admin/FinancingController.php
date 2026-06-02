@@ -26,6 +26,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
 use App\Models\MemberDoc;
+use App\Models\InstallmentPaymentTransaction;
 use App\Services\Admin\RepaymentService;
 use Carbon\Carbon;
 use Exception;
@@ -741,7 +742,7 @@ class FinancingController extends Controller
         ]);
     }
 
-public function storeRepayment(CreateRepaymentRequest $request, RepaymentService $service)
+    public function storeRepayment(CreateRepaymentRequest $request, RepaymentService $service)
     {
         try {
             $transaction = $service->processRepayment($request->validated(), auth()->id());
