@@ -22,7 +22,12 @@ class CreateResignRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'document' => 'required|file|mimes:pdf,doc,docx|max:2048',
+            'document' => [
+                'required',
+                'file',
+                'extensions:pdf,doc,docx',
+                'max:2048',
+            ],
         ];
     }
 
