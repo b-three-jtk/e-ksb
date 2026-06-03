@@ -243,6 +243,7 @@ const breadcrumbItems = [
                 <template #cell-aksi="{ row }">
                     <div class="flex justify-center gap-3">
                         <Link
+                            v-if="can['edit_anggota']"
                             :href="`/admin/users/${row.id}/edit`"
                             class="text-gray-500 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
                         >

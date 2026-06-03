@@ -87,16 +87,23 @@ class UserController extends Controller
             : 'joined_date';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $query = User::with('member.savingAccounts')
-            ->whereHas('member')
-            ->whereNotNull('joined_date')
-            ->whereNotNull('user_code');
-
         $memberBaseQuery = User::with('member.savingAccounts')
             ->whereHas('member');
 
+        if (auth()->user()->hasRole(UserRoleEnum::PJANGGOTA->value)) {
+            $memberBaseQuery->whereHas('member', function ($q) {
+                $q->where('pj_user_id', auth()->id());
+            });
+        }
+
         $verifiedMembersQuery = (clone $memberBaseQuery)
             ->whereNotNull('joined_date');
+
+        $query = clone $memberBaseQuery;
+
+        $query
+            ->whereNotNull('joined_date')
+            ->whereNotNull('user_code');
 
         $totalVerifiedMembers = $verifiedMembersQuery->count();
 

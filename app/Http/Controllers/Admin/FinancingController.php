@@ -768,7 +768,6 @@ class FinancingController extends Controller
         ]);
 
         $installment = $financing->installment()
-            ->where('status', InstallmentPaymentScheduleStatusEnum::PENDING->value)
             ->orderBy('installment_no')
             ->first();
 
