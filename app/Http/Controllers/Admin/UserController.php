@@ -88,19 +88,12 @@ class UserController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
         $query = User::with('member.savingAccounts')
-            ->whereHas(
-                'roles',
-                fn($q) =>
-                $q->where('name', UserRoleEnum::ANGGOTA->value)
-            )
+            ->whereHas('member')
             ->whereNotNull('joined_date')
             ->whereNotNull('user_code');
 
-        $memberBaseQuery = User::with('member.savingAccounts')->whereHas(
-            'roles',
-            fn($q) =>
-            $q->where('name', UserRoleEnum::ANGGOTA->value)
-        );
+        $memberBaseQuery = User::with('member.savingAccounts')
+            ->whereHas('member');
 
         $verifiedMembersQuery = (clone $memberBaseQuery)
             ->whereNotNull('joined_date');
