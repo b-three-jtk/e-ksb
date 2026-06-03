@@ -62,7 +62,7 @@ onMounted(() => {
 const columns = [
     { key: 'no', label: 'No' },
     { key: 'no_anggota', label: 'No Anggota' },
-    { key: 'profil', label: 'Profil Anggota', sortable: true },
+    { key: 'profil', label: 'Nama Anggota', sortable: true },
     { key: 'joined_at', label: 'Tanggal Bergabung', sortable: true },
     { key: 'phone', label: 'Kontak' },
     { key: 'total_simpanan', label: 'Total Simpanan', align: 'right' },
@@ -212,14 +212,14 @@ const breadcrumbItems = [
 
                 <template #cell-profil="{ row }">
                     <div class="flex items-center gap-3">
-                        <img v-if="row.avatar" :src="row.avatar" class="w-9 h-9 rounded-full object-cover" />
+                        <!-- <img v-if="row.avatar" :src="row.avatar" class="w-9 h-9 rounded-full object-cover" />
                         <div
                             v-else
                             class="w-9 h-9 flex items-center justify-center
                                 rounded-full bg-gray-200 dark:bg-gray-700"
                         >
                             <UserIcon />
-                        </div>
+                        </div> -->
                         <span>{{ row.name }}</span>
                     </div>
                 </template>
