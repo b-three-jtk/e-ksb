@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Enums\FinancingReqStatusEnum;
 use App\Enums\FinancingPaymentMethodEnum;
+use App\Enums\FinancingReqStatusEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PaymentMethodsEnum;
 use App\Models\Financing;
 use App\Models\FinancingItem;
@@ -90,6 +91,7 @@ class MurabahaProductSeeder extends Seeder
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
             'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin->id,
+            'tenor' => 12,
         ]);
 
         // Create Financing Item
@@ -104,19 +106,19 @@ class MurabahaProductSeeder extends Seeder
         ]);
 
         // Create Installment (tenor 12 bulan)
-        $tenor = 12;
-        $installment = Installment::create([
-            'financing_id' => $financing->id,
-            'tenor' => $tenor,
-            'due_day' => now()->day,
-        ]);
+        for ($i = 1; $i <= 12; $i++) {
+            $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / 12;
 
-        // Create Payment Transactions (sesuai bulan yang sudah lewat)
-        $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $tenor;
-        $akadDate = Carbon::parse($financing->akad_date);
-        $paidMonths = now()->diffInMonths($akadDate);
+            $installment = Installment::create([
+                'financing_id' => $financing->id,
+                'installment_no' => $i,
+                'due_date' => now()->addMonths($i),
+                'amount' => $monthlyPayment,
+                'status' => now()->addMonths($i)->isPast() ? InstallmentPaymentScheduleStatusEnum::PENDING->value : InstallmentPaymentScheduleStatusEnum::PAID->value,
+            ]);
 
-        for ($i = 1; $i <= min($paidMonths, $tenor); $i++) {
+            $akadDate = Carbon::parse($financing->akad_date);
+
             InstallmentPaymentTransaction::create([
                 'installment_trans_code' => $this->getUniqueTransCode(),
                 'installment_id' => $installment->id,
@@ -190,23 +192,24 @@ class MurabahaProductSeeder extends Seeder
             'product_type_id' => ProductType::where('product_type_name', $item['type'])->first()?->id,
         ]);
 
-        // Create Installment
-        $installment = Installment::create([
-            'financing_id' => $financing->id,
-            'tenor' => $tenor,
-            'due_day' => now()->day,
-        ]);
+        for ($i = 1; $i <= 12; $i++) {
+            $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $tenor;
 
-        // Create ALL Payment Transactions (semua sudah dibayar)
-        $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $tenor;
-        $akadDate = Carbon::parse($financing->akad_date);
+            $installment = Installment::create([
+                'financing_id' => $financing->id,
+                'installment_no' => $i,
+                'due_date' => now()->addMonths($i),
+                'amount' => $monthlyPayment,
+                'status' => now()->addMonths($i)->isPast() ? InstallmentPaymentScheduleStatusEnum::PENDING->value : InstallmentPaymentScheduleStatusEnum::PAID->value,
+            ]);
 
-        for ($i = 1; $i <= $tenor; $i++) {
+            $akadDate = Carbon::parse($financing->akad_date);
+
             InstallmentPaymentTransaction::create([
                 'installment_trans_code' => $this->getUniqueTransCode(),
                 'installment_id' => $installment->id,
                 'nominal' => $monthlyPayment,
-                'payment_method' => PaymentMethodsEnum::CASH->value,
+                'payment_method' => PaymentMethodsEnum::CASHLESS->value,
                 'is_early_repayment' => false,
                 'payment_date' => $akadDate->copy()->addMonths($i),
                 'updated_by' => $admin->id,

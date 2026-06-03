@@ -26,6 +26,7 @@ class Financing extends Model
         'paid_date',
         'status',
         'payment_method',
+        'tenor',
         'signed_akad_document',
 
         'member_id',

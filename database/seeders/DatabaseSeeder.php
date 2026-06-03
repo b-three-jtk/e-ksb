@@ -55,11 +55,7 @@ class DatabaseSeeder extends Seeder
 
             // Create installment schedule
             Installment::factory()
-                ->tenor12()
-                ->create([
-                    'financing_id' => $financing->id,
-                    'due_day' => 5,
-                ]);
+                ->create();
         }
     }
 }
