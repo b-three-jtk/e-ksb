@@ -18,6 +18,8 @@ export function useFinancingForm(initialData = null) {
     const selectedSupplier = ref(null)
     const isSupplierSelected = ref(false)
 
+console.log('init data', initialData.member)
+
     const form = useForm({
         // Member data
         member: {
@@ -52,8 +54,8 @@ export function useFinancingForm(initialData = null) {
             jumlah_cicilan_amount: initialData?.member?.jumlah_cicilan_amount || '',
             jumlah_biaya_lainnya_amount: initialData?.member?.jumlah_biaya_lainnya_amount || '',
 
-            is_have_eligible_saving: initialData?.member?.is_have_eligible_saving || '',
-            is_have_no_obligation: initialData?.member?.is_have_no_obligation || '',
+            is_have_eligible_saving: initialData?.member?.is_have_eligible_saving || null,
+            is_have_no_obligation: initialData?.member?.is_have_no_obligation || null,
             heirs: initialData?.member?.heirs || [],
         },
         // Financing data
@@ -112,25 +114,34 @@ export function useFinancingForm(initialData = null) {
 
 
     // Search members
-    watch(() => searchQuery.value, async (query) => {
+    let searchTimeout = null
+
+    watch(() => searchQuery.value, (query) => {
+        // 1. Bersihkan timer sebelumnya setiap kali user mengetik karakter baru
+        if (searchTimeout) {
+            clearTimeout(searchTimeout)
+        }
+
         if (!query || query.length < 2) {
             memberResults.value = []
             return
         }
 
-        isLoadingSearch.value = true
-        try {
-            const response = await axios.get('/admin/members/search', {
-                params: { q: query }
-            })
-            memberResults.value = response.data.members
-            console.log(memberResults);
-        } catch (error) {
-            console.error('Error searching members:', error)
-            memberResults.value = []
-        } finally {
-            isLoadingSearch.value = false
-        }
+        // 2. Buat timer baru
+        searchTimeout = setTimeout(async () => {
+            isLoadingSearch.value = true
+            try {
+                const response = await axios.get('/admin/members/search', {
+                    params: { q: query }
+                })
+                memberResults.value = response.data.members
+            } catch (error) {
+                console.error('Error searching members:', error)
+                memberResults.value = []
+            } finally {
+                isLoadingSearch.value = false
+            }
+        }, 500) // 500ms delay
     })
 
     // Pilih member
@@ -138,7 +149,7 @@ export function useFinancingForm(initialData = null) {
         selectedMember.value = member
         searchQuery.value = member.name
 
-        console.log(member);
+        console.log('member:',member);
 
         // Update member form
         form.member.user_code = member.user.user_code || ''
@@ -172,8 +183,8 @@ export function useFinancingForm(initialData = null) {
         form.member.jumlah_cicilan_amount = member.financials?.jumlah_cicilan_amount || ''
         form.member.jumlah_biaya_lainnya_amount = member.financials?.jumlah_biaya_lainnya_amount || ''
 
-        form.member.is_have_eligible_saving = member.is_have_eligible_saving || ''
-        form.member.is_have_no_obligation = member.is_have_no_obligation || ''
+        form.member.is_have_eligible_saving = member.is_have_eligible_saving || false
+        form.member.is_have_no_obligation = member.is_have_no_obligation || false
 
         form.documents.family_card = member.family_card || null,
         form.documents.income_slip = member.income_slip || null,
@@ -220,8 +231,8 @@ export function useFinancingForm(initialData = null) {
             jumlah_cicilan_amount: '',
             jumlah_biaya_lainnya_amount: '',
 
-            is_have_eligible_saving: '',
-            is_have_no_obligation: '',
+            is_have_eligible_saving: null,
+            is_have_no_obligation: null,
 
             heirs: [],
         }
@@ -286,10 +297,6 @@ export function useFinancingForm(initialData = null) {
         supplierResults.value = []
         isSupplierSelected.value = true
     }
-
-    const filteredSuppliers = computed(() => {
-        return Array.isArray(supplierResults.value) ? supplierResults.value : []
-    })
 
     const resetSupplierSelection = () => {
         selectedSupplier.value = null
@@ -394,7 +401,6 @@ export function useFinancingForm(initialData = null) {
         isLoadingSearchSupplier,
         selectedSupplier,
         isSupplierSelected,
-        filteredSuppliers,
         // Methods
         resetSupplierSelection,
         resetMemberSelection,

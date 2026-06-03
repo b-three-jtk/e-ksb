@@ -22,6 +22,7 @@ use App\Models\FinancingVerification;
 use App\Models\Installment;
 use App\Models\JournalEntry;
 use App\Models\Member;
+use App\Models\SavingAccount;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
@@ -190,7 +191,6 @@ class FinancingController extends Controller
      */
     private function formatMemberData(Member $member): array
     {
-
         return [
             'id' => $member->id,
             'user_code' => $member->user->user_code,
@@ -284,8 +284,50 @@ class FinancingController extends Controller
      */
     public function create()
     {
+        // Pre-load members dengan criteria tertentu untuk search
+        $activeMembers = Member::with([
+            'user:id,user_code,name,email,nik,phone_number',
+            'memberDocs:id,member_id,doc_name,doc_attachment',
+            'financials',
+            'financings:id,member_id,status',
+            'savingAccounts:id,member_id,saving_type,created_at,balance'
+        ])
+            ->whereHas('user', fn($q) =>
+                $q->whereHas('roles', fn($roleQ) => $roleQ->where('name', 'Anggota'))
+                    ->where('status', UserStatusEnum::ACTIVE->value)
+            )
+            ->limit(20)
+            ->get()
+            ->map(function ($member) {
+                $hasActiveFinancing = $member->financings?->whereIn(
+                    'status',
+                    [
+                        FinancingReqStatusEnum::PENDING_REVIEW->value,
+                        FinancingReqStatusEnum::REJECTED->value,
+                        FinancingReqStatusEnum::APPROVED->value,
+                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                        FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                    ]
+                )->isNotEmpty() ?? false;
+
+                $member->is_have_no_obligation = !$hasActiveFinancing;
+
+                $hasEligibleSaving = $member->savingAccounts
+                    ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+                    ->where('created_at', '<=', now()->subMonth())
+                    ->isNotEmpty();
+
+                $member->is_have_eligible_saving = $hasEligibleSaving;
+                $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
+                $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
+                $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
+
+                return $member;
+            });
+
         return inertia('Admin/Financing/Create', [
             'data' => $this->getCommonData(),
+            'preloadedMembers' => $activeMembers,
         ]);
     }
 
@@ -469,14 +511,14 @@ class FinancingController extends Controller
             }
 
             // VALIDASI 2: PEMOHON HARUS MEMILIKI SIMPANAN AKTIF SATU BULAN
-            // $hasEligibleSaving = SavingAccount::where('member_id', $user->member->id)
-            //     ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
-            //     ->where('created_at', '<=', now()->subMonth())
-            //     ->first();
+            $hasEligibleSaving = SavingAccount::where('member_id', $user->member->id)
+                ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+                ->where('created_at', '<=', now()->subMonth())
+                ->first();
 
-            // if (!$hasEligibleSaving) {
-            //     throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
-            // }
+            if (!$hasEligibleSaving) {
+                throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
+            }
 
             Log::info('storingfinancingdata', ['validated' => $validated, 'user' => $user->id]);
 
@@ -656,7 +698,7 @@ class FinancingController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.financing.index')->with('success', 'Permohonan pembiayaan berhasil disimpan');
+            return redirect()->route('admin.financings.index')->with('success', 'Permohonan pembiayaan berhasil disimpan');
 
         } catch (Exception $e) {
             DB::rollBack();
@@ -680,37 +722,36 @@ class FinancingController extends Controller
                     });
             })
             ->limit(5)
-            ->get();
+            ->get()
+            ->map(function ($member) {
+                $hasActiveFinancing = $member->financings?->whereIn(
+                    'status',
+                    [
+                        FinancingReqStatusEnum::PENDING_REVIEW->value,
+                        FinancingReqStatusEnum::REJECTED->value,
+                        FinancingReqStatusEnum::APPROVED->value,
+                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                        FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                    ]
+                )->isNotEmpty() ?? false;
 
-        $members->map(function ($member) {
-            $hasActiveFinancing = $member->financings?->whereIn(
-                'status',
-                [
-                    FinancingReqStatusEnum::PENDING_REVIEW->value,
-                    FinancingReqStatusEnum::REJECTED->value,
-                    FinancingReqStatusEnum::APPROVED->value,
-                    FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-                    FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-                ]
-            ) ?? false;
-            $member->is_have_no_obligation = !$hasActiveFinancing;
+                $member->is_have_no_obligation = !$hasActiveFinancing;
 
-            $hasEligibleSaving = $member->savingAccounts->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)->contains(function ($account) {
-                $hasBalance = $account->balance > 0;
-                $isOldEnough = $account->created_at->diffInMonths(now()) >= 1;
-                return $hasBalance && $isOldEnough;
+                $hasEligibleSaving = SavingAccount::where('member_id', $member->id)
+                    ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+                    ->where('created_at', '<=', now()->subMonth())
+                    ->exists();
+
+                $member->is_have_eligible_saving = $hasEligibleSaving;
+                $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
+                $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
+                $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
+
+                return $member;
             });
-            $member->is_have_eligible_saving = $hasEligibleSaving;
-            $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
-            $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
-            $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
 
-            return $member;
-        });
-
-        return response()->json(['members' => $members]);
+        return response()->json(['members' => $members->values()]);
     }
-
     public function searchSuppliers(Request $request)
     {
         $query = $request->input('q');
