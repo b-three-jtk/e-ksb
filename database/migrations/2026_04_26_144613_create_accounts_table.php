@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AccountCategoryEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,9 +15,9 @@ return new class extends Migration
         Schema::create('accounts', function (Blueprint $table) {
             $table->string('no_ref_account')->primary();
             $table->string('account_name');
-            $table->string('account_category');
+            $table->enum('account_category', array_column(AccountCategoryEnum::cases(), 'value'));
             $table->decimal('balance', 15, 2)->default(0);
-            $table->string('status')->default('Aktif');
+            $table->enum('status', ['Aktif', 'Non-Aktif'])->default('Aktif');
             $table->timestamps();
         });
     }

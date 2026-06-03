@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Models\JournalEntry;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Account extends Model
 {
+    use HasFactory;
     protected $primaryKey = 'no_ref_account';
     public $incrementing = false;
     protected $keyType = 'string';

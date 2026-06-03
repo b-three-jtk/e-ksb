@@ -7,6 +7,7 @@ use App\Models\FinancingItem;
 use App\Models\Installment;
 use App\Models\Member;
 use App\Models\User;
+use Database\Seeders\JournalSeeder;
 use Database\Seeders\UserSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -26,6 +27,7 @@ class DatabaseSeeder extends Seeder
             ProductTypeSeeder::class,
             SavingProductSeeder::class,
             MurabahaProductSeeder::class,
+            JournalSeeder::class,
         ]);
 
         // Seed demo members
