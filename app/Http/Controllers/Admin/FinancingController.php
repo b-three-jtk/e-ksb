@@ -767,7 +767,10 @@ class FinancingController extends Controller
             'installment',
         ]);
 
-        $installment = $financing->installment;
+        $installment = $financing->installment()
+            ->where('status', InstallmentPaymentScheduleStatusEnum::PENDING->value)
+            ->orderBy('installment_no')
+            ->first();
 
         $paymentCount =
             InstallmentPaymentTransaction::where(
@@ -779,10 +782,7 @@ class FinancingController extends Controller
             $financing->cost_price +
             $financing->margin_amount;
 
-        $angsuranPerBulan =
-            $installment && $installment->tenor > 0
-                ? $hargaJual / $installment->tenor
-                : 0;
+        $angsuranPerBulan = $installment?->amount ?? 0;
 
         $totalTerbayar =
             InstallmentPaymentTransaction::where(
@@ -824,22 +824,16 @@ class FinancingController extends Controller
                     ],
 
                     'installment_per_month' =>
-                        round($angsuranPerBulan),
+                        $installment?->amount ?? 0,
 
                     'remaining_balance' =>
                         max($sisa, 0),
 
                     'next_installment_number' =>
-                        $paymentCount + 1,
+                        $installment?->installment_no,
 
                     'next_due_date' =>
-                        $installment?->due_day
-                            ? now()
-                                ->startOfMonth()
-                                ->addMonth()
-                                ->setDay($installment->due_day)
-                                ->format('Y-m-d')
-                            : null,
+                        $installment?->due_date,
 
                     'financing_id' =>
                         $financing->id,
@@ -889,14 +883,27 @@ class FinancingController extends Controller
                 'updated_by' => auth()->id(),
             ]);
 
+            $installment = Installment::findOrFail(
+                $validated['installment_id']
+            );
+
+            $installment->update([
+                'status' => InstallmentPaymentScheduleStatusEnum::PAID->value,
+            ]);
+
             $hargaJual =
                 $financing->cost_price +
                 $financing->margin_amount;
 
             $totalTerbayar =
-                InstallmentPaymentTransaction::where(
-                    'installment_id',
-                    $validated['installment_id']
+                InstallmentPaymentTransaction::whereHas(
+                    'installment',
+                    function ($q) use ($financing) {
+                        $q->where(
+                            'financing_id',
+                            $financing->id
+                        );
+                    }
                 )->sum('nominal');
 
             $sisa = $hargaJual - $totalTerbayar;
@@ -1069,9 +1076,7 @@ class FinancingController extends Controller
             );
 
             $installment->update([
-                'due_day' => Carbon::parse(
-                    $validated['due_date']
-                )->day,
+                'due_date' => $validated['due_date'],
             ]);
 
             return redirect("/admin/financings/show/{$financing->id}")

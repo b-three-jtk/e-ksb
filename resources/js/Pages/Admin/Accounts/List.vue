@@ -9,6 +9,7 @@ import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import BaseTable from '../../../Components/Table/BaseTable.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
+import CardInfo from '../../../Components/CardInfo.vue'
 
 const props = defineProps<{
     accounts: {
@@ -20,6 +21,10 @@ const props = defineProps<{
     }
     filters: Record<string, any>
     jenisAkunOptions: string[]
+    accountSummary: { 
+        name: string; 
+        balance: number 
+    }[]
 }>()
 
 // Modal state
@@ -82,13 +87,33 @@ const closeModal = () => {
     showModal.value = false
 }
 
-const submitForm = () => {
+const submitForm = async () => {
     if (!validateForm()) {
         toast.error('Lengkapi seluruh data terlebih dahulu', {
             position: 'bottom-right',
         })
         return
     }
+    const result = await Swal.fire({
+        title: 'Konfirmasi Tambah Akun',
+        html: `
+            <div style="text-align:left">
+                <p><b>Nomor Akun:</b> ${form.nomor_akun}</p>
+                <p><b>Nama Akun:</b> ${form.nama_akun}</p>
+                <p><b>Jenis Akun:</b> ${form.jenis_akun}</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Tambahkan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        confirmButtonColor: '#16a34a',
+        cancelButtonColor: '#6b7280',
+    })
+
+    if (!result.isConfirmed) return
+
     isSubmitting.value = true
     router.post(
         '/admin/accounts/create',
@@ -155,7 +180,21 @@ const openStatusModal = (row: any) => {
     showStatusModal.value = true
 }
 
-const updateStatus = () => {
+const updateStatus = async () => {
+    const result = await Swal.fire({
+        title: 'Konfirmasi Perubahan Status',
+        text: `Apakah Anda yakin ingin mengubah status akun menjadi ${statusForm.status}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Simpan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        confirmButtonColor: '#16a34a',
+        cancelButtonColor: '#6b7280',
+    })
+
+    if (!result.isConfirmed) return
+
     router.patch(
         `/admin/accounts/${statusForm.id}/status`,
         {
@@ -190,7 +229,7 @@ const selectFilters = [
         label: 'Semua Status',
         options: [
             { label: 'Aktif', value: 'Aktif' },
-            { label: 'Nonaktif', value: 'Nonaktif' },
+            { label: 'Non-Aktif', value: 'Non-Aktif' },
         ],
         optionLabel: 'label',
         optionValue: 'value',
@@ -252,9 +291,19 @@ const columns = [
     { key: 'nomor_akun', label: 'Nomor Akun', sortable: true, align: 'left' as const },
     { key: 'nama_akun', label: 'Nama Akun', sortable: true },
     { key: 'jenis_akun', label: 'Jenis Akun', align: 'left' as const },
+    { key: 'saldo', label: 'Saldo', align: 'left' as const },
     { key: 'status', label: 'Status', align: 'left' as const },
     { key: 'aksi', label: 'Aksi', align: 'left' as const },
 ]
+
+// Format untuk saldo
+const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    }).format(value || 0)
+}
 
 // Badge class berdasarkan jenis akun
 const jenisClass = (jenis: string) => {
@@ -285,13 +334,12 @@ const breadcrumbItems = [
         <!-- Breadcrumb -->
         <PageBreadcrumb page-title="Pengelolaan Data Akun" :items="breadcrumbItems" />
 
-        <!-- Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-            <!-- Card Header -->
-            <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-                <div>
-                    <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Akun</h2>
-                </div>
+        <!-- Ringkasan -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl p-6 mb-4">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    Ringkasan
+                </h2>
 
                 <button
                     type="button"
@@ -301,6 +349,34 @@ const breadcrumbItems = [
                     <Icon icon="mdi:plus" class="w-5 h-5" />
                     Tambah Akun
                 </button>
+            </div>
+
+            <!-- Card Summary Info -->
+            <div>
+                <div
+                    class="flex gap-4 overflow-x-auto pb-2 w-full"
+                >
+                    <div
+                        v-for="item in props.accountSummary"
+                        :key="item.name"
+                        class="min-w-[280px] flex-none"
+                    >
+                        <CardInfo
+                            :title="`Total ${item.name}`"
+                            :content="formatCurrency(item.balance)"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+            <!-- Card Header -->
+            <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+                <div>
+                    <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Akun</h2>
+                </div>
             </div>
 
             <!-- Filter & Search -->
@@ -349,6 +425,12 @@ const breadcrumbItems = [
                     </span>
                 </template>
 
+                <template #cell-balance="{ row }">
+                    <span class="font-semibold">
+                        {{ formatCurrency(row.balance) }}
+                    </span>
+                </template>
+
                 <template #cell-status="{ row }">
                     <span
                         class="px-4 py-1 text-xs rounded-full font-medium"
@@ -366,7 +448,6 @@ const breadcrumbItems = [
                 <template #cell-aksi="{ row }">
                     <button
                         @click="openStatusModal(row)"
-                        class="text-blue-600 hover:text-blue-700"
                         title="Ubah Status"
                     >
                         <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
@@ -580,7 +661,7 @@ const breadcrumbItems = [
                                     class="w-full border rounded-lg px-4 py-2.5 text-sm"
                                 >
                                     <option value="Aktif">Aktif</option>
-                                    <option value="Nonaktif">Nonaktif</option>
+                                    <option value="Non-Aktif">Non-Aktif</option>
                                 </select>
                             </div>
 

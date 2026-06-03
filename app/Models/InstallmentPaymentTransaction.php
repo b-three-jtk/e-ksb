@@ -27,6 +27,11 @@ class InstallmentPaymentTransaction extends Model
         'payment_date' => 'datetime',
     ];
 
+    public function installment()
+    {
+        return $this->belongsTo(Installment::class);
+    }
+
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Account;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use App\Enums\AccountCategoryEnum;
+use Illuminate\Validation\Rules\Enum;
 
 class AccountController extends Controller
 {
@@ -48,8 +50,17 @@ class AccountController extends Controller
                 'nomor_akun' => $akun->no_ref_account,
                 'nama_akun' => $akun->account_name,
                 'jenis_akun' => $akun->account_category,
+                'saldo' => $akun->balance,
                 'status' => $akun->status,
             ]);
+
+        $summary = collect(AccountCategoryEnum::cases())
+            ->mapWithKeys(function ($category) {
+                return [
+                    $category->value => Account::where('account_category', $category->value)
+                        ->sum('balance'),
+                ];
+            });
 
         return Inertia::render('Admin/Accounts/List', [
             'accounts' => $accounts,
@@ -63,13 +74,17 @@ class AccountController extends Controller
                 'sort_dir' => $request->sort_dir ?? 'asc',
             ],
 
-            'jenisAkunOptions' => [
-                'Aset',
-                'Liabilitas',
-                'Ekuitas',
-                'Pendapatan',
-                'Beban',
-            ],
+            'jenisAkunOptions' => collect(AccountCategoryEnum::cases())
+                ->map(fn ($item) => $item->value)
+                ->values(),
+
+            'accountSummary' => collect(AccountCategoryEnum::cases())
+                ->map(fn ($item) => [
+                    'name' => $item->value,
+                    'balance' => Account::where('account_category', $item->value)
+                        ->sum('balance'),
+                ])
+                ->values(),
         ]);
     }
 
@@ -89,7 +104,7 @@ class AccountController extends Controller
                 ],
                 'jenis_akun' => [
                     'required',
-                    'in:Aset,Liabilitas,Ekuitas,Pendapatan,Beban',
+                    new Enum(AccountCategoryEnum::class),
                 ],
             ],
             [
@@ -117,7 +132,7 @@ class AccountController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:Aktif,Nonaktif',
+            'status' => 'required|in:Aktif,Non-Aktif',
         ]);
 
         $account = Account::findOrFail($id);
