@@ -33,17 +33,12 @@ const {
     searchQuery,
     memberResults,
     isLoadingSearch,
-    selectedMember,
     isMemberSelected,
     searchSupplierQuery,
     supplierResults,
     isLoadingSearchSupplier,
-    selectedSupplier,
     isSupplierSelected,
     filteredSuppliers,
-    totalIncome,
-    totalExpense,
-    netIncome,
     selectMember,
     selectSupplier,
     addIncome,
@@ -71,7 +66,7 @@ const goToStep = (step) => {
     activeStep.value = step
 }
 
-const isStep1Valid = computed(() => isMemberSelected.value && form.member.heirs.length > 0)
+const isStep1Valid = computed(() => isMemberSelected.value && form.member.heirs.length > 0 && (form.financing.status !== 'Belum Ditinjau' || (form.member.is_have_eligible_saving === true && form.member.is_have_no_obligation === true)))
 
 const isStep2Valid = computed(() =>
     (form.documents?.income_slip || form.income_slip_file) && (form.documents?.bank_book || form.bank_book_file) && form.member.job_title && form.member.company_or_business_name && form.member.business_field && form.member.tenure_year && form.member.workplace_contact && form.member.workplace_address
@@ -108,7 +103,7 @@ const isFinalizationValid = computed(() => form.financing.status === 'Disetujui'
 
                 <ProcurementData v-if="activeStep === 4" :form="form" :search-supplier-query="searchSupplierQuery"
                     :is-loading-search-supplier="isLoadingSearchSupplier" :is-supplier-selected="isSupplierSelected"
-                    :filtered-suppliers="filteredSuppliers" @update:search-supplier-query="searchSupplierQuery = $event"
+                    :supplier-results="supplierResults" @update:search-supplier-query="searchSupplierQuery = $event"
                     @selectSupplier="selectSupplier" @resetSupplierSelection="resetSupplierSelection" />
 
                 <Finalization v-if="activeStep === 5" :form="form" />

@@ -9,10 +9,8 @@ const props = defineProps({
     searchSupplierQuery: String,
     isLoadingSearchSupplier: Boolean,
     isSupplierSelected: Boolean,
-    filteredSuppliers: Array,
+    supplierResults: Array,
 })
-
-console.log('Form:', props.form);
 
 watch(() => props.form.financing.price_per_unit, () => {
     const costPrice = (parseFloat(props.form.financing.price_per_unit) || 0) * (parseFloat(props.form.financing.qty) || 0)
@@ -65,9 +63,9 @@ const totalPrice = computed(() => {
                     </div>
 
                     <!-- Search results dropdown -->
-                    <div v-if="filteredSuppliers.length > 0 && !isSupplierSelected"
+                    <div v-if="supplierResults.length > 0 && !isSupplierSelected"
                         class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
-                        <div v-for="supplier in filteredSuppliers" :key="supplier.id"
+                        <div v-for="supplier in supplierResults" :key="supplier.id"
                             @click="$emit('selectSupplier', supplier)"
                             class="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b last:border-0">
                             <div class="font-medium text-dark-text">{{ supplier.supplier_name }}</div>

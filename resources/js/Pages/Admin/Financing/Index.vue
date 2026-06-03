@@ -48,7 +48,7 @@ const filters = reactive({
 const applyFilters = () => {
     isLoading.value = true
     router.get(
-        '/admin/financing',
+        '/admin/financings',
         {
             search: filters.search || undefined,
             per_page: filters.per_page,

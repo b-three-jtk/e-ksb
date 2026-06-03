@@ -3,7 +3,7 @@ import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 import Button from '@/Components/Form/Button.vue'
 import { ref } from 'vue'
 
-defineProps({
+const props = defineProps({
     form: Object,
     searchQuery: String,
     isLoadingSearch: Boolean,
@@ -21,6 +21,24 @@ const heirInput = ref({
     relationship: '',
     heir_contact: '',
 })
+
+console.log('ini member:', props.form.member);
+
+// Validator functions
+const onlyNumbers = (event) => {
+    const input = event.target;
+    input.value = input.value.replace(/[^0-9]/g, '');
+}
+
+const onlyAlpha = (event) => {
+    const input = event.target;
+    input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
+}
+
+const onlyAlphaNumericDash = (event) => {
+    const input = event.target;
+    input.value = input.value.replace(/[^a-zA-Z0-9\s\-.,]/g, '');
+}
 </script>
 
 <template>
@@ -29,11 +47,16 @@ const heirInput = ref({
             <h1 class="card-title">Identitas Pribadi & Ahli Waris</h1>
         </div>
         <!-- kalau dia gak eligible -->
-        <div v-if="form.member.is_have_eligible_saving || form.member.is_have_no_obligation" class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
+        <div v-if="form.member.is_have_eligible_saving === false || form.member.is_have_no_obligation === false"
+            class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative">
             <p>Pemohon tidak memenuhi syarat mengajukan pembiayaan murabahah:</p>
             <ul class="list-disc list-inside mt-2">
-                <li v-if="form.member.is_have_eligible_saving">Memiliki tabungan yang memenuhi syarat</li>
-                <li v-if="form.member.is_have_no_obligation">Tidak memiliki kewajiban atau permohonan pembiayaan aktif</li>
+                <li v-if="form.member.is_have_eligible_saving === false">
+                    Memiliki tabungan anggota yang sudah berjalan selama 1 bulan
+                </li>
+                <li v-if="form.member.is_have_no_obligation === false">
+                    Tidak memiliki kewajiban atau permohonan pembiayaan aktif
+                </li>
             </ul>
         </div>
         <div class="grid grid-cols-2 gap-6 p-4 border-b">
@@ -85,44 +108,46 @@ const heirInput = ref({
 
             <!-- Form fields -->
             <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" :model-value="form.member.name"
-                required :errors="errors.name" />
-            <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" :model-value="form.member.nik" max="16" required
-                :errors="errors.nik" />
+                required :errors="errors.name" @input="onlyAlpha" />
+            <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" :model-value="form.member.nik" max="16"
+                required :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" />
             <BaseInputAdmin label="Email" placeholder="Masukkan email" :model-value="form.member.email" required
-                :errors="errors.email" />
+                :errors="errors.email" type="email" />
             <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="13"
-                :model-value="form.member.phone_number" :errors="errors.phone_number" />
+                :model-value="form.member.phone_number" :errors="errors.phone_number" @input="onlyNumbers" inputmode="numeric" />
             <BaseInputAdmin v-model="form.member.gender" label="Jenis Kelamin" type="radio" required :selectables="[
                 { value: 'Laki-laki', text: 'Laki-laki' },
                 { value: 'Perempuan', text: 'Perempuan' }
             ]" :error="errors.gender">
             </BaseInputAdmin>
             <BaseInputAdmin label="Tempat Lahir" :model-value="form.member.birth_place" :error="errors.birth_place"
-                placeholder="Masukkan tempat lahir" />
+                placeholder="Masukkan tempat lahir" @input="onlyAlpha" />
             <BaseInputAdmin label="Tanggal Lahir" type="date" :model-value="form.member.birth_date"
                 :error="errors.birth_date" />
             <BaseInputAdmin :model-value="form.member.residential_address" label="Alamat" type="textarea"
-                placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address" />
+                placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address" @input="onlyAlphaNumericDash" />
             <BaseInputAdmin :model-value="form.member.domicile_address" label="Alamat Domisili" type="textarea"
-                placeholder="Masukkan alamat domisili" rows="4" :error="errors.domicile_address" />
+                placeholder="Masukkan alamat domisili" rows="4" :error="errors.domicile_address" @input="onlyAlphaNumericDash" />
             <BaseInputAdmin :model-value="form.member.last_education" label="Pendidikan Terakhir" type="select"
                 :selectables="data.educations.map(unit => ({ value: unit, text: unit }))"
                 :error="errors.last_education" />
             <BaseInputAdmin v-model="form.member.marital_status" label="Status Perkawinan" type="select"
                 :selectables="data.marriageStatuses.map(unit => ({ value: unit, text: unit }))" />
-            <BaseInputAdmin v-model="form.member.dependents" label="Jumlah Tanggungan Keluarga" type="number" />
+            <BaseInputAdmin v-model="form.member.dependents" label="Jumlah Tanggungan Keluarga" type="number"
+                @input="onlyNumbers" inputmode="numeric" min="0" />
         </div>
 
         <!-- Heirs section -->
         <div class="flex flex-col gap-4 w-full p-4 border-b border-gray-200">
             <div class="flex gap-4 w-full items-end">
                 <BaseInputAdmin label="Data Ahli Waris" required max="16" pattern="[0-9]{16}"
-                    placeholder="Masukkan NIK Ahli Waris" v-model="heirInput.heir_nik" />
-                <BaseInputAdmin v-model="heirInput.heir_name" placeholder="Nama Ahli Waris" />
+                    placeholder="Masukkan NIK Ahli Waris" v-model="heirInput.heir_nik" @input="onlyNumbers" inputmode="numeric" />
+                <BaseInputAdmin v-model="heirInput.heir_name" placeholder="Nama Ahli Waris" @input="onlyAlpha" />
                 <BaseInputAdmin v-model="heirInput.relationship" type="select"
                     :selectables="data.relationships.map(unit => ({ value: unit, text: unit }))"
                     placeholder="Hubungan dengan anggota" />
-                <BaseInputAdmin v-model="heirInput.heir_contact" max="20" placeholder="Nomor Kontak" />
+                <BaseInputAdmin v-model="heirInput.heir_contact" max="20" placeholder="Nomor Kontak"
+                    @input="onlyNumbers" inputmode="numeric" />
                 <Button variant="primary" @click="$emit('addHeir', heirInput)">
                     Tambah
                 </Button>
