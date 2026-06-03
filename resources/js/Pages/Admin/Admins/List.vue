@@ -13,7 +13,7 @@ import Button from '../../../Components/Form/Button.vue'
 const columns = [
     { key: 'no', label: 'No' },
     { key: 'nik', label: 'NIK' },
-    { key: 'name', label: 'Profil Pengurus', sortable: true },
+    { key: 'name', label: 'Nama Pengurus', sortable: true },
     { key: 'email', label: 'Email' },
     { key: 'posisi', label: 'Posisi' },
     { key: 'status', label: 'Status', align: 'center' },
@@ -40,9 +40,9 @@ const selectFilters = [
         key: 'status',
         label: 'Semua Status',
         options: [
-            { label: 'Aktif', value: 'Aktif' },
-            { label: 'Tidak Aktif', value: 'Tidak Aktif' },
-            { label: 'Mengundurkan Diri', value: 'Mengundurkan Diri' },
+            { label: 'Anggota', value: 'Anggota' },
+            { label: 'Non Anggota', value: 'Non Anggota' },
+
         ],
         optionLabel: 'label',
         optionValue: 'value',
@@ -150,14 +150,14 @@ const breadcrumbItems = [
 
                 <template #cell-name="{ row }">
                     <div class="flex items-center gap-3">
-                        <img v-if="row.avatar" :src="row.avatar" class="w-9 h-9 rounded-full object-cover" />
+                        <!-- <img v-if="row.avatar" :src="row.avatar" class="w-9 h-9 rounded-full object-cover" />
                          <div
                             v-else
                             class="w-9 h-9 flex items-center justify-center
                                 rounded-full bg-gray-200 dark:bg-gray-700"
                         >
                             <UserIcon />
-                        </div>
+                        </div> -->
                         <span class="font-medium">{{ row.name }}</span>
                     </div>
                 </template>
@@ -167,10 +167,10 @@ const breadcrumbItems = [
                         class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
                         :class="{
                             'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
-                                row.status === 'Member',
+                                row.status === 'Anggota',
 
                             'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300':
-                                row.status === 'Non Member',
+                                row.status === 'Non Anggota',
                         }"
                     >
                         {{ row.status }}
