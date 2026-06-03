@@ -29,16 +29,14 @@ class AdminController extends Controller
 
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $allowedAdminStatuses = [
-            UserStatusEnum::ACTIVE->value,
-            UserStatusEnum::INACTIVE->value,
-        ];
-
         $admins = User::with(['roles', 'member'])
-            ->whereHas('roles', fn ($q) =>
-                $q->whereNotIn('name', [UserRoleEnum::ANGGOTA->value])
-            )
-            ->whereIn('status', $allowedAdminStatuses)
+            ->whereHas('roles', function ($q) {
+                $q->whereNotIn('name', [UserRoleEnum::ANGGOTA->value]);
+            })
+            ->whereIn('status', [
+                UserStatusEnum::ACTIVE->value,
+                UserStatusEnum::INACTIVE->value,
+            ])
             ->when($request->search, function ($q) use ($request) {
                 $q->where(function ($qq) use ($request) {
                     $qq->where('name', 'like', "%{$request->search}%")
@@ -46,14 +44,17 @@ class AdminController extends Controller
                         ->orWhere('email', 'like', "%{$request->search}%");
                 });
             })
+            ->when($request->status === 'Anggota', function ($q) {
+                $q->whereHas('member');
+            })
+            ->when($request->status === 'Non Anggota', function ($q) {
+                $q->whereDoesntHave('member');
+            })
             ->when(
-                $request->status && in_array($request->status, $allowedAdminStatuses),
-                fn($q) => $q->where('status', $request->status)
-            )
-            ->when($request->roles && !in_array($request->roles, [UserRoleEnum::ANGGOTA->value]),
+                $request->role,
                 fn ($q) =>
                     $q->whereHas('roles', fn ($r) =>
-                        $r->where('name', $request->roles)
+                        $r->where('name', $request->role)
                     )
             )
             ->orderBy($sortBy, $sortDir)
@@ -66,8 +67,8 @@ class AdminController extends Controller
                 'email' => $user->email,
                 'posisi' => $user->getRoleNames()->first(),
                 'status' => $user->member
-                    ? 'Member'
-                    : 'Non Member',
+                    ? 'Anggota'
+                    : 'Non Anggota',
 
                 'avatar' => $user->profile_picture
                     ? asset('storage/' . $user->profile_picture)
