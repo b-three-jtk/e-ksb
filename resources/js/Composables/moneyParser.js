@@ -1,6 +1,6 @@
 export default function moneyParser(value) {
     if (value === null || value === undefined || value === '') {
-        return 'Rp 0'
+        return 'Rp0'
     }
 
     let num

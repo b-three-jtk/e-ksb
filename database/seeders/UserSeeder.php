@@ -16,6 +16,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         Member::factory()->count(100)->create();
+        User::factory()->count(20)->create();
 
         // SIMULATION FOR DEFAULT USERS
         $dps = User::create([
