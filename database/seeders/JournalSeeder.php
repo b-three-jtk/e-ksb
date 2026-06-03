@@ -98,7 +98,7 @@ class JournalSeeder extends Seeder
         for ($i = 1; $i <= 12; $i++) {
             JournalEntry::factory()->create([
                 'no_ref_account' => '401',
-                'position' => 'Kredit',
+                'position' => 'Credit',
                 'nominal' => 50000000 / 12,
                 'transaction_date' => now()->subMonths(12 - $i),
             ]);
