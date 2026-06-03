@@ -57,7 +57,7 @@ class Financing extends Model
     // Angsuran
     public function installment()
     {
-        return $this->hasOne(Installment::class);
+        return $this->hasMany(Installment::class);
     }
 
     // Objek Pembiayaan
