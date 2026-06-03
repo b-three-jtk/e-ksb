@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('no_ref_account')->primary();
             $table->string('account_name');
             $table->string('account_category');
+            $table->decimal('balance', 15, 2)->default(0);
             $table->string('status')->default('Aktif');
             $table->timestamps();
         });

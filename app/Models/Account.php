@@ -15,6 +15,7 @@ class Account extends Model
         'account_name',
         'account_category',
         'status',
+        'balance',
     ];
 
     public function journalEntries()
