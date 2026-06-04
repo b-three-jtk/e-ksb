@@ -25,7 +25,16 @@ class MemberController extends Controller
             ->where('member_id', $user->member->id)
             ->sum('balance');
 
-        $totalInstallment = DB::table('get_total_financing')->where('member_id', $user->member->id)->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->sum('total_financing');
+        $totalInstallment = Installment::whereHas('financing', function ($q) use ($user) {
+            $q->where('member_id', $user->member->id)
+            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value);
+        })
+        ->whereIn('status', [
+            InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            InstallmentPaymentScheduleStatusEnum::PENDING->value,
+            InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
+        ])
+        ->sum('amount');
 
         $ledger = SavingTransaction::whereHas(
             'savingAccount.member',
@@ -44,15 +53,14 @@ class MemberController extends Controller
                 ];
             });
 
-        $activeMurabahahCount = Financing::where('member_id', $user->member->id)
-            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->count();
+        $totalPoints = PointTransaction::where('user_id', $user->id)
+            ->sum('amount_earned');
 
         return inertia('User/Dashboard', [
             'summary' => [
                 'total_saving' => $totalSaving,
                 'total_installment' => $totalInstallment,
-                'murabahah_count' => $activeMurabahahCount,
+                'total_points' => $totalPoints,
             ],
             'ledger' => $ledger,
         ]);
