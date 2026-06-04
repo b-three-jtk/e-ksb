@@ -17,6 +17,8 @@ use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\FinancingController as UserFinancingController;
 use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\User\UserController as UserUserController;
+use App\Http\Controllers\User\UserFinancingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -136,14 +138,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/financings/repayment', [FinancingController::class, 'storeRepayment'])->middleware('permission:edit_murabahah')->name('financings.repayment.request');
     Route::get('repayment/{id}/receipt', [FinancingController::class, 'viewRepaymentReceipt'])->middleware('permission:edit_murabahah')->name('financings.repayment.view');
     Route::get('repayment/{id}/download', [FinancingController::class, 'downloadRepaymentReceipt'])->middleware('permission:edit_murabahah')->name('financings.repayment.download');
-    Route::get('/financings/{financing}/payments/create',[FinancingController::class, 'createPayment'])->name('financing.payments.create');
-    Route::post('/financings/{financing}/payments', [FinancingController::class, 'storePayment'])->name('financing.payments.store');
-    Route::post('/financings/{financing}/reschedule', [FinancingController::class, 'reschedulePayment'])->name('financing.payments.reschedule');
+    Route::get('/financings/{financing}/payments/create',[FinancingController::class, 'createPayment'])->middleware('permission:edit_murabahah')->name('financing.payments.create');
+    Route::post('/financings/{financing}/payments/store', [FinancingController::class, 'storePayment'])->middleware('permission:edit_murabahah')->name('financing.payments.store');
+    Route::post('/financings/{financing}/payments/reschedule', [FinancingController::class, 'reschedulePayment'])->middleware('permission:edit_murabahah')->name('financing.payments.reschedule');
 
     // Pengelolaan Kas
     Route::get('/accounts/list', [AccountController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
     Route::post('/accounts/create', [AccountController::class, 'store'])->middleware('permission:create_kas')->name('accounts.create');
     Route::patch('/accounts/{id}/status', [AccountController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
+
     // Pengaturan Umum
     Route::middleware('role:' . UserRoleEnum::KETUA->value)->group(function () {
         Route::get('/settings', [SettingsController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
