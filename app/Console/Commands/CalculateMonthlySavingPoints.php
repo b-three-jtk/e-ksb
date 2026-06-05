@@ -17,11 +17,12 @@ class CalculateMonthlySavingPoints extends Command
 
     public function handle(): int
     {
+        $calculationDate = now()->toDateString();
         $periodDate = now()->copy()->endOfMonth()->toDateString();
         $periodLabel = Carbon::parse($periodDate)->translatedFormat('F Y');
 
-        $savingPointAmount = $this->resolveActiveSettingValue('saving_point_amount', $periodDate);
-        $savingPointReward = $this->resolveActiveSettingValue('saving_point_reward', $periodDate);
+        $savingPointAmount = $this->resolveActiveSettingValue('saving_point_amount', $calculationDate);
+        $savingPointReward = $this->resolveActiveSettingValue('saving_point_reward', $calculationDate);
 
         if ($savingPointAmount === null || $savingPointReward === null) {
             $this->error('Konfigurasi poin simpanan aktif tidak ditemukan untuk periode perhitungan.');
