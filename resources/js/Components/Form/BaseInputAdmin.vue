@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { VueDatePicker } from '@vuepic/vue-datepicker'
 import ChevronDownIcon from '../../Icons/ChevronDownIcon.vue';
 import moneyParser from '../../Composables/moneyParser';
 
@@ -29,6 +30,30 @@ const inputType = computed(() => {
     return props.type ?? 'text'
 })
 
+const dateValue = computed<Date | null>({
+    get() {
+        if (!props.modelValue) {
+            return null
+        }
+
+        const value = String(props.modelValue)
+        const date = new Date(value)
+
+        return Number.isNaN(date.getTime()) ? null : date
+    },
+    set(value: Date | null) {
+        if (!value) {
+            emit('update:modelValue', '')
+            return
+        }
+
+        const year = value.getFullYear()
+        const month = String(value.getMonth() + 1).padStart(2, '0')
+        const day = String(value.getDate()).padStart(2, '0')
+        emit('update:modelValue', `${year}-${month}-${day}`)
+    },
+})
+
 const handleFileChange = (event: Event) => {
     const target = event.target as HTMLInputElement
     const files = target.files
@@ -46,6 +71,12 @@ const handleFileChange = (event: Event) => {
     }
 }
 
+const datePickerInputClass = computed(() => [
+    'h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+    props.error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10',
+    'dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30',
+])
+
 const emit = defineEmits(['update:modelValue'])
 </script>
 
@@ -55,8 +86,20 @@ const emit = defineEmits(['update:modelValue'])
             {{ label }}<span class="text-red-500" v-if="required">*</span>
         </label>
 
+        <!-- Date Picker Input -->
+        <VueDatePicker v-if="inputType === 'date' && !isMoney"
+            v-model="dateValue"
+            format="yyyy-MM-dd"
+            :time-picker="false"
+            :time-config="{ enableTimePicker: false, ignoreTimeValidation: true }"
+            teleport="body"
+            :input-class="datePickerInputClass"
+            :disabled="isDisabled"
+            :placeholder="placeholder || 'Pilih tanggal'"
+        />
+
         <!-- Regular Input -->
-        <input v-if="!isMoney && (inputType !== 'select' && inputType !== 'textarea' && inputType !== 'radio' && inputType !== 'file')" :type="inputType"
+        <input v-else-if="!isMoney && (inputType !== 'select' && inputType !== 'textarea' && inputType !== 'radio' && inputType !== 'file')" :type="inputType"
             :value="modelValue" @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
             :placeholder="placeholder" :maxlength="max" :minlength="min" :pattern="pattern" :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                 error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
-class LoginController extends Controller
+class AuthenticationController extends Controller
 {
     public function loginPage()
     {
