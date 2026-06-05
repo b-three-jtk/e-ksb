@@ -39,6 +39,8 @@ const selectedNearestDueFilter = ref('all');
 const selectedSavingTransactionFilter = ref('all');
 const isDarkMode = ref(false);
 
+console.log(props);
+
 onMounted(() => {
     isDarkMode.value = document.documentElement.classList.contains('dark')
 
@@ -92,6 +94,10 @@ const applyFilter = () => {
     }, {
         preserveState: true,
         replace: true,
+        only: [
+            'pertumbuhan_pendapatan', 'pertumbuhan_anggota', 'peta_simpanan', 'peta_pembiayaan',
+            'transaksi_terbaru', 'jatuh_tempo_terdekat', 'permohonan_murabahah', 'pembayaran_terlambat', 'transaksi_simpanan_terbaru',
+        ],
     });
 };
 </script>
