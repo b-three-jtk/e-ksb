@@ -8,13 +8,12 @@ use App\Http\Controllers\Admin\ProductTypeController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ResignationController;
 use App\Http\Controllers\Admin\SavingController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
-use App\Http\Controllers\User\UserController as UserUserController;
 use App\Http\Controllers\User\UserFinancingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -156,12 +155,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'revalidate'])->group(function () {
     Route::get('/dashboard', [MemberController::class, 'index'])->name('userDashboard');
 
-    Route::get('/profile', [UserUserController::class, 'profileShow'])->name('profile.show');
-    Route::get('/profile/edit', [UserUserController::class, 'profileEdit'])->name('profile.edit');
-    Route::put('/profile', [UserUserController::class, 'profileUpdate'])->name('profile.update');
-    Route::post('/profile/picture', [UserUserController::class, 'updateProfilePicture'])->name('profile.picture.update');
-    Route::delete('/profile/picture', [UserUserController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
-    Route::post('/profile/update-password', [UserUserController::class, 'updatePassword'])->name('profile.update-password');
+    Route::get('/profile', [MemberController::class, 'profileShow'])->name('profile.show');
+    Route::get('/profile/edit', [MemberController::class, 'profileEdit'])->name('profile.edit');
+    Route::put('/profile', [MemberController::class, 'profileUpdate'])->name('profile.update');
+    Route::post('/profile/picture', [MemberController::class, 'updateProfilePicture'])->name('profile.picture.update');
+    Route::delete('/profile/picture', [MemberController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
+    Route::post('/profile/update-password', [MemberController::class, 'updatePassword'])->name('profile.update-password');
 
     Route::get('/resign', [MemberController::class, 'createResign'])->name('resign.create');
     Route::post('/resign', [MemberController::class, 'storeResign'])->name('resign.store');
