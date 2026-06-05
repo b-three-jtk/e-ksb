@@ -13,11 +13,11 @@ defineProps({
     },
 })
 
-defineEmits(['submit'])
+const emit = defineEmits(['submit'])
 </script>
 
 <template>
-    <form @submit.prevent="$emit('submit')">
+    <form @submit.prevent="emit('submit')">
         <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200">
             <div class="p-6 md:p-8 space-y-6">
                 <h4 class="text-lg font-semibold text-slate-800">Simpanan Pokok</h4>
@@ -34,8 +34,7 @@ defineEmits(['submit'])
                     is-money
                 />
                 <BaseInputAdmin
-                    :model-value="form.saving_pokok_effective_date"
-                    @update:model-value="form.saving_pokok_effective_date = $event"
+                    v-model="form.saving_pokok_effective_date"
                     label="Tanggal Berlaku"
                     type="date"
                     required
@@ -58,8 +57,7 @@ defineEmits(['submit'])
                     is-money
                 />
                 <BaseInputAdmin
-                    :model-value="form.saving_wajib_effective_date"
-                    @update:model-value="form.saving_wajib_effective_date = $event"
+                    v-model="form.saving_wajib_effective_date"
                     label="Tanggal Berlaku"
                     type="date"
                     required

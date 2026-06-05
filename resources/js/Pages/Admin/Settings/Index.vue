@@ -8,9 +8,12 @@ import { formatCurrency } from '../../../utils/currency'
 import FormPoin from './FormPoin.vue'
 import FormSimpanan from './FormSimpanan.vue'
 import FormPembiayaan from './FormPembiayaan.vue'
+import BaseTable from '@/Components/Table/BaseTable.vue'
+import Swal from 'sweetalert2'
 
 const props = defineProps({
     settings: Object,
+    settingsHistory: Object,
 })
 
 const tabs = [
@@ -77,6 +80,23 @@ const formatMoney = (value) => {
 
     return formatCurrency(numberValue)
 }
+
+const formatHistoryValue = (value, key) => {
+    if (key === 'murabahah_margin_percentage') {
+        return `${formatInteger(value)} %`
+    }
+
+    if (['saving_point_amount', 'saving_pokok_amount', 'saving_wajib_amount'].includes(key)) {
+        return formatMoney(value)
+    }
+
+    if (key === 'saving_point_reward') {
+        return formatInteger(value)
+    }
+
+    return value ?? '-'
+}
+
 
 const sectionTitle = computed(() => {
     if (activeTab.value === 'points') return 'Penetapan Besaran Poin'
@@ -178,6 +198,8 @@ const syncForms = () => {
     forms.financing.effective_date = props.settings?.financing?.murabahah_margin_percentage?.effective_date ?? ''
 }
 
+const historyItems = computed(() => props.settingsHistory?.[activeTab.value] ?? [])
+
 watch(() => props.settings, syncForms, { immediate: true, deep: true })
 
 const submitSection = (section) => {
@@ -199,6 +221,51 @@ const submitSection = (section) => {
             processingSection.value = null
         },
     })
+}
+
+const historyColumns = [
+    {
+        key: 'label',
+        label: 'Pengaturan',
+    },
+    {
+        key: 'value',
+        label: 'Nilai',
+    },
+    {
+        key: 'effective_date',
+        label: 'Tanggal Berlaku',
+    },
+    {
+        key: 'updated_by',
+        label: 'Diubah Oleh',
+    },
+    {
+        key: 'updated_at',
+        label: 'Diubah Pada',
+    },
+]
+
+const submitAlert = async (section) => {
+    const result = await Swal.fire({
+        title: 'Simpan Pengaturan?',
+        text: activeTab.value === 'points'
+            ? 'Perubahan konfigurasi poin akan disimpan.'
+            : activeTab.value === 'savings'
+                ? 'Perubahan konfigurasi simpanan akan disimpan.'
+                : 'Perubahan konfigurasi margin pembiayaan akan disimpan.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Simpan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        confirmButtonColor: '#007943',
+        cancelButtonColor: '#d33',
+    })
+
+    if (result.isConfirmed) {
+        submitSection(section)
+    }
 }
 
 const isProcessing = (section) => processingSection.value === section
@@ -236,7 +303,7 @@ const isProcessing = (section) => processingSection.value === section
             </div>
 
             <div class="relative pt-4">
-                <div class="flex gap-2 absolute -top-4 left-6 z-10 flex-wrap">
+                <div class="flex gap-1 mb-[-1px]">
                     <button
                         v-for="tab in tabs"
                         :key="tab.key"
@@ -251,7 +318,7 @@ const isProcessing = (section) => processingSection.value === section
                     </button>
                 </div>
 
-                <div class="rounded-2xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] overflow-hidden">
+                <div class="rounded-b-2xl rounded-tr-2xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] overflow-hidden">
                     <div class="px-6 py-5 border-b border-slate-200">
                         <h3 class="text-xl font-semibold text-slate-800">
                             {{ sectionTitle }}
@@ -262,7 +329,7 @@ const isProcessing = (section) => processingSection.value === section
                         <FormPoin
                             :form="forms.points"
                             :is-processing="isProcessing('points')"
-                            @submit="submitSection('points')"
+                            @submit="submitAlert('points')"
                         />
                     </div>
 
@@ -270,48 +337,49 @@ const isProcessing = (section) => processingSection.value === section
                         <FormSimpanan
                             :form="forms.savings"
                             :is-processing="isProcessing('savings')"
-                            @submit="submitSection('savings')"
+                            @submit="submitAlert('savings')"
                         />
                     </div>
 
-                    <div v-else-if="activeTab === 'financing'" class="p-0">
+                    <div v-else-if="activeTab === 'financing'" class="p-6 md:p-8">
                         <FormPembiayaan
                             :form="forms.financing"
                             :is-processing="isProcessing('financing')"
-                            @submit="submitSection('financing')"
+                            @submit="submitAlert('financing')"
                         />
                     </div>
+                </div>
 
-                    <div v-else class="p-6 md:p-8">
-                        <form class="space-y-6" @submit.prevent="submitSection('financing')">
-                            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                <BaseInputAdmin
-                                    v-model="forms.financing.murabahah_margin_percentage"
-                                    label="Persentase Margin"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    step="0.01"
-                                    required
-                                    :is-disabled="isProcessing('financing')"
-                                    placeholder="Masukkan persentase margin koperasi"
-                                />
+                <div class="rounded-2xl mt-4 border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] overflow-hidden">
+                    <div class="px-6 py-5 border-b border-slate-200">
+                        <h3 class="text-lg font-semibold text-slate-800">Riwayat Pengaturan {{ sectionTitle }}</h3>
+                    </div>
 
-                                <BaseInputAdmin
-                                    v-model="forms.financing.effective_date"
-                                    label="Tanggal Berlaku"
-                                    type="date"
-                                    required
-                                    :is-disabled="isProcessing('financing')"
-                                />
-                            </div>
+                    <div class="max-h-[400px] overflow-auto mt-4 m-6">
+                        <BaseTable
+                            :columns="historyColumns"
+                            :data="historyItems"
+                        >
+                            <template #cell-value="{ row }">
+                                {{ formatHistoryValue(row.value, row.key) }}
+                            </template>
 
-                            <div class="flex justify-end">
-                                <Button type="submit" size="medium" variant="success" :disabled="isProcessing('financing')">
-                                    {{ isProcessing('financing') ? 'Menyimpan...' : 'Simpan Pengaturan' }}
-                                </Button>
-                            </div>
-                        </form>
+                            <template #cell-effective_date="{ row }">
+                                {{ formatDate(row.effective_date) }}
+                            </template>
+
+                            <template #cell-updated_by="{ row }">
+                                {{ row.updated_by || '-' }}
+                            </template>
+
+                            <template #cell-updated_at="{ row }">
+                                {{ formatDate(row.updated_at) }}
+                            </template>
+
+                            <template #empty>
+                                Belum ada riwayat perubahan untuk bagian ini.
+                            </template>
+                        </BaseTable>
                     </div>
                 </div>
             </div>

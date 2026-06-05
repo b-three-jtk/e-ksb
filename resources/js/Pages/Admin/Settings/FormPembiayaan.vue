@@ -13,11 +13,11 @@ defineProps({
     },
 })
 
-defineEmits(['submit'])
+const emit = defineEmits(['submit'])
 </script>
 
 <template>
-    <form class="space-y-6" @submit.prevent="$emit('submit')">
+    <form class="space-y-6" @submit.prevent="emit('submit')">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <BaseInputAdmin
                 :model-value="form.murabahah_margin_percentage"
@@ -32,8 +32,7 @@ defineEmits(['submit'])
                 placeholder="Masukkan persentase margin koperasi"
             />
             <BaseInputAdmin
-                :model-value="form.effective_date"
-                @update:model-value="form.effective_date = $event"
+                v-model="form.effective_date"
                 label="Tanggal Berlaku"
                 type="date"
                 required
