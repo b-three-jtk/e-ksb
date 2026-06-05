@@ -1,0 +1,50 @@
+<script setup>
+import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
+import Button from '@/Components/Form/Button.vue'
+
+defineProps({
+    form: {
+        type: Object,
+        required: true,
+    },
+    isProcessing: {
+        type: Boolean,
+        default: false,
+    },
+})
+
+defineEmits(['submit'])
+</script>
+
+<template>
+    <form class="space-y-6" @submit.prevent="$emit('submit')">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <BaseInputAdmin
+                :model-value="form.murabahah_margin_percentage"
+                @update:model-value="form.murabahah_margin_percentage = $event"
+                label="Persentase Margin"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                required
+                :is-disabled="isProcessing"
+                placeholder="Masukkan persentase margin koperasi"
+            />
+            <BaseInputAdmin
+                :model-value="form.effective_date"
+                @update:model-value="form.effective_date = $event"
+                label="Tanggal Berlaku"
+                type="date"
+                required
+                :is-disabled="isProcessing"
+            />
+        </div>
+
+        <div class="flex justify-end">
+            <Button type="submit" size="medium" variant="success" :disabled="isProcessing">
+                {{ isProcessing ? 'Menyimpan...' : 'Simpan Pengaturan' }}
+            </Button>
+        </div>
+    </form>
+</template>
