@@ -43,6 +43,7 @@ class SettingsController extends Controller
         return inertia('Admin/Settings/Index', [
             'title' => 'Pengaturan Umum',
             'settings' => $this->formatSettings(),
+            'settingsHistory' => $this->formatSettingsHistory(),
         ]);
     }
 
@@ -118,14 +119,12 @@ class SettingsController extends Controller
 
     private function formatSettings(): array
     {
+        $records = $this->getAllSettings()->groupBy('key');
         $settings = [];
 
         foreach (self::SETTING_MAP as $section => $items) {
             foreach ($items as $key => $meta) {
-                $setting = GlobalSetting::query()
-                    ->with(['updatedBy:id,name'])
-                    ->where('key', $key)
-                    ->first();
+                $setting = $records->get($key)?->first();
 
                 $settings[$section][$key] = [
                     'key' => $key,
@@ -142,20 +141,68 @@ class SettingsController extends Controller
         return $settings;
     }
 
+    private function formatSettingsHistory(): array
+    {
+        $history = [];
+        $records = $this->getAllSettings();
+
+        foreach ($records as $record) {
+            $section = $this->findSettingSection($record->key);
+            if ($section === null) {
+                continue;
+            }
+
+            $history[$section][] = [
+                'id' => $record->id,
+                'key' => $record->key,
+                'label' => self::SETTING_MAP[$section][$record->key]['label'],
+                'value' => $record->value,
+                'effective_date' => $record->effective_date?->toDateString(),
+                'updated_at' => $record->updated_at?->toDateTimeString(),
+                'updated_by' => $record->updatedBy?->name,
+            ];
+        }
+
+        return $history;
+    }
+
+    private function getAllSettings()
+    {
+        $allKeys = [];
+
+        foreach (self::SETTING_MAP as $items) {
+            $allKeys = array_merge($allKeys, array_keys($items));
+        }
+
+        return GlobalSetting::query()
+            ->with(['updatedBy:id,name'])
+            ->whereIn('key', $allKeys)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get();
+    }
+
+    private function findSettingSection(string $key): ?string
+    {
+        foreach (self::SETTING_MAP as $section => $items) {
+            if (array_key_exists($key, $items)) {
+                return $section;
+            }
+        }
+
+        return null;
+    }
+
     private function saveSettingGroup(array $items, string $userId): void
     {
         foreach ($items as $key => $payload) {
-            GlobalSetting::query()->updateOrCreate(
-                [
-                    'key' => $key,
-                ],
-                [
-                    'value' => $payload['value'],
-                    'effective_date' => $payload['effective_date'],
-                    'description' => $payload['description'],
-                    'updated_by' => $userId,
-                ]
-            );
+            GlobalSetting::query()->create([
+                'key' => $key,
+                'value' => $payload['value'],
+                'effective_date' => $payload['effective_date'],
+                'description' => $payload['description'],
+                'updated_by' => $userId,
+            ]);
         }
     }
 }
