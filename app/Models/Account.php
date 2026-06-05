@@ -3,21 +3,25 @@
 namespace App\Models;
 
 use App\Models\JournalEntry;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Account extends Model
 {
-    protected $primaryKey = 'account_code';
+    use HasFactory;
+    protected $primaryKey = 'no_ref_account';
     public $incrementing = false;
     protected $keyType = 'string';
     protected $fillable = [
-        'account_code',
+        'no_ref_account',
         'account_name',
         'account_category',
+        'status',
+        'balance',
     ];
 
     public function journalEntries()
     {
-        return $this->hasMany(JournalEntry::class, 'account_code', 'account_code');
+        return $this->hasMany(JournalEntry::class, 'account_code', 'no_ref_account');
     }
 }

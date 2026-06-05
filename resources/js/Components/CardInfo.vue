@@ -28,7 +28,7 @@
 
 <template>
     <div class="card-layout flex flex-col gap-2">
-        <h2 class="text-3xl font-semibold mb-2 text-gray-800 dark:text-gray-200">{{ content }}</h2>
+        <h2 class="text-2xl font-semibold mb-2 text-gray-800 dark:text-gray-200">{{ content }}</h2>
         <div class="flex justify-between items-center">
             <p class="text-gray-text dark:text-gray-400">{{ title }}</p>
             <div v-if="percentage != 0" class="text-sm flex items-center font-body gap-2 text-gray-text">

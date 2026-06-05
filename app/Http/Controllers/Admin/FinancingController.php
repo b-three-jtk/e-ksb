@@ -26,6 +26,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
 use App\Models\MemberDoc;
+use App\Models\InstallmentPaymentTransaction;
 use App\Services\Admin\RepaymentService;
 use Carbon\Carbon;
 use Exception;
@@ -741,7 +742,7 @@ class FinancingController extends Controller
         ]);
     }
 
-public function storeRepayment(CreateRepaymentRequest $request, RepaymentService $service)
+    public function storeRepayment(CreateRepaymentRequest $request, RepaymentService $service)
     {
         try {
             $transaction = $service->processRepayment($request->validated(), auth()->id());
@@ -766,7 +767,9 @@ public function storeRepayment(CreateRepaymentRequest $request, RepaymentService
             'installment',
         ]);
 
-        $installment = $financing->installment;
+        $installment = $financing->installment()
+            ->orderBy('installment_no')
+            ->first();
 
         $paymentCount =
             InstallmentPaymentTransaction::where(
@@ -778,10 +781,7 @@ public function storeRepayment(CreateRepaymentRequest $request, RepaymentService
             $financing->cost_price +
             $financing->margin_amount;
 
-        $angsuranPerBulan =
-            $installment && $installment->tenor > 0
-                ? $hargaJual / $installment->tenor
-                : 0;
+        $angsuranPerBulan = $installment?->amount ?? 0;
 
         $totalTerbayar =
             InstallmentPaymentTransaction::where(
@@ -823,22 +823,16 @@ public function storeRepayment(CreateRepaymentRequest $request, RepaymentService
                     ],
 
                     'installment_per_month' =>
-                        round($angsuranPerBulan),
+                        $installment?->amount ?? 0,
 
                     'remaining_balance' =>
                         max($sisa, 0),
 
                     'next_installment_number' =>
-                        $paymentCount + 1,
+                        $installment?->installment_no,
 
                     'next_due_date' =>
-                        $installment?->due_day
-                            ? now()
-                                ->startOfMonth()
-                                ->addMonth()
-                                ->setDay($installment->due_day)
-                                ->format('Y-m-d')
-                            : null,
+                        $installment?->due_date,
 
                     'financing_id' =>
                         $financing->id,
@@ -888,14 +882,27 @@ public function storeRepayment(CreateRepaymentRequest $request, RepaymentService
                 'updated_by' => auth()->id(),
             ]);
 
+            $installment = Installment::findOrFail(
+                $validated['installment_id']
+            );
+
+            $installment->update([
+                'status' => InstallmentPaymentScheduleStatusEnum::PAID->value,
+            ]);
+
             $hargaJual =
                 $financing->cost_price +
                 $financing->margin_amount;
 
             $totalTerbayar =
-                InstallmentPaymentTransaction::where(
-                    'installment_id',
-                    $validated['installment_id']
+                InstallmentPaymentTransaction::whereHas(
+                    'installment',
+                    function ($q) use ($financing) {
+                        $q->where(
+                            'financing_id',
+                            $financing->id
+                        );
+                    }
                 )->sum('nominal');
 
             $sisa = $hargaJual - $totalTerbayar;
@@ -1068,9 +1075,7 @@ public function storeRepayment(CreateRepaymentRequest $request, RepaymentService
             );
 
             $installment->update([
-                'due_day' => Carbon::parse(
-                    $validated['due_date']
-                )->day,
+                'due_date' => $validated['due_date'],
             ]);
 
             return redirect("/admin/financings/show/{$financing->id}")

@@ -45,6 +45,8 @@ const validateFile = (file) => {
 
 const handleFileUpload = (event) => {
     const file = event.target.files[0]
+    console.log(file.type)
+    console.log(file.name)
     if (!file) return
 
     if (!validateFile(file)) {
@@ -199,6 +201,31 @@ const submitResignation = () => {
                 class="mt-20"
                 contentClass="mt-8"
             >
+                <!-- <div
+                    v-if="hasExistingResign"
+                    class="flex justify-end mb-6"
+                >
+                    <span
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-300"
+                    >
+                        <Icon icon="mdi:clock-outline" width="18" />
+                        Pengunduran Diri Diajukan
+                    </span>
+                </div> -->
+
+                <div
+                    v-if="hasExistingResign"
+                    class="mb-6 rounded-lg border border-yellow-300 bg-yellow-50 p-4"
+                >
+                    <p class="font-medium text-yellow-800">
+                        Permohonan pengunduran diri telah diajukan.
+                    </p>
+
+                    <p class="mt-1 text-sm text-yellow-700">
+                        Permohonan Anda sedang menunggu peninjauan dan persetujuan petugas koperasi.
+                    </p>
+                </div>
+
                 <!-- Informasi Anggota -->
                 <div class="mb-8 mt-15">
                     <h2 class="font-head text-lg font-semibold text-gray-900 mb-4 dark:text-gray-100">Informasi Anggota</h2>
@@ -234,7 +261,10 @@ const submitResignation = () => {
                 </div>
 
                 <!-- Upload Dokumen -->
-                <div class="mb-8">
+                <div
+                    v-if="!hasExistingResign"
+                    class="mb-8"
+                >
                     <h2 class="font-head text-lg font-semibold text-gray-900 mb-4 dark:text-gray-100">
                         Upload Dokumen Permohonan
                     </h2>
@@ -303,7 +333,7 @@ const submitResignation = () => {
                     <p class="text-sm text-gray-600 mt-4">
                         Unduh dokumen permohonan
                         <a
-                            href="/dokumen-permohonan-pengunduran-diri.pdf"
+                            href="/docs/PermohonanPengunduranDiri.docx"
                             target="_blank"
                             class="text-blue-600 hover:text-blue-800 underline font-medium"
                         >
@@ -313,7 +343,10 @@ const submitResignation = () => {
                 </div>
 
                 <!-- Pernyataan -->
-                <div class="mb-8">
+                <div
+                    v-if="!hasExistingResign"
+                    class="mb-8"
+                >
                     <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 dark:bg-gray-800">
                         <p class="font-head text-gray-700 mb-6 dark:text-gray-100">
                             Dengan ini saya menyatakan bahwa saya benar-benar ingin mengundurkan diri
@@ -347,10 +380,13 @@ const submitResignation = () => {
                 </div>
 
                 <!-- Submit Button -->
-                <div class="flex justify-center">
+                <div
+                    v-if="!hasExistingResign"
+                    class="flex justify-center"
+                >
                     <button
                         @click="submitResignation"
-                        :disabled="!uploadedFile || !isAgreed || !isConfirmed"
+                        :disabled="hasExistingResign || !uploadedFile || !isAgreed || !isConfirmed"
                         class="font-head px-6 py-3 mt-5 mb-5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         Ajukan Permohonan

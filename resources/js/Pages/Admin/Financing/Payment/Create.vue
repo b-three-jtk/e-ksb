@@ -5,6 +5,7 @@ import { Icon } from '@iconify/vue'
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { toast } from 'vue3-toastify'
+import Swal from 'sweetalert2'
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
@@ -64,21 +65,38 @@ function closeReschedule() {
 
 const rescheduleLoading = ref(false)
 
-function submitReschedule() {
+async function submitReschedule() {
 
     if (!rescheduleDate.value) {
         toast(
             'Tanggal reschedule wajib diisi',
             {
                 type: 'error',
+                position: 'bottom-right',
             },
         )
         return
     }
+
+    const result = await Swal.fire({
+        title: 'Reschedule Pembayaran?',
+        text: `Jatuh tempo akan diubah menjadi ${rescheduleDate.value}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Reschedule',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        confirmButtonColor: '#15803d'
+    })
+
+    if (!result.isConfirmed) {
+        return
+    }
+
     rescheduleLoading.value = true
 
     router.post(
-        `/admin/financings/${props.financing.id}/reschedule`,
+        `/admin/financings/${props.financing.id}/payments/reschedule`,
         {
             installment_id:
                 selectedFinancing.value.installment_id,
@@ -95,6 +113,7 @@ function submitReschedule() {
                     'Jadwal pembayaran berhasil diperbarui',
                     {
                         type: 'success',
+                        position: 'bottom-right',
                     },
                 )
                 closeReschedule()
@@ -108,6 +127,7 @@ function submitReschedule() {
                     'Gagal melakukan reschedule',
                     {
                         type: 'error',
+                        position: 'bottom-right',
                     },
                 )
             },
@@ -123,9 +143,24 @@ function submitReschedule() {
 const depositMethod = ref('Tunai')
 
 // Submit
-function handleSubmit() {
+async function handleSubmit() {
+    const result = await Swal.fire({
+        title: 'Posting Pembayaran?',
+        text: 'Pembayaran akan diproses dan tidak dapat dibatalkan.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Posting',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        confirmButtonColor: '#15803d'
+    })
+
+    if (!result.isConfirmed) {
+        return
+    }
+
     router.post(
-        `/admin/financings/${props.financing.id}/payments`,
+        `/admin/financings/${props.financing.id}/payments/store`,
         {
             financing_id:
                 selectedFinancing.value.id,
@@ -148,11 +183,13 @@ function handleSubmit() {
             preserveScroll: true,
 
             onSuccess: (page) => {
+                console.log(page.props.flash)
 
                 toast(
                     'Pembayaran berhasil diposting',
                     {
                         type: 'success',
+                        position: 'bottom-right',
                     },
                 )
 
@@ -172,6 +209,7 @@ function handleSubmit() {
                     'Terjadi kesalahan saat memproses pembayaran',
                     {
                         type: 'error',
+                        position: 'bottom-right',
                     },
                 )
             },
