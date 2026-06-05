@@ -2,10 +2,15 @@
 namespace App\Services\Admin;
 
 use App\Enums\FinancingReqStatusEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\SavingTypeEnum;
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Financing;
-use App\Models\Member;
+use App\Models\GlobalSetting;
+use App\Models\Installment;
+use App\Models\JournalEntry;
+use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Models\User;
 use Carbon\Carbon;
@@ -14,149 +19,483 @@ use Illuminate\Support\Facades\Log;
 
 class DashboardService
 {
-    public function getPreviousPeriod(Carbon $start, string $filterBy): array
+    public function getPeriodeSebelumnya(Carbon $awal, string $filter): array
     {
-        return match ($filterBy) {
+        return match ($filter) {
             'month' => [
-                $start->copy()->subMonth()->startOfMonth(),
-                $start->copy()->subMonth()->endOfMonth()
+                $awal->copy()->subMonth()->startOfMonth(),
+                $awal->copy()->subMonth()->endOfMonth()
             ],
             'year' => [
-                $start->copy()->subYear()->startOfYear(),
-                $start->copy()->subYear()->endOfYear()
+                $awal->copy()->subYear()->startOfYear(),
+                $awal->copy()->subYear()->endOfYear()
             ],
             default => [
-                $start->copy()->subDay(),
-                $start->copy()->subDay()
+                $awal->copy()->subDay(),
+                $awal->copy()->subDay()
             ],
         };
     }
 
-    public function calculatePercentage($current, $previous): int
+    public function hitungPersen($sekarang, $sebelumnya): int
     {
-        return $previous == 0 ? 0 : round((($current - $previous) / $previous) * 100);
+        return $sebelumnya == 0 ? 0 : round((($sekarang - $sebelumnya) / $sebelumnya) * 100);
     }
 
-    public function getMonthlyStats()
+    public function getTotalAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, $filter): array
     {
-        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $total = User::where('status', $filter)->with('roles')->whereHas(
+            'roles',
+            fn($q) =>
+            $q->where('name', UserRoleEnum::ANGGOTA->value)
+        )->where('created_at', '<=', $tanggalAkhir)->count();
 
-        $stats = Financing::selectRaw('EXTRACT(MONTH FROM created_at) AS month, COUNT(*) AS count')
-            ->whereYear('created_at', now()->year)
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->mapWithKeys(function ($item) use ($months) {
-                return [$months[$item->month - 1] => $item->count];
-            })
-            ->toArray();
+        $persen = $this->hitungPersen(
+            $total,
+            User::where('status', $filter)->where('created_at', '<=', $tanggalAkhirSebelumnya)->count()
+        );
 
-        // Fill semua bulan, jika tidak ada data = 0
-        $result = [];
-        foreach ($months as $month) {
-            $result[$month] = $stats[$month] ?? 0;
-        }
-
-        return $result;
+        return [$total, $persen];
     }
 
-    public function getDailyStats()
-    {
-        $startDate = now()->startOfMonth();
-        $endDate = now()->endOfMonth();
-        $daysInMonth = $endDate->day;
-
-        $stats = Financing::selectRaw("EXTRACT(DAY FROM created_at)::INTEGER AS day, COUNT(*) AS count")
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->groupBy('day')
-            ->orderBy('day')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [$item->day => $item->count];
-            })
-            ->toArray();
-
-        // Fill semua hari bulan ini, jika tidak ada data = 0
-        $result = [];
-        for ($day = 1; $day <= $daysInMonth; $day++) {
-            $result[$day] = $stats[$day] ?? 0;
-        }
-
-        return $result;
-    }
-
-    public function getYearlyStats()
-    {
-        $currentYear = now()->year;
-        $startYear = Financing::min('created_at') ? Carbon::parse(Financing::min('created_at'))->year : $currentYear;
-
-        $stats = Financing::selectRaw("EXTRACT(YEAR FROM created_at)::INTEGER AS year, COUNT(*) AS count")
-            ->groupBy('year')
-            ->orderBy('year')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [$item->year => $item->count];
-            })
-            ->toArray();
-
-        // Fill semua tahun dari tahun pertama data sampai sekarang
-        $result = [];
-        for ($year = $startYear; $year <= $currentYear; $year++) {
-            $result[$year] = $stats[$year] ?? 0;
-        }
-
-        return $result;
-    }
-
-    public function getTotalActiveMember($endDate, $prevEndDate): array
+    public function getTotalPengurus($tanggalAkhir, $tanggalAkhirSebelumnya): array
     {
         $total = User::where('status', UserStatusEnum::ACTIVE->value)->with('roles')->whereHas(
             'roles',
             fn($q) =>
-            $q->where('name', 'Anggota')
-        )->where('created_at', '<=', $endDate)->count();
+            $q->where('name', '!=', UserRoleEnum::ANGGOTA->value)
+        )->where('created_at', '<=', $tanggalAkhir)->count();
 
-        $percentage = $this->calculatePercentage(
+        $persen = $this->hitungPersen(
             $total,
-            User::where('status', UserStatusEnum::ACTIVE->value)->where('created_at', '<=', $prevEndDate)->count()
+            User::where('status', UserStatusEnum::ACTIVE->value)->where('created_at', '<=', $tanggalAkhirSebelumnya)->count()
         );
 
-        return [$total, $percentage];
+        return [$total, $persen];
     }
 
-    public function getTotalInactiveMember($endDate, $prevEndDate): array
+    public function getTotalKas($tanggalAkhir, $tanggalAkhirSebelumnya)
     {
-        $total = User::where('status', UserStatusEnum::INACTIVE->value)->with('roles')->whereHas(
-            'roles',
-            fn($q) =>
-            $q->where('name', 'Anggota')
-        )->where('created_at', '<=', $endDate)->count();
+        $kas = JournalEntry::where('no_ref_account', '101')
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->sum('nominal');
 
-        $percentage = $this->calculatePercentage(
-            $total,
-            User::where('status', UserStatusEnum::ACTIVE->value)->where('created_at', '<=', $prevEndDate)->count()
-        );
+        $kasSebelumnya = JournalEntry::where('no_ref_account', '101')
+            ->where('transaction_date', '<=', $tanggalAkhirSebelumnya)
+            ->sum('nominal');
 
-        return [$total, $percentage];
+        $persen = $this->hitungPersen($kas, $kasSebelumnya);
+
+        return [$kas, $persen];
     }
 
-    public function getTotalStaff($endDate, $prevEndDate): array
+    public function getTransaksiTerbaru($filter)
     {
-        $total = User::where('status', UserStatusEnum::ACTIVE->value)->with('roles')->whereHas(
-            'roles',
-            fn($q) =>
-            $q->where('name', '!=', 'Anggota')
-        )->where('created_at', '<=', $endDate)->count();
+        $transaksiSimpanan = SavingTransaction::with('savingAccount.member.user')
+            ->latest()->take(6)->get()
+            ->map(fn($t) => [
+                'id' => $t->id,
+                'transaction_code' => $t->saving_transaction_code,
+                'user_name' => $t->savingAccount->member->user->name,
+                'amount' => $t->amount,
+                'product' => $t->savingAccount->saving_type,
+                'akad' => $this->getAkadSimpanan($t->savingAccount->saving_type),
+                'created_at' => $t->created_at->toDateString(),
+            ]);
 
-        $percentage = $this->calculatePercentage(
-            $total,
-            User::where('status', UserStatusEnum::ACTIVE->value)->where('created_at', '<=', $prevEndDate)->count()
-        );
+        $transaksiPembiayaan = Financing::with('member.user', 'financingItem')
+            ->latest()->take(6)->get()
+            ->map(fn($f) => [
+                'id' => $f->id,
+                'transaction_code' => $f->financing_transaction_code,
+                'user_name' => $f->member->user->name,
+                'amount' => $f->amount,
+                'product' => 'Pembiayaan',
+                'akad' => 'Murabahah',
+                'created_at' => $f->created_at->toDateString(),
+            ]);
 
-        return [$total, $percentage];
+        $data = $filter === 'all' ? $transaksiSimpanan->concat($transaksiPembiayaan)
+            ->sortByDesc('created_at')
+            ->take(6)
+            ->values()
+            ->toArray() : ($filter === 'simpanan' ? $transaksiSimpanan : $transaksiPembiayaan)->toArray();
+
+        return $data;
     }
 
-    public function getAkadSimpanan($savingType): string
+    public function getPendapatanPerPeriode($tanggalAwal, $tanggalAkhir, $filter)
+    {
+        $data = collect();
+        $format = '';
+
+        if ($filter === 'day') {
+            // 30 hari terakhir dari $tanggalAkhir
+            $tanggalAwal = Carbon::parse($tanggalAkhir)->subDays(6)->startOfDay();
+            $tanggalAkhir = Carbon::parse($tanggalAkhir)->endOfDay();
+            $period = CarbonPeriod::create($tanggalAwal, $tanggalAkhir);
+            foreach ($period as $date) {
+                $data->put($date->format('d M'), 0);
+            }
+            $format = 'd M';
+        } else if ($filter === 'month') {
+            // 12 bulan tahun $tanggalAkhir
+            $tahun = Carbon::parse($tanggalAkhir)->year;
+            $tanggalAwal = Carbon::create($tahun, 1, 1)->startOfDay();
+            $tanggalAkhir = Carbon::create($tahun, 12, 31)->endOfDay();
+            for ($m = 1; $m <= 12; $m++) {
+                $date = Carbon::create($tahun, $m, 1);
+                $data->put($date->format('M'), 0);
+            }
+            $format = 'M';
+        } else if ($filter === 'year') {
+            // 5 tahun terakhir dari $tanggalAkhir
+            $tanggalAwal = Carbon::parse($tanggalAkhir)->subYears(4)->startOfYear();
+            $tanggalAkhir = Carbon::parse($tanggalAkhir)->endOfYear();
+            $tahunAkhir = $tanggalAkhir->year;
+            for ($y = $tahunAkhir - 4; $y <= $tahunAkhir; $y++) {
+                $date = Carbon::create($y, 1, 1);
+                $data->put($date->format('Y'), 0);
+            }
+            $format = 'Y';
+        }
+
+        $pendapatan = JournalEntry::where('no_ref_account', '401')
+            ->whereBetween('transaction_date', [$tanggalAwal, $tanggalAkhir])
+            ->get()
+            ->groupBy(fn($entry) => $entry->transaction_date->format($format))
+            ->map(fn($group) => $group->sum('nominal'));
+
+        $result = $data->replace($pendapatan);
+
+        return $result->toArray();
+    }
+
+    public function getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filter)
+    {
+        $start = Carbon::parse($tanggalAwal);
+        $end = Carbon::parse($tanggalAkhir);
+
+        $skeleton = collect();
+        $format = '';
+
+        if ($filter === 'month') {
+            $year = $end->year;
+            for ($m = 1; $m <= 12; $m++) {
+                $date = Carbon::create($year, $m, 1);
+                $skeleton->put($date->format('M'), 0);
+            }
+            $format = 'M';
+        } else if ($filter === 'year') {
+            $endYear = $end->year;
+            for ($y = $endYear - 4; $y <= $endYear; $y++) {
+                $date = Carbon::create($y, 1, 1);
+                $skeleton->put($date->format('Y'), 0);
+            }
+            $format = 'Y';
+        } else {
+            $format = 'd M';
+            $period = CarbonPeriod::create($start, '1 day', $end);
+
+            foreach ($period as $date) {
+                $skeleton->put($date->format($format), 0);
+            }
+        }
+        $queryStart = $filter === 'month' || $filter === 'year' ? $end->copy()->startOfYear() : $start->startOfDay();
+        $queryEnd = $filter === 'month' || $filter === 'year' ? $end->copy()->endOfYear() : $end->endOfDay();
+
+        $queryData = User::where('status', UserStatusEnum::ACTIVE->value)
+            ->with('roles')
+            ->whereHas('roles', fn($q) => $q->where('name', UserRoleEnum::ANGGOTA->value))
+            ->whereBetween('created_at', [$queryStart, $queryEnd])
+            ->get()
+            ->groupBy(fn($user) => $user->created_at->format($format))
+            ->map(fn($group) => $group->count());
+
+        $data = $skeleton->merge($queryData);
+
+        return $data->toArray();
+    }
+
+    public function getRasioKas($tanggalAkhir) {
+        $totalKas = JournalEntry::where('no_ref_account', '101')
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->sum('nominal');
+
+        $totalLiabilitas = JournalEntry::whereIn('no_ref_account', ['201', '202', '203'])
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->sum('nominal');
+
+        $rasioKas = 0;
+        if ($totalLiabilitas > 0) {
+            $rasioKas = ($totalKas / $totalLiabilitas) * 100;
+        }
+
+        return round($rasioKas, 2) . '%';
+    }
+
+    public function getRasioFDR($tanggalAkhir) {
+        $totalPembiayaan = JournalEntry::where('no_ref_account', '103')
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->sum('nominal');
+
+        $totalDeposit = JournalEntry::whereIn('no_ref_account', ['201', '202', '203'])
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->sum('nominal');
+
+        $rasioFDR = 0;
+        if ($totalDeposit > 0) {
+            $rasioFDR = ($totalPembiayaan / $totalDeposit) * 100;
+        }
+
+        return round($rasioFDR, 2) . '%';
+    }
+
+    public function getTotalSimpanan($tanggalAkhir, $tanggalAkhirSebelumnya, $tipe)
+    {
+        $total = JournalEntry::whereIn('no_ref_account', ['201', '202', '203', '301', '302'])
+            ->where('position', $tipe)
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->sum('nominal');
+
+        $persen = $this->hitungPersen(
+            $total,
+            JournalEntry::whereIn('no_ref_account', ['201', '202', '203', '301', '302'])
+                ->where('position', $tipe)
+                ->where('transaction_date', '<=', $tanggalAkhirSebelumnya)
+                ->sum('nominal')
+        );
+
+        return [$total, $persen];
+    }
+
+    public function getPetaSimpanan($tanggalAkhir, $filter)
+    {
+        $skeletonJenis = [
+            'Simpanan Pokok' => 0,
+            'Simpanan Wajib' => 0,
+            'Tabungan Anggota' => 0,
+            'Tabungan Berjangka' => 0,
+            'Tabungan Ibadah' => 0,
+        ];
+
+        $skeletonAkad = [
+            'Musyarakah' => 0,
+            'Wadiah Yad Dhamanah' => 0,
+            'Mudharabah Mutlaqah' => 0,
+        ];
+
+        $res = collect();
+
+        if ($filter === 'jenis') {
+            $data = JournalEntry::whereIn('no_ref_account', ['201', '202', '203', '301', '302'])
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->get()
+            ->groupBy(fn($entry) => match ($entry->no_ref_account) {
+                '201' => 'Tabungan Anggota',
+                '202' => 'Tabungan Berjangka',
+                '203' => 'Tabungan Ibadah',
+                '301' => 'Simpanan Pokok',
+                '302' => 'Simpanan Wajib',
+                default => null,
+            })
+            ->map(function ($group) {
+                $totalCredit = $group->where('position', 'Credit')->sum('nominal');
+                $totalDebit = $group->where('position', 'Debit')->sum('nominal');
+
+                return $totalCredit - $totalDebit;
+            });
+
+            $res = collect($skeletonJenis)->replace($data)->sortDesc();
+        } else if ($filter === 'akad') {
+            $data = JournalEntry::whereIn('no_ref_account', ['201', '202', '203', '301', '302'])
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->get()
+            ->groupBy(fn($entry) => match ($entry->no_ref_account) {
+                '202', '203' => 'Mudharabah Mutlaqah',
+                '201' => 'Wadiah Yad Dhamanah',
+                '301', '302' => 'Musyarakah',
+                default => null,
+            })
+            ->map(function ($group) {
+                $totalCredit = $group->where('position', 'Credit')->sum('nominal');
+                $totalDebit = $group->where('position', 'Debit')->sum('nominal');
+
+                return $totalCredit - $totalDebit;
+            });
+
+            $res = collect($skeletonAkad)->replace($data)->sortDesc();
+        }
+
+        return $res->toArray();
+    }
+
+    public function getJatuhTempoTerdekat($filter)
+    {
+        $savingDueDate = GlobalSetting::where('key', 'due_date_simpanan')->first()->value ?? null;
+        $savingNominal = GlobalSetting::where('key', 'nominal_simpanan')->first()->value ?? null;
+
+        $transaksiSimpanan = SavingAccount::with('member.user', 'transactions')
+            ->where('saving_type', SavingTypeEnum::SIMPANAN_WAJIB->value)
+            ->latest()->take(7)->get()
+            ->map(fn($t) => [
+                'id' => $t->id,
+                'user_name' => $t->member->user->name,
+                'nominal' => $savingNominal,
+                'product' => $t->saving_type,
+                'due_date' => $t->transactions->last() ? $t->transactions->last()->created_at->addDays((int) $savingDueDate)->toDateString() : null
+            ]);
+
+        $transaksiPembiayaan = Installment::with('financing.member.user')
+            ->latest()->take(7)->get()
+            ->map(fn($f) => [
+                'id' => $f->id,
+                'user_name' => $f->financing->member->user->name,
+                'nominal' => $f->amount,
+                'product' => 'Pembiayaan',
+                'due_date' => $f->due_date->toDateString(),
+            ]);
+
+        $allTransactions = $filter === 'all' ? $transaksiSimpanan->concat($transaksiPembiayaan)
+            ->sortByDesc('created_at')
+            ->take(7)
+            ->values()
+            ->toArray() : ($filter === 'simpanan' ? $transaksiSimpanan : $transaksiPembiayaan)->toArray();
+
+        return $allTransactions;
+    }
+
+    public function getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)
+    {
+        return Financing::with('member.user', 'financingItem')
+            ->whereBetween('requested_date', [$tanggalAwal, $tanggalAkhir])
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($f) => [
+                'id' => $f->id,
+                'transaction_code' => $f->financing_transaction_code,
+                'user_name' => $f->member->user->name,
+                'status' => $f->status,
+            ]);
+    }
+
+    public function getPembayaranTerlambat($tanggalAkhir)
+    {
+        $data =  Installment::with('financing.member.user')
+            ->where('due_date', '<=', $tanggalAkhir)
+            ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($i) => [
+                'id' => $i->id,
+                'transaction_code' => $i->financing->financing_transaction_code,
+                'user_name' => $i->financing->member->user->name,
+                'amount' => $i->amount,
+                'days_overdue' => Carbon::parse($i->due_date)->diffInDays(Carbon::parse($tanggalAkhir)),
+                'due_date' => $i->due_date->toDateString(),
+            ]
+        );
+
+        return $data->toArray();
+    }
+
+    public function getTransaksiSimpananTerbaru($tanggalAkhir, $filter)
+    {
+        $savings =  SavingTransaction::with('savingAccount.member.user')
+            ->where('created_at', '<=', $tanggalAkhir)
+            ->latest()
+            ->take(7)
+            ->get()
+            ->map(fn($t) => [
+                'id' => $t->id,
+                'transaction_code' => $t->saving_transaction_code,
+                'user_name' => $t->savingAccount->member->user->name,
+                'amount' => $t->saving_amount,
+                'product' => $t->savingAccount->saving_type,
+                'created_at' => $t->created_at->toDateString(),
+            ])
+            ->toArray();
+
+        if ($filter === 'all') {
+            return $savings;
+        } else {
+            return array_filter($savings, fn($s) => $s['product'] === $filter);
+        }
+    }
+
+    public function getTotalAngsuranBelumLunas()
+    {
+        $total = Installment::where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
+            ->sum('amount');
+
+        return $total;
+    }
+
+    public function getTotalPembiayaanTersalurkan($tanggalAkhir, $tanggalAkhirSebelumnya)
+    {
+        $total = JournalEntry::where('no_ref_account', '104')
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->sum('nominal');
+
+        $persen = $this->hitungPersen(
+            $total,
+            JournalEntry::where('no_ref_account', '103')
+                ->where('transaction_date', '<=', $tanggalAkhirSebelumnya)
+                ->sum('nominal')
+        );
+
+        return [$total, $persen];
+    }
+
+    public function getPetaPembiayaan($tanggalAkhir)
+    {
+        $skeleton = [
+            'Lancar' => 0,
+            'Kurang Lancar' => 0,
+            'Macet' => 0,
+        ];
+
+        $targetDate = Carbon::parse($tanggalAkhir);
+
+        $financings = Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+            ->with(['installment' => function($query) {
+                $query->whereIn('status', [
+                    'Terjadwal',
+                    'Terlambat',
+                ]);
+            }])
+            ->get();
+
+        foreach ($financings as $financing) {
+            $oldestUnpaid = $financing->installment->sortBy('due_date')->first();
+
+            if (!$oldestUnpaid) {
+                $skeleton['Lancar']++;
+                continue;
+            }
+
+            $dueDate = Carbon::parse($oldestUnpaid->due_date);
+
+            if ($targetDate->lessThanOrEqualTo($dueDate)) {
+                $skeleton['Lancar']++;
+            } else {
+                $daysLate = $targetDate->diffInDays($dueDate);
+
+                if ($daysLate <= 90) {
+                    $skeleton['Kurang Lancar']++;
+                } else {
+                    $skeleton['Macet']++;
+                }
+            }
+        }
+
+        return $skeleton;
+    }
+
+    // lokal helper
+    private function getAkadSimpanan($savingType): string
     {
         switch ($savingType) {
             case SavingTypeEnum::SIMPANAN_POKOK->value:
@@ -172,147 +511,5 @@ class DashboardService
             default:
                 return null;
         }
-    }
-
-    public function getAllRecentTransactions($filter)
-    {
-        // join saving transactions dan financing
-        $savingTransactions = SavingTransaction::with('savingAccount.member.user')
-            ->latest()->take(5)->get()
-            ->map(fn($t) => [
-                'id' => $t->id,
-                'transaction_code' => $t->saving_transaction_code,
-                'user_name' => $t->savingAccount->member->user->name,
-                'amount' => $t->amount,
-                'product' => $t->savingAccount->saving_type,
-                'akad' => $this->getAkadSimpanan($t->savingAccount->saving_type),
-                'created_at' => $t->created_at->toDateString(),
-            ]);
-
-        $financingTransactions = Financing::with('member.user', 'financingItem')
-            ->latest()->take(5)->get()
-            ->map(fn($f) => [
-                'id' => $f->id,
-                'transaction_code' => $f->financing_transaction_code,
-                'user_name' => $f->member->user->name,
-                'amount' => $f->amount,
-                'product' => 'Pembiayaan',
-                'akad' => 'Murabahah',
-                'created_at' => $f->created_at->toDateString(),
-            ]);
-
-        // gabungkan dan urutkan berdasarkan created_at
-        $allTransactions = $filter === 'all' ? $savingTransactions->concat($financingTransactions)
-            ->sortByDesc('created_at')
-            ->take(5)
-            ->values()
-            ->toArray() : ($filter === 'simpanan' ? $savingTransactions : $financingTransactions)->toArray();
-
-        return $allTransactions;
-    }
-
-    public function getRevenues($startDate, $endDate)
-    {
-        $financings = Financing::whereIn('status', [
-            FinancingReqStatusEnum::PAID->value,
-            FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value
-        ])
-            ->whereHas('installment.payment', function ($query) use ($startDate, $endDate) {
-                // Memastikan hanya mengambil financing yang punya pembayaran di range tanggal tersebut
-                $query->where('payment_date', '>=', $startDate)
-                    ->where('payment_date', '<=', $endDate);
-            })
-            ->with([
-                'installment.payment' => function ($query) use ($startDate, $endDate) {
-                    // Eager loading hanya pembayaran yang sesuai range tanggal saja
-                    $query->where('payment_date', '>=', $startDate)
-                        ->where('payment_date', '<=', $endDate);
-                }
-            ])
-            ->get();
-
-        // Karena satu Financing bisa punya beberapa Payment di bulan yang berbeda,
-        // pecah dulu datanya per baris Payment agar bisa di-groupBy berdasarkan bulan payment_date.
-        $paymentRows = collect();
-
-        foreach ($financings as $financing) {
-            $marginPerMonth = $financing->margin_amount / $financing->installment->tenor;
-
-            // Ambil semua payment milik financing ini yang lolos filter tanggal
-            foreach ($financing->installment->payment as $payment) {
-                $paymentRows->push([
-                    'month' => Carbon::parse($payment->payment_date)->format('Y-m'),
-                    'margin' => $marginPerMonth,
-                    'financing_id' => $financing->id,
-                    'payment_id' => $payment->id
-                ]);
-            }
-        }
-
-        // Kelompokkan data payment berdasarkan bulan ('Y-m')
-        $groupedByMonth = $paymentRows->groupBy('month');
-
-        // Hitung total margin per bulan
-        $revenuesPerMonth = $groupedByMonth->map(function ($paymentsInMonth, $monthString) {
-            return $paymentsInMonth->sum(function ($paymentRow) use ($monthString) {
-                Log::info("Bulan Payment: {$monthString}, Financing ID: {$paymentRow['financing_id']}, Payment ID: {$paymentRow['payment_id']}, Margin: {$paymentRow['margin']}");
-
-                return $paymentRow['margin'];
-            });
-        });
-
-        // Angka ini adalah real uang margin yang masuk dari cicilan di bulan tersebut.
-        return $revenuesPerMonth;
-    }
-    public function getMemberGrowth($startDate, $endDate, $filterBy)
-    {
-        $start = Carbon::parse($startDate);
-        $end = Carbon::parse($endDate);
-
-        $skeleton = collect();
-        $format = '';
-
-        // 1. Buat Skeleton secara manual
-        if ($filterBy === 'month') {
-            // PAKSA bikin 12 bulan (Jan - Dec) berdasarkan tahun dari $endDate
-            $year = $end->year;
-            for ($m = 1; $m <= 12; $m++) {
-                $date = Carbon::create($year, $m, 1);
-                $skeleton->put($date->format('M'), 0); // Output: Jan, Feb, Mar, dst.
-            }
-            $format = 'M';
-        } else if ($filterBy === 'year') {
-                // PAKSA bikin 5 tahun terakhir berdasarkan tahun dari $endDate
-            $endYear = $end->year;
-            for ($y = $endYear - 4; $y <= $endYear; $y++) {
-                $date = Carbon::create($y, 1, 1);
-                $skeleton->put($date->format('Y'), 0); // Output: 2020, 2021, 2022, dst.
-            }
-            $format = 'Y';
-        } else {
-            // Untuk 'day' dan 'year', tetap gunakan CarbonPeriod sesuai rentang tanggal
-            $format = 'd M'; // Default to day
-            $period = CarbonPeriod::create($start, '1 day', $end);
-
-            foreach ($period as $date) {
-                $skeleton->put($date->format($format), 0);
-            }
-        }
-        $queryStart = $filterBy === 'month' || $filterBy === 'year' ? $end->copy()->startOfYear() : $start->startOfDay();
-        $queryEnd = $filterBy === 'month' || $filterBy === 'year' ? $end->copy()->endOfYear() : $end->endOfDay();
-
-        $queryData = User::where('status', UserStatusEnum::ACTIVE->value)
-            ->with('roles')
-            ->whereHas('roles', fn($q) => $q->where('name', 'Anggota'))
-            ->whereBetween('created_at', [$queryStart, $queryEnd])
-            ->get()
-            ->groupBy(fn($user) => $user->created_at->format($format))
-            ->map(fn($group) => $group->count());
-
-        $result = $skeleton->merge($queryData);
-
-        Log::info("Member Growth Data: " . $result->toJson());
-
-        return $result->toArray();
     }
 }

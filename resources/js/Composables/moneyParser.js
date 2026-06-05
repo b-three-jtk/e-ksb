@@ -11,7 +11,7 @@ export default function moneyParser(value) {
     }
 
     if (isNaN(num)) {
-        return 'Rp 0'
+        return 'Rp0'
     }
 
     const formatter = new Intl.NumberFormat('id-ID', {

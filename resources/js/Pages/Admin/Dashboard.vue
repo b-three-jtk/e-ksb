@@ -9,6 +9,7 @@ import Bendahara from './Dashboard/Bendahara.vue';
 import Sekretaris from './Dashboard/Sekretaris.vue';
 import KetuaStafMurabahah from './Dashboard/KetuaStafMurabahah.vue';
 import PJAnggota from './Dashboard/PJAnggota.vue';
+import DPS from './Dashboard/DPS.vue';
 
 const page = usePage()
 
@@ -20,11 +21,12 @@ const props = defineProps({
     data: Object
 });
 
-console.log('Dashboard data:', props.data);
-
 const dates = ref([new Date(), new Date()]);
 const selectedFilter = ref('month');
 const selectedTransactionFilter = ref('all');
+const selectedSavingsFilter = ref('jenis');
+const selectedNearestDueFilter = ref('all');
+const selectedSavingTransactionFilter = ref('all');
 const isDarkMode = ref(false);
 
 onMounted(() => {
@@ -48,12 +50,27 @@ watch(selectedTransactionFilter, () => {
     applyFilter();
 });
 
+watch(selectedSavingsFilter, () => {
+    applyFilter();
+});
+
+watch(selectedNearestDueFilter, () => {
+    applyFilter();
+});
+
+watch(selectedSavingTransactionFilter, () => {
+    applyFilter();
+});
+
 const applyFilter = () => {
     router.get('/admin/dashboard', {
         start_date: dates.value[0] ? dates.value[0].toISOString().split('T')[0] : null,
         end_date: dates.value[1] ? dates.value[1].toISOString().split('T')[0] : null,
         filter_by: selectedFilter.value,
         transaction_filter: selectedTransactionFilter.value,
+        savings_filter: selectedSavingsFilter.value,
+        nearest_filter: selectedNearestDueFilter.value,
+        saving_transaction_filter: selectedSavingTransactionFilter.value,
     }, {
         preserveState: true,
         replace: true,
@@ -85,9 +102,16 @@ const applyFilter = () => {
             </div>
             <!-- Dashboard Ketua Pengawas -->
             <KetuaPengawas @update:selected-transaction-filter="selectedTransactionFilter = $event"
-                :selected-transaction-filter="selectedTransactionFilter" :can="can"
-                v-if="role === 'Ketua' || role === 'Pengawas' || role === 'Dewan Pengawas Syariah'"
+                :selected-transaction-filter="selectedTransactionFilter" @update:selected-filter="selectedFilter"
+                :selected-filter="selectedFilter" @update:selected-savings-filter="selectedSavingsFilter = $event"
+                :selected-savings-filter="selectedSavingsFilter" :can="can"
+                v-if="role === 'Ketua' || role === 'Pengawas'"
                 :data="props.data" />
+            <!-- Dashboard DPS -->
+            <DPS v-if="role === 'Dewan Pengawas Syariah'" @update:selected-transaction-filter="selectedTransactionFilter = $event"
+                :selected-transaction-filter="selectedTransactionFilter" @update:selected-filter="selectedFilter" :role="role"
+                :selected-filter="selectedFilter" @update:selected-savings-filter="selectedSavingsFilter = $event"
+                :selected-savings-filter="selectedSavingsFilter" :can="can" :data="props.data" />
             <!-- Dashboard Bendahara -->
             <Bendahara v-if="role === 'Bendahara'" :can="can" :data="props.data" :selected-filter="selectedFilter" />
             <!-- Dashboard Sekretaris -->
@@ -97,8 +121,9 @@ const applyFilter = () => {
                 @update:selected-transaction-filter="selectedTransactionFilter = $event"
                 :selected-transaction-filter="selectedTransactionFilter" :can="can" :data="props.data" :role="role" />
             <PJAnggota v-if="role === 'Penanggung Jawab Anggota'"
-                @update:selected-transaction-filter="selectedTransactionFilter = $event"
-                :selected-transaction-filter="selectedTransactionFilter" :can="can" :data="props.data" :role="role" />
+                @update:selected-nearest-due-filter="selectedNearestDueFilter = $event"
+                :selected-nearest-due-filter="selectedNearestDueFilter" @update:selected-saving-transaction-filter="selectedSavingTransactionFilter = $event"
+                :selected-saving-transaction-filter="selectedSavingTransactionFilter" :can="can" :data="props.data" :role="role" />
         </div>
     </AdminLayout>
 </template>

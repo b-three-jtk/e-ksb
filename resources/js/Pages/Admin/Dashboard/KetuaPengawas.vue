@@ -1,70 +1,123 @@
 <script setup>
 import CardInfo from '@/Components/CardInfo.vue';
 import VerticalBarChart from '@/Components/Dashboard/VerticalBarChart.vue';
-import FinancingWaffleChart from '@/Components/FinancingWaffleChart.vue';
 import TransactionTable from '@/Components/Dashboard/TransactionTable.vue';
 import parseCurrencyAmount from '@/Composables/moneyParser.js';
-import BarChart from '@/Components/Dashboard/Barchart.vue'
+import BarChart from '@/Components/Dashboard/Barchart.vue';
+import PieChart from '@/Components/Dashboard/PieChart.vue';
+import { computed } from 'vue';
+import EyeIcon from '@/Icons/EyeIcon.vue';
+import { Link } from '@inertiajs/vue3';
 
-defineProps({
-    data: Object,
+const props = defineProps({
+    stats: Object,
+    revenues: Object,
+    member_growth: Object,
+    peta_simpanan: Object,
+    peta_pembiayaan: Object,
+    recent_transactions: Array,
     can: Object,
     selectedFilter: String,
     selectedTransactionFilter: String,
+    selectedSavingsFilter: String,
+})
+
+const tableColumns = computed(() => {
+    const cols = [
+        { key: 'transaction_code', label: 'No. Transaksi' },
+        { key: 'user_name', label: 'Anggota' },
+        { key: 'product', label: 'Produk' },
+        { key: 'created_at', label: 'Tanggal' },
+    ];
+    cols.push({ key: 'action', label: 'Aksi' });
+    return cols;
 });
 
+const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSavingsFilter']);
 </script>
 
 <template>
     <!-- INFO -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <CardInfo v-if="can['view_kas']" title="Total Kas" :content="parseCurrencyAmount(data.total_saving_amount)" />
-        <CardInfo v-if="can['view_pengurus']" title="Total Pengurus" :content="data.total_staff"
-            :percentage="total_staff_percentage" />
-        <CardInfo v-if="can['view_anggota']" title="Total Anggota Aktif" :content="data.total_active_member"
-            :percentage="total_active_member_percentage" :filter="selectedFilter" />
+        <CardInfo v-if="can['view_kas']" title="Total Kas" :content="parseCurrencyAmount(props.stats.total_kas)"
+            :percentage="props.stats.total_kas_percentage" :filter="selectedFilter" />
+        <CardInfo v-if="can['view_pengurus']" title="Total Pengurus" :content="props.stats.total_staff"
+            :percentage="props.stats.total_staff_percentage" :filter="selectedFilter" />
+        <CardInfo v-if="can['view_anggota']" title="Total Anggota Aktif" :content="props.stats.total_active_member"
+            :percentage="props.stats.total_active_member_percentage" :filter="selectedFilter" />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pendapatan Margin</h1>
-            <VerticalBarChart class="col-span-3 pt-10" title="Grafik Pendapatan Margin" :data="revenues"
+            <VerticalBarChart class="col-span-3 pt-10" title="Grafik Pendapatan Margin" :data="props.revenues"
                 :filter="selectedFilter" />
         </div>
         <div class="card-layout col-span-2">
-            <TransactionTable :selected-transaction-filter="selectedTransactionFilter" :data="data" :role="role" />
+            <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                <h1 class="card-title">Peta Pembiayaan</h1>
+                <h2 class="text-2xl font-semibold text-primary mt-2">{{
+                    parseCurrencyAmount(data.total_pembiayaan_tersalurkan) }}</h2>
+                <p class="text-gray-500 font-body text-sm">Total Pembiayaan Tersalurkan</p>
+            </div>
+            <PieChart :data="props.peta_pembiayaan" class="flex items-center justify-center mt-8" />
         </div>
         <div class="col-span-3 grid grid-cols-2 gap-3.5">
-            <CardInfo v-if="can['view_anggota']" title="Rasio Kas" :content="data.total_active_member"
-                :filter="selectedFilter" />
-            <CardInfo v-if="can['view_anggota']" title="Rasio Financing-to-Deposit (FDR)"
-                :content="data.total_active_member" :filter="selectedFilter" />
+            <CardInfo title="Rasio Kas" :content="props.stats.rasio_kas" />
+            <CardInfo title="Rasio Financing-to-Deposit (FDR)" :content="props.stats.rasio_fdr" />
             <div class="card-layout col-span-2">
                 <div class="border-b border-stroke pb-4">
-                    <h1 class="card-title">Komposisi Simpanan</h1>
-                    <h2 class="text-2xl font-semibold text-primary">Rp</h2>
-                    <p class="text-gray-500 font-body text-sm">Total Simpanan Masuk</p>
+                    <div class="flex justify-between w-full items-center">
+                        <h1 class="card-title">Peta Simpanan</h1>
+                        <div class="relative z-20 bg-transparent">
+                            <select :value="selectedSavingsFilter"
+                                @input="$emit('update:selectedSavingsFilter', $event.target.value)"
+                                class="h-11 w-full font-body appearance-none px-4 bg-white pr-11 text-sm focus:outline-hidden dark:bg-dark-900 text-gray-800 dark:bg-gray-900 dark:text-white/90">
+                                <option value="jenis">Berdasarkan Jenisnya</option>
+                                <option value="akad">Berdasarkan Akadnya</option>
+                            </select>
+                            <svg class="absolute z-30 right-4 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 stroke-current text-gray-500 dark:text-gray-400"
+                                viewBox="0 0 20 20" fill="none">
+                                <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-primary pt-5">{{
+                        parseCurrencyAmount(data.total_simpanan_masuk) }}
+                    </h2>
+                    <p class="text-gray-500 font-body text-sm pt-2">Total Simpanan Masuk</p>
                 </div>
-                <div class="flex gap-2">
-                    <BarChart />
-                    <ul class="flex flex-col gap-3.5">
-                        <li class="text-gray-400">JUMLAH</li>
-                        <li class="bg-gray-200 p-1 rounded-lg">Rp100.000.000 <span class="text-gray-400">(52,6%)</span>
-                        </li>
-                        <li class="bg-gray-200 p-1 rounded-lg">Rp100.000.000 <span class="text-gray-400">(52,6%)</span>
-                        </li>
-                        <li class="bg-gray-200 p-1 rounded-lg">Rp100.000.000 <span class="text-gray-400">(52,6%)</span>
-                        </li>
-                        <li class="bg-gray-200 p-1 rounded-lg">Rp100.000.000 <span class="text-gray-400">(52,6%)</span>
-                        </li>
-                        <li class="bg-gray-200 p-1 rounded-lg">Rp100.000.000 <span class="text-gray-400">(52,6%)</span>
-                        </li>
-                    </ul>
-                </div>
+                <BarChart :data="props.peta_simpanan" />
             </div>
         </div>
+
         <div class="card-layout col-span-2">
-            <FinancingWaffleChart :data="{ launched: 85, underReview: 50, declined: 35 }"
-                total-amount="Rp190.000.000" />
+            <div class="flex justify-between">
+                <h1 class="card-title">Transaksi Terbaru</h1>
+                <div class="relative z-20 bg-transparent">
+                    <select :value="selectedTransactionFilter"
+                        @input="$emit('update:selectedTransactionFilter', $event.target.value)"
+                        class="h-11 w-full font-body appearance-none rounded-lg border px-4 bg-white pr-11 text-sm shadow-theme-xs focus:outline-hidden dark:bg-dark-900 text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="all">Semua</option>
+                        <option value="simpanan">Simpanan</option>
+                        <option value="pembiayaan">Pembiayaan</option>
+                    </select>
+                    <svg class="absolute z-30 right-4 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 stroke-current text-gray-500 dark:text-gray-400"
+                        viewBox="0 0 20 20" fill="none">
+                        <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+            </div>
+            <TransactionTable :columns="tableColumns" :rows="props.recent_transactions">
+                <template #action="{ item }">
+                    <Link
+                        :href="item.product !== 'Pembiayaan' ? `/admin/savings/show/${item.id}` : `/admin/financings/show/${item.id}`">
+                        <EyeIcon
+                            class="w-5 h-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
+                    </Link>
+                </template>
+            </TransactionTable>
         </div>
     </div>
 </template>

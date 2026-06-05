@@ -47,6 +47,8 @@ const getStyles = () => {
             return 'bg-success-500 text-white hover:bg-success-400';
         case 'gray':
             return 'bg-gray-400 text-white hover:bg-gray-300';
+        case 'transparent':
+            return 'bg-white text-black hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300';
         default:
             return 'bg-primary text-white hover:bg-brand-800';
     }

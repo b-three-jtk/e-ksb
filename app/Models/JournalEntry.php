@@ -19,6 +19,10 @@ class JournalEntry extends Model
         'transaction_date',
     ];
 
+    protected $casts = [
+        'transaction_date' => 'date',
+    ];
+
     public function account()
     {
         return $this->belongsTo(Account::class);

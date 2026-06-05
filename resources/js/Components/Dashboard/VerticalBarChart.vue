@@ -17,7 +17,7 @@ const props = defineProps({
 const series = ref([
     {
         name: 'Keuntungan',
-        data: [250,190,300,110,200,50,150,220,120,170,290,60],
+        data: [],
     },
 ])
 
@@ -47,7 +47,7 @@ const chartOptions = ref({
         colors: ['transparent'],
     },
     xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        categories: [],
         axisBorder: {
             show: false,
         },
@@ -59,13 +59,20 @@ const chartOptions = ref({
         show: true,
         position: 'top',
         horizontalAlign: 'left',
-        fontFamily: 'Outfit',
+        fontFamily: 'Manrope',
         markers: {
             radius: 99,
         },
     },
     yaxis: {
         title: false,
+    labels: {
+        formatter: function (value) {
+            return 'Rp' + new Intl.NumberFormat('id-ID', {
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+    }
     },
     grid: {
         yaxis: {
@@ -82,9 +89,11 @@ const chartOptions = ref({
             show: false,
         },
         y: {
-            formatter: function (val) {
-                return val.toString()
-            },
+            formatter: function (value) {
+                return 'Rp' + new Intl.NumberFormat('id-ID', {
+                    maximumFractionDigits: 0
+                }).format(value);
+            }
         },
     },
 })

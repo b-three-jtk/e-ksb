@@ -17,6 +17,10 @@ class Installment extends Model
         'financing_id',
     ];
 
+    protected $casts = [
+        'due_date' => 'date',
+    ];
+
     public function financing()
     {
         return $this->belongsTo(Financing::class);
