@@ -14,7 +14,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
-use App\Http\Controllers\User\UserFinancingController;
+use App\Http\Controllers\User\FinancingController as UserFinancingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
