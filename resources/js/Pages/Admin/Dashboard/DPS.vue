@@ -10,25 +10,24 @@ import EyeIcon from '@/Icons/EyeIcon.vue';
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-    data: Object,
-    can: Object,
-    role: String,
+    stats: Object,
+    pertumbuhan_pendapatan: Object,
+    transaksi_terbaru: Object,
+    peta_simpanan: Object,
+    peta_pembiayaan: Object,
     selectedFilter: String,
     selectedTransactionFilter: String,
     selectedSavingsFilter: String,
 });
 
-const tableColumns = computed(() => {
+const kolomTabel = computed(() => {
     const cols = [
-        { key: 'transaction_code', label: 'No. Transaksi' },
-        { key: 'user_name', label: 'Anggota' },
-        { key: 'product', label: 'Produk' },
-        { key: 'created_at', label: 'Tanggal' },
+        { key: 'no_transaksi', label: 'No. Transaksi' },
+        { key: 'anggota', label: 'Anggota' },
+        { key: 'produk', label: 'Produk' },
+        { key: 'tanggal', label: 'Tanggal' },
+        { key: 'akad', label: 'Akad' },
     ];
-
-    if (props.role === 'Dewan Pengawas Syariah') {
-        cols.splice(3, 0, { key: 'akad', label: 'Akad' });
-    }
 
     cols.push({ key: 'action', label: 'Aksi' });
     return cols;
@@ -38,16 +37,28 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
 </script>
 
 <template>
-    <div class="grid grid-cols-1 lg:grid-cols-7 gap-3.5">
-        <div class="grid grid-cols-2 col-span-7 gap-3.5">
-            <div class="grid grid-cols-2 col-span-1 flex-col gap-3.5">
-                <CardInfo title="Rasio Kas" :content="data.rasio_kas" />
-                <CardInfo v-if="can['view_kas']" title="Total Kas" :content="parseCurrencyAmount(data.total_kas)"
-                    :percentage="data.total_kas_percentage" :filter="selectedFilter" />
+    <div class="grid grid-cols-1 lg:grid-cols-7 gap-4">
+        <!-- GRAFIK PENDAPATAN & TRANSAKSI TERBARU - BARIS SATU -->
+        <div class="grid grid-cols-2 col-span-7 gap-4">
+            <div class="grid grid-cols-2 col-span-1 flex-col gap-4">
+                <CardInfo
+                    title="Rasio Kas"
+                    :content="props.stats.rasio_kas"
+                />
+                <CardInfo
+                    title="Total Kas"
+                    :content="parseCurrencyAmount(props.stats.total_kas)"
+                    :percentage="props.stats.total_kas_persen"
+                    :filter="props.selectedFilter"
+                />
                 <div class="card-layout col-span-2">
                     <h1 class="card-title">Grafik Pendapatan Margin</h1>
-                    <VerticalBarChart class="col-span-3 pt-10" title="Grafik Pendapatan Margin" :data="data.revenues"
-                        :filter="selectedFilter" />
+                    <VerticalBarChart
+                        class="col-span-3 pt-10"
+                        title="Grafik Pendapatan Margin"
+                        :data="props.pertumbuhan_pendapatan"
+                        :filter="props.selectedFilter"
+                    />
                 </div>
             </div>
             <div class="card-layout col-span-1">
@@ -68,10 +79,10 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                         </svg>
                     </div>
                 </div>
-                <TransactionTable :columns="tableColumns" :rows="data.recent_transactions">
+                <TransactionTable :columns="kolomTabel" :rows="props.transaksi_terbaru">
                     <template #action="{ item }">
                         <Link
-                            :href="item.product !== 'Pembiayaan' ? `/admin/savings/show/${item.id}` : `/admin/financings/show/${item.id}`">
+                            :href="item.produk !== 'Pembiayaan' ? `/admin/savings/show/${item.id}` : `/admin/financings/show/${item.id}`">
                             <EyeIcon
                                 class="w-5 h-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
                         </Link>
@@ -79,9 +90,10 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                 </TransactionTable>
             </div>
         </div>
-        <div class="col-span-4 grid grid-cols-2 gap-3.5">
-            <CardInfo title="Rasio Non-Performing Financing (NPF)" :content="data.rasio_npf" />
-            <CardInfo title="Rasio Financing-to-Deposit (FDR)" :content="data.rasio_fdr" />
+        <!-- KOMPOSISI SIMPANAN & PETA PEMBIAYAAN - BARIS DUA -->
+        <div class="col-span-4 grid grid-cols-2 gap-4">
+            <CardInfo title="Rasio Non-Performing Financing (NPF)" :content="props.stats.rasio_npf" />
+            <CardInfo title="Rasio Financing-to-Deposit (FDR)" :content="props.stats.rasio_fdr" />
             <div class="card-layout col-span-2">
                 <div class="border-b border-stroke pb-4">
                     <div class="flex justify-between w-full items-center">
@@ -101,22 +113,22 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                         </div>
                     </div>
                     <h2 class="text-2xl font-semibold text-primary pt-5">{{
-                        parseCurrencyAmount(data.total_simpanan_masuk) }}
+                        parseCurrencyAmount(props.stats.total_simpanan_masuk) }}
                     </h2>
                     <p class="text-gray-500 font-body text-sm pt-2">Total Simpanan Masuk</p>
                 </div>
-                <BarChart :data="data.peta_simpanan" />
+                <BarChart :data="props.peta_simpanan" />
             </div>
         </div>
         <div class="card-layout col-span-3">
             <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
                 <h1 class="card-title">Peta Pembiayaan</h1>
                 <h2 class="text-2xl font-semibold text-primary mt-2">{{
-                    parseCurrencyAmount(data.total_pembiayaan_tersalurkan) }}</h2>
+                    parseCurrencyAmount(props.stats.total_pembiayaan_tersalurkan) }}</h2>
                 <p class="text-gray-500 font-body text-sm">Total Pembiayaan Tersalurkan</p>
             </div>
             <div class="flex items-center justify-center mt-15">
-                <PieChart :data="data.peta_pembiayaan" class="flex items-center justify-center mt-8" />
+                <PieChart :data="props.peta_pembiayaan" class="flex items-center justify-center mt-8" />
             </div>
         </div>
     </div>

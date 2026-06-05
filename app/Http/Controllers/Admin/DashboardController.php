@@ -17,54 +17,61 @@ class DashboardController extends Controller
         $role = auth()->user()->getRoleNames()->first();
 
         $data = [];
-        $startDate = $req->start_date
+        $tanggalAwal = $req->start_date
             ? Carbon::parse($req->start_date)->startOfDay()
             : now()->startOfMonth()->startOfDay();
 
-        $endDate = $req->end_date
+        $tanggalAkhir = $req->end_date
             ? Carbon::parse($req->end_date)->endOfDay()
             : now()->endOfMonth()->endOfDay();
         $filterBy = $req->filter_by ?? 'month';
 
-        [$prevStartDate, $prevEndDate] = $service->getPeriodeSebelumnya($startDate, $filterBy);
+        [$tanggalAwalSebelumnya, $tanggalAkhirSebelumnya] = $service->getPeriodeSebelumnya($tanggalAwal, $filterBy);
 
-        [$data['total_kas'], $data['total_kas_persen']] = $service->getTotalKas($endDate, $prevEndDate);
+        [$data['total_kas'], $data['total_kas_persen']] = $service->getTotalKas($tanggalAkhir, $tanggalAkhirSebelumnya);
 
-        [$data['total_anggota_aktif'], $data['total_anggota_aktif_persen']] = $service->getTotalAnggota($endDate, $prevEndDate, UserStatusEnum::ACTIVE->value);
+        [$data['total_anggota_aktif'], $data['total_anggota_aktif_persen']] = $service->getTotalAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, UserStatusEnum::ACTIVE->value);
 
-        [$data['total_anggota_non_aktif'], $data['total_anggota_non_aktif_persen']] = $service->getTotalAnggota($endDate, $prevEndDate, UserStatusEnum::INACTIVE->value);
+        [$data['total_anggota_non_aktif'], $data['total_anggota_non_aktif_persen']] = $service->getTotalAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, UserStatusEnum::INACTIVE->value);
 
-        [$data['total_pengurus'], $data['total_pengurus_persen']] = $service->getTotalPengurus($endDate, $prevEndDate);
+        [$data['total_pengurus'], $data['total_pengurus_persen']] = $service->getTotalPengurus($tanggalAkhir, $tanggalAkhirSebelumnya);
 
-        $data['rasio_kas'] = $service->getRasioKas($endDate);
+        $data['rasio_kas'] = $service->getRasioKas($tanggalAkhir);
 
-        $data['rasio_fdr'] = $service->getRasioFDR($endDate);
+        $data['rasio_fdr'] = $service->getRasioFDR($tanggalAkhir);
 
-        [$data['total_simpanan_masuk'], $data['total_simpanan_masuk_persem']] = $service->getTotalSimpanan($endDate, $prevEndDate, 'Debit');
+        [$data['total_simpanan_masuk'], $data['total_simpanan_masuk_persen']] = $service->getTotalSimpanan($tanggalAkhir, $tanggalAkhirSebelumnya, 'Debit');
 
-        [$data['total_simpanan_keluar'], $data['total_simpanan_keluar_persem']] = $service->getTotalSimpanan($endDate, $prevEndDate, 'Credit');
+        [$data['total_simpanan_keluar'], $data['total_simpanan_keluar_persen']] = $service->getTotalSimpanan($tanggalAkhir, $tanggalAkhirSebelumnya, 'Credit');
 
         $data['total_angsuran_belum_lunas'] = $service->getTotalAngsuranBelumLunas();
 
-        $data['total_pembiayaan_tersalurkan'] = $service->getTotalPembiayaanTersalurkan($endDate, $prevEndDate);
+        [$data['total_pembiayaan_tersalurkan'], $data['total_pembiayaan_tersalurkan_persen']] = $service->getTotalPembiayaanTersalurkan($tanggalAkhir, $tanggalAkhirSebelumnya);
 
-        $data['peta_simpanan'] = $service->getPetaSimpanan($endDate, $req->savings_filter ?? 'jenis');
+        [$data['modal_sudah_dialokasi'], $data['modal_sudah_dialokasi_persen']] = $service->getTotalModalSudahDialokasi($tanggalAkhir, $tanggalAkhirSebelumnya);
+
+        [$data['total_pembiayaan_aktif'], $data['total_pembiayaan_aktif_persen']] = $service->getTotalPembiayaanAktif($tanggalAkhir, $tanggalAkhirSebelumnya);
+
+        [$data['total_permohonan_pembiayaan'], $data['total_permohonan_pembiayaan_persen']] = $service->getTotalPermohonanPembiayaan($tanggalAkhir, $tanggalAkhirSebelumnya);
+
+        $data['peta_simpanan'] = $service->getPetaSimpanan($tanggalAkhir, $req->savings_filter ?? 'jenis');
 
         $data['jatuh_tempo_terdekat'] = $service->getJatuhTempoTerdekat($req->nearest_filter ?? 'all');
 
-        $data['permohonan_murabahah'] = $service->getPermohonanMurabahahTerbaru($startDate, $endDate);
+        $data['permohonan_murabahah'] = $service->getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir);
 
-        $data['pembayaran_terlambat'] = $service->getPembayaranTerlambat($endDate);
+        $data['pembayaran_terlambat'] = $service->getPembayaranTerlambat($tanggalAkhir);
 
-        $data['transaksi_simpanan_terbaru'] = $service->getTransaksiSimpananTerbaru($endDate, $req->saving_transaction_filter ?? 'all');
+        $data['transaksi_simpanan_terbaru'] = $service->getTransaksiSimpananTerbaru($tanggalAkhir, $req->saving_transaction_filter ?? 'all');
 
         $data['transaksi_terbaru'] = $service->getTransaksiTerbaru($req->transaction_filter ?? 'all');
 
         $data['pertumbuhan_pendapatan'] = $service->getPendapatanPerPeriode($req->start_date, $req->end_date, $filterBy);
 
-        $data['pertumbuhan_anggota'] = $service->getTotalAnggotaPerPeriode($startDate, $endDate, $filterBy);
+        $data['pertumbuhan_anggota'] = $service->getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filterBy);
 
-        $data['peta_pembiayaan'] = $service->getPetaPembiayaan($endDate);
+        $data['peta_pembiayaan'] = $service->getPetaPembiayaan($tanggalAkhir);
+
 
         return inertia('Admin/Dashboard', [
             'stats' => [
@@ -79,9 +86,13 @@ class DashboardController extends Controller
                 'total_simpanan_masuk' => $data['total_simpanan_masuk'],
                 'total_simpanan_masuk_persen' => $data['total_simpanan_masuk_persen'],
                 'total_simpanan_keluar' => $data['total_simpanan_keluar'],
-                'total_simpanan_keluar_percentage' => $data['total_simpanan_keluar_percentage'],
+                'total_simpanan_keluar_persen' => $data['total_simpanan_keluar_persen'],
                 'total_angsuran_belum_lunas' => $data['total_angsuran_belum_lunas'],
                 'total_pembiayaan_tersalurkan' => $data['total_pembiayaan_tersalurkan'],
+                'modal_sudah_dialokasi' => $data['modal_sudah_dialokasi'],
+                'modal_sudah_dialokasi_persen' => $data['modal_sudah_dialokasi_persen'],
+                'total_pembiayaan_aktif' => $data['total_pembiayaan_aktif'],
+                'total_pembiayaan_aktif_persen' => $data['total_pembiayaan_aktif_persen'],
                 'rasio_kas' => $data['rasio_kas'],
                 'rasio_fdr' => $data['rasio_fdr'],
             ],

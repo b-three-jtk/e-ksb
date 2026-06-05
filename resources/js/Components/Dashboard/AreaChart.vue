@@ -103,9 +103,9 @@ watch(() => props.data, updateChart, { deep: true })
 </script>
 
 <template>
-    <div class="max-w-full overflow-x-auto custom-scrollbar">
+    <div class="max-w-full overflow-x-scroll custom-scrollbar">
         <div id="chartOne" class="-ml-5 min-w-162.5 xl:min-w-full pl-2">
-            <VueApexCharts type="area" height="300" :key="filter" :options="chartOptions" :series="series" />
+            <VueApexCharts type="area" height="400" :key="filter" :options="chartOptions" :series="series" />
         </div>
     </div>
 </template>

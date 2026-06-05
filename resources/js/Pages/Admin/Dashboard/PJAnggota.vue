@@ -7,30 +7,30 @@ import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 
 defineProps({
-    data: Object,
-    can: Object,
-    role: Object,
+    stats: Object,
+    jatuh_tempo_terdekat: Object,
+    transaksi_simpanan_terbaru: Object,
     selectedSavingTransactionFilter: String,
     selectedNearestDueFilter: String,
 });
 
 const tableNearestDueColumns = computed(() => {
     const cols = [
-        { key: 'product', label: 'Jenis' },
-        { key: 'due_date', label: 'Jatuh Tempo' },
-        { key: 'user_name', label: 'Anggota' },
+        { key: 'produk', label: 'Jenis' },
+        { key: 'jatuh_tempo', label: 'Jatuh Tempo' },
+        { key: 'anggota', label: 'Anggota' },
         { key: 'nominal', label: 'Nominal' },
         { key: 'status', label: 'Status' },
     ];
     return cols;
 });
 
-const tableSavingTransactionColumns = computed(() => {
+const kolomTabelTransaksiSimpanan = computed(() => {
     const cols = [
-        { key: 'transaction_code', label: 'No. Transaksi' },
-        { key: 'user_name', label: 'Anggota' },
-        { key: 'amount', label: 'Nominal' },
-        { key: 'product', label: 'Jenis' },
+        { key: 'no_transaksi', label: 'No. Transaksi' },
+        { key: 'anggota', label: 'Anggota' },
+        { key: 'jumlah', label: 'Nominal' },
+        { key: 'produk', label: 'Jenis' },
     ];
     cols.push({ key: 'action', label: 'Aksi' });
     return cols;
@@ -41,9 +41,20 @@ const tableSavingTransactionColumns = computed(() => {
 <template>
     <!-- INFO -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <CardInfo title="Total Simpanan Masuk" :content="parseCurrencyAmount(data.total_simpanan_masuk)" :percentage="data.total_simpanan_masuk_percentage" />
-        <CardInfo title="Total Simpanan Keluar" :content="parseCurrencyAmount(data.total_simpanan_keluar)" :percentage="data.total_simpanan_keluar_percentage" />
-        <CardInfo title="Total Angsuran Belum Lunas" :content="parseCurrencyAmount(data.total_angsuran_belum_lunas)" />
+        <CardInfo
+            title="Total Simpanan Masuk"
+            :content="parseCurrencyAmount(stats.total_simpanan_masuk)"
+            :percentage="stats.total_simpanan_masuk_persen"
+        />
+        <CardInfo
+            title="Total Simpanan Keluar"
+            :content="parseCurrencyAmount(stats.total_simpanan_keluar)"
+            :percentage="stats.total_simpanan_keluar_persen"
+        />
+        <CardInfo
+            title="Total Angsuran Belum Lunas"
+            :content="parseCurrencyAmount(stats.total_angsuran_belum_lunas)"
+        />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="card-layout">
@@ -64,7 +75,7 @@ const tableSavingTransactionColumns = computed(() => {
                     </svg>
                 </div>
             </div>
-            <TransactionTable :columns="tableNearestDueColumns" :rows="data.nearest_due">
+            <TransactionTable :columns="tableNearestDueColumns" :rows="jatuh_tempo_terdekat">
                 <template #nominal="{ item }">
                     {{ parseCurrencyAmount(item.nominal) }}
                 </template>
@@ -91,9 +102,9 @@ const tableSavingTransactionColumns = computed(() => {
                     </svg>
                 </div>
             </div>
-            <TransactionTable :columns="tableSavingTransactionColumns" :rows="data.recent_saving_transactions">
-                <template #amount="{ item }">
-                        {{ parseCurrencyAmount(item.amount) }}
+            <TransactionTable :columns="kolomTabelTransaksiSimpanan" :rows="transaksi_simpanan_terbaru">
+                <template #jumlah="{ item }">
+                        {{ parseCurrencyAmount(item.jumlah) }}
                 </template>
                 <template #action="{ item }">
                     <Link :href="`/admin/savings/show/${item.id}`">

@@ -1,7 +1,7 @@
 <script setup>
 import CardInfo from '@/Components/CardInfo.vue';
 import VerticalBarChart from '@/Components/Dashboard/VerticalBarChart.vue';
-import parseCurrencyAmount from '@/Composables/moneyParser.js';
+import parseCurrencyjumlah from '@/Composables/moneyParser.js';
 import EyeIcon from '@/Icons/EyeIcon.vue';
 import TransactionTable from '@/Components/Dashboard/TransactionTable.vue';
 import { computed } from 'vue';
@@ -12,28 +12,32 @@ import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingSt
 import PieChart from '@/Components/Dashboard/PieChart.vue';
 
 defineProps({
-    data: Object,
+    stats: Object,
+    pertumbuhan_pendapatan: Object,
+    peta_pembiayaan: Object,
+    pembayaran_terlambat: Object,
+    permohonan_murabahah: Object,
     can: Object,
     role: Object,
     selectedFilter: String,
     selectedTransactionFilter: String,
 });
 
-const tableLatePaymentColumns = computed(() => {
+const kolomTabelPembayaranTerlambat = computed(() => {
     const cols = [
-        { key: 'transaction_code', label: 'No. Transaksi' },
-        { key: 'user_name', label: 'Anggota' },
-        { key: 'days_overdue', label: 'Hari Terlambat' },
-        { key: 'amount', label: 'Jumlah' },
+        { key: 'no_transaksi', label: 'No. Transaksi' },
+        { key: 'anggota', label: 'Anggota' },
+        { key: 'hari_terlambat', label: 'Hari Terlambat' },
+        { key: 'jumlah', label: 'Jumlah' },
     ];
     cols.push({ key: 'action', label: 'Aksi' });
     return cols;
 });
 
-const tableMurabahaRequestsColumns = computed(() => {
+const kolomTabelPermohonanMurabahah = computed(() => {
     const cols = [
-        { key: 'transaction_code', label: 'No. Transaksi' },
-        { key: 'user_name', label: 'Anggota' },
+        { key: 'no_transaksi', label: 'No. Transaksi' },
+        { key: 'anggota', label: 'Anggota' },
         { key: 'status', label: 'Status' },
     ];
     cols.push({ key: 'action', label: 'Aksi' });
@@ -45,26 +49,43 @@ const tableMurabahaRequestsColumns = computed(() => {
 <template>
     <!-- INFO -->
     <div v-if="role === 'Ketua Murabahah'" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <CardInfo title="Total Modal Belum Diputar" :content="parseCurrencyAmount(data.total_saving_amount)" />
-        <CardInfo title="Jumlah Pembiayaan Aktif" :content="data.total_staff" :percentage="total_staff_pct" />
-        <CardInfo title="Total Permohonan Pembiayaan" :content="data.total_active_member"
-            :percentage="total_active_member_pct" :filter="selectedFilter" />
+        <CardInfo
+            title="Total Modal Belum Diputar"
+            :content="parseCurrencyjumlah(stats.modal_sudah_dialokasi)"
+            :percentage="stats.modal_sudah_dialokasi_persen"
+            :filter="selectedFilter"
+        />
+        <CardInfo
+            title="Jumlah Pembiayaan Aktif"
+            :content="stats.total_pembiayaan_aktif"
+            :percentage="stats.total_pembiayaan_aktif"
+            :filter="selectedFilter"
+        />
+        <CardInfo
+            title="Total Permohonan Pembiayaan"
+            :content="stats.total_permohonan_pembiayaan"
+            :percentage="stats.total_permohonan_pembiayaan_persen"
+            :filter="selectedFilter"
+        />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pendapatan Margin</h1>
-            <VerticalBarChart class="col-span-3 pt-10" title="Grafik Pendapatan Margin" :data="revenues"
+            <VerticalBarChart
+                class="col-span-3 pt-10"
+                title="Grafik Pendapatan Margin"
+                :data="pertumbuhan_pendapatan"
                 :filter="selectedFilter" />
         </div>
         <div class="card-layout col-span-2">
             <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
                 <h1 class="card-title">Peta Pembiayaan</h1>
                 <h2 class="text-2xl font-semibold text-primary mt-2">{{
-                    parseCurrencyAmount(data.total_pembiayaan_tersalurkan) }}</h2>
+                    parseCurrencyjumlah(stats.total_pembiayaan_tersalurkan) }}</h2>
                 <p class="text-gray-500 font-body text-sm">Total Pembiayaan Tersalurkan</p>
             </div>
             <div class="flex items-center justify-center">
-                <PieChart :data="data.peta_pembiayaan" class="flex items-center justify-center mt-8" />
+                <PieChart :data="peta_pembiayaan" class="flex items-center justify-center mt-8" />
             </div>
         </div>
     </div>
@@ -74,7 +95,7 @@ const tableMurabahaRequestsColumns = computed(() => {
                 <h1 class="card-title">Pembayaran Angsuran Terlambat</h1>
                 <div class="bg-white border border-stroke px-4 py-2 rounded-lg">Selengkapnya</div>
             </div>
-            <TransactionTable :columns="tableLatePaymentColumns" :rows="data.late_payment_installments">
+            <TransactionTable :columns="kolomTabelPembayaranTerlambat" :rows="pembayaran_terlambat">
                 <template #action="{ item }">
                     <Link :href="`/admin/financings/show/${item.id}`">
                     <EyeIcon
@@ -88,7 +109,7 @@ const tableMurabahaRequestsColumns = computed(() => {
                 <h1 class="card-title">Permohonan Pembiayaan Sedang Berjalan</h1>
                 <div class="bg-white border border-stroke px-4 py-2 rounded-lg">Selengkapnya</div>
             </div>
-            <TransactionTable :columns="tableMurabahaRequestsColumns" :rows="data.murabahah_requests">
+            <TransactionTable :columns="kolomTabelPermohonanMurabahah" :rows="permohonan_murabahah">
                 <template #cell-status="{ item }">
                     <span :class="useFinancingStatus(item.status)">
                         {{ getStatusLabel(item.status) }}

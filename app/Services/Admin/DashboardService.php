@@ -78,11 +78,13 @@ class DashboardService
     {
         $kas = JournalEntry::where('no_ref_account', '101')
             ->where('transaction_date', '<=', $tanggalAkhir)
-            ->sum('nominal');
+            ->selectRaw("SUM(CASE WHEN position = 'Debit' THEN nominal ELSE 0 END) - SUM(CASE WHEN position = 'Credit' THEN nominal ELSE 0 END) as total")
+            ->value('total') ?? 0;
 
         $kasSebelumnya = JournalEntry::where('no_ref_account', '101')
             ->where('transaction_date', '<=', $tanggalAkhirSebelumnya)
-            ->sum('nominal');
+            ->selectRaw("SUM(CASE WHEN position = 'Debit' THEN nominal ELSE 0 END) - SUM(CASE WHEN position = 'Credit' THEN nominal ELSE 0 END) as total")
+            ->value('total') ?? 0;
 
         $persen = $this->hitungPersen($kas, $kasSebelumnya);
 
@@ -95,28 +97,28 @@ class DashboardService
             ->latest()->take(6)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
-                'transaction_code' => $t->saving_transaction_code,
-                'user_name' => $t->savingAccount->member->user->name,
-                'amount' => $t->amount,
-                'product' => $t->savingAccount->saving_type,
+                'no_transaksi' => $t->saving_transaction_code,
+                'anggota' => $t->savingAccount->member->user->name,
+                'jumlah' => $t->amount,
+                'produk' => $t->savingAccount->saving_type,
                 'akad' => $this->getAkadSimpanan($t->savingAccount->saving_type),
-                'created_at' => $t->created_at->toDateString(),
+                'tanggal' => $t->created_at->toDateString(),
             ]);
 
         $transaksiPembiayaan = Financing::with('member.user', 'financingItem')
             ->latest()->take(6)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
-                'transaction_code' => $f->financing_transaction_code,
-                'user_name' => $f->member->user->name,
-                'amount' => $f->amount,
-                'product' => 'Pembiayaan',
+                'no_transaksi' => $f->financing_transaction_code,
+                'anggota' => $f->member->user->name,
+                'jumlah' => $f->amount,
+                'produk' => 'Pembiayaan',
                 'akad' => 'Murabahah',
-                'created_at' => $f->created_at->toDateString(),
+                'tanggal' => $f->created_at->toDateString(),
             ]);
 
         $data = $filter === 'all' ? $transaksiSimpanan->concat($transaksiPembiayaan)
-            ->sortByDesc('created_at')
+            ->sortByDesc('tanggal')
             ->take(6)
             ->values()
             ->toArray() : ($filter === 'simpanan' ? $transaksiSimpanan : $transaksiPembiayaan)->toArray();
@@ -340,24 +342,24 @@ class DashboardService
             ->latest()->take(7)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
-                'user_name' => $t->member->user->name,
+                'anggota' => $t->member->user->name,
                 'nominal' => $savingNominal,
-                'product' => $t->saving_type,
-                'due_date' => $t->transactions->last() ? $t->transactions->last()->created_at->addDays((int) $savingDueDate)->toDateString() : null
+                'produk' => $t->saving_type,
+                'jatuh_tempo' => $t->transactions->last() ? $t->transactions->last()->created_at->addDays((int) $savingDueDate)->toDateString() : null
             ]);
 
         $transaksiPembiayaan = Installment::with('financing.member.user')
             ->latest()->take(7)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
-                'user_name' => $f->financing->member->user->name,
+                'anggota' => $f->financing->member->user->name,
                 'nominal' => $f->amount,
-                'product' => 'Pembiayaan',
-                'due_date' => $f->due_date->toDateString(),
+                'produk' => 'Pembiayaan',
+                'jatuh_tempo' => $f->due_date->toDateString(),
             ]);
 
         $allTransactions = $filter === 'all' ? $transaksiSimpanan->concat($transaksiPembiayaan)
-            ->sortByDesc('created_at')
+            ->sortByDesc('jatuh_tempo')
             ->take(7)
             ->values()
             ->toArray() : ($filter === 'simpanan' ? $transaksiSimpanan : $transaksiPembiayaan)->toArray();
@@ -374,8 +376,8 @@ class DashboardService
             ->get()
             ->map(fn($f) => [
                 'id' => $f->id,
-                'transaction_code' => $f->financing_transaction_code,
-                'user_name' => $f->member->user->name,
+                'no_transaksi' => $f->financing_transaction_code,
+                'anggota' => $f->member->user->name,
                 'status' => $f->status,
             ]);
     }
@@ -390,11 +392,10 @@ class DashboardService
             ->get()
             ->map(fn($i) => [
                 'id' => $i->id,
-                'transaction_code' => $i->financing->financing_transaction_code,
-                'user_name' => $i->financing->member->user->name,
-                'amount' => $i->amount,
-                'days_overdue' => Carbon::parse($i->due_date)->diffInDays(Carbon::parse($tanggalAkhir)),
-                'due_date' => $i->due_date->toDateString(),
+                'no_transaksi' => $i->financing->financing_transaction_code,
+                'anggota' => $i->financing->member->user->name,
+                'jumlah' => $i->amount,
+                'hari_terlambat' => Carbon::parse($i->due_date)->diffInDays(Carbon::parse($tanggalAkhir)),
             ]
         );
 
@@ -410,18 +411,17 @@ class DashboardService
             ->get()
             ->map(fn($t) => [
                 'id' => $t->id,
-                'transaction_code' => $t->saving_transaction_code,
-                'user_name' => $t->savingAccount->member->user->name,
-                'amount' => $t->saving_amount,
-                'product' => $t->savingAccount->saving_type,
-                'created_at' => $t->created_at->toDateString(),
+                'no_transaksi' => $t->saving_transaction_code,
+                'anggota' => $t->savingAccount->member->user->name,
+                'jumlah' => $t->saving_amount,
+                'produk' => $t->savingAccount->saving_type,
             ])
             ->toArray();
 
         if ($filter === 'all') {
             return $savings;
         } else {
-            return array_filter($savings, fn($s) => $s['product'] === $filter);
+            return array_filter($savings, fn($s) => $s['produk'] === $filter);
         }
     }
 
@@ -435,18 +435,19 @@ class DashboardService
 
     public function getTotalPembiayaanTersalurkan($tanggalAkhir, $tanggalAkhirSebelumnya)
     {
-        $total = JournalEntry::where('no_ref_account', '104')
+        $modal = JournalEntry::where('no_ref_account', '104')
             ->where('transaction_date', '<=', $tanggalAkhir)
-            ->sum('nominal');
+            ->selectRaw("SUM(CASE WHEN position = 'Debit' THEN nominal ELSE 0 END) - SUM(CASE WHEN position = 'Credit' THEN nominal ELSE 0 END) as total")
+            ->value('total') ?? 0;
 
-        $persen = $this->hitungPersen(
-            $total,
-            JournalEntry::where('no_ref_account', '103')
-                ->where('transaction_date', '<=', $tanggalAkhirSebelumnya)
-                ->sum('nominal')
-        );
+        $modalSebelumnya = JournalEntry::where('no_ref_account', '104')
+            ->where('transaction_date', '<=', $tanggalAkhirSebelumnya)
+            ->selectRaw("SUM(CASE WHEN position = 'Debit' THEN nominal ELSE 0 END) - SUM(CASE WHEN position = 'Credit' THEN nominal ELSE 0 END) as total")
+            ->value('total') ?? 0;
 
-        return [$total, $persen];
+        $persen = $this->hitungPersen($modal, $modalSebelumnya);
+
+        return [$modal, $persen];
     }
 
     public function getPetaPembiayaan($tanggalAkhir)
@@ -492,6 +493,51 @@ class DashboardService
         }
 
         return $skeleton;
+    }
+
+    public function getTotalModalSudahDialokasi($tanggalAkhir, $tanggalAkhirSebelumnya)
+    {
+        $modal = JournalEntry::where('no_ref_account', '102')
+            ->where('transaction_date', '<=', $tanggalAkhir)
+            ->selectRaw("SUM(CASE WHEN position = 'Debit' THEN nominal ELSE 0 END) - SUM(CASE WHEN position = 'Credit' THEN nominal ELSE 0 END) as total")
+            ->value('total') ?? 0;
+
+        $modalSebelumnya = JournalEntry::where('no_ref_account', '102')
+            ->where('transaction_date', '<=', $tanggalAkhirSebelumnya)
+            ->selectRaw("SUM(CASE WHEN position = 'Debit' THEN nominal ELSE 0 END) - SUM(CASE WHEN position = 'Credit' THEN nominal ELSE 0 END) as total")
+            ->value('total') ?? 0;
+
+        $persen = $this->hitungPersen($modal, $modalSebelumnya);
+
+        return [$modal, $persen];
+    }
+
+    public function getTotalPembiayaanAktif($tanggalAkhir, $tanggalAkhirSebelumnya)
+    {
+        $total = Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+            ->where('akad_date', '<=', $tanggalAkhir)
+            ->count();
+
+        $persen = $this->hitungPersen(
+            $total,
+            Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+                ->where('akad_date', '<=', $tanggalAkhirSebelumnya)
+                ->count()
+        );
+
+        return [$total, $persen];
+    }
+
+    public function getTotalPermohonanPembiayaan($tanggalAkhir, $tanggalAkhirSebelumnya)
+    {
+        $total = Financing::whereIn('status', [FinancingReqStatusEnum::PENDING_REVIEW->value, FinancingReqStatusEnum::APPROVED->value, FinancingReqStatusEnum::REJECTED->value])->where('requested_date', '<=', $tanggalAkhir)->count();
+
+        $persen = $this->hitungPersen(
+            $total,
+            Financing::whereIn('status', [FinancingReqStatusEnum::PENDING_REVIEW->value, FinancingReqStatusEnum::APPROVED->value, FinancingReqStatusEnum::REJECTED->value])->where('requested_date', '<=', $tanggalAkhirSebelumnya)->count()
+        );
+
+        return [$total, $persen];
     }
 
     // lokal helper

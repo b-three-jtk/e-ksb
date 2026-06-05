@@ -18,7 +18,16 @@ const role = computed(() => page.props.auth.role);
 const can = computed(() => page.props.auth.can)
 
 const props = defineProps({
-    data: Object
+    stats: Object,
+    pertumbuhan_pendapatan: Object,
+    pertumbuhan_anggota: Object,
+    peta_simpanan: Object,
+    peta_pembiayaan: Object,
+    transaksi_terbaru: Object,
+    jatuh_tempo_terdekat: Object,
+    permohonan_murabahah: Object,
+    pembayaran_terlambat: Object,
+    transaksi_simpanan_terbaru: Object,
 });
 
 const dates = ref([new Date(), new Date()]);
@@ -101,29 +110,72 @@ const applyFilter = () => {
                 </div>
             </div>
             <!-- Dashboard Ketua Pengawas -->
-            <KetuaPengawas @update:selected-transaction-filter="selectedTransactionFilter = $event"
-                :selected-transaction-filter="selectedTransactionFilter" @update:selected-filter="selectedFilter"
-                :selected-filter="selectedFilter" @update:selected-savings-filter="selectedSavingsFilter = $event"
-                :selected-savings-filter="selectedSavingsFilter" :can="can"
-                v-if="role === 'Ketua' || role === 'Pengawas'"
-                :data="props.data" />
-            <!-- Dashboard DPS -->
-            <DPS v-if="role === 'Dewan Pengawas Syariah'" @update:selected-transaction-filter="selectedTransactionFilter = $event"
-                :selected-transaction-filter="selectedTransactionFilter" @update:selected-filter="selectedFilter" :role="role"
-                :selected-filter="selectedFilter" @update:selected-savings-filter="selectedSavingsFilter = $event"
-                :selected-savings-filter="selectedSavingsFilter" :can="can" :data="props.data" />
-            <!-- Dashboard Bendahara -->
-            <Bendahara v-if="role === 'Bendahara'" :can="can" :data="props.data" :selected-filter="selectedFilter" />
-            <!-- Dashboard Sekretaris -->
-            <Sekretaris v-if="role === 'Sekretaris'" :can="can" :data="props.data" />
-            <!-- Dashboard Ketua Staf Murabahah -->
-            <KetuaStafMurabahah v-if="role === 'Ketua Murabahah' || role === 'Staf Murabahah'"
+            <KetuaPengawas
                 @update:selected-transaction-filter="selectedTransactionFilter = $event"
-                :selected-transaction-filter="selectedTransactionFilter" :can="can" :data="props.data" :role="role" />
+                :selected-transaction-filter="selectedTransactionFilter"
+                @update:selected-filter="selectedFilter"
+                :selected-filter="selectedFilter"
+                @update:selected-savings-filter="selectedSavingsFilter = $event"
+                :selected-savings-filter="selectedSavingsFilter"
+                :can="can"
+                v-if="role === 'Ketua' || role === 'Pengawas'"
+                :stats="props.stats"
+                :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
+                :peta_simpanan="props.peta_simpanan"
+                :peta_pembiayaan="props.peta_pembiayaan"
+                :transaksi_terbaru="props.transaksi_terbaru"
+            />
+            <!-- Dashboard DPS -->
+            <DPS
+                v-if="role === 'Dewan Pengawas Syariah'"
+                @update:selected-transaction-filter="selectedTransactionFilter = $event"
+                :selected-transaction-filter="selectedTransactionFilter"
+                @update:selected-filter="selectedFilter"
+                :selected-filter="selectedFilter"
+                @update:selected-savings-filter="selectedSavingsFilter = $event"
+                :selected-savings-filter="selectedSavingsFilter"
+                :stats="props.stats"
+                :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
+                :peta_simpanan="props.peta_simpanan"
+                :peta_pembiayaan="props.peta_pembiayaan"
+                :transaksi_terbaru="props.transaksi_terbaru"
+            />
+            <!-- Dashboard Bendahara -->
+            <Bendahara
+                v-if="role === 'Bendahara'"
+                :stats="props.stats"
+                :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
+                :selected-filter="selectedFilter"
+            />
+            <!-- Dashboard Sekretaris -->
+            <Sekretaris
+                v-if="role === 'Sekretaris'"
+                :stats="props.stats"
+                :pertumbuhan_anggota="props.pertumbuhan_anggota"
+            />
+            <!-- Dashboard Ketua Staf Murabahah -->
+            <KetuaStafMurabahah
+                v-if="role === 'Ketua Murabahah' || role === 'Staf Murabahah'"
+                @update:selected-transaction-filter="selectedTransactionFilter = $event"
+                :selected-transaction-filter="selectedTransactionFilter"
+                :peta_pembiayaan="props.peta_pembiayaan"
+                :pembayaran_terlambat="props.pembayaran_terlambat"
+                :permohonan_murabahah="props.permohonan_murabahah"
+                :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
+                :can="can"
+                :stats="props.stats"
+                :role="role"
+            />
+            <!-- Dashboard Penanggung Jawab Anggota -->
             <PJAnggota v-if="role === 'Penanggung Jawab Anggota'"
                 @update:selected-nearest-due-filter="selectedNearestDueFilter = $event"
-                :selected-nearest-due-filter="selectedNearestDueFilter" @update:selected-saving-transaction-filter="selectedSavingTransactionFilter = $event"
-                :selected-saving-transaction-filter="selectedSavingTransactionFilter" :can="can" :data="props.data" :role="role" />
+                :selected-nearest-due-filter="selectedNearestDueFilter"
+                @update:selected-saving-transaction-filter="selectedSavingTransactionFilter = $event"
+                :selected-saving-transaction-filter="selectedSavingTransactionFilter"
+                :stats="props.stats"
+                :jatuh_tempo_terdekat="props.jatuh_tempo_terdekat"
+                :transaksi_simpanan_terbaru="props.transaksi_simpanan_terbaru"
+            />
         </div>
     </AdminLayout>
 </template>
