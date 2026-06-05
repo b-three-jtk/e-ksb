@@ -2,207 +2,91 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\MemberStatusEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Models\Financing;
-use App\Models\SavingTransaction;
-use App\Models\User;
+use App\Services\Admin\DashboardService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function index(Request $req)
+    public function index(Request $req, DashboardService $service)
     {
-        $startDate = $req->start_date
+        //  get role spatie
+        $role = auth()->user()->getRoleNames()->first();
+
+        $data = [];
+        $tanggalAwal = $req->start_date
             ? Carbon::parse($req->start_date)->startOfDay()
             : now()->startOfMonth()->startOfDay();
 
-        $endDate = $req->end_date
+        $tanggalAkhir = $req->end_date
             ? Carbon::parse($req->end_date)->endOfDay()
             : now()->endOfMonth()->endOfDay();
         $filterBy = $req->filter_by ?? 'month';
 
-        // Get previous period dates
-        [$prevStartDate, $prevEndDate] = $this->getPreviousPeriod($startDate, $filterBy);
+        [$tanggalAwalSebelumnya, $tanggalAkhirSebelumnya] = $service->getPeriodeSebelumnya($tanggalAwal, $filterBy);
 
-        // Total financing amount from view
-        $totalFinancingAmountQuery = DB::table('get_total_financing');
+        [$data['total_kas'], $data['total_kas_persen']] = $service->getTotalKas($tanggalAkhir, $tanggalAkhirSebelumnya);
 
-        if ($startDate && $endDate) {
-            $totalFinancingAmountQuery->whereBetween('created_at', [$startDate, $endDate]);
-        }
+        [$data['total_anggota_aktif'], $data['total_anggota_aktif_persen']] = $service->getTotalAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, UserStatusEnum::ACTIVE->value);
 
-        $totalFinancingAmount = $totalFinancingAmountQuery->sum('total_financing');
+        [$data['total_anggota_non_aktif'], $data['total_anggota_non_aktif_persen']] = $service->getTotalAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, UserStatusEnum::INACTIVE->value);
 
-        $activeUserCount = User::where('status', UserStatusEnum::ACTIVE->value)->where('created_at', '<=', $endDate)->count();
+        [$data['total_pengurus'], $data['total_pengurus_persen']] = $service->getTotalPengurus($tanggalAkhir, $tanggalAkhirSebelumnya);
+
+        $data['rasio_kas'] = $service->getRasioKas($tanggalAkhir);
+
+        $data['rasio_fdr'] = $service->getRasioFDR($tanggalAkhir);
+
+        [$data['total_simpanan_masuk'], $data['total_simpanan_masuk_persen']] = $service->getTotalSimpanan($tanggalAkhir, $tanggalAkhirSebelumnya, 'Debit');
+
+        [$data['total_simpanan_keluar'], $data['total_simpanan_keluar_persen']] = $service->getTotalSimpanan($tanggalAkhir, $tanggalAkhirSebelumnya, 'Credit');
+
+        $data['total_angsuran_belum_lunas'] = $service->getTotalAngsuranBelumLunas();
+
+        [$data['total_pembiayaan_tersalurkan'], $data['total_pembiayaan_tersalurkan_persen']] = $service->getTotalPembiayaanTersalurkan($tanggalAkhir, $tanggalAkhirSebelumnya);
+
+        [$data['modal_sudah_dialokasi'], $data['modal_sudah_dialokasi_persen']] = $service->getTotalModalSudahDialokasi($tanggalAkhir, $tanggalAkhirSebelumnya);
+
+        [$data['total_pembiayaan_aktif'], $data['total_pembiayaan_aktif_persen']] = $service->getTotalPembiayaanAktif($tanggalAkhir, $tanggalAkhirSebelumnya);
+
+        [$data['total_permohonan_pembiayaan'], $data['total_permohonan_pembiayaan_persen']] = $service->getTotalPermohonanPembiayaan($tanggalAkhir, $tanggalAkhirSebelumnya);
 
         return inertia('Admin/Dashboard', [
-            'active_user_count' => $activeUserCount,
-            'active_user_percentage' => $this->calculatePercentage(
-                $activeUserCount,
-                User::where('status', UserStatusEnum::ACTIVE->value)->where('created_at', '<=', $prevEndDate)->count()
-            ),
-            'total_saving_amount' => DB::table('saving_accounts')
-                ->sum('balance'),
-            'total_financing_amount' => $totalFinancingAmount,
-            'total_financing_percentage' => $this->calculatePercentage(
-                $totalFinancingAmount,
-                $totalFinancingAmountQuery->whereBetween('created_at', [$prevStartDate, $prevEndDate])->sum('total_financing') ?? 0
-            ),
-            'transaction_data' => $this->getRecentTransactions(),
-            'registration_data' => $this->getPendingRegistrations(),
-            'financing_data' => $this->getRecentFinancings(),
-            'financing_stats' => $this->getFinancingStats($filterBy)
+            'stats' => [
+                'total_kas' => $data['total_kas'],
+                'total_kas_persen' => $data['total_kas_persen'],
+                'total_anggota_aktif' => $data['total_anggota_aktif'],
+                'total_anggota_aktif_persen' => $data['total_anggota_aktif_persen'],
+                'total_anggota_non_aktif' => $data['total_anggota_non_aktif'],
+                'total_anggota_non_aktif_persen' => $data['total_anggota_non_aktif_persen'],
+                'total_pengurus' => $data['total_pengurus'],
+                'total_pengurus_persen' => $data['total_pengurus_persen'],
+                'total_simpanan_masuk' => $data['total_simpanan_masuk'],
+                'total_simpanan_masuk_persen' => $data['total_simpanan_masuk_persen'],
+                'total_simpanan_keluar' => $data['total_simpanan_keluar'],
+                'total_simpanan_keluar_persen' => $data['total_simpanan_keluar_persen'],
+                'total_angsuran_belum_lunas' => $data['total_angsuran_belum_lunas'],
+                'total_pembiayaan_tersalurkan' => $data['total_pembiayaan_tersalurkan'],
+                'modal_sudah_dialokasi' => $data['modal_sudah_dialokasi'],
+                'modal_sudah_dialokasi_persen' => $data['modal_sudah_dialokasi_persen'],
+                'total_pembiayaan_aktif' => $data['total_pembiayaan_aktif'],
+                'total_pembiayaan_aktif_persen' => $data['total_pembiayaan_aktif_persen'],
+                'rasio_kas' => $data['rasio_kas'],
+                'rasio_fdr' => $data['rasio_fdr'],
+            ],
+                'pertumbuhan_pendapatan' => Inertia::lazy(fn() => $service->getPendapatanPerPeriode($req->start_date, $req->end_date, $filterBy)),
+                'pertumbuhan_anggota' => Inertia::lazy(fn() => $service->getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filterBy)),
+                'peta_simpanan' => Inertia::lazy(fn() => $service->getPetaSimpanan($tanggalAkhir, $req->savings_filter ?? 'jenis')),
+                'peta_pembiayaan' => Inertia::lazy(fn() => $service->getPetaPembiayaan($tanggalAkhir)),
+                'transaksi_terbaru' => Inertia::lazy(fn() => $service->getTransaksiTerbaru($req->transaction_filter ?? 'all')),
+                'jatuh_tempo_terdekat' => Inertia::lazy(fn() => $service->getJatuhTempoTerdekat($req->nearest_filter ?? 'all')),
+                'permohonan_murabahah' => Inertia::lazy(fn() => $service->getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)),
+                'pembayaran_terlambat' => Inertia::lazy(fn() => $service->getPembayaranTerlambat($tanggalAkhir)),
+                'transaksi_simpanan_terbaru' => Inertia::lazy(fn() => $service->getTransaksiSimpananTerbaru($tanggalAkhir, $req->saving_transaction_filter ?? 'all')),
         ]);
-    }
-
-    private function getPreviousPeriod(Carbon $start, string $filterBy): array
-    {
-        return match ($filterBy) {
-            'month' => [
-                $start->copy()->subMonth()->startOfMonth(),
-                $start->copy()->subMonth()->endOfMonth()
-            ],
-            'year' => [
-                $start->copy()->subYear()->startOfYear(),
-                $start->copy()->subYear()->endOfYear()
-            ],
-            default => [
-                $start->copy()->subDay(),
-                $start->copy()->subDay()
-            ],
-        };
-    }
-
-    private function calculatePercentage($current, $previous): int
-    {
-        return $previous == 0 ? 0 : round((($current - $previous) / $previous) * 100);
-    }
-
-    private function getRecentTransactions()
-    {
-        return SavingTransaction::with('savingAccount.member.user')
-            ->latest()->take(5)->get()
-            ->map(fn($t) => [
-                'id' => $t->id,
-                'transaction_code' => $t->saving_transaction_code,
-                'user_name' => $t->savingAccount->member->user->name,
-                'amount' => $t->amount,
-                'type' => $t->type,
-                'created_at' => $t->created_at->toDateTimeString(),
-            ]);
-    }
-
-    private function getPendingRegistrations()
-    {
-        return User::with(['member' => function ($query) {
-                $query->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
-            }])
-            ->latest()->take(5)->get()
-            ->map(fn($u) => [
-                'user_code' => $u->user_code,
-                'name' => $u->name,
-                'email' => $u->email,
-                'created_at' => $u->created_at,
-            ]);
-    }
-
-    private function getRecentFinancings()
-    {
-        return Financing::with('member.user', 'financingItem')
-            ->latest()->take(5)->get()
-            ->map(fn($f) => [
-                'id' => $f->id,
-                'transaction_code' => $f->financing_transaction_code,
-                'product_name' => $f->financingItem->name ?? '-',
-                'status' => $f->status,
-                'user_code' => $f->member->user->user_code,
-                'user_name' => $f->member->user->name,
-                'created_at' => $f->created_at,
-            ]);
-    }
-
-    private function getFinancingStats($filterBy = 'month')
-    {
-        return match ($filterBy) {
-            'month' => $this->getMonthlyStats(),
-            'day' => $this->getDailyStats(),
-            'year' => $this->getYearlyStats(),
-            default => $this->getMonthlyStats(),
-        };
-    }
-
-    private function getMonthlyStats()
-    {
-        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-        $stats = Financing::selectRaw('EXTRACT(MONTH FROM created_at) AS month, COUNT(*) AS count')
-            ->whereYear('created_at', now()->year)
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->mapWithKeys(function ($item) use ($months) {
-                return [$months[$item->month - 1] => $item->count];
-            })
-            ->toArray();
-
-        // Fill semua bulan, jika tidak ada data = 0
-        $result = [];
-        foreach ($months as $month) {
-            $result[$month] = $stats[$month] ?? 0;
-        }
-
-        return $result;
-    }
-
-    private function getDailyStats()
-    {
-        $startDate = now()->startOfMonth();
-        $endDate = now()->endOfMonth();
-        $daysInMonth = $endDate->day;
-
-        $stats = Financing::selectRaw("EXTRACT(DAY FROM created_at)::INTEGER AS day, COUNT(*) AS count")
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->groupBy('day')
-            ->orderBy('day')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [$item->day => $item->count];
-            })
-            ->toArray();
-
-        // Fill semua hari bulan ini, jika tidak ada data = 0
-        $result = [];
-        for ($day = 1; $day <= $daysInMonth; $day++) {
-            $result[$day] = $stats[$day] ?? 0;
-        }
-
-        return $result;
-    }
-
-    private function getYearlyStats()
-    {
-        $currentYear = now()->year;
-        $startYear = Financing::min('created_at') ? Carbon::parse(Financing::min('created_at'))->year : $currentYear;
-
-        $stats = Financing::selectRaw("EXTRACT(YEAR FROM created_at)::INTEGER AS year, COUNT(*) AS count")
-            ->groupBy('year')
-            ->orderBy('year')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [$item->year => $item->count];
-            })
-            ->toArray();
-
-        // Fill semua tahun dari tahun pertama data sampai sekarang
-        $result = [];
-        for ($year = $startYear; $year <= $currentYear; $year++) {
-            $result[$year] = $stats[$year] ?? 0;
-        }
-
-        return $result;
     }
 }

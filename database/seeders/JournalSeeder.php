@@ -94,14 +94,120 @@ class JournalSeeder extends Seeder
             'balance' => 50000000,
         ]);
 
-        // simulasi margin 12 bulan
+        // simulasi margin 12 bulan, dengan bulan terbaru tiap harinya diisi data
         for ($i = 1; $i <= 12; $i++) {
-            JournalEntry::factory()->create([
-                'no_ref_account' => '401',
-                'position' => 'Credit',
-                'nominal' => 50000000 / 12,
-                'transaction_date' => now()->subMonths(12 - $i),
-            ]);
+            if ($i == 11) {
+                for ($j = 1; $j <= 10; $j++) {
+                    JournalEntry::factory()->create([
+                        'no_ref_account' => '401',
+                        'position' => 'Credit',
+                        'nominal' => 50000000 / 12,
+                        'transaction_date' => now()->subMonths(12 - $i)->addDays($j),
+                    ]);
+                }
+            } else {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '401',
+                    'position' => 'Credit',
+                    'nominal' => 500000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            }
         }
+
+        // simulasi kas 12 bulan terakhir
+        for ($i = 1; $i <= 12; $i++) {
+            if ($i == 11) {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '101',
+                    'position' => 'Debit',
+                    'nominal' => 50000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            } else {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '101',
+                    'position' => 'Debit',
+                    'nominal' => 500000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            }
+        }
+
+
+        // simulasi akun 201, 202, 203 dengan nominal 50000000 tiap bulan selama 12 bulan terakhir
+        for ($i = 1; $i <= 12; $i++) {
+            if ($i == 11) {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '201',
+                    'position' => 'Credit',
+                    'nominal' => 50000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            } else {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '201',
+                    'position' => 'Credit',
+                    'nominal' => 500000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            }
+        }
+
+        for ($i = 1; $i <= 12; $i++) {
+            if ($i == 11) {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '202',
+                    'position' => 'Credit',
+                    'nominal' => 50000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            } else {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '202',
+                    'position' => 'Credit',
+                    'nominal' => 500000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            }
+        }
+
+        for ($i = 1; $i <= 12; $i++) {
+            if ($i == 11) {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '203',
+                    'position' => 'Credit',
+                    'nominal' => 50000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            } else {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '203',
+                    'position' => 'Credit',
+                    'nominal' => 500000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            }
+        }
+
+        // simulasi akun 103
+        for ($i = 1; $i <= 12; $i++) {
+            if ($i == 11) {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '103',
+                    'position' => 'Debit',
+                    'nominal' => 40000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            } else {
+                JournalEntry::factory()->create([
+                    'no_ref_account' => '103',
+                    'position' => 'Debit',
+                    'nominal' => 400000000 / 12,
+                    'transaction_date' => now()->subMonths(12 - $i),
+                ]);
+            }
+        }
+
     }
 }

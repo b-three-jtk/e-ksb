@@ -25,8 +25,8 @@ const props = defineProps({
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Admin', link: '/admin/list' },
-    { name: 'Tambah Admin' },
+    { name: 'Pengelolaan Pengurus', link: '/admin/list' },
+    { name: 'Tambah Pengurus' },
 ];
 
 const { errors } = useUserValidation(form)
@@ -122,7 +122,7 @@ const submitForm = () => {
                 },
                 onError: (errors) => {
                     console.error('Form errors:', errors)
-                    toast("Gagal menambahkan admin." , {
+                    toast("Gagal menambahkan admin.", {
                         "type": "error",
                         "position": "bottom-right",
                         "transition": "slide",
@@ -139,93 +139,93 @@ const submitForm = () => {
 <template>
     <Layout title="Tambah Admin">
         <div class="flex flex-col">
-            <PageBreadcrumb page-title="Tambah Admin" :items="breadcrumbItems" />
-            <div class="card-layout flex flex-col gap-10">
-                <!-- Search Member Section -->
-                <div class="space-y-4">
-                    <div class="relative">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Cari Member Aktif (Opsional)</label>
-                        <input
-                            v-model="searchQuery"
-                            @input="searchMembers"
-                            type="text"
-                            placeholder="Ketik nama, NIK, email, atau kode member untuk memilih member yang ada"
-                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-                        />
-
-                        <!-- Search Results Dropdown -->
-                        <div v-if="searchResults.length > 0" class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg">
-                            <div
-                                v-for="member in searchResults"
-                                :key="member.id"
-                                @click="selectMember(member)"
-                                class="px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-100"
-                            >
-                                <div class="font-semibold">{{ member.name }}</div>
-                                <div class="text-sm text-gray-600">{{ member.user_code }} | NIK: {{ member.nik }}</div>
-                                <div class="text-sm text-gray-600">{{ member.email }}</div>
-                            </div>
-                        </div>
-
-                        <!-- No Results Message -->
-                        <div v-else-if="searchQuery.length >= 2 && !isSearching && searchResults.length === 0" class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg p-4">
-                            <p class="text-gray-500 text-sm">Tidak ada member aktif yang ditemukan</p>
-                        </div>
-
-                        <!-- Loading State -->
-                        <div v-if="isSearching" class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg p-4">
-                            <p class="text-gray-500 text-sm">Mencari...</p>
-                        </div>
-                    </div>
-
-                    <!-- Selected Member Info -->
-                    <div v-if="selectedMember" class="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold text-green-900">Member Dipilih</p>
-                            </div>
-                            <button
-                                @click="clearSelectedMember"
-                                class="text-sm text-red-600 hover:text-red-800 font-semibold"
-                            >
-                                Ubah
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
+            <PageBreadcrumb page-title="Tambah Pengurus" :items="breadcrumbItems" />
+            <div class="card-layout flex flex-col px-0!">
                 <div class="grid md:grid-cols-2 grid-cols-1 gap-6">
-                    <!-- NIK -->
-                    <BaseInputAdmin v-model="form.nik" label="NIK" type="text" required
-                        placeholder="Masukkan 16 digit NIK" max="16" min="16" pattern="[0-9]*"
-                        :error="errors.nik" :disabled="isEditingExistingMember">
-                    </BaseInputAdmin>
+                    <div class="space-y-4 pl-6">
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tambahkan dari Anggota Aktif
+                                (Opsional)</label>
+                            <input v-model="searchQuery" @input="searchMembers" type="text"
+                                placeholder="Ketik nama, NIK, email, atau nomor anggota"
+                                class="w-full px-4 py-2 border font-body text-sm shadow-theme-xs focus:outline-hidden focus:ring-3 placeholder:text-gray-400 rounded-lg border-gray-300 focus:border-brand-300 focus:ring-brand-500/10" />
 
-                    <!-- Nama -->
-                    <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
-                        placeholder="Masukkan nama lengkap" :error="errors.name" :disabled="isEditingExistingMember"></BaseInputAdmin>
+                            <!-- Search Results Dropdown -->
+                            <div v-if="searchResults.length > 0"
+                                class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg">
+                                <div v-for="member in searchResults" :key="member.id" @click="selectMember(member)"
+                                    class="px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-100">
+                                    <div class="font-semibold">{{ member.name }}</div>
+                                    <div class="text-sm text-gray-600">{{ member.user_code }} | NIK: {{ member.nik }}
+                                    </div>
+                                    <div class="text-sm text-gray-600">{{ member.email }}</div>
+                                </div>
+                            </div>
 
-                    <!-- Posisi -->
-                    <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
-                        :selectables="allowedRoles.map(role => ({ value: role.id, text: role.name }))" :error="errors.role_id">
-                    </BaseInputAdmin>
+                            <!-- No Results Message -->
+                            <div v-else-if="searchQuery.length >= 2 && !isSearching && searchResults.length === 0"
+                                class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg p-4">
+                                <p class="text-gray-500 text-sm">Tidak ada member aktif yang ditemukan</p>
+                            </div>
 
-                    <!-- Email -->
-                    <BaseInputAdmin v-model="form.email" label="Email" type="email" required
-                        placeholder="Masukkan email" :error="errors.email" :disabled="isEditingExistingMember"></BaseInputAdmin>
+                            <!-- Loading State -->
+                            <div v-if="isSearching"
+                                class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg p-4">
+                                <p class="text-gray-500 text-sm">Mencari...</p>
+                            </div>
+                        </div>
 
-                    <!-- No. Telp -->
-                    <BaseInputAdmin v-model="form.phone_number" max="20" required label="Nomor Telepon" type="text"
-                        placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number"
-                        :disabled="isEditingExistingMember">
-                    </BaseInputAdmin>
+                        <!-- Selected Member Info -->
+                        <div v-if="selectedMember" class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-semibold text-green-900">Member Dipilih</p>
+                                </div>
+                                <button @click="clearSelectedMember"
+                                    class="text-sm text-red-600 hover:text-red-800 font-semibold">
+                                    Ubah
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid border-t gap-6 md:grid-cols-2 col-span-2 grid-cols-1 px-6 pt-6">
+                        <!-- NIK -->
+                        <BaseInputAdmin v-model="form.nik" label="NIK" type="text" required
+                            placeholder="Masukkan 16 digit NIK" max="16" min="16" pattern="[0-9]*" :error="errors.nik"
+                            :disabled="isEditingExistingMember">
+                        </BaseInputAdmin>
+
+                        <!-- Nama -->
+                        <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
+                            placeholder="Masukkan nama lengkap" :error="errors.name"
+                            :disabled="isEditingExistingMember">
+                        </BaseInputAdmin>
+
+                        <!-- Posisi -->
+                        <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
+                            :selectables="allowedRoles.map(role => ({ value: role.id, text: role.name }))"
+                            :error="errors.role_id">
+                        </BaseInputAdmin>
+
+                        <!-- Email -->
+                        <BaseInputAdmin v-model="form.email" label="Email" type="email" required
+                            placeholder="Masukkan email" :error="errors.email" :disabled="isEditingExistingMember">
+                        </BaseInputAdmin>
+
+                        <!-- No. Telp -->
+                        <BaseInputAdmin v-model="form.phone_number" max="20" required label="Nomor Telepon" type="text"
+                            placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number"
+                            :disabled="isEditingExistingMember">
+                        </BaseInputAdmin>
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-6 pb-6">
                     <Button href="/admin/list" variant="light">
                         Batal
                     </Button>
-                    <Button @click="submitForm" variant="secondary" :disabled="!form.role_id || (isEditingExistingMember ? !selectedMember : !form.name || !form.nik || !form.email)">
+                    <Button @click="submitForm" variant="secondary"
+                        :disabled="!form.role_id || (isEditingExistingMember ? !selectedMember : !form.name || !form.nik || !form.email)">
                         {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                     </Button>
                 </div>

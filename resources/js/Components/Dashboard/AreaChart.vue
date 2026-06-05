@@ -3,9 +3,6 @@ import { ref, watch } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
 
 const props = defineProps({
-    title: {
-        type: String,
-    },
     data: {
         type: Object,
     },
@@ -16,13 +13,13 @@ const props = defineProps({
 
 const series = ref([
     {
-        name: 'Permohonan',
+        name: 'Jumlah Anggota',
         data: [],
     },
 ])
 
 const chartOptions = ref({
-    colors: ['#50B2D5'],
+    colors: ['#C3DC6D'],
     chart: {
         fontFamily: 'Manrope, sans-serif',
         type: 'bar',
@@ -47,7 +44,7 @@ const chartOptions = ref({
         colors: ['transparent'],
     },
     xaxis: {
-        categories: [],
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         axisBorder: {
             show: false,
         },
@@ -59,7 +56,7 @@ const chartOptions = ref({
         show: true,
         position: 'top',
         horizontalAlign: 'left',
-        fontFamily: 'Outfit',
+        fontFamily: 'Manrope',
         markers: {
             radius: 99,
         },
@@ -98,7 +95,7 @@ const updateChart = () => {
         ...chartOptions.value,
         xaxis: { ...chartOptions.value.xaxis, categories }
     }
-    series.value = [{ name: 'Permohonan', data: [...values] }]
+    series.value = [{ name: 'Jumlah Anggota', data: [...values] }]
 }
 
 watch(() => props.filter, updateChart, { immediate: true })
@@ -106,12 +103,9 @@ watch(() => props.data, updateChart, { deep: true })
 </script>
 
 <template>
-    <div class="w-full card-layout flex flex-col gap-10">
-        <h1 class="card-title">{{ title }}</h1>
-        <div class="max-w-full overflow-x-auto custom-scrollbar">
-            <div id="chartOne" class="-ml-5 min-w-162.5 xl:min-w-full pl-2">
-                <VueApexCharts type="bar" height="300" :key="filter" :options="chartOptions" :series="series" />
-            </div>
+    <div class="max-w-full overflow-x-scroll custom-scrollbar">
+        <div id="chartOne" class="-ml-5 min-w-162.5 xl:min-w-full pl-2">
+            <VueApexCharts type="area" height="400" :key="filter" :options="chartOptions" :series="series" />
         </div>
     </div>
 </template>

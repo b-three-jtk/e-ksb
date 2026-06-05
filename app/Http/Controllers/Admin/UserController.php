@@ -205,14 +205,12 @@ class UserController extends Controller
 
             if ($user->member->financings) {
                 $user->member->financings->each(function ($financing) {
-                    $financing->installment_payment_paid_count = $financing->installment->payment
-                        ->count();
-                    $financing->next_payment = $financing->installment
-                        ->sortBy('payment_date')
+                    $financing->installment_payment_paid_count = $financing->installment?->payment?->count() ?? 0;
+                    $financing->next_payment = $financing->installment?->sortBy('payment_date')
                         ->first();
                     $financing->total_price = $financing->cost_price + $financing->margin_amount - $financing->down_payment;
-                    $financing->monthly_installment = $financing->installment->tenor > 0
-                        ? ($financing->cost_price + $financing->margin_amount) / $financing->installment->tenor
+                    $financing->monthly_installment = $financing->installment?->tenor > 0
+                        ? ($financing->cost_price + $financing->margin_amount) / $financing->installment?->tenor
                         : null;
                     $financing->remaining_total = $financing->total_price - ($financing->installment_payment_paid_count * ($financing->monthly_installment ?? 0));
                 });

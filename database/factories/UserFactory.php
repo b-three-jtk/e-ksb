@@ -32,7 +32,7 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'phone_number' => fake()->unique()->numerify('08##########'),
             'joined_date' => fake()->date(),
-            'status' => fake()->randomElement(UserStatusEnum::cases())->value,
+            'status' => UserStatusEnum::ACTIVE->value,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
