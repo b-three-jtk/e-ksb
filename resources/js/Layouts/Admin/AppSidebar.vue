@@ -96,7 +96,7 @@ const menuGroups = [
         items: [
             {
                 icon: SettingsIcon,
-                name: "Pengaturan",
+                name: "Pengaturan Umum",
                 path: "/admin/settings",
                 permission: "view_pengaturan"
             }
