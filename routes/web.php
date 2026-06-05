@@ -4,6 +4,7 @@ use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinancingController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ProductTypeController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ResignationController;
@@ -143,6 +144,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     // Pengelolaan Kas
     // Pengaturan Umum
+    Route::middleware('role:' . UserRoleEnum::KETUA->value)->group(function () {
+        Route::get('/settings', [SettingsController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
+        Route::post('/settings', [SettingsController::class, 'store'])->middleware('permission:create_pengaturan')->name('settings.store');
+    });
 
     // Personal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
