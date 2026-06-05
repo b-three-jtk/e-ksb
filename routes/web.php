@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\ResignationController;
 use App\Http\Controllers\Admin\SavingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
@@ -53,10 +53,10 @@ Route::prefix('auth')
     ->middleware('guest')
     ->group(function () {
 
-        Route::get('/login', [LoginController::class, 'loginPage'])
+        Route::get('/login', [AuthenticationController::class, 'loginPage'])
             ->name('login');
 
-        Route::post('/login', [LoginController::class, 'login'])
+        Route::post('/login', [AuthenticationController::class, 'login'])
             ->name('login.store');
 
         Route::get('/forgot-password', [ForgotPasswordController::class, 'index'])
@@ -75,7 +75,7 @@ Route::prefix('auth')
 
 Route::redirect('/login', '/auth/login')->middleware('guest')->name('login');
 
-Route::post('/auth/logout', [LoginController::class, 'logout'])
+Route::post('/auth/logout', [AuthenticationController::class, 'logout'])
     ->middleware('auth')
     ->name('auth.logout');
 
