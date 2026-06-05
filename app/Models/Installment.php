@@ -10,8 +10,10 @@ class Installment extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'tenor',
-        'due_day',
+        'due_date',
+        'installment_no',
+        'amount',
+        'status',
         'financing_id',
     ];
 

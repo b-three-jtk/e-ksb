@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,8 +13,10 @@ return new class extends Migration {
     {
         Schema::create('installments', function (Blueprint $table) {
             $table->id();
-            $table->integer('tenor');
-            $table->integer('due_day');
+            $table->date('due_date');
+            $table->integer('installment_no');
+            $table->decimal('amount', 15, 2);
+            $table->enum('status', array_column(InstallmentPaymentScheduleStatusEnum::cases(), 'value'))->default(InstallmentPaymentScheduleStatusEnum::PENDING->value);
             $table->foreignUuid('financing_id')->nullable()->constrained('financings')->onDelete('set null');
             $table->timestamps();
         });

@@ -62,7 +62,7 @@ onMounted(() => {
 const columns = [
     { key: 'no', label: 'No' },
     { key: 'no_anggota', label: 'No Anggota' },
-    { key: 'profil', label: 'Profil Anggota', sortable: true },
+    { key: 'profil', label: 'Nama Anggota', sortable: true },
     { key: 'joined_at', label: 'Tanggal Bergabung', sortable: true },
     { key: 'phone', label: 'Kontak' },
     { key: 'total_simpanan', label: 'Total Simpanan', align: 'right' },
@@ -212,14 +212,14 @@ const breadcrumbItems = [
 
                 <template #cell-profil="{ row }">
                     <div class="flex items-center gap-3">
-                        <img v-if="row.avatar" :src="row.avatar" class="w-9 h-9 rounded-full object-cover" />
+                        <!-- <img v-if="row.avatar" :src="row.avatar" class="w-9 h-9 rounded-full object-cover" />
                         <div
                             v-else
                             class="w-9 h-9 flex items-center justify-center
                                 rounded-full bg-gray-200 dark:bg-gray-700"
                         >
                             <UserIcon />
-                        </div>
+                        </div> -->
                         <span>{{ row.name }}</span>
                     </div>
                 </template>
@@ -242,12 +242,13 @@ const breadcrumbItems = [
 
                 <template #cell-aksi="{ row }">
                     <div class="flex justify-center gap-3">
-                        <!-- <Link
+                        <Link
+                            v-if="can['edit_anggota']"
                             :href="`/admin/users/${row.id}/edit`"
                             class="text-gray-500 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
                         >
                             <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
-                        </Link> -->
+                        </Link>
 
                         <Link
                             :href="`/admin/users/show/${row.id}`"

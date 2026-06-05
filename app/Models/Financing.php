@@ -26,6 +26,7 @@ class Financing extends Model
         'paid_date',
         'status',
         'payment_method',
+        'tenor',
         'signed_akad_document',
 
         'member_id',
@@ -56,7 +57,7 @@ class Financing extends Model
     // Angsuran
     public function installment()
     {
-        return $this->hasOne(Installment::class);
+        return $this->hasMany(Installment::class);
     }
 
     // Objek Pembiayaan

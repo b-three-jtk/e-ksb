@@ -5,9 +5,12 @@ namespace App\Http\Controllers\User;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\MemberStatusEnum;
 use App\Enums\EducationEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Models\Installment;
 use App\Http\Requests\CreateResignRequest;
 use App\Models\Financing;
+use App\Models\PointTransaction;
 use App\Models\MemberDoc;
 use App\Models\SavingTransaction;
 use Carbon\Carbon;
@@ -30,7 +33,16 @@ class MemberController extends Controller
             ->where('member_id', $user->member->id)
             ->sum('balance');
 
-        $totalInstallment = DB::table('get_total_financing')->where('member_id', $user->member->id)->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->sum('total_financing');
+        $totalInstallment = Installment::whereHas('financing', function ($q) use ($user) {
+            $q->where('member_id', $user->member->id)
+            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value);
+        })
+        ->whereIn('status', [
+            InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            InstallmentPaymentScheduleStatusEnum::PENDING->value,
+            InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
+        ])
+        ->sum('amount');
 
         $ledger = SavingTransaction::whereHas(
             'savingAccount.member',
@@ -49,15 +61,14 @@ class MemberController extends Controller
                 ];
             });
 
-        $activeMurabahahCount = Financing::where('member_id', $user->member->id)
-            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->count();
+        $totalPoints = PointTransaction::where('user_id', $user->id)
+            ->sum('amount_earned');
 
         return inertia('User/Dashboard', [
             'summary' => [
                 'total_saving' => $totalSaving,
                 'total_installment' => $totalInstallment,
-                'murabahah_count' => $activeMurabahahCount,
+                'total_points' => $totalPoints,
             ],
             'ledger' => $ledger,
         ]);
@@ -92,6 +103,7 @@ class MemberController extends Controller
                 'total_obligation' => $totalObligation,
             ],
             'has_existing_resign' => $hasExistingResign,
+            'member_status' => $user->member->status,
         ]);
     }
 
@@ -115,11 +127,13 @@ class MemberController extends Controller
             ]);
         }
 
-        $hasObligation = Financing::where('member_id', $user->member->id)
+        $totalObligation = DB::table('get_total_financing')
+            ->where('member_id', $user->member->id)
             ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->exists();
+            ->sum('total_financing');
 
-        if ($hasObligation) {
+
+        if ($totalObligation > 0) {
             return back()->withErrors([
                 'resign' => 'Anda masih memiliki kewajiban finansial yang belum dilunasi. Silakan selesaikan kewajiban tersebut sebelum mengajukan pengunduran diri.',
             ]);

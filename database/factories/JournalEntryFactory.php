@@ -16,7 +16,6 @@ class JournalEntryFactory extends Factory
     {
         return [
             'no_ref_account' => Account::factory(),
-            'user_id' => User::factory(),
             'position' => $this->faker->randomElement(PositionEnum::cases())->value,
             'nominal' => $this->faker->numberBetween(10000, 100000000),
             'updated_by' => User::factory(),
