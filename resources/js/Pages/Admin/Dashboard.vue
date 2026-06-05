@@ -3,13 +3,14 @@ import { ref, watch, onMounted, computed } from 'vue';
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { router, usePage } from '@inertiajs/vue3';
 import { VueDatePicker } from '@vuepic/vue-datepicker';
+import { defineAsyncComponent } from 'vue';
 
-import KetuaPengawas from './Dashboard/KetuaPengawas.vue';
-import Bendahara from './Dashboard/Bendahara.vue';
-import Sekretaris from './Dashboard/Sekretaris.vue';
-import KetuaStafMurabahah from './Dashboard/KetuaStafMurabahah.vue';
-import PJAnggota from './Dashboard/PJAnggota.vue';
-import DPS from './Dashboard/DPS.vue';
+const KetuaPengawas = defineAsyncComponent(() => import('./Dashboard/KetuaPengawas.vue'));
+const Bendahara = defineAsyncComponent(() => import('./Dashboard/Bendahara.vue'));
+const Sekretaris = defineAsyncComponent(() => import('./Dashboard/Sekretaris.vue'));
+const KetuaStafMurabahah = defineAsyncComponent(() => import('./Dashboard/KetuaStafMurabahah.vue'));
+const PJAnggota = defineAsyncComponent(() => import('./Dashboard/PJAnggota.vue'));
+const DPS = defineAsyncComponent(() => import('./Dashboard/DPS.vue'));
 
 const page = usePage()
 
@@ -45,6 +46,14 @@ onMounted(() => {
         isDarkMode.value = document.documentElement.classList.contains('dark')
     })
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
+    router.reload({
+        only: [
+            'pertumbuhan_pendapatan', 'pertumbuhan_anggota', 'peta_simpanan', 'peta_pembiayaan',
+            'transaksi_terbaru', 'jatuh_tempo_terdekat', 'permohonan_murabahah', 'pembayaran_terlambat', 'transaksi_simpanan_terbaru',
+        ],
+        preserveState: true,
+    })
 })
 
 watch(dates, () => {

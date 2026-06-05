@@ -8,6 +8,7 @@ use App\Services\Admin\DashboardService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -54,25 +55,6 @@ class DashboardController extends Controller
 
         [$data['total_permohonan_pembiayaan'], $data['total_permohonan_pembiayaan_persen']] = $service->getTotalPermohonanPembiayaan($tanggalAkhir, $tanggalAkhirSebelumnya);
 
-        $data['peta_simpanan'] = $service->getPetaSimpanan($tanggalAkhir, $req->savings_filter ?? 'jenis');
-
-        $data['jatuh_tempo_terdekat'] = $service->getJatuhTempoTerdekat($req->nearest_filter ?? 'all');
-
-        $data['permohonan_murabahah'] = $service->getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir);
-
-        $data['pembayaran_terlambat'] = $service->getPembayaranTerlambat($tanggalAkhir);
-
-        $data['transaksi_simpanan_terbaru'] = $service->getTransaksiSimpananTerbaru($tanggalAkhir, $req->saving_transaction_filter ?? 'all');
-
-        $data['transaksi_terbaru'] = $service->getTransaksiTerbaru($req->transaction_filter ?? 'all');
-
-        $data['pertumbuhan_pendapatan'] = $service->getPendapatanPerPeriode($req->start_date, $req->end_date, $filterBy);
-
-        $data['pertumbuhan_anggota'] = $service->getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filterBy);
-
-        $data['peta_pembiayaan'] = $service->getPetaPembiayaan($tanggalAkhir);
-
-
         return inertia('Admin/Dashboard', [
             'stats' => [
                 'total_kas' => $data['total_kas'],
@@ -96,15 +78,15 @@ class DashboardController extends Controller
                 'rasio_kas' => $data['rasio_kas'],
                 'rasio_fdr' => $data['rasio_fdr'],
             ],
-                'pertumbuhan_pendapatan' => $data['pertumbuhan_pendapatan'],
-                'pertumbuhan_anggota' => $data['pertumbuhan_anggota'],
-                'peta_simpanan' => $data['peta_simpanan'],
-                'peta_pembiayaan' => $data['peta_pembiayaan'],
-                'transaksi_terbaru' => $data['transaksi_terbaru'],
-                'jatuh_tempo_terdekat' => $data['jatuh_tempo_terdekat'],
-                'permohonan_murabahah' => $data['permohonan_murabahah'],
-                'pembayaran_terlambat' => $data['pembayaran_terlambat'],
-                'transaksi_simpanan_terbaru' => $data['transaksi_simpanan_terbaru'],
+                'pertumbuhan_pendapatan' => Inertia::lazy(fn() => $service->getPendapatanPerPeriode($req->start_date, $req->end_date, $filterBy)),
+                'pertumbuhan_anggota' => Inertia::lazy(fn() => $service->getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filterBy)),
+                'peta_simpanan' => Inertia::lazy(fn() => $service->getPetaSimpanan($tanggalAkhir, $req->savings_filter ?? 'jenis')),
+                'peta_pembiayaan' => Inertia::lazy(fn() => $service->getPetaPembiayaan($tanggalAkhir)),
+                'transaksi_terbaru' => Inertia::lazy(fn() => $service->getTransaksiTerbaru($req->transaction_filter ?? 'all')),
+                'jatuh_tempo_terdekat' => Inertia::lazy(fn() => $service->getJatuhTempoTerdekat($req->nearest_filter ?? 'all')),
+                'permohonan_murabahah' => Inertia::lazy(fn() => $service->getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)),
+                'pembayaran_terlambat' => Inertia::lazy(fn() => $service->getPembayaranTerlambat($tanggalAkhir)),
+                'transaksi_simpanan_terbaru' => Inertia::lazy(fn() => $service->getTransaksiSimpananTerbaru($tanggalAkhir, $req->saving_transaction_filter ?? 'all')),
         ]);
     }
 }
