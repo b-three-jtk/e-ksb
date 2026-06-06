@@ -5,18 +5,26 @@ namespace App\Http\Requests;
 use App\Enums\EducationEnum;
 use App\Enums\GenderEnum;
 use App\Enums\MaritalStatusEnum;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreFinancingRequest extends FormRequest
+class StoreFinancingDraftRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
-
         return [
             // Member data
             'member.user_code' => 'nullable|string|max:255',
@@ -68,8 +76,8 @@ class StoreFinancingRequest extends FormRequest
             'financing.notes' => 'nullable|string|max:1000',
             'financing.status' => 'nullable|string|max:255',
             'financing.tenor' => 'nullable|integer',
-            'financing.akad_wakalah_date' => 'nullable|date',
             'financing.predicted_cost_price' => 'nullable|numeric|min:0',
+            'financing.akad_wakalah_date' => 'nullable|date',
 
             // Collateral data
             'collateral.collateral_type' => 'nullable|string|max:255',
@@ -87,6 +95,6 @@ class StoreFinancingRequest extends FormRequest
             'purchase_receipt_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
             'akad_document_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
             'akad_wakalah_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-        ];;
+        ];
     }
 }

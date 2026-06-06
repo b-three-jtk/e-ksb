@@ -68,14 +68,14 @@ export function useFinancingForm(initialData = null) {
             cost_price: initialData?.financing?.cost_price || null,
             margin_amount: initialData?.financing?.margin_amount || null,
             akad_wakalah_date: initialData?.financing?.akad_wakalah_date || null,
-            nominal_wakalah: initialData?.financing?.nominal_wakalah || null,
             payment_method: initialData?.financing?.payment_method || '',
             akad_date: initialData?.financing?.akad_date || '',
             down_payment: initialData?.financing?.down_payment || null,
             notes: initialData?.financing?.notes || '',
             status: initialData?.financing?.status || 'Menunggu Kelengkapan Dokumen',
             purchase_receipt: initialData?.financing?.purchase_receipt || null,
-            tenor: initialData?.financing?.tenor || null
+            tenor: initialData?.financing?.tenor || null,
+            predicted_cost_price: initialData?.financing?.predicted_cost_price || null,
         },
         collateral: {
             collateral_type: initialData?.collateral?.collateral_type || '',
@@ -264,24 +264,33 @@ export function useFinancingForm(initialData = null) {
     }
 
     // search supplier
-    watch(() => searchSupplierQuery.value, async (query) => {
-        if (!query || query.length < 3) {
+    let supplierSearchTimeout = null
+    watch(() => searchSupplierQuery.value, (query) => {
+        // 1. Bersihkan timer sebelumnya setiap kali user mengetik karakter baru
+        if (supplierSearchTimeout) {
+            clearTimeout(supplierSearchTimeout)
+        }
+
+        if (!query || query.length < 2) {
             supplierResults.value = []
             return
         }
 
-        isLoadingSearchSupplier.value = true
-        try {
-            const response = await axios.get('/admin/suppliers/search', {
-                params: { q: query }
-            })
-            supplierResults.value = response.data.suppliers
-        } catch (error) {
-            console.error('Error searching suppliers:', error)
-            supplierResults.value = []
-        } finally {
-            isLoadingSearchSupplier.value = false
-        }
+        // 2. Buat timer baru
+        supplierSearchTimeout = setTimeout(async () => {
+            isLoadingSearch.value = true
+            try {
+                const response = await axios.get('/admin/suppliers/search', {
+                    params: { q: query }
+                })
+                supplierResults.value = response.data.suppliers
+            } catch (error) {
+                console.error('Error searching suppliers:', error)
+                supplierResults.value = []
+            } finally {
+                isLoadingSearch.value = false
+            }
+        }, 500) // 500ms delay
     })
 
     // Pilih supplier
@@ -325,19 +334,8 @@ export function useFinancingForm(initialData = null) {
         form.member.heirs.splice(index, 1)
     }
 
-    const submit = (status) => {
-        if ((form.financing.status === 'Menunggu Kelengkapan Dokumen' || form.financing.status === 'Ditolak') && status === 'PENDING_REVIEW') {
-            form.financing.status = 'Belum Ditinjau'
-        }
-
-        if (form.financing.status === 'Disetujui' && status === 'FINAL') {
-            if (form.financing.payment_method === 'Cicilan') {
-                form.financing.status = 'Angsuran Berjalan'
-            } else {
-                form.financing.status = 'Lunas'
-            }
-        }
-
+    const submit = () => {
+        form.financing.status = 'Belum Ditinjau'
         Swal.fire({
             title: 'Konfirmasi',
             text: 'Apakah Anda yakin ingin menyimpan permohonan ini?',
@@ -349,6 +347,97 @@ export function useFinancingForm(initialData = null) {
         }).then((result) => {
             if (result.isConfirmed) {
                 form.post('/admin/financings/store', {
+                    onSuccess: (page) => {
+                        if (page.props.flash?.success) {
+                            toast(page.props.flash.success, {
+                                type: 'success',
+                                position: 'bottom-right',
+                            })
+                        }
+                    },
+                    onError: (errors) => {
+                        // Show all errors
+                        const errorMessages = Object.values(errors).flat()
+
+                        if (errorMessages.length > 0) {
+                            toast(errorMessages.join(', '), {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        } else {
+                            toast('Gagal menyimpan permohonan', {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        }
+                    }
+                })
+            }
+        })
+    }
+
+    const finalize = () => {
+        if (form.financing.payment_method === 'Cicilan') {
+            form.financing.status = 'Angsuran Berjalan'
+        } else {
+            form.financing.status = 'Lunas'
+        }
+
+        Swal.fire({
+            title: 'Konfirmasi',
+            text: 'Apakah Anda yakin ingin memfinalisasi pembiayaan ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, simpan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#007943',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.post('/admin/financings/finalize', {
+                    onSuccess: (page) => {
+                        if (page.props.flash?.success) {
+                            toast(page.props.flash.success, {
+                                type: 'success',
+                                position: 'bottom-right',
+                            })
+                        }
+                    },
+                    onError: (errors) => {
+                        // Show all errors
+                        form.financing.status = 'Disetujui' // Revert status if error occurs
+                        const errorMessages = Object.values(errors).flat()
+
+                        if (errorMessages.length > 0) {
+                            toast(errorMessages.join(', '), {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        } else {
+                            toast('Gagal menyimpan permohonan', {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        }
+                    }
+                })
+            } else {
+                form.financing.status = 'Disetujui'
+            }
+        })
+    }
+
+    const saveDraft = () => {
+        Swal.fire({
+            title: 'Konfirmasi',
+            text: 'Apakah Anda yakin ingin menyimpan sementara permohonan ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, simpan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#007943',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.post('/admin/financings/draft', {
                     onSuccess: (page) => {
                         if (page.props.flash?.success) {
                             toast(page.props.flash.success, {
@@ -407,5 +496,7 @@ export function useFinancingForm(initialData = null) {
         addHeir,
         removeHeir,
         submit,
+        saveDraft,
+        finalize
     }
 }

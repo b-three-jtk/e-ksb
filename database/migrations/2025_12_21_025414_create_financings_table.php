@@ -26,6 +26,7 @@ return new class extends Migration
             $table->date('akad_date')->nullable();
             $table->date('paid_date')->nullable();
             $table->integer('tenor')->nullable();
+            $table->decimal('predicted_cost_price', 15, 2)->nullable();
 
             // set null so that if the member is deleted, the financing record will not be deleted but the id fk will be set to null
             $table->foreignUuid('updated_by')->nullable()->constrained('users')->onDelete('set null');

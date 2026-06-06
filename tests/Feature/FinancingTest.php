@@ -189,7 +189,6 @@ describe('FR-20 Aplikasi harus menyediakan pencatatan permohonan pembiayaan mura
                     'specification' => 'Draft permohonan pembiayaan untuk motor.',
                     'qty' => 1,
                     'condition' => 'Baru',
-                    'nominal_wakalah' => 50000000,
                     'akad_wakalah_date' => now()->toDateString(),
                 ],
                 'akad_wakalah_file' => $file,
@@ -199,7 +198,6 @@ describe('FR-20 Aplikasi harus menyediakan pencatatan permohonan pembiayaan mura
 
         $res->assertStatus(302);
         $this->assertDatabaseHas('wakalahs', [
-            'nominal_wakalah' => 50000000,
         ]);
     });
 });

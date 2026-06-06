@@ -87,16 +87,15 @@ const totalPrice = computed(() => {
             <div class="grid grid-cols-2 gap-4 pt-4">
                 <BaseInputAdmin type="file" label="Bukti Pembelian" v-model="form.purchase_receipt_file"
                     accept=".pdf,.jpg,.jpeg,.png" required />
-                <BaseInputAdmin v-model.number="form.financing.down_payment" label="Uang Muka" type="number"
+                <BaseInputAdmin v-model.number="form.financing.down_payment" label="Uang Muka" isMoney
                     placeholder="Masukkan uang muka" />
-                <BaseInputAdmin v-model.number="form.financing.cost_price" label="Harga Perolehan Barang" type="number"
-                    placeholder="Masukkan harga perolehan barang" />
-                <BaseInputAdmin v-model.number="form.financing.price_per_unit" label="Harga Per Item" type="number"
+                <BaseInputAdmin v-model.number="form.financing.price_per_unit" label="Harga Per Item" isMoney
                     placeholder="Masukkan harga per item" />
+                <Info label="Harga Perolehan Barang" :value="parseCurrencyAmount(form.financing.cost_price)" />
                 <Info label="Margin (8%)" :value="parseCurrencyAmount(form.financing.margin_amount)" />
             </div>
             <div class="bg-light-bg flex justify-between border px-8 py-4 mt-6 rounded-lg">
-                <div class="font-semibold text-primary">Total Harga Jual Murabahah</div>
+                <div class="font-semibold text-primary">Total Pembiayaan Murabahah</div>
                 <div class="font-semibold text-primary">{{ parseCurrencyAmount(totalPrice) }}</div>
             </div>
             <div class="col-span-2 grid grid-cols-2 mt-6">
@@ -106,7 +105,7 @@ const totalPrice = computed(() => {
                     <label for="wakalah" class="text-sm text-gray-700">Pengadaan dengan Skema Wakalah</label>
                 </div>
             </div>
-            <div class="col-span-2 grid grid-cols-2 items-end gap-6 mt-4" v-if="form.is_wakalah || form.financing.nominal_wakalah">
+            <div class="col-span-2 grid grid-cols-2 items-end gap-6 mt-4" v-if="form.is_wakalah">
                 <a href="/docs/AkadWakalah.docx" target="_blank"
                     class="border border-gray-300 flex justify-between rounded-lg p-4">
                     <div class="text-sm text-primary hover:underline">
@@ -122,8 +121,6 @@ const totalPrice = computed(() => {
                         <p>Max. 2 MB per file</p>
                     </div>
                 </div>
-                <BaseInputAdmin v-model.number="form.financing.nominal_wakalah" label="Dana Yang Dititipkan"
-                    type="number" placeholder="Masukkan dana titipan" />
                 <BaseInputAdmin v-model="form.financing.akad_wakalah_date" label="Tanggal Akad Wakalah" type="date" />
             </div>
         </div>

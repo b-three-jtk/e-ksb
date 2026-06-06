@@ -15,12 +15,9 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        Member::factory()->count(100)->create();
-        User::factory()->count(20)->create();
-
-        // SIMULATION FOR DEFAULT USERS
+        // DEFAULT USERS
         $dps = User::create([
-            'user_code' => 'KSP0231',
+            'user_code' => 'KSB0001',
             'nik' => '0000000099',
             'name' => 'DPS',
             'email' => 'dps@example.com',

@@ -28,9 +28,16 @@ class Financing extends Model
         'payment_method',
         'tenor',
         'signed_akad_document',
+        'predicted_cost_price',
 
         'member_id',
         'updated_by',
+    ];
+
+    protected $casts = [
+        'akad_date' => 'date',
+        'requested_date' => 'date',
+        'paid_date' => 'date',
     ];
 
     protected static function boot()

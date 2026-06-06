@@ -298,13 +298,13 @@ const submit = () => {
         <div class="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] pt-24 pb-12">
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-8 mt-2">
-                    <h1 class="text-3xl font-bold text-[#007031]">Edit Profil Anggota</h1>
+                    <h1 class="text-3xl font-bold text-primary">Edit Profil Anggota</h1>
                 </div>
 
                 <form @submit.prevent="submit" class="space-y-6">
                     <div class="card-layout flex flex-col xl:flex-row justify-between gap-4 items-center">
                         <div class="flex flex-col xl:flex-row justify-center items-center text-center xl:text-left gap-6">
-                            <div class="relative flex-shrink-0">
+                            <div class="relative shrink-0">
                                 <div v-if="previewUrl" class="w-20 h-20 rounded-full overflow-hidden border border-stroke bg-white">
                                     <img
                                         :src="previewUrl"

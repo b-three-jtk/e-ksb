@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Wakalah extends Model
 {
     //
+
+    protected $table = 'wakalah';
     protected $fillable = [
-        'nominal_wakalah',
         'akad_date',
         'signed_akad_document',
 
