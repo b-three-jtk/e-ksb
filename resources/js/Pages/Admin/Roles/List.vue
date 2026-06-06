@@ -79,7 +79,7 @@ const breadcrumbItems = [
             <div class="flex justify-between items-center p-6 border-b">
                 <div>
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Daftar Peran dan Akses</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Kelola hak akses tiap peran dalam sistem.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Kelola hak akses tiap peran dalam aplikasi.</p>
                 </div>
             </div>
 
