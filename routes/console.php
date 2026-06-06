@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 Schedule::command('points:calculate-monthly-savings')
     ->dailyAt('23:59')
     ->when(fn () => now()->isLastOfMonth());
+
+Schedule::command('notifications:send-reminders')
+    ->daily();
