@@ -6,6 +6,7 @@ use App\Enums\NotificationReminderTypeEnum;
 use App\Enums\NotificationStatusEnum;
 use App\Enums\NotificationTypeEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
+use App\Enums\UserRoleEnum;
 use App\Models\Installment;
 use App\Models\Member;
 use App\Models\Notification;
@@ -146,13 +147,17 @@ class NotificationService
 
     public function getAdminNotifications(array $filters, int $perPage = 10)
     {
-        return $this->repository->getAdminList($filters, $perPage);
+        $pjUserId = auth()->id();
+        $isPj = auth()->user()?->hasRole(UserRoleEnum::PJANGGOTA->value) ?? false;
+
+        return $this->repository->getAdminList($filters, $perPage, $isPj ? $pjUserId : null);
     }
 
     public function getMemberNotifications(string $memberId, bool $unreadOnly = false, int $perPage = 10)
     {
         $query = Notification::with('installment')
             ->where('member_id', $memberId)
+            ->where('status', NotificationStatusEnum::SENT->value)
             ->orderBy('scheduled_at', 'desc');
 
         if ($unreadOnly) {
@@ -193,6 +198,7 @@ class NotificationService
     public function getNotificationDropdown(string $memberId): array
     {
         return Notification::where('member_id', $memberId)
+            ->where('status', NotificationStatusEnum::SENT->value)
             ->orderBy('scheduled_at', 'desc')
             ->limit(5)
             ->get()
@@ -210,6 +216,7 @@ class NotificationService
     public function getUnreadCount(string $memberId): int
     {
         return Notification::where('member_id', $memberId)
+            ->where('status', NotificationStatusEnum::SENT->value)
             ->where('is_read', false)
             ->count();
     }
@@ -217,6 +224,7 @@ class NotificationService
     public function getPendingPopupNotifications(string $memberId): array
     {
         return Notification::where('member_id', $memberId)
+            ->where('status', NotificationStatusEnum::SENT->value)
             ->where('is_read', false)
             ->whereNull('alert_displayed_at')
             ->where('created_at', '>=', now()->subDay())

@@ -24,6 +24,8 @@ const popupNotifications = computed(
     () => page.props.pending_notification_popups || []
 )
 
+const csrfToken = computed(() => page.props.csrf_token || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '')
+
 const notifying = computed(() => count.value > 0)
 
 const toggleDropdown = () => {
@@ -43,7 +45,7 @@ const handleClickOutside = (event) => {
     }
 }
 
-const markPopupDisplayed = () => {
+const markPopupDisplayed = async () => {
     if (!popupNotifications.value.length) {
         return
     }
@@ -52,16 +54,19 @@ const markPopupDisplayed = () => {
         item => item.id
     )
 
-    router.post(
-        '/user/notifications/mark-popup-displayed',
-        {
-            notification_ids: notificationIds,
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-        }
-    )
+    try {
+        await fetch('/user/notifications/mark-popup-displayed', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken.value,
+                Accept: 'application/json',
+            },
+            body: JSON.stringify({ notification_ids: notificationIds }),
+        })
+    } catch (error) {
+        console.error('Failed to mark notification popups displayed', error)
+    }
 }
 
 onMounted(async () => {
@@ -73,7 +78,12 @@ onMounted(async () => {
                 title: notification.title,
                 text: notification.message,
                 icon: 'info',
+                confirmButtonColor: '#007031',
                 confirmButtonText: 'Tutup',
+                position: 'middle',
+                customClass: {
+                    container: 'swal-notification-container',
+                },
             })
         }
 
@@ -97,15 +107,6 @@ onUnmounted(() => {
             class="relative flex items-center justify-center text-dark-text transition-colors bg-transparent border border-gray-200 rounded-full hover:text-dark-900 h-11 w-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
             @click="toggleDropdown"
         >
-            <!-- Ping Indicator -->
-            <span
-                v-if="notifying"
-                class="absolute right-0 top-0.5 z-10 h-2 w-2 rounded-full bg-orange-400"
-            >
-                <span
-                    class="absolute inline-flex w-full h-full rounded-full bg-orange-400 opacity-75 animate-ping"
-                />
-            </span>
 
             <!-- Bell Icon -->
             <span
@@ -228,3 +229,9 @@ onUnmounted(() => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.swal-notification-container {
+    top: 96px !important;
+}
+</style>
