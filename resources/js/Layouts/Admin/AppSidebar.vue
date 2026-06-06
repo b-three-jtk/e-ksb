@@ -7,6 +7,7 @@ import { useSidebar } from "@/Composables/useSidebar";
 import GridIcon from "@/Icons/GridIcon.vue";
 import ChevronDownIcon from "@/Icons/ChevronDownIcon.vue";
 import SettingsIcon from "@/Icons/SettingsIcon.vue";
+import AccessIcon from "@/Icons/AccessIcon.vue";
 import HorizontalDots from "@/Icons/HorizontalDots.vue";
 import MoneyIcon from "@/Icons/MoneyIcon.vue";
 import EmployeeIcon from "@/Icons/EmployeeIcon.vue";
@@ -85,6 +86,12 @@ const menuGroups = [
                 name: "Monitoring Notifikasi",
                 path: "/admin/notifications",
                 permission: "view_notifikasi"
+            },
+            {
+                icon: AccessIcon,
+                name: "Peran dan Akses",
+                path: "/admin/roles",
+                permission: "view_peran_akses"
             },
         ],
     },

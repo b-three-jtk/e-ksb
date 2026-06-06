@@ -18,6 +18,7 @@ use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\FinancingController as UserFinancingController;
 use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\User\NotificationController as UserNotificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -160,6 +161,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     // Notifikasi
     Route::get('/notifications', [NotificationController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifications.index');
+
+    // Peran dan Akses
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:view_peran_akses')->name('roles.index');
+    Route::get('/roles/{id}/edit', [RoleController::class, 'edit'])->middleware('permission:edit_peran_akses')->name('roles.edit');
+    Route::put('/roles/{id}', [RoleController::class, 'update'])->middleware('permission:edit_peran_akses')->name('roles.update');
 });
 
 // User Routes
