@@ -38,7 +38,6 @@ const {
     supplierResults,
     isLoadingSearchSupplier,
     isSupplierSelected,
-    filteredSuppliers,
     selectMember,
     selectSupplier,
     addIncome,
@@ -50,6 +49,8 @@ const {
     resetMemberSelection,
     resetSupplierSelection,
     submit,
+    saveDraft,
+    finalize
 } = useFinancingForm(props.financing)
 
 const { errors } = useUserValidation(form)
@@ -114,7 +115,7 @@ const isFinalizationValid = computed(() => form.financing.status === 'Disetujui'
                     </Button>
                     <div class="flex items-center gap-4 justify-end">
                         <Button v-if="activeStep < totalSteps" variant="light"
-                            @click="submit()" :disabled="(activeStep === 1 && !isStep1Valid) ||
+                            @click="saveDraft()" :disabled="(activeStep === 1 && !isStep1Valid) ||
                             (activeStep === 2 && !isStep2Valid) ||
                             (activeStep === 3 && !isStep3Valid) ||
                             (activeStep === 4 && !isStep4Valid)
@@ -130,11 +131,11 @@ const isFinalizationValid = computed(() => form.financing.status === 'Disetujui'
                             Selanjutnya
                         </Button>
 
-                        <Button :disabled="!isRequestValid" v-if="activeStep === 3 && (form.financing.status === 'Menunggu Kelengkapan Dokumen' || form.financing.status === 'Ditolak')" type="submit" @click="submit('PENDING_REVIEW')" variant="secondary">
+                        <Button :disabled="!isRequestValid" v-if="activeStep === 3 && (form.financing.status === 'Menunggu Kelengkapan Dokumen' || form.financing.status === 'Ditolak')" type="submit" @click="submit()" variant="secondary">
                             Ajukan Permohonan
                         </Button>
 
-                        <Button :disabled="!isFinalizationValid"  v-if="activeStep === 5" type="submit" @click="submit('FINAL')" variant="secondary">
+                        <Button :disabled="!isFinalizationValid"  v-if="activeStep === 5" type="submit" @click="finalize()" variant="secondary">
                             Finalisasi Pembiayaan
                         </Button>
                     </div>

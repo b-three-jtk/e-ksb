@@ -28,6 +28,7 @@ class Financing extends Model
         'payment_method',
         'tenor',
         'signed_akad_document',
+        'predicted_cost_price',
 
         'member_id',
         'updated_by',

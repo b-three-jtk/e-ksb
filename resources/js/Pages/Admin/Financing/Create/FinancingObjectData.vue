@@ -1,6 +1,7 @@
 <script setup>
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 import { ref, computed } from 'vue'
+import { Transition } from 'vue'
 
 const props = defineProps({
     form: Object,
@@ -67,19 +68,33 @@ const closeModal = () => {
             <h1 class="card-title">Objek Pembiayaan</h1>
         </div>
         <div class="grid grid-cols-2 gap-4 p-4">
+            <Transition name="fade" class="col-span-2">
+                <div class="flex items-start gap-3 p-4 rounded-lg border
+                        bg-light-bg dark:bg-blue-900/20
+                        border-brand-200 dark:border-blue-800">
+                    <div class="text-sm">
+                        <div class="font-semibold text-primary dark:text-blue-300 mb-1">
+                            Ketentuan Objek Pembiayaan Murabahah (No. 111/DSN-MUI/IX/2017)
+                        </div>
+                        <ol class="text-gray-600 dark:text-gray-300 leading-relaxed ml-3">
+                            <li class="list-disc">Barang halal menurut syariah,</li>
+                            <li class="list-disc">Memiliki spesifikasi jelas,</li>
+                            <li class="list-disc">Dapat diserahterimakan,</li>
+                            <li class="list-disc">Bermanfaat dan tidak dilarang oleh peraturan perundang-undangan.</li>
+                        </ol>
+                    </div>
+                </div>
+            </Transition>
             <BaseInputAdmin v-model="form.financing.name" label="Nama Produk" placeholder="Masukkan nama produk"
                 required />
-
-            <div>
-                <BaseInputAdmin :model-value="form.financing.product_type_id" label="Kategori Produk" type="select"
-                    :selectables="productTypeSelectables" @update:modelValue="handleProductTypeChange" />
-            </div>
-
+            <BaseInputAdmin v-model="form.financing.product_type_id" label="Kategori Produk" type="select"
+                :selectables="productTypeSelectables" @update:modelValue="handleProductTypeChange" />
             <BaseInputAdmin required v-model="form.financing.condition" label="Kondisi" type="select"
                 :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
             <BaseInputAdmin required v-model="form.financing.qty" label="Jumlah" type="number" />
             <BaseInputAdmin v-model="form.financing.specification" label="Deskripsi" type="textarea" rows="4"
                 placeholder="Masukkan deskripsi produk" />
+            <BaseInputAdmin v-model="form.financing.predicted_cost_price" label="Harga Perkiraan" isMoney />
         </div>
         <div class="border-y border-gray-200 px-8 py-4">
             <h1 class="card-title">Jaminan (Rahn)</h1>
@@ -87,8 +102,9 @@ const closeModal = () => {
         <div class="grid grid-cols-2 gap-4 p-4">
             <BaseInputAdmin v-model="form.collateral.collateral_type" label="Jenis Agunan"
                 placeholder="Masukkan jenis agunan" required />
-            <BaseInputAdmin v-model="form.collateral.owner_name" required label="Atas Nama" placeholder="Masukkan nama pemilik" />
-            <BaseInputAdmin v-model="form.collateral.estimated_market_value" label="Nilai Perkiraan Pasar"
+            <BaseInputAdmin v-model="form.collateral.owner_name" required label="Atas Nama"
+                placeholder="Masukkan nama pemilik" />
+            <BaseInputAdmin v-model="form.collateral.estimated_market_value" label="Nilai Perkiraan Pasar" isMoney
                 placeholder="Masukkan nilai perkiraan pasar" />
             <BaseInputAdmin v-model="form.collateral.collateral_location" label="Lokasi/Kondisi Agunan" type="textarea"
                 rows="4" placeholder="Masukkan lokasi atau kondisi agunan" />

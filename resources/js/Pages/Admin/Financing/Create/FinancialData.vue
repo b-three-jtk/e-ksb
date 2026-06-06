@@ -74,7 +74,7 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
                                 class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
                                 <td class="py-2 text-left pl-6">{{ income.label }}</td>
                                 <td class="py-2 text-right pr-6">
-                                    <BaseInputAdmin v-model="form.member[income.model]" type="number" placeholder="0"
+                                    <BaseInputAdmin v-model="form.member[income.model]" isMoney
                                         input-class="text-right" />
                                 </td>
                             </tr>
@@ -105,7 +105,7 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
                                 class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
                                 <td class="py-2 text-left pl-6">{{ expense.label }}</td>
                                 <td class="py-2 text-right pr-6">
-                                    <BaseInputAdmin v-model="form.member[expense.model]" type="number" placeholder="0"
+                                    <BaseInputAdmin v-model="form.member[expense.model]" isMoney
                                         input-class="text-right" />
                                 </td>
                             </tr>

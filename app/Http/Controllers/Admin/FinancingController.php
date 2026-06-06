@@ -15,6 +15,7 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateRepaymentRequest;
+use App\Http\Requests\StoreFinancingDraftRequest;
 use App\Http\Requests\StoreFinancingRequest;
 use App\Models\Financial;
 use App\Models\Financing;
@@ -29,6 +30,7 @@ use App\Models\SavingAccount;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
+use App\Services\Admin\FinancingService;
 use App\Services\Admin\RepaymentService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -42,6 +44,7 @@ use Inertia\Inertia;
 
 class FinancingController extends Controller
 {
+    public function __construct(private FinancingService $financingService){}
     private function baseQuery(Request $request)
     {
         $verifier = auth()->user();
@@ -361,7 +364,7 @@ class FinancingController extends Controller
                     'nominal_wakalah' => $financing->wakalah?->nominal_wakalah,
                     'akad_date' => $financing->akad_date,
                     'status' => $financing->status,
-                    'tenor' => $financing->installment?->tenor,
+                    'tenor' => $financing->tenor,
                 ],
                 'collateral' => [
                     'collateral_type' => $financing->collateral?->collateral_type,
@@ -480,183 +483,64 @@ class FinancingController extends Controller
         }
     }
 
-
     public function store(StoreFinancingRequest $request)
     {
         try {
-            DB::beginTransaction();
+            DB::transaction(function () use ($request) {
+                $validated = $request->validated();
+                $user = User::with('member.savingAccounts')
+                    ->where('user_code', $validated['member']['user_code'])
+                    ->firstOrFail();
 
-            $validated = $request->validated();
-            $user = User::with('member.savingAccounts')->where('user_code', $validated['member']['user_code'])->firstOrFail();
-            $verifier = auth()->user();
-
-            // VALIDASI 1: PEMOHON HARUS DALAM STATUS AKTIF
-            if ($user->status !== UserStatusEnum::ACTIVE->value) {
-                throw ValidationException::withMessages(['member' => 'Pemohon harus dalam status aktif']);
-            }
-
-            // VALIDASI 2: PEMOHON HARUS MEMILIKI SIMPANAN AKTIF SATU BULAN
-            $hasEligibleSaving = SavingAccount::where('member_id', $user->member->id)
-                ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
-                ->where('created_at', '<=', now()->subMonth())
-                ->first();
-
-            if (!$hasEligibleSaving) {
-                throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
-            }
-
-            Log::info('storingfinancingdata', ['validated' => $validated, 'user' => $user->id]);
-
-            // Update user
-            $user->update([
-                'name' => $validated['member']['name'],
-                'nik' => $validated['member']['nik'],
-                'email' => $validated['member']['email'] ?? $user->email,
-                'phone_number' => $validated['member']['phone_number'] ?? $user->phone_number,
-            ]);
-
-            // Update member
-            $user->member->update([
-                'gender' => $validated['member']['gender'] ?? $user->member->gender,
-                'birth_place' => $validated['member']['birth_place'] ?? $user->member->birth_place,
-                'birth_date' => $validated['member']['birth_date'] ?? $user->member->birth_date,
-                'last_education' => $validated['member']['last_education'] ?? $user->member->last_education,
-                'domicile_address' => $validated['member']['domicile_address'] ?? $user->member->domicile_address,
-                'residential_address' => $validated['member']['residential_address'] ?? $user->member->residential_address,
-                'marital_status' => $validated['member']['marital_status'] ?? $user->member->marital_status,
-                'dependents' => $validated['member']['dependents'] ?? $user->member->dependents,
-            ]);
-
-            // Sync heirs
-            $user->member->heirs()->delete();
-            if (!empty($validated['member']['heirs'] ?? [])) {
-                $user->member->heirs()->createMany($validated['member']['heirs']);
-            }
-
-            // Sync documents
-            $documents = [
-                'slip_gaji' => 'income_slip_file',
-                'buku_tabungan' => 'bank_book_file',
-            ];
-            foreach ($documents as $docName => $fileField) {
-                if ($request->hasFile($fileField)) {
-                    $user->member->memberDocs()->updateOrCreate(
-                        ['doc_name' => $docName],
-                        ['doc_attachment' => $request->file($fileField)->store('documents', 'public')]
-                    );
-                }
-            }
-
-            // Sync financials
-            $user->member->financials()->delete();
-            Financial::create(
-                [
-                    'member_id' => $user->member->id,
-                    'gaji_pokok_amount' => $validated['member']['gaji_pokok_amount'] ?? 0,
-                    'penghasilan_usaha_amount' => $validated['member']['penghasilan_usaha_amount'] ?? 0,
-                    'penghasilan_pasangan_amount' => $validated['member']['penghasilan_pasangan_amount'] ?? 0,
-                    'penghasilan_lainnya_amount' => $validated['member']['penghasilan_lainnya_amount'] ?? 0,
-                    'biaya_hidup_keluarga_amount' => $validated['member']['biaya_hidup_keluarga_amount'] ?? 0,
-                    'biaya_pendidikan_amount' => $validated['member']['biaya_pendidikan_amount'] ?? 0,
-                    'jumlah_cicilan_amount' => $validated['member']['jumlah_cicilan_amount'] ?? 0,
-                    'jumlah_tanggungan_amount' => $validated['member']['jumlah_tanggungan_amount'] ?? 0,
-                    'jumlah_biaya_lainnya_amount' => $validated['member']['jumlah_biaya_lainnya_amount'] ?? 0,
-                ]
-            );
-
-            // Sync job
-            $user->member->memberJobs()->delete();
-            if (isset($validated['member']['job_title'])) {
-                $user->member->memberJobs()->create([
-                    'employment_status' => $validated['member']['employment_status'] ?? null,
-                    'job_title' => $validated['member']['job_title'] ?? null,
-                    'company_or_business_name' => $validated['member']['company_or_business_name'] ?? null,
-                    'business_field' => $validated['member']['business_field'] ?? null,
-                    'tenure_year' => $validated['member']['tenure_year'] ?? null,
-                    'workplace_address' => $validated['member']['workplace_address'] ?? null,
-                    'workplace_contact' => $validated['member']['workplace_contact'] ?? null,
-                ]);
-            }
-
-            if (isset($validated['financing']['name'])) {
-                $financing = Financing::updateOrCreate(
-                    ['member_id' => $user->member->id],
-                    [
-                        'down_payment' => $validated['financing']['down_payment'] ?? 0,
-                        'akad_date' => $validated['financing']['akad_date'] ?? null,
-                        'cost_price' => $validated['financing']['cost_price'] ?? null,
-                        'margin_amount' => $validated['financing']['margin_amount'] ?? null,
-                        'payment_method' => $validated['financing']['payment_method'] ?? null,
-                        'updated_by' => $verifier->id,
-                        'status' => $validated['financing']['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-                    ]
-                );
-
-                if ($financing->status === FinancingReqStatusEnum::PENDING_REVIEW->value) {
-                    $financing->update(['requested_date' => now()]);
+                if ($user->status !== UserStatusEnum::ACTIVE->value) {
+                    throw ValidationException::withMessages(['member' => 'Pemohon harus dalam status aktif']);
                 }
 
-                if (isset($validated['supplier']['supplier_name'])) {
-                    $supplier = Supplier::updateOrCreate(
-                        ['supplier_name' => $validated['supplier']['supplier_name']],
-                        [
-                            'address' => $validated['supplier']['address'] ?? null,
-                        ]
-                    );
+                $hasEligibleSaving = SavingAccount::where('member_id', $user->member->id)
+                    ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+                    ->where('created_at', '<=', now()->subMonth())
+                    ->exists();
+
+                if (!$hasEligibleSaving) {
+                    throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
-                $financingItem = FinancingItem::updateOrCreate(
-                    ['financing_id' => $financing->id],
-                    [
-                        'name' => $validated['financing']['name'] ?? null,
-                        'specification' => $validated['financing']['specification'] ?? null,
-                        'qty' => $validated['financing']['qty'] ?? null,
-                        'condition' => $validated['financing']['condition'] ?? null,
-                        'price_per_unit' => $validated['financing']['price_per_unit'] ?? null,
-                        'product_type_id' => $validated['financing']['product_type_id'] ?? null,
-                        'supplier_id' => $supplier?->id ?? null,
-                    ]
-                );
+                $this->financingService->syncMemberData($user, $validated['member'], $request);
+                $this->financingService->syncFinancingData($user, $validated, $request, auth()->id());
+            });
 
-                if (isset($validated['financing']['nominal_wakalah'])) {
-                    Log::info('Updating wakalah', [
-                        'financing_id' => $financing->id,
-                        'nominal_wakalah' => $validated['financing']['nominal_wakalah'] ?? null,
-                        'akad_date' => $validated['financing']['akad_wakalah_date'] ?? null,
-                    ]);
-                    $wakalah = Wakalah::updateOrCreate(
-                        ['financing_id' => $financing->id],
-                        [
-                            'nominal_wakalah' => $validated['financing']['nominal_wakalah'] ?? null,
-                            'akad_date' => $validated['financing']['akad_date'] ?? null,
-                        ]
-                    );
+            return redirect()->route('admin.financings.index')
+                ->with('success', 'Permohonan pembiayaan berhasil dikirim');
 
-                    if ($request->hasFile('akad_wakalah_file')) {
-                        $wakalah->update([
-                            'signed_akad_document' => $request->file('akad_wakalah_file')->store('documents', 'public'),
-                        ]);
-                    }
+        } catch (Exception $e) {
+            Log::error('Error storing financing: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal menyimpan permohonan: ' . $e->getMessage()]);
+        }
+    }
+    public function finalize(StoreFinancingRequest $request)
+    {
+        try {
+            DB::transaction(function () use ($request) {
+                $validated = $request->validated();
+                $user = User::with('member.savingAccounts')
+                    ->where('user_code', $validated['member']['user_code'])
+                    ->firstOrFail();
+
+                if ($user->status !== UserStatusEnum::ACTIVE->value) {
+                    throw ValidationException::withMessages(['member' => 'Pemohon harus dalam status aktif']);
                 }
 
-                if (isset($validated['collateral']['collateral_type'])) {
-                    $financing->collateral()->updateOrCreate(
-                        ['financing_id' => $financing->id],
-                        [
-                            'collateral_type' => $validated['collateral']['collateral_type'] ?? null,
-                            'owner_name' => $validated['collateral']['owner_name'] ?? null,
-                            'estimated_market_value' => $validated['collateral']['estimated_market_value'] ?? null,
-                            'collateral_location' => $validated['collateral']['collateral_location'] ?? null,
-                        ]
-                    );
+                $hasEligibleSaving = SavingAccount::where('member_id', $user->member->id)
+                    ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+                    ->where('created_at', '<=', now()->subMonth())
+                    ->exists();
+
+                if (!$hasEligibleSaving) {
+                    throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
-                // FILE UPLOADS
-                if($request->hasFile('purchase_receipt_file')) {
-                    $financingItem->update([
-                        'purchase_receipt' => $request->file('purchase_receipt_file')->store('documents', 'public'),
-                    ]);
-                }
+                $this->financingService->syncMemberData($user, $validated['member'], $request);
+                $financing = $this->financingService->syncFinancingData($user, $validated, $request, auth()->id());
 
                 if ($request->hasFile('akad_document_file')) {
                     $financing->update([
@@ -664,31 +548,38 @@ class FinancingController extends Controller
                     ]);
                 }
 
-                if ($request->hasFile('akad_wakalah_file')) {
-                    $user->member->memberDocs()->updateOrCreate(
-                        ['doc_name' => 'akad_wakalah'],
-                        ['doc_attachment' => $request->file('akad_wakalah_file')->store('documents', 'public')]
-                    );
-                }
-
-                // IF INSTALLMENT
                 if (isset($validated['financing']['tenor'])) {
-                    Installment::create([
-                        'financing_id' => $financing->id,
-                        'tenor' => $validated['financing']['tenor'],
-                        'due_day' => Carbon::parse($validated['financing']['akad_date'])->day,
-                    ]);
+                    $this->financingService->generateInstallments($financing);
                 }
-            }
+            });
 
-            DB::commit();
+            return redirect()->route('admin.financings.index')
+                ->with('success', 'Pembiayaan berhasil difinalisasi');
+        } catch (Exception $e) {
+            Log::error('Error storing financing: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal menyimpan permohonan: ' . $e->getMessage()]);
+        }
+    }
 
-            return redirect()->route('admin.financings.index')->with('success', 'Permohonan pembiayaan berhasil disimpan');
+    public function saveDraft(StoreFinancingDraftRequest $request)
+    {
+        try {
+            DB::transaction(function () use ($request) {
+                $validated = $request->validated();
+                $user = User::with('member.savingAccounts')
+                    ->where('user_code', $validated['member']['user_code'])
+                    ->firstOrFail();
+
+                $this->financingService->syncMemberData($user, $validated['member'], $request);
+                $this->financingService->syncFinancingData($user, $validated, $request, auth()->id());
+            });
+
+            return redirect()->route('admin.financings.index')
+                ->with('success', 'Draft berhasil disimpan');
 
         } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Error storing draft: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Gagal menyimpan permohonan: ' . $e->getMessage()]);
+            Log::error('Error saving draft: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal menyimpan draft: ' . $e->getMessage()]);
         }
     }
 
