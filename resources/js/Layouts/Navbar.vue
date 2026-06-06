@@ -4,6 +4,7 @@ import { Link, usePage, useForm } from '@inertiajs/vue3'
 import UserIcon from '../Icons/UserIcon.vue'
 import ThemeToggler from '../Components/ThemeToggler.vue'
 import Logo from '@/Components/Logo.vue'
+import UserNotificationMenu from '@/Components/UserNotificationMenu.vue'
 import Swal from 'sweetalert2'
 import { toast } from "vue3-toastify";
 import ChevronDownIcon from '@/Icons/ChevronDownIcon.vue'
@@ -129,6 +130,7 @@ const logout = () => {
                         <span class="icon-[material-symbols-light--home-outline-rounded]"
                             style="width: 24px; height: 24px;"></span>
                     </Link>
+                    <UserNotificationMenu />
                     <div class="relative">
                         <button class="flex items-center text-gray-700 dark:text-gray-400"
                             @click.prevent="toggleUserDropdown">
