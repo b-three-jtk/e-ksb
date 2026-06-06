@@ -73,15 +73,15 @@ const acceptTransaction = () => {
                 <div class="card-layout px-0! md:col-span-2">
                     <h1 class="card-title border-b border-b-stroke px-6 pb-6">Detail Data Pengunduran Diri Anggota</h1>
                     <div class="grid grid-cols-2 gap-6 p-8 pb-6">
-                        <BaseInputAdmin label="Nama" type="text" v-model="props.data.name" isDisabled />
-                        <BaseInputAdmin label="Nomor Anggota" type="text" v-model="props.data.user_code" isDisabled />
-                        <BaseInputAdmin label="Tanggal Bergabung" type="date" v-model="props.data.joined_date" isDisabled />
-                        <BaseInputAdmin label="Email" type="email" v-model="props.data.email" isDisabled />
+                        <BaseInputAdmin label="Nama" type="text" v-model="props.data.name" disabled />
+                        <BaseInputAdmin label="Nomor Anggota" type="text" v-model="props.data.user_code" disabled />
+                        <BaseInputAdmin label="Tanggal Bergabung" type="date" v-model="props.data.joined_date" disabled />
+                        <BaseInputAdmin label="Email" type="email" v-model="props.data.email" disabled />
                         <div class="grid grid-cols-2 col-span-2 gap-6">
                             <BaseInputAdmin label="Total Simpanan" type="string" v-model="props.data.total_savings" isMoney
-                                isDisabled />
+                                disabled />
                             <BaseInputAdmin label="Total Kewajiban" type="string" v-model="props.data.total_obligations"
-                                isMoney isDisabled />
+                                isMoney disabled />
                         </div>
                     </div>
                     <div class="flex gap-6 items-center justify-center">

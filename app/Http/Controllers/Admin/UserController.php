@@ -10,14 +10,17 @@ use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMemberAllocationRequest;
 use App\Http\Requests\StoreMemberRequest;
+use App\Http\Requests\UpdateMemberRequest;
 use App\Models\Financing;
 use App\Models\SavingAccount;
 use App\Models\User;
 use App\Services\Admin\MemberAllocationService;
 use App\Services\Admin\RegisterMemberService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Log;
 use RuntimeException;
 
 class UserController extends Controller
@@ -222,6 +225,89 @@ class UserController extends Controller
             'ktp_photo' => $ktpDoc?->attachment ? asset('storage/' . $ktpDoc->attachment) : null,
             'kk_photo' => $kkDoc?->attachment ? asset('storage/' . $kkDoc->attachment) : null,
         ]);
+    }
+
+    public function edit(string $id)
+    {
+        $user = User::with(['member', 'member.memberDocs' => function ($query) {
+            $query->whereIn('doc_name', ['ktp', 'kk']);
+        }, 'member.heirs'])->findOrFail($id);
+
+        $user->kk = $user->member?->memberDocs?->firstWhere('doc_name', 'kk')?->doc_attachment
+            ? asset('storage/' . $user->member->memberDocs->firstWhere('doc_name', 'kk')->doc_attachment)
+            : null;
+
+        $user->ktp = $user->member?->memberDocs?->firstWhere('doc_name', 'ktp')?->doc_attachment
+            ? asset('storage/' . $user->member->memberDocs->firstWhere('doc_name', 'ktp')->doc_attachment)
+            : null;
+
+        return inertia('Admin/User/Edit', [
+            'data' => $user,
+            'opsiPendidikan' => $this->enumOptions(EducationEnum::cases()),
+            'opsiStatusPerkawinan' => $this->enumOptions(MaritalStatusEnum::cases()),
+            'opsiHubunganKeluarga' => $this->enumOptions(HeirEnum::cases()),
+        ]);
+    }
+
+    public function update(UpdateMemberRequest $request, string $id)
+    {
+        $validated = $request->validated();
+
+        $user = User::with('member.memberDocs', 'member.heirs')->findOrFail($id);
+
+        try {
+            DB::transaction(function () use ($user, $validated) {
+                $user->update([
+                    'name' => $validated['name'] ?? $user->name,
+                    'nik' => $validated['nik'] ?? $user->nik,
+                    'email' => $validated['email'] ?? $user->email,
+                    'phone_number' => $validated['phone_number'] ?? $user->phone_number,
+                ]);
+
+                if ($user->member) {
+                    $user->member->update([
+                        'gender' => $validated['gender'] ?? $user->member->gender,
+                        'birth_place' => $validated['birth_place'] ?? $user->member->birth_place,
+                        'birth_date' => $validated['birth_date'] ?? $user->member->birth_date,
+                        'residential_address' => $validated['residential_address'] ?? $user->member->residential_address,
+                        'domicile_address' => $validated['domicile_address'] ?? $user->member->domicile_address,
+                        'last_education' => $validated['last_education'] ?? $user->member->last_education,
+                        'marital_status' => $validated['marital_status'] ?? $user->member->marital_status,
+                        'dependents' => $validated['dependents'] ?? $user->member->dependents,
+                    ]);
+                }
+
+                if (isset($validated['heirs'])) {
+                    $user->member->heirs()->delete();
+
+                    foreach ($validated['heirs'] as $heirData) {
+                        $user->member->heirs()->create($heirData);
+                    }
+                }
+
+                if (isset($validated['ktp_file'])) {
+                    $user->member->memberDocs()->firstOrCreate([
+                        'doc_name' => 'ktp',
+                        'doc_attachment' => $validated['ktp_file']->store('member_docs', 'public'),
+                        'member_id' => $user->member->id,
+                    ]);
+                }
+
+                if (isset($validated['kk_file'])) {
+                    $user->member->memberDocs()->firstOrCreate([
+                        'doc_name' => 'kk',
+                        'doc_attachment' => $validated['kk_file']->store('member_docs', 'public'),
+                        'member_id' => $user->member->id
+                    ]);
+                }
+            });
+
+            return redirect()->route('admin.users.index');
+        } catch (Exception $e) {
+            return back()->withErrors([
+                'member' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function getMutasi($accountId)

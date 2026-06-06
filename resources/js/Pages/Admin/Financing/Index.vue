@@ -11,6 +11,7 @@ import { Icon } from '@iconify/vue';
 import Button from '@/Components/Form/Button.vue';
 import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
 import ReviewIcon from '@/Icons/ReviewIcon.vue'
+import moneyParser from '@/Composables/moneyParser';
 
 const page = usePage();
 
@@ -127,7 +128,7 @@ watch(() => filters.tab, applyFilters)
                 </h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <CardInfo v-for="item in summary" :key="item.title" :title="item.title" :content="item.value"
+                <CardInfo v-for="item in summary" :key="item.title" :title="item.title" :content="item.title === 'Total Modal Belum Diputar' ? moneyParser(item.value) : item.value"
                     :percentage="item.percentage" />
             </div>
         </div>

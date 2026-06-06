@@ -108,6 +108,7 @@ const menuGroups = [
                 permission: "view_pengaturan"
             }
         ],
+        permission: "view_pengaturan"
     }
 ];
 
@@ -155,6 +156,15 @@ const hasPermission = (permission) => {
     if (!permission) return true;
     return page.props.auth?.can?.[permission];
 };
+
+const isGroupVisible = (group) => {
+    if (group.permission && !hasPermission(group.permission)) {
+        return false;
+    }
+
+    return group.items.some(item => hasPermission(item.permission) && isItemVisible(item));
+};
+
 </script>
 
 <template>
@@ -186,124 +196,133 @@ const hasPermission = (permission) => {
         <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
             <nav class="mb-6">
                 <div class="flex flex-col gap-4">
-                    <div v-for="(menuGroup, groupIndex) in menuGroups" :key="groupIndex">
-                        <h2 :class="[
-                            'mb-4 text-xs uppercase flex leading-5 text-gray-400',
-                            !isExpanded && !isHovered
-                                ? 'lg:justify-center'
-                                : 'justify-start',
-                        ]">
-                            <template v-if="isExpanded || isHovered || isMobileOpen">
-                                {{ menuGroup.title }}
-                            </template>
-                            <HorizontalDots v-else />
-                        </h2>
-                        <ul class="flex flex-col gap-4">
-                            <li v-for="(item, index) in menuGroup.items" :v-if="hasPermission(item.permission)" :key="item.name">
-                                <button v-if="item.subItems && isItemVisible(item)"
-                                    @click="toggleSubmenu(groupIndex, index)" :class="[
-                                        'menu-item group w-full',
-                                        {
-                                            'menu-item-active': isSubmenuOpen(groupIndex, index),
-                                            'menu-item-inactive': !isSubmenuOpen(groupIndex, index),
-                                        },
-                                        !isExpanded && !isHovered
-                                            ? 'lg:justify-center'
-                                            : 'lg:justify-start',
-                                    ]">
-                                    <span :class="[
-                                        isSubmenuOpen(groupIndex, index)
-                                            ? 'menu-item-icon-active'
-                                            : 'menu-item-icon-inactive',
-                                    ]">
-                                        <component :is="item.icon" />
-                                    </span>
-                                    <span v-if="isExpanded || isHovered || isMobileOpen" class="menu-item-text">{{
-                                        item.name }}</span>
-                                    <ChevronDownIcon v-if="isExpanded || isHovered || isMobileOpen" :class="[
-                                        'ml-auto w-5 h-5 transition-transform duration-200',
-                                        {
-                                            'rotate-180 text-brand-500': isSubmenuOpen(
-                                                groupIndex,
-                                                index
-                                            ),
-                                        },
-                                    ]" />
-                                </button>
-                                <Link v-else-if="item.path && isItemVisible(item) && hasPermission(item.permission)" :href="item.path" :class="[
-                                    'menu-item group',
-                                    {
-                                        'menu-item-active': isActive(item.path),
-                                        'menu-item-inactive': !isActive(item.path),
-                                    },
-                                ]">
-                                    <span :class="[
-                                        isActive(item.path)
-                                            ? 'menu-item-icon-active'
-                                            : 'menu-item-icon-inactive',
-                                    ]">
-                                        <component :is="item.icon" />
-                                    </span>
-                                    <span v-if="isExpanded || isHovered || isMobileOpen" class="menu-item-text">{{
-                                        item.name }}</span>
-                                </Link>
-                                <transition @enter="startTransition" @after-enter="endTransition"
-                                    @before-leave="startTransition" @after-leave="endTransition">
-                                    <div v-show="isSubmenuOpen(groupIndex, index) &&
-                                        (isExpanded || isHovered || isMobileOpen)
-                                        ">
-                                        <ul class="mt-2 space-y-1 ml-9">
-                                            <template v-for="subItem in item.subItems" :key="subItem.name">
-                                                <li v-if="isSubItemVisible(subItem) && hasPermission(subItem.permission)">
-                                                    <Link :href="subItem.path" :class="[
-                                                        'menu-dropdown-item',
-                                                        {
-                                                            'menu-dropdown-item-active': isActive(
-                                                                subItem.path
-                                                            ),
-                                                            'menu-dropdown-item-inactive': !isActive(
-                                                                subItem.path
-                                                            ),
-                                                        },
-                                                    ]">
-                                                        {{ subItem.name }}
-                                                        <span class="flex items-center gap-1 ml-auto">
-                                                            <span v-if="subItem.new" :class="[
-                                                                'menu-dropdown-badge',
+                    <template v-for="(menuGroup, groupIndex) in menuGroups" :key="groupIndex">
+                        <div v-if="isGroupVisible(menuGroup)">
+                            <h2 :class="[
+                                'mb-4 text-xs uppercase flex leading-5 text-gray-400',
+                                !isExpanded && !isHovered
+                                    ? 'lg:justify-center'
+                                    : 'justify-start',
+                            ]">
+                                <template v-if="isExpanded || isHovered || isMobileOpen">
+                                    {{ menuGroup.title }}
+                                </template>
+                                <HorizontalDots v-else />
+                            </h2>
+                            <ul class="flex flex-col gap-4">
+                                <template v-for="(item, index) in menuGroup.items" :key="item.name">
+                                    <li v-if="hasPermission(item.permission) && isItemVisible(item)">
+                                        <button v-if="item.subItems && isItemVisible(item)"
+                                            @click="toggleSubmenu(groupIndex, index)" :class="[
+                                                'menu-item group w-full',
+                                                {
+                                                    'menu-item-active': isSubmenuOpen(groupIndex, index),
+                                                    'menu-item-inactive': !isSubmenuOpen(groupIndex, index),
+                                                },
+                                                !isExpanded && !isHovered
+                                                    ? 'lg:justify-center'
+                                                    : 'lg:justify-start',
+                                            ]">
+                                            <span :class="[
+                                                isSubmenuOpen(groupIndex, index)
+                                                    ? 'menu-item-icon-active'
+                                                    : 'menu-item-icon-inactive',
+                                            ]">
+                                                <component :is="item.icon" />
+                                            </span>
+                                            <span v-if="isExpanded || isHovered || isMobileOpen"
+                                                class="menu-item-text">{{
+                                                    item.name }}</span>
+                                            <ChevronDownIcon v-if="isExpanded || isHovered || isMobileOpen" :class="[
+                                                'ml-auto w-5 h-5 transition-transform duration-200',
+                                                {
+                                                    'rotate-180 text-brand-500': isSubmenuOpen(
+                                                        groupIndex,
+                                                        index
+                                                    ),
+                                                },
+                                            ]" />
+                                        </button>
+                                        <Link
+                                            v-else-if="item.path && isItemVisible(item) && hasPermission(item.permission)"
+                                            :href="item.path" :class="[
+                                                'menu-item group',
+                                                {
+                                                    'menu-item-active': isActive(item.path),
+                                                    'menu-item-inactive': !isActive(item.path),
+                                                },
+                                            ]">
+                                            <span :class="[
+                                                isActive(item.path)
+                                                    ? 'menu-item-icon-active'
+                                                    : 'menu-item-icon-inactive',
+                                            ]">
+                                                <component :is="item.icon" />
+                                            </span>
+                                            <span v-if="isExpanded || isHovered || isMobileOpen"
+                                                class="menu-item-text">{{
+                                                    item.name }}</span>
+                                        </Link>
+                                        <transition @enter="startTransition" @after-enter="endTransition"
+                                            @before-leave="startTransition" @after-leave="endTransition">
+                                            <div v-show="isSubmenuOpen(groupIndex, index) &&
+                                                (isExpanded || isHovered || isMobileOpen)
+                                                ">
+                                                <ul class="mt-2 space-y-1 ml-9">
+                                                    <template v-for="subItem in item.subItems" :key="subItem.name">
+                                                        <li
+                                                            v-if="isSubItemVisible(subItem) && hasPermission(subItem.permission)">
+                                                            <Link :href="subItem.path" :class="[
+                                                                'menu-dropdown-item',
                                                                 {
-                                                                    'menu-dropdown-badge-active': isActive(
+                                                                    'menu-dropdown-item-active': isActive(
                                                                         subItem.path
                                                                     ),
-                                                                    'menu-dropdown-badge-inactive': !isActive(
+                                                                    'menu-dropdown-item-inactive': !isActive(
                                                                         subItem.path
                                                                     ),
                                                                 },
                                                             ]">
-                                                                new
-                                                            </span>
-                                                            <span v-if="subItem.pro" :class="[
-                                                                'menu-dropdown-badge',
-                                                                {
-                                                                    'menu-dropdown-badge-active': isActive(
-                                                                        subItem.path
-                                                                    ),
-                                                                    'menu-dropdown-badge-inactive': !isActive(
-                                                                        subItem.path
-                                                                    ),
-                                                                },
-                                                            ]">
-                                                                pro
-                                                            </span>
-                                                        </span>
-                                                    </Link>
-                                                </li>
-                                            </template>
-                                        </ul>
-                                    </div>
-                                </transition>
-                            </li>
-                        </ul>
-                    </div>
+                                                                {{ subItem.name }}
+                                                                <span class="flex items-center gap-1 ml-auto">
+                                                                    <span v-if="subItem.new" :class="[
+                                                                        'menu-dropdown-badge',
+                                                                        {
+                                                                            'menu-dropdown-badge-active': isActive(
+                                                                                subItem.path
+                                                                            ),
+                                                                            'menu-dropdown-badge-inactive': !isActive(
+                                                                                subItem.path
+                                                                            ),
+                                                                        },
+                                                                    ]">
+                                                                        new
+                                                                    </span>
+                                                                    <span v-if="subItem.pro" :class="[
+                                                                        'menu-dropdown-badge',
+                                                                        {
+                                                                            'menu-dropdown-badge-active': isActive(
+                                                                                subItem.path
+                                                                            ),
+                                                                            'menu-dropdown-badge-inactive': !isActive(
+                                                                                subItem.path
+                                                                            ),
+                                                                        },
+                                                                    ]">
+                                                                        pro
+                                                                    </span>
+                                                                </span>
+                                                            </Link>
+                                                        </li>
+                                                    </template>
+                                                </ul>
+                                            </div>
+                                        </transition>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
                 </div>
             </nav>
         </div>
