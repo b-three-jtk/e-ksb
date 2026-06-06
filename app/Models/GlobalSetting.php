@@ -15,6 +15,10 @@ class GlobalSetting extends Model
         'updated_by',
     ];
 
+    protected $casts = [
+        'effective_date' => 'date',
+    ];
+
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');

@@ -139,7 +139,7 @@ watch(() => filters.tab, applyFilters)
                 <button v-for="tab in tabs" :key="tab.key" @click="filters.tab = tab.key"
                     class="font-head px-4 py-2 rounded-lg text-sm border transition border-gray-200 dark:border-slate-700"
                     :class="filters.tab === tab.key
-                        ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-medium shadow'
+                        ? 'bg-white dark:bg-slate-800 text-primary dark:text-blue-400 font-medium shadow'
                         : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'">
                     {{ tab.label }}
                 </button>

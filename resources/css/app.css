@@ -300,13 +300,16 @@
 }
 
 @layer utilities {
-  /* For Remove Date Icon */
+  /* Hide native number spinner controls but keep the date/time picker icon visible. */
   input[type='date']::-webkit-inner-spin-button,
-  input[type='time']::-webkit-inner-spin-button,
+  input[type='time']::-webkit-inner-spin-button {
+    display: none;
+  }
+
   input[type='date']::-webkit-calendar-picker-indicator,
   input[type='time']::-webkit-calendar-picker-indicator {
-    display: none;
-    -webkit-appearance: none;
+    opacity: 1;
+    -webkit-appearance: auto;
   }
 }
 

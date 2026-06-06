@@ -103,7 +103,7 @@ const menuGroups = [
         items: [
             {
                 icon: SettingsIcon,
-                name: "Pengaturan",
+                name: "Pengaturan Umum",
                 path: "/admin/settings",
                 permission: "view_pengaturan"
             }
@@ -113,7 +113,11 @@ const menuGroups = [
 ];
 
 // Menggunakan Inertia untuk check active route
-const isActive = (path) => page.url === path;
+const isActive = (path) => {
+    const currentPath = page.url.split('?')[0];
+
+    return currentPath === path || currentPath.startsWith(path + '/');
+};
 
 const toggleSubmenu = (groupIndex, itemIndex) => {
     const key = `${groupIndex}-${itemIndex}`;
