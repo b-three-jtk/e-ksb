@@ -34,7 +34,7 @@ const hasDocuments = computed(() => availableDocuments.value.length > 0)
             <a
                 v-for="doc in availableDocuments"
                 :key="doc.key"
-                :href="props.form.documents[doc.key]"
+                :href="form.documents[doc.key]"
                 target="_blank"
                 class="border flex justify-between p-4 rounded-xl items-center font-body hover:bg-gray-50 hover:border-secondary cursor-pointer transition-all group"
             >

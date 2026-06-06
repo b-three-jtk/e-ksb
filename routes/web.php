@@ -127,6 +127,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/financings/create', [FinancingController::class, 'create'])->middleware('permission:create_murabahah')->name('financings.create');
     Route::get('/members/search', [FinancingController::class, 'searchMembers'])->middleware('permission:create_murabahah')->name('members.search');
     Route::get('/suppliers/search', [FinancingController::class, 'searchSuppliers'])->middleware('permission:create_murabahah')->name('suppliers.search');
+    Route::post('/financings/draft', [FinancingController::class, 'saveDraft'])->middleware('permission:create_murabahah')->name('financings.draft');
+    Route::post('/financings/finalize', [FinancingController::class, 'finalize'])->middleware('permission:create_murabahah')->name('financings.finalize');
     Route::post('/financings/store', [FinancingController::class, 'store'])->middleware('permission:create_murabahah')->name('financings.store');
     Route::resource('product-types', ProductTypeController::class)->middleware('permission:create_murabahah');
     Route::get('/financings/draft/{id}', [FinancingController::class, 'loadDraft'])->middleware('permission:create_murabahah')->name('financings.load-draft');

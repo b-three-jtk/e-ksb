@@ -107,28 +107,28 @@ const onlyAlphaNumericDash = (event) => {
             </div>
 
             <!-- Form fields -->
-            <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" :model-value="form.member.name"
+            <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" v-model="form.member.name"
                 required :errors="errors.name" @input="onlyAlpha" />
-            <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" :model-value="form.member.nik" max="16"
+            <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" v-model="form.member.nik" max="16"
                 required :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" />
-            <BaseInputAdmin label="Email" placeholder="Masukkan email" :model-value="form.member.email" required
+            <BaseInputAdmin label="Email" placeholder="Masukkan email" v-model="form.member.email" required
                 :errors="errors.email" type="email" />
             <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="13"
-                :model-value="form.member.phone_number" :errors="errors.phone_number" @input="onlyNumbers" inputmode="numeric" />
+                v-model="form.member.phone_number" :errors="errors.phone_number" @input="onlyNumbers" inputmode="numeric" />
             <BaseInputAdmin v-model="form.member.gender" label="Jenis Kelamin" type="radio" required :selectables="[
                 { value: 'Laki-laki', text: 'Laki-laki' },
                 { value: 'Perempuan', text: 'Perempuan' }
             ]" :error="errors.gender">
             </BaseInputAdmin>
-            <BaseInputAdmin label="Tempat Lahir" :model-value="form.member.birth_place" :error="errors.birth_place"
+            <BaseInputAdmin label="Tempat Lahir" v-model="form.member.birth_place" :error="errors.birth_place"
                 placeholder="Masukkan tempat lahir" @input="onlyAlpha" />
-            <BaseInputAdmin label="Tanggal Lahir" type="date" :model-value="form.member.birth_date"
+            <BaseInputAdmin label="Tanggal Lahir" type="date" v-model="form.member.birth_date"
                 :error="errors.birth_date" />
-            <BaseInputAdmin :model-value="form.member.residential_address" label="Alamat" type="textarea"
+            <BaseInputAdmin v-model="form.member.residential_address" label="Alamat" type="textarea"
                 placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address" @input="onlyAlphaNumericDash" />
-            <BaseInputAdmin :model-value="form.member.domicile_address" label="Alamat Domisili" type="textarea"
+            <BaseInputAdmin v-model="form.member.domicile_address" label="Alamat Domisili" type="textarea"
                 placeholder="Masukkan alamat domisili" rows="4" :error="errors.domicile_address" @input="onlyAlphaNumericDash" />
-            <BaseInputAdmin :model-value="form.member.last_education" label="Pendidikan Terakhir" type="select"
+            <BaseInputAdmin v-model="form.member.last_education" label="Pendidikan Terakhir" type="select"
                 :selectables="data.educations.map(unit => ({ value: unit, text: unit }))"
                 :error="errors.last_education" />
             <BaseInputAdmin v-model="form.member.marital_status" label="Status Perkawinan" type="select"
