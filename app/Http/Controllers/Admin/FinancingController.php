@@ -361,10 +361,10 @@ class FinancingController extends Controller
                     'down_payment' => $financing->down_payment,
                     'payment_method' => $financing->payment_method,
                     'akad_wakalah_date' => $financing->wakalah?->akad_date,
-                    'nominal_wakalah' => $financing->wakalah?->nominal_wakalah,
                     'akad_date' => $financing->akad_date,
                     'status' => $financing->status,
                     'tenor' => $financing->tenor,
+                    'predicted_cost_price' => $financing->predicted_cost_price,
                 ],
                 'collateral' => [
                     'collateral_type' => $financing->collateral?->collateral_type,
@@ -406,11 +406,12 @@ class FinancingController extends Controller
                 'financingItem.productType',
                 'financingItem.supplier',
                 'collateral',
+                'wakalah',
             ])
             ->first();
 
         if (!$financing) {
-            return redirect()->route('admin.financing.index')->withErrors(['error' => 'Data pembiayaan tidak ditemukan atau tidak dalam status yang valid untuk divalidasi']);
+            return redirect()->route('admin.financings.index')->withErrors(['error' => 'Data pembiayaan tidak ditemukan atau tidak dalam status yang valid untuk divalidasi']);
         }
 
         return inertia('Admin/Financing/Validation', [

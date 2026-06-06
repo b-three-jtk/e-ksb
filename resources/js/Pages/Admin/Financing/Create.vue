@@ -74,13 +74,12 @@ const isStep2Valid = computed(() =>
 )
 
 const isStep3Valid = computed(() =>
-    form.financing.name && form.collateral.collateral_type &&
-    form.financing.status !== 'Menunggu Kelengkapan Dokumen' && form.financing.status !== 'Ditolak'
+    form.financing.name && form.collateral.collateral_type
 )
 
 const isStep4Valid = computed(() => form.supplier.supplier_name && form.financing.cost_price && (form.purchase_receipt_file || form.documents.purchase_receipt))
 
-const isRequestValid = computed(() => isStep1Valid.value && isStep2Valid.value && form.financing.name && form.collateral.collateral_type)
+const isRequestValid = computed(() => isStep1Valid.value && isStep2Valid.value && form.financing.name && form.collateral.collateral_type && (form.financing.status !== 'Disetujui' && form.financing.status !== 'Ditolak'))
 
 const isFinalizationValid = computed(() => form.financing.status === 'Disetujui' && form.financing.akad_date && (form.akad_document_file || form.documents.akad_document) && form.financing.payment_method)
 
@@ -131,7 +130,7 @@ const isFinalizationValid = computed(() => form.financing.status === 'Disetujui'
                             Selanjutnya
                         </Button>
 
-                        <Button :disabled="!isRequestValid" v-if="activeStep === 3 && (form.financing.status === 'Menunggu Kelengkapan Dokumen' || form.financing.status === 'Ditolak')" type="submit" @click="submit()" variant="secondary">
+                        <Button :disabled="!isRequestValid" v-if="activeStep === 3" type="submit" @click="submit()" variant="secondary">
                             Ajukan Permohonan
                         </Button>
 

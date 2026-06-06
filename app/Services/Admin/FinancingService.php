@@ -11,6 +11,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 // App/Services/Admin/FinancingService.php
 class FinancingService
@@ -90,18 +91,44 @@ class FinancingService
         $supplierData   = $validated['supplier'] ?? null;
         $collateralData = $validated['collateral'] ?? null;
 
-        $financing = Financing::updateOrCreate(
-            ['member_id' => $user->member->id, 'status' => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value],
-            [
-                'down_payment'    => $financingData['down_payment'] ?? 0,
-                'akad_date'       => $financingData['akad_date'] ?? null,
-                'cost_price'      => $financingData['cost_price'] ?? null,
-                'margin_amount'   => $financingData['margin_amount'] ?? null,
-                'payment_method'  => $financingData['payment_method'] ?? null,
-                'updated_by'      => $updatedBy,
-                'status'          => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-            ]
-        );
+        $existingFinancing = Financing::where('member_id', $user->member->id)
+            ->whereIn('status', [
+                FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                FinancingReqStatusEnum::REJECTED->value,
+                FinancingReqStatusEnum::APPROVED->value,
+            ])
+            ->latest()
+            ->first();
+
+        if ($existingFinancing) {
+            // Update yang sudah ada
+            $existingFinancing->update([
+                'down_payment'   => $financingData['down_payment'] ?? 0,
+                'akad_date'      => $financingData['akad_date'] ?? null,
+                'cost_price'     => $financingData['cost_price'] ?? null,
+                'margin_amount'  => $financingData['margin_amount'] ?? null,
+                'payment_method' => $financingData['payment_method'] ?? null,
+                'tenor'          => $financingData['tenor'] ?? null,
+                'updated_by'     => $updatedBy,
+                'predicted_cost_price' => $financingData['predicted_cost_price'] ?? null,
+                'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+            ]);
+            $financing = $existingFinancing;
+        } else {
+            // Buat baru kalau memang belum ada sama sekali
+            $financing = Financing::create([
+                'member_id'      => $user->member->id,
+                'tenor'          => $financingData['tenor'] ?? null,
+                'down_payment'   => $financingData['down_payment'] ?? 0,
+                'akad_date'      => $financingData['akad_date'] ?? null,
+                'cost_price'     => $financingData['cost_price'] ?? null,
+                'margin_amount'  => $financingData['margin_amount'] ?? null,
+                'payment_method' => $financingData['payment_method'] ?? null,
+                'predicted_cost_price' => $financingData['predicted_cost_price'] ?? null,
+                'updated_by'     => $updatedBy,
+                'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+            ]);
+        }
 
         if ($financing->status === FinancingReqStatusEnum::PENDING_REVIEW->value) {
             $financing->update(['requested_date' => now()]);
@@ -134,12 +161,11 @@ class FinancingService
             ]);
         }
 
-        if (isset($financingData['nominal_wakalah'])) {
+        if (isset($financingData['akad_wakalah_date'])) {
             $wakalah = Wakalah::updateOrCreate(
                 ['financing_id' => $financing->id],
                 [
-                    'nominal_wakalah' => $financingData['nominal_wakalah'],
-                    'akad_date'       => $financingData['akad_date'] ?? null,
+                    'akad_date'       => $financingData['akad_wakalah_date'] ?? null,
                 ]
             );
             if ($request->hasFile('akad_wakalah_file')) {

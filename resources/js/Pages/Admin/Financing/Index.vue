@@ -157,7 +157,7 @@ watch(() => filters.tab, applyFilters)
                             Lacak transaksi pembiayaan murabahah di sini
                         </p>
                     </div>
-                    <Button :href="`/admin/financings/create`" variant="secondary" size="small" class="mx-6">
+                    <Button v-if="can['create_murabahah']" :href="`/admin/financings/create`" variant="secondary" size="small" class="mx-6">
                         <Icon icon="mdi:plus" class="w-5 h-5 mr-1" />
                         Tambah Pembiayaan
                     </Button>

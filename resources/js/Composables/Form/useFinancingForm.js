@@ -18,8 +18,6 @@ export function useFinancingForm(initialData = null) {
     const selectedSupplier = ref(null)
     const isSupplierSelected = ref(false)
 
-console.log('init data', initialData.member)
-
     const form = useForm({
         // Member data
         member: {
@@ -70,7 +68,6 @@ console.log('init data', initialData.member)
             cost_price: initialData?.financing?.cost_price || null,
             margin_amount: initialData?.financing?.margin_amount || null,
             akad_wakalah_date: initialData?.financing?.akad_wakalah_date || null,
-            nominal_wakalah: initialData?.financing?.nominal_wakalah || null,
             payment_method: initialData?.financing?.payment_method || '',
             akad_date: initialData?.financing?.akad_date || '',
             down_payment: initialData?.financing?.down_payment || null,
@@ -309,7 +306,7 @@ console.log('init data', initialData.member)
     }
 
     const resetSupplierSelection = () => {
-        selectedSupplier.value = null                              
+        selectedSupplier.value = null
         searchSupplierQuery.value = ''
         form.supplier = {
             supplier_name: '',
@@ -407,6 +404,7 @@ console.log('init data', initialData.member)
                     },
                     onError: (errors) => {
                         // Show all errors
+                        form.financing.status = 'Disetujui' // Revert status if error occurs
                         const errorMessages = Object.values(errors).flat()
 
                         if (errorMessages.length > 0) {
@@ -422,6 +420,8 @@ console.log('init data', initialData.member)
                         }
                     }
                 })
+            } else {
+                form.financing.status = 'Disetujui'
             }
         })
     }

@@ -34,6 +34,12 @@ class Financing extends Model
         'updated_by',
     ];
 
+    protected $casts = [
+        'akad_date' => 'date',
+        'requested_date' => 'date',
+        'paid_date' => 'date',
+    ];
+
     protected static function boot()
     {
         parent::boot();

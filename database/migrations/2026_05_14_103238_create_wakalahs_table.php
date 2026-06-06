@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wakalahs', function (Blueprint $table) {
+        Schema::create('wakalah', function (Blueprint $table) {
             $table->id();
-            $table->decimal('nominal_wakalah', 15, 2);
             $table->date('akad_date');
             $table->string('signed_akad_document')->nullable();
             $table->uuid('financing_id');

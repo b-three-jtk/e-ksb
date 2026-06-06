@@ -20,8 +20,7 @@ class SavingProductSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ambil member yang sudah ada atau buat baru
-        $members = Member::take(5)->get();
+        $members = Member::take(15)->get();
 
         if ($members->isEmpty()) {
             return; // Skip jika tidak ada member
@@ -29,20 +28,20 @@ class SavingProductSeeder extends Seeder
 
         $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? User::first();
 
-        // Seeder 1: Simpanan Pokok
-        $this->seedSimpananPokok($members->get(0), $admin);
+        // Seeder 1: Simpanan Pokok (Pastikan index 0 ada)
+        if ($member1 = $members->get(0)) $this->seedSimpananPokok($member1, $admin);
 
-        // Seeder 2: Simpanan Wajib
-        $this->seedSimpananWajib($members->get(1), $admin);
+        // Seeder 2: Simpanan Wajib (Pastikan index 1 ada)
+        if ($member2 = $members->get(1)) $this->seedSimpananWajib($member2, $admin);
 
-        // Seeder 3: Tabungan Anggota
-        $this->seedTabunganAnggota($members->get(2), $admin);
+        // Seeder 3: Tabungan Anggota (Pastikan index 2 ada)
+        if ($member3 = $members->get(2)) $this->seedTabunganAnggota($member3, $admin);
 
-        // Seeder 4: Tabungan Berjangka
-        $this->seedTabunganBerjangka($members->get(3), $admin);
+        // Seeder 4: Tabungan Berjangka (Pastikan index 3 ada)
+        if ($member4 = $members->get(3)) $this->seedTabunganBerjangka($member4, $admin);
 
-        // Seeder 5: Tabungan Ibadah
-        $this->seedTabunganIbadah($members->get(4), $admin);
+        // Seeder 5: Tabungan Ibadah (Pastikan index 4 ada)
+        if ($member5 = $members->get(4)) $this->seedTabunganIbadah($member5, $admin);
     }
 
     private function seedSimpananPokok(Member $member, User $admin): void
