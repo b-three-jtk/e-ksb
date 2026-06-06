@@ -32,9 +32,14 @@ class NotificationRepository
         return $query->first();
     }
 
-    public function getAdminList(array $filters, int $perPage = 10)
+    public function getAdminList(array $filters, int $perPage = 10, ?string $pjUserId = null)
     {
         $query = Notification::with(['member.user'])
+            ->when($pjUserId, function ($query, $pjUserId) {
+                $query->whereHas('member', function ($memberQuery) use ($pjUserId) {
+                    $memberQuery->where('pj_user_id', $pjUserId);
+                });
+            })
             ->orderBy('scheduled_at', 'desc');
 
         if (!empty($filters['periode'])) {
