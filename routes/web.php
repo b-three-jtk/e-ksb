@@ -17,6 +17,8 @@ use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\FinancingController as UserFinancingController;
 use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\User\NotificationController as UserNotificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -155,6 +157,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Notifikasi
+    Route::get('/notifications', [NotificationController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifications.index');
 });
 
 // User Routes
@@ -170,6 +175,12 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'reval
 
     Route::get('/resign', [MemberController::class, 'createResign'])->name('resign.create');
     Route::post('/resign', [MemberController::class, 'storeResign'])->name('resign.store');
+
+    // Notifikasi
+    Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}', [UserNotificationController::class, 'show'])->name('notifications.show');
+    Route::post('/notifications/mark-all-read', [UserNotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+    Route::post('/notifications/mark-popup-displayed', [UserNotificationController::class, 'markPopupDisplayed'])->name('notifications.markPopupDisplayed');
 
     // Ledger
     Route::get('/ledger', [UserSavingController::class, 'index'])->name('ledger.index');

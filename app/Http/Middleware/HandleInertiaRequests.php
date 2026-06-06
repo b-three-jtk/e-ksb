@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\NotificationService;
 use Inertia\Middleware;
 use Illuminate\Http\Request;
 
@@ -45,12 +46,26 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        $notifications = [];
+        $unreadCount = 0;
+        $pendingPopup = [];
+
+        if ($user && $user->member) {
+            $service = app(NotificationService::class);
+            $notifications = $service->getNotificationDropdown($user->member->id);
+            $unreadCount = $service->getUnreadCount($user->member->id);
+            $pendingPopup = $service->getPendingPopupNotifications($user->member->id);
+        }
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user,
                 'role' => $user ? $user->getRoleNames()->first() : null,
                 'can' => $permissions,
             ],
+            'notification_dropdown' => $notifications,
+            'unread_notification_count' => $unreadCount,
+            'pending_notification_popups' => $pendingPopup,
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),
                 'error' => fn() => $request->session()->get('error'),

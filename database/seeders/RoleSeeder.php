@@ -24,6 +24,7 @@ public function run(): void
             'simpanan' => ['view', 'create', 'edit'],
             'kas' => ['view', 'create', 'edit'],
             'pengaturan' => ['view', 'create', 'edit'],
+            'notifikasi' => ['view'],
             'peran_akses' => ['view', 'create', 'edit'],
         ];
 
@@ -51,7 +52,7 @@ public function run(): void
                     $role->givePermissionTo(['view_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'view_peran_akses']);
                     break;
                 case UserRoleEnum::KETUA:
-                    $role->givePermissionTo(['view_anggota', 'edit_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'edit_pengunduran_diri', 'create_pengaturan', 'edit_pengaturan', 'approve_murabahah', 'view_peran_akses', 'create_peran_akses', 'edit_peran_akses']);
+                    $role->givePermissionTo(['view_anggota', 'edit_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'edit_pengunduran_diri', 'create_pengaturan', 'edit_pengaturan', 'approve_murabahah', 'view_notifikasi', 'view_peran_akses', 'create_peran_akses', 'edit_peran_akses']);
                     break;
                 case UserRoleEnum::SEKRETARIS:
                     $role->givePermissionTo(['create_anggota', 'view_anggota', 'edit_anggota', 'create_pengurus', 'view_pengurus', 'edit_pengurus', 'view_pengaturan']);
@@ -66,7 +67,7 @@ public function run(): void
                     $role->givePermissionTo(['view_murabahah', 'create_murabahah', 'edit_murabahah']);
                     break;
                 case UserRoleEnum::PJANGGOTA:
-                    $role->givePermissionTo(['view_anggota', 'create_simpanan', 'view_simpanan', 'edit_simpanan']);
+                    $role->givePermissionTo(['view_anggota', 'create_simpanan', 'view_simpanan', 'edit_simpanan', 'view_notifikasi']);
                     break;
                 default:
                     // Role lain tidak diberikan permission khusus

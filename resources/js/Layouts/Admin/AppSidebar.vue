@@ -15,6 +15,7 @@ import SavingsIcon from "@/Icons/SavingsIcon.vue";
 import PersonAlertIcon from "@/Icons/PersonAlertIcon.vue";
 import FinanceIcon from "@/Icons/FinanceIcon.vue";
 import AccountIcon from "@/Icons/AccountIcon.vue";
+import NotificationsIcon from "@/Icons/NotificationsIcon.vue";
 
 const page = usePage()
 
@@ -78,6 +79,12 @@ const menuGroups = [
                 name: "Pengelolaan Kas",
                 path: "/admin",
                 permission: "view_kas"
+            },
+            {
+                icon: NotificationsIcon,
+                name: "Monitoring Notifikasi",
+                path: "/admin/notifications",
+                permission: "view_notifikasi"
             },
         ],
     },
