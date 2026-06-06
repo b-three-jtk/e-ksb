@@ -9,14 +9,13 @@ const props = defineProps<{
     type?: string
     required?: boolean
     error?: string
-    disabled?: boolean,
     placeholder?: string,
     max?: string,
     min?: string,
     pattern?: string,
     selectables?: Array<{ value: string | number; text: string }>,
     rows?: string,
-    isDisabled?: boolean,
+    disabled?: boolean,
     isMoney?: boolean,
     accept?: string,
     multiple?: boolean,
@@ -60,7 +59,7 @@ const emit = defineEmits(['update:modelValue'])
             :value="modelValue" @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
             :placeholder="placeholder" :maxlength="max" :minlength="min" :pattern="pattern" :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                 error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
-            ]" :disabled="isDisabled"
+            ]" :disabled="disabled"
             class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
 
         <input v-if="isMoney && (inputType !== 'select' && inputType !== 'textarea')" :type="inputType"
@@ -68,7 +67,7 @@ const emit = defineEmits(['update:modelValue'])
             @input="$emit('update:modelValue', moneyParser.parse(($event.target as HTMLInputElement).value))"
             :placeholder="placeholder" :maxlength="max" :minlength="min" :pattern="pattern" :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                 error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
-            ]" :disabled="isDisabled"
+            ]" :disabled="disabled"
             class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
 
         <!-- Select Input -->
@@ -77,7 +76,7 @@ const emit = defineEmits(['update:modelValue'])
                 :class="['h-11 w-full font-body appearance-none rounded-lg border bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                     error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                 ]" class="dark:bg-dark-900 text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                :disabled="isDisabled">
+                :disabled="disabled">
                 <option value="" disabled selected>Pilih Opsi</option>
                 <option v-for="option in selectables" :key="option.value" :value="option.value">{{ option.text }}
                 </option>
@@ -90,7 +89,7 @@ const emit = defineEmits(['update:modelValue'])
         <div v-else-if="inputType === 'radio'" class="flex gap-4 items-center py-2">
             <label v-for="option in selectables" :key="option.value" class="inline-flex items-center">
                 <input type="radio" :value="option.value" :checked="modelValue === option.value"
-                    @change="$emit('update:modelValue', option.value)" :disabled="isDisabled"
+                    @change="$emit('update:modelValue', option.value)" :disabled="disabled"
                     :class="['h-4 w-4 accent-brand-900', error ? 'border-red-500' : 'border-gray-300']" />
                 <span class="ml-2 text-gray-700 dark:text-gray-400">{{ option.text }}</span>
             </label>
@@ -103,7 +102,7 @@ const emit = defineEmits(['update:modelValue'])
                 error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
             ]"
             class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
-            :disabled="isDisabled"></textarea>
+            :disabled="disabled"></textarea>
 
         <!-- File Input -->
         <div v-else-if="inputType === 'file'" class="flex">
@@ -113,13 +112,13 @@ const emit = defineEmits(['update:modelValue'])
                 @change="handleFileChange"
                 :accept="accept"
                 :multiple="multiple"
-                :disabled="isDisabled"
+                :disabled="disabled"
                 class="hidden"
             />
             <button
                 @click="$refs.fileInput?.click()"
                 type="button"
-                :disabled="isDisabled"
+                :disabled="disabled"
                 class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-l-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed font-medium text-sm"
             >
                 Choose file

@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\ProductTypeController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ResignationController;
 use App\Http\Controllers\Admin\SavingController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -83,17 +83,12 @@ Route::post('/auth/logout', [LoginController::class, 'logout'])
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'revalidate'])->group(function () {
     //  Pengelolaan Anggota
-    Route::get('/users/list', [AdminUserController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
-    Route::get('/users/create', [AdminUserController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
-    Route::post('/users/store', [AdminUserController::class, 'store'])->middleware('permission:create_anggota')->name('users.store');
-    Route::get('/users/show/{id}', [AdminUserController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
-    Route::put('/users/{id}/disable', [AdminUserController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
-    Route::get('/accounts/{id}/mutasi', [AdminUserController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
-    Route::get('/financings/{id}/history', [AdminUserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
     Route::get('/users/list', [UserController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
     Route::post('/users/store', [UserController::class, 'store'])->middleware('permission:create_anggota')->name('users.store');
     Route::get('/users/show/{id}', [UserController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
+    Route::get('/users/edit/{id}', [UserController::class, 'edit'])->middleware('permission:edit_anggota')->name('users.edit');
+    Route::put('/users/{id}/update', [UserController::class, 'update'])->middleware('permission:edit_anggota')->name('users.update');
     Route::get('/users/allocation', [UserController::class, 'allocation'])->middleware('permission:edit_anggota')->name('users.allocation');
     Route::post('/users/allocation', [UserController::class, 'storeAllocation'])->middleware('permission:edit_anggota')->name('users.allocation.store');
     Route::put('/users/{id}/disable', [UserController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');

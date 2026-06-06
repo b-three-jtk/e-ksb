@@ -8,6 +8,7 @@ use App\Enums\FinancialCostEnum;
 use App\Enums\FinancialIncomeEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\HeirEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
 use App\Enums\SavingTypeEnum;
@@ -20,24 +21,24 @@ use App\Models\Financing;
 use App\Models\FinancingItem;
 use App\Models\FinancingVerification;
 use App\Models\Installment;
+use App\Models\InstallmentPaymentTransaction;
 use App\Models\JournalEntry;
 use App\Models\Member;
+use App\Models\MemberDoc;
 use App\Models\SavingAccount;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
-use App\Models\MemberDoc;
-use App\Models\InstallmentPaymentTransaction;
 use App\Services\Admin\RepaymentService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
 
 class FinancingController extends Controller
 {
@@ -51,9 +52,7 @@ class FinancingController extends Controller
             'member.user' => function ($query) {
                 $query->select('id', 'name', 'user_code');
             },
-            'installment' => function ($query) {
-                $query->withCount('payment');
-            },
+            'installment',
             'financingItem.productType' => function ($query) {
                 $query->select('product_types.id', 'product_types.product_type_name');
             }
@@ -120,7 +119,7 @@ class FinancingController extends Controller
                     'user' => $f->member->user
                         ? ($f->member->user->user_code . ' - ' . $f->member->user->name)
                         : '-',
-                    'tenor_left' => $f->installment?->payment_schedules_count ?? 0,
+                    'tenor_left' => $f->installment ? max(0, $f->tenor - ($f->installment->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
                     'product_name' => $f->financingItem?->name,
                     'status' => $f->status,
                 ];
@@ -149,21 +148,11 @@ class FinancingController extends Controller
 
     private function getModalBelumDiputar()
     {
-        $modalCredit = JournalEntry::
-            with([
-                'account' => function ($q) {
-                    $q->where('account_name', 'Modal Murabahah');
-                }
-            ])
+        $modalCredit = JournalEntry::where('no_ref_account', '102')
             ->where('position', PositionEnum::CREDIT->value)
             ->sum('nominal');
 
-        $modalDebit = JournalEntry::
-            with([
-                'account' => function ($q) {
-                    $q->where('account_name', 'Modal Murabahah');
-                }
-            ])
+        $modalDebit = JournalEntry::where('no_ref_account', '102')
             ->where('position', PositionEnum::DEBIT->value)
             ->sum('nominal');
 
@@ -237,26 +226,22 @@ class FinancingController extends Controller
 
         $installment = $financing->installment;
 
-        if ($installment && $installment->payment?->count() > 0) {
-            $total_paid = 0;
-
-            foreach ($installment->payment as $payment) {
-                $total_paid += $payment->nominal ?? 0;
-            }
+        if ($installment && $installment->count() > 0) {
+            $paid_count = $installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
+            $total_paid = $paid_count * ($financing->margin_amount + $financing->cost_price - $financing->down_payment / $financing->tenor);
 
             $financing->remaining_balance = $financing->total_price - $total_paid;
-            $financing->total_monthly_payment = $financing->margin_amount + $financing->cost_price - $financing->down_payment / $financing->installment->tenor;
             $financing->total_paid = $total_paid;
 
-            if ($financing->installment?->tenor) {
-                $financing->installment_per_month = ($financing->total_price) / $financing->installment->tenor;
+            if ($financing->tenor) {
+                $financing->installment_per_month = ($financing->total_price) / $financing->tenor;
             } else {
                 $financing->installment_per_month = 0;
             }
         } else {
             $financing->total_paid = 0;
-            if ($installment && $financing->installment?->tenor) {
-                $financing->installment_per_month = ($financing->total_price) / $financing->installment->tenor;
+            if ($installment && $financing->tenor) {
+                $financing->installment_per_month = ($financing->total_price) / $financing->tenor;
             } else {
                 $financing->installment_per_month = 0;
             }
@@ -264,8 +249,8 @@ class FinancingController extends Controller
         }
 
         if ($installment && $financing->akad_date) {
-            $paid_count = $installment->payment ? $installment->payment->count() : 0;
-            if ($paid_count < $installment->tenor) {
+            $paid_count = $installment ? $installment->count() : 0;
+            if ($paid_count < $financing->tenor) {
                 $financing->next_due_date = Carbon::parse($financing->akad_date)
                     ->addMonthsNoOverflow($paid_count + 1)
                     ->format('Y-m-d');

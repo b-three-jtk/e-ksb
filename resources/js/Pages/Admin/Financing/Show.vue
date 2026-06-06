@@ -1,13 +1,13 @@
 <script setup>
-import AdminLayout from '../../../Layouts/Admin/Layout.vue'
-import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
-import Info from '../../../Components/Form/Info.vue';
-import Button from '../../../Components/Form/Button.vue';
-import moneyParser from '../../../Composables/moneyParser.js';
-import dateParser from '../../../Composables/dateParser.js';
-import EyeIcon from '../../../Icons/EyeIcon.vue';
-import FinancingChart from '../../../Components/FinancingChart.vue';
-import NoArchiveIcon from '../../../Icons/NoArchiveIcon.vue';
+import AdminLayout from '@/Layouts/Admin/Layout.vue'
+import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import Info from '@/Components/Form/Info.vue';
+import Button from '@/Components/Form/Button.vue';
+import moneyParser from '@/Composables/moneyParser.js';
+import dateParser from '@/Composables/dateParser.js';
+import EyeIcon from '@/Icons/EyeIcon.vue';
+import FinancingChart from '@/Components/FinancingChart.vue';
+import NoArchiveIcon from '@/Icons/NoArchiveIcon.vue';
 import useFinancingStatus from '@/Composables/useFinancingStatus.js';
 
 const props = defineProps({

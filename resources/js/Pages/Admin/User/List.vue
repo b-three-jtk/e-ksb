@@ -244,7 +244,7 @@ const breadcrumbItems = [
                     <div class="flex justify-center gap-3">
                         <Link
                             v-if="can['edit_anggota']"
-                            :href="`/admin/users/${row.id}/edit`"
+                            :href="`/admin/users/edit/${row.id}`"
                             class="text-gray-500 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
                         >
                             <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
