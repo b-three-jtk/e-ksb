@@ -8,6 +8,7 @@ use App\Models\Heir;
 use App\Models\MemberBankAccount;
 use App\Models\MemberDoc;
 use App\Models\MemberJob;
+use App\Models\Notification;
 use App\Models\SavingAccount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -78,5 +79,10 @@ class Member extends Model
     public function financings()
     {
         return $this->hasMany(Financing::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 }
