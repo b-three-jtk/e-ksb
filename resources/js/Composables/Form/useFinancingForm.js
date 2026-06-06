@@ -18,8 +18,6 @@ export function useFinancingForm(initialData = null) {
     const selectedSupplier = ref(null)
     const isSupplierSelected = ref(false)
 
-console.log('init data', initialData.member)
-
     const form = useForm({
         // Member data
         member: {

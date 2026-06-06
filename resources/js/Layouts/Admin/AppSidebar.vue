@@ -113,7 +113,11 @@ const menuGroups = [
 ];
 
 // Menggunakan Inertia untuk check active route
-const isActive = (path) => page.url === path;
+const isActive = (path) => {
+    const currentPath = page.url.split('?')[0];
+
+    return currentPath === path || currentPath.startsWith(path + '/');
+};
 
 const toggleSubmenu = (groupIndex, itemIndex) => {
     const key = `${groupIndex}-${itemIndex}`;
