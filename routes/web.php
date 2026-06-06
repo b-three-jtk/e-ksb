@@ -17,6 +17,7 @@ use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\FinancingController as UserFinancingController;
 use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\NotificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -153,6 +154,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Notifikasi
+    Route::get('/notifications', [NotificationController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifications.index');
 });
 
 // User Routes
