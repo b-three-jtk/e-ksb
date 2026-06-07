@@ -13,6 +13,7 @@ use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
+use App\Enums\FinancingPaymentMethodEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateRepaymentRequest;
 use App\Http\Requests\StoreFinancingDraftRequest;
@@ -30,6 +31,8 @@ use App\Models\SavingAccount;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
+use App\Models\Account;
+use App\Services\Admin\JournalService;
 use App\Services\Admin\FinancingService;
 use App\Services\Admin\RepaymentService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -475,7 +478,37 @@ class FinancingController extends Controller
                 'verified_at' => now(),
             ]);
 
-            return redirect()->route('admin.financing.index')->with('success', 'Keputusan validasi berhasil disimpan');
+            if ($validated['status'] === FinancingReqStatusEnum::APPROVED->value) {
+
+                $pembiayaanDalamProses = Account::where(
+                    'account_name',
+                    'Pembiayaan Dalam Proses'
+                )->firstOrFail();
+
+                $danaAlokasi = Account::where(
+                    'account_name',
+                    'Dana Alokasi Pembiayaan Murabahah'
+                )->firstOrFail();
+
+                app(JournalService::class)->create(
+                    [
+                        [
+                            'account' => $pembiayaanDalamProses->no_ref_account,
+                            'position' => PositionEnum::DEBIT->value,
+                            'nominal' => $financing->predicted_cost_price,
+                        ],
+                        [
+                            'account' => $danaAlokasi->no_ref_account,
+                            'position' => PositionEnum::CREDIT->value,
+                            'nominal' => $financing->predicted_cost_price,
+                        ],
+                    ],
+                    now()->toDateString(),
+                    auth()->id()
+                );
+            }
+
+            return redirect()->route('admin.financings.index')->with('success', 'Keputusan validasi berhasil disimpan');
         } catch (Exception $e) {
             Log::error('Error validating financing: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Gagal menyimpan keputusan validasi']);
@@ -516,10 +549,11 @@ class FinancingController extends Controller
             return back()->withErrors(['error' => 'Gagal menyimpan permohonan: ' . $e->getMessage()]);
         }
     }
+
     public function finalize(StoreFinancingRequest $request)
     {
         try {
-            DB::transaction(function () use ($request) {
+            $financing = DB::transaction(function () use ($request) {
                 $validated = $request->validated();
                 $user = User::with('member.savingAccounts')
                     ->where('user_code', $validated['member']['user_code'])
@@ -550,8 +584,206 @@ class FinancingController extends Controller
                 if (isset($validated['financing']['tenor'])) {
                     $this->financingService->generateInstallments($financing);
                 }
-            });
 
+                $pembiayaanDalamProses = Account::where(
+                    'account_name',
+                    'Pembiayaan Dalam Proses'
+                )->firstOrFail();
+
+                $piutangMurabahah = Account::where(
+                    'account_name',
+                    'Piutang Murabahah'
+                )->firstOrFail();
+
+                $pendapatanMargin = Account::where(
+                    'account_name',
+                    'Pendapatan Margin Murabahah'
+                )->firstOrFail();
+                $danaAlokasi = Account::where(
+                    'account_name',
+                    'Dana Alokasi Pembiayaan Murabahah'
+                )->firstOrFail();
+
+                $kas = Account::where(
+                    'account_name',
+                    'Kas'
+                )->firstOrFail();
+
+                $costPrice = $financing->cost_price;
+                $margin = $financing->margin_amount;
+                $downPayment = $financing->down_payment ??0;
+
+                // Kalo pembayaran pembiayaannya cicilan
+                if ($financing->payment_method === FinancingPaymentMethodEnum::INSTALLMENT->value)
+                {
+                    $uangMukaMurabahah = Account::where(
+                        'account_name',
+                        'Uang Muka Murabahah'
+                    )->firstOrFail();
+                    $allocatedAmount = $financing->predicted_cost_price ?? 0;
+                    $piutang = $costPrice;
+                    $selisih = $allocatedAmount - $piutang;
+
+                    if ($selisih > 0) {
+
+                        app(JournalService::class)->create(
+                            [
+                                [
+                                    'account' => $danaAlokasi->no_ref_account,
+                                    'position' => PositionEnum::DEBIT->value,
+                                    'nominal' => $selisih,
+                                ],
+                                [
+                                    'account' => $piutangMurabahah->no_ref_account,
+                                    'position' => PositionEnum::DEBIT->value,
+                                    'nominal' => $piutang,
+                                ],
+                                [
+                                    'account' => $pembiayaanDalamProses->no_ref_account,
+                                    'position' => PositionEnum::CREDIT->value,
+                                    'nominal' => $financing->predicted_cost_price,
+                                ],
+                            ],
+                            now()->toDateString(),
+                            auth()->id()
+                        );
+                    } elseif ($selisih == 0){
+
+                        app(JournalService::class)->create(
+                            [
+                                [
+                                    'account' => $piutangMurabahah->no_ref_account,
+                                    'position' => PositionEnum::DEBIT->value,
+                                    'nominal' => $piutang,
+                                ],
+                                [
+                                    'account' => $pembiayaanDalamProses->no_ref_account,
+                                    'position' => PositionEnum::CREDIT->value,
+                                    'nominal' => $allocatedAmount,
+                                ],
+                            ],
+                            now()->toDateString(),
+                            auth()->id()
+                        );
+                    } else {
+                        throw ValidationException::withMessages([
+                            'cost_price' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
+                        ]);
+                    }
+
+                    if ($downPayment > 0) 
+                    {
+                        app(JournalService::class)->create(
+                            [
+                                [
+                                    'account' => $kas->no_ref_account,
+                                    'position' => PositionEnum::DEBIT->value,
+                                    'nominal' => $downPayment,
+                                ],
+                                [
+                                    'account' => $uangMukaMurabahah->no_ref_account,
+                                    'position' => PositionEnum::CREDIT->value,
+                                    'nominal' => $downPayment,
+                                ],
+                            ],
+                            now()->toDateString(),
+                            auth()->id()
+                        );
+
+                        app(JournalService::class)->create(
+                            [
+                                [
+                                    'account' => $uangMukaMurabahah->no_ref_account,
+                                    'position' => PositionEnum::DEBIT->value,
+                                    'nominal' => $downPayment,
+                                ],
+                                [
+                                    'account' => $piutangMurabahah->no_ref_account,
+                                    'position' => PositionEnum::CREDIT->value,
+                                    'nominal' => $downPayment,
+                                ],
+                            ],
+                            now()->toDateString(),
+                            auth()->id()
+                        );
+                    }
+                }
+
+                // Klo pembayaran pembiayaannya cash
+                if (
+                        $financing->payment_method === FinancingPaymentMethodEnum::CASH->value
+                        && $downPayment > 0
+                    ) {
+                        throw ValidationException::withMessages([
+                            'down_payment' => 'Pembayaran cash tidak boleh menggunakan uang muka.'
+                        ]);
+                    }
+                    
+                if ($financing->payment_method === FinancingPaymentMethodEnum::CASH->value)
+                {
+                    $allocatedAmount = $financing->predicted_cost_price ?? 0;
+                    $piutang = $costPrice;
+                    $selisih = $allocatedAmount - $piutang;
+
+                    if ($selisih > 0)
+                    {
+                        app(JournalService::class)->create(
+                        [
+                            [
+                                'account' => $danaAlokasi->no_ref_account,
+                                'position' => PositionEnum::DEBIT->value,
+                                'nominal' => $selisih,
+                            ],
+                            [
+                                'account' => $kas->no_ref_account,
+                                'position' => PositionEnum::DEBIT->value,
+                                'nominal' => $piutang + $margin,
+                            ],
+                            [
+                                'account' => $pembiayaanDalamProses->no_ref_account,
+                                'position' => PositionEnum::CREDIT->value,
+                                'nominal' => $allocatedAmount,
+                            ],
+                            [
+                                'account' => $pendapatanMargin->no_ref_account,
+                                'position' => PositionEnum::CREDIT->value,
+                                'nominal' => $margin,
+                            ],
+                        ],
+                        now()->toDateString(),
+                        auth()->id()
+                        );
+                    } elseif ($selisih == 0)
+                    {
+                        app(JournalService::class)->create(
+                        [
+                            [
+                                'account' => $kas->no_ref_account,
+                                'position' => PositionEnum::DEBIT->value,
+                                'nominal' => $piutang + $margin,
+                            ],
+                            [
+                                'account' => $pembiayaanDalamProses->no_ref_account,
+                                'position' => PositionEnum::CREDIT->value,
+                                'nominal' => $allocatedAmount,
+                            ],
+                            [
+                                'account' => $pendapatanMargin->no_ref_account,
+                                'position' => PositionEnum::CREDIT->value,
+                                'nominal' => $margin,
+                            ],
+                        ],
+                        now()->toDateString(),
+                        auth()->id()
+                        );
+                    } else {
+                        throw ValidationException::withMessages([
+                            'cost_price' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
+                        ]);
+                    }
+                } 
+                return $financing;
+            });
             return redirect()->route('admin.financings.index')
                 ->with('success', 'Pembiayaan berhasil difinalisasi');
         } catch (Exception $e) {
@@ -762,6 +994,7 @@ class FinancingController extends Controller
 
     public function storePayment(Request $request)
     {
+
         $validated = $request->validate([
             'installment_id' => 'required|exists:installments,id',
             'financing_id' => 'required|exists:financings,id',
@@ -797,6 +1030,62 @@ class FinancingController extends Controller
                 'installment_id' => $validated['installment_id'],
                 'updated_by' => auth()->id(),
             ]);
+
+            $basePrincipal = $financing->cost_price - $financing->down_payment;
+
+            $marginPerMonth = round(
+                $financing->margin_amount / $financing->tenor,
+                2
+            );
+
+            $principalPerMonth = round(
+                $validated['nominal'] - $marginPerMonth,
+                2
+            );
+
+            $kas = Account::where(
+                'account_name',
+                'Kas'
+            )->firstOrFail();
+
+            $piutangMurabahah = Account::where(
+                'account_name',
+                'Piutang Murabahah'
+            )->firstOrFail();
+
+            $pendapatanMargin = Account::where(
+                'account_name',
+                'Pendapatan Margin Murabahah'
+            )->firstOrFail();
+
+            // dd([
+            //     'debit' => $validated['nominal'],
+            //     'principal' => $principalPerMonth,
+            //     'margin' => $marginPerMonth,
+            //     'kredit' => $principalPerMonth + $marginPerMonth,
+            // ]);
+
+            app(JournalService::class)->create(
+                [
+                    [
+                        'account' => $kas->no_ref_account,
+                        'position' => PositionEnum::DEBIT->value,
+                        'nominal' => $validated['nominal'],
+                    ],
+                    [
+                        'account' => $piutangMurabahah->no_ref_account,
+                        'position' => PositionEnum::CREDIT->value,
+                        'nominal' => $principalPerMonth,
+                    ],
+                    [
+                        'account' => $pendapatanMargin->no_ref_account,
+                        'position' => PositionEnum::CREDIT->value,
+                        'nominal' => $marginPerMonth,
+                    ],
+                ],
+                now()->toDateString(),
+                auth()->id()
+            );
 
             $installment = Installment::findOrFail(
                 $validated['installment_id']
