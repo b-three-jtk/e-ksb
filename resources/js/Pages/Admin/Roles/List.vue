@@ -81,6 +81,10 @@ const breadcrumbItems = [
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Daftar Peran dan Akses</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Kelola hak akses tiap peran dalam aplikasi.</p>
                 </div>
+                <Button href="/admin/roles/create" variant="secondary">
+                    <Icon icon="mdi:plus" class="w-5 h-5 mr-1" />
+                    Tambah Peran
+                </Button>
             </div>
 
             <BaseFunctionality

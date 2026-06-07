@@ -70,6 +70,12 @@ const menuGroups = [
                 permission: "view_pengurus"
             },
             {
+                icon: AccessIcon,
+                name: "Peran dan Akses",
+                path: "/admin/roles",
+                permission: "view_peran_akses"
+            },
+            {
                 icon: AccountIcon,
                 name: "Pengelolaan Akun",
                 path: "/admin/accounts/list",
@@ -86,12 +92,6 @@ const menuGroups = [
                 name: "Monitoring Notifikasi",
                 path: "/admin/notifications",
                 permission: "view_notifikasi"
-            },
-            {
-                icon: AccessIcon,
-                name: "Peran dan Akses",
-                path: "/admin/roles",
-                permission: "view_peran_akses"
             },
         ],
     },

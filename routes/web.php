@@ -165,6 +165,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     // Peran dan Akses
     Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:view_peran_akses')->name('roles.index');
+    Route::get('/roles/create', [RoleController::class, 'create'])->middleware('permission:create_peran_akses')->name('roles.create');
+    Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:create_peran_akses')->name('roles.store');
     Route::get('/roles/{id}/edit', [RoleController::class, 'edit'])->middleware('permission:edit_peran_akses')->name('roles.edit');
     Route::put('/roles/{id}', [RoleController::class, 'update'])->middleware('permission:edit_peran_akses')->name('roles.update');
 });

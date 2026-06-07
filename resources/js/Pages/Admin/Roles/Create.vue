@@ -9,13 +9,12 @@ import { toast } from 'vue3-toastify'
 import Button from '@/Components/Form/Button.vue'
 
 const props = defineProps({
-    role: Object,
     permissions: Object,
 })
 
 const form = useForm({
-    name: props.role.name || '',
-    permissions: props.role.permissions || [],
+    name:'',
+    permissions: [],
 })
 
 const actionColumns = [
@@ -64,7 +63,7 @@ const isChecked = (permissionId) => {
 const submitForm = () => {
     Swal.fire({
         title: 'Konfirmasi',
-        text: 'Simpan perubahan hak akses untuk peran ini?',
+        text: 'Simpan peran dan hak akses baru ini?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Ya, simpan',
@@ -72,7 +71,7 @@ const submitForm = () => {
         confirmButtonColor: '#007943',
     }).then((result) => {
         if (result.isConfirmed) {
-            form.put(`/admin/roles/${props.role.id}`, {
+            form.post(`/admin/roles`, {
                 preserveScroll: true,
                 onSuccess: () => {
                     toast('Hak akses berhasil diperbarui.', {
@@ -98,17 +97,17 @@ const submitForm = () => {
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
     { name: 'Peran dan Akses', link: '/admin/roles' },
-    { name: 'Edit Peran dan Akses' },
+    { name: 'Buat Peran dan Akses' },
 ]
 </script>
 
 <template>
-    <AdminLayout title="Edit Peran dan Akses">
-        <PageBreadcrumb page-title="Edit Peran dan Akses" :items="breadcrumbItems" />
+    <AdminLayout title="Buat Peran dan Akses">
+        <PageBreadcrumb page-title="Buat Peran dan Akses" :items="breadcrumbItems" />
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
             <div class="p-6 border-b">
-                <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Peran dan Akses</h2>
+                <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Buat Peran dan Akses</h2>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Atur peran sesuai hak akses yang tersedia.</p>
             </div>
 

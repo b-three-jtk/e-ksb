@@ -13,7 +13,7 @@ class RoleController extends Controller
     {
         $allowedSorts = ['name', 'created_at'];
         $sortBy = in_array($request->sort_by, $allowedSorts) ? $request->sort_by : 'name';
-        $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
+        $sortDir = $request->sort_dir === 'desc' ? 'desc' : 'asc';
 
         $roles = Role::with('permissions')
             ->when($request->search, function ($query) use ($request) {
@@ -71,14 +71,54 @@ class RoleController extends Controller
         $allowedPermissionIds = Permission::pluck('id')->toArray();
 
         $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['integer', 'in:' . implode(',', $allowedPermissionIds)],
         ]);
 
         $role = Role::findOrFail($id);
+        $role->update(['name' => $data['name']]);
         $role->syncPermissions($data['permissions'] ?? []);
 
         return redirect()->route('admin.roles.index')->with('success', 'Hak akses peran berhasil diperbarui.');
+    }
+
+    public function create()
+    {
+        $permissions = Permission::all()
+            ->map(function ($permission) {
+                return [
+                    'id' => $permission->id,
+                    'name' => $permission->name,
+                    'label' => $this->formatPermissionLabel($permission->name),
+                    'group' => $this->permissionGroup($permission->name),
+                ];
+            })
+            ->groupBy('group')
+            ->map(function ($items) {
+                return $items->values();
+            });
+
+        return inertia('Admin/Roles/Create', [
+            'permissions' => $permissions,
+            'title' => 'Buat Peran dan Akses',
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $allowedPermissionIds = Permission::pluck('id')->toArray();
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['integer', 'in:' . implode(',', $allowedPermissionIds)],
+        ]);
+
+        $role = Role::create(['name' => $data['name'], 'guard_name' => 'web']);
+        $role->syncPermissions($data['permissions'] ?? []);
+
+        return redirect()->route('admin.roles.index')->with('success', 'Peran dan hak akses baru berhasil dibuat.');
     }
 
     private function formatPermissionLabel(string $name): string
