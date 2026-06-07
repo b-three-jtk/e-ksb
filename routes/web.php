@@ -17,7 +17,9 @@ use App\Http\Controllers\User\SavingController as UserSavingController;
 use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\FinancingController as UserFinancingController;
 use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\CashFlowController;
 use App\Http\Controllers\User\UserController as UserUserController;
+// use App\Http\Controllers\User\UserFinancingController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\User\NotificationController as UserNotificationController;
@@ -152,6 +154,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/accounts/list', [AccountController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
     Route::post('/accounts/create', [AccountController::class, 'store'])->middleware('permission:create_kas')->name('accounts.create');
     Route::patch('/accounts/{id}/status', [AccountController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
+    Route::get('/kas/list', [CashflowController::class, 'index'])->name('kas.list');
+    Route::post('/kas/store', [CashflowController::class, 'store'])->name('kas.store');
+    Route::get('/kas/export/csv',[CashflowController::class, 'exportCsv'])->name('kas.export.csv');
 
 
 
