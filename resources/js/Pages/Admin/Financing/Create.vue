@@ -113,6 +113,9 @@ const isFinalizationValid = computed(() => form.financing.status === 'Disetujui'
                         Kembali
                     </Button>
                     <div class="flex items-center gap-4 justify-end">
+                        <Button :disabled="!isRequestValid" v-if="activeStep === 3 && isRequestValid" type="submit" @click="submit()" variant="secondary">
+                            Ajukan Permohonan
+                        </Button>
                         <Button v-if="activeStep < totalSteps" variant="light"
                             @click="saveDraft()" :disabled="(activeStep === 1 && !isStep1Valid) ||
                             (activeStep === 2 && !isStep2Valid) ||
@@ -122,16 +125,12 @@ const isFinalizationValid = computed(() => form.financing.status === 'Disetujui'
                             Simpan Sementara
                         </Button>
 
-                        <Button v-if="activeStep < totalSteps" @click="nextStep" variant="primary" :disabled="(activeStep === 1 && !isStep1Valid) ||
+                        <Button v-if="activeStep < totalSteps && !isRequestValid" @click="nextStep" variant="primary" :disabled="(activeStep === 1 && !isStep1Valid) ||
                             (activeStep === 2 && !isStep2Valid) ||
                             (activeStep === 3 && !isStep3Valid) ||
                             (activeStep === 4 && !isStep4Valid)
                             ">
                             Selanjutnya
-                        </Button>
-
-                        <Button :disabled="!isRequestValid" v-if="activeStep === 3" type="submit" @click="submit()" variant="secondary">
-                            Ajukan Permohonan
                         </Button>
 
                         <Button :disabled="!isFinalizationValid"  v-if="activeStep === 5" type="submit" @click="finalize()" variant="secondary">

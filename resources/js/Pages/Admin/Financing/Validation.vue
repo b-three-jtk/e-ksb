@@ -6,6 +6,7 @@ import Button from '@/Components/Form/Button.vue'
 import Swal from 'sweetalert2'
 import { useForm } from '@inertiajs/vue3'
 import { toast } from 'vue3-toastify'
+import moneyParser from '@/Composables/moneyParser'
 
 import Stepper from './Validation/Stepper.vue'
 import Documents from './Validation/Documents.vue'
@@ -24,6 +25,8 @@ const form = useForm({
     suitability_status: '',
     income_feasibility_status: '',
     final_decision_status: '',
+    monthly_installment: 0,
+    monthly_income: 0,
 })
 
 const isValidationComplete = computed(() => {
@@ -130,12 +133,13 @@ const submit = () => {
                     <Info label="Kategori Produk" :value="data.financing.product_type" />
                     <Info label="Kondisi" :value="data.financing.condition" />
                     <Info label="Kuantitas" :value="data.financing.qty" />
+                    <Info label="Harga Perkiraan" :value="moneyParser(data.financing.predicted_cost_price)" />
                 </div>
             </div>
             <div class="justify-between card-layout flex flex-col col-span-4">
                 <PersonalData v-if="activeStep === 1" :data="data" />
                 <FinancialData v-if="activeStep === 2" :data="data" />
-                <ValidationNotes v-if="activeStep === 3" :data="data" :form="form" v-model="validationState" />
+                <ValidationNotes v-if="activeStep === 3" :data="data" :form="form" />
                 <div :class="activeStep === 1 ? 'justify-end' : 'justify-between'" class="flex gap-4 p-4">
                     <Button v-if="activeStep > 1" @click="prevStep" variant="gray">
                         Kembali

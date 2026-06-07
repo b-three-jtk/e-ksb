@@ -410,10 +410,6 @@ class FinancingController extends Controller
             ])
             ->first();
 
-        if (!$financing) {
-            return redirect()->route('admin.financings.index')->withErrors(['error' => 'Data pembiayaan tidak ditemukan atau tidak dalam status yang valid untuk divalidasi']);
-        }
-
         return inertia('Admin/Financing/Validation', [
             'data' => [
                 'member' => $this->formatMemberData($financing->member),
@@ -433,6 +429,8 @@ class FinancingController extends Controller
                     'akad_date' => $financing->akad_date,
                     'status' => $financing->status,
                     'product_type' => $financing->financingItem->productType?->product_type_name,
+                    'tenor' => $financing->tenor,
+                    'predicted_cost_price' => $financing->predicted_cost_price,
                 ],
                 'collateral' => [
                     'collateral_type' => $financing->collateral?->collateral_type,

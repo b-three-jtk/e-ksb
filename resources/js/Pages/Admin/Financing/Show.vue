@@ -13,7 +13,6 @@ import useFinancingStatus from '@/Composables/useFinancingStatus.js';
 const props = defineProps({
     data: { type: Object, required: true },
 });
-
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
     { name: 'Pengelolaan Pembiayaan' },
@@ -99,6 +98,9 @@ const breadcrumbItems = [
                                     No. Transaksi
                                 </th>
                                 <th class="py-5 px-2">
+                                    Jatuh Tempo
+                                </th>
+                                <th class="py-5 px-2">
                                     Tanggal Pembayaran
                                 </th>
                                 <th class="py-5 px-2">
@@ -113,33 +115,38 @@ const breadcrumbItems = [
                             </tr>
                         </thead>
                         <tbody
-                            v-if="data.installment?.payment && data.installment?.payment?.length > 0">
-                            <tr v-for="i in data.installment?.payment"
+                            v-if="data.installment && data.installment?.length > 0">
+                            <tr v-for="i in data.installment"
                                 class="border-t border-gray-100 dark:border-gray-500 font-body">
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                        {{ i.installment_trans_code }}
+                                        {{ i.payment?.installment_trans_code }}
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                        {{ dateParser(i.payment_date) }}
+                                        {{ dateParser(i.due_date) }}
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <p class="text-dark-text text-theme-sm dark:text-gray-400">
-                                        {{ moneyParser(i.nominal) }}
+                                        {{ dateParser(i.payment?.payment_date) }}
+                                    </p>
+                                </td>
+                                <td class="py-5 px-2 whitespace-nowrap">
+                                    <p class="text-dark-text text-theme-sm dark:text-gray-400">
+                                        {{ moneyParser(i.amount) }}
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
                                     <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="i.is_early_repayment ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'">
-                                        {{ i.is_early_repayment ? 'Pelunasan Dipercepat' : 'Reguler' }}
+                                        {{ i.payment?.is_early_repayment ? 'Pelunasan Dipercepat' : 'Reguler' }}
                                     </span>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap flex justify-center">
-                                    <div v-if="i.installment_payment_receipt">
+                                    <div v-if="i.payment?.installment_payment_receipt">
                                         <Button size="small" variant="info" target="_blank"
-                                            :href="`/storage/${i.installment_payment_receipt}`">
+                                            :href="`/storage/${i.payment?.installment_payment_receipt}`">
                                             <EyeIcon width="18px" height="18px" />
                                             Lihat Bukti
                                         </Button>

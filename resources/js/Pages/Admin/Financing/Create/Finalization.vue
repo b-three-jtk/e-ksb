@@ -153,7 +153,10 @@ const paymentMethod = {
                         <span class="text-lg font-semibold text-primary">{{ tenor }} Bulan</span>
                     </div>
                     <input v-model.number="tenor" type="range" min="3" max="60" step="1"
-                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" />
+                        class="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                        :style="{
+                            background: `linear-gradient(to right, #007943 0%, #007943 ${((tenor - 3) / (60 - 3)) * 100}%, #e5e7eb ${((tenor - 3) / (60 - 3)) * 100}%, #e5e7eb 100%)`
+                        }" />
                     <div class="flex justify-between text-xs text-gray-500 mt-2">
                         <span>3</span>
                         <span>60</span>
