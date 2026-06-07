@@ -30,6 +30,8 @@ class MurabahaProductSeeder extends Seeder
         // Reset counter setiap kali seeder dijalankan
         self::$transCodeCounter = 1000000;
 
+        Member::factory()->count(100)->create();
+
         // Ambil semua members
         $members = Member::all();
 

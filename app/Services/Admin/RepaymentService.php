@@ -2,6 +2,7 @@
 namespace App\Services\Admin;
 
 use App\Enums\FinancingReqStatusEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Models\Financing;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
@@ -13,11 +14,11 @@ class RepaymentService
 {
 public function calculateDetails(Financing $financing): array
     {
-        $tenor = $financing->installment->tenor;
+        $tenor = $financing->tenor;
 
         $basePrincipal = $financing->cost_price - $financing->down_payment;
         $marginAmount = $financing->margin_amount;
-        $totalPaidInstallments = $financing->installment->payment->count();
+        $totalPaidInstallments = $financing->installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
 
         // Asumsi menggunakan metode margin Flat
         $principalPerMonth = $basePrincipal / $tenor;
