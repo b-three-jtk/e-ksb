@@ -18,6 +18,7 @@ use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\FinancingController as UserFinancingController;
 use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\User\NotificationController as UserNotificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -146,6 +147,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/accounts/list', [AccountController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
     Route::post('/accounts/create', [AccountController::class, 'store'])->middleware('permission:create_kas')->name('accounts.create');
     Route::patch('/accounts/{id}/status', [AccountController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
+
     // Pengaturan Umum
     Route::middleware('role:' . UserRoleEnum::KETUA->value)->group(function () {
         Route::get('/settings', [SettingsController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
@@ -160,6 +162,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     // Notifikasi
     Route::get('/notifications', [NotificationController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifications.index');
+
+    // Peran dan Akses
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:view_peran_akses')->name('roles.index');
+    Route::get('/roles/create', [RoleController::class, 'create'])->middleware('permission:create_peran_akses')->name('roles.create');
+    Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:create_peran_akses')->name('roles.store');
+    Route::get('/roles/{id}/edit', [RoleController::class, 'edit'])->middleware('permission:edit_peran_akses')->name('roles.edit');
+    Route::put('/roles/{id}', [RoleController::class, 'update'])->middleware('permission:edit_peran_akses')->name('roles.update');
 });
 
 // User Routes
