@@ -84,7 +84,7 @@ const menuGroups = [
             {
                 icon: FinanceIcon,
                 name: "Pengelolaan Kas",
-                path: "/admin/accounts/list",
+                path: "/admin/kas/list",
                 permission: "view_kas"
             },
             {
