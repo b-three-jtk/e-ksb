@@ -6,6 +6,7 @@ use App\Enums\MemberStatusEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
+use App\Enums\PositionEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDepositRequest;
 use App\Http\Requests\StoreWithdrawalRequest;
@@ -15,6 +16,8 @@ use App\Models\Member;
 use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
+use App\Models\Account;
+use App\Services\Admin\JournalService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -369,6 +372,33 @@ class SavingController extends Controller
             return $trx;
         });
 
+        $kasAccount = Account::where(
+            'account_name',
+            'Kas'
+        )->firstOrFail();
+
+        $savingAccountRef = Account::where(
+            'account_name',
+            $data['saving_category']
+        )->firstOrFail();
+
+        app(JournalService::class)->create(
+            [
+                [
+                    'account'  => $kasAccount->no_ref_account,
+                    'position' => PositionEnum::DEBIT->value,
+                    'nominal'  => $transaction->saving_amount,
+                ],
+                [
+                    'account'  => $savingAccountRef->no_ref_account,
+                    'position' => PositionEnum::CREDIT->value,
+                    'nominal'  => $transaction->saving_amount,
+                ],
+            ],
+            $transaction->transaction_date,
+            Auth::id()
+        );
+
         Log::info('Deposit transaction created', [
             'transaction_id' => $transaction->id,
             'saving_account_id' => $savingAccount->id,
@@ -541,6 +571,33 @@ class SavingController extends Controller
 
                 return [$transaction, $saldoSebelum];
             });
+
+            $kasAccount = Account::where(
+                'account_name',
+                'Kas'
+            )->firstOrFail();
+
+            $savingAccountRef = Account::where(
+                'account_name',
+                $savingType
+            )->firstOrFail();
+
+            app(JournalService::class)->create(
+                [
+                    [
+                        'account'  => $savingAccountRef->no_ref_account,
+                        'position' => PositionEnum::DEBIT->value,
+                        'nominal'  => $transaction->saving_amount,
+                    ],
+                    [
+                        'account'  => $kasAccount->no_ref_account,
+                        'position' => PositionEnum::CREDIT->value,
+                        'nominal'  => $transaction->saving_amount,
+                    ],
+                ],
+                $transaction->transaction_date,
+                Auth::id()
+            );
 
             $admin = auth()->user();
             $namaAdmin = $admin->name ?? 'Pengurus';
