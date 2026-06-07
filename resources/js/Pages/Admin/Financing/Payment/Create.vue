@@ -159,6 +159,11 @@ async function handleSubmit() {
         return
     }
 
+    console.log('nominalDisplay', nominalDisplay.value)
+    console.log(
+        'nominal',
+        selectedFinancing.value.installment_per_month
+    )
     router.post(
         `/admin/financings/${props.financing.id}/payments/store`,
         {
@@ -172,9 +177,7 @@ async function handleSubmit() {
                 depositMethod.value,
 
             nominal:
-                Number(
-                    nominalDisplay.value.replace(/\./g, '')
-                ),
+                selectedFinancing.value.installment_per_month,
 
             payment_date:
                 tanggalPembayaran.value,
@@ -198,6 +201,9 @@ async function handleSubmit() {
 
                 if (pdfUrl) {
                     window.open(pdfUrl, '_blank')
+                }
+                if (page.props.financing) {
+                    selectedFinancing.value = page.props.financing
                 }
             },
 
@@ -341,11 +347,11 @@ async function handleSubmit() {
                                 <label
                                     class="block text-sm text-gray-600 mb-1"
                                 >
-                                    Merk
+                                    Nama Produk
                                 </label>
 
                                 <input
-                                    :value="selectedFinancing.brand"
+                                    :value="selectedFinancing.product_name"
                                     readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />
@@ -355,11 +361,11 @@ async function handleSubmit() {
                                 <label
                                     class="block text-sm text-gray-600 mb-1"
                                 >
-                                    Warna
+                                    Deskripsi Produk
                                 </label>
 
                                 <input
-                                    :value="selectedFinancing.color"
+                                    :value="selectedFinancing.product_specification"
                                     readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />
@@ -436,6 +442,7 @@ async function handleSubmit() {
                             <input
                                 v-model="nominalDisplay"
                                 type="text"
+                                readonly
                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
                             />
                         </div>
