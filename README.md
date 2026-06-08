@@ -1,55 +1,89 @@
-# E-KSWP (Koperasi Syariah Warga Polban Elektronik)
+# E-KSB (Koperasi Syariah Berkah Elektronik)
 
-## About E-KSWP
-E-KSWP (Koperasi Syariah Warga Polban Elektronik) is a web application built using the Laravel framework and Inertia. It serves as a platform for managing cooperative activities, providing users with a seamless experience for various cooperative-related tasks.
+## Tentang E-KSB
+E-KSB (Koperasi Syariah Berkah Elektronik) adalah aplikasi web yang dibangun menggunakan framework Laravel dan Inertia. Aplikasi ini berfungsi sebagai platform untuk mengelola operasional koperasi, memberikan pengalaman yang lancar bagi pengguna dalam melakukan berbagai tugas terkait koperasi.
 
-Features of E-KSWP include:
-- User authentication and registration
-- Cooperative member management
-- Savings management
-- Murabahah financing management
-- Murabahah installment tracking
+Fitur-fitur E-KSB meliputi:
+- Autentikasi dan registrasi pengguna
+- Manajemen anggota dan pengurus koperasi
+- Manajemen simpanan dan tabungan
+- Manajemen pembiayaan murabahah
+- Pelacakan angsuran murabahah
+- Notifikasi Jatuh Tempo
 
-## Installation
-To set up the E-KSWP application locally, follow these steps:
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/e-kswp.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd e-kswp
-    ```
-3. Install the dependencies using Composer:
-    ```bash
-    composer install
-    ```
-4. Copy the example environment file and configure it:
-    ```bash
-    cp .env.example .env
-    ```
-    Update the `.env` file with your database and other configuration settings.
-5. Generate an application key:
-    ```bash
-    php artisan key:generate
-    ```
-6. Run the database migrations:
-    ```bash
-    php artisan migrate
-    ```
-7. Run the database seeders to populate initial data:
-    ```bash
-    php artisan db:seed
-    ```
-8. Start the development server:
-    ```bash
-    php artisan serve
-    npm run dev
-    ```
+## Instalasi
+Untuk menjalankan aplikasi E-KSB secara lokal, ikuti langkah-langkah berikut:
 
-## Copyright
-This project is developed and maintained by Final Project Team KoTA-203 2026. All rights reserved.
-[Team Members]
-- Alanna Tanisya Anwar (231511034)
-- Dhira Ramadini (231511041)
-- Erina Dwi Yanti (231511043)
+1. Klon repositori:
+```bash
+   git clone [https://github.com/your-username/e-ksb.git](https://github.com/your-username/e-ksb.git)
+
+```
+
+2. Masuk ke direktori proyek:
+
+```bash
+   cd e-ksb
+
+```
+
+3. Instal dependensi menggunakan Composer:
+
+```bash
+   composer install
+
+```
+
+4. Salin file contoh environment dan konfigurasikan:
+
+```bash
+   cp .env.example .env
+
+```
+
+Perbarui file `.env` dengan kredensial database MySQL Anda beserta pengaturan konfigurasi lainnya.
+
+5. Hasilkan kunci aplikasi (*application key*):
+
+```bash
+   php artisan key:generate
+
+```
+
+6. Jalankan migrasi database:
+
+```bash
+   php artisan migrate
+
+```
+
+7. Jalankan *seeder* database untuk mengisi data awal:
+
+```bash
+   php artisan db:seed
+
+```
+
+8. Mulai server pengembangan:
+
+```bash
+   php artisan serve
+
+```
+
+Di terminal terpisah, kompilasi aset *frontend*:
+
+```bash
+   npm run dev
+
+```
+
+## Hak Cipta
+
+Proyek ini dikembangkan dan dikelola oleh Tim Kelompok Tugas Akhir-203 2026.
+
+[Anggota Tim]
+
+* Alanna Tanisya Anwar (231511034)
+* Dhira Ramadini (231511041)
+* Erina Dwi Yanti (231511043)

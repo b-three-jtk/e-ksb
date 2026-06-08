@@ -11,10 +11,10 @@ class JournalEntry extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'journal_group_id',
         'no_ref_account',
         'position',
         'nominal',
-
         'updated_by',
         'transaction_date',
     ];
@@ -25,7 +25,11 @@ class JournalEntry extends Model
 
     public function account()
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(
+            Account::class,
+            'no_ref_account',
+            'no_ref_account'
+        );
     }
 
     public function updatedBy()

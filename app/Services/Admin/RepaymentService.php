@@ -2,6 +2,8 @@
 namespace App\Services\Admin;
 
 use App\Enums\FinancingReqStatusEnum;
+use App\Enums\PositionEnum;
+use App\Models\Account;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Models\Financing;
 use App\Models\Installment;
@@ -76,6 +78,14 @@ public function calculateDetails(Financing $financing): array
 
             $calculatedData = $this->calculateDetails($financing);
 
+            $remainingPrincipal =
+                ($financing->cost_price - $financing->down_payment)
+                - $calculatedData['principal_paid'];
+
+            $marginSettlement =
+                $calculatedData['repayment_total']
+                - $remainingPrincipal;
+
             $transCode = 'LP' . str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
 
             // logo
@@ -118,6 +128,43 @@ public function calculateDetails(Financing $financing): array
                 'updated_by' => $userId,
                 'installment_payment_receipt' => $filePath,
             ]);
+
+            $kas = Account::where(
+                'account_name',
+                'Kas'
+            )->firstOrFail();
+
+            $piutangMurabahah = Account::where(
+                'account_name',
+                'Piutang Murabahah'
+            )->firstOrFail();
+
+            $pendapatanMargin = Account::where(
+                'account_name',
+                'Pendapatan Margin Murabahah'
+            )->firstOrFail();
+
+            app(JournalService::class)->create(
+            [
+                [
+                    'account' => $kas->no_ref_account,
+                    'position' => PositionEnum::DEBIT->value,
+                    'nominal' => $calculatedData['repayment_total'],
+                ],
+                [
+                    'account' => $piutangMurabahah->no_ref_account,
+                    'position' => PositionEnum::CREDIT->value,
+                    'nominal' => $remainingPrincipal,
+                ],
+                [
+                    'account' => $pendapatanMargin->no_ref_account,
+                    'position' => PositionEnum::CREDIT->value,
+                    'nominal' => $marginSettlement,
+                ],
+            ],
+            now()->toDateString(),
+            auth()->id()
+            );
 
             $financing->update([
                 'status' => FinancingReqStatusEnum::PAID->value,
