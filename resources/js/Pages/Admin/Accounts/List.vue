@@ -425,9 +425,12 @@ const breadcrumbItems = [
                     </span>
                 </template>
 
-                <template #cell-balance="{ row }">
-                    <span class="font-semibold">
-                        {{ formatCurrency(row.balance) }}
+                <template #cell-saldo="{ row }">
+                    <span
+                        class="font-semibold"
+                        :class="row.saldo < 0 ? 'text-red-600' : 'text-green-600'"
+                    >
+                        {{ formatCurrency(row.saldo) }}
                     </span>
                 </template>
 
