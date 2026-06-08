@@ -22,7 +22,7 @@ const kolomTabelJatuhTempoTerdekat = computed(() => {
         { key: 'jatuh_tempo', label: 'Jatuh Tempo' },
         { key: 'anggota', label: 'Anggota' },
         { key: 'nominal', label: 'Nominal' },
-        { key: 'status', label: 'Status' },
+        { key: 'status_notifikasi', label: 'Status Notifikasi' },
     ];
     return cols;
 });

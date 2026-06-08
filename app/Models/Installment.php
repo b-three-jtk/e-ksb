@@ -30,4 +30,9 @@ class Installment extends Model
     {
         return $this->hasMany(InstallmentPaymentTransaction::class);
     }
+
+    public function notification()
+    {
+        return $this->hasOne(Notification::class, 'reference_id');
+    }
 }
