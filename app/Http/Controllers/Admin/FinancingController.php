@@ -540,9 +540,14 @@ class FinancingController extends Controller
             }
 
             return redirect()->route('admin.financings.index')->with('success', 'Keputusan validasi berhasil disimpan');
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (Exception $e) {
             Log::error('Error validating financing: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Gagal menyimpan keputusan validasi']);
+
+            return back()->withErrors([
+                'error' => 'Gagal menyimpan keputusan validasi'
+            ]);
         }
     }
 
