@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -26,7 +27,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_code' => 'KSP' . fake()->unique()->numerify('######'),
+            'user_code' => 'KSB' . date('ym') . str_pad(User::count() + 1, 4, '0', STR_PAD_LEFT),
             'nik' => fake()->unique()->numerify('################'),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),

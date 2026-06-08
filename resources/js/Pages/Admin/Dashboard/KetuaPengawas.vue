@@ -8,6 +8,10 @@ import PieChart from '@/Components/Dashboard/PieChart.vue';
 import { computed } from 'vue';
 import EyeIcon from '@/Icons/EyeIcon.vue';
 import { Link } from '@inertiajs/vue3';
+import SkeletonStatCard from '@/Components/Dashboard/Loading/SkeletonStatCard.vue';
+import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
+import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue';
+import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
 
 const props = defineProps({
     stats: Object,
@@ -37,7 +41,8 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
 
 <template>
     <!-- INFO - BARIS SATU -->
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <SkeletonStatCard v-if="!stats" :count="3" />
+    <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <CardInfo
             v-if="can['view_kas']"
             title="Total Kas"
@@ -61,8 +66,9 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
         />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <SkeletonChartCard v-if="!pertumbuhan_pendapatan" class="col-span-3" :bars="12" :legend="2" />
         <!-- GRAFIK PENDAPATAN & PIE CHART PETA PEMBIAYAAN - BARIS DUA -->
-        <div class="card-layout col-span-3">
+        <div v-else class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pendapatan Margin</h1>
             <VerticalBarChart
                 class="col-span-3 pt-10"
@@ -71,12 +77,13 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                 :filter="selectedFilter"
             />
         </div>
-        <div class="card-layout col-span-2">
+        <SkeletonMapCard v-if="!peta_pembiayaan" class="col-span-2" :legend-items="4" />
+        <div v-else class="card-layout col-span-2">
             <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
                 <h1 class="card-title">Peta Pembiayaan</h1>
-                <h2 class="text-2xl font-semibold text-primary mt-2">
-                    {{ parseCurrencyAmount(props.stats.total_pembiayaan_tersalurkan) }}</h2>
-                <p class="text-gray-500 font-body text-sm">Total Pembiayaan Tersalurkan</p>
+                <h2 class="text-3xl font-semibold text-primary mt-4">{{
+                    parseCurrencyAmount(props.stats.total_pembiayaan_tersalurkan) }}</h2>
+                <p class="text-gray-500 font-body text-lg mt-2">Total Pembiayaan Tersalurkan</p>
             </div>
             <PieChart
                 :data="peta_pembiayaan"
@@ -84,7 +91,8 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
             />
         </div>
         <!-- HORIZONTAL BAR CHART PETA SIMPANAN & TRANSAKSI TERBARU - BARIS TIGA -->
-        <div class="col-span-3 grid grid-cols-2 gap-4">
+        <SkeletonMapCard v-if="!peta_simpanan" class="col-span-3" :legend-items="4" />
+        <div v-else class="col-span-3 grid grid-cols-2 gap-4">
             <CardInfo title="Rasio Kas" :content="props.stats.rasio_kas" />
             <CardInfo title="Rasio Financing-to-Deposit (FDR)" :content="props.stats.rasio_fdr" />
             <div class="card-layout col-span-2">
@@ -113,7 +121,8 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                 <BarChart :data="peta_simpanan" />
             </div>
         </div>
-        <div class="card-layout col-span-2">
+        <SkeletonTableCard v-if="!transaksi_terbaru" class="col-span-2" :columns="kolomTabel.length" :rows="5" />
+        <div v-else class="card-layout col-span-2">
             <div class="flex justify-between">
                 <h1 class="card-title">Transaksi Terbaru</h1>
                 <div class="relative z-20 bg-transparent">

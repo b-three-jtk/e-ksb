@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\AccountCategoryEnum;
 use App\Models\Account;
+use App\Models\JournalEntry;
 use Illuminate\Database\Seeder;
 
 class AccountSeeder extends Seeder

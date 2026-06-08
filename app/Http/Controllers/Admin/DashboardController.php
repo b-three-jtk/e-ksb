@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Services\Admin\DashboardService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -55,6 +54,10 @@ class DashboardController extends Controller
 
         [$data['total_permohonan_pembiayaan'], $data['total_permohonan_pembiayaan_persen']] = $service->getTotalPermohonanPembiayaan($tanggalAkhir, $tanggalAkhirSebelumnya);
 
+        [$data['total_simpanan_anggota_masuk'], $data['total_simpanan_anggota_masuk_persen']] = $service->getTotalSimpananAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, 'Penyetoran');
+
+        [$data['total_simpanan_anggota_keluar'], $data['total_simpanan_anggota_keluar_persen']] = $service->getTotalSimpananAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, 'Penarikan');
+
         return inertia('Admin/Dashboard', [
             'stats' => [
                 'total_kas' => $data['total_kas'],
@@ -77,6 +80,10 @@ class DashboardController extends Controller
                 'total_pembiayaan_aktif_persen' => $data['total_pembiayaan_aktif_persen'],
                 'rasio_kas' => $data['rasio_kas'],
                 'rasio_fdr' => $data['rasio_fdr'],
+                'total_simpanan_anggota_masuk' => $data['total_simpanan_anggota_masuk'],
+                'total_simpanan_anggota_masuk_persen' => $data['total_simpanan_anggota_masuk_persen'],
+                'total_simpanan_anggota_keluar' => $data['total_simpanan_anggota_keluar'],
+                'total_simpanan_anggota_keluar_persen' => $data['total_simpanan_anggota_keluar_persen'],
             ],
                 'pertumbuhan_pendapatan' => Inertia::lazy(fn() => $service->getPendapatanPerPeriode($req->start_date, $req->end_date, $filterBy)),
                 'pertumbuhan_anggota' => Inertia::lazy(fn() => $service->getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filterBy)),

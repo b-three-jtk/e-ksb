@@ -10,6 +10,10 @@ import { Icon } from '@iconify/vue';
 import ReviewIcon from '@/Icons/ReviewIcon.vue';
 import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
 import PieChart from '@/Components/Dashboard/PieChart.vue';
+import SkeletonStatCard from '@/Components/Dashboard/Loading/SkeletonStatCard.vue';
+import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
+import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue';
+import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
 
 defineProps({
     stats: Object,
@@ -48,7 +52,8 @@ const kolomTabelPermohonanMurabahah = computed(() => {
 
 <template>
     <!-- INFO -->
-    <div v-if="role === 'Ketua Murabahah'" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <SkeletonStatCard v-if="!stats" :count="3" />
+    <div v-else v-if="role === 'Ketua Murabahah'" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <CardInfo
             title="Total Modal Belum Diputar"
             :content="parseCurrencyjumlah(stats.modal_sudah_dialokasi)"
@@ -69,7 +74,8 @@ const kolomTabelPermohonanMurabahah = computed(() => {
         />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div class="card-layout col-span-3">
+        <SkeletonChartCard v-if="!pertumbuhan_pendapatan" class="col-span-3" :bars="12" :legend="2" />
+        <div v-else class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pendapatan Margin</h1>
             <VerticalBarChart
                 class="col-span-3 pt-10"
@@ -77,7 +83,8 @@ const kolomTabelPermohonanMurabahah = computed(() => {
                 :data="pertumbuhan_pendapatan"
                 :filter="selectedFilter" />
         </div>
-        <div class="card-layout col-span-2">
+        <SkeletonMapCard v-if="!peta_pembiayaan" class="col-span-2" :legend-items="4" />
+        <div v-else class="card-layout col-span-2">
             <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
                 <h1 class="card-title">Peta Pembiayaan</h1>
                 <h2 class="text-2xl font-semibold text-primary mt-2">{{
@@ -90,7 +97,8 @@ const kolomTabelPermohonanMurabahah = computed(() => {
         </div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="card-layout">
+        <SkeletonTableCard v-if="!pembayaran_terlambat" class="col-span-1" :columns="kolomTabelPembayaranTerlambat.length" :rows="5" />
+        <div v-else class="card-layout">
             <div class="flex justify-between items-center">
                 <h1 class="card-title">Pembayaran Angsuran Terlambat</h1>
                 <div class="bg-white border border-stroke px-4 py-2 rounded-lg">Selengkapnya</div>
@@ -104,7 +112,8 @@ const kolomTabelPermohonanMurabahah = computed(() => {
                 </template>
             </TransactionTable>
         </div>
-        <div class="card-layout">
+        <SkeletonTableCard v-if="!permohonan_murabahah" class="col-span-1" :columns="kolomTabelPermohonanMurabahah.length" :rows="5" />
+        <div v-else class="card-layout">
             <div class="flex justify-between items-center">
                 <h1 class="card-title">Permohonan Pembiayaan Sedang Berjalan</h1>
                 <div class="bg-white border border-stroke px-4 py-2 rounded-lg">Selengkapnya</div>

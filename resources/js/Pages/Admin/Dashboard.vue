@@ -58,48 +58,38 @@ onMounted(() => {
     })
 })
 
-watch(dates, () => {
-    applyFilter();
-}, { deep: true });
+const filterDataMap = {
+    dates:                        ['pertumbuhan_pendapatan', 'pertumbuhan_anggota', 'peta_simpanan', 'peta_pembiayaan', 'transaksi_terbaru', 'jatuh_tempo_terdekat', 'permohonan_murabahah', 'pembayaran_terlambat', 'transaksi_simpanan_terbaru'],
+    selectedFilter:               ['pertumbuhan_pendapatan', 'pertumbuhan_anggota'],
+    selectedTransactionFilter:    ['transaksi_terbaru'],
+    selectedSavingsFilter:        ['peta_simpanan'],
+    selectedNearestDueFilter:     ['jatuh_tempo_terdekat'],
+    selectedSavingTransactionFilter: ['transaksi_simpanan_terbaru'],
+};
 
-watch(selectedFilter, () => {
-    applyFilter();
-});
-
-watch(selectedTransactionFilter, () => {
-    applyFilter();
-});
-
-watch(selectedSavingsFilter, () => {
-    applyFilter();
-});
-
-watch(selectedNearestDueFilter, () => {
-    applyFilter();
-});
-
-watch(selectedSavingTransactionFilter, () => {
-    applyFilter();
-});
-
-const applyFilter = () => {
+const applyFilter = (changedKey) => {
     router.get('/admin/dashboard', {
         start_date: dates.value[0] ? dates.value[0].toISOString().split('T')[0] : null,
-        end_date: dates.value[1] ? dates.value[1].toISOString().split('T')[0] : null,
-        filter_by: selectedFilter.value,
-        transaction_filter: selectedTransactionFilter.value,
-        savings_filter: selectedSavingsFilter.value,
-        nearest_filter: selectedNearestDueFilter.value,
+        end_date:   dates.value[1] ? dates.value[1].toISOString().split('T')[0] : null,
+        filter_by:                selectedFilter.value,
+        transaction_filter:       selectedTransactionFilter.value,
+        savings_filter:           selectedSavingsFilter.value,
+        nearest_filter:           selectedNearestDueFilter.value,
         saving_transaction_filter: selectedSavingTransactionFilter.value,
     }, {
-        preserveState: true,
-        replace: true,
-        only: [
-            'pertumbuhan_pendapatan', 'pertumbuhan_anggota', 'peta_simpanan', 'peta_pembiayaan',
-            'transaksi_terbaru', 'jatuh_tempo_terdekat', 'permohonan_murabahah', 'pembayaran_terlambat', 'transaksi_simpanan_terbaru',
-        ],
+        preserveState:  true,
+        preserveScroll: true,
+        replace:        true,
+        only: filterDataMap[changedKey],
     });
 };
+
+watch(dates,                        () => applyFilter('dates'),                        { deep: true });
+watch(selectedFilter,               () => applyFilter('selectedFilter'));
+watch(selectedTransactionFilter,    () => applyFilter('selectedTransactionFilter'));
+watch(selectedSavingsFilter,        () => applyFilter('selectedSavingsFilter'));
+watch(selectedNearestDueFilter,     () => applyFilter('selectedNearestDueFilter'));
+watch(selectedSavingTransactionFilter, () => applyFilter('selectedSavingTransactionFilter'));
 </script>
 
 <template>

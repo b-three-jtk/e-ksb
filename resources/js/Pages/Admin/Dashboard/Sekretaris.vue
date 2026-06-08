@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import CardInfo from '@/Components/CardInfo.vue';
 import AreaChart from '@/Components/Dashboard/AreaChart.vue'
+import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
 
 const props = defineProps({
     stats: Object,
@@ -12,6 +13,7 @@ const props = defineProps({
 
 <template>
     <div class="grid grid-cols-5 gap-3.5">
+        <SkeletonChartCard v-if="!pertumbuhan_anggota" class="col-span-3" :bars="12" :legend="2" />
         <div class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pertumbuhan Anggota</h1>
             <AreaChart :data="pertumbuhan_anggota" />

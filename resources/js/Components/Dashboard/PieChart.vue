@@ -13,8 +13,8 @@ const props = defineProps({
 const canvasRef = ref(null)
 let chartInstance = null
 
-const COLORS = ['#008E43', '#F4BE37', '#CE4F41']
-const LABELS = ['Lancar', 'Kurang Lancar', 'Macet']
+const COLORS = ['#008E43', '#F4BE37', '#FF6384', '#CE4F41']
+const LABELS = ['Lancar', 'Kurang Lancar', 'Diragukan', 'Macet']
 
 const legendItems = computed(() => {
     if (!props.data) return []

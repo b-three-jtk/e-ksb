@@ -74,6 +74,19 @@ class User extends Authenticatable
         return asset('images/default-avatar.png');
     }
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->user_code) {
+                $last = User::max('user_code');
+                $lastNumber = $last ? (int) substr($last, -4) : 0;
+                $model->user_code = 'KSB' . date('ym') . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+            }
+        });
+    }
+
     // universal relation
     public function pointTransactions()
     {

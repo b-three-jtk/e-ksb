@@ -5,6 +5,8 @@ import EyeIcon from '@/Icons/EyeIcon.vue';
 import TransactionTable from '@/Components/Dashboard/TransactionTable.vue';
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import SkeletonStatCard from '@/Components/Dashboard/Loading/SkeletonStatCard.vue';
+import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
 
 defineProps({
     stats: Object,
@@ -14,7 +16,7 @@ defineProps({
     selectedNearestDueFilter: String,
 });
 
-const tableNearestDueColumns = computed(() => {
+const kolomTabelJatuhTempoTerdekat = computed(() => {
     const cols = [
         { key: 'produk', label: 'Jenis' },
         { key: 'jatuh_tempo', label: 'Jatuh Tempo' },
@@ -40,16 +42,17 @@ const kolomTabelTransaksiSimpanan = computed(() => {
 
 <template>
     <!-- INFO -->
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <SkeletonStatCard v-if="!stats" :count="3" />
+    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <CardInfo
             title="Total Simpanan Masuk"
-            :content="parseCurrencyAmount(stats.total_simpanan_masuk)"
-            :percentage="stats.total_simpanan_masuk_persen"
+            :content="parseCurrencyAmount(stats.total_simpanan_anggota_masuk)"
+            :percentage="stats.total_simpanan_anggota_masuk_persen"
         />
         <CardInfo
             title="Total Simpanan Keluar"
-            :content="parseCurrencyAmount(stats.total_simpanan_keluar)"
-            :percentage="stats.total_simpanan_keluar_persen"
+            :content="parseCurrencyAmount(stats.total_simpanan_anggota_keluar)"
+            :percentage="stats.total_simpanan_anggota_keluar_persen"
         />
         <CardInfo
             title="Total Angsuran Belum Lunas"
@@ -57,7 +60,8 @@ const kolomTabelTransaksiSimpanan = computed(() => {
         />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="card-layout">
+        <SkeletonTableCard v-if="!jatuh_tempo_terdekat" class="col-span-1" :columns="kolomTabelJatuhTempoTerdekat.length" :rows="5" />
+        <div v-else class="card-layout">
             <div class="flex justify-between items-center">
                 <h1 class="card-title">Jatuh Tempo Terdekat</h1>
                 <div class="relative z-20 bg-transparent">
@@ -75,13 +79,14 @@ const kolomTabelTransaksiSimpanan = computed(() => {
                     </svg>
                 </div>
             </div>
-            <TransactionTable :columns="tableNearestDueColumns" :rows="jatuh_tempo_terdekat">
+            <TransactionTable :columns="kolomTabelJatuhTempoTerdekat" :rows="jatuh_tempo_terdekat">
                 <template #nominal="{ item }">
                     {{ parseCurrencyAmount(item.nominal) }}
                 </template>
             </TransactionTable>
         </div>
-        <div class="card-layout">
+        <SkeletonTableCard v-if="!transaksi_simpanan_terbaru" class="col-span-1" :columns="kolomTabelTransaksiSimpanan.length" :rows="5" />
+        <div v-else class="card-layout">
             <div class="flex justify-between items-center">
                 <h1 class="card-title">Transaksi Simpanan Terbaru</h1>
                 <div class="relative z-20 bg-transparent">

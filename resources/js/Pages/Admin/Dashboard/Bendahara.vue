@@ -3,6 +3,7 @@ import VerticalBarChart from '@/Components/Dashboard/VerticalBarChart.vue';
 import { Link } from '@inertiajs/vue3';
 import parseCurrencyAmount from '@/Composables/moneyParser.js';
 import CardInfo from '@/Components/CardInfo.vue';
+import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
 
 defineProps({
     stats: Object,
@@ -27,7 +28,8 @@ defineProps({
         />
     </div>
     <div class="grid grid-cols-5 gap-4">
-        <div class="card-layout col-span-3">
+        <SkeletonChartCard v-if="!pertumbuhan_pendapatan" class="col-span-3" :bars="12" :legend="2" />
+        <div v-else class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pendapatan Margin</h1>
             <VerticalBarChart
                 class="col-span-3"

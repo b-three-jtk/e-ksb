@@ -15,7 +15,6 @@ use App\Models\SavingTransaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-use Illuminate\Support\Facades\Log;
 
 class DashboardService
 {
@@ -271,6 +270,30 @@ class DashboardService
         return [$total, $persen];
     }
 
+    public function getTotalSimpananAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, $tipe)
+    {
+        $total = SavingTransaction::with('savingAccount.member')
+            ->whereHas('savingAccount.member', function($q) {
+                $q->where('pj_user_id', auth()->id());
+            })
+            ->where('transaction_type', $tipe)
+            ->where('created_at', '<=', $tanggalAkhir)
+            ->sum('saving_amount');
+
+
+        $persen = $this->hitungPersen(
+            $total,
+            SavingTransaction::whereHas('savingAccount.member', function($q) {
+                    $q->where('pj_user_id', auth()->id());
+                })
+                ->where('transaction_type', $tipe)
+                ->where('created_at', '<=', $tanggalAkhirSebelumnya)
+                ->sum('saving_amount')
+        );
+
+        return [$total, $persen];
+    }
+
     public function getPetaSimpanan($tanggalAkhir, $filter)
     {
         $skeletonJenis = [
@@ -334,35 +357,61 @@ class DashboardService
 
     public function getJatuhTempoTerdekat($filter)
     {
-        $savingDueDate = GlobalSetting::where('key', 'due_date_simpanan')->first()->value ?? null;
-        $savingNominal = GlobalSetting::where('key', 'nominal_simpanan')->first()->value ?? null;
+        $savingDueDate = GlobalSetting::where('key', 'due_date_simpanan')->first()->value ?? 30;
+        $savingNominal = GlobalSetting::where('key', 'nominal_simpanan')->first()->value ?? 0;
 
-        $transaksiSimpanan = SavingAccount::with('member.user', 'transactions')
-            ->where('saving_type', SavingTypeEnum::SIMPANAN_WAJIB->value)
-            ->latest()->take(7)->get()
-            ->map(fn($t) => [
-                'id' => $t->id,
-                'anggota' => $t->member->user->name,
-                'nominal' => $savingNominal,
-                'produk' => $t->saving_type,
-                'jatuh_tempo' => $t->transactions->last() ? $t->transactions->last()->created_at->addDays((int) $savingDueDate)->toDateString() : null
-            ]);
+        $transaksiSimpanan = collect();
+        $transaksiPembiayaan = collect();
 
-        $transaksiPembiayaan = Installment::with('financing.member.user')
-            ->latest()->take(7)->get()
-            ->map(fn($f) => [
-                'id' => $f->id,
-                'anggota' => $f->financing->member->user->name,
-                'nominal' => $f->amount,
-                'produk' => 'Pembiayaan',
-                'jatuh_tempo' => $f->due_date->toDateString(),
-            ]);
+        if ($filter === 'all' || $filter === 'simpanan') {
+            $transaksiSimpanan = SavingAccount::with([
+                    'member.user',
+                    'transactions' => fn($q) => $q->latest()
+                ])
+                ->whereHas('member', function($q) {
+                    $q->where('pj_user_id', auth()->id());
+                })
+                ->where('saving_type', SavingTypeEnum::SIMPANAN_WAJIB->value)
+                ->get()
+                ->map(function($t) use ($savingDueDate, $savingNominal) {
+                    $lastTransaction = $t->transactions->first();
+                    $baseDate = $lastTransaction ? $lastTransaction->created_at : $t->created_at;
 
-        $allTransactions = $filter === 'all' ? $transaksiSimpanan->concat($transaksiPembiayaan)
-            ->sortByDesc('jatuh_tempo')
+                    return [
+                        'id' => $t->id,
+                        'anggota' => $t->member?->user?->name ?? '-',
+                        'nominal' => $savingNominal,
+                        'produk' => $t->saving_type,
+                        'jatuh_tempo' => Carbon::parse($baseDate)->addDays((int) $savingDueDate)->toDateString()
+                    ];
+                });
+        }
+
+        if ($filter === 'all' || $filter === 'pembiayaan') {
+            $transaksiPembiayaan = Installment::with(['financing.member.user'])
+                ->whereHas('financing.member', function($query) {
+                    $query->where('pj_user_id', auth()->id());
+                })
+                ->whereIn('status', [
+                    InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+                ])
+                ->orderBy('due_date', 'asc')
+                ->take(7)
+                ->get()
+                ->map(fn($f) => [
+                    'id' => $f->id,
+                    'anggota' => $f->financing->member?->user?->name ?? '-',
+                    'nominal' => $f->amount,
+                    'produk' => 'Pembiayaan',
+                    'jatuh_tempo' => Carbon::parse($f->due_date)->toDateString(),
+                ]);
+        }
+
+        $allTransactions = $transaksiSimpanan->concat($transaksiPembiayaan)
+            ->sortBy('jatuh_tempo')
             ->take(7)
             ->values()
-            ->toArray() : ($filter === 'simpanan' ? $transaksiSimpanan : $transaksiPembiayaan)->toArray();
+            ->toArray();
 
         return $allTransactions;
     }
@@ -404,30 +453,40 @@ class DashboardService
 
     public function getTransaksiSimpananTerbaru($tanggalAkhir, $filter)
     {
-        $savings =  SavingTransaction::with('savingAccount.member.user')
-            ->where('created_at', '<=', $tanggalAkhir)
-            ->latest()
+        $query = SavingTransaction::with(['savingAccount.member.user'])
+            ->whereHas('savingAccount.member', function ($q) {
+                $q->where('pj_user_id', auth()->id());
+            })
+            ->where('created_at', '<=', $tanggalAkhir);
+
+        if ($filter !== 'all') {
+            $query->whereHas('savingAccount', function ($q) use ($filter) {
+                $q->where('saving_type', $filter);
+            });
+        }
+
+        $savings = $query->latest()
             ->take(7)
             ->get()
             ->map(fn($t) => [
                 'id' => $t->id,
                 'no_transaksi' => $t->saving_transaction_code,
-                'anggota' => $t->savingAccount->member->user->name,
+                'anggota' => $t->savingAccount->member?->user?->name ?? '-',
                 'jumlah' => $t->saving_amount,
                 'produk' => $t->savingAccount->saving_type,
             ])
             ->toArray();
 
-        if ($filter === 'all') {
-            return $savings;
-        } else {
-            return array_filter($savings, fn($s) => $s['produk'] === $filter);
-        }
+        return $savings;
     }
 
     public function getTotalAngsuranBelumLunas()
     {
-        $total = Installment::where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
+        $total = Installment::with('financing.member')
+            ->whereHas('financing.member', function($query) {
+                $query->where('pj_user_id', auth()->id());
+            })
+            ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
             ->sum('amount');
 
         return $total;
@@ -450,43 +509,77 @@ class DashboardService
         return [$modal, $persen];
     }
 
-    public function getPetaPembiayaan($tanggalAkhir)
+public function getPetaPembiayaan($tanggalAkhir)
     {
         $skeleton = [
             'Lancar' => 0,
             'Kurang Lancar' => 0,
+            'Diragukan' => 0,
             'Macet' => 0,
         ];
 
-        $targetDate = Carbon::parse($tanggalAkhir);
+        // Gunakan endOfDay() agar perhitungan mencakup transaksi hingga malam hari
+        $targetDate = Carbon::parse($tanggalAkhir)->endOfDay();
 
+        // Cari semua pembiayaan dengan status aktif dan ambil jadwal angsurannya yang belum lunas
         $financings = Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->with(['installment' => function($query) {
                 $query->whereIn('status', [
-                    'Terjadwal',
-                    'Terlambat',
+                    InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
                 ]);
             }])
             ->get();
 
         foreach ($financings as $financing) {
             $oldestUnpaid = $financing->installment->sortBy('due_date')->first();
+            $jatuhTempoPembiayaan = Carbon::parse($financing->akad_date)->addMonths($financing->tenor)->endOfDay();
 
+            // Jika tidak ada jadwal angsuran yang belum lunas, berarti pembiayaan ini 100% lancar
             if (!$oldestUnpaid) {
                 $skeleton['Lancar']++;
                 continue;
             }
 
-            $dueDate = Carbon::parse($oldestUnpaid->due_date);
+            $dueDate = Carbon::parse($oldestUnpaid->due_date)->startOfDay();
 
+            // Cek 0: Jika target tanggal yang dipilih user SEBELUM due date (belum waktunya bayar)
             if ($targetDate->lessThanOrEqualTo($dueDate)) {
                 $skeleton['Lancar']++;
-            } else {
-                $daysLate = $targetDate->diffInDays($dueDate);
+                continue;
+            }
 
-                if ($daysLate <= 90) {
+            // KONDISI 2: Kontrak Akad Sudah Tamat / Jatuh Tempo Pembiayaan Terlewati
+            if ($targetDate->greaterThan($jatuhTempoPembiayaan)) {
+                // Hitung selisih bulan dari tanggal TAMAT kontraknya
+                $monthsPastMaturity = $jatuhTempoPembiayaan->diffInMonths($targetDate);
+
+                if ($monthsPastMaturity <= 1) {
+                    // Pembiayaan telah jatuh tempo sampai dengan 1 bulan
                     $skeleton['Kurang Lancar']++;
+                } elseif ($monthsPastMaturity <= 2) {
+                    // Pembiayaan jatuh tempo telah melewati 1 bulan sampai dengan 2 bulan
+                    $skeleton['Diragukan']++;
                 } else {
+                    // Pembiayaan jatuh tempo telah melewati 2 bulan
+                    $skeleton['Macet']++;
+                }
+            }
+            // KONDISI 1: Kontrak Akad Masih Berjalan
+            else {
+                // Hitung selisih bulan dari angsuran TERTUA yang belum dibayar
+                $monthsLate = $dueDate->diffInMonths($targetDate);
+
+                if ($monthsLate <= 3) {
+                    // Tunggakan angsuran sampai dengan 3 bulan
+                    $skeleton['Lancar']++;
+                } elseif ($monthsLate <= 6) {
+                    // Tunggakan angsuran yang telah melewati 3 bulan sampai dengan 6 bulan
+                    $skeleton['Kurang Lancar']++;
+                } elseif ($monthsLate <= 12) {
+                    // Tunggakan angsuran yang telah melewati 6 bulan sampai dengan 12 bulan
+                    $skeleton['Diragukan']++;
+                } else {
+                    // Tunggakan angsuran yang telah melewati 12 bulan
                     $skeleton['Macet']++;
                 }
             }
