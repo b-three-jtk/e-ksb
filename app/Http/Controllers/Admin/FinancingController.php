@@ -466,6 +466,37 @@ class FinancingController extends Controller
                 ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
                 ->firstOrFail();
 
+                if ($validated['status'] === FinancingReqStatusEnum::APPROVED->value) {
+
+                    $danaAlokasi = Account::where(
+                        'account_name',
+                        'Dana Alokasi Pembiayaan Murabahah'
+                    )->firstOrFail();
+
+                    $danaAlokasiMasuk = JournalEntry::where(
+                        'no_ref_account',
+                        $danaAlokasi->no_ref_account
+                    )
+                    ->where('position', PositionEnum::DEBIT->value)
+                    ->sum('nominal');
+
+                    $danaAlokasiKeluar = JournalEntry::where(
+                        'no_ref_account',
+                        $danaAlokasi->no_ref_account
+                    )
+                    ->where('position', PositionEnum::CREDIT->value)
+                    ->sum('nominal');
+
+                    $saldoDanaAlokasi = $danaAlokasiMasuk - $danaAlokasiKeluar;
+
+                    if ($saldoDanaAlokasi < $financing->predicted_cost_price) {
+                        throw ValidationException::withMessages([
+                            'status' =>
+                                'Dana alokasi pembiayaan tidak mencukupi. Silakan lakukan alokasi dana terlebih dahulu.'
+                        ]);
+                    }
+                }
+
             $financing->update([
                 'status' => $validated['status'],
             ]);
