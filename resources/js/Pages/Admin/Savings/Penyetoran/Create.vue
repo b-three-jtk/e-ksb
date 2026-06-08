@@ -7,12 +7,14 @@ import { toast } from 'vue3-toastify'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import ConfirmationModal from '@/Components/Savings/ConfirmationModal.vue'
 import Struk from '@/Components/Savings/Struk.vue'
+import Swal from 'sweetalert2'
 
 const props = defineProps({
     saving_types: { type: Array, required: true },
     members: { type: Array, required: true },
     accounts: { type: Array, required: true },
-    pengurus: { type: Object, required: true }
+    pengurus: { type: Object, required: true },
+    global_saving: { type: Object, required: true },
 })
 
 const filteredSavingTypes = computed(() => {
@@ -96,13 +98,41 @@ const targetDisplay = ref('')
 // Dialog & konfirmasi
 const showDialog        = ref(false)
 
+const fixedNominal = computed(() => {
+  if (jenisSimpanan.value === 'Simpanan Pokok') {
+    return props.global_saving?.pokok || 0
+  }
+  if (jenisSimpanan.value === 'Simpanan Wajib') {
+    return props.global_saving?.wajib || 0
+  }
+  return null
+})
+
+watch(jenisSimpanan, () => {
+  if (fixedNominal.value) {
+    nominalRaw.value = fixedNominal.value.toString()
+    nominalDisplay.value = formatRp(fixedNominal.value)
+  } else {
+    nominalRaw.value = ''
+    nominalDisplay.value = ''
+  }
+})
+
 watch(jenisSimpanan, () => {
   selectedPurpose.value = ''
   isCreatingNew.value   = false
   purposeInput.value    = ''
-  tenorMonths.value   = ''
-  targetAmount.value  = ''
-  targetDisplay.value = ''
+  tenorMonths.value     = ''
+  targetAmount.value    = ''
+  targetDisplay.value   = ''
+
+  if (fixedNominal.value) {
+    nominalRaw.value = fixedNominal.value.toString()
+    nominalDisplay.value = formatRp(fixedNominal.value)
+  } else {
+    nominalRaw.value = ''
+    nominalDisplay.value = ''
+  }
 })
 
 const existingAccounts = computed(() => {
@@ -276,17 +306,37 @@ const errorsForm = computed(() => {
 
 const isFormValid = computed(() => Object.keys(errorsForm.value).length === 0)
 
+function selectAccount(acc) {
+  selectedPurpose.value = acc.purpose
+  isCreatingNew.value = false
+}
+
 // Struk
 const showStruk = ref(false)
 const dataStruk = ref(null)
 
 // Submit
-function bukaDialog() {
+async function bukaDialog() {
   if (!isFormValid.value) {
     toast('Lengkapi data yang wajib diisi', { type: 'warning' })
     return
   }
-  showDialog.value = true
+
+  const result = await Swal.fire({
+    title: 'Konfirmasi Penyetoran',
+    text: 'Yakin ingin memposting transaksi ini?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, Posting',
+    cancelButtonText: 'Batal',
+    reverseButtons: true,
+    focusCancel: true,
+    confirmButtonColor: '#15803d',
+  })
+
+  if (result.isConfirmed) {
+    handleConfirm()
+  }
 }
 
 const confirmationData = computed(() => ({
@@ -321,18 +371,18 @@ function handleConfirm() {
     formData.append('target_amount', targetAmount.value)
   }
 
-  if (depositMethod.value === 'Non-Tunai') {
-    formData.append('bank_name', bankName.value)
-    formData.append('account_name', accountName.value)
-    formData.append('account_number', accountNumber.value)
-    formData.append('payment_proof', paymentFile.value)
-  }
+  // if (depositMethod.value === 'Non-Tunai') {
+  //   formData.append('bank_name', bankName.value)
+  //   formData.append('account_name', accountName.value)
+  //   formData.append('account_number', accountNumber.value)
+  //   formData.append('payment_proof', paymentFile.value)
+  // }
 
   router.post('/admin/savings/deposit', formData, {
     forceFormData: true,
     preserveScroll: true,
     onSuccess: (page) => {
-      toast('Penyetoran berhasil!', { type: 'success', position: 'top-center' })
+      toast('Penyetoran berhasil!', { type: 'success', position: 'bottom-right' })
       dataStruk.value = page.props.struk
       showStruk.value = true
       showDialog.value = false
@@ -340,10 +390,10 @@ function handleConfirm() {
     },
     onError: (errors) => {
       showDialog.value = false
-      console.log('Validation Errors:', errors) // ← tambahkan ini untuk debug
+      console.log('Validation Errors:', errors)
       const msg = Object.values(errors).flat().join('\n')
       console.error('Form errors:', errors)
-      toast(msg || 'Gagal menyimpan', { type: 'error' })
+      toast(msg || 'Gagal menyimpan', { type: 'error', position: 'bottom-right' })
     }
   })
 }
@@ -420,7 +470,7 @@ const akadType = computed(() => {
                   placeholder="Nama / No. Anggota..."
                   class="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600
                          rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
 
@@ -433,11 +483,11 @@ const akadType = computed(() => {
                 <button
                   v-for="m in memberSuggestions" :key="m.id"
                   @click="pilihAnggota(m)"
-                  class="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-gray-700
+                  class="w-full text-left px-4 py-2.5 hover:bg-light-accent dark:hover:bg-gray-700
                          flex items-center gap-3 transition-colors"
                 >
-                  <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center
-                              justify-center text-blue-700 dark:text-blue-300 font-semibold text-sm shrink-0">
+                  <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-primary flex items-center
+                              justify-center text-primary dark:text-gray-300 font-semibold text-sm shrink-0">
                     {{ initials(m.name) }}
                   </div>
                   <div>
@@ -452,15 +502,15 @@ const akadType = computed(() => {
             <Transition name="fade">
               <div
                 v-if="selectedMember"
-                class="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/20
-                       border border-blue-100 dark:border-blue-800 rounded-lg"
+                class="flex items-center gap-4 p-4 bg-light-accent dark:bg-gray-900/20
+                       border border-accent dark:border-gray-600 rounded-lg"
               >
-                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center
-                            justify-center text-xl font-bold text-blue-700 dark:text-blue-300 shrink-0">
+                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-primary flex items-center
+                            justify-center text-xl font-bold text-secondary dark:text-light-accent shrink-0">
                   {{ initials(selectedMember.name) }}
                 </div>
                 <div class="flex-1 min-w-0">
-                  <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
+                  <div class="font-medium text-primary dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
                   <div class="text-sm text-gray-500">{{ selectedMember.user_code }}</div>
                 </div>
                 <button @click="resetAnggota" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
@@ -511,7 +561,7 @@ const akadType = computed(() => {
                   v-model="jenisSimpanan"
                   class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
                          bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="" disabled>— Pilih jenis simpanan —</option>
                   <option v-for="j in filteredSavingTypes" :key="j" :value="j">{{ j }}</option>
@@ -523,11 +573,11 @@ const akadType = computed(() => {
                 <div
                   v-if="akadType"
                   class="flex items-start gap-3 p-4 rounded-lg border
-                        bg-blue-50 dark:bg-blue-900/20
-                        border-blue-200 dark:border-blue-800"
+                        bg-gray-100 dark:bg-blue-900/20
+                        border-primary dark:border-gray-500"
                 >
                   <div class="text-sm">
-                    <div class="font-semibold text-blue-700 dark:text-blue-300 mb-1">
+                    <div class="font-semibold text-primary dark:text-gray-300 mb-1">
                       {{
                         akadType === 'musyarakah'
                           ? 'Akad Musyarakah'
@@ -562,20 +612,19 @@ const akadType = computed(() => {
 
                     <div class="space-y-2">
                       <!-- Existing accounts -->
-                      <label
+                      <div
                         v-for="acc in existingAccounts"
                         :key="acc.purpose"
-                        class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
-                        :class="selectedPurpose === acc.purpose && !isCreatingNew
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-blue-300'"
+                        @click="selectAccount(acc)"
+                        class="p-3 border rounded-lg cursor-pointer hover:border-secondary"
+                        :class="selectedPurpose === acc.purpose ? 'border-secondary bg-blue-50' : ''"
                       >
                         <input
                           type="radio"
                           :value="acc.purpose"
                           v-model="selectedPurpose"
                           @change="isCreatingNew = false"
-                          class="mt-0.5 text-blue-600"
+                          class="mt-0.5 text-secondary"
                         />
                         <div class="flex-1 min-w-0">
                           <div class="font-medium text-sm text-gray-800 dark:text-gray-200">{{ acc.purpose }}</div>
@@ -598,26 +647,24 @@ const akadType = computed(() => {
                             <Icon icon="mdi:clock-alert-outline" width="12" /> Jatuh tempo — segera cairkan
                           </span>
                         </div>
-                      </label>
+                      </div>
 
                       <!-- Tombol buat baru -->
                       <label
                         class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
                         :class="isCreatingNew
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-300'"
+                          ? 'border-primary bg-stroke dark:bg-muted/20'
+                          : 'border-dashed border-gray-600 dark:border-gray-300 hover:border-gray-300'"
                       >
-                        <input
-                          type="radio"
-                          :value="true"
-                          v-model="isCreatingNew"
-                          @change="selectedPurpose = ''"
-                          class="text-blue-600"
-                        />
-                        <div class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-medium">
-                          <Icon icon="mdi:plus-circle-outline" width="18" />
-                          Buat tabungan baru
-                        </div>
+                        <button
+                          type="button"
+                          @click="isCreatingNew = true; selectedPurpose = ''"
+                          class="w-full flex items-center justify-center gap-2 p-3 border border-dashed
+                                rounded-lg text-primary hover:bg-stroke dark:hover:bg-blue-900/20"
+                        >
+                          <Icon icon="mdi:plus" />
+                          Tambah Tabungan Baru
+                        </button>
                       </label>
                     </div>
 
@@ -790,9 +837,10 @@ const akadType = computed(() => {
                     type="text"
                     inputmode="numeric"
                     placeholder="0"
+                    :readonly="!!fixedNominal"
                     class="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                           focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           focus:outline-none focus:ring-2 focus:ring-secondary"
                   />
                 </div>
                 <p v-if="errorNominal" class="mt-1 text-xs text-red-600 flex items-center gap-1">
@@ -824,7 +872,7 @@ const akadType = computed(() => {
                     placeholder="Opsional"
                     class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                           focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           focus:outline-none focus:ring-2 focus:ring-secondary"
                   />
                 </div>
               </div>
@@ -960,8 +1008,8 @@ const akadType = computed(() => {
           <button
             @click="bukaDialog"
             :disabled="!isFormValid"
-            class="px-8 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg
-                   hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-8 py-2.5 bg-secondary text-white text-sm font-medium rounded-lg
+                   hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Posting
           </button>
@@ -985,12 +1033,12 @@ const akadType = computed(() => {
       <div class="bg-white rounded-xl shadow-lg p-4 max-w-sm w-full relative">
 
         <!-- tombol close -->
-        <!-- <button
+        <button
           @click="showStruk = false"
           class="absolute top-2 right-2 text-gray-500 hover:text-red-500"
         >
           ✕
-        </button> -->
+        </button>
 
         <Struk
           :transaksi="dataStruk"
