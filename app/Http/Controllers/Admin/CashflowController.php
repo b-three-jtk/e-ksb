@@ -120,71 +120,6 @@ class CashflowController extends Controller
     {
         $query = $this->baseQuery($request);
 
-        // Search
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-
-                $q->where(
-                    'accounts.account_name', 'like', '%' . $request->search . '%')
-                    ->orWhere('journal_entries.journal_group_id', 'like', '%' . $request->search . '%')
-                    ->orWhere('journal_entries.no_ref_account', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        // Filter periode
-        if ($request->filled('periode')) {
-
-            switch ($request->periode) {
-
-                case '1_minggu':
-                    $query->whereDate(
-                        'journal_entries.transaction_date',
-                        '>=',
-                        now()->subWeek()
-                    );
-                    break;
-
-                case '1_bulan':
-                    $query->whereDate(
-                        'journal_entries.transaction_date',
-                        '>=',
-                        now()->subMonth()
-                    );
-                    break;
-
-                case '3_bulan':
-                    $query->whereDate(
-                        'journal_entries.transaction_date',
-                        '>=',
-                        now()->subMonths(3)
-                    );
-                    break;
-
-                case '1_tahun':
-                    $query->whereDate(
-                        'journal_entries.transaction_date',
-                        '>=',
-                        now()->subYear()
-                    );
-                    break;
-
-                case 'custom':
-                    if (
-                        $request->filled('date_from')
-                        && $request->filled('date_to')
-                    ) {
-                        $query->whereBetween(
-                            'journal_entries.transaction_date',
-                            [
-                                $request->date_from,
-                                $request->date_to
-                            ]
-                        );
-                    }
-                    break;
-            }
-        }
-
         $sortMap = [
             'tanggal' => 'journal_entries.transaction_date',
             'no_jurnal' => 'journal_entries.journal_group_id',
@@ -197,149 +132,95 @@ class CashflowController extends Controller
 
         $journalEntries = $query
             ->orderBy($sortBy, $sortDir)
-            ->paginate(
-                $request->get('per_page', 10)
-            )
+            ->orderBy('journal_entries.journal_group_id', $sortDir)
+            ->orderBy('journal_entries.id', 'asc')                 
+            ->paginate($request->get('per_page', 10))
             ->withQueryString();
 
-        $counter = 1;
-        $lastJournal = null;
+        $allGroups = $this->baseQuery($request)
+            ->orderBy($sortBy, $sortDir)
+            ->orderBy('journal_entries.journal_group_id', $sortDir)
+            ->distinct()
+            ->pluck('journal_entries.journal_group_id')
+            ->values();
+
+        $firstGroupOnPage = collect($journalEntries->items())
+            ->first()
+            ?->journal_group_id;
+
+        $groupStartIndex = $firstGroupOnPage
+            ? ($allGroups->search($firstGroupOnPage) + 1)
+            : 1;
+
+        $groupCounter  = $groupStartIndex;
+        $lastJournal   = null;
+        $currentNumber = null;
 
         $transactions = $journalEntries->through(
-            function ($item) use (&$counter, &$lastJournal) {
-
-                $nomor = null;
+            function ($item) use (&$groupCounter, &$lastJournal, &$currentNumber) {
 
                 if ($lastJournal !== $item->journal_group_id) {
-                    $nomor = $counter++;
-                    $lastJournal = $item->journal_group_id;
+                    $currentNumber = $groupCounter++;
+                    $lastJournal   = $item->journal_group_id;
                 }
 
                 return [
-                    'id' => $item->id,
-
-                    'no' => $nomor,
-
-                    'no_jurnal' => $item->journal_group_id,
-
-                    'tanggal' => Carbon::parse(
-                        $item->transaction_date
-                    )->format('d/m/Y'),
-
-                    'akun' =>
-                        $item->no_ref_account .
-                        ' - ' .
-                        $item->account_name,
-
-                    'jenis_akun' =>
-                        $item->account_category,
-
-                    'debit' =>
-                        $item->position === PositionEnum::DEBIT->value
-                            ? $item->nominal
-                            : null,
-
-                    'kredit' =>
-                        $item->position === PositionEnum::CREDIT->value
-                            ? $item->nominal
-                            : null,
+                    'id'         => $item->id,
+                    'no'         => $currentNumber,
+                    'no_jurnal'  => $item->journal_group_id,
+                    'tanggal'    => Carbon::parse($item->transaction_date)->format('d/m/Y'),
+                    'akun'       => $item->no_ref_account . ' - ' . $item->account_name,
+                    'jenis_akun' => $item->account_category,
+                    'debit'      => $item->position === PositionEnum::DEBIT->value  ? $item->nominal : null,
+                    'kredit'     => $item->position === PositionEnum::CREDIT->value ? $item->nominal : null,
                 ];
             }
         );    
 
-        $kasAccount = Account::where(
-            'account_name',
-            'Kas'
-        )->firstOrFail();
+        $kasAccount = Account::where('account_name', 'Kas')->firstOrFail();
 
-        $kasMasukQuery = JournalEntry::query()
-            ->where(
-                'no_ref_account',
-                $kasAccount->no_ref_account
-            )
-            ->where(
-                'position',
-                PositionEnum::DEBIT->value
-            );
+        $totalKasMasuk = JournalEntry::where('no_ref_account', $kasAccount->no_ref_account)
+            ->where('position', PositionEnum::DEBIT->value)
+            ->sum('nominal');
 
-        $totalKasMasuk = $kasMasukQuery->sum(
-            'nominal'
-        );
-
-        $kasKeluarQuery = JournalEntry::query()
-            ->where(
-                'no_ref_account',
-                $kasAccount->no_ref_account
-            )
-            ->where(
-                'position',
-                PositionEnum::CREDIT->value
-            );
-
-        $totalKasKeluar = $kasKeluarQuery->sum(
-            'nominal'
-        );
+        $totalKasKeluar = JournalEntry::where('no_ref_account', $kasAccount->no_ref_account)
+            ->where('position', PositionEnum::CREDIT->value)
+            ->sum('nominal');
 
         $saldoKas = $totalKasMasuk - $totalKasKeluar;
 
         $summary = [
             [
-                'title' => 'Total Kas Tersedia',
-                'value' => 'Rp' . number_format(
-                    $saldoKas,
-                    0,
-                    ',',
-                    '.'
-                ),
+                'title'      => 'Total Kas Tersedia',
+                'value'      => 'Rp' . number_format($saldoKas, 0, ',', '.'),
                 'percentage' => 0,
             ],
             [
-                'title' => 'Total Kas Keluar',
-                'value' => 'Rp' . number_format(
-                    $totalKasKeluar,
-                    0,
-                    ',',
-                    '.'
-                ),
+                'title'      => 'Total Kas Keluar',
+                'value'      => 'Rp' . number_format($totalKasKeluar, 0, ',', '.'),
                 'percentage' => 0,
             ],
             [
-                'title' => 'Total Kas Masuk',
-                'value' => 'Rp' . number_format(
-                    $totalKasMasuk,
-                    0,
-                    ',',
-                    '.'
-                ),
+                'title'      => 'Total Kas Masuk',
+                'value'      => 'Rp' . number_format($totalKasMasuk, 0, ',', '.'),
                 'percentage' => 0,
             ],
         ];
 
-        return Inertia::render(
-            'Admin/CashFlow/List',
-            [
-                'transactions' => $transactions,
-
-                'summary' => $summary,
-
-                'filters' => $request->only([
-                    'search',
-                    'per_page',
-                    'periode',
-                    'date_from',
-                    'date_to',
-                    'sort_by',
-                    'sort_dir',
-                ]),
-
-                'akunOptions' => Account::select(
+        return Inertia::render('Admin/CashFlow/List', [
+            'transactions' => $transactions,
+            'summary'      => $summary,
+            'filters'      => $request->only([
+                'search', 'per_page', 'periode',
+                'date_from', 'date_to', 'sort_by', 'sort_dir',
+            ]),
+            'akunOptions'  => Account::select(
                     'no_ref_account as nomor_akun',
                     'account_name as nama_akun'
                 )
-                    ->orderBy('no_ref_account')
-                    ->get(),
-            ]
-        );
+                ->orderBy('no_ref_account')
+                ->get(),
+        ]);
     }
 
     public function store(Request $request)

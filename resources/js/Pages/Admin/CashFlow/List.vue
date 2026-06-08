@@ -94,6 +94,13 @@ const transactions = computed(() => page.props.transactions ?? {
 
 const summary = computed(() => page.props.summary ?? [])
 
+const isFirstInGroup = (index) => {
+    if (index === 0) return true
+    const current  = transactions.value.data[index]
+    const previous = transactions.value.data[index - 1]
+    return String(current.no) !== String(previous.no)
+}
+
 const getJenisColor = (jenis) => {
     if (!jenis) return { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-600 dark:text-slate-300' }
     switch (jenis) {
@@ -432,8 +439,8 @@ const periodeOptions = [
                 :sort-dir="filters.sort_dir"
                 @sort="toggleSort"
             >
-                <template #cell-no="{ row }">
-                    {{ row.no }}
+                <template #cell-no="{ row, index }">
+                    {{ isFirstInGroup(index) ? row.no : '' }}
                 </template>
 
                 <template #cell-jenis_akun="{ row }">
