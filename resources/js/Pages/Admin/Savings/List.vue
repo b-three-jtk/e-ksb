@@ -224,7 +224,7 @@ const handleAction = (type) => {
                 @click="filters.tab = 'semua'"
                 class="px-4 py-2 rounded-lg text-sm font-medium border"
                 :class="filters.tab === 'semua'
-                    ? 'bg-blue-600 text-white border-blue-600'
+                    ? 'bg-primary text-white border-primary'
                     : 'bg-gray-50 dark:bg-slate-700 dark:text-white'"
             >
                 Semua
