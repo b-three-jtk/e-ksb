@@ -7,6 +7,7 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Enums\PositionEnum;
+use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDepositRequest;
 use App\Http\Requests\StoreWithdrawalRequest;
@@ -49,7 +50,19 @@ class SavingController extends Controller
             'tabungan_ibadah' => SavingTypeEnum::TABUNGAN_IBADAH->value,
         ];
 
-        return SavingTransaction::with(['savingAccount.member.user', 'savingAccount'])
+        $query = SavingTransaction::with([
+            'savingAccount.member.user',
+            'savingAccount'
+        ]);
+
+        // ===== khusus PJ anggota =====
+        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value)) {
+            $query->whereHas('savingAccount.member', function ($q) {
+                $q->where('pj_user_id', Auth::id());
+            });
+        }
+
+        return $query
             ->when($search, function ($q) use ($search) {
                 $q->whereHas('savingAccount.member.user', function ($m) use ($search) {
                     $m->where('name', 'like', "%{$search}%")
@@ -62,7 +75,6 @@ class SavingController extends Controller
                     $sa->where('saving_type', $typeMap[$tab]);
                 });
             })
-            // Filter grup: 'simpanan' → 2 tipe simpanan
             ->when($tab === 'simpanan', function ($q) {
                 $q->whereHas('savingAccount', function ($sa) {
                     $sa->whereIn('saving_type', [
@@ -257,8 +269,18 @@ class SavingController extends Controller
         $members = Member::whereIn('status', [
             MemberStatusEnum::ACTIVE->value,
             MemberStatusEnum::PAYMENT_PENDING->value
-        ])
-            ->with(['user:id,user_code,name', 'savingAccounts.ibadah', 'savingAccounts.berjangka',])
+            ])
+            ->when(
+                Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value),
+                function ($q) {
+                    $q->where('pj_user_id', Auth::id());
+                }
+            )
+            ->with([
+                'user:id,user_code,name',
+                'savingAccounts.ibadah',
+                'savingAccounts.berjangka'
+            ])
             ->get()
             ->map(function ($member) {
                 return [
@@ -341,6 +363,13 @@ class SavingController extends Controller
         }
 
         $member = Member::with('user')->findOrFail($data['member_id']);
+
+        if (
+            Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value)
+            && $member->pj_user_id !== Auth::id()
+        ) {
+            abort(403, 'Anda tidak berhak melakukan transaksi untuk anggota ini.');
+        }
 
         if (filled($data['saving_account_id'] ?? null)) {
             $savingAccount = SavingAccount::where(
