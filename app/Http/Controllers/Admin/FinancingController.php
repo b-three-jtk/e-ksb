@@ -951,14 +951,26 @@ class FinancingController extends Controller
             'installment',
         ]);
 
-        $lastPaidNo = Installment::where('financing_id', $financing->id)
-            ->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)
-            ->max('installment_no') ?? 0;
+        $paidStatuses = [
+            InstallmentPaymentScheduleStatusEnum::PAID->value,
+            InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
+        ];
 
-        $installment = Installment::where('financing_id', $financing->id)
-            ->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)
-            ->orderBy('installment_no', 'asc')
-            ->first();
+        $installment = Installment::where(
+            'financing_id',
+            $financing->id
+        )
+        ->whereNotIn('status', $paidStatuses)
+        ->orderBy('installment_no')
+        ->first();
+
+        $nextInstallment = Installment::where(
+            'financing_id',
+            $financing->id
+        )
+        ->where('installment_no', '>', $installment?->installment_no)
+        ->orderBy('installment_no')
+        ->first();
 
         $paymentCount =
             InstallmentPaymentTransaction::where(
@@ -1029,10 +1041,13 @@ class FinancingController extends Controller
                     'next_installment_number' =>
                         $installment?->installment_no,
 
+                    'current_due_date' =>
+                        $installment?->due_date?->format('Y-m-d'),
+
                     'payment_count' => $paymentCount + 1,
 
                     'next_due_date' =>
-                        $installment?->due_date?->format('Y-m-d'),
+                        $nextInstallment?->due_date?->format('Y-m-d'),
 
                     'financing_id' =>
                         $financing->id,
@@ -1095,9 +1110,35 @@ class FinancingController extends Controller
             );
 
             $installment = Installment::findOrFail($validated['installment_id']);
+            $paymentDate = \Carbon\Carbon::parse(
+                $validated['payment_date']
+            );
+
+            $dueDate = $installment->due_date;
+
+            $status =
+                $paymentDate->startOfDay()
+                    ->gt(
+                        $dueDate->copy()->startOfDay()
+                    )
+                    ? InstallmentPaymentScheduleStatusEnum::OVERDUE->value
+                    : InstallmentPaymentScheduleStatusEnum::PAID->value;
+
             $installment->update([
-                'status' => InstallmentPaymentScheduleStatusEnum::PAID->value,
+                'status' => $status,
             ]);
+
+            $nextInstallment = Installment::where(
+                'financing_id',
+                $financing->id
+            )
+            ->where(
+                'installment_no',
+                '>',
+                $installment->installment_no
+            )
+            ->orderBy('installment_no')
+            ->first();
 
             $hargaJual    = $financing->cost_price + $financing->margin_amount;
             $totalTerbayar = InstallmentPaymentTransaction::whereHas('installment', function ($q) use ($financing) {
@@ -1152,7 +1193,11 @@ class FinancingController extends Controller
                 'total_angsuran'  => $payment->nominal,
                 'sisa_hutang'     => max($sisa, 0),
                 'status'          => max($sisa, 0) <= 0 ? 'Lunas' : 'Belum Lunas',
-                'jatuh_tempo'     => now()->addMonth()->translatedFormat('d F Y'),
+                'jatuh_tempo' =>
+                    $nextInstallment
+                        ? $nextInstallment->due_date
+                            ->translatedFormat('d F Y')
+                        : '-',
                 'catatan'         => 'Dasar akad yang digunakan adalah akad murabahah yang merupakan kontrak jual beli syariah.',
                 'tanggal_cetak'   => now()->translatedFormat('d F Y'),
             ];
@@ -1188,18 +1233,41 @@ class FinancingController extends Controller
     {
         $validated = $request->validate([
             'installment_id' => 'required|exists:installments,id',
-            'due_date' => 'required|date',
+            'due_date' => [
+                'required',
+                'date',
+                'after_or_equal:today',
+            ],
         ]);
 
         try {
 
-            $installment = Installment::findOrFail(
+            $currentInstallment = Installment::findOrFail(
                 $validated['installment_id']
             );
 
-            $installment->update([
-                'due_date' => $validated['due_date'],
-            ]);
+            $newDate = Carbon::parse($validated['due_date']);
+
+            Installment::where(
+                'financing_id',
+                $financing->id
+            )
+            ->where(
+                'installment_no',
+                '>=',
+                $currentInstallment->installment_no
+            )
+            ->orderBy('installment_no')
+            ->get()
+            ->each(function ($item, $index) use ($newDate) {
+
+                $item->update([
+                    'due_date' => $newDate
+                        ->copy()
+                        ->addMonths($index)
+                ]);
+
+            });
 
             return redirect("/admin/financings/show/{$financing->id}")
                 ->with(
