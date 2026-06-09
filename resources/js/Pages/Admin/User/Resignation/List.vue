@@ -3,10 +3,10 @@ import { Link, usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { Icon } from '@iconify/vue'
 import { ref, computed, reactive, watch } from 'vue'
-import PageBreadcrumb from '../../../../Components/PageBreadcrumb.vue'
-import BaseFunctionality from '../../../../Components/Table/BaseFunctionality.vue'
-import BaseTable from '../../../../Components/Table/BaseTable.vue'
-import Pagination from '../../../../Components/Table/Pagination.vue'
+import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import BaseFunctionality from '@/Components/Table/BaseFunctionality.vue'
+import BaseTable from '@/Components/Table/BaseTable.vue'
+import Pagination from '@/Components/Table/Pagination.vue'
 import Button from '@/Components/Form/Button.vue'
 
 const isLoading = ref(false)
@@ -25,6 +25,8 @@ const columns = [
 ]
 
 const page = usePage()
+
+const can = computed(() => page.props.auth.can);
 
 const filters = reactive({
     search: page.props.filters?.search ?? '',
@@ -138,7 +140,7 @@ const breadcrumbItems = [
                 </template>
 
                 <template #cell-aksi="{ row }">
-                    <Button variant="info" size="small" :href="`/admin/resignations/${row.id}`">
+                    <Button v-if="can['edit_pengunduran_diri']" variant="warning" size="small" :href="`/admin/resignations/${row.id}`">
                         <Icon icon="tabler:checklist" class="w-4 h-4" />
                         Tinjau
                     </Button>
