@@ -78,6 +78,7 @@ class StoreFinancingDraftRequest extends FormRequest
             'financing.tenor' => 'nullable|integer',
             'financing.predicted_cost_price' => 'nullable|numeric|min:0',
             'financing.akad_wakalah_date' => 'nullable|date',
+            'financing.supplier_id' => 'nullable|exists:suppliers,id',
 
             // Collateral data
             'collateral.collateral_type' => 'nullable|string|max:255',

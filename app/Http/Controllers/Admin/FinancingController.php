@@ -174,6 +174,7 @@ class FinancingController extends Controller
             'relationships' => array_column(HeirEnum::cases(), 'value'),
             'conditions' => array_column(ConditionEnum::cases(), 'value'),
             'productTypes' => DB::table('product_types')->select('id', 'product_type_name')->get(),
+            'suppliers' => DB::table('suppliers')->select('id', 'supplier_name', 'address')->get(),
         ];
     }
 
@@ -230,8 +231,9 @@ class FinancingController extends Controller
 
         if ($installment && $installment->count() > 0) {
             $paid_count = $installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
-            $total_paid = $paid_count * ($financing->margin_amount + $financing->cost_price - $financing->down_payment / $financing->tenor);
-
+            $total_paid = $financing->tenor > 0
+                ? $paid_count * (($financing->margin_amount ?? 0) + ($financing->cost_price ?? 0) - ($financing->down_payment ?? 0)) / $financing->tenor
+                : 0;
             $financing->remaining_balance = $financing->total_price - $total_paid;
             $financing->total_paid = $total_paid;
 
@@ -305,7 +307,7 @@ class FinancingController extends Controller
                     ->isNotEmpty();
 
                 $member->is_have_eligible_saving = $hasEligibleSaving;
-                $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
+                $member->family_card = $member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kk')->first()->doc_attachment) : null;
                 $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
                 $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
 
@@ -372,7 +374,7 @@ class FinancingController extends Controller
                     'collateral_location' => $financing->collateral?->collateral_location,
                 ],
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                     'purchase_receipt' => $this->getDocumentUrl($financing->financingItem->purchase_receipt),
@@ -438,7 +440,7 @@ class FinancingController extends Controller
                     'collateral_location' => $financing->collateral?->collateral_location,
                 ],
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                 ],
@@ -877,7 +879,7 @@ class FinancingController extends Controller
                     ->exists();
 
                 $member->is_have_eligible_saving = $hasEligibleSaving;
-                $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
+                $member->family_card = $member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kk')->first()->doc_attachment) : null;
                 $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
                 $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
 

@@ -238,7 +238,7 @@ class SavingController extends Controller
      */
     public function show(string $id)
     {
-        $data = SavingTransaction::with('savingAccount.member.user', 'memberBankAccount', 'point')->find($id);
+        $data = SavingTransaction::with('savingAccount.member.user', 'memberBankAccount')->find($id);
 
         return inertia('Admin/Savings/Show', [
             'data' => $data,

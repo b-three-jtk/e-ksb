@@ -76,6 +76,7 @@ export function useFinancingForm(initialData = null) {
             purchase_receipt: initialData?.financing?.purchase_receipt || null,
             tenor: initialData?.financing?.tenor || null,
             predicted_cost_price: initialData?.financing?.predicted_cost_price || null,
+            supplier_id: initialData?.financing?.supplier_id || null,
         },
         collateral: {
             collateral_type: initialData?.collateral?.collateral_type || '',
@@ -248,7 +249,8 @@ export function useFinancingForm(initialData = null) {
             akad_date: '',
             down_payment: null,
             notes: '',
-            status: ''
+            status: '',
+            supplier_id: null,
         }
         form.collateral = {
             collateral_type: '',
@@ -318,7 +320,10 @@ export function useFinancingForm(initialData = null) {
     // Heirs
     const addHeir = (heirData) => {
         if (!heirData.heir_nik || !heirData.heir_name || !heirData.relationship || !heirData.heir_contact) {
-            alert('Lengkapi semua field untuk menambahkan ahli waris!')
+            toast('Lengkapi semua field untuk menambahkan ahli waris!', {
+                type: 'error',
+                position: 'bottom-right',
+            })
             return
         }
 
