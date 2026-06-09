@@ -7,9 +7,14 @@ import ModalDocument from '@/Components/ModalDocument.vue'
 import { ref } from 'vue'
 import Swal from 'sweetalert2'
 import { toast } from "vue3-toastify";
+import { useForm, router } from '@inertiajs/vue3'
 
 const props = defineProps({
     data: { type: Object, required: true },
+});
+
+const form = useForm({
+    status: 'accepted'
 });
 
 const showModal = () => {
@@ -40,7 +45,7 @@ const acceptTransaction = () => {
         confirmButtonColor: '#007943',
     }).then((result) => {
         if (result.isConfirmed) {
-            form.put('/admin/resignation/' + props.data.id, {
+            form.put('/admin/resignations/' + props.data.id, {
                 onSuccess: () => {
                     toast("Permohonan pengunduran diri berhasil diterima!", {
                         "type": "success",
@@ -73,34 +78,39 @@ const acceptTransaction = () => {
                 <div class="card-layout px-0! md:col-span-2">
                     <h1 class="card-title border-b border-b-stroke px-6 pb-6">Detail Data Pengunduran Diri Anggota</h1>
                     <div class="grid grid-cols-2 gap-6 p-8 pb-6">
-                        <BaseInputAdmin label="Nama" type="text" v-model="props.data.name" disabled />
-                        <BaseInputAdmin label="Nomor Anggota" type="text" v-model="props.data.user_code" disabled />
-                        <BaseInputAdmin label="Tanggal Bergabung" type="date" v-model="props.data.joined_date" disabled />
-                        <BaseInputAdmin label="Email" type="email" v-model="props.data.email" disabled />
+                        <BaseInputAdmin label="Nama" type="text" v-model="props.data.name" isDisabled />
+                        <BaseInputAdmin label="Nomor Anggota" type="text" v-model="props.data.user_code" isDisabled />
+                        <BaseInputAdmin label="Tanggal Bergabung" type="date" v-model="props.data.joined_date"
+                            isDisabled />
+                        <BaseInputAdmin label="Email" type="email" v-model="props.data.email" isDisabled />
                         <div class="grid grid-cols-2 col-span-2 gap-6">
-                            <BaseInputAdmin label="Total Simpanan" type="string" v-model="props.data.total_savings" isMoney
-                                disabled />
+                            <BaseInputAdmin label="Total Simpanan" type="string" v-model="props.data.total_savings"
+                                isMoney isDisabled />
                             <BaseInputAdmin label="Total Kewajiban" type="string" v-model="props.data.total_obligations"
-                                isMoney disabled />
+                                isMoney isDisabled />
                         </div>
                     </div>
                     <div class="flex gap-6 items-center justify-center">
-                        <Button variant="secondary" @click="acceptTransaction()">Terima</Button>
+                        <Button variant="secondary" @click="acceptTransaction()" :disabled="form.processing">{{ form.processing ? 'Menyimpan...' : 'Terima' }}</Button>
                     </div>
                 </div>
                 <div class="card-layout md:col-span-1 h-fit!">
-                    <h1 class="card-title">Dokumen Permohonan Pengunduran Diri</h1>
-                    <div class="flex flex-col items-center justify-center gap-4 mt-4 px-6">
-                        <div
-                            class="mx-auto flex w-60 aspect-square items-center justify-center rounded-lg border-2 bg-gray-50 dark:border-gray-700">
-                            <!-- <img v-if="form.photo_url" :src="form.photo_url" alt="Foto calon anggota"
-                                class="h-full w-full rounded-lg object-cover" /> -->
+                    <h1 class="card-title">Lampiran</h1>
+                    <div v-if="props.data.resignation_doc"
+                        class="flex flex-col items-center justify-center gap-4 mt-4">
+                        <div @click="openDocModal()" target="_blank"
+                            class="border flex w-full justify-between p-4 rounded-xl items-center font-body hover:bg-gray-50 hover:border-secondary cursor-pointer transition-all group">
+                            <p class="font-medium text-dark-text group-hover:text-secondary">Dokumen Pengunduran Diri
+                            </p>
+                            <span
+                                class="icon-[tabler--eye] text-secondary group-hover:scale-110 transition-transform"></span>
                         </div>
-                        <Button @click="openDocModal()" variant="secondary">Lihat Detail</Button>
                     </div>
                 </div>
             </div>
         </div>
-        <ModalDocument ref="buktiResignRef" modal-id="modal-doc" title="Dokumen Pengunduran Diri Anggota" name="Dokumen Pengunduran Diri Anggota" :attachment="props.data.resignation_doc" />
+        <ModalDocument v-if="props.data.resignation_doc" ref="buktiResignRef" modal-id="modal-doc"
+            title="Dokumen Pengunduran Diri Anggota" name="Dokumen Pengunduran Diri Anggota"
+            :attachment="props.data.resignation_doc" />
     </AdminLayout>
 </template>
