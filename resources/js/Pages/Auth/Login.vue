@@ -19,7 +19,7 @@ const submit = () => {
     },
     onError: () => {
       form.reset('password')
-      toast.error('Login gagal. Periksa kembali nomor anggota dan password Anda.', {
+      toast.error('Login gagal. Periksa kembali kode pengguna dan password Anda.', {
         autoClose: 3000,
         position: 'bottom-right',
       })
@@ -32,7 +32,7 @@ const submit = () => {
 <template>
   <AuthLayout title="Masuk">
     <div class="w-full px-4 py-8">
-      <div class="max-w-xl mx-auto bg-white/95 dark:bg-gray-800 border border-white/60 dark:border-gray-700 shadow-xl rounded-2xl backdrop-blur">
+      <div class="max-w-xl mx-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl backdrop-blur">
         <div class="p-8 space-y-8">
             <div class="flex justify-center mb-12">
                 <img class="max-h-24" src="/public/images/logo/logo-icon.svg" alt="Logo">
@@ -41,7 +41,7 @@ const submit = () => {
             <form @submit.prevent="submit" class="space-y-8">
                 <BaseInput
                   v-model="form.user_code"
-                  label="Nomor Anggota"
+                  label="Kode Pengguna"
                   type="text"
                   required
                   :error="form.errors.user_code"

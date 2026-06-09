@@ -45,7 +45,7 @@ defineProps({
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<div>
 				<label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Foto KTP</label>
-				<input ref="ktpInput" type="file" class="hidden" accept="image/*,.pdf" @change="setFile($event, 'ktp')" />
+				<input ref="ktpInput" type="file" class="hidden" accept="image/png,image/jpeg,image/jpg" @change="setFile($event, 'ktp')" />
 				<div v-if="ktpPreviewUrl" class="mb-3">
 					<button type="button" class="w-full" @click="openImageOptions('ktp', () => openPicker('ktp'))">
 						<img
@@ -70,7 +70,7 @@ defineProps({
 
 			<div>
 				<label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Foto KK</label>
-				<input ref="kkInput" type="file" class="hidden" accept="image/*,.pdf" @change="setFile($event, 'kk')" />
+				<input ref="kkInput" type="file" class="hidden" accept="image/png,image/jpeg,image/jpg" @change="setFile($event, 'kk')" />
 				<div v-if="kkPreviewUrl" class="mb-3">
 					<button type="button" class="w-full" @click="openImageOptions('kk', () => openPicker('kk'))">
 						<img
