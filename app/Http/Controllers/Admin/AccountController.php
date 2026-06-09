@@ -11,6 +11,21 @@ use Illuminate\Validation\Rules\Enum;
 
 class AccountController extends Controller
 {
+    private function calculateBalance(string $noRefAccount, string $category): float
+    {
+        $debit  = \App\Models\JournalEntry::where('no_ref_account', $noRefAccount)
+            ->where('position', \App\Enums\PositionEnum::DEBIT->value)
+            ->sum('nominal');
+
+        $kredit = \App\Models\JournalEntry::where('no_ref_account', $noRefAccount)
+            ->where('position', \App\Enums\PositionEnum::CREDIT->value)
+            ->sum('nominal');
+
+        return in_array($category, ['Aset', 'Beban'])
+            ? $debit - $kredit
+            : $kredit - $debit;
+    }
+
     public function index(Request $request)
     {
         $query = Account::query();
@@ -46,12 +61,15 @@ class AccountController extends Controller
             ->paginate($request->per_page ?? 10)
             ->withQueryString()
             ->through(fn ($akun) => [
-                'id' => $akun->no_ref_account,
+                'id'         => $akun->no_ref_account,
                 'nomor_akun' => $akun->no_ref_account,
-                'nama_akun' => $akun->account_name,
+                'nama_akun'  => $akun->account_name,
                 'jenis_akun' => $akun->account_category,
-                'saldo' => $akun->balance,
-                'status' => $akun->status,
+                'saldo'      => $this->calculateBalance( 
+                                    $akun->no_ref_account,
+                                    $akun->account_category
+                                ),
+                'status'     => $akun->status,
             ]);
 
         $summary = collect(AccountCategoryEnum::cases())
@@ -79,11 +97,26 @@ class AccountController extends Controller
                 ->values(),
 
             'accountSummary' => collect(AccountCategoryEnum::cases())
-                ->map(fn ($item) => [
-                    'name' => $item->value,
-                    'balance' => Account::where('account_category', $item->value)
-                        ->sum('balance'),
-                ])
+                ->map(function ($item) {
+
+                    $accounts = Account::where(
+                        'account_category',
+                        $item->value
+                    )->get();
+
+                    $totalBalance = $accounts->sum(
+                        fn ($akun) =>
+                            $this->calculateBalance(
+                                $akun->no_ref_account,
+                                $akun->account_category
+                            )
+                    );
+
+                    return [
+                        'name' => $item->value,
+                        'balance' => $totalBalance,
+                    ];
+                })
                 ->values(),
         ]);
     }

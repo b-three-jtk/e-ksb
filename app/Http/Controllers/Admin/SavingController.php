@@ -17,6 +17,7 @@ use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Models\Account;
+use App\Models\GlobalSetting;
 use App\Services\Admin\JournalService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -157,7 +158,6 @@ class SavingController extends Controller
         ]);
     }
 
-
     private function exportTitle(string $tab): string
     {
         return match ($tab) {
@@ -245,6 +245,13 @@ class SavingController extends Controller
         ]);
     }
 
+    private function getGlobalSettingValue(string $key): float
+    {
+        return (float) GlobalSetting::where('key', $key)
+            ->latest('effective_date')
+            ->value('value') ?? 0;
+    }
+
     public function createDeposit(Request $request)
     {
         $members = Member::whereIn('status', [
@@ -279,12 +286,36 @@ class SavingController extends Controller
             'members' => $members,
             'saving_types' => SavingTypeEnum::cases(),
             'pengurus' => ['name' => Auth::user()->name ?? 'Pengurus'],
+            'global_saving' => [
+                'pokok' => $this->getGlobalSettingValue('saving_pokok_amount'),
+                'wajib' => $this->getGlobalSettingValue('saving_wajib_amount'),
+            ],
         ]);
+    }
+
+    private function getTrxPrefix(string $category): string
+    {
+        return match ($category) {
+            'Tabungan Anggota' => 'TA',
+            'Simpanan Pokok' => 'SP',
+            'Simpanan Wajib' => 'SW',
+            'Tabungan Berjangka' => 'TB',
+            'Tabungan Ibadah' => 'TI',
+            default => 'ST',
+        };
     }
 
     public function storeDeposit(StoreDepositRequest $request)
     {
         $data = $request->validated();
+
+        if (in_array($data['saving_category'], ['Simpanan Pokok', 'Simpanan Wajib'])) {
+            $data['amount'] = $this->getGlobalSettingValue(
+                $data['saving_category'] === 'Simpanan Pokok'
+                    ? 'saving_pokok_amount'
+                    : 'saving_wajib_amount'
+            );
+        }
 
         $member = Member::with('user')->findOrFail($data['member_id']);
 
@@ -294,8 +325,9 @@ class SavingController extends Controller
                 'saving_type' => $data['saving_category'],
             ],
             [
-                'saving_account_code' => 'SA-' . strtoupper(Str::random(8)),
-                'balance' => 0,
+                'saving_account_code' =>
+                    $this->getTrxPrefix($data['saving_category']) .
+                    '-SA-' . strtoupper(Str::random(6)),
             ]
         );
 
@@ -306,14 +338,35 @@ class SavingController extends Controller
         ]);
 
         if ($data['saving_category'] === 'Simpanan Pokok') {
-            if ($member->status !== MemberStatusEnum::PAYMENT_PENDING->value) {
+
+            $expected = $this->getGlobalSettingValue('saving_pokok_amount');
+
+            if ((float)$data['amount'] != $expected) {
                 throw ValidationException::withMessages([
-                    'saving_category' => 'Simpanan Pokok hanya untuk anggota dengan status Menunggu Pembayaran.'
+                    'amount' => "Simpanan Pokok harus sebesar Rp " . number_format($expected, 0, ',', '.')
                 ]);
             }
+
+            if ($member->status !== MemberStatusEnum::PAYMENT_PENDING->value) {
+                throw ValidationException::withMessages([
+                    'saving_category' => 'Simpanan Pokok hanya untuk anggota Menunggu Pembayaran.'
+                ]);
+            }
+
             if (SavingTransaction::where('saving_account_id', $savingAccount->id)->exists()) {
                 throw ValidationException::withMessages([
                     'saving_category' => 'Simpanan Pokok hanya boleh dibayar sekali.'
+                ]);
+            }
+        }
+
+        if ($data['saving_category'] === 'Simpanan Wajib') {
+
+            $expected = $this->getGlobalSettingValue('saving_wajib_amount');
+
+            if (abs((float)$data['amount'] - (float)$expected) > 0.01) {
+                throw ValidationException::withMessages([
+                    'amount' => "Simpanan Wajib harus sebesar Rp " . number_format($expected, 0, ',', '.')
                 ]);
             }
         }
@@ -336,15 +389,17 @@ class SavingController extends Controller
         }
 
         if ($data['saving_category'] === 'Tabungan Berjangka') {
-            BerjangkaAccount::updateOrCreate([
-                'saving_account_id' => $savingAccount->id,
-            ], [
-                'tenor' => $data['tenor_months'] ?? null,
-                'purpose' => $data['purpose'] ?? null,
-            ]);
 
-            if (!$data['tenor_months']) {
-                throw ValidationException::withMessages(['tenor_months' => 'Tenor bulan wajib diisi untuk Tabungan Berjangka.']);
+            $existing = SavingAccount::where('member_id', $member->id)
+                ->where('saving_type', 'Tabungan Berjangka')
+                ->first();
+
+            if ($existing) {
+                if (SavingTransaction::where('saving_account_id', $existing->id)->exists()) {
+                    throw ValidationException::withMessages([
+                        'saving_category' => 'Tabungan Berjangka hanya boleh setor sekali (deposito).'
+                    ]);
+                }
             }
         }
 
@@ -352,7 +407,7 @@ class SavingController extends Controller
 
         $transaction = DB::transaction(function () use ($data, $savingAccount, $member) {
             $trx = SavingTransaction::create([
-                'saving_transaction_code' => 'ST' . strtoupper(Str::random(8)),
+                'saving_transaction_code' => $this->getTrxPrefix($data['saving_category']) . strtoupper(Str::random(8)),
                 'saving_amount' => $data['amount'],
                 'balance_after_transaction' => $savingAccount->balance + $data['amount'],
                 'transaction_type' => TransactionTypeEnum::DEPOSIT->value,
@@ -416,7 +471,7 @@ class SavingController extends Controller
             'metode' => $transaction->saving_payment_method,
             'nominal' => $transaction->saving_amount,
             'saldo_sebelum' => $prevBalance,
-            'saldo_sesudah' => $prevBalance + $request->amount,
+            'saldo_sesudah' => $prevBalance + $transaction->saving_amount,
             'purpose' => $data['purpose'] ?? null,
         ];
 
