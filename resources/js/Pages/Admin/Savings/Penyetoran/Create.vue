@@ -73,7 +73,7 @@ watch(memberQuery, val => {
 })
 
 const jenisSimpanan  = ref('')
-const selectedPurpose = ref('')
+const selectedAccountId = ref('')
 const isCreatingNew   = ref(false)
 const purposeInput    = ref('')
 const nominalRaw     = ref('')
@@ -113,7 +113,7 @@ watch(jenisSimpanan, () => {
 })
 
 watch(jenisSimpanan, () => {
-  selectedPurpose.value = ''
+  selectedAccountId.value = '' 
   isCreatingNew.value   = false
   purposeInput.value    = ''
   tenorMonths.value     = ''
@@ -190,9 +190,9 @@ function onTargetInput(e) {
 const selectedAccount = computed(() => {
   if (!selectedMember.value) return null
   if (isMultiAccountType.value) {
-    if (isCreatingNew.value || !selectedPurpose.value) return null
+    if (isCreatingNew.value || !selectedAccountId.value) return null
     return (selectedMember.value.savingAccounts || []).find(
-      acc => acc.type === jenisSimpanan.value && acc.purpose === selectedPurpose.value
+      acc => acc.id === selectedAccountId.value
     )
   }
   return (selectedMember.value.savingAccounts || []).find(
@@ -216,10 +216,10 @@ const errorsForm = computed(() => {
   if (tanggalSetor.value > today())  e.tanggal = 'Tanggal tidak boleh di masa depan'
 
   if (isMultiAccountType.value) {
-    if (!isCreatingNew.value && !selectedPurpose.value)
+    if (!isCreatingNew.value && !selectedAccountId.value)
       e.purpose = 'Pilih tujuan tabungan atau buat baru'
     if (isCreatingNew.value) {
-      if (!purposeInput.value) e.purpose = 'Tujuan tabungan wajib diisi'
+      if (!purposeInput.value) e.purposeInput = 'Tujuan tabungan wajib diisi'
       if (jenisSimpanan.value === 'Tabungan Berjangka' && !tenorMonths.value)
         e.tenor = 'Jatuh tempo wajib diisi'
       if (jenisSimpanan.value === 'Tabungan Ibadah' && !targetAmount.value)
@@ -237,13 +237,32 @@ const errorsForm = computed(() => {
 const isFormValid = computed(() => Object.keys(errorsForm.value).length === 0)
 
 function selectAccount(acc) {
-  selectedPurpose.value = acc.purpose
+  selectedAccountId.value = acc.id
   isCreatingNew.value = false
 }
 
 // Struk
 const showStruk = ref(false)
 const dataStruk = ref(null)
+
+function resetForm() {
+  selectedMember.value  = null
+  memberQuery.value     = ''
+  jenisSimpanan.value   = ''
+  selectedAccountId.value = '' 
+  isCreatingNew.value   = false
+  purposeInput.value    = ''
+  nominalRaw.value      = ''
+  nominalDisplay.value  = ''
+  tanggalSetor.value    = today()
+  catatan.value         = ''
+  depositMethod.value   = 'Tunai'
+  tenorMonths.value     = ''
+  targetAmount.value    = ''
+  targetDisplay.value   = ''
+  errorNominal.value    = ''
+  errorTarget.value     = ''
+}
 
 // Submit
 function bukaDialog() {
@@ -290,6 +309,9 @@ async function handleConfirm() {
 }
 
 function submitDeposit() {
+  console.log('selectedAccount:', selectedAccount.value)
+  console.log('isCreatingNew:', isCreatingNew.value)
+  console.log('savingAccounts:', selectedMember.value?.savingAccounts)
   if (!selectedMember.value) return
 
   const formData = new FormData()
@@ -315,7 +337,7 @@ function submitDeposit() {
           'purpose',
           isCreatingNew.value
               ? purposeInput.value
-              : selectedPurpose.value
+              : selectedAccount.value?.purpose 
       )
   }
 
@@ -340,19 +362,12 @@ function submitDeposit() {
 
     onSuccess: (page) => {
       Swal.close()
-
       showDialog.value = false
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil',
-        text: 'Penyetoran berhasil diposting'
-      })
-
+      toast.success('Penyetoran berhasil diposting', { position: 'bottom-right' })
       dataStruk.value = page.props.struk
       showStruk.value = true
-
       resetForm()
+      router.reload({ only: ['members'] })  // ← tambah ini
     },
 
     onError: (errors) => {
@@ -360,11 +375,7 @@ function submitDeposit() {
 
       const msg = Object.values(errors).flat().join('\n')
 
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal',
-        text: msg || 'Gagal menyimpan transaksi'
-      })
+      toast.error(msg || 'Gagal menyimpan transaksi', {position: 'bottom-right'})
     }
   })
 }
@@ -571,7 +582,7 @@ const akadType = computed(() => {
                         @click="!acc.is_frozen && !acc.is_matured && selectAccount(acc)"
                         class="p-3 border rounded-lg"
                         :class="[
-                          selectedPurpose === acc.purpose
+                          selectedAccountId === acc.id
                             ? 'border-secondary bg-blue-50'
                             : '',
                           acc.is_frozen || acc.is_matured
@@ -581,7 +592,7 @@ const akadType = computed(() => {
                       >
                         <input
                           type="radio"
-                          :checked="selectedPurpose === acc.purpose"
+                          :checked="selectedAccountId === acc.id"
                           @change="selectAccount(acc)"
                           class="mt-0.5 text-secondary"
                         />
@@ -617,7 +628,7 @@ const akadType = computed(() => {
                       >
                         <button
                           type="button"
-                          @click="isCreatingNew = true; selectedPurpose = ''"
+                          @click="isCreatingNew = true; selectedAccountId = ''"
                           class="w-full flex items-center justify-center gap-2 p-3 border border-dashed
                                 rounded-lg text-primary hover:bg-stroke dark:hover:bg-blue-900/20"
                         >
@@ -647,10 +658,13 @@ const akadType = computed(() => {
                           placeholder="Contoh: Haji 2027, Umroh bersama keluarga..."
                           class="w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700
                                 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors"
-                          :class="errorsForm.purpose
+                          :class="errorsForm.purposeInput
                             ? 'border-red-400 focus:ring-red-400'
                             : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
                         />
+                        <p v-if="errorsForm.purposeInput" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                          <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.purposeInput }}
+                        </p>
                       </div>
 
                       <!-- Tabungan Berjangka — Jatuh Tempo -->
