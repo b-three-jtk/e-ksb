@@ -81,10 +81,11 @@ export function useUserValidation(form: any, options: UserValidationOptions = {}
     watch(
         () => form.phone_number,
         (v) => {
-            const value = v?.trim() || "";
+            const value = (v ?? "").toString().trim();
+            const normalized = value.startsWith('0') ? `62${value.slice(1)}` : value.startsWith('62') ? value : `62${value}`;
 
-            if (!/^\+?\d{6,20}$/.test(value)) {
-                errors.phone_number = "Format nomor telepon tidak valid";
+            if (!/^62\d{8,15}$/.test(normalized)) {
+                errors.phone_number = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
             } else {
                 errors.phone_number = "";
             }
