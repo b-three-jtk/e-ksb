@@ -29,7 +29,7 @@ class AuthenticationController extends Controller
 
         if (!$user) {
             throw ValidationException::withMessages([
-                'user_code' => 'Nomor anggota atau password tidak sesuai.',
+                'user_code' => 'Kode pengguna atau password tidak sesuai.',
             ]);
         }
 
@@ -42,7 +42,7 @@ class AuthenticationController extends Controller
 
         if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
-                'user_code' => 'Nomor anggota atau password tidak sesuai.',
+                'user_code' => 'Kode pengguna atau password tidak sesuai.',
             ]);
         }
 
