@@ -24,8 +24,8 @@ class UpdateAdminRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'nik' => 'required|string|digits:16|unique:users,nik,' . $this->route('id'),
-            'email' => 'required|email|max:255|unique:users,email,' . $this->route('id'),
-            'phone_number' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255|unique:users,email,' . $this->route('id'),
+            'phone_number' => 'required|string|max:20',
             'role_id' => 'nullable|exists:roles,id',
         ];
     }

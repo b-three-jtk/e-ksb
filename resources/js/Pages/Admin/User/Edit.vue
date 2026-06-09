@@ -137,9 +137,9 @@ const submitForm = () => {
                         required :errors="errors.name" @input="onlyAlpha" />
                     <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" v-model="form.nik" max="16" required
                         :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" />
-                    <BaseInputAdmin label="Email" placeholder="Masukkan email" v-model="form.email" required
+                    <BaseInputAdmin label="Email" placeholder="Masukkan email" v-model="form.email"
                         :errors="errors.email" type="email" />
-                    <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="13"
+                    <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="14"
                         v-model="form.phone_number" :errors="errors.phone_number" @input="onlyNumbers"
                         inputmode="numeric" />
                     <BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required :selectables="[
