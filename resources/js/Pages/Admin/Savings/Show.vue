@@ -85,11 +85,6 @@ const openModalBukti = () => modalRef.value?.openModal()
                                     <span class="font-medium text-dark-text dark:text-white">{{ data.saving_description ?? '-'
                                     }}</span>
                                 </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Poin Didapatkan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.point.amount_earned ?? '-'
-                                    }}</span>
-                                </li>
                             </ul>
                         </div>
                     </div>

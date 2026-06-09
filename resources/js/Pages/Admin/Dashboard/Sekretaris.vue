@@ -14,7 +14,7 @@ const props = defineProps({
 <template>
     <div class="grid grid-cols-5 gap-3.5">
         <SkeletonChartCard v-if="!pertumbuhan_anggota" class="col-span-3" :bars="12" :legend="2" />
-        <div class="card-layout col-span-3">
+        <div v-else class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pertumbuhan Anggota</h1>
             <AreaChart :data="pertumbuhan_anggota" />
         </div>
@@ -60,7 +60,7 @@ const props = defineProps({
                             <div class="flex flex-col">
                                 <h2 class="text-lg font-medium">Tambah Pengurus Baru</h2>
                                 <p class="text-gray-500 text-sm font-body">Registrasi pengurus koperasi baru di sini</p>
-                            </div>
+                        </div>
                         </div>
                         <div class="text-secondary text-3xl">
                             <span class="icon-[material-symbols--chevron-right-rounded]"></span>

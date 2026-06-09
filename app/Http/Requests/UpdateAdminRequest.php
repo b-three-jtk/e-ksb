@@ -24,15 +24,9 @@ class UpdateAdminRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'nik' => 'required|string|digits:16|unique:users,nik,' . $this->route('id'),
-            'birth_place' => 'nullable|string|max:255',
-            'birth_date' => 'nullable|date',
-            'gender' => 'nullable|in:Laki-laki,Perempuan',
-            'email' => 'required|email|max:255|unique:users,email,' . $this->route('id'),
-            'phone_number' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:500',
-            'residential_address' => 'nullable|string|max:500',
+            'email' => 'nullable|email|max:255|unique:users,email,' . $this->route('id'),
+            'phone_number' => 'required|string|max:20',
             'role_id' => 'nullable|exists:roles,id',
-            'last_education' => 'nullable|string|max:255',
         ];
     }
 }

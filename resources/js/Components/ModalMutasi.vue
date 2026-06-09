@@ -75,7 +75,7 @@ defineExpose({ openModal, closeModal })
                     <span :class="transaction.type === 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
                         class="font-semibold">
                         {{ transaction.type === 'Penyetoran' ? '+' : '-' }}
-                        {{ parseCurrencyAmount(transaction.amount) }}
+                        {{ parseCurrencyAmount(transaction.saving_amount) }}
                     </span>
                 </li>
             </ul>

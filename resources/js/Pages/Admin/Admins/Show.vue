@@ -10,8 +10,8 @@ const props = defineProps({
 
 const breadcrumbItems = [
     {name: 'Dashboard', link: '/admin'},
-    {name: 'Admin', link: '/admin/list'},
-    {name: 'Detail Admin'},
+    {name: 'Pengurus', link: '/admin/list'},
+    {name: 'Detail Pengurus'},
 ];
 
 console.log(props.user);
@@ -19,9 +19,9 @@ console.log(props.user);
 </script>
 
 <template>
-    <AdminLayout title="Detail Admin">
+    <AdminLayout title="Detail Pengurus">
         <div class="flex flex-col">
-            <PageBreadcrumb :page-title="'Detail Admin'" :items="breadcrumbItems" />
+            <PageBreadcrumb :page-title="'Detail Pengurus'" :items="breadcrumbItems" />
             <div class="flex flex-col gap-6">
                 <div class="card-layout flex justify-between items-center">
                     <div class="flex gap-6">

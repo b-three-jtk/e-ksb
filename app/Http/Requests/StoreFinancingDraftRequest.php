@@ -63,7 +63,6 @@ class StoreFinancingDraftRequest extends FormRequest
             // Financing data
             'financing.name' => 'nullable|string|max:255',
             'financing.product_type_id' => 'nullable|exists:product_types,id',
-            'financing.brand' => 'nullable|string|max:255',
             'financing.condition' => 'nullable|string|max:255',
             'financing.qty' => 'nullable|integer|min:1',
             'financing.specification' => 'nullable|string|max:1000',
@@ -78,6 +77,7 @@ class StoreFinancingDraftRequest extends FormRequest
             'financing.tenor' => 'nullable|integer',
             'financing.predicted_cost_price' => 'nullable|numeric|min:0',
             'financing.akad_wakalah_date' => 'nullable|date',
+            'financing.supplier_id' => 'nullable|exists:suppliers,id',
 
             // Collateral data
             'collateral.collateral_type' => 'nullable|string|max:255',

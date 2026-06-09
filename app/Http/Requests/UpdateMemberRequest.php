@@ -27,7 +27,7 @@ class UpdateMemberRequest extends FormRequest
         return [
             'nik' => 'required|digits:16|unique:users,nik,' . $this->route('id'),
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $this->route('id'),
+            'email' => 'nullable|email|max:255|unique:users,email,' . $this->route('id'),
             'phone_number' => 'required|string|max:20',
             'gender' => 'required|in:'. implode(',', ['Laki-laki', 'Perempuan']),
             'birth_place' => 'nullable|string|max:255',

@@ -1,29 +1,28 @@
 <?php
 
 use App\Enums\UserRoleEnum;
+use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\CashFlowController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinancingController;
-use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ProductTypeController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ResignationController;
-use App\Http\Controllers\Admin\SavingController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\AuthenticationController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\User\SavingController as UserSavingController;
-use App\Http\Controllers\User\MemberController;
-use App\Http\Controllers\User\FinancingController as UserFinancingController;
-use App\Http\Controllers\Admin\AccountController;
-use App\Http\Controllers\Admin\CashFlowController;
-use App\Http\Controllers\User\UserController as UserUserController;
-// use App\Http\Controllers\User\UserFinancingController;
-use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SavingController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\SupplierController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\AuthenticationController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\User\FinancingController as UserFinancingController;
+use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\NotificationController as UserNotificationController;
-// use App\Http\Controllers\User\UserFinancingController;
+use App\Http\Controllers\User\SavingController as UserSavingController;
+use App\Http\Controllers\User\UserController as UserUserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -101,6 +100,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/accounts/{id}/mutasi', [UserController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
     Route::get('/financings/{id}/history', [UserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
 
+
     // Pengelolaan Pengurus
     Route::get('/list', [AdminController::class, 'index'])->middleware('permission:view_pengurus')->name('admin.index');
     Route::get('/create', [AdminController::class, 'create'])->middleware('permission:create_pengurus')->name('admin.create');
@@ -135,6 +135,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/financings/finalize', [FinancingController::class, 'finalize'])->middleware('permission:create_murabahah')->name('financings.finalize');
     Route::post('/financings/store', [FinancingController::class, 'store'])->middleware('permission:create_murabahah')->name('financings.store');
     Route::resource('product-types', ProductTypeController::class)->middleware('permission:create_murabahah');
+    Route::resource('suppliers', SupplierController::class)->middleware('permission:create_murabahah');
     Route::get('/financings/draft/{id}', [FinancingController::class, 'loadDraft'])->middleware('permission:create_murabahah')->name('financings.load-draft');
     Route::get('/financings/validation/{id}', [FinancingController::class, 'showValidation'])->middleware('permission:approve_murabahah')->name('financings.validation');
     Route::put('/financings/validate/{id}', [FinancingController::class, 'validate'])->middleware('permission:approve_murabahah')->name('financings.validation.submit');
@@ -156,8 +157,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/kas/list', [CashflowController::class, 'index'])->name('kas.list');
     Route::post('/kas/store', [CashflowController::class, 'store'])->name('kas.store');
     Route::get('/kas/export/csv',[CashflowController::class, 'exportCsv'])->name('kas.export.csv');
-
-
 
     // Pengaturan Umum
     Route::middleware('role:' . UserRoleEnum::KETUA->value)->group(function () {

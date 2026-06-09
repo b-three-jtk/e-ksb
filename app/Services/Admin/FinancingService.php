@@ -151,7 +151,7 @@ class FinancingService
                 'condition'       => $financingData['condition'] ?? null,
                 'price_per_unit'  => $financingData['price_per_unit'] ?? null,
                 'product_type_id' => $financingData['product_type_id'] ?? null,
-                'supplier_id'     => $supplier?->id,
+                'supplier_id'     => $financingData['supplier_id'] ?? null,
             ]
         );
 

@@ -61,7 +61,7 @@ const menuGroups = [
                 icon: PersonAlertIcon,
                 name: "Pengunduran Diri",
                 path: "/admin/resignations/list",
-                permission: "view_anggota"
+                permission: "view_pengunduran_diri"
             },
             {
                 icon: EmployeeIcon,

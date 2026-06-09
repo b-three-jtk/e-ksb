@@ -59,6 +59,8 @@ const columns = [
 
 const page = usePage()
 
+const can = computed(() => page.props.auth.can);
+
 const filters = reactive({
     search:   page.props.filters?.search ?? '',
     per_page: page.props.filters?.per_page ?? 10,
@@ -176,7 +178,7 @@ const handleAction = (type) => {
 
                 <!-- Button + Dropdown -->
                 <div class="relative">
-                    <button
+                    <button v-if="can['create_simpanan']"
                         @click="openActionDropdown = !openActionDropdown"
                         class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-secondary rounded-lg hover:bg-primary transition"
                     >

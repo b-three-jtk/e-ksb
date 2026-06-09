@@ -117,7 +117,7 @@ const submitForm = () => {
                         "transition": "slide",
                         "dangerouslyHTMLString": true
                     }).then(() => {
-                        window.location.href = route('admin.index')
+                        window.location.href = route('admin.admin.index')
                     })
                 },
                 onError: (errors) => {
@@ -208,7 +208,7 @@ const submitForm = () => {
                         </BaseInputAdmin>
 
                         <!-- Email -->
-                        <BaseInputAdmin v-model="form.email" label="Email" type="email" required
+                        <BaseInputAdmin v-model="form.email" label="Email" type="email"
                             placeholder="Masukkan email" :error="errors.email" :disabled="isEditingExistingMember">
                         </BaseInputAdmin>
 

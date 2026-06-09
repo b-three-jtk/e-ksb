@@ -174,6 +174,7 @@ class FinancingController extends Controller
             'relationships' => array_column(HeirEnum::cases(), 'value'),
             'conditions' => array_column(ConditionEnum::cases(), 'value'),
             'productTypes' => DB::table('product_types')->select('id', 'product_type_name')->get(),
+            'suppliers' => DB::table('suppliers')->select('id', 'supplier_name', 'address')->get(),
         ];
     }
 
@@ -230,8 +231,9 @@ class FinancingController extends Controller
 
         if ($installment && $installment->count() > 0) {
             $paid_count = $installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
-            $total_paid = $paid_count * ($financing->margin_amount + $financing->cost_price - $financing->down_payment / $financing->tenor);
-
+            $total_paid = $financing->tenor > 0
+                ? $paid_count * (($financing->margin_amount ?? 0) + ($financing->cost_price ?? 0) - ($financing->down_payment ?? 0)) / $financing->tenor
+                : 0;
             $financing->remaining_balance = $financing->total_price - $total_paid;
             $financing->total_paid = $total_paid;
 
@@ -305,7 +307,7 @@ class FinancingController extends Controller
                     ->isNotEmpty();
 
                 $member->is_have_eligible_saving = $hasEligibleSaving;
-                $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
+                $member->family_card = $member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kk')->first()->doc_attachment) : null;
                 $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
                 $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
 
@@ -372,7 +374,7 @@ class FinancingController extends Controller
                     'collateral_location' => $financing->collateral?->collateral_location,
                 ],
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                     'purchase_receipt' => $this->getDocumentUrl($financing->financingItem->purchase_receipt),
@@ -438,7 +440,7 @@ class FinancingController extends Controller
                     'collateral_location' => $financing->collateral?->collateral_location,
                 ],
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                 ],
@@ -536,9 +538,14 @@ class FinancingController extends Controller
             }
 
             return redirect()->route('admin.financings.index')->with('success', 'Keputusan validasi berhasil disimpan');
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (Exception $e) {
             Log::error('Error validating financing: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Gagal menyimpan keputusan validasi']);
+
+            return back()->withErrors([
+                'error' => 'Gagal menyimpan keputusan validasi'
+            ]);
         }
     }
 
@@ -877,7 +884,7 @@ class FinancingController extends Controller
                     ->exists();
 
                 $member->is_have_eligible_saving = $hasEligibleSaving;
-                $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
+                $member->family_card = $member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kk')->first()->doc_attachment) : null;
                 $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
                 $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
 
@@ -942,14 +949,26 @@ class FinancingController extends Controller
             'installment',
         ]);
 
-        $lastPaidNo = Installment::where('financing_id', $financing->id)
-            ->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)
-            ->max('installment_no') ?? 0;
+        $paidStatuses = [
+            InstallmentPaymentScheduleStatusEnum::PAID->value,
+            InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
+        ];
 
-        $installment = Installment::where('financing_id', $financing->id)
-            ->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)
-            ->orderBy('installment_no', 'asc')
-            ->first();
+        $installment = Installment::where(
+            'financing_id',
+            $financing->id
+        )
+        ->whereNotIn('status', $paidStatuses)
+        ->orderBy('installment_no')
+        ->first();
+
+        $nextInstallment = Installment::where(
+            'financing_id',
+            $financing->id
+        )
+        ->where('installment_no', '>', $installment?->installment_no)
+        ->orderBy('installment_no')
+        ->first();
 
         $paymentCount =
             InstallmentPaymentTransaction::where(
@@ -1020,10 +1039,13 @@ class FinancingController extends Controller
                     'next_installment_number' =>
                         $installment?->installment_no,
 
+                    'current_due_date' =>
+                        $installment?->due_date?->format('Y-m-d'),
+
                     'payment_count' => $paymentCount + 1,
 
                     'next_due_date' =>
-                        $installment?->due_date?->format('Y-m-d'),
+                        $nextInstallment?->due_date?->format('Y-m-d'),
 
                     'financing_id' =>
                         $financing->id,
@@ -1086,9 +1108,35 @@ class FinancingController extends Controller
             );
 
             $installment = Installment::findOrFail($validated['installment_id']);
+            $paymentDate = \Carbon\Carbon::parse(
+                $validated['payment_date']
+            );
+
+            $dueDate = $installment->due_date;
+
+            $status =
+                $paymentDate->startOfDay()
+                    ->gt(
+                        $dueDate->copy()->startOfDay()
+                    )
+                    ? InstallmentPaymentScheduleStatusEnum::OVERDUE->value
+                    : InstallmentPaymentScheduleStatusEnum::PAID->value;
+
             $installment->update([
-                'status' => InstallmentPaymentScheduleStatusEnum::PAID->value,
+                'status' => $status,
             ]);
+
+            $nextInstallment = Installment::where(
+                'financing_id',
+                $financing->id
+            )
+            ->where(
+                'installment_no',
+                '>',
+                $installment->installment_no
+            )
+            ->orderBy('installment_no')
+            ->first();
 
             $hargaJual    = $financing->cost_price + $financing->margin_amount;
             $totalTerbayar = InstallmentPaymentTransaction::whereHas('installment', function ($q) use ($financing) {
@@ -1143,7 +1191,11 @@ class FinancingController extends Controller
                 'total_angsuran'  => $payment->nominal,
                 'sisa_hutang'     => max($sisa, 0),
                 'status'          => max($sisa, 0) <= 0 ? 'Lunas' : 'Belum Lunas',
-                'jatuh_tempo'     => now()->addMonth()->translatedFormat('d F Y'),
+                'jatuh_tempo' =>
+                    $nextInstallment
+                        ? $nextInstallment->due_date
+                            ->translatedFormat('d F Y')
+                        : '-',
                 'catatan'         => 'Dasar akad yang digunakan adalah akad murabahah yang merupakan kontrak jual beli syariah.',
                 'tanggal_cetak'   => now()->translatedFormat('d F Y'),
             ];
@@ -1179,18 +1231,41 @@ class FinancingController extends Controller
     {
         $validated = $request->validate([
             'installment_id' => 'required|exists:installments,id',
-            'due_date' => 'required|date',
+            'due_date' => [
+                'required',
+                'date',
+                'after_or_equal:today',
+            ],
         ]);
 
         try {
 
-            $installment = Installment::findOrFail(
+            $currentInstallment = Installment::findOrFail(
                 $validated['installment_id']
             );
 
-            $installment->update([
-                'due_date' => $validated['due_date'],
-            ]);
+            $newDate = Carbon::parse($validated['due_date']);
+
+            Installment::where(
+                'financing_id',
+                $financing->id
+            )
+            ->where(
+                'installment_no',
+                '>=',
+                $currentInstallment->installment_no
+            )
+            ->orderBy('installment_no')
+            ->get()
+            ->each(function ($item, $index) use ($newDate) {
+
+                $item->update([
+                    'due_date' => $newDate
+                        ->copy()
+                        ->addMonths($index)
+                ]);
+
+            });
 
             return redirect("/admin/financings/show/{$financing->id}")
                 ->with(

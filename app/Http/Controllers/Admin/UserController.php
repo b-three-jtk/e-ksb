@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\EducationEnum;
 use App\Enums\HeirEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
@@ -19,8 +20,8 @@ use App\Services\Admin\RegisterMemberService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Log;
 use RuntimeException;
 
 class UserController extends Controller
@@ -203,17 +204,19 @@ class UserController extends Controller
 
         $user->profile_picture = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
         if ($user->member) {
-            $ktpDoc = $user->member->memberDocs?->firstWhere('name', 'ktp');
-            $kkDoc = $user->member->memberDocs?->firstWhere('name', 'kk');
+            $ktpDoc = $user->member->memberDocs->where('doc_name', 'ktp')->first();
+            $kkDoc = $user->member->memberDocs->where('doc_name', 'kk')->first();
+
+            Log::info('ktp doc: ' . ($ktpDoc?->doc_attachment ?? 'null'));
 
             if ($user->member->financings) {
                 $user->member->financings->each(function ($financing) {
-                    $financing->installment_payment_paid_count = $financing->installment?->payment?->count() ?? 0;
+                    $financing->installment_payment_paid_count = $financing->installment?->where('status', InstallmentPaymentScheduleStatusEnum::PAID)->count() ?? 0;
                     $financing->next_payment = $financing->installment?->sortBy('payment_date')
                         ->first();
                     $financing->total_price = $financing->cost_price + $financing->margin_amount - $financing->down_payment;
-                    $financing->monthly_installment = $financing->installment?->tenor > 0
-                        ? ($financing->cost_price + $financing->margin_amount) / $financing->installment?->tenor
+                    $financing->monthly_installment = $financing->tenor > 0
+                        ? ($financing->cost_price + $financing->margin_amount) / $financing->tenor
                         : null;
                     $financing->remaining_total = $financing->total_price - ($financing->installment_payment_paid_count * ($financing->monthly_installment ?? 0));
                 });
@@ -222,8 +225,8 @@ class UserController extends Controller
 
         return inertia('Admin/User/Show', [
             'user' => $user,
-            'ktp_photo' => $ktpDoc?->attachment ? asset('storage/' . $ktpDoc->attachment) : null,
-            'kk_photo' => $kkDoc?->attachment ? asset('storage/' . $kkDoc->attachment) : null,
+            'ktp_photo' => $ktpDoc?->doc_attachment ? asset('storage/' . $ktpDoc->doc_attachment) : null,
+            'kk_photo' => $kkDoc?->doc_attachment ? asset('storage/' . $kkDoc->doc_attachment) : null,
         ]);
     }
 
@@ -322,10 +325,14 @@ class UserController extends Controller
     public function getRiwayat($financingId)
     {
         $financing = Financing::with([
-            'installment.paymentSchedules.payment' => fn($q) => $q->latest('payment_date')
+            'installment.payment' => fn($q) => $q->latest('payment_date')
         ])->findOrFail($financingId);
 
-        return response()->json($financing->installment->paymentSchedules);
+        if (!$financing->installment->payment) {
+            return response()->json([]);
+        }
+
+        return response()->json($financing->installment->payment);
     }
 
     public function verificationDetail(User $user)

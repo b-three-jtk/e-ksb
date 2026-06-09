@@ -9,6 +9,12 @@ import EyeIcon from '@/Icons/EyeIcon.vue';
 import FinancingChart from '@/Components/FinancingChart.vue';
 import NoArchiveIcon from '@/Icons/NoArchiveIcon.vue';
 import useFinancingStatus from '@/Composables/useFinancingStatus.js';
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+
+const can = computed(() => page.props.auth.can);
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -57,11 +63,11 @@ const breadcrumbItems = [
                 <div class="flex justify-between items-center">
                     <h1>Ringkasan Pembiayaan</h1>
                     <div class="flex items-center gap-4">
-                        <Button v-if="data.installment && data.status == 'Angsuran Berjalan'" :href="`/admin/financings/repayment/${data.id}`" variant="secondary" size="small">
+                        <Button v-if="can['edit_murabahah'] && data.installment && data.status == 'Angsuran Berjalan'" :href="`/admin/financings/repayment/${data.id}`" variant="secondary" size="small">
                             <span class="icon-[tabler--moneybag-move]" style="width: 18px; height: 18px;"></span>
                             Pelunasan Dipercepat
                         </Button>
-                        <Button v-if="data.installment && data.status == 'Angsuran Berjalan'" :href="`/admin/financings/${data.id}/payments/create`" variant="info" size="small">
+                        <Button v-if="can['edit_murabahah'] && data.installment && data.status == 'Angsuran Berjalan'" :href="`/admin/financings/${data.id}/payments/create`" variant="info" size="small">
                             <span class="icon-[tabler--credit-card-pay]" style="width: 18px; height: 18px;"></span>
                             Bayar Tagihan
                         </Button>
