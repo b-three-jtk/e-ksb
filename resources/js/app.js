@@ -4,6 +4,7 @@ import ThemeProvider from '@/Layouts/Admin/ThemeProvider.vue'
 import SidebarProvider from '@/Layouts/Admin/SidebarProvider.vue'
 import "vue3-toastify/dist/index.css";
 import '@vuepic/vue-datepicker/dist/main.css'
+import '../css/app.css'
 
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'

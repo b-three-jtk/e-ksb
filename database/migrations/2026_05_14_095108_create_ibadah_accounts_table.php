@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('ibadah_accounts', function (Blueprint $table) {
             $table->id();
-            $table->integer('tenor');
             $table->decimal('target_amount', 15, 2);
+            $table->string('purpose');
             $table->uuid('saving_account_id');
 
             $table->foreign('saving_account_id')->references('id')->on('saving_accounts')->onDelete('cascade');

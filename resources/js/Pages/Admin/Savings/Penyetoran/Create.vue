@@ -16,6 +16,7 @@ const props = defineProps({
     pengurus: { type: Object, required: true },
     global_saving: { type: Object, required: true },
 })
+console.log(props.members[0].savingAccounts)
 
 const filteredSavingTypes = computed(() => {
   if (!selectedMember.value) return []
@@ -27,7 +28,9 @@ const filteredSavingTypes = computed(() => {
   }
 
   if (selectedMember.value.status === 'Aktif') {
-    return types.filter(j => j !== 'Simpanan Pokok')
+    return types.filter(
+      j => j !== 'Simpanan Pokok'
+    )
   }
 
   return []
@@ -70,7 +73,7 @@ watch(memberQuery, val => {
 })
 
 const jenisSimpanan  = ref('')
-const selectedPurpose = ref('')
+const selectedAccountId = ref('')
 const isCreatingNew   = ref(false)
 const purposeInput    = ref('')
 const nominalRaw     = ref('')
@@ -85,15 +88,6 @@ const errorNominal   = ref('')
 const tenorMonths  = ref('')
 const targetAmount = ref('')
 const targetDisplay = ref('')
-
-//Non-tunai
-// const bankName      = ref('')
-// const accountName   = ref('')
-// const accountNumber = ref('')
-// const paymentFile   = ref(null)
-// const paymentProof  = ref(null)
-// const errorFile     = ref('')
-// const fileInput     = ref(null)
 
 // Dialog & konfirmasi
 const showDialog        = ref(false)
@@ -119,7 +113,7 @@ watch(jenisSimpanan, () => {
 })
 
 watch(jenisSimpanan, () => {
-  selectedPurpose.value = ''
+  selectedAccountId.value = '' 
   isCreatingNew.value   = false
   purposeInput.value    = ''
   tenorMonths.value     = ''
@@ -137,7 +131,7 @@ watch(jenisSimpanan, () => {
 
 const existingAccounts = computed(() => {
   if (!selectedMember.value) return []
-  const accounts = selectedMember.value.savingAccounts || []
+  const accounts = selectedMember.value.savingAccounts ?? []
   if (!['Tabungan Ibadah', 'Tabungan Berjangka'].includes(jenisSimpanan.value)) return []
   return accounts.filter(acc => acc.type === jenisSimpanan.value)
 })
@@ -145,26 +139,6 @@ const existingAccounts = computed(() => {
 const isMultiAccountType = computed(() =>
   ['Tabungan Ibadah', 'Tabungan Berjangka'].includes(jenisSimpanan.value)
 )
-
-// watch(depositMethod, val => {
-//   if (val === 'Tunai') resetNonTunai()
-// })
-
-// watch(accountName, val => {
-//   const acc = filteredAccounts.value.find(a => a.account_name === val)
-//   if (acc) {
-//     accountNumber.value = acc.account_number
-//     bankName.value      = acc.bank_name
-//   }
-// })
-
-// watch(accountNumber, val => {
-//   const acc = filteredAccounts.value.find(a => a.account_number === val)
-//   if (acc) {
-//     accountName.value = acc.account_name
-//     bankName.value    = acc.bank_name
-//   }
-// })
 
 function today() {
   const d     = new Date()
@@ -213,49 +187,12 @@ function onTargetInput(e) {
   targetDisplay.value = raw ? formatRp(raw) : ''
 }
 
-// function resetNonTunai() {
-//   bankName.value = accountName.value = accountNumber.value = ''
-//   paymentFile.value = paymentProof.value = null
-//   errorFile.value = ''
-//   if (fileInput.value) fileInput.value.value = ''
-// }
-
-// const bankOptions = ['BCA','BNI','BRI','Mandiri','BTN','CIMB Niaga','Permata','Danamon','BSI','BJB']
-
-// const filteredAccounts = computed(() => {
-//   if (!selectedMember.value) return []
-
-//   return props.accounts.filter(
-//     acc => acc.member_id === selectedMember.value.id
-//   )
-// })
-
-// const accountNameOptions   = computed(() => filteredAccounts.value.map(a => a.account_name))
-// const accountNumberOptions = computed(() => filteredAccounts.value.map(a => a.account_number))
-
-// function handleFileUpload(e) {
-//   const file  = e.target.files[0]
-//   if (!file) return
-//   const valid = ['image/jpeg','image/png','image/jpg','application/pdf']
-//   if (!valid.includes(file.type)) { errorFile.value = 'Hanya JPG, PNG, atau PDF'; return }
-//   if (file.size > 2 * 1024 * 1024) { errorFile.value = 'Maksimal 2 MB'; return }
-//   paymentFile.value  = file
-//   paymentProof.value = URL.createObjectURL(file)
-//   errorFile.value    = ''
-// }
-
-// function removeFile() {
-//   paymentFile.value = paymentProof.value = null
-//   errorFile.value   = ''
-//   if (fileInput.value) fileInput.value.value = ''
-// }
-
 const selectedAccount = computed(() => {
   if (!selectedMember.value) return null
   if (isMultiAccountType.value) {
-    if (isCreatingNew.value || !selectedPurpose.value) return null
+    if (isCreatingNew.value || !selectedAccountId.value) return null
     return (selectedMember.value.savingAccounts || []).find(
-      acc => acc.type === jenisSimpanan.value && acc.purpose === selectedPurpose.value
+      acc => acc.id === selectedAccountId.value
     )
   }
   return (selectedMember.value.savingAccounts || []).find(
@@ -279,10 +216,10 @@ const errorsForm = computed(() => {
   if (tanggalSetor.value > today())  e.tanggal = 'Tanggal tidak boleh di masa depan'
 
   if (isMultiAccountType.value) {
-    if (!isCreatingNew.value && !selectedPurpose.value)
+    if (!isCreatingNew.value && !selectedAccountId.value)
       e.purpose = 'Pilih tujuan tabungan atau buat baru'
     if (isCreatingNew.value) {
-      if (!purposeInput.value) e.purpose = 'Tujuan tabungan wajib diisi'
+      if (!purposeInput.value) e.purposeInput = 'Tujuan tabungan wajib diisi'
       if (jenisSimpanan.value === 'Tabungan Berjangka' && !tenorMonths.value)
         e.tenor = 'Jatuh tempo wajib diisi'
       if (jenisSimpanan.value === 'Tabungan Ibadah' && !targetAmount.value)
@@ -294,20 +231,13 @@ const errorsForm = computed(() => {
     if (jenisSimpanan.value === 'Tabungan Ibadah' && !targetAmount.value)
       e.target = 'Target wajib diisi'
   }
-
-  // if (depositMethod.value === 'Non-Tunai') {
-  //   if (!bankName.value)      e.bank          = 'Pilih bank'
-  //   if (!accountNumber.value) e.accountNumber = 'Isi nomor rekening'
-  //   if (!accountName.value)   e.accountName   = 'Isi atas nama'
-  //   if (!paymentFile.value)   e.bukti         = 'Upload bukti pembayaran'
-  // }
   return e
 })
 
 const isFormValid = computed(() => Object.keys(errorsForm.value).length === 0)
 
 function selectAccount(acc) {
-  selectedPurpose.value = acc.purpose
+  selectedAccountId.value = acc.id
   isCreatingNew.value = false
 }
 
@@ -315,28 +245,33 @@ function selectAccount(acc) {
 const showStruk = ref(false)
 const dataStruk = ref(null)
 
+function resetForm() {
+  selectedMember.value  = null
+  memberQuery.value     = ''
+  jenisSimpanan.value   = ''
+  selectedAccountId.value = '' 
+  isCreatingNew.value   = false
+  purposeInput.value    = ''
+  nominalRaw.value      = ''
+  nominalDisplay.value  = ''
+  tanggalSetor.value    = today()
+  catatan.value         = ''
+  depositMethod.value   = 'Tunai'
+  tenorMonths.value     = ''
+  targetAmount.value    = ''
+  targetDisplay.value   = ''
+  errorNominal.value    = ''
+  errorTarget.value     = ''
+}
+
 // Submit
-async function bukaDialog() {
+function bukaDialog() {
   if (!isFormValid.value) {
     toast('Lengkapi data yang wajib diisi', { type: 'warning' })
     return
   }
 
-  const result = await Swal.fire({
-    title: 'Konfirmasi Penyetoran',
-    text: 'Yakin ingin memposting transaksi ini?',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Ya, Posting',
-    cancelButtonText: 'Batal',
-    reverseButtons: true,
-    focusCancel: true,
-    confirmButtonColor: '#15803d',
-  })
-
-  if (result.isConfirmed) {
-    handleConfirm()
-  }
+  showDialog.value = true
 }
 
 const confirmationData = computed(() => ({
@@ -354,10 +289,41 @@ const confirmationData = computed(() => ({
 
 const konfirmasiChecked = ref(false)
 
-function handleConfirm() {
+async function handleConfirm() {
+  const result = await Swal.fire({
+    title: 'Posting Transaksi?',
+    text: 'Transaksi yang sudah diposting tidak dapat diubah.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, Posting',
+    cancelButtonText: 'Batal',
+    reverseButtons: true,
+    confirmButtonColor: '#15803d',
+  })
+
+  if (!result.isConfirmed) {
+    return
+  }
+
+  submitDeposit()
+}
+
+function submitDeposit() {
+  console.log('selectedAccount:', selectedAccount.value)
+  console.log('isCreatingNew:', isCreatingNew.value)
+  console.log('savingAccounts:', selectedMember.value?.savingAccounts)
   if (!selectedMember.value) return
 
   const formData = new FormData()
+
+  const accountId = selectedAccount.value?.id
+
+  if (
+      accountId &&
+      accountId !== 'undefined'
+  ) {
+      formData.append('saving_account_id', accountId)
+  }
 
   formData.append('member_id', selectedMember.value.id)
   formData.append('saving_category', jenisSimpanan.value)
@@ -366,54 +332,52 @@ function handleConfirm() {
   formData.append('saving_payment_method', depositMethod.value)
   formData.append('notes', catatan.value)
 
-  if (isNewAccount.value) {
-    formData.append('tenor_months', tenorMonths.value)
-    formData.append('target_amount', targetAmount.value)
+  if (isMultiAccountType.value) {
+      formData.append(
+          'purpose',
+          isCreatingNew.value
+              ? purposeInput.value
+              : selectedAccount.value?.purpose 
+      )
   }
 
-  // if (depositMethod.value === 'Non-Tunai') {
-  //   formData.append('bank_name', bankName.value)
-  //   formData.append('account_name', accountName.value)
-  //   formData.append('account_number', accountNumber.value)
-  //   formData.append('payment_proof', paymentFile.value)
-  // }
+  if (isNewAccount.value) {
+      formData.append('tenor_months', tenorMonths.value)
+      formData.append('target_amount', targetAmount.value)
+  }
 
   router.post('/admin/savings/deposit', formData, {
     forceFormData: true,
     preserveScroll: true,
+
+    onStart: () => {
+      Swal.fire({
+        title: 'Memproses transaksi...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading()
+        }
+      })
+    },
+
     onSuccess: (page) => {
-      toast('Penyetoran berhasil!', { type: 'success', position: 'bottom-right' })
+      Swal.close()
+      showDialog.value = false
+      toast.success('Penyetoran berhasil diposting', { position: 'bottom-right' })
       dataStruk.value = page.props.struk
       showStruk.value = true
-      showDialog.value = false
       resetForm()
+      router.reload({ only: ['members'] })  // ← tambah ini
     },
+
     onError: (errors) => {
-      showDialog.value = false
-      console.log('Validation Errors:', errors)
+      Swal.close()
+
       const msg = Object.values(errors).flat().join('\n')
-      console.error('Form errors:', errors)
-      toast(msg || 'Gagal menyimpan', { type: 'error', position: 'bottom-right' })
+
+      toast.error(msg || 'Gagal menyimpan transaksi', {position: 'bottom-right'})
     }
   })
-}
-
-function resetForm() {
-  resetAnggota()
-  jenisSimpanan.value  = ''
-  nominalRaw.value     = ''
-  nominalDisplay.value = ''
-  tanggalSetor.value   = today()
-  catatan.value        = ''
-  depositMethod.value  = 'Tunai'
-  konfirmasiChecked.value = false
-  tenorMonths.value    = ''
-  targetAmount.value   = ''
-  targetDisplay.value  = ''
-  selectedPurpose.value = ''
-  isCreatingNew.value   = false
-  purposeInput.value    = ''
-  // resetNonTunai()
 }
 
 const breadcrumbItems = [
@@ -615,15 +579,21 @@ const akadType = computed(() => {
                       <div
                         v-for="acc in existingAccounts"
                         :key="acc.purpose"
-                        @click="selectAccount(acc)"
-                        class="p-3 border rounded-lg cursor-pointer hover:border-secondary"
-                        :class="selectedPurpose === acc.purpose ? 'border-secondary bg-blue-50' : ''"
+                        @click="!acc.is_frozen && !acc.is_matured && selectAccount(acc)"
+                        class="p-3 border rounded-lg"
+                        :class="[
+                          selectedAccountId === acc.id
+                            ? 'border-secondary bg-blue-50'
+                            : '',
+                          acc.is_frozen || acc.is_matured
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'cursor-pointer hover:border-secondary'
+                        ]"
                       >
                         <input
                           type="radio"
-                          :value="acc.purpose"
-                          v-model="selectedPurpose"
-                          @change="isCreatingNew = false"
+                          :checked="selectedAccountId === acc.id"
+                          @change="selectAccount(acc)"
                           class="mt-0.5 text-secondary"
                         />
                         <div class="flex-1 min-w-0">
@@ -658,7 +628,7 @@ const akadType = computed(() => {
                       >
                         <button
                           type="button"
-                          @click="isCreatingNew = true; selectedPurpose = ''"
+                          @click="isCreatingNew = true; selectedAccountId = ''"
                           class="w-full flex items-center justify-center gap-2 p-3 border border-dashed
                                 rounded-lg text-primary hover:bg-stroke dark:hover:bg-blue-900/20"
                         >
@@ -688,10 +658,13 @@ const akadType = computed(() => {
                           placeholder="Contoh: Haji 2027, Umroh bersama keluarga..."
                           class="w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700
                                 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors"
-                          :class="errorsForm.purpose
+                          :class="errorsForm.purposeInput
                             ? 'border-red-400 focus:ring-red-400'
                             : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
                         />
+                        <p v-if="errorsForm.purposeInput" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                          <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.purposeInput }}
+                        </p>
                       </div>
 
                       <!-- Tabungan Berjangka — Jatuh Tempo -->
@@ -838,11 +811,21 @@ const akadType = computed(() => {
                     inputmode="numeric"
                     placeholder="0"
                     :readonly="!!fixedNominal"
-                    class="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                           focus:outline-none focus:ring-2 focus:ring-secondary"
+                    class="pl-10 w-full px-4 py-2.5 border rounded-lg
+                          text-gray-900 dark:text-gray-100
+                          focus:outline-none focus:ring-2 focus:ring-secondary transition-colors"
+                    :class="fixedNominal
+                      ? 'bg-gray-100 dark:bg-gray-600 border-gray-200 dark:border-gray-500 cursor-not-allowed text-gray-500'
+                      : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600'"
                   />
+                  <span v-if="fixedNominal" class="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Icon icon="mdi:lock-outline" class="text-gray-400" width="16" />
+                  </span>
                 </div>
+                <p v-if="fixedNominal" class="mt-1 text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                  <Icon icon="mdi:information-outline" width="13" />
+                  Nominal ditetapkan sesuai ketentuan koperasi dan tidak dapat diubah.
+                </p>
                 <p v-if="errorNominal" class="mt-1 text-xs text-red-600 flex items-center gap-1">
                   <Icon icon="mdi:alert-circle-outline" width="13" />
                   {{ errorNominal }}
@@ -893,106 +876,7 @@ const akadType = computed(() => {
                   </label>
                 </div>
               </div>
-
-              <!-- Non-Tunai fields -->
-              <!-- <Transition name="slide">
-                <div
-                  v-if="depositMethod === 'Non-Tunai'"
-                  class="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700"
-                >
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4"> -->
-                    <!-- Bank -->
-                    <!-- <div>
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
-                        Bank <span class="text-red-500">*</span>
-                      </label>
-                      <select
-                        v-model="bankName"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                               focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="" disabled>— Pilih —</option>
-                        <option v-for="b in bankOptions" :key="b">{{ b }}</option>
-                      </select>
-                    </div> -->
-
-                    <!-- No. Rekening -->
-                    <!-- <div>
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
-                        No. Rekening <span class="text-red-500">*</span>
-                      </label>
-                      <input
-                        list="norekList"
-                        v-model="accountNumber"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                               focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <datalist id="norekList">
-                        <option v-for="n in accountNumberOptions" :key="n" :value="n" />
-                      </datalist>
-                    </div> -->
-
-                    <!-- Atas Nama -->
-                    <!-- <div>
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
-                        Atas Nama <span class="text-red-500">*</span>
-                      </label>
-                      <input
-                        list="namaRekList"
-                        v-model="accountName"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                               focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <datalist id="namaRekList">
-                        <option v-for="n in accountNameOptions" :key="n" :value="n" />
-                      </datalist>
-                    </div>
-                  </div> -->
-
-                  <!-- Upload bukti -->
-                  <!-- <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 font-head">
-                      Bukti Transfer <span class="text-red-500">*</span>
-                    </label>
-                    <div
-                      @click="fileInput?.click()"
-                      class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6
-                             text-center cursor-pointer hover:border-blue-400 transition-colors"
-                    >
-                      <input
-                        ref="fileInput"
-                        type="file"
-                        @change="handleFileUpload"
-                        accept="image/*,.pdf"
-                        class="hidden"
-                      />
-                      <div v-if="!paymentProof">
-                        <Icon icon="lets-icons:upload" class="mx-auto text-gray-400 mb-2" width="40" />
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Klik untuk upload bukti</p>
-                        <p class="text-xs text-gray-400 mt-1">JPG / PNG / PDF • max 2MB</p>
-                      </div>
-                      <div v-else class="flex items-center gap-3">
-                        <Icon icon="akar-icons:file" class="text-blue-500 shrink-0" width="32" />
-                        <div class="flex-1 text-left text-sm text-gray-700 dark:text-gray-300 min-w-0">
-                          <div class="truncate">{{ paymentFile?.name }}</div>
-                          <div class="text-xs text-gray-500">{{ (paymentFile.size / 1024).toFixed(1) }} KB</div>
-                        </div>
-                        <button @click.stop="removeFile" class="text-red-500 hover:text-red-700 shrink-0">
-                          <Icon icon="mdi:close" width="20" />
-                        </button>
-                      </div>
-                    </div>
-                    <p v-if="errorFile" class="mt-1 text-xs text-red-600">{{ errorFile }}</p>
-                  </div>
-                </div>
-              </Transition> -->
-
             </fieldset>
-            <!-- Akhir fieldset -->
-
           </div>
         </div>
 
