@@ -258,7 +258,7 @@ class SavingController extends Controller
             MemberStatusEnum::ACTIVE->value,
             MemberStatusEnum::PAYMENT_PENDING->value
         ])
-            ->with(['user:id,user_code,name', 'savingAccounts'])
+            ->with(['user:id,user_code,name', 'savingAccounts.ibadah', 'savingAccounts.berjangka',])
             ->get()
             ->map(function ($member) {
                 return [
@@ -266,17 +266,39 @@ class SavingController extends Controller
                     'user_code' => $member->user->user_code,
                     'name' => $member->user->name,
                     'status' => $member->status,
-                    'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
-                        'type' => $acc->saving_type ?? null,
-                        'purpose' => $acc->purpose ?? null,
-                        'balance' => $acc->balance ?? 0,
-                        'target_amount' => $acc->target_amount ?? null,
-                        'matured_at' => $acc->saving_tenor && $acc->created_at
-                            ? $acc->created_at->copy()->addMonths($acc->saving_tenor)->format('d M Y')
-                            : null,
-                        'is_frozen'  => !is_null($acc->target_amount) && $acc->balance >= $acc->target_amount,
-                        'is_matured' => $acc->saving_tenor && $acc->created_at
-                            ? now()->gte($acc->created_at->copy()->addMonths($acc->saving_tenor))
+                    'savingAccounts' => $member->savingAccounts
+                         ->filter(function ($acc) {
+                            if ($acc->saving_type === 'Tabungan Ibadah') {
+                                return $acc->ibadah;
+                            }
+
+                            if ($acc->saving_type === 'Tabungan Berjangka') {
+                                return $acc->berjangka;
+                            }
+
+                            return true;
+                        })
+                        ->map(fn($acc) => [
+                            'id' => $acc->id,
+                            'type' => $acc->saving_type ?? null,
+                            'purpose' => $acc->berjangka?->purpose?? $acc->ibadah?->purpose,
+                            'balance' => $acc->balance ?? 0,
+                            'target_amount' => $acc->ibadah?->target_amount,
+                            'matured_at' => $acc->berjangka
+                                ? $acc->created_at
+                                    ->copy()
+                                    ->addMonths($acc->berjangka->tenor)
+                                    ->format('d M Y')
+                                : null,
+                        'is_frozen' => $acc->ibadah
+                            ? $acc->balance >= $acc->ibadah->target_amount
+                            : false,
+                        'is_matured' => $acc->berjangka
+                            ? now()->gte(
+                                $acc->created_at
+                                    ->copy()
+                                    ->addMonths($acc->berjangka->tenor)
+                            )
                             : false,
                     ]),
                 ];
@@ -284,7 +306,8 @@ class SavingController extends Controller
 
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
             'members' => $members,
-            'saving_types' => SavingTypeEnum::cases(),
+            'saving_types' => collect(SavingTypeEnum::cases())
+                ->map(fn ($case) => $case->value),
             'pengurus' => ['name' => Auth::user()->name ?? 'Pengurus'],
             'global_saving' => [
                 'pokok' => $this->getGlobalSettingValue('saving_pokok_amount'),
@@ -319,17 +342,56 @@ class SavingController extends Controller
 
         $member = Member::with('user')->findOrFail($data['member_id']);
 
-        $savingAccount = SavingAccount::firstOrCreate(
-            [
-                'member_id' => $member->id,
-                'saving_type' => $data['saving_category'],
-            ],
-            [
-                'saving_account_code' =>
-                    $this->getTrxPrefix($data['saving_category']) .
-                    '-SA-' . strtoupper(Str::random(6)),
-            ]
-        );
+        if (filled($data['saving_account_id'] ?? null)) {
+            $savingAccount = SavingAccount::where(
+                'id',
+                $data['saving_account_id']
+            )->where(
+                'member_id',
+                $member->id
+            )->firstOrFail();
+        } else {
+
+            if (
+                in_array(
+                    $data['saving_category'],
+                    [
+                        'Simpanan Pokok',
+                        'Simpanan Wajib',
+                        'Tabungan Anggota'
+                    ]
+                )
+            ) {
+                $savingAccount = SavingAccount::firstOrCreate(
+                    [
+                        'member_id' => $member->id,
+                        'saving_type' => $data['saving_category'],
+                    ],
+                    [
+                        'saving_account_code' =>
+                            $this->getTrxPrefix($data['saving_category'])
+                            . '-SA-' . strtoupper(Str::random(6)),
+                    ]
+                );
+            } else {
+                $savingAccount = SavingAccount::create([
+                    'member_id' => $member->id,
+                    'saving_type' => $data['saving_category'],
+                    'saving_account_code' =>
+                        $this->getTrxPrefix($data['saving_category'])
+                        . '-SA-' . strtoupper(Str::random(6)),
+                ]);
+            }
+        }
+
+        if ($savingAccount->wasRecentlyCreated && $data['saving_category'] === 'Tabungan Berjangka') 
+        {
+            BerjangkaAccount::create([
+                'saving_account_id' => $savingAccount->id,
+                'purpose' => $data['purpose'],
+                'tenor' => $data['tenor_months'],
+            ]);
+        }
 
         Log::info('Saving account for member', [
             'member_id' => $member->id,
@@ -371,35 +433,60 @@ class SavingController extends Controller
             }
         }
 
-        if ($data['saving_category'] === 'Tabungan Ibadah' && $savingAccount->wasRecentlyCreated === false) {
-            if (!$data['target_amount']) {
-                throw ValidationException::withMessages(['target_amount' => 'Target tabungan wajib diisi.']);
+        if ($data['saving_category'] === 'Tabungan Ibadah')
+        {
+            $targetAmount = $savingAccount->ibadah?->target_amount;
+
+            if (
+                $targetAmount &&
+                $savingAccount->balance >= $targetAmount
+            )
+            {
+                throw ValidationException::withMessages([
+                    'saving_category' =>
+                    'Target tabungan sudah tercapai.'
+                ]);
             }
 
-            $existingIbadah = IbadahAccount::updateOrCreate([
-                'saving_account_id' => $savingAccount->id,
-            ], [
-                'tenor' => $data['tenor_months'] ?? null,
-                'target_amount' => $data['target_amount'] ?? null,
-            ]);
+            if ($savingAccount->wasRecentlyCreated && !isset($data['target_amount'])) 
+            {
+                throw ValidationException::withMessages([
+                    'target_amount' => 'Target tabungan wajib diisi.'
+                ]);
+            }
 
-            if ($savingAccount->balance >= $existingIbadah->target_amount) {
-                throw ValidationException::withMessages(['saving_category' => 'Tabungan Ibadah sudah mencapai target dan dibekukan.']);
+            if ($savingAccount->wasRecentlyCreated) {
+                IbadahAccount::create([
+                    'saving_account_id' => $savingAccount->id,
+                    'purpose' => $data['purpose'],
+                    'target_amount' => $data['target_amount'],
+                ]);
+            }
+
+            $ibadahAccount = $savingAccount->fresh()->ibadah;
+
+            if (
+                $ibadahAccount &&
+                $savingAccount->balance >= $ibadahAccount->target_amount
+            ) {
+                throw ValidationException::withMessages([
+                    'saving_category' => 'Tabungan Ibadah sudah mencapai target dan dibekukan.'
+                ]);
             }
         }
 
-        if ($data['saving_category'] === 'Tabungan Berjangka') {
+        if ($data['saving_category'] === 'Tabungan Berjangka' && $savingAccount->berjangka) 
+        {
+            $jatuhTempo = $savingAccount
+                ->created_at
+                ->copy()
+                ->addMonths($savingAccount->berjangka->tenor);
 
-            $existing = SavingAccount::where('member_id', $member->id)
-                ->where('saving_type', 'Tabungan Berjangka')
-                ->first();
-
-            if ($existing) {
-                if (SavingTransaction::where('saving_account_id', $existing->id)->exists()) {
-                    throw ValidationException::withMessages([
-                        'saving_category' => 'Tabungan Berjangka hanya boleh setor sekali (deposito).'
-                    ]);
-                }
+            if (now()->gte($jatuhTempo)) {
+                throw ValidationException::withMessages([
+                    'saving_category' =>
+                        'Tabungan Berjangka sudah jatuh tempo.'
+                ]);
             }
         }
 
@@ -477,11 +564,17 @@ class SavingController extends Controller
 
         $this->storeReceiptDepositPdf($transaction, $strukData, $member->id);
 
-        // Return dengan data fresh
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
-            'members' => $this->getMembersForDeposit(), // extract ke method
-            'saving_types' => $data['saving_category'],
-            'pengurus' => ['name' => Auth::user()->name ?? 'Pengurus'],
+            'members' => $this->getMembersForDeposit(),
+            'saving_types' => collect(SavingTypeEnum::cases())
+                ->map(fn ($case) => $case->value),
+            'pengurus' => [
+                'name' => Auth::user()->name ?? 'Pengurus'
+            ],
+            'global_saving' => [
+                'pokok' => $this->getGlobalSettingValue('saving_pokok_amount'),
+                'wajib' => $this->getGlobalSettingValue('saving_wajib_amount'),
+            ],
             'struk' => $strukData,
         ]);
     }
@@ -511,7 +604,7 @@ class SavingController extends Controller
                             'type' => $acc->saving_type ?? '-',
                             'balance' => $acc->balance ?? 0,
                             'tenor_months' => $acc->saving_tenor,
-                            'target_amount' => $acc->target_amount,
+                            'target_amount' => $acc->ibadah?->target_amount,
                             'opened_at' => optional($acc->created_at)->toDateString(),
                         ];
                     })->toArray(),
@@ -713,15 +806,25 @@ class SavingController extends Controller
                 'status' => $member->status,
                 'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
                     'type' => $acc->saving_type ?? null,
-                    'purpose' => $acc->purpose ?? null,
+                    'purpose' => $acc->berjangka?->purpose?? $acc->ibadah?->purpose,
                     'balance' => $acc->balance ?? 0,
-                    'target_amount' => $acc->target_amount ?? null,
-                    'matured_at' => $acc->saving_tenor && $acc->created_at
-                        ? $acc->created_at->copy()->addMonths($acc->saving_tenor)->format('d M Y')
+                    'target_amount' => $acc->ibadah?->target_amount,
+                    'matured_at' => $acc->berjangka
+                        ? $acc->created_at
+                            ->copy()
+                            ->addMonths($acc->berjangka->tenor)
+                            ->format('d M Y')
                         : null,
-                    // tambahkan flag jika perlu
-                    'is_frozen' => $acc->target_amount && $acc->balance >= $acc->target_amount,
-                    'is_matured' => false, // logic sesuai kebutuhan
+                    'is_frozen' => $acc->ibadah
+                        ? $acc->balance >= $acc->ibadah->target_amount
+                        : false,
+                    'is_matured' => $acc->berjangka
+                        ? now()->gte(
+                            $acc->created_at
+                                ->copy()
+                                ->addMonths($acc->berjangka->tenor)
+                        )
+                        : false,
                 ]),
             ]);
     }
