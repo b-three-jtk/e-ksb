@@ -63,7 +63,6 @@ class StoreFinancingDraftRequest extends FormRequest
             // Financing data
             'financing.name' => 'nullable|string|max:255',
             'financing.product_type_id' => 'nullable|exists:product_types,id',
-            'financing.brand' => 'nullable|string|max:255',
             'financing.condition' => 'nullable|string|max:255',
             'financing.qty' => 'nullable|integer|min:1',
             'financing.specification' => 'nullable|string|max:1000',

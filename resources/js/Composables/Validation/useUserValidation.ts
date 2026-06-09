@@ -79,7 +79,7 @@ export function useUserValidation(form: any, options: UserValidationOptions = {}
         (v) => {
             const value = v?.trim() || "";
 
-            if (!/^\+?\d{6,20}$/.test(value)) {
+            if (!/^\+?\d{6,14}$/.test(value)) {
                 errors.phone_number = "Format nomor telepon tidak valid";
             } else {
                 errors.phone_number = "";

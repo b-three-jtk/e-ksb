@@ -16,7 +16,7 @@ export function useFinancingValidation(form) {
 
     // Helper validators
     const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    const isValidPhone = (phone) => /^[0-9]{8,13}$/.test(phone)
+    const isValidPhone = (phone) => /^[0-9]{8,14}$/.test(phone)
     const isValidNik   = (nik)   => /^[0-9]{16}$/.test(nik)
 
     const validateStep1 = () => {
@@ -40,7 +40,7 @@ export function useFinancingValidation(form) {
         if (!m.phone_number)
             errs.phone_number = 'Nomor telepon wajib diisi.'
         else if (!isValidPhone(m.phone_number))
-            errs.phone_number = 'Nomor telepon harus 8-13 digit angka.'
+            errs.phone_number = 'Nomor telepon harus 8-14 digit angka.'
 
         if (!m.gender)
             errs.gender = 'Jenis kelamin wajib dipilih.'

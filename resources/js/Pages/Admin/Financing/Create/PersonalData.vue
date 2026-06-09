@@ -157,7 +157,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                 label="Nomor Telepon"
                 required
                 placeholder="Masukkan nomor telepon"
-                max="13"
+                max="14"
                 v-model="form.member.phone_number"
                 :error="errors?.phone_number"
                 @input="onlyNumbers($event); onFieldChange('phone_number')"
