@@ -43,7 +43,7 @@ const submit = () => {
                     <div class="mb-4 rounded-3xl mx-auto border border-stroke px-5 py-3 my-auto">
                         <Logo :titleIncluded="false" class="h-16 mx-auto" />
                     </div>
-                    
+
                     <div class="flex flex-col text-center">
                         <h1 class="card-title">Reset Password</h1>
                         <p class="text-gray-400 font-body px-6">Mohon masukan password baru anda di bawah ini.</p>
@@ -69,7 +69,7 @@ const submit = () => {
                         <div class="space-y-4">
                             <button
                                 type="submit"
-                                class="w-full bg-blue-900 hover:bg-blue-800 text-white py-3 rounded-xl"
+                                class="w-full bg-secondary hover:bg-primary text-white py-3 rounded-xl"
                                 :disabled="form.processing"
                             >
                                 <span v-if="form.processing">Memproses...</span>

@@ -13,12 +13,20 @@ import EyeIcon from '@/Icons/EyeIcon.vue';
 import ModalDocument from '@/Components/ModalDocument.vue';
 import { ref } from 'vue'
 import ModalMutasi from '@/Components/ModalMutasi.vue';
+import { computed } from 'vue';
+import { usePage, router } from '@inertiajs/vue3';
+
+const page = usePage();
 
 const props = defineProps({
     user: { type: Object, required: true },
     ktp_photo: String,
     kk_photo: String,
 });
+
+console.log(props.ktp_photo);
+
+const can = computed(() => page.props.auth.can);
 
 const form = useForm({
     status: '',
@@ -52,7 +60,7 @@ const nonactiveUser = () => {
         confirmButtonColor: '#007943',
     }).then((result) => {
         if (result.isConfirmed) {
-            form.put((`/admin/users/${props.user.id}/nonactive`), {
+            form.put((`/admin/users/${props.user.id}/disable`), {
                 onSuccess: () => {
                     Swal.fire('Berhasil', 'Pengguna berhasil dinonaktifkan!', 'success').then(() => {
                         router.push(route('admin.users.index'))
@@ -202,14 +210,14 @@ const breadcrumbItems = [
                             <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
                                 <li class="flex flex-col gap-2 w-fit">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Foto KTP</span>
-                                    <Button :disabled="ktp_photo" variant="gray" @click="openKtpModal">
+                                    <Button :disabled="!ktp_photo" variant="gray" @click="openKtpModal">
                                         <EyeIcon />
                                         Lihat
                                     </Button>
                                 </li>
                                 <li class="flex flex-col gap-2 w-fit">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Foto KK</span>
-                                    <Button variant="gray" :disabled="kk_photo" @click="openKkModal()">
+                                    <Button variant="gray" :disabled="!kk_photo" @click="openKkModal()">
                                         <EyeIcon />
                                         Lihat
                                     </Button>
@@ -274,7 +282,7 @@ const breadcrumbItems = [
                         class="flex flex-col gap-4">
                         <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
                             <div v-for="account in user.member.saving_accounts" class="card-layout flex flex-col gap-12">
-                                <h1 class="card-title">{{ account.saving_product?.name }}</h1>
+                                <h1 class="card-title">{{ account.saving_type }}</h1>
                                 <ul class="grid sm:grid-cols-2 grid-cols-1 gap-6">
                                     <li class="flex flex-col gap-2">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Saldo</span>
@@ -340,8 +348,8 @@ const breadcrumbItems = [
                                         </div>
                                         <div class="progress-container">
                                             <div class="progress-bar"
-                                                :style="{ width: (Math.min(((financing.installment?.tenor ?? 0) > 0
-                                                    ? (((financing.installment?.payment_schedules?.length ?? 0) / (financing.installment?.tenor ?? 0)) * 100)
+                                                :style="{ width: (Math.min(((financing.tenor ?? 0) > 0
+                                                    ? (((financing.installment?.installment?.length ?? 0) / (financing.tenor ?? 0)) * 100)
                                                     : 0), 100)) + '%' }">
                                             </div>
                                         </div>
@@ -360,12 +368,12 @@ const breadcrumbItems = [
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Posisi Angsuran</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            financing.installment?.payment_schedules?.length ?? 0 }} dari {{ financing.installment?.tenor ?? 0
+                                            financing.installment_payment_paid_count ?? 0 }} dari {{ financing.tenor ?? 0
                                             }}</span>
                                     </li>
                                 </ul>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full px-8">
-                                    <Button size="small" full variant="info">
+                                <div class="flex gap-4 w-full px-8">
+                                    <Button v-if="can['view_murabahah']" :href="`/admin/financings/show/${financing.id}`" size="small" full variant="info">
                                         <InfoCircleIcon />
                                         Detail
                                     </Button>

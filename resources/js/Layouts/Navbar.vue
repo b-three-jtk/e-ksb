@@ -152,7 +152,7 @@ const logout = () => {
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div v-if="isUserDropdownOpen"
+                        <div v-if="isUserDropdownOpen && role === 'Anggota'"
                             class="absolute right-0 z-10 mt-2 w-44 divide-y divide-gray-100 rounded-lg hover:rounded-lg shadow bg-white dark:bg-gray-800 dark:divide-gray-600">
                             <div
                                 class="px-4 py-3 text-sm cursor-default text-gray-900 dark:text-white dark:hover:bg-gray-600">

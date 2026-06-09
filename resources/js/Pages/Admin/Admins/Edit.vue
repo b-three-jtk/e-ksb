@@ -18,20 +18,14 @@ const form = useForm({
     nik: props.admin.nik || '',
     name: props.admin.name || '',
     email: props.admin.email || '',
-    role_id: props.admin.role_id || '',
-    domicile_address: props.admin.domicile_address || '',
+    role_id: props.admin.roles[0]?.id || '',
     phone_number: props.admin.phone_number || '',
-    last_education: props.admin.last_education || '',
-    birth_place: props.admin.birth_place || '',
-    birth_date: props.admin.birth_date || '',
-    gender: props.admin.gender || '',
-    residential_address: props.admin.residential_address || '',
 })
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Admin', link: '/admin/list' },
-    { name: 'Edit Admin' },
+    { name: 'Pengurus', link: '/admin/list' },
+    { name: 'Edit Pengurus' },
 ];
 
 const { errors } = useUserValidation(form)
@@ -39,7 +33,7 @@ const { errors } = useUserValidation(form)
 const submitForm = () => {
     Swal.fire({
         title: 'Konfirmasi',
-        text: 'Apakah Anda yakin ingin memperbarui data admin ini?',
+        text: 'Apakah Anda yakin ingin memperbarui data pengurus ini?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Ya, perbarui',
@@ -49,7 +43,7 @@ const submitForm = () => {
         if (result.isConfirmed) {
             form.put(('/admin/update/' + props.admin.id), {
                 onSuccess: () => {
-                    toast("Admin berhasil diperbarui!", {
+                    toast("Pengurus berhasil diperbarui!", {
                         "type": "success",
                         "position": "bottom-right",
                         "transition": "slide",
@@ -59,7 +53,7 @@ const submitForm = () => {
                     })
                 },
                 onError: () => {
-                    toast("Gagal menambahkan admin.", {
+                    toast("Gagal memperbarui pengurus.", {
                         "type": "error",
                         "position": "bottom-right",
                         "transition": "slide",
@@ -73,9 +67,9 @@ const submitForm = () => {
 </script>
 
 <template>
-    <Layout title="Edit Admin">
+    <Layout title="Edit Pengurus">
         <div class="flex flex-col">
-            <PageBreadcrumb page-title="Edit Admin" :items="breadcrumbItems" />
+            <PageBreadcrumb page-title="Edit Pengurus" :items="breadcrumbItems" />
             <div class="card-layout flex flex-col gap-10">
                 <div class="grid md:grid-cols-2 grid-cols-1 gap-6">
                     <!-- NIK -->
@@ -86,30 +80,6 @@ const submitForm = () => {
                     <!-- Nama -->
                     <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
                         placeholder="Masukkan nama lengkap" :error="errors.name"></BaseInputAdmin>
-
-                    <!-- Jenis Kelamin -->
-                    <BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required :selectables="[
-                        { value: 'Laki-laki', text: 'Laki-laki' },
-                        { value: 'Perempuan', text: 'Perempuan' }
-                    ]" :error="errors.gender">
-                    </BaseInputAdmin>
-
-                    <div class="flex gap-6">
-                        <!-- Tempat Lahir -->
-                        <BaseInputAdmin v-model="form.birth_place" max="150" label="Tempat Lahir" type="text"
-                            placeholder="Masukkan tempat lahir" :error="errors.birth_place">
-                        </BaseInputAdmin>
-                        <!-- Tanggal Lahir -->
-                        <BaseInputAdmin v-model="form.birth_date" label="Tanggal Lahir" type="date"
-                            :error="errors.birth_date">
-                        </BaseInputAdmin>
-                    </div>
-
-                    <!-- Pendidikan Terakhir -->
-                    <BaseInputAdmin v-model="form.last_education" label="Pendidikan Terakhir" type="select"
-                        :selectables="educations.map(unit => ({ value: unit, text: unit }))"
-                        :error="errors.last_education">
-                    </BaseInputAdmin>
 
                     <!-- Posisi -->
                     <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
@@ -124,23 +94,13 @@ const submitForm = () => {
                     <BaseInputAdmin v-model="form.phone_number" max="20" required label="Nomor Telepon" type="text"
                         placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number">
                     </BaseInputAdmin>
-
-                    <!-- Alamat (full width) -->
-                    <BaseInputAdmin v-model="form.domicile_address" label="Alamat" type="textarea"
-                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.domicile_address">
-                    </BaseInputAdmin>
-
-                    <!-- Alamat Domisili (full width) -->
-                    <BaseInputAdmin v-model="form.residential_address" label="Alamat Domisili" type="textarea"
-                        placeholder="Masukkan alamat domisili" rows="4" :error="errors.residential_address">
-                    </BaseInputAdmin>
                 </div>
 
                 <div class="flex items-center justify-end gap-6 pb-6">
                     <Button href="/admin/list" variant="light">
                         Batal
                     </Button>
-                    <Button @click="submitForm" variant="secondary">
+                    <Button @click="submitForm" :disabled="form.processing" variant="secondary">
                         {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                     </Button>
                 </div>

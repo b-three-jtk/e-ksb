@@ -124,7 +124,7 @@ class AdminController extends Controller
                 $user->save();
 
                 DB::commit();
-                return redirect()->route('admin.index')->with('success', 'Pengurus berhasil ditambahkan dari member');
+                return redirect()->route('admin.admin.index')->with('success', 'Pengurus berhasil ditambahkan dari member');
             } else {
 
                 $user = User::create([
@@ -141,7 +141,7 @@ class AdminController extends Controller
                 $user->assignRole($role->name);
             }
             DB::commit();
-            return redirect()->route('admin.index')->with('success', 'Admin berhasil ditambahkan');
+            return redirect()->route('admin.admin.index')->with('success', 'Admin berhasil ditambahkan');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error storing admin: ' . $e->getMessage());
@@ -175,6 +175,8 @@ class AdminController extends Controller
         $roles = Role::where('name', '!=', UserRoleEnum::ANGGOTA->value)->get();
         $educations = array_column(EducationEnum::cases(), 'value');
 
+        Log::info('admin data: ' . print_r($admin->toArray(), true));
+
         return inertia('Admin/Admins/Edit', [
             'admin' => $admin,
             'roles' => $roles,
@@ -187,18 +189,21 @@ class AdminController extends Controller
      */
     public function update(UpdateAdminRequest $request, string $id)
     {
-        // DB::begin();
-        // try {
+        DB::beginTransaction();
+        try {
             $data = $request->validated();
 
             $admin = User::findOrFail($id);
+            $role = Role::findOrFail($data['role_id']);
+            
             $admin->update($data);
-            // DB::commit();
-            return redirect()->route('admin.index');
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     return redirect()->back()->withInput();
-        // }
+            $admin->syncRoles([$role->name]);
+            DB::commit();
+            return redirect()->route('admin.admin.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput();
+        }
     }
 
     public function searchMember(Request $request)

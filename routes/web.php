@@ -157,8 +157,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/kas/store', [CashflowController::class, 'store'])->name('kas.store');
     Route::get('/kas/export/csv',[CashflowController::class, 'exportCsv'])->name('kas.export.csv');
 
-
-
     // Pengaturan Umum
     Route::middleware('role:' . UserRoleEnum::KETUA->value)->group(function () {
         Route::get('/settings', [SettingsController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');

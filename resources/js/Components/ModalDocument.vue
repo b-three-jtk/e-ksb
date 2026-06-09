@@ -45,7 +45,7 @@ defineExpose({ openModal, closeModal })
                         </svg>
                 </button>
             </div>
-            <div class="px-4 pb-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <div class="px-4 pb-4 max-h-[70vh] w-5xl overflow-y-auto custom-scrollbar">
                 <img :src="attachment" :alt="name"
                     class="w-full h-auto object-contain" />
                 <p class="mt-2 text-center text-gray-600 dark:text-gray-400">{{ name }}</p>
