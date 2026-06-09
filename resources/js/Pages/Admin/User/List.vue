@@ -65,9 +65,9 @@ const columns = [
     { key: 'profil', label: 'Nama Anggota', sortable: true },
     { key: 'joined_at', label: 'Tanggal Bergabung', sortable: true },
     { key: 'phone', label: 'Kontak' },
-    { key: 'total_simpanan', label: 'Total Simpanan', align: 'right' },
-    { key: 'status', label: 'Status', align: 'center' },
-    { key: 'aksi', label: 'Aksi', align: 'center' },
+    { key: 'total_simpanan', label: 'Total Simpanan' },
+    { key: 'status', label: 'Status' },
+    { key: 'aksi', label: 'Aksi' },
 ]
 
 const selectFilters = [
