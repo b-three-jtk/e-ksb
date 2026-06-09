@@ -21,7 +21,7 @@ defineProps({
                     </td>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="dark:text-gray-400">
                 <tr v-for="(row, index) in rows" :key="index" class="border-y-2 border-gray-100 dark:border-gray-500">
                     <td v-for="col in columns" :key="col.key" class="py-5 text-center">
                         <slot :name="col.key" :item="row">

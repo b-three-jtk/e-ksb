@@ -38,54 +38,54 @@ defineProps({
                 :filter="selectedFilter"
             />
         </div>
-        <div class="card-layout col-span-2 bg-light-bg!">
+        <div class="card-layout col-span-2 bg-light-bg! dark:bg-brand-900/60!">
             <h1 class="card-title text-center">Menu Pintasan</h1>
             <div class="flex flex-col gap-4 mt-6">
                 <Link href="/admin/jurnal-umum"
-                    class="bg-white border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
+                    class="bg-white dark:bg-light-bg/20 dark:border-stroke/30 border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
                     <div class="flex items-center gap-4">
                         <div
                             class="bg-secondary text-white  rounded-full flex justify-center text-2xl items-center w-11 h-11">
                             <span class="icon-[solar--calculator-bold]"></span>
                         </div>
                         <div class="flex flex-col">
-                            <h2 class="text-lg font-medium">Jurnal Umum</h2>
-                            <p class="text-gray-500 text-sm font-body">Pengelolaan Kas Koperasi</p>
+                            <h2 class="text-lg font-medium dark:text-gray-200">Jurnal Umum</h2>
+                            <p class="text-gray-500 text-sm font-body dark:text-gray-300">Pengelolaan Kas Koperasi</p>
                         </div>
                     </div>
-                    <div class="text-secondary text-3xl">
+                    <div class="text-secondary dark:text-gray-300 text-3xl">
                         <span class="icon-[material-symbols--chevron-right-rounded]"></span>
                     </div>
                 </Link>
                 <Link href="/admin/financings"
-                    class="bg-white border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
+                    class="bg-white dark:bg-light-bg/20 dark:border-stroke/30 border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
                     <div class="flex items-center gap-4">
                         <div
                             class="bg-secondary text-white  rounded-full flex justify-center text-2xl items-center w-11 h-11">
                             <span class="icon-[tdesign--money-filled]"></span>
                         </div>
                         <div class="flex flex-col">
-                            <h2 class="text-lg font-medium">Pembiayaan Murabahah</h2>
-                            <p class="text-gray-500 text-sm font-body">Pengelolaan pembiayaan murabahah di sini</p>
+                            <h2 class="text-lg font-medium dark:text-gray-200">Pembiayaan Murabahah</h2>
+                            <p class="text-gray-500 text-sm font-body dark:text-gray-300">Pengelolaan pembiayaan murabahah di sini</p>
                         </div>
                     </div>
-                    <div class="text-secondary text-3xl">
+                    <div class="text-secondary dark:text-gray-300 text-3xl">
                         <span class="icon-[material-symbols--chevron-right-rounded]"></span>
                     </div>
                 </Link>
                 <Link href="/admin/financings"
-                    class="bg-white border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
+                    class="bg-white dark:bg-light-bg/20 dark:border-stroke/30 border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
                     <div class="flex items-center gap-4">
                         <div
                             class="bg-secondary text-white  rounded-full flex justify-center text-2xl items-center w-11 h-11">
                             <span class="icon-[mdi--hand-coin]"></span>
                         </div>
                         <div class="flex flex-col">
-                            <h2 class="text-lg font-medium">Simpanan</h2>
-                            <p class="text-gray-500 text-sm font-body">Pengelolaan simpanan di sini</p>
+                            <h2 class="text-lg font-medium dark:text-gray-200">Simpanan</h2>
+                            <p class="text-gray-500 text-sm font-body dark:text-gray-300">Pengelolaan simpanan di sini</p>
                         </div>
                     </div>
-                    <div class="text-secondary text-3xl">
+                    <div class="text-secondary dark:text-gray-300 text-3xl">
                         <span class="icon-[material-symbols--chevron-right-rounded]"></span>
                     </div>
                 </Link>
