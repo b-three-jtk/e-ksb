@@ -51,7 +51,7 @@ const columns = [
     { key: 'no_transaksi', label: 'No Transaksi' },
     { key: 'tanggal',      label: 'Tanggal', sortable: true },
     { key: 'anggota',      label: 'Anggota' },
-    { key: 'nominal',      label: 'Nominal', align: 'right' },
+    { key: 'nominal',      label: 'Nominal' },
     { key: 'produk',       label: 'Produk' },
     { key: 'jenis',        label: 'Jenis Transaksi' },
     { key: 'aksi',         label: 'Aksi', align: 'center' },
