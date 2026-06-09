@@ -5,8 +5,6 @@ type UserValidationOptions = {
 };
 
 export function useUserValidation(form: any, options: UserValidationOptions = {}) {
-    const requireEmail = options.requireEmail ?? true;
-
     const errors = reactive({
         email: "",
         nik: "",
@@ -22,9 +20,7 @@ export function useUserValidation(form: any, options: UserValidationOptions = {}
         (v) => {
             const value = v?.trim() || "";
 
-            if (!value && requireEmail) {
-                errors.email = "Email wajib diisi";
-            } else if (!value) {
+            if (!value) {
                 errors.email = "";
             } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
                 errors.email = "Format email tidak valid";

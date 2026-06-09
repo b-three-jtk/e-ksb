@@ -168,7 +168,7 @@ const photoUrl = computed(() => {
                     <h1 class="card-title">Kontak dan Alamat</h1>
                     <ul class="grid md:grid-cols-2 grid-cols-1 gap-4">
                         <li>
-                            <BaseInputAdmin v-model="form.email" label="Email" type="email" required
+                            <BaseInputAdmin v-model="form.email" label="Email" type="email"
                                 placeholder="Masukkan email" :error="errors.email">
                             </BaseInputAdmin>
                         </li>

@@ -34,9 +34,7 @@ export function useFinancingValidation(form) {
         else if (!isValidNik(m.nik))
             errs.nik = 'NIK harus 16 digit angka.'
 
-        if (!m.email)
-            errs.email = 'Email wajib diisi.'
-        else if (!isValidEmail(m.email))
+        if (!isValidEmail(m.email))
             errs.email = 'Format email tidak valid.'
 
         if (!m.phone_number)

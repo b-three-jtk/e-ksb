@@ -148,7 +148,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 label="Email"
                 placeholder="Masukkan email"
                 v-model="form.member.email"
-                required
                 :error="errors?.email"
                 type="email"
                 @input="onFieldChange('email')"

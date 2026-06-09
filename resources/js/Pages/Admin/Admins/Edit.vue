@@ -87,7 +87,7 @@ const submitForm = () => {
                     </BaseInputAdmin>
 
                     <!-- Email -->
-                    <BaseInputAdmin v-model="form.email" label="Email" type="email" required
+                    <BaseInputAdmin v-model="form.email" label="Email" type="email"
                         placeholder="Masukkan email" :error="errors.email"></BaseInputAdmin>
 
                     <!-- No. Telp -->
