@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\MemberStatusEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Enums\PositionEnum;
 use App\Http\Controllers\Controller;
@@ -581,42 +582,7 @@ class SavingController extends Controller
 
     public function createWithdrawal()
     {
-        $members = Member::query()
-            ->with([
-                'user',
-                'savingAccounts',
-                'bankAccounts' => function ($q) {
-                    $q->latest();
-                },
-            ])
-            ->whereHas('user', function ($q) {
-                $q->where('status', UserStatusEnum::ACTIVE->value);
-            })
-            ->get()
-            ->map(function ($member) {
-                return [
-                    'id' => $member->id,
-                    'name' => $member->user?->name,
-                    'user_code' => $member->user?->user_code,
-                    'savingAccounts' => $member->savingAccounts->map(function ($acc) {
-                        return [
-                            'id' => $acc->id,
-                            'type' => $acc->saving_type ?? '-',
-                            'balance' => $acc->balance ?? 0,
-                            'tenor_months' => $acc->saving_tenor,
-                            'target_amount' => $acc->ibadah?->target_amount,
-                            'opened_at' => optional($acc->created_at)->toDateString(),
-                        ];
-                    })->toArray(),
-                    'accounts' => $member->bankAccounts->map(function ($acc) {
-                        return [
-                            'bank_name' => $acc->bank_name,
-                            'account_name' => $acc->account_name,
-                            'account_number' => $acc->account_number,
-                        ];
-                    })->toArray(),
-                ];
-            });
+        $members =  $members = $this->getMembersForSavingSelection(true);
 
         return Inertia::render('Admin/Savings/Withdrawal/Create', [
             'members' => $members,
@@ -666,7 +632,7 @@ class SavingController extends Controller
         }
 
         try {
-            [$transaction, $saldoSebelum] = DB::transaction(function () use ($validated, $member, $savingAccount) {
+            [$transaction, $saldoSebelum] = DB::transaction(function () use ($validated, $member, $savingAccount, $savingType) {
                 $lockedSavingAccount = SavingAccount::query()
                     ->whereKey($savingAccount->id)
                     ->lockForUpdate()
@@ -685,7 +651,7 @@ class SavingController extends Controller
                 }
 
                 $transaction = SavingTransaction::create([
-                    'saving_transaction_code' => $this->generateWithdrawalTransactionCode(),
+                    'saving_transaction_code' => $this->generateWithdrawalTransactionCode($savingType),
                     'saving_account_id' => $lockedSavingAccount->id,
                     'balance_after_transaction' => $saldoSebelum - $validated['amount'],
                     'saving_amount' => $validated['amount'],
@@ -790,7 +756,81 @@ class SavingController extends Controller
         }
     }
 
-    // Helper baru
+    // Helper
+    private function getMembersForSavingSelection(bool $includeBankAccounts = false)
+    {
+        $query = Member::query()
+            ->when($includeBankAccounts, function ($q) {
+                $q->with([
+                    'user',
+                    'savingAccounts',
+                    'bankAccounts' => function ($subQuery) {
+                        $subQuery->latest();
+                    },
+                ]);
+            }, function ($q) {
+                $q->with(['user:id,user_code,name', 'savingAccounts']);
+            })
+            ->whereIn('status', [
+                MemberStatusEnum::ACTIVE->value,
+                MemberStatusEnum::PAYMENT_PENDING->value,
+            ])
+            ->whereHas('user', function ($q) {
+                $q->where('status', UserStatusEnum::ACTIVE->value);
+            });
+
+        if (Auth::user()?->hasRole(UserRoleEnum::PJANGGOTA->value)) {
+            $query->where('pj_user_id', Auth::id());
+        }
+
+        return $query->get()->map(function ($member) use ($includeBankAccounts) {
+            if ($includeBankAccounts) {
+                return [
+                    'id' => $member->id,
+                    'name' => $member->user?->name,
+                    'user_code' => $member->user?->user_code,
+                    'savingAccounts' => $member->savingAccounts->map(function ($acc) {
+                        return [
+                            'id' => $acc->id,
+                            'type' => $acc->saving_type ?? '-',
+                            'balance' => $acc->balance ?? 0,
+                            'tenor_months' => $acc->saving_tenor,
+                            'target_amount' => $acc->target_amount,
+                            'opened_at' => optional($acc->created_at)->toDateString(),
+                        ];
+                    })->toArray(),
+                    'accounts' => $member->bankAccounts->map(function ($acc) {
+                        return [
+                            'bank_name' => $acc->bank_name,
+                            'account_name' => $acc->account_name,
+                            'account_number' => $acc->account_number,
+                        ];
+                    })->toArray(),
+                ];
+            }
+
+            return [
+                'id' => $member->id,
+                'user_code' => $member->user->user_code,
+                'name' => $member->user->name,
+                'status' => $member->status,
+                'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
+                    'type' => $acc->saving_type ?? null,
+                    'purpose' => $acc->purpose ?? null,
+                    'balance' => $acc->balance ?? 0,
+                    'target_amount' => $acc->target_amount ?? null,
+                    'matured_at' => $acc->saving_tenor && $acc->created_at
+                        ? $acc->created_at->copy()->addMonths($acc->saving_tenor)->format('d M Y')
+                        : null,
+                    'is_frozen' => !is_null($acc->target_amount) && $acc->balance >= $acc->target_amount,
+                    'is_matured' => $acc->saving_tenor && $acc->created_at
+                        ? now()->gte($acc->created_at->copy()->addMonths($acc->saving_tenor))
+                        : false,
+                ]),
+            ];
+        });
+    }
+
     private function getMembersForDeposit()
     {
         return Member::whereIn('status', [
@@ -892,13 +932,16 @@ class SavingController extends Controller
         return null;
     }
 
-    private function generateWithdrawalTransactionCode(): string
+    private function generateWithdrawalTransactionCode(string $savingType): string
     {
-        $date = Carbon::now()->format('d');
-        $prefix = 'ST' . $date;
+        $yymm = Carbon::now()->format('ym'); 
+        
+        // inisial jenis simpanan
+        $categoryPrefix = $this->getTrxPrefix($savingType); 
+        
+        $prefix = $categoryPrefix . $yymm; 
 
         $latestTransaction = SavingTransaction::where('transaction_type', TransactionTypeEnum::WITHDRAWAL->value)
-            ->whereDate('created_at', Carbon::today())
             ->where('saving_transaction_code', 'like', $prefix . '%')
             ->lockForUpdate()
             ->orderByDesc('saving_transaction_code')

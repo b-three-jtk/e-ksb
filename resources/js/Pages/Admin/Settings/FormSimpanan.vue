@@ -67,7 +67,7 @@ const emit = defineEmits(['submit'])
         </div>
 
         <div class="px-6 pb-6 md:px-8 md:pb-8 flex justify-end">
-            <Button type="submit" size="medium" variant="success" :disabled="isProcessing">
+            <Button type="submit" size="medium" variant="secondary" :disabled="isProcessing">
                 {{ isProcessing ? 'Menyimpan...' : 'Simpan Pengaturan' }}
             </Button>
         </div>
