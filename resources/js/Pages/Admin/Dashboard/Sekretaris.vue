@@ -31,38 +31,38 @@ const props = defineProps({
                 :percentage="props.stats.total_anggota_non_aktif_persen"
                 :filter="selectedFilter"
             />
-            <div class="card-layout col-span-2 bg-light-bg!">
+            <div class="card-layout col-span-2 bg-light-bg! dark:bg-brand-900/60!">
                 <h1 class="card-title text-center">Menu Pintasan</h1>
                 <div class="flex flex-col gap-3.5 mt-6">
                     <Link href="/admin/users/create"
-                        class="bg-white border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
+                        class="bg-white dark:bg-light-bg/20 dark:border-stroke/30 border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3.5">
                             <div
                                 class="bg-secondary text-white  rounded-full flex justify-center text-2xl items-center w-11 h-11">
                                 <span class="icon-[mdi--users]"></span>
                             </div>
                             <div class="flex flex-col">
-                                <h2 class="text-lg font-medium">Tambah Anggota Baru</h2>
-                                <p class="text-gray-500 text-sm font-body">Registrasi anggota koperasi baru di sini</p>
+                                <h2 class="text-lg font-medium dark:text-gray-200">Tambah Anggota Baru</h2>
+                                <p class="text-gray-500 text-sm font-body dark:text-gray-300">Registrasi anggota koperasi baru di sini</p>
                             </div>
                         </div>
-                        <div class="text-secondary text-3xl">
+                        <div class="text-secondary dark:text-gray-300 text-3xl">
                             <span class="icon-[material-symbols--chevron-right-rounded]"></span>
                         </div>
                     </Link>
                     <Link href="/admin/create"
-                        class="bg-white border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
+                        class="bg-white dark:bg-light-bg/20 dark:border-stroke/30 border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3.5">
                             <div
                                 class="bg-secondary text-white  rounded-full flex justify-center text-2xl items-center w-11 h-11">
                                 <span class="icon-[clarity--employee-group-solid]"></span>
                             </div>
                             <div class="flex flex-col">
-                                <h2 class="text-lg font-medium">Tambah Pengurus Baru</h2>
-                                <p class="text-gray-500 text-sm font-body">Registrasi pengurus koperasi baru di sini</p>
+                                <h2 class="text-lg font-medium dark:text-gray-200">Tambah Pengurus Baru</h2>
+                                <p class="text-gray-500 text-sm font-body dark:text-gray-300">Registrasi pengurus koperasi baru di sini</p>
+                            </div>
                         </div>
-                        </div>
-                        <div class="text-secondary text-3xl">
+                        <div class="text-secondary dark:text-gray-300 text-3xl">
                             <span class="icon-[material-symbols--chevron-right-rounded]"></span>
                         </div>
                     </Link>
