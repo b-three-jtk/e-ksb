@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('nik', 16)->unique();
             $table->string('name');
             $table->enum('status', array_column(UserStatusEnum::cases(), 'value'))->default('Aktif');
-            $table->string('email')->unique();
+            $table->string('email')->unique()->nullable();
             $table->string('phone_number', 20)->unique();
             $table->date('joined_date')->nullable();
 
@@ -32,7 +32,7 @@ return new class extends Migration {
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
+            $table->string('phone_number')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });

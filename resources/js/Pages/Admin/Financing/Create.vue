@@ -92,9 +92,7 @@ const isRequestValid = computed(() =>
     isStep1Valid.value &&
     isStep2Valid.value &&
     isStep3Valid.value
-    && form.financing.status === 'Menunggu Kelengkapan Dokumen' &&
-    (form.financing.status !== 'Disetujui' ||
-    form.financing.status !== 'Ditolak')
+    && form.financing.status === 'Menunggu Kelengkapan Dokumen'
 )
 
 const isFinalizationValid = computed(() =>
