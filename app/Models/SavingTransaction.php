@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class SavingTransaction extends Model
 {
@@ -50,5 +51,10 @@ class SavingTransaction extends Model
     public function point()
     {
         return $this->belongsTo(PointTransaction::class, 'point_id');
+    }
+
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'reference');
     }
 }

@@ -109,7 +109,7 @@ class NotificationService
                 'title' => 'Pengingat Angsuran Pembiayaan #' . $installment->installment_no,
                 'message' => 'Angsuran ke-' . $installment->installment_no . ' sebesar Rp ' . number_format($installment->amount, 0, ',', '.') . ' jatuh tempo pada ' . $dueDate->translatedFormat('d F Y') . '.',
                 'notification_type' => NotificationTypeEnum::INSTALLMENT->value,
-                'reference_type' => 'installment',
+                'reference_type' => Installment::class,
                 'reference_id' => $installment->id,
                 'notification_period' => $period,
                 'reminder_type' => $reminderType->value,
