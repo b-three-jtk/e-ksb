@@ -36,13 +36,13 @@ class ResetPasswordController extends Controller
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
-                    'password' => Hash::make($password), 
-                ])->save();      
+                    'password' => Hash::make($password),
+                ])->save();
             }
         );
 
         return $status === Password::PASSWORD_RESET
-            ? redirect()->route('auth.login')->with('status', __($status))
+            ? redirect()->route('login')->with('status', __($status))
             : back()->withErrors(['email' => __($status)]);
     }
 

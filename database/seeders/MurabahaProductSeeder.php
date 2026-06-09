@@ -127,7 +127,6 @@ class MurabahaProductSeeder extends Seeder
                 'nominal' => $monthlyPayment,
                 'payment_method' => PaymentMethodsEnum::CASHLESS->value,
                 'is_early_repayment' => false,
-                'status' => now()->addMonths($i)->isPast() ? 'Terlambat' : 'Tepat Waktu',
                 'payment_date' => $akadDate->copy()->addMonths($i),
                 'updated_by' => $admin->id,
             ]);
@@ -214,7 +213,6 @@ class MurabahaProductSeeder extends Seeder
                 'nominal' => $monthlyPayment,
                 'payment_method' => PaymentMethodsEnum::CASHLESS->value,
                 'is_early_repayment' => false,
-                'status' => now()->addMonths($i)->isPast() ? 'Terlambat' : 'Tepat Waktu',
                 'payment_date' => $akadDate->copy()->addMonths($i),
                 'updated_by' => $admin->id,
             ]);

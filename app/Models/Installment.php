@@ -4,11 +4,14 @@ namespace App\Models;
 
 use App\Models\Financing;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Installment extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $fillable = [
         'due_date',
         'installment_no',
@@ -33,6 +36,7 @@ class Installment extends Model
 
     public function notification()
     {
-        return $this->hasOne(Notification::class, 'reference_id');
+        // Parameter kedua ('reference') merujuk pada nama method di model Notification
+        return $this->morphOne(Notification::class, 'reference');
     }
 }

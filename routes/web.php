@@ -58,7 +58,6 @@ Route::get('/faq', function () {
 
 // Authentication Routes
 Route::prefix('auth')
-    ->name('auth.')
     ->middleware('guest')
     ->group(function () {
 

@@ -53,7 +53,7 @@ class UserSeeder extends Seeder
             'user_code' => 'KSB26070004',
             'nik' => '6543210987654321',
             'name' => 'Anggota',
-            'email' => 'contactsims11@gmail.com',
+            'email' => 'raizelmaid@gmail.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
             'phone_number' => '081234568590',

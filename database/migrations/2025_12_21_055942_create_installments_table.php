@@ -12,7 +12,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('installments', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->date('due_date');
             $table->integer('installment_no');
             $table->decimal('amount', 15, 2);

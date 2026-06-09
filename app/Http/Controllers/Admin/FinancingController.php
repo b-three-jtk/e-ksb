@@ -18,9 +18,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateRepaymentRequest;
 use App\Http\Requests\StoreFinancingDraftRequest;
 use App\Http\Requests\StoreFinancingRequest;
-use App\Models\Financial;
 use App\Models\Financing;
-use App\Models\FinancingItem;
 use App\Models\FinancingVerification;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
@@ -28,9 +26,7 @@ use App\Models\JournalEntry;
 use App\Models\Member;
 use App\Models\MemberDoc;
 use App\Models\SavingAccount;
-use App\Models\Supplier;
 use App\Models\User;
-use App\Models\Wakalah;
 use App\Models\Account;
 use App\Services\Admin\JournalService;
 use App\Services\Admin\FinancingService;
@@ -121,7 +117,7 @@ class FinancingController extends Controller
                 return [
                     'id' => $f->id,
                     'financing_transaction_code' => $f->financing_transaction_code,
-                    'akad_date' => $f->akad_date,
+                    'akad_date' => $f->akad_date?->format('Y-m-d') ?? '',
                     'user' => $f->member->user
                         ? ($f->member->user->user_code . ' - ' . $f->member->user->name)
                         : '-',
@@ -671,7 +667,7 @@ class FinancingController extends Controller
                         ]);
                     }
 
-                    if ($downPayment > 0) 
+                    if ($downPayment > 0)
                     {
                         app(JournalService::class)->create(
                             [
@@ -718,7 +714,7 @@ class FinancingController extends Controller
                             'down_payment' => 'Pembayaran cash tidak boleh menggunakan uang muka.'
                         ]);
                     }
-                    
+
                 if ($financing->payment_method === FinancingPaymentMethodEnum::CASH->value)
                 {
                     $allocatedAmount = $financing->predicted_cost_price ?? 0;
@@ -781,7 +777,7 @@ class FinancingController extends Controller
                             'cost_price' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
                         ]);
                     }
-                } 
+                }
                 return $financing;
             });
             return redirect()->route('admin.financings.index')

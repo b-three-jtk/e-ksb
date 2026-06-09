@@ -47,18 +47,22 @@ const onlyAlphaNumericDash = (event) => {
             <h1 class="card-title">Identitas Pribadi & Ahli Waris</h1>
         </div>
         <!-- kalau dia gak eligible -->
-        <div v-if="form.member.is_have_eligible_saving === false || form.member.is_have_no_obligation === false"
-            class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative">
-            <p>Pemohon tidak memenuhi syarat mengajukan pembiayaan murabahah:</p>
-            <ul class="list-disc list-inside mt-2">
-                <li v-if="form.member.is_have_eligible_saving === false">
-                    Memiliki tabungan anggota yang sudah berjalan selama 1 bulan
-                </li>
-                <li v-if="form.member.is_have_no_obligation === false">
-                    Tidak memiliki kewajiban atau permohonan pembiayaan aktif
-                </li>
-            </ul>
-        </div>
+        <Transition name="fade"
+            v-if="form.member.is_have_eligible_saving === false || form.member.is_have_no_obligation === false"
+            class="bg-yellow-100 mx-4 mt-4 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg relative">
+            <div class="flex flex-col gap-2">
+                <p>Pemohon tidak memenuhi syarat mengajukan pembiayaan murabahah:</p>
+                <ul class="list-disc list-inside mt-2">
+                    <li v-if="form.member.is_have_eligible_saving === false">
+                        Memiliki tabungan anggota yang sudah berjalan selama 1 bulan
+                    </li>
+                    <li v-if="form.member.is_have_no_obligation === false">
+                        Tidak memiliki kewajiban atau permohonan pembiayaan aktif
+                    </li>
+                </ul>
+            </div>
+        </Transition>
+
         <div class="grid grid-cols-2 gap-6 p-4 border-b">
             <!-- Member search input -->
             <div class="col-span-1 relative">
@@ -107,14 +111,15 @@ const onlyAlphaNumericDash = (event) => {
             </div>
 
             <!-- Form fields -->
-            <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" v-model="form.member.name"
-                required :errors="errors.name" @input="onlyAlpha" />
-            <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" v-model="form.member.nik" max="16"
-                required :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" />
+            <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" v-model="form.member.name" required
+                :errors="errors.name" @input="onlyAlpha" />
+            <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" v-model="form.member.nik" max="16" required
+                :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" />
             <BaseInputAdmin label="Email" placeholder="Masukkan email" v-model="form.member.email" required
                 :errors="errors.email" type="email" />
             <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="13"
-                v-model="form.member.phone_number" :errors="errors.phone_number" @input="onlyNumbers" inputmode="numeric" />
+                v-model="form.member.phone_number" :errors="errors.phone_number" @input="onlyNumbers"
+                inputmode="numeric" />
             <BaseInputAdmin v-model="form.member.gender" label="Jenis Kelamin" type="radio" required :selectables="[
                 { value: 'Laki-laki', text: 'Laki-laki' },
                 { value: 'Perempuan', text: 'Perempuan' }
@@ -125,9 +130,11 @@ const onlyAlphaNumericDash = (event) => {
             <BaseInputAdmin label="Tanggal Lahir" type="date" v-model="form.member.birth_date"
                 :error="errors.birth_date" />
             <BaseInputAdmin v-model="form.member.residential_address" label="Alamat" type="textarea"
-                placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address" @input="onlyAlphaNumericDash" />
+                placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address"
+                @input="onlyAlphaNumericDash" />
             <BaseInputAdmin v-model="form.member.domicile_address" label="Alamat Domisili" type="textarea"
-                placeholder="Masukkan alamat domisili" rows="4" :error="errors.domicile_address" @input="onlyAlphaNumericDash" />
+                placeholder="Masukkan alamat domisili" rows="4" :error="errors.domicile_address"
+                @input="onlyAlphaNumericDash" />
             <BaseInputAdmin v-model="form.member.last_education" label="Pendidikan Terakhir" type="select"
                 :selectables="data.educations.map(unit => ({ value: unit, text: unit }))"
                 :error="errors.last_education" />
@@ -141,7 +148,8 @@ const onlyAlphaNumericDash = (event) => {
         <div class="flex flex-col gap-4 w-full p-4 border-b border-gray-200">
             <div class="flex gap-4 w-full items-end">
                 <BaseInputAdmin label="Data Ahli Waris" required max="16" pattern="[0-9]{16}"
-                    placeholder="Masukkan NIK Ahli Waris" v-model="heirInput.heir_nik" @input="onlyNumbers" inputmode="numeric" />
+                    placeholder="Masukkan NIK Ahli Waris" v-model="heirInput.heir_nik" @input="onlyNumbers"
+                    inputmode="numeric" />
                 <BaseInputAdmin v-model="heirInput.heir_name" placeholder="Nama Ahli Waris" @input="onlyAlpha" />
                 <BaseInputAdmin v-model="heirInput.relationship" type="select"
                     :selectables="data.relationships.map(unit => ({ value: unit, text: unit }))"

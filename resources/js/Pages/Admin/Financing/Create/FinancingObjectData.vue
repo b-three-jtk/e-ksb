@@ -76,7 +76,7 @@ const closeModal = () => {
                         <div class="font-semibold text-primary dark:text-blue-300 mb-1">
                             Ketentuan Objek Pembiayaan Murabahah (No. 111/DSN-MUI/IX/2017)
                         </div>
-                        <ol class="text-gray-600 dark:text-gray-300 leading-relaxed ml-3">
+                        <ol class="text-gray-600 font-body dark:text-gray-300 leading-relaxed ml-3">
                             <li class="list-disc">Barang halal menurut syariah,</li>
                             <li class="list-disc">Memiliki spesifikasi jelas,</li>
                             <li class="list-disc">Dapat diserahterimakan,</li>

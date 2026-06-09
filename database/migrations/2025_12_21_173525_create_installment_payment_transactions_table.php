@@ -21,7 +21,7 @@ return new class extends Migration
             $table->datetime('payment_date');
             $table->string('installment_payment_receipt')->nullable();
 
-            $table->foreignId('installment_id')->nullable()->references('id')->on('installments')->onDelete('set null');
+            $table->foreignUuid('installment_id')->nullable()->references('id')->on('installments')->onDelete('set null');
             $table->foreignUuid('updated_by')->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
