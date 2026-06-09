@@ -8,7 +8,6 @@ class BerjangkaAccount extends Model
 {
     //
     protected $fillable = [
-        'member_id',
         'tenor',
         'purpose',
         'saving_account_id',
