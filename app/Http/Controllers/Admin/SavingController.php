@@ -539,7 +539,7 @@ class SavingController extends Controller
         }
 
         try {
-            [$transaction, $saldoSebelum] = DB::transaction(function () use ($validated, $member, $savingAccount) {
+            [$transaction, $saldoSebelum] = DB::transaction(function () use ($validated, $member, $savingAccount, $savingType) {
                 $lockedSavingAccount = SavingAccount::query()
                     ->whereKey($savingAccount->id)
                     ->lockForUpdate()
@@ -558,7 +558,7 @@ class SavingController extends Controller
                 }
 
                 $transaction = SavingTransaction::create([
-                    'saving_transaction_code' => $this->generateWithdrawalTransactionCode(),
+                    'saving_transaction_code' => $this->generateWithdrawalTransactionCode($savingType),
                     'saving_account_id' => $lockedSavingAccount->id,
                     'balance_after_transaction' => $saldoSebelum - $validated['amount'],
                     'saving_amount' => $validated['amount'],
@@ -829,13 +829,16 @@ class SavingController extends Controller
         return null;
     }
 
-    private function generateWithdrawalTransactionCode(): string
+    private function generateWithdrawalTransactionCode(string $savingType): string
     {
-        $date = Carbon::now()->format('d');
-        $prefix = 'ST' . $date;
+        $yymm = Carbon::now()->format('ym'); 
+        
+        // inisial jenis simpanan
+        $categoryPrefix = $this->getTrxPrefix($savingType); 
+        
+        $prefix = $categoryPrefix . $yymm; 
 
         $latestTransaction = SavingTransaction::where('transaction_type', TransactionTypeEnum::WITHDRAWAL->value)
-            ->whereDate('created_at', Carbon::today())
             ->where('saving_transaction_code', 'like', $prefix . '%')
             ->lockForUpdate()
             ->orderByDesc('saving_transaction_code')
