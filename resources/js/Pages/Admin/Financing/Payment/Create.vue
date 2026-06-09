@@ -29,7 +29,10 @@ function formatRp(value) {
 
 // Form
 const nominalDisplay = ref(
-    formatRp(props.financing.installment_per_month)
+    'Rp ' +
+    formatRp(
+        props.financing.installment_per_month
+    )
 )
 
 const tanggalPembayaran = ref(today())
@@ -42,6 +45,31 @@ function today() {
     const day = String(d.getDate()).padStart(2, '0')
 
     return `${year}-${month}-${day}`
+}
+
+function getLateDays() {
+    if (
+        !selectedFinancing.value?.current_due_date ||
+        !tanggalPembayaran.value
+    ) {
+        return 0
+    }
+
+    const due = new Date(
+        selectedFinancing.value.current_due_date
+    )
+
+    const pay = new Date(
+        tanggalPembayaran.value
+    )
+
+    const diff =
+        Math.floor(
+            (pay - due) /
+            (1000 * 60 * 60 * 24)
+        )
+
+    return diff > 0 ? diff : 0
 }
 
 // Reschedule Modal
@@ -448,7 +476,7 @@ async function handleSubmit() {
                         </div>
 
                         <div
-                            class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                            class="grid grid-cols-1 md:grid-cols-3 gap-4"
                         >
                             <div>
                                 <label
@@ -460,8 +488,31 @@ async function handleSubmit() {
                                 <input
                                     v-model="tanggalPembayaran"
                                     type="date"
+                                    readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300"
                                 />
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-sm text-gray-600 mb-1"
+                                >
+                                    Jatuh Tempo Angsuran Saat Ini
+                                </label>
+
+                                <input
+                                    :value="selectedFinancing.current_due_date"
+                                    type="date"
+                                    readonly
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
+                                />
+
+                                <p
+                                    v-if="getLateDays() > 0"
+                                    class="text-sm text-red-600 mt-1"
+                                >
+                                    Terlambat {{ getLateDays() }} hari
+                                </p>
                             </div>
 
                             <div>
@@ -565,6 +616,7 @@ async function handleSubmit() {
                             <input
                                 v-model="rescheduleDate"
                                 type="date"
+                                :min="today()"
                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
                             />
                         </div>
