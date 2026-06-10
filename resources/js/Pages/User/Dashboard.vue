@@ -119,9 +119,9 @@ const rupiah = (value) =>
                             </div>
                         </Link>
 
-                        <Link href="/user/points" class="group">
+                        <Link href="/user/profile" class="group">
                             <div class="flex flex-col items-center gap-2">
-                                <div class="w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-white group-hover:bg-orange-600 transition-colors">
+                                <div class="w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
                                     <Icon icon="subway:coin" class="w-9 h-9" />
                                 </div>
                                 <div class="mt-1">
