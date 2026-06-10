@@ -148,7 +148,7 @@ const submitResignation = () => {
                         if (errors.resign) {
                             Swal.fire({
                                 icon: 'warning',
-                                title: 'Permohonan Sudah Ada',
+                                title: 'Permohonan Tidak Dapat Diajukan',
                                 text: errors.resign,
                                 confirmButtonColor: '#f59e0b',
                                 confirmButtonText: 'Kembali ke Dashboard'
@@ -272,7 +272,7 @@ const submitResignation = () => {
                     <div
                         @drop="handleDrop"
                         @dragover="handleDragOver"
-                        class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                        class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-secondary transition-colors cursor-pointer"
                         @click="$refs.fileInput.click()"
                     >
                         <input
@@ -298,10 +298,10 @@ const submitResignation = () => {
                             </div>
 
                             <!-- File yang diupload -->
-                            <div v-if="uploadedFile" class="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <div v-if="uploadedFile" class="mt-4 p-3 bg-gray-200 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-3">
-                                        <div class="text-blue-500">
+                                        <div class="text-primary">
                                             <Icon icon="akar-icons:file" width="30" height="30" />
                                         </div>
                                         <div>
@@ -358,7 +358,7 @@ const submitResignation = () => {
                                 <input
                                     v-model="isAgreed"
                                     type="checkbox"
-                                    class="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                                    class="mt-1 h-4 w-4 text-green-600 rounded focus:ring-green-500"
                                 />
                                 <span class="text-gray-700 dark:text-gray-300">
                                     Saya memahami bahwa setelah permohonan dikirim, data tidak dapat diubah.
@@ -369,7 +369,7 @@ const submitResignation = () => {
                                 <input
                                     v-model="isConfirmed"
                                     type="checkbox"
-                                    class="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                                    class="mt-1 h-4 w-4 text-green-600 rounded focus:ring-green-500"
                                 />
                                 <span class="text-gray-700 dark:text-gray-300">
                                     Saya yakin ingin melanjutkan pengunduran diri sebagai anggota koperasi.
@@ -387,7 +387,7 @@ const submitResignation = () => {
                     <button
                         @click="submitResignation"
                         :disabled="hasExistingResign || !uploadedFile || !isAgreed || !isConfirmed"
-                        class="font-head px-6 py-3 mt-5 mb-5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        class="font-head px-6 py-3 mt-5 mb-5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         Ajukan Permohonan
                     </button>
