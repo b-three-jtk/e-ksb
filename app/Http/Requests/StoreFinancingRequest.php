@@ -81,11 +81,11 @@ class StoreFinancingRequest extends FormRequest
             'supplier.address' => 'required|string|max:500',
 
             // File uploads
-            'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-            'bank_book_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-            'purchase_receipt_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-            'akad_document_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-            'akad_wakalah_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-        ];;
+            'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'bank_book_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'purchase_receipt_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'akad_document_file' => 'nullable|file|mimes:pdf|max:2048',
+            'akad_wakalah_file' => 'nullable|file|mimes:pdf|max:2048',
+        ];
     }
 }

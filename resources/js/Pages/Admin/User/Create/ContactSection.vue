@@ -1,5 +1,8 @@
 <script setup>
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
+import { useFormatter } from '@/Composables/Form/useFormatter'
+
+const { normalizePhoneNumber } = useFormatter()
 
 defineProps({
 	form: {

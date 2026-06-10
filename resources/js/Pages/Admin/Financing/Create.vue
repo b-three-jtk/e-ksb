@@ -12,6 +12,9 @@ import ProcurementData from './Create/ProcurementData.vue'
 import Finalization from './Create/Finalization.vue'
 import Stepper from './Create/Stepper.vue'
 import Documents from './Create/Documents.vue'
+import { useInputSanitizers } from '@/Composables/useInputSanitizers'
+
+const { onlyLetters, onlyNumbers } = useInputSanitizers()
 
 const activeStep = ref(1)
 const totalSteps = 5
@@ -104,6 +107,28 @@ const isFinalizationValid = computed(() =>
     form.financing.payment_method
 )
 
+const draftStatuses = [
+    'Menunggu Kelengkapan Dokumen',
+    'Ditolak',
+    'Disetujui dengan Catatan'
+]
+
+const showSubmitButton = computed(() => {
+    return activeStep.value === 3 && draftStatuses.includes(form.financing.status)
+})
+
+const showNextButton = computed(() => {
+    if (activeStep.value >= totalSteps || activeStep.value === 5) {
+        return false
+    }
+
+    if (activeStep.value === 3 && draftStatuses.includes(form.financing.status)) {
+        return false
+    }
+
+    return true
+})
+
 const handleSubmit = () => {
     const s1 = validateAndShowErrors(1)
     if (!s1) { activeStep.value = 1; return }
@@ -139,6 +164,8 @@ const handleSaveDraft = () => {
                     :is-member-selected="isMemberSelected"
                     :member-results="memberResults"
                     :data="props.data"
+                    :only-letters="onlyLetters"
+                    :only-numbers="onlyNumbers"
                     :errors="errors"
                     @update:search-query="searchQuery = $event"
                     @selectMember="selectMember"
@@ -210,7 +237,17 @@ const handleSaveDraft = () => {
                         </Button>
 
                         <Button
-                            v-if="activeStep < totalSteps && !isRequestValid"
+                            v-if="showSubmitButton"
+                            :disabled="!isStep3Valid"
+                            type="submit"
+                            @click="handleSubmit()"
+                            variant="secondary"
+                        >
+                            Ajukan Permohonan
+                        </Button>
+
+                        <Button
+                            v-if="showNextButton"
                             @click="nextStep"
                             variant="primary"
                         >

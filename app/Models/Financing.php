@@ -84,4 +84,9 @@ class Financing extends Model
     {
         return $this->hasOne(Wakalah::class);
     }
+
+    public function verification()
+    {
+        return $this->hasMany(FinancingVerification::class);
+    }
 }

@@ -79,8 +79,8 @@ export function useUserValidation(form: any, options: UserValidationOptions = {}
         (v) => {
             const value = v?.trim() || "";
 
-            if (!/^\+?\d{6,14}$/.test(value)) {
-                errors.phone_number = "Format nomor telepon tidak valid";
+            if (!/^62\d{10,15}$/.test(value)) {
+                errors.phone_number = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
             } else {
                 errors.phone_number = "";
             }

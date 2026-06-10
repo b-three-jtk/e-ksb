@@ -26,15 +26,15 @@ const emit = defineEmits([
 // Hitung cost_price & margin otomatis dari price_per_unit × qty
 watch(() => props.form.financing.price_per_unit, () => {
     const costPrice = (parseFloat(props.form.financing.price_per_unit) || 0)
-                    * (parseFloat(props.form.financing.qty) || 0)
+        * (parseFloat(props.form.financing.qty) || 0)
     props.form.financing.cost_price = costPrice
     props.form.financing.margin_amount = costPrice * 0.08
 }, { immediate: true })
 
 const totalPrice = computed(() => {
-    const costPrice    = parseFloat(props.form.financing.cost_price) || 0
+    const costPrice = parseFloat(props.form.financing.cost_price) || 0
     const marginAmount = parseFloat(props.form.financing.margin_amount) || 0
-    const downPayment  = parseFloat(props.form.financing.down_payment) || 0
+    const downPayment = parseFloat(props.form.financing.down_payment) || 0
     return costPrice + marginAmount - downPayment
 })
 
@@ -110,63 +110,24 @@ const onFieldChange = (field) => emit('validate-field', field)
 <template>
     <section class="flex flex-col gap-6">
 
-        <!-- Informasi Pemasok -->
-        <div class="card-layout mx-4">
-            <h1 class="card-title">Informasi Pemasok</h1>
-            <div class="grid grid-cols-2 gap-4 pt-4">
-
-                <!-- Supplier search / input -->
-                <BaseInputAdmin
-                    v-model="form.financing.supplier_id"
-                    label="Pemasok"
-                    type="select"
-                    :selectables="supplierSelectables"
-                    @update:modelValue="handleSupplierChange"
-                />
-
-                <BaseInputAdmin
-                    v-model="form.supplier.address"
-                    label="Alamat"
-                    type="textarea"
-                    rows="3"
-                    placeholder="Masukkan alamat pemasok"
-                />
-            </div>
-        </div>
-
         <!-- Pengadaan Barang -->
         <div class="card-layout mx-4">
             <h1 class="card-title">Pengadaan Barang</h1>
             <div class="grid grid-cols-2 gap-4 pt-4">
                 <div>
-                    <BaseInputAdmin
-                        type="file"
-                        label="Bukti Pembelian"
-                        v-model="form.purchase_receipt_file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        required
-                        :error="errors?.purchase_receipt_file"
-                        @change="onFieldChange('purchase_receipt_file')"
-                    />
+                    <BaseInputAdmin type="file" label="Bukti Pembelian" v-model="form.purchase_receipt_file"
+                        accept=".jpg,.jpeg,.png" required :error="errors?.purchase_receipt_file"
+                        @change="onFieldChange('purchase_receipt_file')" />
                     <div class="flex justify-between text-xs text-gray-400 mt-1">
-                        <p>Format: JPG, JPEG, PNG, PDF</p>
-                        <p>Max. 5 MB per file</p>
+                        <p>Format: JPG, JPEG, PNG</p>
+                        <p>Max. 2 MB per file</p>
                     </div>
                 </div>
-                <BaseInputAdmin
-                    v-model.number="form.financing.down_payment"
-                    label="Uang Muka"
-                    isMoney
-                    placeholder="Masukkan uang muka"
-                />
-                <BaseInputAdmin
-                    v-model.number="form.financing.price_per_unit"
-                    label="Harga Per Item"
-                    isMoney
-                    placeholder="Masukkan harga per item"
-                    :error="errors?.cost_price"
-                    @input="onFieldChange('cost_price')"
-                />
+                <BaseInputAdmin v-model.number="form.financing.down_payment" label="Uang Muka" isMoney
+                    placeholder="Masukkan uang muka" />
+                <BaseInputAdmin v-model.number="form.financing.price_per_unit" label="Harga Per Item" isMoney
+                    placeholder="Masukkan harga per item" :error="errors?.cost_price"
+                    @input="onFieldChange('cost_price')" />
                 <Info label="Harga Perolehan Barang" :value="parseCurrencyAmount(form.financing.cost_price)" />
                 <Info label="Margin (8%)" :value="parseCurrencyAmount(form.financing.margin_amount)" />
             </div>
@@ -178,12 +139,8 @@ const onFieldChange = (field) => emit('validate-field', field)
 
             <!-- Wakalah toggle -->
             <div class="mt-6 flex items-center gap-2">
-                <input
-                    v-model="form.is_wakalah"
-                    type="checkbox"
-                    id="wakalah"
-                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary-500"
-                />
+                <input v-model="form.is_wakalah" type="checkbox" id="wakalah"
+                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary-500" />
                 <label for="wakalah" class="text-sm text-gray-700">
                     Pengadaan dengan Skema Wakalah
                 </label>
@@ -200,60 +157,56 @@ const onFieldChange = (field) => emit('validate-field', field)
                 </a>
                 <div class="col-span-2 grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
-                    <BaseInputAdmin
-                        type="file"
-                        label="Upload Dokumen Wakalah Tertandatangani"
-                        v-model="form.akad_wakalah_file"
-                        accept=".jpg,.jpeg,.png,application/pdf"
-                        required
-                    />
-                    <div class="flex justify-between text-xs text-gray-400">
-                        <p>Format: JPG, JPEG, PNG, PDF</p>
-                        <p>Max. 2 MB per file</p>
+                        <BaseInputAdmin type="file" label="Upload Dokumen Wakalah Tertandatangani"
+                            v-model="form.akad_wakalah_file" accept="application/pdf" required />
+                        <div class="flex justify-between text-xs text-gray-400">
+                            <p>Format: PDF</p>
+                            <p>Max. 2 MB per file</p>
+                        </div>
                     </div>
+                    <BaseInputAdmin v-model="form.financing.akad_wakalah_date" label="Tanggal Akad Wakalah"
+                        type="date" />
                 </div>
-                <BaseInputAdmin
-                    v-model="form.financing.akad_wakalah_date"
-                    label="Tanggal Akad Wakalah"
-                    type="date"
-                />
-                </div>
+            </div>
+        </div>
+
+        <!-- Informasi Pemasok -->
+        <div class="card-layout mx-4">
+            <h1 class="card-title">Informasi Pemasok</h1>
+            <div class="grid grid-cols-2 gap-4 pt-4">
+
+                <!-- Supplier search / input -->
+                <BaseInputAdmin v-model="form.financing.supplier_id" label="Pemasok" type="select"
+                    :selectables="supplierSelectables" @update:modelValue="handleSupplierChange" />
+
+                <BaseInputAdmin v-model="form.supplier.address" label="Alamat" type="textarea" rows="3"
+                    placeholder="Masukkan alamat pemasok" />
             </div>
         </div>
     </section>
 
     <Teleport to="body">
-        <div v-if="showNewSupplierInput"
-            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div v-if="showNewSupplierInput" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                 <h2 class="text-lg font-bold text-gray-900 mb-4">Tambah Pemasok Baru</h2>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pemasok</label>
-                    <input
-                        v-model="newSupplierName"
-                        type="text"
-                        placeholder="Masukkan nama pemasok..."
+                    <input v-model="newSupplierName" type="text" placeholder="Masukkan nama pemasok..."
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
-                        @keyup.enter="createNewSupplier"
-                    />
+                        @keyup.enter="createNewSupplier" />
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Pemasok</label>
-                    <input
-                        v-model="newSupplierAddress"
-                        type="text"
-                        placeholder="Masukkan alamat pemasok..."
+                    <input v-model="newSupplierAddress" type="text" placeholder="Masukkan alamat pemasok..."
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
-                        @keyup.enter="createNewSupplier"
-                    />
+                        @keyup.enter="createNewSupplier" />
                 </div>
                 <div class="flex gap-3 justify-end">
                     <button @click="closeModal"
                         class="px-4 py-2 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400 transition font-medium">
                         Batal
                     </button>
-                    <button @click="createNewSupplier"
-                        :disabled="isCreatingSupplier || !newSupplierName.trim()"
+                    <button @click="createNewSupplier" :disabled="isCreatingSupplier || !newSupplierName.trim()"
                         class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium">
                         <span v-if="!isCreatingSupplier">Buat</span>
                         <span v-else class="flex items-center gap-2">

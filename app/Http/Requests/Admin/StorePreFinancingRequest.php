@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
 use App\Enums\EducationEnum;
 use App\Enums\GenderEnum;
@@ -8,7 +8,7 @@ use App\Enums\MaritalStatusEnum;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreFinancingDraftRequest extends FormRequest
+class StorePreFinancingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,10 +27,10 @@ class StoreFinancingDraftRequest extends FormRequest
     {
         return [
             // Member data
-            'member.user_code' => 'nullable|string|max:255',
-            'member.name' => 'nullable|string|max:255',
-            'member.nik' => 'nullable|string|digits:16',
-            'member.phone_number' => 'nullable|string|max:20',
+            'member.user_code' => 'required|string|max:255',
+            'member.name' => 'required|string|max:255',
+            'member.nik' => 'required|string|digits:16',
+            'member.phone_number' => 'required|string|max:20',
             'member.email' => 'nullable|email|max:255',
             'member.birth_place' => 'nullable|string|max:255',
             'member.birth_date' => 'nullable|date',
@@ -47,10 +47,10 @@ class StoreFinancingDraftRequest extends FormRequest
             'member.tenure_year' => 'nullable|integer|min:0',
             'member.workplace_address' => 'nullable|string|max:500',
             'member.workplace_contact' => 'nullable|string|max:20',
-            'member.heirs.*.heir_name' => 'nullable|string|max:255',
-            'member.heirs.*.heir_nik' => 'nullable|string|digits:16',
-            'member.heirs.*.relationship' => 'nullable|string|max:255',
-            'member.heirs.*.heir_contact' => 'nullable|string|max:20',
+            'member.heirs.*.heir_name' => 'required|string|max:255',
+            'member.heirs.*.heir_nik' => 'required|string|digits:16',
+            'member.heirs.*.relationship' => 'required|string|max:255',
+            'member.heirs.*.heir_contact' => 'required|string|max:20',
             'member.gaji_pokok_amount' => 'nullable|numeric|min:0',
             'member.penghasilan_usaha_amount' => 'nullable|numeric|min:0',
             'member.penghasilan_pasangan_amount' => 'nullable|numeric|min:0',
@@ -61,23 +61,13 @@ class StoreFinancingDraftRequest extends FormRequest
             'member.jumlah_biaya_lainnya_amount' => 'nullable|numeric|min:0',
 
             // Financing data
-            'financing.name' => 'nullable|string|max:255',
-            'financing.product_type_id' => 'nullable|exists:product_types,id',
-            'financing.condition' => 'nullable|string|max:255',
-            'financing.qty' => 'nullable|integer|min:1',
-            'financing.specification' => 'nullable|string|max:1000',
-            'financing.price_per_unit' => 'nullable|numeric|min:0',
-            'financing.cost_price' => 'nullable|numeric|min:0',
-            'financing.margin_amount' => 'nullable|numeric|min:0',
-            'financing.payment_method' => 'nullable|string|max:255',
-            'financing.akad_date' => 'nullable|date',
-            'financing.down_payment' => 'nullable|numeric|min:0',
-            'financing.notes' => 'nullable|string|max:1000',
-            'financing.status' => 'nullable|string|max:255',
-            'financing.tenor' => 'nullable|integer',
-            'financing.predicted_cost_price' => 'nullable|numeric|min:0',
-            'financing.akad_wakalah_date' => 'nullable|date',
-            'financing.supplier_id' => 'nullable|exists:suppliers,id',
+            'financing.name' => 'required|string|max:255',
+            'financing.product_type_id' => 'required|exists:product_types,id',
+            'financing.condition' => 'required|string|max:255',
+            'financing.qty' => 'required|integer|min:1',
+            'financing.specification' => 'required|string|max:1000',
+            'financing.status' => 'required|string|max:255',
+            'financing.predicted_cost_price' => 'required|numeric|min:0',
 
             // Collateral data
             'collateral.collateral_type' => 'nullable|string|max:255',
@@ -85,16 +75,9 @@ class StoreFinancingDraftRequest extends FormRequest
             'collateral.estimated_market_value' => 'nullable|numeric|min:0',
             'collateral.collateral_location' => 'nullable|string|max:500',
 
-            // Supplier data
-            'supplier.supplier_name' => 'nullable|string|max:255',
-            'supplier.address' => 'nullable|string|max:500',
-
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
             'bank_book_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-            'purchase_receipt_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-            'akad_document_file' => 'nullable|file|mimes:pdf|max:2048',
-            'akad_wakalah_file' => 'nullable|file|mimes:pdf|max:2048',
-        ];
+        ];;
     }
 }

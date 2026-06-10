@@ -18,6 +18,7 @@ export function useFinancingValidation(form) {
     const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     const isValidPhone = (phone) => /^[0-9]{8,14}$/.test(phone)
     const isValidNik   = (nik)   => /^[0-9]{16}$/.test(nik)
+    const isValidDependents = (dependents) => /^[0-9]+$/.test(dependents)
 
     const validateStep1 = () => {
         const errs = {}
@@ -45,8 +46,8 @@ export function useFinancingValidation(form) {
         if (!m.gender)
             errs.gender = 'Jenis kelamin wajib dipilih.'
 
-        if (!m.residential_address?.trim())
-            errs.residential_address = 'Alamat wajib diisi.'
+        if (!isValidDependents(m.dependents))
+            errs.dependents = 'Jumlah tanggungan harus angka.'
 
         if (!form.member.heirs || form.member.heirs.length === 0)
             errs.heirs = 'Minimal satu data ahli waris wajib ditambahkan.'
@@ -64,6 +65,7 @@ export function useFinancingValidation(form) {
     const validateStep2 = () => {
         const errs = {}
         const m = form.member
+        const isValidTenureYear = (tenure_year) => /^[0-9]+$/.test(tenure_year)
 
         if (!m.job_title?.trim())
             errs.job_title = 'Jabatan wajib diisi.'
@@ -76,6 +78,8 @@ export function useFinancingValidation(form) {
 
         if (!m.tenure_year && m.tenure_year !== 0)
             errs.tenure_year = 'Lama bekerja wajib diisi.'
+        else if (!isValidTenureYear(m.tenure_year))
+            errs.tenure_year = 'Lama bekerja harus berupa angka.'
 
         if (!m.workplace_contact?.trim())
             errs.workplace_contact = 'Kontak perusahaan wajib diisi.'
@@ -87,9 +91,17 @@ export function useFinancingValidation(form) {
 
         if (!form.income_slip_file && !form.documents?.income_slip)
             errs.income_slip_file = 'Slip gaji wajib diunggah.'
+        else if (form.income_slip_file && !['image/jpeg', 'image/png'].includes(form.income_slip_file.type))
+            errs.income_slip_file = 'Format slip gaji harus JPG, JPEG, atau PNG.'
+        else if (form.income_slip_file && form.income_slip_file.size > 2 * 1024 * 1024)
+            errs.income_slip_file = 'Ukuran slip gaji maksimal 2 MB.'
 
         if (!form.bank_book_file && !form.documents?.bank_book)
             errs.bank_book_file = 'Foto buku tabungan wajib diunggah.'
+        else if (form.bank_book_file && !['image/jpeg', 'image/png'].includes(form.bank_book_file.type))
+            errs.bank_book_file = 'Format buku tabungan harus JPG, JPEG, atau PNG.'
+        else if (form.bank_book_file && form.bank_book_file.size > 2 * 1024 * 1024)
+            errs.bank_book_file = 'Ukuran buku tabungan maksimal 2 MB.'
 
         return errs
     }
@@ -98,7 +110,24 @@ export function useFinancingValidation(form) {
         const errs = {}
 
         if (!form.financing.name?.trim())
-            errs.financing_name = 'Nama objek pembiayaan wajib diisi.'
+            errs.name = 'Nama objek pembiayaan wajib diisi.'
+
+        if (!form.financing.condition)
+            errs.condition = 'Kondisi objek pembiayaan wajib diisi.'
+
+        if (isNaN(form.financing.qty) || form.financing.qty <= 0)
+            errs.qty = 'Jumlah objek pembiayaan harus berupa angka positif.'
+        else if (!form.financing.qty)
+            errs.qty = 'Jumlah objek pembiayaan wajib diisi.'
+
+        if (!form.financing.predicted_cost_price)
+            errs.predicted_cost_price = 'Harga perkiraan wajib diisi.'
+
+        if (!form.financing.specification?.trim())
+            errs.specification = 'Spesifikasi objek pembiayaan wajib diisi.'
+
+        if (!form.financing.predicted_cost_price)
+            errs.predicted_cost_price = 'Harga perkiraan wajib diisi.'
 
         if (!form.collateral.collateral_type)
             errs.collateral_type = 'Jenis jaminan wajib dipilih.'
@@ -117,6 +146,10 @@ export function useFinancingValidation(form) {
 
         if (!form.purchase_receipt_file && !form.documents?.purchase_receipt)
             errs.purchase_receipt_file = 'Nota pembelian wajib diunggah.'
+        else if (form.purchase_receipt_file && !['image/jpeg', 'image/png'].includes(form.purchase_receipt_file.type))
+            errs.purchase_receipt_file = 'Format nota pembelian harus JPG, JPEG, atau PNG.'
+        else if (form.purchase_receipt_file && form.purchase_receipt_file.size > 2 * 1024 * 1024)
+            errs.purchase_receipt_file = 'Ukuran nota pembelian maksimal 2 MB.'
 
         return errs
     }

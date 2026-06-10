@@ -96,6 +96,7 @@ class FinancingService
                 FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                 FinancingReqStatusEnum::REJECTED->value,
                 FinancingReqStatusEnum::APPROVED->value,
+                FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
             ])
             ->latest()
             ->first();
