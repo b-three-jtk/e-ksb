@@ -134,12 +134,10 @@ watch(() => props.modelValue, (val) => {
             v-model="dateValue"
             format="yyyy-MM-dd"
             :time-picker="false"
-            :time-config="{ enableTimePicker: false, ignoreTimeValidation: true }"
-            teleport="body"
             :input-class="datePickerInputClass"
             :disabled="disabled"
             :placeholder="placeholder || 'Pilih tanggal'"
-        />
+            />
 
         <!-- Select -->
         <div v-else-if="inputType === 'select'" class="relative z-20 bg-transparent">

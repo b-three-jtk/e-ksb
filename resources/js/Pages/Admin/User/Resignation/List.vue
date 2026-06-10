@@ -1,13 +1,16 @@
 <script setup>
-import { Link, usePage, router } from '@inertiajs/vue3'
+import { usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { Icon } from '@iconify/vue'
-import { ref, computed, reactive, watch } from 'vue'
+import { ref, computed, reactive, watch, onMounted } from 'vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import BaseFunctionality from '@/Components/Table/BaseFunctionality.vue'
 import BaseTable from '@/Components/Table/BaseTable.vue'
 import Pagination from '@/Components/Table/Pagination.vue'
 import Button from '@/Components/Form/Button.vue'
+import Swal from 'sweetalert2'
+import { useWhatsAppResignation } from '@/Composables/useWhatsAppResignation'
+import { toast } from 'vue3-toastify'
 
 const isLoading = ref(false)
 
@@ -92,6 +95,41 @@ const breadcrumbItems = [
     {name: 'Dashboard', link: '/admin'},
     {name: 'Pengunduran Diri Anggota'},
 ]
+
+const { sendResignationToWhatsApp } = useWhatsAppResignation(toast)
+const resignationInfo = ref(null)
+
+const showResignationInfo = async () => {
+    if (!resignationInfo.value) return
+
+    const result = await Swal.fire({
+        title: 'Pengunduran Diri Disetujui',
+        html: `
+            <div style="text-align:left;font-size:14px;line-height:1.8">
+                <div><strong>Nama:</strong> ${resignationInfo.value.name ?? '-'}</div>
+                <div><strong>Nomor Anggota:</strong> ${resignationInfo.value.user_code ?? '-'}</div>
+            </div>
+        `,
+        icon: 'success',
+        confirmButtonText: 'Kirim ke WhatsApp',
+        confirmButtonColor: '#007943',
+        showCancelButton: true,
+        cancelButtonText: 'Tutup',
+    })
+
+    if (result.isConfirmed) {
+        sendResignationToWhatsApp(resignationInfo.value)
+    }
+
+    resignationInfo.value = null
+}
+
+onMounted(() => {
+    resignationInfo.value = page.props.flash?.resignation_info ?? null
+    if (resignationInfo.value) {
+        showResignationInfo()
+    }
+})
 </script>
 
 <template>

@@ -8,7 +8,6 @@ use App\Enums\TransactionTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Enums\PositionEnum;
-use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDepositRequest;
 use App\Http\Requests\StoreWithdrawalRequest;
@@ -416,7 +415,7 @@ class SavingController extends Controller
             }
         }
 
-        if ($savingAccount->wasRecentlyCreated && $data['saving_category'] === 'Tabungan Berjangka') 
+        if ($savingAccount->wasRecentlyCreated && $data['saving_category'] === 'Tabungan Berjangka')
         {
             if (empty($data['tenor_months'])) {
                 throw ValidationException::withMessages([
@@ -501,7 +500,7 @@ class SavingController extends Controller
             }
         }
 
-        if ($data['saving_category'] === 'Tabungan Berjangka' && $savingAccount->berjangka) 
+        if ($data['saving_category'] === 'Tabungan Berjangka' && $savingAccount->berjangka)
         {
             $jatuhTempo = $savingAccount
                 ->created_at
@@ -959,12 +958,12 @@ class SavingController extends Controller
 
     private function generateWithdrawalTransactionCode(string $savingType): string
     {
-        $yymm = Carbon::now()->format('ym'); 
-        
+        $yymm = Carbon::now()->format('ym');
+
         // inisial jenis simpanan
-        $categoryPrefix = $this->getTrxPrefix($savingType); 
-        
-        $prefix = $categoryPrefix . $yymm; 
+        $categoryPrefix = $this->getTrxPrefix($savingType);
+
+        $prefix = $categoryPrefix . $yymm;
 
         $latestTransaction = SavingTransaction::where('transaction_type', TransactionTypeEnum::WITHDRAWAL->value)
             ->where('saving_transaction_code', 'like', $prefix . '%')

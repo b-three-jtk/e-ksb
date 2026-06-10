@@ -109,8 +109,8 @@ export function useFinancingValidation(form) {
     const validateStep4 = () => {
         const errs = {}
 
-        if (!form.supplier.supplier_name?.trim())
-            errs.supplier_name = 'Nama supplier wajib diisi.'
+        if (!form.financing.supplier_id)
+            errs.supplier_name = 'Supplier wajib diisi.'
 
         if (!form.financing.cost_price)
             errs.cost_price = 'Harga pokok wajib diisi.'

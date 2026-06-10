@@ -1,22 +1,30 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
 use App\Enums\EducationEnum;
 use App\Enums\GenderEnum;
 use App\Enums\MaritalStatusEnum;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreFinancingRequest extends FormRequest
+class StorePreFinancingRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
-
         return [
             // Member data
             'member.user_code' => 'required|string|max:255',
@@ -58,17 +66,8 @@ class StoreFinancingRequest extends FormRequest
             'financing.condition' => 'required|string|max:255',
             'financing.qty' => 'required|integer|min:1',
             'financing.specification' => 'required|string|max:1000',
-            'financing.price_per_unit' => 'required|numeric|min:0',
-            'financing.cost_price' => 'required|numeric|min:0',
-            'financing.margin_amount' => 'required|numeric|min:0',
-            'financing.payment_method' => 'required|string|max:255',
-            'financing.akad_date' => 'required|date',
-            'financing.down_payment' => 'required|numeric|min:0',
             'financing.status' => 'required|string|max:255',
-            'financing.tenor' => 'nullable|integer',
-            'financing.akad_wakalah_date' => 'nullable|date',
             'financing.predicted_cost_price' => 'required|numeric|min:0',
-            'financing.supplier_id' => 'required|exists:suppliers,id',
 
             // Collateral data
             'collateral.collateral_type' => 'nullable|string|max:255',
@@ -76,16 +75,9 @@ class StoreFinancingRequest extends FormRequest
             'collateral.estimated_market_value' => 'nullable|numeric|min:0',
             'collateral.collateral_location' => 'nullable|string|max:500',
 
-            // Supplier data
-            'supplier.supplier_name' => 'required|string|max:255',
-            'supplier.address' => 'required|string|max:500',
-
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
             'bank_book_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-            'purchase_receipt_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-            'akad_document_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-            'akad_wakalah_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-        ];
+        ];;
     }
 }
