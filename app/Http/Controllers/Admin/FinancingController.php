@@ -920,6 +920,16 @@ class FinancingController extends Controller
 
         $data['pengurus'] = auth()->user()->name;
 
+        $unpaidInstallment = $financing->installment
+            ->whereNotIn('status', [
+                InstallmentPaymentScheduleStatusEnum::PAID->value,
+                InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
+            ])
+            ->sortBy('installment_no')
+            ->first();
+
+        $data['installment_id'] = $unpaidInstallment?->id;
+
         return inertia('Admin/Financing/Repayment/Create', [
             'data' => $data,
         ]);
