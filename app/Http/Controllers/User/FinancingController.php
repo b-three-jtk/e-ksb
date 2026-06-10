@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Financing;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class FinancingController extends Controller
 {
@@ -80,11 +83,9 @@ class FinancingController extends Controller
     private function mapFinancingForList($financing): array
     {
         $productName = null;
-        $productBrand = null;
 
         if ($financing->financingItem && $financing->financingItem) {
             $productName = $financing->financingItem->name;
-            $productBrand = $financing->financingItem->brand;
         }
 
         return [
@@ -92,7 +93,6 @@ class FinancingController extends Controller
             'transaction_code' => $financing->financing_transaction_code,
             'akad_date' => $financing->akad_date,
             'product_name' => $productName,
-            'product_brand' => $productBrand,
             'status' => $financing->status,
             'remaining_balance' => 0,
             'loan' => null,
@@ -121,18 +121,55 @@ class FinancingController extends Controller
     public function show(string $id)
     {
         $user = auth()->user();
-        $member = $user->member;
+        $member = $user?->member;
 
         if (!$member) {
             abort(404);
         }
 
-        $financing = Financing::with(['financingItem.product'])
-            ->where('member_id', $member->id)
-            ->findOrFail($id);
+        $financing = Financing::with(['financingItem.productType', 'installment.payment', 'financingItem.supplier', 'collateral'])
+        ->where('member_id', $member->id)
+        ->findOrFail($id);
+        $financing->total_price = ($financing->cost_price ?? 0) + ($financing->margin_amount ?? 0) - ($financing->down_payment ?? 0);
+
+        $installment = $financing->installment;
+
+        if ($installment && $installment->count() > 0) {
+            $paid_count = $installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
+            $total_paid = $financing->tenor > 0
+                ? $paid_count * (($financing->margin_amount ?? 0) + ($financing->cost_price ?? 0) - ($financing->down_payment ?? 0)) / $financing->tenor
+                : 0;
+            $financing->remaining_balance = $financing->total_price - $total_paid;
+            $financing->total_paid = $total_paid;
+
+            if ($financing->tenor) {
+                $financing->installment_per_month = ($financing->total_price) / $financing->tenor;
+            } else {
+                $financing->installment_per_month = 0;
+            }
+        } else {
+            $financing->total_paid = 0;
+            if ($installment && $financing->tenor) {
+                $financing->installment_per_month = ($financing->total_price) / $financing->tenor;
+            } else {
+                $financing->installment_per_month = 0;
+            }
+            $financing->remaining_balance = $financing->total_price;
+        }
+
+        if ($installment && $financing->akad_date) {
+            $paid_count = $installment ? $installment->count() : 0;
+            if ($paid_count < $financing->tenor) {
+                $financing->next_due_date = Carbon::parse($financing->akad_date)
+                    ->addMonthsNoOverflow($paid_count + 1)
+                    ->format('Y-m-d');
+            } else {
+                $financing->next_due_date = null;
+            }
+        }
 
         return inertia('User/Financing/Show', [
-            'data' => $this->mapFinancingForList($financing)
+            'data' => $financing
         ]);
     }
 

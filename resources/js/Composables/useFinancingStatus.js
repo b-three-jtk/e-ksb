@@ -10,7 +10,7 @@ const STATUS_MAP = {
     'Disetujui': {
         class: `${baseClass} text-green-600 bg-green-50`
     },
-    'Disetujui Dengan Catatan': {
+    'Disetujui dengan Catatan': {
         class: `${baseClass} text-blue-600 bg-blue-50`
     },
     'Ditolak': {
@@ -18,12 +18,6 @@ const STATUS_MAP = {
     },
     'Angsuran Berjalan': {
         class: `${baseClass} text-blue-600 bg-blue-50`
-    },
-    'Permintaan Pelunasan Diajukan': {
-        class: `${baseClass} text-yellow-600 bg-yellow-50`
-    },
-    'Lunas Dipercepat': {
-        class: `${baseClass} text-green-600 bg-green-50`
     },
     'Lunas': {
         class: `${baseClass} text-green-600 bg-green-50`

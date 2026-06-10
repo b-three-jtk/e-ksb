@@ -76,8 +76,8 @@ class StorePreFinancingRequest extends FormRequest
             'collateral.collateral_location' => 'nullable|string|max:500',
 
             // File uploads
-            'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-            'bank_book_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
-        ];;
+            'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'bank_book_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+        ];
     }
 }

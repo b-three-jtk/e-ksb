@@ -47,7 +47,7 @@ const breadcrumbItems = [
                     <Info label="Jumlah/Kuantitas" :value="data.financing_item?.qty" />
                     <Info label="Kondisi" :value="data.financing_item?.condition" />
                     <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.specification" />
-                    <Info label="Supplier" :value="data.financing_item.supplier?.supplier_name" />
+                    <Info label="Supplier" :value="data.financing_item?.supplier?.supplier_name" />
                 </div>
             </div>
             <div v-if="data.collateral" class="flex flex-col px-12 pb-2 pt-4 gap-2">
@@ -82,8 +82,8 @@ const breadcrumbItems = [
                         <Info label="Total Dibayar" :value="moneyParser(data.total_paid)" />
                         <Info label="Sisa Tagihan" :value="moneyParser(data.remaining_balance)" />
                                                 <Info label="Angsuran/Bulan" :value="moneyParser(data.installment_per_month)" />
-                        <Info v-if="data.installment?.tenor" label="Tenor"
-                            :value="data.installment?.tenor + ' Bulan'" />
+                        <Info v-if="data.tenor" label="Tenor"
+                            :value="data.tenor + ' Bulan'" />
                         <Info v-if="data.next_due_date" label="Jatuh Tempo Terdekat" :value="dateParser(data.next_due_date)" />
                     </div>
                     <div class="py-8 px-8" v-if="data.total_price">
@@ -145,7 +145,7 @@ const breadcrumbItems = [
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
-                                    <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="i.is_early_repayment ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'">
+                                    <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="i.payment?.is_early_repayment ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'">
                                         {{ i.payment?.is_early_repayment ? 'Pelunasan Dipercepat' : 'Reguler' }}
                                     </span>
                                 </td>

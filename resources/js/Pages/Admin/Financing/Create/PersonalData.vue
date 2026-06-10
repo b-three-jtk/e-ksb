@@ -2,6 +2,9 @@
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 import Button from '@/Components/Form/Button.vue'
 import { ref } from 'vue'
+import { useFormatter } from '@/Composables/Form/useFormatter'
+
+const { normalizePhoneNumber } = useFormatter()
 
 const props = defineProps({
     form: Object,
@@ -11,6 +14,8 @@ const props = defineProps({
     memberResults: Array,
     data: Object,
     errors: Object,
+    onlyLetters: Function,
+    onlyNumbers: Function,
 })
 
 const emit = defineEmits([
@@ -29,24 +34,11 @@ const heirInput = ref({
     heir_contact: '',
 })
 
-const onlyNumbers = (event) => {
-    event.target.value = event.target.value.replace(/[^0-9]/g, '')
-}
-const onlyAlpha = (event) => {
-    event.target.value = event.target.value.replace(/[^a-zA-Z\s]/g, '')
-}
-const onlyAlphaNumericDash = (event) => {
-    event.target.value = event.target.value.replace(/[^a-zA-Z0-9\s\-.,]/g, '')
-}
-
 const sanitizeHeirNik = (event) => {
     heirInput.value.heir_nik = event.target.value.replace(/[^0-9]/g, '')
 }
 const sanitizeHeirName = (event) => {
     heirInput.value.heir_name = event.target.value.replace(/[^a-zA-Z\s]/g, '')
-}
-const sanitizeHeirContact = (event) => {
-    heirInput.value.heir_contact = event.target.value.replace(/[^0-9]/g, '')
 }
 
 const onFieldChange = (field) => emit('validate-field', field)
@@ -132,7 +124,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 v-model="form.member.name"
                 required
                 :error="errors?.name"
-                @input="onlyAlpha($event); onFieldChange('name')"
             />
             <BaseInputAdmin
                 label="NIK"
@@ -141,7 +132,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 max="16"
                 required
                 :error="errors?.nik"
-                @input="onlyNumbers($event); onFieldChange('nik')"
                 inputmode="numeric"
             />
             <BaseInputAdmin
@@ -160,7 +150,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                 max="14"
                 v-model="form.member.phone_number"
                 :error="errors?.phone_number"
-                @input="onlyNumbers($event); onFieldChange('phone_number')"
+                @input="form.member.phone_number = normalizePhoneNumber(form.member.phone_number, props.onlyNumbers)"
                 inputmode="numeric"
             />
             <BaseInputAdmin
@@ -195,7 +185,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 placeholder="Masukkan alamat lengkap sesuai KTP"
                 rows="4"
                 :error="errors?.residential_address"
-                @input="onlyAlphaNumericDash($event); onFieldChange('residential_address')"
             />
             <BaseInputAdmin
                 v-model="form.member.domicile_address"
@@ -204,7 +193,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 placeholder="Masukkan alamat domisili"
                 rows="4"
                 :error="errors?.domicile_address"
-                @input="onlyAlphaNumericDash"
             />
             <BaseInputAdmin
                 v-model="form.member.last_education"
@@ -223,9 +211,9 @@ const onFieldChange = (field) => emit('validate-field', field)
                 v-model="form.member.dependents"
                 label="Jumlah Tanggungan Keluarga"
                 type="number"
-                @input="onlyNumbers"
                 inputmode="numeric"
                 min="0"
+                :error="errors?.dependents"
             />
         </div>
 
@@ -257,7 +245,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     max="20"
                     placeholder="Nomor Kontak"
                     inputmode="numeric"
-                    @input="sanitizeHeirContact"
+                    @input="heirInput.heir_contact = normalizePhoneNumber(heirInput.heir_contact, props.onlyNumbers)"
                 />
                 <Button variant="primary" @click="$emit('addHeir', heirInput); onFieldChange('heirs')">
                     Tambah

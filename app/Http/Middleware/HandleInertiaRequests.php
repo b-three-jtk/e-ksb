@@ -63,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                 'role' => $user ? $user->getRoleNames()->first() : null,
                 'can' => $permissions,
             ],
+            'guest' => $request->user() === null,
             'notification_dropdown' => $notifications,
             'unread_notification_count' => $unreadCount,
             'pending_notification_popups' => $pendingPopup,

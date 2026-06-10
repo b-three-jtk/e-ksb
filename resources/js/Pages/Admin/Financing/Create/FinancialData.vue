@@ -177,14 +177,14 @@ const onFieldChange = (field) => emit('validate-field', field)
                         type="file"
                         label="Penghasilan (Slip Gaji)"
                         v-model="form.income_slip_file"
-                        accept=".pdf,.jpg,.jpeg,.png"
+                        accept=".jpg,.jpeg,.png"
                         required
                         :error="errors?.income_slip_file"
                         @change="onFieldChange('income_slip_file')"
                     />
                     <div class="flex justify-between text-xs text-gray-400 mt-1">
-                        <p>Format: JPG, JPEG, PNG, PDF</p>
-                        <p>Max. 5 MB per file</p>
+                        <p>Format: JPG, JPEG, PNG</p>
+                        <p>Max. 2 MB per file</p>
                     </div>
                 </div>
                 <div>
@@ -192,14 +192,14 @@ const onFieldChange = (field) => emit('validate-field', field)
                         type="file"
                         label="Foto Buku Tabungan/Rekening Koran 3 Bulan Terakhir"
                         v-model="form.bank_book_file"
-                        accept=".pdf,.jpg,.jpeg,.png"
+                        accept=".jpg,.jpeg,.png"
                         required
                         :error="errors?.bank_book_file"
                         @change="onFieldChange('bank_book_file')"
                     />
                     <div class="flex justify-between text-xs text-gray-400 mt-1">
-                        <p>Format: JPG, JPEG, PNG, PDF</p>
-                        <p>Max. 5 MB per file</p>
+                        <p>Format: JPG, JPEG, PNG</p>
+                        <p>Max. 2 MB per file</p>
                     </div>
                 </div>
             </div>

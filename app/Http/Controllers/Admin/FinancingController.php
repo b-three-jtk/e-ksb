@@ -86,6 +86,7 @@ class FinancingController extends Controller
                 $q->whereIn('status', [
                     FinancingReqStatusEnum::APPROVED->value,
                     FinancingReqStatusEnum::REJECTED->value,
+                    FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
                 ]);
             })
             ->when($tab === 'active', function ($q) {
@@ -136,6 +137,7 @@ class FinancingController extends Controller
                     FinancingReqStatusEnum::PENDING_REVIEW->value,
                     FinancingReqStatusEnum::APPROVED->value,
                     FinancingReqStatusEnum::REJECTED->value,
+                    FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
                 ])->count()
             ],
             ['title' => 'Total Pembiayaan Berlangsung', 'value' => Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->count()],
@@ -328,6 +330,7 @@ class FinancingController extends Controller
                 FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                 FinancingReqStatusEnum::APPROVED->value,
                 FinancingReqStatusEnum::REJECTED->value,
+                FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
             ])
             ->with([
                 'member.user',
@@ -339,6 +342,7 @@ class FinancingController extends Controller
                 'financingItem.supplier',
                 'collateral',
                 'wakalah',
+            'verification.verifier'
             ])
             ->first();
 
@@ -374,6 +378,14 @@ class FinancingController extends Controller
                     'estimated_market_value' => $financing->collateral?->estimated_market_value,
                     'collateral_location' => $financing->collateral?->collateral_location,
                 ],
+                'verification' => $financing->verification->map(function ($item) {
+                    return [
+                        'final_verification_status' => $item->final_verification_status,
+                        'notes' => $item->notes,
+                        'verified_by_name' => $item->verifier?->name,
+                        'verified_at' => $item->verified_at?->format('Y-m-d H:i:s'),
+                    ];
+                })->values(),
                 'documents' => [
                     'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
@@ -1170,7 +1182,7 @@ class FinancingController extends Controller
         $fileName = null;
 
         try {
-            \Carbon\Carbon::setLocale('id');
+            Carbon::setLocale('id');
 
             $logoPath = public_path('images/logo/logo-icon.svg');
             $logo = file_exists($logoPath)
@@ -1185,7 +1197,7 @@ class FinancingController extends Controller
                     'address' => 'Komplek Puri Cipageran Indah 2, RW 21, Desa Ngamprah, Kec. Tanimulya, Kabupaten Bandung Barat',
                 ],
                 'petugas'             => auth()->user()->name,
-                'tanggal_angsuran'    => \Carbon\Carbon::parse($payment->payment_date)->translatedFormat('d F Y'),
+                'tanggal_angsuran'    => Carbon::parse($payment->payment_date)->translatedFormat('d F Y'),
                 'nomor_pembiayaan'    => $financing->financing_transaction_code,
                 'no_anggota'          => $financing->member?->user?->user_code,
                 'diterima_dari'       => $financing->member?->user?->name,

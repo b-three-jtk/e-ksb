@@ -71,7 +71,6 @@ export function useFinancingForm(initialData = null) {
             payment_method: initialData?.financing?.payment_method || '',
             akad_date: initialData?.financing?.akad_date || '',
             down_payment: initialData?.financing?.down_payment || null,
-            notes: initialData?.financing?.notes || '',
             status: initialData?.financing?.status || 'Menunggu Kelengkapan Dokumen',
             purchase_receipt: initialData?.financing?.purchase_receipt || null,
             tenor: initialData?.financing?.tenor || null,
@@ -84,6 +83,7 @@ export function useFinancingForm(initialData = null) {
             estimated_market_value: initialData?.collateral?.estimated_market_value || 0,
             collateral_location: initialData?.collateral?.collateral_location || '',
         },
+        verification: initialData?.verification || [],
         documents: {
             family_card: initialData?.documents?.family_card || null,
             income_slip: initialData?.documents?.income_slip || null,

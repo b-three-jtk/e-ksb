@@ -14,6 +14,10 @@ class FinancingVerification extends Model
         'verified_at',
     ];
 
+    protected $casts = [
+        'verified_at' => 'datetime',
+    ];
+
     public function financing()
     {
         return $this->belongsTo(Financing::class);

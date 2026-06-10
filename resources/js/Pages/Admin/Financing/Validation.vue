@@ -65,13 +65,6 @@ const submit = () => {
         return
     }
 
-    const statusMapping = {
-        'approved': 'Disetujui',
-        'rejected': 'Ditolak',
-    }
-
-    const finalStatus = statusMapping[form.final_decision_status]
-
     Swal.fire({
         title: 'Konfirmasi',
         text: 'Apakah Anda yakin ingin menyimpan validasi permohonan ini?',
@@ -83,7 +76,7 @@ const submit = () => {
     }).then((result) => {
         if (result.isConfirmed) {
             const submitForm = useForm({
-                status: finalStatus,
+                status: form.final_decision_status,
                 notes: form.notes,
             })
 
