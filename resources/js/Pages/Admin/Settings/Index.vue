@@ -280,21 +280,21 @@ const isProcessing = (section) => processingSection.value === section
                 <div
                     v-for="card in summaryCards"
                     :key="card.label"
-                    class="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)]"
+                    class="rounded-2xl border border-slate-200:dark:border-slate-700 bg-white:dark:bg-slate-800 px-5 py-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)]"
                 >
-                    <div class="text-2xl font-semibold tracking-tight text-slate-800">
+                    <div class="text-2xl font-semibold tracking-tight text-slate-800 dark:text-white">
                         {{ card.value }}
                     </div>
-                    <div class="mt-1 text-sm text-slate-500">
+                    <div class="mt-1 text-sm text-slate-500 dark:text-slate-300">
                         {{ card.label }}
                     </div>
 
                     <div v-if="card.details" class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                         <div v-for="detail in card.details" :key="detail.label" class="space-y-1">
-                            <div class="text-slate-400">
+                            <div class="text-slate-400 dark:text-slate-300">
                                 {{ detail.label }}
                             </div>
-                            <div class="font-semibold text-slate-700">
+                            <div class="font-semibold text-slate-700 dark:text-white">
                                 {{ detail.value }}
                             </div>
                         </div>
@@ -309,18 +309,18 @@ const isProcessing = (section) => processingSection.value === section
                         :key="tab.key"
                         type="button"
                         @click="activeTab = tab.key"
-                        class="font-head px-4 py-2 rounded-t-lg text-sm border transition shadow-sm"
+                        class="font-head px-4 py-2 rounded-t-lg text-sm border transition shadow-sm dark:text-white dark:border-slate-700 dark:bg-slate-800 "
                         :class="activeTab === tab.key
                             ? 'bg-white text-brand-900 border-gray-200 shadow-sm'
-                            : 'bg-slate-100 text-slate-500 border-slate-100'"
+                            : 'bg-slate-100 text-slate-500 border-slate-100 dark:text-white dark:border-slate-700 dark:bg-slate-800'"
                     >
                         {{ tab.label }}
                     </button>
                 </div>
 
-                <div class="rounded-b-2xl rounded-tr-2xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] overflow-hidden">
-                    <div class="px-6 py-5 border-b border-slate-200">
-                        <h3 class="text-xl font-semibold text-slate-800">
+                <div class="rounded-b-2xl rounded-tr-2xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] overflow-hidden dark:border-slate-700 dark:bg-slate-800">
+                    <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700 dark:bg-slate-800">
+                        <h3 class="text-xl font-semibold text-slate-800 dark:text-white">
                             {{ sectionTitle }}
                         </h3>
                     </div>
@@ -350,9 +350,9 @@ const isProcessing = (section) => processingSection.value === section
                     </div>
                 </div>
 
-                <div class="rounded-2xl mt-4 border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] overflow-hidden">
-                    <div class="px-6 py-5 border-b border-slate-200">
-                        <h3 class="text-lg font-semibold text-slate-800">Riwayat Pengaturan {{ sectionTitle }}</h3>
+                <div class="rounded-2xl mt-4 border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] overflow-hidden dark:border-slate-700 dark:bg-slate-800">
+                    <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700 dark:bg-slate-800">
+                        <h3 class="text-lg font-semibold text-slate-800 dark:text-white">Riwayat Pengaturan {{ sectionTitle }}</h3>
                     </div>
 
                     <div class="max-h-[400px] overflow-auto mt-4 m-6">
