@@ -42,10 +42,8 @@ type FinancingPagination = {
 const props = withDefaults(defineProps<{
 	financings?: FinancingPagination
 	activeFinancing?: FinancingItem | null
-	productNames?: string[]
 	filters?: {
 		search?: string
-		product_name?: string
 		per_page?: number
 	}
 }>(), {
@@ -58,36 +56,16 @@ const props = withDefaults(defineProps<{
 		links: [],
 	}),
 	activeFinancing: null,
-	productNames: () => [],
 	filters: () => ({
 		search: '',
-		product_name: '',
 		per_page: 10,
 	}),
 })
 
 const filterState = ref({
 	search: props.filters?.search ?? '',
-	product_name: props.filters?.product_name ?? '',
 	per_page: props.filters?.per_page ?? 10,
 })
-
-const productNameOptions = computed(() => {
-	return props.productNames.map((productName) => ({
-		key: productName,
-		label: productName,
-	}))
-})
-
-const selectFilters = computed(() => ([
-	{
-		key: 'product_name',
-		label: 'Semua Produk',
-		options: productNameOptions.value,
-		optionLabel: 'label',
-		optionValue: 'key',
-	},
-]))
 
 const currentFinancing = computed(() => {
 	const status = String(props.activeFinancing?.status || '').trim().toLowerCase()
@@ -114,7 +92,6 @@ const currentRemaining = computed(() => {
 const applyFilters = () => {
 	router.get('/user/financings', {
 		search: filterState.value.search || undefined,
-		product_name: filterState.value.product_name || undefined,
 		per_page: filterState.value.per_page,
 	}, {
 		preserveScroll: true,
@@ -194,15 +171,12 @@ const getStatusClass = (status?: string) => {
 				<BaseFunctionality
 					:search="filterState.search"
 					:per-page="filterState.per_page"
-					:filters="{ product_name: filterState.product_name }"
-					:selects="selectFilters"
-					:search-tooltip="['No Transaksi', 'Tanggal Akad']"
+					:search-tooltip="['No Transaksi']"
 					:show-search-button="true"
 					:show-border="true"
 					@update:search="handleSearch"
 					@submit:search="applyFilters"
 					@update:perPage="val => { filterState.per_page = val; applyFilters() }"
-					@update:filters="val => { filterState.product_name = val.product_name; applyFilters() }"
 				/>
 
 				<div class="px-6 py-6 overflow-x-auto">
