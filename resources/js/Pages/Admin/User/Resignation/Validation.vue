@@ -6,8 +6,11 @@ import Button from '@/Components/Form/Button.vue'
 import ModalDocument from '@/Components/ModalDocument.vue'
 import { ref } from 'vue'
 import Swal from 'sweetalert2'
-import { toast } from "vue3-toastify";
 import { useForm, router } from '@inertiajs/vue3'
+
+import { useWhatsAppResignation } from '@/Composables/useWhatsAppResignation'
+
+const { sendResignationToWhatsApp } = useWhatsAppResignation()
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -16,13 +19,6 @@ const props = defineProps({
 const form = useForm({
     status: 'accepted'
 });
-
-const showModal = () => {
-    document.getElementById('modal').classList.remove('hidden');
-};
-const hideModal = () => {
-    document.getElementById('modal').classList.add('hidden');
-};
 
 const buktiResignRef = ref(null)
 
@@ -47,21 +43,24 @@ const acceptTransaction = () => {
         if (result.isConfirmed) {
             form.put('/admin/resignations/' + props.data.id, {
                 onSuccess: () => {
-                    toast("Permohonan pengunduran diri berhasil diterima!", {
-                        "type": "success",
-                        "position": "bottom-right",
-                        "transition": "slide",
-                        "dangerouslyHTMLString": true
-                    }).then(() => {
-                        router.visit(route('admin.resignations.index'))
-                    })
-                },
-                onError: () => {
-                    toast("Gagal menerima permohonan pengunduran diri.", {
-                        "type": "error",
-                        "position": "bottom-right",
-                        "transition": "slide",
-                        "dangerouslyHTMLString": true
+                    Swal.fire({
+                        title: 'Pengunduran Diri Disetujui',
+                        html: `
+                            <div style="text-align:left;font-size:14px;line-height:1.8">
+                                <div><strong>Nama:</strong> ${props.data.name ?? '-'}</div>
+                                <div><strong>Nomor Anggota:</strong> ${props.data.user_code ?? '-'}</div>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: 'Kirim ke WhatsApp',
+                        confirmButtonColor: '#007943',
+                        showCancelButton: true,
+                        cancelButtonText: 'Tutup',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            sendResignationToWhatsApp(props.data)
+                        }
+                        router.visit('/admin/resignations/list')
                     })
                 }
             })

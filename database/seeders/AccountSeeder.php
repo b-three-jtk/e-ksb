@@ -24,6 +24,14 @@ class AccountSeeder extends Seeder
 
         Account::factory()->create([
             'no_ref_account' => '102',
+            'account_name' => 'Dana Alokasi Pembiayaan Murabahah',
+            'account_category' => AccountCategoryEnum::ASSET->value,
+            'status' => 'Aktif',
+            'balance' => 0,
+        ]);
+
+        Account::factory()->create([
+            'no_ref_account' => '103',
             'account_name' => 'Pembiayaan Dalam Proses',
             'account_category' => AccountCategoryEnum::ASSET->value,
             'status' => 'Aktif',
@@ -57,6 +65,14 @@ class AccountSeeder extends Seeder
         Account::factory()->create([
             'no_ref_account' => '203',
             'account_name' => 'Tabungan Ibadah',
+            'account_category' => AccountCategoryEnum::LIABILITY->value,
+            'status' => 'Aktif',
+            'balance' => 0,
+        ]);
+
+        Account::factory()->create([
+            'no_ref_account' => '204',
+            'account_name' => 'Uang Muka Murabahah',
             'account_category' => AccountCategoryEnum::LIABILITY->value,
             'status' => 'Aktif',
             'balance' => 0,

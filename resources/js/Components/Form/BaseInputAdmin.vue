@@ -45,15 +45,9 @@ const dateValue = computed<Date | null>({
 })
 
 const datePickerInputClass = computed(() => [
-  'h-11 w-full rounded-lg border bg-transparent font-body',
-  'px-4 py-2.5 text-sm shadow-theme-xs',
-  'focus:outline-hidden focus:ring-3',
-  props.error
-    ? 'border-red-500 focus:ring-red-500/10'
-    : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10',
-  'dark:bg-gray-900 dark:border-gray-700',
-  'text-gray-800 dark:text-white/90',
-  'placeholder:text-gray-400 dark:placeholder:text-white/30',
+    'h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+    props.error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10',
+    'dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30',
 ])
 
 const handleFileChange = (event: Event) => {
@@ -124,7 +118,6 @@ watch(() => props.modelValue, (val) => {
                     'h-11 w-full rounded-lg border bg-transparent font-body pl-9 pr-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
                     error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                 ]"
-                class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
             />
         </div>
 
@@ -134,10 +127,12 @@ watch(() => props.modelValue, (val) => {
             v-model="dateValue"
             format="yyyy-MM-dd"
             :time-picker="false"
+            :time-config="{ enableTimePicker: false, ignoreTimeValidation: true }"
+            teleport="body"
             :input-class="datePickerInputClass"
             :disabled="disabled"
             :placeholder="placeholder || 'Pilih tanggal'"
-            />
+        />
 
         <!-- Select -->
         <div v-else-if="inputType === 'select'" class="relative z-20 bg-transparent">
