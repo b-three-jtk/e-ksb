@@ -340,7 +340,6 @@ export function useFinancingForm(initialData = null) {
     }
 
     const submit = () => {
-        form.financing.status = 'Belum Ditinjau'
         Swal.fire({
             title: 'Konfirmasi',
             text: 'Apakah Anda yakin ingin menyimpan permohonan ini?',
@@ -351,6 +350,7 @@ export function useFinancingForm(initialData = null) {
             confirmButtonColor: '#007943',
         }).then((result) => {
             if (result.isConfirmed) {
+                form.financing.status = 'Belum Ditinjau'
                 form.post('/admin/financings/store', {
                     onSuccess: (page) => {
                         if (page.props.flash?.success) {

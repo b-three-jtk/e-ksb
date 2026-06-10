@@ -54,12 +54,12 @@ const emit = defineEmits(['submit'])
             />
         </div>
 
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-slate-600">
+        <div class="rounded-xl border border-emerald-200 dark:border-slate-700 bg-emerald-50 dark:bg-slate-800 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
             Contoh: jika jumlah simpanan ditetapkan Rp100.000 dan poin yang diperoleh 1, maka setiap kelipatan penuh Rp100.000 akan mendapatkan 1 poin.
         </div>
 
         <div class="flex justify-end">
-            <Button type="submit" size="medium" variant="success" :disabled="isProcessing">
+            <Button type="submit" size="medium" variant="secondary" :disabled="isProcessing">
                 {{ isProcessing ? 'Menyimpan...' : 'Simpan Pengaturan' }}
             </Button>
         </div>

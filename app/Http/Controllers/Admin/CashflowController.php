@@ -132,6 +132,7 @@ class CashflowController extends Controller
 
         $journalEntries = $query
             ->orderBy($sortBy, $sortDir)
+            ->orderBy('journal_entries.created_at', $sortDir)
             ->orderBy('journal_entries.journal_group_id', $sortDir)
             ->orderBy('journal_entries.id', 'asc')                 
             ->paginate($request->get('per_page', 10))
@@ -139,6 +140,7 @@ class CashflowController extends Controller
 
         $allGroups = $this->baseQuery($request)
             ->orderBy($sortBy, $sortDir)
+            ->orderBy('journal_entries.created_at', $sortDir)
             ->orderBy('journal_entries.journal_group_id', $sortDir)
             ->distinct()
             ->pluck('journal_entries.journal_group_id')

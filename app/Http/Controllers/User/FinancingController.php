@@ -30,10 +30,8 @@ class FinancingController extends Controller
                     'links' => [],
                 ],
                 'activeFinancing' => null,
-                'productTypes' => [],
                 'filters' => [
                     'search' => '',
-                    'product_type' => '',
                     'per_page' => 10,
                 ],
             ]);
@@ -43,31 +41,21 @@ class FinancingController extends Controller
         $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
 
         $search = trim((string) $request->input('search', ''));
-        $productName = trim((string) $request->input('product_name', ''));
 
         $query = Financing::query()
             ->with(['financingItem.productType'])
             ->where('member_id', $member->id)
             ->whereIn('status', ['Lunas', 'Angsuran Berjalan'])
             ->when($search !== '', function ($q) use ($search) {
-                $searchLower = mb_strtolower($search);
-                $q->where(function ($sub) use ($searchLower) {
-                    $sub->whereRaw('LOWER(financing_transaction_code) LIKE ?', ["%{$searchLower}%"]);
-                });
+                $q->whereRaw(
+                    'LOWER(financing_transaction_code) LIKE ?',
+                    ['%' . mb_strtolower($search) . '%']
+                );
             })
+
+
             ->orderByDesc('akad_date')
             ->orderByDesc('created_at');
-
-        $productNames = Financing::query()
-            ->where('member_id', $member->id)
-            ->whereIn('status', ['Lunas', 'Angsuran Berjalan'])
-            ->with('financingItem')
-            ->get()
-            ->filter(fn($f) => $f->financingItem && $f->financingItem->product)
-            ->pluck('financingItem.name')
-            ->unique()
-            ->sort()
-            ->values();
 
         $financings = $query
             ->paginate($perPage)
@@ -85,10 +73,8 @@ class FinancingController extends Controller
         return inertia('User/Financing/List', [
             'financings' => $financings,
             'activeFinancing' => $activeFinancingModel ? $this->mapFinancingForList($activeFinancingModel) : null,
-            'productNames' => $productNames,
             'filters' => [
                 'search' => $search,
-                'product_name' => $productName,
                 'per_page' => $perPage,
             ],
         ]);

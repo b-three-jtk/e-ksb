@@ -67,37 +67,8 @@ const prevStep = () => {
     activeStep.value--
 }
 
-const isStep1Valid = computed(() =>
-    isMemberSelected.value &&
-    form.member.heirs.length > 0 &&
-    form.member.is_have_eligible_saving === true &&
-    form.member.is_have_no_obligation === true
-)
-
-const isStep2Valid = computed(() =>
-    (form.documents?.income_slip || form.income_slip_file) &&
-    (form.documents?.bank_book || form.bank_book_file) &&
-    form.member.job_title &&
-    form.member.company_or_business_name &&
-    form.member.business_field &&
-    form.member.tenure_year &&
-    form.member.workplace_contact &&
-    form.member.workplace_address
-)
-
 const isStep3Valid = computed(() =>
     form.financing.name && form.collateral.collateral_type
-)
-
-// "Ajukan Permohonan" muncul di step 3 jika step 1–3 semua valid
-// dan status belum di-approve/reject (tidak boleh re-submit)
-const isRequestValid = computed(() =>
-    isStep1Valid.value &&
-    isStep2Valid.value &&
-    isStep3Valid.value
-    && form.financing.status === 'Menunggu Kelengkapan Dokumen' &&
-    (form.financing.status !== 'Disetujui' ||
-    form.financing.status !== 'Ditolak')
 )
 
 const isFinalizationValid = computed(() =>
@@ -219,14 +190,6 @@ const handleSaveDraft = () => {
                     </Button>
 
                     <div class="flex items-center gap-4 justify-end">
-                        <Button
-                            v-if="activeStep === 3 && isRequestValid"
-                            type="submit"
-                            @click="handleSubmit()"
-                            variant="secondary"
-                        >
-                            Ajukan Permohonan
-                        </Button>
 
                         <Button
                             v-if="activeStep < totalSteps"
@@ -253,7 +216,6 @@ const handleSaveDraft = () => {
                         >
                             Selanjutnya
                         </Button>
-
                         <Button
                             v-if="activeStep === 5"
                             :disabled="!isFinalizationValid"

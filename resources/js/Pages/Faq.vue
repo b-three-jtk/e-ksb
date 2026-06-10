@@ -77,11 +77,10 @@ onUnmounted(() => {
                             <h1 class="text-xl font-head font-bold text-green-800 dark:text-green-500">Produk Simpanan</h1>
                             <span class="text-sm font-medium text-secondary dark:text-accent bg-secondary/10 dark:bg-primary/20 px-3 py-1 rounded-full">Simpanan Anggota</span>
                         </div>
-                        <AccordionPanel title="Apa keuntungan simpanan sukarela dengan akad Mudharabah?"
-                            ariaTitle="Keuntungan simpanan sukarela dengan akad Mudharabah">
+                        <AccordionPanel title="Apa perbedaan Simpanan Pokok dan Simpanan Wajib?"
+                            ariaTitle="Apa perbedaan Simpanan Pokok dan Simpanan Wajib">
                             <p class="font-body text-md py-4 dark:text-gray-200">
-                                Dengan akad Mudharabah, Anda akan mendapatkan bagi hasil dari keuntungan usaha yang dijalankan koperasi.
-                                Nisbah bagi hasil disepakati di awal dan lebih menguntungkan dibanding bunga bank konvensional.
+                                Simpanan Pokok dibayarkan satu kali saat pertama kali menjadi anggota koperasi, sedangkan Simpanan Wajib dibayarkan secara rutin setiap bulan selama masih menjadi anggota.
                             </p>
                         </AccordionPanel>
                         <AccordionPanel title="Apakah simpanan saya dijamin aman?"
@@ -92,12 +91,22 @@ onUnmounted(() => {
                                 Pengurus dan Pengawas sesuai dengan Anggaran Dasar dan Anggaran Rumah Tangga (AD/ART) koperasi.
                             </p>
                         </AccordionPanel>
-                        <AccordionPanel title="Berapa minimal simpanan sukarela?"
-                            ariaTitle="Berapa minimal simpanan sukarela">
+                        <AccordionPanel title="Apakah Simpanan Pokok dapat ditarik kapan saja?"
+                            ariaTitle="Apakah Simpanan Pokok dapat ditarik kapan saja?">
                             <p class="font-body text-md py-4 dark:text-gray-200">
-                                Jumlah minimal simpanan sukarela mengikuti kebijakan Koperasi Syariah Berkah.
-                                Untuk informasi nominal terkini dan ketentuan lainnya, silakan langsung menghubungi
-                                pengurus koperasi.
+                                Tidak. Simpanan Pokok hanya dapat dicairkan sesuai ketentuan koperasi, umumnya ketika anggota mengundurkan diri atau keanggotaannya berakhir.
+                            </p>
+                        </AccordionPanel>
+                        <AccordionPanel title="Apa perbedaan Tabungan Anggota dan Tabungan Berjangka?"
+                            ariaTitle="Apa perbedaan Tabungan Anggota dan Tabungan Berjangka?">
+                            <p class="font-body text-md py-4 dark:text-gray-200">
+                                Tabungan Anggota adalah jenis tabungan yang dapat disetor dan ditarik kapan saja, sedangkan Tabungan Berjangka memiliki periode simpanan tertentu dan tidak dapat ditarik sebelum jatuh tempo.
+                            </p>
+                        </AccordionPanel>
+                        <AccordionPanel title="Apakah saya bisa menabung lebih dari jumlah Simpanan Wajib?"
+                            ariaTitle="Apakah saya bisa menabung lebih dari jumlah Simpanan Wajib?">
+                            <p class="font-body text-md py-4 dark:text-gray-200">
+                                Ya. Anggota dapat menggunakan produk tabungan yang tersedia untuk menyimpan dana tambahan sesuai kebutuhan.
                             </p>
                         </AccordionPanel>
                     </div>

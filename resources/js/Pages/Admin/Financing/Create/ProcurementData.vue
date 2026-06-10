@@ -58,12 +58,14 @@ const handleSupplierChange = (value) => {
     if (value === 'NEW') {
         showNewSupplierInput.value = true
         props.form.financing.supplier_id = null
+        props.form.supplier.supplier_name = ''
         props.form.supplier.address = ''
     } else {
         showNewSupplierInput.value = false
         props.form.financing.supplier_id = value
 
         const selectedSupplier = props.data.suppliers.find(s => String(s.id) === String(value))
+        props.form.supplier.supplier_name = selectedSupplier?.supplier_name || ''
         props.form.supplier.address = selectedSupplier?.address || ''
     }
 }
@@ -80,7 +82,7 @@ const createNewSupplier = async () => {
         props.data.suppliers.push(response.data)
 
         props.form.financing.supplier_id = response.data.id
-
+        props.form.supplier.supplier_name = response.data.supplier_name || newSupplierName.value
         props.form.supplier.address = response.data.address || newSupplierAddress.value
 
         // Reset state modal

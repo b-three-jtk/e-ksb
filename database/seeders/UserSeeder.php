@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
     {
         // DEFAULT USERS
         $dps = User::create([
-            'user_code' => 'KSB26070001',
+            'user_code' => 'KSB2607001',
             'nik' => '0000000099',
             'name' => 'DPS',
             'email' => 'dps@example.com',
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
         $dps->assignRole(UserRoleEnum::DPS->value);
 
         $pengawas = User::create([
-            'user_code' => 'KSB26070002',
+            'user_code' => 'KSB2607002',
             'nik' => '0000000000000001',
             'name' => 'Pengawas',
             'email' => 'pengawas@example.com',
@@ -39,7 +39,7 @@ class UserSeeder extends Seeder
         $pengawas->assignRole(UserRoleEnum::PENGAWAS->value);
 
         $ketua = User::create([
-            'user_code' => 'KSB26070003',
+            'user_code' => 'KSB2607003',
             'nik' => '1234567890123456',
             'name' => 'Ketua',
             'email' => 'ketua@example.com',
@@ -50,7 +50,7 @@ class UserSeeder extends Seeder
         $ketua->assignRole(UserRoleEnum::KETUA->value);
 
         $anggota = User::create([
-            'user_code' => 'KSB26070004',
+            'user_code' => 'KSB2607004',
             'nik' => '6543210987654321',
             'name' => 'Anggota',
             'email' => 'raizelmaid@gmail.com',
@@ -65,7 +65,7 @@ class UserSeeder extends Seeder
         ]);
 
         $sekretaris = User::create([
-            'user_code' => 'KSB26070005',
+            'user_code' => 'KSB2607005',
             'nik' => '1122334455667788',
             'name' => 'Sekretaris',
             'email' => 'sekretaris@example.com',
@@ -76,7 +76,7 @@ class UserSeeder extends Seeder
         $sekretaris->assignRole(UserRoleEnum::SEKRETARIS->value);
 
         $bendahara = User::create([
-            'user_code' => 'KSB26070006',
+            'user_code' => 'KSB2607006',
             'nik' => '8877665544332211',
             'name' => 'Bendahara',
             'email' => 'bendahara@example.com',
@@ -87,7 +87,7 @@ class UserSeeder extends Seeder
         $bendahara->assignRole(UserRoleEnum::BENDAHARA->value);
 
         $ketuaMurabahah = User::create([
-            'user_code' => 'KSB26070007',
+            'user_code' => 'KSB2607007',
             'nik' => '1234432112344321',
             'name' => 'Ketua Murabahah',
             'email' => 'ketuamurabah@example.com',
@@ -98,7 +98,7 @@ class UserSeeder extends Seeder
         $ketuaMurabahah->assignRole(UserRoleEnum::KETUAMURABAHAH->value);
 
         $stafMurabahah = User::create([
-            'user_code' => 'KSB26070008',
+            'user_code' => 'KSB2607008',
             'nik' => '1234432112344391',
             'name' => 'Staf Murabahah',
             'email' => 'seksimurabah@example.com',
@@ -109,7 +109,7 @@ class UserSeeder extends Seeder
         $stafMurabahah->assignRole(UserRoleEnum::STAFMURABAHAH->value);
 
         $pjAnggota = User::create([
-            'user_code' => 'KSB26070009',
+            'user_code' => 'KSB2607009',
             'nik' => '5678123456781234',
             'name' => 'Penanggung Jawab Anggota',
             'email' => 'pjanggota@example.com',

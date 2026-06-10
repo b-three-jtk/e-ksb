@@ -18,7 +18,7 @@ const emit = defineEmits(['submit'])
 
 <template>
     <form @submit.prevent="emit('submit')">
-        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-700">
             <div class="p-6 md:p-8 space-y-6">
                 <h4 class="text-lg font-semibold text-slate-800">Simpanan Pokok</h4>
                 <BaseInputAdmin
@@ -67,7 +67,7 @@ const emit = defineEmits(['submit'])
         </div>
 
         <div class="px-6 pb-6 md:px-8 md:pb-8 flex justify-end">
-            <Button type="submit" size="medium" variant="success" :disabled="isProcessing">
+            <Button type="submit" size="medium" variant="secondary" :disabled="isProcessing">
                 {{ isProcessing ? 'Menyimpan...' : 'Simpan Pengaturan' }}
             </Button>
         </div>

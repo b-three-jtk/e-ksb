@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             AccountSeeder::class,
             SavingProductSeeder::class,
             MurabahaProductSeeder::class,
+            GlobalSettingSeeder::class,
         ]);
     }
 }

@@ -31,7 +31,7 @@ export const useWhatsAppCredentials = (toast) => {
 		const message = [
 			'Halo, akun anggota Anda sudah dibuat.',
 			`Nama: ${credentials?.name ?? '-'}`,
-			`Nomor Anggota: ${credentials?.user_code ?? '-'}`,
+			`Kode Pengguna: ${credentials?.user_code ?? '-'}`,
 			`Password Awal: ${credentials?.initial_password ?? '-'}`,
 			'Silakan login dan segera ubah password Anda.',
 		].join('\n')

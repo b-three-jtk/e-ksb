@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import ChevronDownIcon from '../../Icons/ChevronDownIcon.vue'
 
@@ -27,6 +27,21 @@ const fileName = ref('')
 const displayValue = ref('')
 const isMoneyFocused = ref(false)
 
+const isDarkMode = ref(false)
+
+onMounted(() => {
+    isDarkMode.value = document.documentElement.classList.contains('dark')
+
+    const observer = new MutationObserver(() => {
+        isDarkMode.value = document.documentElement.classList.contains('dark')
+    })
+
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+    })
+})
+
 const inputType = computed(() => props.type ?? 'text')
 
 const dateValue = computed<Date | null>({
@@ -45,9 +60,9 @@ const dateValue = computed<Date | null>({
 })
 
 const datePickerInputClass = computed(() => [
-    'h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+    'h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
     props.error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10',
-    'dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30',
+    'placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:placeholder:text-white/30',
 ])
 
 const handleFileChange = (event: Event) => {
@@ -98,13 +113,13 @@ watch(() => props.modelValue, (val) => {
 
 <template>
     <div>
-        <label v-if="label" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+        <label v-if="label" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {{ label }}<span v-if="required" class="text-red-500">*</span>
         </label>
 
         <!-- Money Input -->
         <div v-if="isMoney" class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium">Rp</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-700 dark:text-gray-300">Rp</span>
             <input
                 type="text"
                 inputmode="numeric"
@@ -115,7 +130,7 @@ watch(() => props.modelValue, (val) => {
                 :disabled="disabled"
                 :placeholder="placeholder || '0'"
                 :class="[
-                    'h-11 w-full rounded-lg border bg-transparent font-body pl-9 pr-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                    'h-11 w-full rounded-lg border bg-transparent font-body pl-9 pr-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
                     error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                 ]"
             />
@@ -132,6 +147,7 @@ watch(() => props.modelValue, (val) => {
             :input-class="datePickerInputClass"
             :disabled="disabled"
             :placeholder="placeholder || 'Pilih tanggal'"
+            :dark="isDarkMode"
         />
 
         <!-- Select -->
@@ -139,7 +155,7 @@ watch(() => props.modelValue, (val) => {
             <select
                 :value="modelValue"
                 @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
-                :class="['h-11 w-full font-body appearance-none rounded-lg border bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+                :class="['h-11 w-full font-body appearance-none rounded-lg border bg-transparent px-4 py-2.5 pr-11 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
                     error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                 ]"
                 class="dark:bg-dark-900 text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
@@ -162,7 +178,7 @@ watch(() => props.modelValue, (val) => {
                     :disabled="disabled"
                     :class="['h-4 w-4 accent-brand-900', error ? 'border-red-500' : 'border-gray-300']"
                 />
-                <span class="ml-2 text-gray-700 dark:text-gray-400">{{ option.text }}</span>
+                <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ option.text }}</span>
             </label>
         </div>
 
@@ -173,7 +189,7 @@ watch(() => props.modelValue, (val) => {
             @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
             :placeholder="placeholder"
             :rows="rows"
-            :class="['w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+            :class="['w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
                 error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
             ]"
             class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
@@ -187,7 +203,7 @@ watch(() => props.modelValue, (val) => {
                 class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-l-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed font-medium text-sm">
                 Choose file
             </button>
-            <div class="flex-1 px-4 py-2.5 border border-l-0 border-gray-300 rounded-r-lg bg-white text-gray-500 text-sm flex items-center">
+            <div class="flex-1 px-4 py-2.5 border border-l-0 border-gray-300 rounded-r-lg bg-white dark:bg-gray-900 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                 {{ fileName || 'No file chosen' }}
             </div>
         </div>
@@ -203,7 +219,7 @@ watch(() => props.modelValue, (val) => {
             :minlength="min"
             :pattern="pattern"
             :disabled="disabled"
-            :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3',
+            :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
                 error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
             ]"
             class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"

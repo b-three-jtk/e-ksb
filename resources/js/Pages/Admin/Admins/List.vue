@@ -16,7 +16,7 @@ const columns = [
     { key: 'name', label: 'Nama Pengurus', sortable: true },
     { key: 'email', label: 'Email' },
     { key: 'posisi', label: 'Posisi' },
-    { key: 'status', label: 'Status', align: 'center' },
+    { key: 'status', label: 'Status' },
     { key: 'aksi', label: 'Aksi', align: 'center' },
 ]
 

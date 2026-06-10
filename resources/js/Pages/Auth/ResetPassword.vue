@@ -7,12 +7,12 @@ import { toast } from 'vue3-toastify';
 
 const props = defineProps({
     token: String,
-    email: String,
+    phone_number: String, 
 })
 
 const form = useForm({
     token: props.token,
-    email: props.email ?? '',
+    phone_number: props.phone_number ?? '',
     password: '',
     password_confirmation: '',
 })
@@ -25,7 +25,8 @@ const submit = () => {
                 position: 'bottom-right',
             })
         },
-        onError: () => {
+        onError: (errors) => {
+            console.log(errors);
             toast.error('Gagal membuat ulang password. Periksa kembali data anda.', {
                 autoClose: 3000,
                 position: 'bottom-right',
@@ -69,7 +70,7 @@ const submit = () => {
                         <div class="space-y-4">
                             <button
                                 type="submit"
-                                class="w-full bg-secondary hover:bg-primary text-white py-3 rounded-xl"
+                                class="w-full bg-secondary hover:bg-primary text-white py-3 rounded-xl transition"
                                 :disabled="form.processing"
                             >
                                 <span v-if="form.processing">Memproses...</span>

@@ -33,8 +33,8 @@ const breadcrumbItems = [
 
 const form = useForm({
     method: '',
-    installment_id: props.data?.financing?.installment.id || '',
-});
+    installment_id: props.data?.installment_id || '',
+})
 
 const submitForm = () => {
     Swal.fire({
@@ -60,11 +60,11 @@ const submitForm = () => {
                 },
 
                 onError: (errors) => {
-                    toast(("Gagal mengirim permohonan" + errors.message), {
-                        "type": "error",
-                        "position": "bottom-right",
-                        "transition": "slide",
-                        "dangerouslyHTMLString": true
+                    console.log('errors:', errors)
+                    const msg = Object.values(errors).flat().join(', ')
+                    toast("Gagal mengirim permohonan: " + (msg || 'Unknown error'), {
+                        type: "error",
+                        position: "bottom-right",
                     })
                 }
             })

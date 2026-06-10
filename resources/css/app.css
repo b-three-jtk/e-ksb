@@ -834,3 +834,17 @@ span.flatpickr-weekday,
 }
 
 .progress-bar { height: 100%; background: #4caf50; transition: width 0.3s ease; }
+
+/* Menargetkan tema light dan dark milik datepicker secara langsung */
+.dp__theme_light,
+.dp__theme_dark {
+  --dp-primary-color: #009141 !important; /* Warna brand-500 */
+  --dp-primary-text-color: #ffffff !important;
+}
+
+/* Cadangan (fallback) jika ingin memastikan tombol select benar-benar berubah */
+.dp__action_select {
+  background-color: #009141 !important;
+  color: #ffffff !important;
+  border: none !important;
+}

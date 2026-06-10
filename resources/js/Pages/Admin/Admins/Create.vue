@@ -147,7 +147,7 @@ const submitForm = () => {
                             <label class="block text-sm font-medium text-gray-700 mb-2">Tambahkan dari Anggota Aktif
                                 (Opsional)</label>
                             <input v-model="searchQuery" @input="searchMembers" type="text"
-                                placeholder="Ketik nama, NIK, email, atau nomor anggota"
+                                placeholder="Ketik nama, NIK, email, atau kode pengguna"
                                 class="w-full px-4 py-2 border font-body text-sm shadow-theme-xs focus:outline-hidden focus:ring-3 placeholder:text-gray-400 rounded-lg border-gray-300 focus:border-brand-300 focus:ring-brand-500/10" />
 
                             <!-- Search Results Dropdown -->

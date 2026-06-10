@@ -36,7 +36,7 @@ const showNewMemberCredentials = async () => {
         html: `
             <div style="text-align:left;font-size:14px;line-height:1.8">
                 <div><strong>Nama:</strong> ${memberCredentials.value.name ?? '-'}</div>
-                <div><strong>Nomor Anggota:</strong> ${memberCredentials.value.user_code}</div>
+                <div><strong>Kode Pengguna:</strong> ${memberCredentials.value.user_code}</div>
                 <div><strong>Password Awal:</strong> ${memberCredentials.value.initial_password}</div>
             </div>
         `,
@@ -61,13 +61,13 @@ onMounted(() => {
 
 const columns = [
     { key: 'no', label: 'No' },
-    { key: 'no_anggota', label: 'No Anggota' },
+    { key: 'no_anggota', label: 'Kode Pengguna' },
     { key: 'profil', label: 'Nama Anggota', sortable: true },
     { key: 'joined_at', label: 'Tanggal Bergabung', sortable: true },
     { key: 'phone', label: 'Kontak' },
-    { key: 'total_simpanan', label: 'Total Simpanan', align: 'right' },
-    { key: 'status', label: 'Status', align: 'center' },
-    { key: 'aksi', label: 'Aksi', align: 'center' },
+    { key: 'total_simpanan', label: 'Total Simpanan' },
+    { key: 'status', label: 'Status' },
+    { key: 'aksi', label: 'Aksi' },
 ]
 
 const selectFilters = [

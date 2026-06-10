@@ -1,30 +1,31 @@
 <script setup>
-import { Link, useForm, router } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue3'
 import AuthLayout from '@/Layouts/AuthLayout.vue'
 import BaseInput from '@/Components/Form/BaseInput.vue'
 import Logo from '@/Components/Logo.vue'
 import { toast } from 'vue3-toastify'
 
 const form = useForm({
-    email: '',
+    phone_number: '',
 })
 
 const submit = () => {
     form.post('/auth/forgot-password', {
         onSuccess: () => {
-            toast.success('Link reset password telah dikirim ke email Anda.', {
+            toast.success('Link reset password telah dikirim ke nomor telepon Anda.', {
                 autoClose: 2000,
                 position: 'bottom-right',
             })
         },
-        onError: () => {
-            form.reset('email')
-            toast.error('Gagal mengirim link reset password. Periksa kembali email Anda.', {
+        onError: (errors) => {
+            console.error(errors)
+            form.reset('phone_number')
+            toast.error('Gagal mengirim link reset password. Periksa kembali nomor telepon Anda.', {
                 autoClose: 3000,
                 position: 'bottom-right',
             })
         },
-        onFinish: () => form.reset('email'),
+        onFinish: () => form.reset('phone_number'),
     })
 }
 </script>
@@ -40,12 +41,12 @@ const submit = () => {
                     </div>
                     <div class="flex flex-col text-center">
                         <h1 class="card-title">Lupa Password</h1>
-                        <p class="text-gray-400 font-body px-6">Mohon masukkan email terdaftar Anda untuk menerima instruksi reset password.</p>
+                        <p class="text-gray-400 font-body px-6">Mohon masukkan nomor telepon terdaftar Anda untuk menerima instruksi reset password.</p>
                     </div>
 
                     <form @submit.prevent="submit" class="space-y-8">
-                        <BaseInput v-model="form.email" label="Email" type="email" required
-                            :error="form.errors.email" />
+                        <BaseInput v-model="form.phone_number" label="Nomor Telepon" type="phone_number" required
+                            :error="form.errors.phone_number" />
 
                         <div class="space-y-4">
                             <button type="submit"

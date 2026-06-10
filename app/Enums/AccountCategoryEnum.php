@@ -10,6 +10,3 @@ enum AccountCategoryEnum: string
     case REVENUE = 'Pendapatan';
     case EXPENSE = 'Beban';
 }
-{
-    //
-}

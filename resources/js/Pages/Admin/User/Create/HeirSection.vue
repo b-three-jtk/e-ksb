@@ -1,7 +1,7 @@
 <script setup>
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 
-defineProps({
+const props = defineProps({
 	form: {
 		type: Object,
 		required: true,
@@ -27,6 +27,20 @@ defineProps({
 		default: () => [],
 	},
 })
+
+const normalizePhoneNumber = (value, onlyNumbers) => {
+	const digits = onlyNumbers(value)
+
+	if (!digits) {
+		return ''
+	}
+
+	if (digits.startsWith('0')) {
+		return `62${digits.slice(1)}`
+	}
+
+	return digits.startsWith('62') ? digits : `62${digits}`
+}
 </script>
 
 <template>
@@ -68,9 +82,9 @@ defineProps({
 				v-model="form.heir_contact"
 				label="Nomor Telepon Ahli Waris"
 				type="text"
-				placeholder="Isi dengan angka"
+				placeholder="Contoh: 81234567890"
 				required
-				@input="form.heir_contact = onlyNumbers(form.heir_contact)"
+				@input="form.heir_contact = normalizePhoneNumber(form.heir_contact, props.onlyNumbers)"
 				:error="getFieldError('heir_contact', errors.heir_contact)"
 			/>
 		</div>

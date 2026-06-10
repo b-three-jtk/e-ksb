@@ -62,9 +62,9 @@ const filters = reactive({
 const columns = [
     { key: 'title', label: 'Judul Notifikasi' },
     { key: 'notification_type', label: 'Jenis' },
-    { key: 'reminder_type', label: 'Reminder' },
+    { key: 'reminder_type', label: 'Pengingat' },
     { key: 'is_read', label: 'Status' },
-    { key: 'scheduled_at', label: 'Scheduled' },
+    { key: 'scheduled_at', label: 'Tanggal' },
     { key: 'actions', label: 'Aksi' },
 ]
 
@@ -133,7 +133,7 @@ const getReadStatusClass = (isRead: boolean) => {
                 <div class="flex flex-wrap gap-2">
                     <button
                         @click="markAllAsRead"
-                        class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+                        class="inline-flex items-center rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
                         Tandai Semua Dibaca
                     </button>
