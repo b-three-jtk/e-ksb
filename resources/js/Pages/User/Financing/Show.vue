@@ -93,8 +93,8 @@ const breadcrumbItems = [
                             <Info label="Total Dibayar" :value="moneyParser(data.total_paid)" />
                             <Info label="Sisa Tagihan" :value="moneyParser(data.remaining_balance)" />
                             <Info label="Angsuran/Bulan" :value="moneyParser(data.installment_per_month)" />
-                            <Info v-if="data.installment?.tenor" label="Tenor"
-                                :value="data.installment?.tenor + ' Bulan'" />
+                            <Info v-if="data.tenor" label="Tenor"
+                                :value="data.tenor + ' Bulan'" />
                             <Info v-if="data.next_due_date" label="Jatuh Tempo Terdekat"
                                 :value="dateParser(data.next_due_date)" />
                         </div>
