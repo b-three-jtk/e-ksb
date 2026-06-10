@@ -358,7 +358,7 @@ class DashboardService
     public function getJatuhTempoTerdekat($filter)
     {
         $savingDueDate = GlobalSetting::where('key', 'due_date_simpanan')->first()->value ?? 30;
-        $savingNominal = GlobalSetting::where('key', 'nominal_simpanan')->first()->value ?? 0;
+        $savingNominal = GlobalSetting::where('key', 'saving_wajib_amount')->first()->value ?? 0;
 
         $transaksiSimpanan = collect();
         $transaksiPembiayaan = collect();

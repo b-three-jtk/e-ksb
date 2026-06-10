@@ -8,8 +8,8 @@ class IbadahAccount extends Model
 {
     //
     protected $fillable = [
-        'tenor',
         'target_amount',
+        'purpose',
         'saving_account_id',
     ];
 

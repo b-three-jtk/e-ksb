@@ -8,8 +8,8 @@ import { toast } from 'vue3-toastify'
 import Swal from 'sweetalert2'
 
 const breadcrumbItems = [
-    { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Murabahah', link: '#' },
+    { name: 'Dashboard', link: '/admin/dashboard' },
+    { name: 'Pengelolaan Murabahah', link: '/admin/financings' },
     { name: 'Pembayaran Murabahah' },
 ]
 

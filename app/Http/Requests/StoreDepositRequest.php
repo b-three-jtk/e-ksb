@@ -23,14 +23,19 @@ class StoreDepositRequest extends FormRequest
     {
         return [
             'member_id' => 'required|exists:members,id',
+            'saving_account_id' => 'nullable|exists:saving_accounts,id',
             'saving_category' => 'required|in:'. implode(',', array_column(SavingTypeEnum::cases(), 'value')),
             'amount' => 'required|numeric|min:1',
             'date' => 'required|date|before_or_equal:today',
             'saving_payment_method' => 'required|in:Tunai,Non-Tunai',
             'notes' => 'nullable|string|max:255',
-            'purpose' => 'nullable|string|max:255',
+            'purpose' => [
+                'required_if:saving_category,Tabungan Ibadah,Tabungan Berjangka',
+                'string',
+                'max:255',
+            ],
             'tenor_months' => 'nullable|integer|min:1|max:360',
-            'target_amount' => 'nullable|numeric|min:0',
+            'target_amount' => 'nullable|numeric|min:1',
         ];
     }
 }
