@@ -145,7 +145,7 @@ const breadcrumbItems = [
                                     </p>
                                 </td>
                                 <td class="py-5 px-2 whitespace-nowrap">
-                                    <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="i.is_early_repayment ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'">
+                                    <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="i.payment?.is_early_repayment ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'">
                                         {{ i.payment?.is_early_repayment ? 'Pelunasan Dipercepat' : 'Reguler' }}
                                     </span>
                                 </td>
