@@ -342,11 +342,9 @@ class FinancingController extends Controller
                 'financingItem.supplier',
                 'collateral',
                 'wakalah',
-                'verification'
+            'verification.verifier'
             ])
             ->first();
-
-            Log::info('Financing loaded for draft', ['id' => $id, 'financing' => $financing]);
 
         if (!$financing) {
             throw ValidationException::withMessages(['Data pembiayaan tidak ditemukan atau tidak dalam status yang valid untuk dimuat sebagai draft']);

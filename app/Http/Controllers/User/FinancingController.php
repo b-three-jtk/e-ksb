@@ -120,7 +120,16 @@ class FinancingController extends Controller
      */
     public function show(string $id)
     {
-        $financing = Financing::with(['financingItem.productType', 'installment.payment', 'financingItem.supplier', 'collateral'])->findOrFail($id);
+        $user = auth()->user();
+        $member = $user?->member;
+
+        if (!$member) {
+            abort(404);
+        }
+
+        $financing = Financing::with(['financingItem.productType', 'installment.payment', 'financingItem.supplier', 'collateral'])
+        ->where('member_id', $member->id)
+        ->findOrFail($id);
         $financing->total_price = ($financing->cost_price ?? 0) + ($financing->margin_amount ?? 0) - ($financing->down_payment ?? 0);
 
         $installment = $financing->installment;

@@ -78,6 +78,6 @@ class StorePreFinancingRequest extends FormRequest
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
             'bank_book_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-        ];;
+        ];
     }
 }
