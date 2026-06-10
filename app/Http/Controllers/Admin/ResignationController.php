@@ -89,7 +89,7 @@ class ResignationController extends Controller
         ]);
     }
 
-public function validate(string $id)
+    public function validate(string $id)
     {
         $member = Member::with('user')
             ->where('status', MemberStatusEnum::RESIGNED_REQUESTED)
@@ -102,6 +102,13 @@ public function validate(string $id)
         $member->user->status = UserStatusEnum::INACTIVE->value;
         $member->user->save();
 
-        return to_route('admin.resignations.index')->with('success', 'Pengunduran diri berhasil divalidasi.');
+        return to_route('admin.resignations.index')->with([
+            'success' => 'Pengunduran diri berhasil divalidasi.',
+            'resignation_info' => [
+                'name'      => $member->user->name,
+                'user_code' => $member->user->user_code,
+                'phone'     => $member->user->phone,
+            ],
+        ]);
     }
 }

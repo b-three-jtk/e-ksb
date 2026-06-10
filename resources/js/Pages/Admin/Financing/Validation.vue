@@ -58,7 +58,10 @@ const prevStep = () => {
 
 const submit = () => {
     if (!isValidationComplete.value) {
-        alert('Lengkapi semua penilaian terlebih dahulu!')
+        toast('Lengkapi semua penilaian terlebih dahulu!', {
+            type: 'error',
+            position: 'bottom-right',
+        })
         return
     }
 

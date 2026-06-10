@@ -6,6 +6,7 @@ use App\Enums\ConditionEnum;
 use App\Enums\EducationEnum;
 use App\Enums\FinancialCostEnum;
 use App\Enums\FinancialIncomeEnum;
+use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\HeirEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
@@ -13,11 +14,12 @@ use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
-use App\Enums\FinancingPaymentMethodEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StorePreFinancingRequest;
 use App\Http\Requests\CreateRepaymentRequest;
 use App\Http\Requests\StoreFinancingDraftRequest;
 use App\Http\Requests\StoreFinancingRequest;
+use App\Models\Account;
 use App\Models\Financing;
 use App\Models\FinancingVerification;
 use App\Models\Installment;
@@ -27,9 +29,8 @@ use App\Models\Member;
 use App\Models\MemberDoc;
 use App\Models\SavingAccount;
 use App\Models\User;
-use App\Models\Account;
-use App\Services\Admin\JournalService;
 use App\Services\Admin\FinancingService;
+use App\Services\Admin\JournalService;
 use App\Services\Admin\RepaymentService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -549,7 +550,7 @@ class FinancingController extends Controller
         }
     }
 
-    public function store(StoreFinancingRequest $request)
+    public function store(StorePreFinancingRequest $request)
     {
         try {
             DB::transaction(function () use ($request) {

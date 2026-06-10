@@ -126,11 +126,11 @@ watch([tenor, totalPrice, monthlyIncome], () => {
                         </td>
                         <td class="py-4 flex gap-4 justify-end pl-6">
                             <div class="flex items-center gap-2">
-                                <input type="radio" value="lengkap" v-model="form.collateral_document_status">
+                                <input type="radio" value="lengkap" class="accent-primary" v-model="form.collateral_document_status">
                                 <span>Lengkap</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="radio" value="tidak_lengkap" v-model="form.collateral_document_status">
+                                <input type="radio" value="tidak_lengkap" class="accent-primary" v-model="form.collateral_document_status">
                                 <span>Tidak Lengkap</span>
                             </div>
                         </td>
@@ -145,11 +145,11 @@ watch([tenor, totalPrice, monthlyIncome], () => {
                         </td>
                         <td class="py-4 flex gap-4 justify-end pl-6">
                             <div class="flex items-center gap-2">
-                                <input type="radio" value="sesuai" v-model="form.suitability_status">
+                                <input type="radio" value="sesuai" class="accent-primary" v-model="form.suitability_status">
                                 <span>Sesuai</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="radio" value="tidak_sesuai" v-model="form.suitability_status">
+                                <input type="radio" value="tidak_sesuai" class="accent-primary" v-model="form.suitability_status">
                                 <span>Tidak Sesuai</span>
                             </div>
                         </td>
@@ -164,15 +164,15 @@ watch([tenor, totalPrice, monthlyIncome], () => {
                         </td>
                         <td class="py-4 flex gap-4 justify-end pl-6">
                             <div class="flex items-center gap-2">
-                                <input type="radio" value="layak" v-model="form.income_feasibility_status">
+                                <input type="radio" value="layak" class="accent-primary" v-model="form.income_feasibility_status">
                                 <span>Layak</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="radio" value="dipertimbangkan" v-model="form.income_feasibility_status">
+                                <input type="radio" value="dipertimbangkan" class="accent-primary" v-model="form.income_feasibility_status">
                                 <span>Dipertimbangkan</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="radio" value="tidak_layak" v-model="form.income_feasibility_status">
+                                <input type="radio" value="tidak_layak" class="accent-primary" v-model="form.income_feasibility_status">
                                 <span>Tidak Layak</span>
                             </div>
                         </td>
@@ -187,11 +187,11 @@ watch([tenor, totalPrice, monthlyIncome], () => {
                         </td>
                         <td class="py-4 flex gap-4 justify-end pl-6">
                             <div class="flex items-center gap-2">
-                                <input type="radio" value="approved" v-model="form.final_decision_status">
+                                <input type="radio" value="approved" class="accent-primary" v-model="form.final_decision_status">
                                 <span>Disetujui</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="radio" value="rejected" v-model="form.final_decision_status">
+                                <input type="radio" value="rejected" class="accent-primary" v-model="form.final_decision_status">
                                 <span>Ditolak</span>
                             </div>
                         </td>
