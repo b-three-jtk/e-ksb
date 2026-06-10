@@ -47,7 +47,7 @@ const breadcrumbItems = [
                     <Info label="Jumlah/Kuantitas" :value="data.financing_item?.qty" />
                     <Info label="Kondisi" :value="data.financing_item?.condition" />
                     <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.specification" />
-                    <Info label="Supplier" :value="data.financing_item.supplier?.supplier_name" />
+                    <Info label="Supplier" :value="data.financing_item?.supplier?.supplier_name" />
                 </div>
             </div>
             <div v-if="data.collateral" class="flex flex-col px-12 pb-2 pt-4 gap-2">
