@@ -99,8 +99,31 @@ const formatMoney = (val: string | number | File) => {
 }
 
 const handleMoneyInput = (event: Event) => {
-    const raw = (event.target as HTMLInputElement).value.replace(/\D/g, '')
-    ;(event.target as HTMLInputElement).value = raw ? new Intl.NumberFormat('id-ID').format(+raw) : ''
+    const input = event.target as HTMLInputElement
+    const cursorPos = input.selectionStart ?? 0
+    
+    const beforeCursor = input.value.slice(0, cursorPos)
+    const digitsBeforeCursor = beforeCursor.replace(/\D/g, '').length
+
+    const raw = input.value.replace(/\D/g, '')
+    
+    const formatted = raw ? new Intl.NumberFormat('id-ID').format(+raw) : ''
+    input.value = formatted
+
+    let digitCount = 0
+    let newCursorPos = 0
+    for (let i = 0; i < formatted.length; i++) {
+        if (/\d/.test(formatted[i])) digitCount++
+        if (digitCount === digitsBeforeCursor) {
+            newCursorPos = i + 1
+            break
+        }
+    }
+    
+    if (digitCount < digitsBeforeCursor) newCursorPos = formatted.length
+
+    input.setSelectionRange(newCursorPos, newCursorPos)
+    
     emit('update:modelValue', raw || '')
 }
 </script>
