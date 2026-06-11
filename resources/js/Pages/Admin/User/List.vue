@@ -18,6 +18,7 @@ const props = defineProps({
     filters: Object,
     statuses: Array,
     summary: Object,
+    can: Object,
 })
 
 const page = usePage()
@@ -178,7 +179,7 @@ const breadcrumbItems = [
                 </div>
 
                 <Link
-                    v-if="can['create_anggota']"
+                    v-if="props.can.tambah_anggota"
                     href="/admin/users/create"
                     class="bg-green-500 hover:bg-green-600 text-white font-semibold font-head px-5 py-2 rounded-xl shadow-sm"
                 >
@@ -243,7 +244,7 @@ const breadcrumbItems = [
                 <template #cell-aksi="{ row }">
                     <div class="flex justify-center gap-3">
                         <Link
-                            v-if="can['edit_anggota']"
+                            v-if="props.can.edit_anggota"
                             :href="`/admin/users/edit/${row.id}`"
                             class="text-gray-500 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
                         >
