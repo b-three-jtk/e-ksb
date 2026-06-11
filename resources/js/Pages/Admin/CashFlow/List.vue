@@ -472,7 +472,7 @@ const periodeOptions = [
             />
         </div>
 
-        <!-- ─── Modal Tambah Alokasi Kas ──────────────────────────────────────── -->
+        <!--Modal Tambah Alokasi Kas-->
         <Teleport to="body">
             <Transition name="modal">
                 <div

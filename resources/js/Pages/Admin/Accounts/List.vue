@@ -327,6 +327,14 @@ const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
     { name: 'Pengelolaan Akun', link: '' },
 ]
+
+const nomorAkunGuide = [
+    { kode: '1xx', label: 'Aset' },
+    { kode: '2xx', label: 'Liabilitas' },
+    { kode: '3xx', label: 'Ekuitas' },
+    { kode: '4xx', label: 'Pendapatan' },
+    { kode: '5xx', label: 'Beban' },
+]
 </script>
 
 <template>
@@ -489,6 +497,22 @@ const breadcrumbItems = [
                             >
                                 <Icon icon="mdi:close" class="w-5 h-5" />
                             </button>
+                        </div>
+
+                        <!-- Panduan Nomor Akun -->
+                        <div class="border border-primary dark:border-green-700 rounded-lg px-4 py-3 mr-6 ml-6 mt-6">
+                            <p class="flex items-center gap-1.5 text-xs font-semibold text-primary dark:text-green-400 mb-2">
+                                <Icon icon="tabler:info-circle" class="w-3.5 h-3.5" />
+                                Panduan penomoran akun
+                            </p>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                                <div v-for="item in nomorAkunGuide" :key="item.kode" class="flex items-baseline gap-2">
+                                    <span class="font-mono text-xs font-medium bg-light-accent dark:bg-green-800 text-green-700 dark:text-green-300 rounded px-1.5 py-0.5">
+                                        {{ item.kode }}
+                                    </span>
+                                    <span class="text-xs text-green-800 dark:text-green-200">{{ item.label }}</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Modal Body -->
