@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import ChevronDownIcon from '../../Icons/ChevronDownIcon.vue'
 
@@ -24,8 +24,6 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue'])
 
 const fileName = ref('')
-const displayValue = ref('')
-const isMoneyFocused = ref(false)
 
 const isDarkMode = ref(false)
 
@@ -77,38 +75,17 @@ const handleFileChange = (event: Event) => {
     }
 }
 
-const handleMoneyFocus = () => {
-    isMoneyFocused.value = true
-    displayValue.value = props.modelValue ? String(props.modelValue) : ''
-}
-
-const handleMoneyBlur = () => {
-    isMoneyFocused.value = false
-    const num = Number(props.modelValue)
-    if (!props.modelValue || num === 0) {
-        displayValue.value = ''
-        return
-    }
-    displayValue.value = new Intl.NumberFormat('id-ID').format(num)
+const formatMoney = (val: string | number | File) => {
+    const num = Number(val)
+    if (!val || isNaN(num) || num === 0) return ''
+    return new Intl.NumberFormat('id-ID').format(num)
 }
 
 const handleMoneyInput = (event: Event) => {
-    const raw = (event.target as HTMLInputElement).value
-    const numeric = raw.replace(/\D/g, '')
-    const cleaned = numeric ? String(parseInt(numeric, 10)) : ''
-    displayValue.value = cleaned
-    emit('update:modelValue', cleaned)
+    const raw = (event.target as HTMLInputElement).value.replace(/\D/g, '')
+    ;(event.target as HTMLInputElement).value = raw ? new Intl.NumberFormat('id-ID').format(+raw) : ''
+    emit('update:modelValue', raw || '')
 }
-
-watch(() => props.modelValue, (val) => {
-    if (isMoneyFocused.value) return
-    if (!val || val === '0' || val === '0.00' || Number(val) === 0) {
-        displayValue.value = ''
-        return
-    }
-    const num = Number(val)
-    displayValue.value = isNaN(num) ? '' : new Intl.NumberFormat('id-ID').format(num)
-}, { immediate: true })
 </script>
 
 <template>
@@ -123,15 +100,13 @@ watch(() => props.modelValue, (val) => {
             <input
                 type="text"
                 inputmode="numeric"
-                :value="displayValue"
+                :value="formatMoney(modelValue)"
                 @input="handleMoneyInput"
-                @focus="handleMoneyFocus"
-                @blur="handleMoneyBlur"
                 :disabled="disabled"
                 :placeholder="placeholder || '0'"
                 :class="[
-                    'h-11 w-full rounded-lg border bg-transparent font-body pl-9 pr-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
-                    error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                    'h-11 w-full rounded-lg border bg-transparent font-body pl-9 pr-4 py-2.5 text-sm font-medium ...',
+                    error ? 'border-red-500 ...' : 'border-gray-300 ...'
                 ]"
             />
         </div>
