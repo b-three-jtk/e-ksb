@@ -22,7 +22,7 @@ const props = defineProps({
 
 const columns = [
     { key: 'no',          label: 'No' },
-    { key: 'no_jurnal',   label: 'No. Jurnal' },
+    // { key: 'no_jurnal',   label: 'No. Jurnal' },
     { key: 'tanggal',     label: 'Tanggal', sortable: true },
     { key: 'akun',        label: 'Akun' },
     { key: 'jenis_akun',  label: 'Jenis Akun' },
@@ -443,14 +443,14 @@ const periodeOptions = [
                     {{ isFirstInGroup(index) ? row.no : '' }}
                 </template>
 
-                <template #cell-jenis_akun="{ row }">
+                <!-- <template #cell-jenis_akun="{ row }">
                     <span
                         class="px-3 py-1 text-xs rounded-full font-medium"
                         :class="[getJenisColor(row.jenis_akun).bg, getJenisColor(row.jenis_akun).text]"
                     >
                         {{ row.jenis_akun }}
                     </span>
-                </template>
+                </template> -->
 
                 <template #cell-debit="{ row }">
                     <span v-if="row.debit" class="font-medium text-gray-800 dark:text-gray-100">
