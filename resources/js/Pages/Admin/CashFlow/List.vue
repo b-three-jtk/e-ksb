@@ -18,6 +18,7 @@ const props = defineProps({
     summary: Array,
     filters: Object,
     akunOptions: Array,
+    can: Object,
 })
 
 const columns = [
@@ -329,6 +330,7 @@ const periodeOptions = [
                 </h2>
 
                 <button
+                    v-if="props.can.tambah_alokasi"
                     @click="openModal"
                     class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-secondary rounded-lg hover:bg-primary transition"
                 >
