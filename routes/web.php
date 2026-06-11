@@ -22,7 +22,6 @@ use App\Http\Controllers\User\FinancingController as UserFinancingController;
 use App\Http\Controllers\User\MemberController;
 use App\Http\Controllers\User\NotificationController as UserNotificationController;
 use App\Http\Controllers\User\SavingController as UserSavingController;
-use App\Http\Controllers\User\UserController as UserUserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

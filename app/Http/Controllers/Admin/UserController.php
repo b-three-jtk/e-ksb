@@ -15,6 +15,7 @@ use App\Http\Requests\UpdateMemberRequest;
 use App\Models\Financing;
 use App\Models\SavingAccount;
 use App\Models\User;
+use App\Services\Admin\FinancingService;
 use App\Services\Admin\MemberAllocationService;
 use App\Services\Admin\RegisterMemberService;
 use Exception;
@@ -187,7 +188,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, FinancingService $service)
     {
         $ktpDoc = null;
         $kkDoc = null;
@@ -195,7 +196,7 @@ class UserController extends Controller
         $user = User::with([
             'member.memberDocs',
             'roles',
-            'member.savingAccounts.transactions',
+            'member.savingAccounts.transactions' => fn($q) => $q->orderBy('transaction_date', 'desc'),
             'member.savingAccounts',
             'member.heirs',
             'member.financings.installment.payment',
@@ -205,20 +206,17 @@ class UserController extends Controller
         $user->profile_picture = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
         if ($user->member) {
             $ktpDoc = $user->member->memberDocs->where('doc_name', 'ktp')->first();
-            $kkDoc = $user->member->memberDocs->where('doc_name', 'kk')->first();
-
-            Log::info('ktp doc: ' . ($ktpDoc?->doc_attachment ?? 'null'));
+            $kkDoc = $user->member->memberDocs->where('doc_name', 'kartu_keluarga')->first();
 
             if ($user->member->financings) {
-                $user->member->financings->each(function ($financing) {
-                    $financing->installment_payment_paid_count = $financing->installment?->where('status', InstallmentPaymentScheduleStatusEnum::PAID)->count() ?? 0;
-                    $financing->next_payment = $financing->installment?->sortBy('payment_date')
-                        ->first();
-                    $financing->total_price = $financing->cost_price + $financing->margin_amount - $financing->down_payment;
-                    $financing->monthly_installment = $financing->tenor > 0
-                        ? ($financing->cost_price + $financing->margin_amount) / $financing->tenor
-                        : null;
-                    $financing->remaining_total = $financing->total_price - ($financing->installment_payment_paid_count * ($financing->monthly_installment ?? 0));
+                $user->member->financings->each(function ($financing) use ($service) {
+                    $service->computeFinancingSummary($financing);
+                    $nextInstallment = $financing->installment
+                    ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
+                    ->sortBy('due_date')
+                    ->first();
+
+                $financing->setAttribute('next_due_date', $nextInstallment?->due_date);
                 });
             }
         }
@@ -236,8 +234,8 @@ class UserController extends Controller
             $query->whereIn('doc_name', ['ktp', 'kk']);
         }, 'member.heirs'])->findOrFail($id);
 
-        $user->kk = $user->member?->memberDocs?->firstWhere('doc_name', 'kk')?->doc_attachment
-            ? asset('storage/' . $user->member->memberDocs->firstWhere('doc_name', 'kk')->doc_attachment)
+        $user->kk = $user->member?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga')?->doc_attachment
+            ? asset('storage/' . $user->member->memberDocs->firstWhere('doc_name', 'kartu_keluarga')->doc_attachment)
             : null;
 
         $user->ktp = $user->member?->memberDocs?->firstWhere('doc_name', 'ktp')?->doc_attachment
@@ -325,14 +323,15 @@ class UserController extends Controller
     public function getRiwayat($financingId)
     {
         $financing = Financing::with([
-            'installment.payment' => fn($q) => $q->latest('payment_date')
+            'installment' => fn($q) => $q->orderBy('installment_no', 'asc'),
+            'installment.payment'
         ])->findOrFail($financingId);
 
-        if (!$financing->installment->payment) {
+        if ($financing->installment->isEmpty()) {
             return response()->json([]);
         }
 
-        return response()->json($financing->installment->payment);
+        return response()->json($financing->installment);
     }
 
     public function verificationDetail(User $user)

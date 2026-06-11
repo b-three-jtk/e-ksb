@@ -24,8 +24,6 @@ const props = defineProps({
     kk_photo: String,
 });
 
-console.log(props.ktp_photo);
-
 const can = computed(() => page.props.auth.can);
 
 const form = useForm({
@@ -181,7 +179,7 @@ const breadcrumbItems = [
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Lahir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.birth_date ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ dateParser(user.member.birth_date) ?? '-'
                                         }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
@@ -298,9 +296,9 @@ const breadcrumbItems = [
                                     <li class="flex flex-col gap-2">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Transaksi Terakhir</span>
                                         <span
-                                            :class="account.transactions[0]?.type == 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
+                                            :class="account.transactions[0]?.transaction_type == 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
                                             class="font-medium text-dark-text dark:text-white">{{
-                                                account.transactions[0]?.type == 'Penyetoran' ? '+' : '-' }}
+                                                account.transactions[0]?.transaction_type == 'Penyetoran' ? '+' : '-' }}
                                             {{ parseCurrencyAmount(account.transactions[0]?.saving_amount) ?? '-' }}</span>
                                     </li>
                                     <li class="flex flex-col gap-2">
@@ -315,18 +313,14 @@ const breadcrumbItems = [
                                 </Button>
                             </div>
                         </div>
-                        <div class="grid xl:grid-cols-2 grid-cols-1 gap-4">
-                            <div v-for="financing in user.member.financings" class="card-layout flex flex-col gap-12 px-0!">
+                        <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
+                            <div v-for="financing in user.member.financings" class="card-layout flex flex-col gap-8 px-0!">
                                 <div class="border-b-2 border-gray-200 dark:border-gray-700 pb-4 px-8">
-                                    <h1 class="font-semibold text-dark-text dark:text-white/90">Pembiayaan Murabahah
+                                    <h1 class="font-semibold text-dark-text dark:text-white/90">{{ financing.financing_item?.name }}
+                                        <span class="text-sm text-gray-400 dark:text-gray-300">#{{ financing.financing_transaction_code }}</span>
                                     </h1>
                                 </div>
-                                <ul class="grid grid-cols-1 gap-6 px-8">
-                                    <li class="flex sm:flex-row flex-col justify-between">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Objek Pembiayaan</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            financing.financing_item?.name }}</span>
-                                    </li>
+                                <ul class="grid grid-cols-1 gap-4 px-8">
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Harga Pembiayaan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
@@ -343,13 +337,13 @@ const breadcrumbItems = [
                                             <span class="text-sm text-gray-500 dark:text-gray-300">Sisa
                                                 Pembiayaan</span>
                                             <span class="font-medium text-dark-text dark:text-white">
-                                                {{ parseCurrencyAmount(financing.remaining_total) }}
+                                                {{ parseCurrencyAmount(financing.remaining_balance) }}
                                             </span>
                                         </div>
                                         <div class="progress-container">
                                             <div class="progress-bar"
                                                 :style="{ width: (Math.min(((financing.tenor ?? 0) > 0
-                                                    ? (((financing.installment?.installment?.length ?? 0) / (financing.tenor ?? 0)) * 100)
+                                                    ? (((financing.total_paid ?? 0) / (financing.total_price ?? 0)) * 100)
                                                     : 0), 100)) + '%' }">
                                             </div>
                                         </div>
@@ -357,19 +351,18 @@ const breadcrumbItems = [
                                     <li class="flex sm:flex-row flex-col justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(financing.monthly_installment) }}</span>
+                                            parseCurrencyAmount(financing.installment_per_month) }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Jatuh Tempo
-                                            Berikutnya</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
                                         <span class="font-medium text-dark-text dark:text-white">{{
-                                            dateParser(financing.next_payment?.due_date) }}</span>
+                                            dateParser(financing.next_due_date) }}</span>
                                     </li>
                                     <li class="flex sm:flex-row flex-col justify-between">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Posisi Angsuran</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            financing.installment_payment_paid_count ?? 0 }} dari {{ financing.tenor ?? 0
-                                            }}</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-300">Jangka Waktu Angsuran</span>
+                                        <span class="font-medium text-dark-text dark:text-white">
+                                            {{ financing.tenor ?? 0
+                                            }} bulan</span>
                                     </li>
                                 </ul>
                                 <div class="flex gap-4 w-full px-8">

@@ -66,15 +66,15 @@ defineExpose({ openModal, closeModal })
                     class="flex justify-between items-center py-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
                     <div class="flex flex-col gap-1">
                         <span class="font-medium text-dark-text dark:text-white">
-                            {{ transaction.description }}
+                            {{ transaction.saving_description }}
                         </span>
                         <span class="text-sm text-gray-500 dark:text-gray-400">
                             {{ dateParser(transaction.transaction_date) }}
                         </span>
                     </div>
-                    <span :class="transaction.type === 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
+                    <span :class="transaction.transaction_type === 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
                         class="font-semibold">
-                        {{ transaction.type === 'Penyetoran' ? '+' : '-' }}
+                        {{ transaction.transaction_type === 'Penyetoran' ? '+' : '-' }}
                         {{ parseCurrencyAmount(transaction.saving_amount) }}
                     </span>
                 </li>
@@ -86,7 +86,7 @@ defineExpose({ openModal, closeModal })
                     class="flex justify-between items-center py-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
                     <div class="flex flex-col gap-1 flex-1">
                         <span class="font-medium text-dark-text dark:text-white">
-                            Angsuran #{{ schedule.installment_number }}
+                            Angsuran #{{ schedule.installment_no }}
                         </span>
                         <span class="text-sm text-gray-500 dark:text-gray-400">
                             Jatuh Tempo: {{ dateParser(schedule.due_date) }}
@@ -94,9 +94,9 @@ defineExpose({ openModal, closeModal })
                     </div>
                     <div class="flex flex-col gap-1 items-end">
                         <span class="font-semibold text-dark-text dark:text-white">
-                            {{ parseCurrencyAmount(schedule.total_amount) }}
+                            {{ parseCurrencyAmount(schedule.amount) }}
                         </span>
-                        <span :class="schedule.status === 'PAID' ? 'text-green-500' : schedule.status === 'LATE' ? 'text-red-500' : 'text-yellow-500'"
+                        <span :class="schedule.status === 'Dibayar' ? 'text-green-500' : schedule.status === 'Terlambat' ? 'text-red-500' : 'text-yellow-500'"
                             class="text-xs font-medium">
                             {{ schedule.status }}
                         </span>
