@@ -1,7 +1,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { toast } from 'vue3-toastify'
-import { router } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import { formatCurrency } from '../../../utils/currency'
@@ -14,6 +14,45 @@ import Swal from 'sweetalert2'
 const props = defineProps({
     settings: Object,
     settingsHistory: Object,
+})
+
+const page = usePage()
+
+const hasPointsData = computed(() => {
+    const amt = props.settings?.points?.saving_point_amount?.value
+    const rwd = props.settings?.points?.saving_point_reward?.value
+    return amt !== null && amt !== undefined && amt !== '' &&
+           rwd !== null && rwd !== undefined && rwd !== ''
+})
+
+const hasSavingsData = computed(() => {
+    const pokok = props.settings?.savings?.saving_pokok_amount?.value
+    const wajib = props.settings?.savings?.saving_wajib_amount?.value
+    return pokok !== null && pokok !== undefined && pokok !== '' &&
+           wajib !== null && wajib !== undefined && wajib !== ''
+})
+
+const hasFinancingData = computed(() => {
+    const margin = props.settings?.financing?.murabahah_margin_percentage?.value
+    return margin !== null && margin !== undefined && margin !== ''
+})
+
+const readonlyPoints = computed(() => {
+    const canCreate = !!page.props.auth?.can?.['create_pengaturan']
+    const canEdit = !!page.props.auth?.can?.['edit_pengaturan']
+    return hasPointsData.value ? !canEdit : !canCreate
+})
+
+const readonlySavings = computed(() => {
+    const canCreate = !!page.props.auth?.can?.['create_pengaturan']
+    const canEdit = !!page.props.auth?.can?.['edit_pengaturan']
+    return hasSavingsData.value ? !canEdit : !canCreate
+})
+
+const readonlyFinancing = computed(() => {
+    const canCreate = !!page.props.auth?.can?.['create_pengaturan']
+    const canEdit = !!page.props.auth?.can?.['edit_pengaturan']
+    return hasFinancingData.value ? !canEdit : !canCreate
 })
 
 const tabs = [
@@ -329,6 +368,7 @@ const isProcessing = (section) => processingSection.value === section
                         <FormPoin
                             :form="forms.points"
                             :is-processing="isProcessing('points')"
+                            :readonly="readonlyPoints"
                             @submit="submitAlert('points')"
                         />
                     </div>
@@ -337,6 +377,7 @@ const isProcessing = (section) => processingSection.value === section
                         <FormSimpanan
                             :form="forms.savings"
                             :is-processing="isProcessing('savings')"
+                            :readonly="readonlySavings"
                             @submit="submitAlert('savings')"
                         />
                     </div>
@@ -345,6 +386,7 @@ const isProcessing = (section) => processingSection.value === section
                         <FormPembiayaan
                             :form="forms.financing"
                             :is-processing="isProcessing('financing')"
+                            :readonly="readonlyFinancing"
                             @submit="submitAlert('financing')"
                         />
                     </div>

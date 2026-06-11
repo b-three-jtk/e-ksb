@@ -11,6 +11,10 @@ defineProps({
         type: Boolean,
         default: false,
     },
+    readonly: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const emit = defineEmits(['submit'])
@@ -29,7 +33,7 @@ const emit = defineEmits(['submit'])
                     min="1"
                     step="1"
                     required
-                    :is-disabled="isProcessing"
+                    :disabled="readonly || isProcessing"
                     placeholder="Masukkan nominal simpanan pokok"
                     is-money
                 />
@@ -38,7 +42,7 @@ const emit = defineEmits(['submit'])
                     label="Tanggal Berlaku"
                     type="date"
                     required
-                    :is-disabled="isProcessing"
+                    :disabled="readonly || isProcessing"
                 />
             </div>
 
@@ -52,7 +56,7 @@ const emit = defineEmits(['submit'])
                     min="1"
                     step="1"
                     required
-                    :is-disabled="isProcessing"
+                    :disabled="readonly || isProcessing"
                     placeholder="Masukkan nominal simpanan wajib"
                     is-money
                 />
@@ -61,12 +65,12 @@ const emit = defineEmits(['submit'])
                     label="Tanggal Berlaku"
                     type="date"
                     required
-                    :is-disabled="isProcessing"
+                    :disabled="readonly || isProcessing"
                 />
             </div>
         </div>
 
-        <div class="px-6 pb-6 md:px-8 md:pb-8 flex justify-end">
+        <div v-if="!readonly" class="px-6 pb-6 md:px-8 md:pb-8 flex justify-end">
             <Button type="submit" size="medium" variant="secondary" :disabled="isProcessing">
                 {{ isProcessing ? 'Menyimpan...' : 'Simpan Pengaturan' }}
             </Button>
