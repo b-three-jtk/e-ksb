@@ -225,7 +225,7 @@ class CashflowController extends Controller
                 ->orderBy('no_ref_account')
                 ->get(),
             'can' => [
-                'tambah_alokasi' => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
+                'tambah_alokasi' => Auth::user()->hasRole(UserRoleEnum::BENDAHARA->value),
             ],
         ]);
     }
