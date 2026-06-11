@@ -32,7 +32,7 @@ class Installment extends Model
 
     public function payment()
     {
-        return $this->hasMany(InstallmentPaymentTransaction::class);
+        return $this->hasOne(InstallmentPaymentTransaction::class);
     }
 
     public function notifications(): MorphMany

@@ -47,7 +47,6 @@ defineExpose({ openModal, closeModal })
             </div>
             <div class="px-4 pb-4 max-h-[70vh] w-5xl overflow-y-auto custom-scrollbar">
                 <iframe :src="attachment" class="w-full h-full min-h-150" frameborder="0"></iframe>
-                <p class="mt-2 text-center text-gray-600 dark:text-gray-400">{{ name }}</p>
             </div>
         </div>
     </div>

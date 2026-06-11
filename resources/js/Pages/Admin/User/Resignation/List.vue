@@ -19,17 +19,24 @@ const props = defineProps({
     filters: Object,
 })
 
-const columns = [
-    { key: 'no', label: 'No' },
-    { key: 'user_code', label: 'Nomor Anggota' },
-    { key: 'name', label: 'Nama' },
-    { key: 'email', label: 'Email' },
-    { key: 'aksi', label: 'Aksi' },
-]
-
 const page = usePage()
 
 const can = computed(() => page.props.auth.can);
+
+const columns = computed(() => {
+    const baseColumns = [
+        { key: 'no', label: 'No' },
+        { key: 'user_code', label: 'Nomor Anggota' },
+        { key: 'name', label: 'Nama' },
+        { key: 'email', label: 'Email' },
+    ]
+
+    if (can.value?.['edit_pengunduran_diri']) {
+        baseColumns.push({ key: 'aksi', label: 'Aksi' })
+    }
+
+    return baseColumns
+})
 
 const filters = reactive({
     search: page.props.filters?.search ?? '',
@@ -164,21 +171,8 @@ onMounted(() => {
                 <template #cell-no="{ index }">
                     {{ (members.current_page - 1) * members.per_page + index + 1 }}
                 </template>
-
-                <template #cell-user_code="{ row }">
-                    {{ row.user_code }}
-                </template>
-
-                <template #cell-name="{ row }">
-                    {{ row.name }}
-                </template>
-
-                <template #cell-email="{ row }">
-                    {{ row.email }}
-                </template>
-
-                <template #cell-aksi="{ row }">
-                    <Button v-if="can['edit_pengunduran_diri']" variant="warning" size="small" :href="`/admin/resignations/${row.id}`">
+                <template #cell-action="{ row }">
+                    <Button variant="warning" size="small" :href="`/admin/resignations/${row.id}`">
                         <Icon icon="tabler:checklist" class="w-4 h-4" />
                         Tinjau
                     </Button>

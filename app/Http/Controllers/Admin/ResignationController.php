@@ -34,7 +34,7 @@ class ResignationController extends Controller
             ->when($search, function ($q) use ($search) {
                 return $q->where('name', 'like', "%{$search}%")
                     ->orWhere('user_code', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('phone_number', 'like', "%{$search}%");
             });
 
         // Apply sorting

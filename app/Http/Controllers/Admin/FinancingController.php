@@ -123,6 +123,7 @@ class FinancingController extends Controller
                     'user' => $f->member->user
                         ? ($f->member->user->user_code . ' - ' . $f->member->user->name)
                         : '-',
+                    'user_role' => $f->member->user?->getRoleNames()->first() ?? '-',
                     'tenor_left' => $f->installment ? max(0, $f->tenor - ($f->installment->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
                     'product_name' => $f->financingItem?->name,
                     'status' => $f->status,
@@ -153,15 +154,25 @@ class FinancingController extends Controller
 
     private function getModalBelumDiputar()
     {
-        $modalCredit = JournalEntry::where('no_ref_account', '102')
-            ->where('position', PositionEnum::CREDIT->value)
-            ->sum('nominal');
+        $modalCredit = JournalEntry::whereHas(
+            'account',
+            function ($q) {
+                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
+            }
+        )
+        ->where('position', PositionEnum::CREDIT->value)
+        ->sum('nominal');
 
-        $modalDebit = JournalEntry::where('no_ref_account', '102')
-            ->where('position', PositionEnum::DEBIT->value)
-            ->sum('nominal');
+        $modalDebit = JournalEntry::whereHas(
+            'account',
+            function ($q) {
+                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
+            }
+        )
+        ->where('position', PositionEnum::DEBIT->value)
+        ->sum('nominal');
 
-        return $modalCredit - $modalDebit;
+        return $modalDebit - $modalCredit;
     }
 
     /**
@@ -225,50 +236,32 @@ class FinancingController extends Controller
         ];
     }
 
-    public function show(string $id)
+    public function show(string $id, FinancingService $service)
     {
-        $financing = Financing::with(['financingItem.productType', 'installment.payment', 'financingItem.supplier', 'collateral'])->findOrFail($id);
-        $financing->total_price = ($financing->cost_price ?? 0) + ($financing->margin_amount ?? 0) - ($financing->down_payment ?? 0);
+        $financing = Financing::with([
+            'financingItem.productType',
+            'financingItem.supplier',
+            'installment' => fn($q) => $q->orderBy('installment_no'),
+            'installment.payment',
+            'collateral',
+        ])->findOrFail($id);
 
-        $installment = $financing->installment;
+        $service->computeFinancingSummary($financing);
+        $service->computeNextDueDate($financing);
 
-        if ($installment && $installment->count() > 0) {
-            $paid_count = $installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
-            $total_paid = $financing->tenor > 0
-                ? $paid_count * (($financing->margin_amount ?? 0) + ($financing->cost_price ?? 0) - ($financing->down_payment ?? 0)) / $financing->tenor
-                : 0;
-            $financing->remaining_balance = $financing->total_price - $total_paid;
-            $financing->total_paid = $total_paid;
+        $financing->setRelation('installment', $financing->installment->map(function ($item) {
+            return [
+                'installment_no'              => $item->installment_no,
+                'installment_trans_code'      => $item->payment?->installment_trans_code,
+                'due_date'                    => $item->due_date,
+                'payment_date'               => $item->payment?->payment_date,
+                'amount'                     => $item->payment?->nominal,
+                'is_early_repayment'         => $item->payment?->is_early_repayment ?? false,
+                'installment_payment_receipt' => $item->payment?->installment_payment_receipt,
+            ];
+        }));
 
-            if ($financing->tenor) {
-                $financing->installment_per_month = ($financing->total_price) / $financing->tenor;
-            } else {
-                $financing->installment_per_month = 0;
-            }
-        } else {
-            $financing->total_paid = 0;
-            if ($installment && $financing->tenor) {
-                $financing->installment_per_month = ($financing->total_price) / $financing->tenor;
-            } else {
-                $financing->installment_per_month = 0;
-            }
-            $financing->remaining_balance = $financing->total_price;
-        }
-
-        if ($installment && $financing->akad_date) {
-            $paid_count = $installment ? $installment->count() : 0;
-            if ($paid_count < $financing->tenor) {
-                $financing->next_due_date = Carbon::parse($financing->akad_date)
-                    ->addMonthsNoOverflow($paid_count + 1)
-                    ->format('Y-m-d');
-            } else {
-                $financing->next_due_date = null;
-            }
-        }
-
-        return inertia('Admin/Financing/Show', [
-            'data' => $financing
-        ]);
+        return inertia('Admin/Financing/Show', ['data' => $financing]);
     }
 
     /**

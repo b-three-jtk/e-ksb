@@ -77,16 +77,16 @@ const tableTitle = computed(() => {
 
 const columns = computed(() => {
     const baseColumns = [
-        { key: 'financing_transaction_code', label: 'No. Transaksi', align: 'center' },
-        { key: 'akad_date', label: 'Tanggal Akad', align: 'center' },
-        { key: 'user', label: 'Anggota', align: 'center' },
-        { key: 'product_name', label: 'Nama Produk', align: 'center' },
-        { key: 'status', label: 'Status', align: 'center' },
-        { key: 'aksi', label: 'Aksi', align: 'center' }
+        { key: 'financing_transaction_code', label: 'No. Transaksi', align: 'left' },
+        { key: 'akad_date', label: 'Tanggal Akad', align: 'left' },
+        { key: 'user', label: 'Anggota', align: 'left' },
+        { key: 'product_name', label: 'Nama Produk', align: 'left' },
+        { key: 'status', label: 'Status', align: 'left' },
+        { key: 'aksi', label: 'Aksi', align: 'left' }
     ]
 
     if (filters.tab === 'active') {
-        baseColumns.splice(3, 0, { key: 'tenor_left', label: 'Sisa Tenor', align: 'center' })
+        baseColumns.splice(3, 0, { key: 'tenor_left', label: 'Sisa Tenor', align: 'left' })
     }
 
     return baseColumns
@@ -170,7 +170,7 @@ watch(() => filters.tab, applyFilters)
                 </BaseFunctionality>
 
                 <!-- Table -->
-                <BaseTable :columns="columns" :align="center" :data="transactions.data" :is-loading="isLoading"
+                <BaseTable :columns="columns" :align="left" :data="transactions.data" :is-loading="isLoading"
                     :pagination="transactions" :sort-by="filters.sort_by" :sort-dir="filters.sort_dir"
                     @sort="toggleSort">
 
@@ -181,7 +181,7 @@ watch(() => filters.tab, applyFilters)
                     </template>
 
                     <template #cell-aksi="{ row }">
-                        <div class="flex justify-center">
+                        <div class="flex">
 
                             <Button
                                 v-if="can['edit_murabahah'] && (role === 'Staf Murabahah' && (row.status === 'Disetujui' || row.status === 'Ditolak' || row.status === 'Menunggu Kelengkapan Dokumen' || row.status === 'Disetujui dengan Catatan'))"
@@ -190,14 +190,14 @@ watch(() => filters.tab, applyFilters)
                                 Lanjutkan
                             </Button>
                             <Button
-                                v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((row.status === 'Angsuran Berjalan') || (row.status === 'Belum Ditinjau') || (row.status === 'Lunas'))) || (role === 'Ketua Murabahah' && (row.status !== 'Belum Ditinjau')) || (role === 'Ketua' && (row.status !== 'Belum Ditinjau')))"
+                                v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((row.status === 'Angsuran Berjalan') || (row.status === 'Belum Ditinjau') || (row.status === 'Lunas'))) || (role === 'Ketua Murabahah' && (row.status !== 'Belum Ditinjau')) || (role === 'Ketua' && (row.status !== 'Belum Ditinjau' || row.user_role !== 'Ketua Murabahah')))"
                                 :href="`/admin/financings/show/${row.id}`" size="small" variant="secondary">
                                 <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                                 Lihat Detail
                             </Button>
 
                             <Button
-                                v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (row.status === 'Belum Ditinjau'))"
+                                v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (row.status === 'Belum Ditinjau')) || (role === 'Ketua' && (row.status === 'Belum Ditinjau' && row.user_role === 'Ketua Murabahah'))"
                                 :href="`/admin/financings/validation/${row.id}`" size="small" variant="warning">
                                 <ReviewIcon width="18px" height="18px" />
                                 Tinjau

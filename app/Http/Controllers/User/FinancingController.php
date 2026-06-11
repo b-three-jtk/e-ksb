@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Financing;
+use App\Services\Admin\FinancingService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -118,59 +119,32 @@ class FinancingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, FinancingService $service)
     {
-        $user = auth()->user();
-        $member = $user?->member;
+        $financing = Financing::with([
+            'financingItem.productType',
+            'financingItem.supplier',
+            'installment' => fn($q) => $q->orderBy('installment_no'),
+            'installment.payment',
+            'collateral',
+        ])->findOrFail($id);
 
-        if (!$member) {
-            abort(404);
-        }
+        $service->computeFinancingSummary($financing);
+        $service->computeNextDueDate($financing);
 
-        $financing = Financing::with(['financingItem.productType', 'installment.payment', 'financingItem.supplier', 'collateral'])
-        ->where('member_id', $member->id)
-        ->findOrFail($id);
-        $financing->total_price = ($financing->cost_price ?? 0) + ($financing->margin_amount ?? 0) - ($financing->down_payment ?? 0);
+        $financing->setRelation('installment', $financing->installment->map(function ($item) {
+            return [
+                'installment_no'              => $item->installment_no,
+                'installment_trans_code'      => $item->payment?->installment_trans_code,
+                'due_date'                    => $item->due_date,
+                'payment_date'               => $item->payment?->payment_date,
+                'amount'                     => $item->payment?->nominal,
+                'is_early_repayment'         => $item->payment?->is_early_repayment ?? false,
+                'installment_payment_receipt' => $item->payment?->installment_payment_receipt,
+            ];
+        }));
 
-        $installment = $financing->installment;
-
-        if ($installment && $installment->count() > 0) {
-            $paid_count = $installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
-            $total_paid = $financing->tenor > 0
-                ? $paid_count * (($financing->margin_amount ?? 0) + ($financing->cost_price ?? 0) - ($financing->down_payment ?? 0)) / $financing->tenor
-                : 0;
-            $financing->remaining_balance = $financing->total_price - $total_paid;
-            $financing->total_paid = $total_paid;
-
-            if ($financing->tenor) {
-                $financing->installment_per_month = ($financing->total_price) / $financing->tenor;
-            } else {
-                $financing->installment_per_month = 0;
-            }
-        } else {
-            $financing->total_paid = 0;
-            if ($installment && $financing->tenor) {
-                $financing->installment_per_month = ($financing->total_price) / $financing->tenor;
-            } else {
-                $financing->installment_per_month = 0;
-            }
-            $financing->remaining_balance = $financing->total_price;
-        }
-
-        if ($installment && $financing->akad_date) {
-            $paid_count = $installment ? $installment->count() : 0;
-            if ($paid_count < $financing->tenor) {
-                $financing->next_due_date = Carbon::parse($financing->akad_date)
-                    ->addMonthsNoOverflow($paid_count + 1)
-                    ->format('Y-m-d');
-            } else {
-                $financing->next_due_date = null;
-            }
-        }
-
-        return inertia('User/Financing/Show', [
-            'data' => $financing
-        ]);
+        return inertia('User/Financing/Show', ['data' => $financing]);
     }
 
     /**

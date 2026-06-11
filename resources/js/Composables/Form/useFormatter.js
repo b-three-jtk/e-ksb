@@ -13,19 +13,7 @@ export function useFormatter() {
         return digits.startsWith('62') ? digits : `62${digits}`
     }
 
-    const formatDate = (dateString) => {
-    if (!dateString) return '-'
-    const date = new Date(dateString)
-
-    return new Intl.DateTimeFormat('id-ID', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric'
-    }).format(date)
-}
-
     return {
         normalizePhoneNumber,
-        formatDate
     }
 }
