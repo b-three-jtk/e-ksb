@@ -26,11 +26,8 @@ const formatRupiah = (value) => {
 const MAX_SIZE = 2 * 1024 * 1024
 
 const validateFile = (file) => {
-    if (!['application/pdf',
-          'application/msword',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ].includes(file.type)) {
-        errorFile.value = 'File harus PDF atau DOC'
+    if (file.type !== 'application/pdf') {
+        errorFile.value = 'File harus berformat PDF'
         return false
     }
 
@@ -80,6 +77,8 @@ const handleDragOver = (event) => {
     event.preventDefault();
 }
 
+const isSubmitting = ref(false)
+
 const submitResignation = () => {
     if (hasExistingResign) {
         Swal.fire({
@@ -116,6 +115,7 @@ const submitResignation = () => {
         confirmButtonColor: '#007943',
     }).then((result) => {
         if (result.isConfirmed) {
+            isSubmitting.value = true
             const formData = new FormData()
             formData.append('document', uploadedFile.value)
 
@@ -127,6 +127,7 @@ const submitResignation = () => {
                     preserveScroll: true,
                     preserveState: true,
                     onSuccess: () => {
+                        isSubmitting.value = false
                         toast("Permohonan pengunduran diri berhasil diajukan!", {
                             "type": "success",
                             "position": "bottom-right",
@@ -145,6 +146,7 @@ const submitResignation = () => {
                         if (fileInput.value) fileInput.value.value = null
                     },
                     onError: (errors) => {
+                        isSubmitting.value = false
                         if (errors.resign) {
                             Swal.fire({
                                 icon: 'warning',
@@ -182,6 +184,9 @@ const submitResignation = () => {
                                 });
                             }
                         }
+                    },
+                    onFinish: () => {
+                        isSubmitting.value = false
                     }
                 }
             )
@@ -279,7 +284,7 @@ const submitResignation = () => {
                             ref="fileInput"
                             type="file"
                             @change="handleFileUpload"
-                            accept=".pdf,.doc,.docx"
+                            accept=".pdf"
                             class="hidden"
                         />
 
@@ -293,7 +298,7 @@ const submitResignation = () => {
                                     <span class="text-blue-600 font-medium dark:text-blue-400">browse</span>
                                 </p>
                                 <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">
-                                    Hanya file PDF dan DOC yang diterima (maks. 2MB)
+                                    Hanya file PDF yang diterima (maks. 2MB)
                                 </p>
                             </div>
 
@@ -386,9 +391,21 @@ const submitResignation = () => {
                 >
                     <button
                         @click="submitResignation"
-                        :disabled="hasExistingResign || !uploadedFile || !isAgreed || !isConfirmed"
-                        class="font-head px-6 py-3 mt-5 mb-5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        :disabled="
+                            hasExistingResign ||
+                            !uploadedFile ||
+                            !isAgreed ||
+                            !isConfirmed ||
+                            isSubmitting
+                        "
+                        class="font-head px-6 py-3 mt-5 mb-5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                     >
+                        <Icon
+                            v-if="isSubmitting"
+                            icon="line-md:loading-twotone-loop"
+                            width="20"
+                            height="20"
+                        />
                         Ajukan Permohonan
                     </button>
                 </div>

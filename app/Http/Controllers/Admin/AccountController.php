@@ -7,7 +7,9 @@ use App\Models\Account;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Enums\AccountCategoryEnum;
+use App\Enums\UserRoleEnum;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
@@ -118,6 +120,11 @@ class AccountController extends Controller
                     ];
                 })
                 ->values(),
+
+            'can' => [
+                'tambah_akun' => Auth::user()->hasRole(UserRoleEnum::BENDAHARA->value),
+                'edit_akun'   => Auth::user()->hasRole(UserRoleEnum::BENDAHARA->value),
+            ],
         ]);
     }
 

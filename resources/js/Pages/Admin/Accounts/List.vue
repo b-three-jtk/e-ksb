@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import AdminLayout from '../../../Layouts/Admin/Layout.vue'
-import { reactive, watch, ref } from 'vue'
+import { reactive, watch, ref, computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify'
@@ -25,6 +25,7 @@ const props = defineProps<{
         name: string; 
         balance: number 
     }[]
+    can: Record<string, boolean>
 }>()
 
 // Modal state
@@ -286,15 +287,22 @@ const toggleSort = (column: string) => {
 }
 
 // Kolom tabel
-const columns = [
-    { key: 'no', label: 'No', align: 'left' as const },
-    { key: 'nomor_akun', label: 'Nomor Akun', sortable: true, align: 'left' as const },
-    { key: 'nama_akun', label: 'Nama Akun', sortable: true },
-    { key: 'jenis_akun', label: 'Jenis Akun', align: 'left' as const },
-    { key: 'saldo', label: 'Saldo', align: 'left' as const },
-    { key: 'status', label: 'Status', align: 'left' as const },
-    { key: 'aksi', label: 'Aksi', align: 'left' as const },
-]
+const columns = computed(() => {
+    const base = [
+        { key: 'no', label: 'No', align: 'left' as const },
+        { key: 'nomor_akun', label: 'Nomor Akun', sortable: true, align: 'left' as const },
+        { key: 'nama_akun', label: 'Nama Akun', sortable: true },
+        { key: 'jenis_akun', label: 'Jenis Akun', align: 'left' as const },
+        { key: 'saldo', label: 'Saldo', align: 'left' as const },
+        { key: 'status', label: 'Status', align: 'left' as const },
+    ]
+
+    if (props.can.edit_akun) {
+        base.push({ key: 'aksi', label: 'Aksi', align: 'left' as const })
+    }
+
+    return base
+})
 
 // Format untuk saldo
 const formatCurrency = (value: number) => {
@@ -350,6 +358,7 @@ const nomorAkunGuide = [
                 </h2>
 
                 <button
+                    v-if="props.can.tambah_akun"
                     type="button"
                     @click="openCreateModal"
                     class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold font-head px-5 py-2 rounded-xl shadow-sm transition-colors"
@@ -458,6 +467,7 @@ const nomorAkunGuide = [
                 <!-- Aksi -->
                 <template #cell-aksi="{ row }">
                     <button
+                        v-if="props.can.tambah_akun"
                         @click="openStatusModal(row)"
                         title="Ubah Status"
                     >
@@ -685,7 +695,7 @@ const nomorAkunGuide = [
 
                                 <select
                                     v-model="statusForm.status"
-                                    class="w-full border rounded-lg px-4 py-2.5 text-sm"
+                                    class="w-full border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500"
                                 >
                                     <option value="Aktif">Aktif</option>
                                     <option value="Non-Aktif">Non-Aktif</option>

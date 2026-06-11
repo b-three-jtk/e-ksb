@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Log;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -81,7 +82,11 @@ class AdminController extends Controller
                 ->whereNotIn('name', [UserRoleEnum::ANGGOTA->value])
                 ->pluck('name'),
             'filters' => $request->only(['search', 'status', 'role', 'per_page', 'sort_by', 'sort_dir']),
-            'title' => 'Pengelolaan Admin'
+            'title' => 'Pengelolaan Admin',
+            'can' => [
+                'tambah_pengurus' => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
+                'edit_pengurus'   => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
+            ],
         ]);
     }
 

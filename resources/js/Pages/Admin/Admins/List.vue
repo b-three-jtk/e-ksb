@@ -24,6 +24,7 @@ const props = defineProps({
     admins: Object,
     filters: Object,
     roles: Array,
+    can: Object,
 })
 
 const filters = reactive({
@@ -115,7 +116,11 @@ const breadcrumbItems = [
                 <div>
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Pengurus</h2>
                 </div>
-                <Button size="medium" variant="secondary" href="/admin/create">
+                <Button
+                    v-if="props.can.tambah_pengurus" 
+                    size="medium" 
+                    variant="secondary" 
+                    href="/admin/create">
                     <Icon icon="mdi:plus" class="w-5 h-5"/>
                     Tambah Pengurus
                 </Button>
@@ -180,6 +185,7 @@ const breadcrumbItems = [
                 <template #cell-aksi="{ row }">
                     <div class="flex justify-center gap-3">
                         <Link
+                            v-if="props.can.edit_pengurus"
                             :href="`/admin/edit/${row.id}`"
                             class="text-gray-500 hover:text-blue-600 transition"
                             title="Edit"
