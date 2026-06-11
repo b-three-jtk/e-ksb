@@ -43,7 +43,7 @@ const breadcrumbItems = [
                 <div class="card-layout grid grid-cols-2 gap-6">
                     <Info label="Kategori Produk" :value="data.financing_item?.product_type?.product_type_name" />
                     <Info label="Nama Produk" :value="data.financing_item?.name" />
-                    <Info label="Tanggal Akad" :value="data.akad_date" />
+                    <Info label="Tanggal Akad" :value="dateParser(data.akad_date)" />
                     <Info label="Jumlah/Kuantitas" :value="data.financing_item?.qty" />
                     <Info label="Kondisi" :value="data.financing_item?.condition" />
                     <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.specification" />
