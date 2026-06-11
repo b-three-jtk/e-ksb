@@ -8,10 +8,12 @@ use App\Models\JournalEntry;
 use App\Services\Admin\JournalService;
 use App\Enums\AccountCategoryEnum;
 use App\Enums\PositionEnum;
+use App\Enums\UserRoleEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class CashflowController extends Controller
 {
@@ -222,6 +224,9 @@ class CashflowController extends Controller
                 )
                 ->orderBy('no_ref_account')
                 ->get(),
+            'can' => [
+                'tambah_alokasi' => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
+            ],
         ]);
     }
 
