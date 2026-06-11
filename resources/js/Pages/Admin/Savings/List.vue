@@ -166,8 +166,8 @@ const handleAction = (type) => {
 </script>
 
 <template>
-    <AdminLayout title="Daftar Simpanan & Tabungan">
-        <PageBreadcrumb page-title="Pengelolaan Simpanan & Tabungan" :items="breadcrumbItems" />
+    <AdminLayout title="Daftar Simpanan">
+        <PageBreadcrumb page-title="Pengelolaan Simpanan" :items="breadcrumbItems" />
 
         <!-- Ringkasan -->
         <div class="bg-white dark:bg-slate-800 rounded-xl p-6 mb-8">
