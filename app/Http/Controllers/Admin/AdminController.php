@@ -141,7 +141,7 @@ class AdminController extends Controller
                 $user->assignRole($role->name);
             }
             DB::commit();
-            return redirect()->route('admin.admin.index')->with('success', 'Admin berhasil ditambahkan');
+            return redirect()->route('admin.admin.index')->withInput()->with('success', 'Admin berhasil ditambahkan');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error storing admin: ' . $e->getMessage());
@@ -195,7 +195,7 @@ class AdminController extends Controller
 
             $admin = User::findOrFail($id);
             $role = Role::findOrFail($data['role_id']);
-            
+
             $admin->update($data);
             $admin->syncRoles([$role->name]);
             DB::commit();

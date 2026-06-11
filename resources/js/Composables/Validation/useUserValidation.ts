@@ -80,7 +80,7 @@ export function useUserValidation(form: any, options: UserValidationOptions = {}
             const value = (v ?? "").toString().trim();
             const normalized = value.startsWith('0') ? `62${value.slice(1)}` : value.startsWith('62') ? value : `62${value}`;
 
-            if (!/^62\d{8,15}$/.test(normalized)) {
+            if (!/^62\d{8,20}$/.test(normalized)) {
                 errors.phone_number = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
             } else {
                 errors.phone_number = "";

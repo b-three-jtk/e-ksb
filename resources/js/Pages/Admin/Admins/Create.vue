@@ -6,8 +6,10 @@ import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify';
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 import { useUserValidation } from '@/Composables/Validation/useUserValidation'
-import Button from '../../../Components/Form/Button.vue'
+import Button from '@/Components/Form/Button.vue'
 import { ref, computed } from 'vue'
+import { useFormatter } from '@/Composables/Form/useFormatter'
+import { useInputSanitizers } from '@/Composables/useInputSanitizers'
 
 const form = useForm({
     user_id: '',
@@ -31,26 +33,16 @@ const breadcrumbItems = [
 
 const { errors } = useUserValidation(form)
 
-// Search states
 const searchQuery = ref('')
 const searchResults = ref([])
 const isSearching = ref(false)
 const selectedMember = ref(null)
 
-// Computed - check if form is for new admin or existing member
+const { onlyNumbers } = useInputSanitizers()
+const { normalizePhoneNumber } = useFormatter()
+
 const isEditingExistingMember = computed(() => !!form.user_id)
 
-// Computed - filter roles for member promotion (only Ketua, Sekretaris, Bendahara)
-const allowedRoles = computed(() => {
-    if (!isEditingExistingMember.value) {
-        return props.roles
-    }
-    // Filter roles yang diizinkan untuk member (Ketua, Sekretaris, Bendahara)
-    const allowedRoleNames = ['Ketua', 'Sekretaris', 'Bendahara']
-    return props.roles.filter(role => allowedRoleNames.includes(role.name))
-})
-
-// Search members
 const searchMembers = async () => {
     if (searchQuery.value.length < 2) {
         searchResults.value = []
@@ -63,7 +55,6 @@ const searchMembers = async () => {
         const data = await response.json()
         searchResults.value = data.members
     } catch (error) {
-        console.error('Error searching members:', error)
         toast("Gagal mencari member", {
             "type": "error",
             "position": "bottom-right",
@@ -74,7 +65,6 @@ const searchMembers = async () => {
     }
 }
 
-// Select a member
 const selectMember = (member) => {
     selectedMember.value = member
     form.user_id = member.id
@@ -86,7 +76,6 @@ const selectMember = (member) => {
     searchResults.value = []
 }
 
-// Clear selected member
 const clearSelectedMember = () => {
     selectedMember.value = null
     form.user_id = ''
@@ -121,12 +110,12 @@ const submitForm = () => {
                     })
                 },
                 onError: (errors) => {
-                    console.error('Form errors:', errors)
-                    toast("Gagal menambahkan admin.", {
-                        "type": "error",
-                        "position": "bottom-right",
-                        "transition": "slide",
-                        "dangerouslyHTMLString": true
+                    const firstError = Object.values(errors || {})[0]
+                    toast(firstError || 'Gagal menambahkan pengurus.', {
+                        type: 'error',
+                        position: 'bottom-right',
+                        transition: 'slide',
+                        dangerouslyHTMLString: true,
                     })
                 }
             })
@@ -134,7 +123,6 @@ const submitForm = () => {
     })
 }
 </script>
-
 
 <template>
     <Layout title="Tambah Admin">
@@ -146,13 +134,22 @@ const submitForm = () => {
                         <div class="relative">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Tambahkan dari Anggota Aktif
                                 (Opsional)</label>
-                            <input v-model="searchQuery" @input="searchMembers" type="text"
+                            <input v-if="!selectedMember" v-model="searchQuery" @input="searchMembers" type="text"
                                 placeholder="Ketik nama, NIK, email, atau kode pengguna"
                                 class="w-full px-4 py-2 border font-body text-sm shadow-theme-xs focus:outline-hidden focus:ring-3 placeholder:text-gray-400 rounded-lg border-gray-300 focus:border-brand-300 focus:ring-brand-500/10" />
+                            <!-- Selected Member Info -->
+                            <div v-else class="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+                                <div class="flex justify-between items-center">
+                                    <p class="font-semibold font-body text-md text-green-900">{{ selectedMember.user_code }}</p>
+                                    <button class="text-primary flex items-center" @click="clearSelectedMember">
+                                        <span class="icon-[tabler--x]"></span>
+                                    </button>
+                                </div>
+                            </div>
 
                             <!-- Search Results Dropdown -->
                             <div v-if="searchResults.length > 0"
-                                class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg">
+                                class="absolute z-100 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg">
                                 <div v-for="member in searchResults" :key="member.id" @click="selectMember(member)"
                                     class="px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-100">
                                     <div class="font-semibold">{{ member.name }}</div>
@@ -175,57 +172,47 @@ const submitForm = () => {
                             </div>
                         </div>
 
-                        <!-- Selected Member Info -->
-                        <div v-if="selectedMember" class="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="font-semibold text-green-900">Member Dipilih</p>
-                                </div>
-                                <button @click="clearSelectedMember"
-                                    class="text-sm text-red-600 hover:text-red-800 font-semibold">
-                                    Ubah
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     <div class="grid border-t gap-6 md:grid-cols-2 col-span-2 grid-cols-1 px-6 pt-6">
                         <!-- NIK -->
                         <BaseInputAdmin v-model="form.nik" label="NIK" type="text" required
                             placeholder="Masukkan 16 digit NIK" max="16" min="16" pattern="[0-9]*" :error="errors.nik"
-                            :disabled="isEditingExistingMember">
+                        >
                         </BaseInputAdmin>
 
                         <!-- Nama -->
                         <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
                             placeholder="Masukkan nama lengkap" :error="errors.name"
-                            :disabled="isEditingExistingMember">
+                        >
                         </BaseInputAdmin>
 
                         <!-- Posisi -->
                         <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
-                            :selectables="allowedRoles.map(role => ({ value: role.id, text: role.name }))"
+                            :selectables="roles.map(role => ({ value: role.id, text: role.name }))"
                             :error="errors.role_id">
                         </BaseInputAdmin>
 
                         <!-- Email -->
                         <BaseInputAdmin v-model="form.email" label="Email" type="email"
-                            placeholder="Masukkan email" :error="errors.email" :disabled="isEditingExistingMember">
+                            placeholder="Masukkan email" :error="errors.email">
                         </BaseInputAdmin>
 
                         <!-- No. Telp -->
                         <BaseInputAdmin v-model="form.phone_number" max="20" required label="Nomor Telepon" type="text"
+                            @input="form.phone_number = normalizePhoneNumber(form.phone_number, onlyNumbers)"
                             placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number"
-                            :disabled="isEditingExistingMember">
+                        >
                         </BaseInputAdmin>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-6 pb-6">
+                <div class="flex items-center justify-end gap-6 pb-6 mr-6">
                     <Button href="/admin/list" variant="light">
                         Batal
                     </Button>
                     <Button @click="submitForm" variant="secondary"
-                        :disabled="!form.role_id || (isEditingExistingMember ? !selectedMember : !form.name || !form.nik || !form.email)">
+                        :disabled="!form.role_id || form.processing || (isEditingExistingMember ? !selectedMember : !form.name || !form.nik || !form.email)">
+                        <div v-if="form.processing" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                         {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                     </Button>
                 </div>

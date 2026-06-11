@@ -7,12 +7,17 @@ import { toast } from "vue3-toastify";
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 import { useUserValidation } from '@/Composables/Validation/useUserValidation'
 import Button from '../../../Components/Form/Button.vue';
+import { useFormatter } from '@/Composables/Form/useFormatter'
+import { useInputSanitizers } from '@/Composables/useInputSanitizers'
 
 const props = defineProps({
     admin: { type: Object, required: true },
     roles: { type: Array, required: true },
     educations: Array
 })
+
+const { onlyNumbers } = useInputSanitizers()
+const { normalizePhoneNumber } = useFormatter()
 
 const form = useForm({
     nik: props.admin.nik || '',
@@ -92,7 +97,9 @@ const submitForm = () => {
 
                     <!-- No. Telp -->
                     <BaseInputAdmin v-model="form.phone_number" max="20" required label="Nomor Telepon" type="text"
-                        placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number">
+                            @input="form.phone_number = normalizePhoneNumber(form.phone_number, onlyNumbers)"
+                            placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number"
+                        >
                     </BaseInputAdmin>
                 </div>
 
@@ -101,6 +108,7 @@ const submitForm = () => {
                         Batal
                     </Button>
                     <Button @click="submitForm" :disabled="form.processing" variant="secondary">
+                        <div v-if="form.processing" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                         {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                     </Button>
                 </div>
