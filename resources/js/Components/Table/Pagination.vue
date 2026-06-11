@@ -35,7 +35,7 @@ defineProps<{
                        dark:text-gray-300
                        dark:border-gray-600"
                 :class="{
-                    'bg-blue-600 text-white border-blue-600': link.active,
+                    'bg-primary text-white border-primary': link.active,
                     'hover:bg-gray-100 dark:hover:bg-gray-700': !link.active
                 }"
                 v-html="link.label"
