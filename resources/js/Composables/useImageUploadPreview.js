@@ -1,4 +1,5 @@
 import { onBeforeUnmount, ref } from 'vue'
+import { toast } from 'vue3-toastify'
 
 export const useImageUploadPreview = (form) => {
 	const ktpInput = ref(null)
@@ -31,6 +32,27 @@ export const useImageUploadPreview = (form) => {
 
 	const setFile = (event, target) => {
 		const file = event.target.files?.[0] ?? null
+		if (!file) return
+
+		const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+		if (!allowedTypes.includes(file.type)) {
+			toast.error('Format file tidak didukung. Hanya diperbolehkan format JPG, JPEG, atau PNG.', {
+				position: 'bottom-right',
+				transition: 'slide'
+			})
+			event.target.value = ''
+			return
+		}
+
+		const maxSizeBytes = 2 * 1024 * 1024
+		if (file.size > maxSizeBytes) {
+			toast.error('Ukuran file melebihi batas maksimum 2 MB.', {
+				position: 'bottom-right',
+				transition: 'slide'
+			})
+			event.target.value = ''
+			return
+		}
 
 		if (target === 'ktp') {
 			form.ktp_photo = file

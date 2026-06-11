@@ -81,8 +81,9 @@ const submitForm = () => {
                         dangerouslyHTMLString: true,
                     })
                 },
-                onError: () => {
-                    toast('Gagal memperbarui hak akses.', {
+                onError: (errors) => {
+                    const firstError = Object.values(errors)[0]
+                    toast(firstError || 'Gagal membuat peran dan hak akses.', {
                         type: 'error',
                         position: 'bottom-right',
                         transition: 'slide',

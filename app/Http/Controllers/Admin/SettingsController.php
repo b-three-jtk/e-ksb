@@ -74,6 +74,25 @@ class SettingsController extends Controller
             return redirect()->back()->withErrors(['section' => 'Bagian pengaturan tidak dikenali.']);
         }
 
+        $keys = match ($section) {
+            'points' => ['saving_point_amount', 'saving_point_reward'],
+            'savings' => ['saving_pokok_amount', 'saving_wajib_amount'],
+            'financing' => ['murabahah_margin_percentage'],
+            default => [],
+        };
+
+        $hasData = GlobalSetting::whereIn('key', $keys)->exists();
+
+        if ($hasData) {
+            if (!$request->user()->can('edit_pengaturan')) {
+                abort(403, 'Anda tidak memiliki akses untuk mengubah pengaturan ini.');
+            }
+        } else {
+            if (!$request->user()->can('create_pengaturan')) {
+                abort(403, 'Anda tidak memiliki akses untuk membuat pengaturan ini.');
+            }
+        }
+
         $validated = $request->validate($rules);
 
         DB::transaction(function () use ($section, $validated, $request): void {

@@ -11,6 +11,10 @@ defineProps({
         type: Boolean,
         default: false,
     },
+    readonly: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const emit = defineEmits(['submit'])
@@ -28,7 +32,7 @@ const emit = defineEmits(['submit'])
                 max="100"
                 step="0.01"
                 required
-                :is-disabled="isProcessing"
+                :disabled="readonly || isProcessing"
                 placeholder="Masukkan persentase margin koperasi"
             />
             <BaseInputAdmin
@@ -36,11 +40,11 @@ const emit = defineEmits(['submit'])
                 label="Tanggal Berlaku"
                 type="date"
                 required
-                :is-disabled="isProcessing"
+                :disabled="readonly || isProcessing"
             />
         </div>
 
-        <div class="flex justify-end">
+        <div v-if="!readonly" class="flex justify-end">
             <Button type="submit" size="medium" variant="secondary" :disabled="isProcessing">
                 {{ isProcessing ? 'Menyimpan...' : 'Simpan Pengaturan' }}
             </Button>

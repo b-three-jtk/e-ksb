@@ -59,8 +59,8 @@ class NotificationService
 
             $notification = Notification::create([
                 'member_id' => $member->id,
-                'title' => 'Pengingat Simpanan Wajib Bulan ' . now()->translatedFormat('F Y'),
-                'message' => 'Simpanan wajib untuk periode ' . now()->format('F Y') . ' jatuh tempo pada ' . $dueDate->translatedFormat('d F Y') . '. Pastikan Anda melakukan setoran sebelum jatuh tempo.',
+                'title' => 'Pengingat Simpanan Wajib Bulan ' . now()->locale('id')->isoFormat('MMMM YYYY'),
+                'message' => 'Simpanan wajib untuk periode ' . now()->locale('id')->isoFormat('MMMM YYYY') . ' jatuh tempo pada ' . $dueDate->locale('id')->translatedFormat('d F Y') . '. Pastikan Anda melakukan setoran sebelum jatuh tempo.',
                 'notification_type' => NotificationTypeEnum::MANDATORY_SAVING->value,
                 'reference_type' => null,
                 'reference_id' => null,
@@ -107,7 +107,7 @@ class NotificationService
             $notification = Notification::create([
                 'member_id' => $memberId,
                 'title' => 'Pengingat Angsuran Pembiayaan #' . $installment->installment_no,
-                'message' => 'Angsuran ke-' . $installment->installment_no . ' sebesar Rp ' . number_format($installment->amount, 0, ',', '.') . ' jatuh tempo pada ' . $dueDate->translatedFormat('d F Y') . '.',
+                'message' => 'Angsuran ke-' . $installment->installment_no . ' sebesar Rp ' . number_format($installment->amount, 0, ',', '.') . ' jatuh tempo pada ' . $dueDate->locale('id')->translatedFormat('d F Y') . '.',
                 'notification_type' => NotificationTypeEnum::INSTALLMENT->value,
                 'reference_type' => Installment::class,
                 'reference_id' => $installment->id,

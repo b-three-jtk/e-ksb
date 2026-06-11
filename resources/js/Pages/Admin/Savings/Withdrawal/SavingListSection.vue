@@ -95,12 +95,15 @@ const savingsList = computed(() => {
   return accounts
     .map(acc => {
       const availability = evaluateAvailability(acc)
+      const typeLower = (acc.type || '').toLowerCase()
+      const isFullWithdrawal = typeLower.includes('berjangka') || typeLower.includes('ibadah')
       return {
         id: acc.id,
         type: acc.type,
         balance: acc.balance,
         isAvailable: availability.isAvailable,
         reason: availability.reason,
+        isFullWithdrawal,
       }
     })
 })

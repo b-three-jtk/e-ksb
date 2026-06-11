@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Enums\UserRoleEnum;
 
 class RoleController extends Controller
 {
@@ -16,6 +18,7 @@ class RoleController extends Controller
         $sortDir = $request->sort_dir === 'desc' ? 'desc' : 'asc';
 
         $roles = Role::with('permissions')
+            ->where('name', '!=', UserRoleEnum::ANGGOTA->value)
             ->when($request->search, function ($query) use ($request) {
                 $query->where('name', 'like', "%{$request->search}%");
             })
@@ -38,9 +41,46 @@ class RoleController extends Controller
         ]);
     }
 
+    public function show(string $id)
+    {
+        $role = Role::with('permissions')->findOrFail($id);
+        if ($role->name === UserRoleEnum::ANGGOTA->value) {
+            abort(404);
+        }
+
+        $permissions = Permission::all()
+            ->map(function ($permission) {
+                return [
+                    'id' => $permission->id,
+                    'name' => $permission->name,
+                    'label' => $this->formatPermissionLabel($permission->name),
+                    'group' => $this->permissionGroup($permission->name),
+                ];
+            })
+            ->groupBy('group')
+            ->map(function ($items) {
+                return $items->values();
+            });
+
+        return inertia('Admin/Roles/Edit', [
+            'role' => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'permissions' => $role->permissions->pluck('id')->toArray(),
+            ],
+            'permissions' => $permissions,
+            'title' => 'Detail Peran dan Akses',
+            'readonly' => true,
+        ]);
+    }
+
     public function edit(string $id)
     {
         $role = Role::with('permissions')->findOrFail($id);
+        if ($role->name === UserRoleEnum::ANGGOTA->value) {
+            abort(404);
+        }
+
         $permissions = Permission::all()
             ->map(function ($permission) {
                 return [
@@ -63,20 +103,30 @@ class RoleController extends Controller
             ],
             'permissions' => $permissions,
             'title' => 'Edit Peran dan Akses',
+            'readonly' => false,
         ]);
     }
 
     public function update(Request $request, string $id)
     {
+        $role = Role::findOrFail($id);
+        if ($role->name === UserRoleEnum::ANGGOTA->value) {
+            abort(404);
+        }
+
         $allowedPermissionIds = Permission::pluck('id')->toArray();
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required', 'string', 'max:255',
+                Rule::unique('roles', 'name')->where('guard_name', 'web')->ignore($role->id),
+            ],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['integer', 'in:' . implode(',', $allowedPermissionIds)],
+        ], [
+            'name.unique' => 'Nama peran sudah digunakan, silakan gunakan nama lain.',
         ]);
 
-        $role = Role::findOrFail($id);
         $role->update(['name' => $data['name']]);
         $role->syncPermissions($data['permissions'] ?? []);
 
@@ -110,9 +160,14 @@ class RoleController extends Controller
         $allowedPermissionIds = Permission::pluck('id')->toArray();
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required', 'string', 'max:255',
+                Rule::unique('roles', 'name')->where('guard_name', 'web'),
+            ],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['integer', 'in:' . implode(',', $allowedPermissionIds)],
+        ], [
+            'name.unique' => 'Nama peran sudah digunakan, silakan gunakan nama lain.',
         ]);
 
         $role = Role::create(['name' => $data['name'], 'guard_name' => 'web']);

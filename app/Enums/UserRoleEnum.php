@@ -11,8 +11,8 @@ enum UserRoleEnum: string
     case BENDAHARA = 'Bendahara';
     case KETUAMURABAHAH = 'Ketua Murabahah';
     case STAFMURABAHAH = 'Staf Murabahah';
-    case KETUAAMDK = 'Ketua AMDK';
-    case STOKIST = 'Stokist';
+    // case KETUAAMDK = 'Ketua AMDK';
+    // case STOKIST = 'Stokist';
     case PJANGGOTA = 'Penanggung Jawab Anggota';
     case ANGGOTA = 'Anggota';
 }

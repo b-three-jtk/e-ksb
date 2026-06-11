@@ -11,6 +11,10 @@ import Button from '@/Components/Form/Button.vue'
 const props = defineProps({
     role: Object,
     permissions: Object,
+    readonly: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const form = useForm({
@@ -49,6 +53,7 @@ const permissionRows = computed(() => {
 })
 
 const togglePermission = (permissionId) => {
+    if (props.readonly) return
     const index = form.permissions.indexOf(permissionId)
     if (index > -1) {
         form.permissions.splice(index, 1)
@@ -62,6 +67,7 @@ const isChecked = (permissionId) => {
 }
 
 const submitForm = () => {
+    if (props.readonly) return
     Swal.fire({
         title: 'Konfirmasi',
         text: 'Simpan perubahan hak akses untuk peran ini?',
@@ -82,8 +88,9 @@ const submitForm = () => {
                         dangerouslyHTMLString: true,
                     })
                 },
-                onError: () => {
-                    toast('Gagal memperbarui hak akses.', {
+                onError: (errors) => {
+                    const firstError = Object.values(errors)[0]
+                    toast(firstError || 'Gagal memperbarui hak akses.', {
                         type: 'error',
                         position: 'bottom-right',
                         transition: 'slide',
@@ -95,21 +102,25 @@ const submitForm = () => {
     })
 }
 
-const breadcrumbItems = [
+const breadcrumbItems = computed(() => [
     { name: 'Dashboard', link: '/admin' },
     { name: 'Peran dan Akses', link: '/admin/roles' },
-    { name: 'Edit Peran dan Akses' },
-]
+    { name: props.readonly ? 'Detail Peran dan Akses' : 'Edit Peran dan Akses' },
+])
 </script>
 
 <template>
-    <AdminLayout title="Edit Peran dan Akses">
-        <PageBreadcrumb page-title="Edit Peran dan Akses" :items="breadcrumbItems" />
+    <AdminLayout :title="readonly ? 'Detail Peran dan Akses' : 'Edit Peran dan Akses'">
+        <PageBreadcrumb :page-title="readonly ? 'Detail Peran dan Akses' : 'Edit Peran dan Akses'" :items="breadcrumbItems" />
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
             <div class="p-6 border-b">
-                <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Peran dan Akses</h2>
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Atur peran sesuai hak akses yang tersedia.</p>
+                <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    {{ readonly ? 'Detail Peran dan Akses' : 'Edit Peran dan Akses' }}
+                </h2>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    {{ readonly ? 'Lihat detail hak akses tiap peran.' : 'Atur peran sesuai hak akses yang tersedia.' }}
+                </p>
             </div>
 
             <form @submit.prevent="submitForm" class="p-6 space-y-6">
@@ -124,6 +135,7 @@ const breadcrumbItems = [
                             v-model="form.name"
                             type="text"
                             placeholder="Masukkan nama peran"
+                            :disabled="readonly"
                         />
                     </div>
 
@@ -155,6 +167,7 @@ const breadcrumbItems = [
                                                 :value="row.actions.view"
                                                 :checked="isChecked(row.actions.view)"
                                                 @change="togglePermission(row.actions.view)"
+                                                :disabled="readonly"
                                                 class="h-4 w-4 accent-green-600"
                                             />
                                         </template>
@@ -170,6 +183,7 @@ const breadcrumbItems = [
                                                 :value="row.actions.create"
                                                 :checked="isChecked(row.actions.create)"
                                                 @change="togglePermission(row.actions.create)"
+                                                :disabled="readonly"
                                                 class="h-4 w-4 accent-green-600"
                                             />
                                         </template>
@@ -185,6 +199,7 @@ const breadcrumbItems = [
                                                 :value="row.actions.edit"
                                                 :checked="isChecked(row.actions.edit)"
                                                 @change="togglePermission(row.actions.edit)"
+                                                :disabled="readonly"
                                                 class="h-4 w-4 accent-green-600"
                                             />
                                         </template>
@@ -200,6 +215,7 @@ const breadcrumbItems = [
                                                 :value="row.actions.approve"
                                                 :checked="isChecked(row.actions.approve)"
                                                 @change="togglePermission(row.actions.approve)"
+                                                :disabled="readonly"
                                                 class="h-4 w-4 accent-green-600"
                                             />
                                         </template>
@@ -213,8 +229,8 @@ const breadcrumbItems = [
                     </div>
 
                     <div class="flex justify-end gap-4">
-                        <Button href="/admin/roles" variant="light">Batal</Button>
-                        <Button type="submit" variant="secondary" :disabled="form.processing">{{ form.processing ? 'Menyimpan...' : 'Simpan' }}</Button>
+                        <Button href="/admin/roles" variant="light">{{ readonly ? 'Kembali' : 'Batal' }}</Button>
+                        <Button v-if="!readonly" type="submit" variant="secondary" :disabled="form.processing">{{ form.processing ? 'Menyimpan...' : 'Simpan' }}</Button>
                     </div>
                 </div>
             </form>
