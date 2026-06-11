@@ -1,13 +1,21 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3'
 import AuthLayout from '@/Layouts/AuthLayout.vue'
-import BaseInput from '@/Components/Form/BaseInput.vue'
 import Logo from '@/Components/Logo.vue'
 import { toast } from 'vue3-toastify'
+import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
+import { useUserValidation } from '@/Composables/Validation/useUserValidation'
+import { useFormatter } from '@/Composables/Form/useFormatter'
+import { useInputSanitizers } from '@/Composables/useInputSanitizers'
+import Button from '@/Components/Form/Button.vue'
 
 const form = useForm({
     phone_number: '',
 })
+
+const { onlyNumbers } = useInputSanitizers()
+const { errors } = useUserValidation(form)
+const { normalizePhoneNumber } = useFormatter()
 
 const submit = () => {
     form.post('/auth/forgot-password', {
@@ -41,20 +49,24 @@ const submit = () => {
                     </div>
                     <div class="flex flex-col text-center">
                         <h1 class="card-title">Lupa Password</h1>
-                        <p class="text-gray-400 font-body px-6">Mohon masukkan nomor telepon terdaftar Anda untuk menerima instruksi reset password.</p>
+                        <p class="text-gray-400 font-body px-6">Mohon masukkan nomor telepon terdaftar Anda untuk
+                            menerima instruksi reset password.</p>
                     </div>
 
                     <form @submit.prevent="submit" class="space-y-8">
-                        <BaseInput v-model="form.phone_number" label="Nomor Telepon" type="phone_number" required
-                            :error="form.errors.phone_number" />
+                        <BaseInputAdmin v-model="form.phone_number"
+                            placeholder="Masukkan nomor telepon. contoh: 628XXXXXXX" label="Nomor Telepon"
+                            @input="form.phone_number = normalizePhoneNumber(form.phone_number, onlyNumbers)"
+                            type="text" required :error="errors.phone_number" />
 
                         <div class="space-y-4">
-                            <button type="submit"
-                                class="mt-2 mb-6 w-full bg-secondary hover:bg-primary text-white font-semibold font-head py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
-                                :disabled="form.processing">
-                                <span v-if="form.processing">Memproses...</span>
+                            <Button type="primary" :disabled="form.processing" full>
+                                <div class="flex items-center justify-center gap-2" v-if="form.processing">
+                                    <div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                                    Memproses...
+                                </div>
                                 <span v-else>Kirim</span>
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>
