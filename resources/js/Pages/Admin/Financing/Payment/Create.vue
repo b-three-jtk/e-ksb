@@ -93,6 +93,9 @@ function closeReschedule() {
 
 const rescheduleLoading = ref(false)
 
+const isSubmittingPayment = ref(false)
+const isSubmittingReschedule = ref(false)
+
 async function submitReschedule() {
 
     if (!rescheduleDate.value) {
@@ -186,12 +189,7 @@ async function handleSubmit() {
     if (!result.isConfirmed) {
         return
     }
-
-    console.log('nominalDisplay', nominalDisplay.value)
-    console.log(
-        'nominal',
-        selectedFinancing.value.installment_per_month
-    )
+    isSubmittingPayment.value = true
     router.post(
         `/admin/financings/${props.financing.id}/payments/store`,
         {
@@ -234,7 +232,6 @@ async function handleSubmit() {
                     selectedFinancing.value = page.props.financing
                 }
             },
-
             onError: (errors) => {
 
                 console.error(errors)
@@ -246,6 +243,9 @@ async function handleSubmit() {
                         position: 'bottom-right',
                     },
                 )
+            },
+            onFinish: () => {
+                isSubmittingPayment.value = false
             },
         },
     )
@@ -579,9 +579,16 @@ async function handleSubmit() {
                     <button
                         @click="handleSubmit"
                         type="button"
-                        class="px-8 py-2.5 rounded-lg bg-green-700 hover:bg-green-800 text-white"
+                        :disabled="isSubmittingPayment"
+                        class="inline-flex items-center gap-2 px-8 py-2.5 rounded-lg bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white transition-colors"
                     >
                         Posting
+
+                        <Icon
+                            v-if="isSubmittingPayment"
+                            icon="tabler:loader-2"
+                            class="w-4 h-4 animate-spin"
+                        />
                     </button>
                 </div>
 
@@ -632,8 +639,14 @@ async function handleSubmit() {
                         <button
                             type="button"
                             @click="submitReschedule"
-                            class="px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium"
+                            :disabled="rescheduleLoading"
+                            class="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
                         >
+                            <Icon
+                                v-if="rescheduleLoading"
+                                icon="line-md:loading-alt-loop"
+                                class="w-4 h-4"
+                            />
                             Kirim
                         </button>
                     </div>
