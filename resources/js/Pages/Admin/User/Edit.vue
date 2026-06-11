@@ -4,7 +4,7 @@ import PageBreadcrumb from '@/Components/PageBreadcrumb.vue';
 import { useForm } from '@inertiajs/vue3';
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue';
 import { useUserValidation } from '@/Composables/Validation/useUserValidation';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import Swal from 'sweetalert2';
 import { toast } from "vue3-toastify";
 import Button from '@/Components/Form/Button.vue';
@@ -49,6 +49,48 @@ const form = useForm({
 });
 
 const { errors } = useUserValidation(form)
+
+watch(() => form.ktp_file, (file) => {
+    if (!file) return
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+    if (!allowedTypes.includes(file.type)) {
+        toast.error('Format file KTP tidak didukung. Hanya diperbolehkan JPG, JPEG, atau PNG.', {
+            position: 'bottom-right',
+            transition: 'slide'
+        })
+        form.ktp_file = null
+        return
+    }
+    const maxSizeBytes = 2 * 1024 * 1024
+    if (file.size > maxSizeBytes) {
+        toast.error('Ukuran file KTP melebihi batas maksimum 2 MB.', {
+            position: 'bottom-right',
+            transition: 'slide'
+        })
+        form.ktp_file = null
+    }
+})
+
+watch(() => form.kk_file, (file) => {
+    if (!file) return
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+    if (!allowedTypes.includes(file.type)) {
+        toast.error('Format file KK tidak didukung. Hanya diperbolehkan JPG, JPEG, atau PNG.', {
+            position: 'bottom-right',
+            transition: 'slide'
+        })
+        form.kk_file = null
+        return
+    }
+    const maxSizeBytes = 2 * 1024 * 1024
+    if (file.size > maxSizeBytes) {
+        toast.error('Ukuran file KK melebihi batas maksimum 2 MB.', {
+            position: 'bottom-right',
+            transition: 'slide'
+        })
+        form.kk_file = null
+    }
+})
 
 const onlyNumbers = (event) => {
     const input = event.target;
@@ -219,7 +261,7 @@ const submitForm = () => {
                         <div class="flex gap-4 items-end">
                             <div class="grow">
                                 <BaseInputAdmin type="file" label="Kartu Tanda Penduduk (KTP)" v-model="form.ktp_file"
-                                    accept=".pdf,.jpg,.jpeg,.png" :required="!form.ktp" />
+                                    accept="image/png,image/jpeg,image/jpg" :required="!form.ktp" />
                             </div>
                             <a v-if="form.ktp" :href="`${form.ktp}`" target="_blank"
                                 class="h-11 px-4 flex items-center justify-center rounded-lg border border-primary text-primary hover:bg-primary hover:text-white transition-colors text-sm font-semibold whitespace-nowrap">
@@ -227,7 +269,7 @@ const submitForm = () => {
                             </a>
                         </div>
                         <div class="flex justify-between text-xs text-gray-400 mt-1">
-                            <p>Format: JPG, JPEG, PNG, PDF (Max. 2 MB)</p>
+                            <p>Format: JPG, JPEG, PNG (Maks. 2 MB)</p>
                             <p v-if="form.ktp" class="text-amber-500 italic">*Abaikan jika tidak ingin mengganti KTP</p>
                         </div>
                     </div>
@@ -235,7 +277,7 @@ const submitForm = () => {
                         <div class="flex gap-4 items-end">
                             <div class="grow">
                                 <BaseInputAdmin type="file" label="Kartu Keluarga (KK)" v-model="form.kk_file"
-                                    accept=".pdf,.jpg,.jpeg,.png" :required="!form.kk" />
+                                    accept="image/png,image/jpeg,image/jpg" :required="!form.kk" />
                             </div>
                             <a v-if="form.kk" :href="`${form.kk}`" target="_blank"
                                 class="h-11 px-4 flex items-center justify-center rounded-lg border border-primary text-primary hover:bg-primary hover:text-white transition-colors text-sm font-semibold whitespace-nowrap">
@@ -243,7 +285,7 @@ const submitForm = () => {
                             </a>
                         </div>
                         <div class="flex justify-between text-xs text-gray-400 mt-1">
-                            <p>Format: JPG, JPEG, PNG, PDF (Max. 2 MB)</p>
+                            <p>Format: JPG, JPEG, PNG (Maks. 2 MB)</p>
                             <p v-if="form.kk" class="text-amber-500 italic">*Abaikan jika tidak ingin mengganti KK</p>
                         </div>
                     </div>

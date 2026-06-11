@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import ChevronDownIcon from '../../Icons/ChevronDownIcon.vue'
 
@@ -24,6 +24,22 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue'])
 
 const fileName = ref('')
+const fileInput = ref<HTMLInputElement | null>(null)
+
+watch(() => props.modelValue, (val) => {
+    if (!val) {
+        fileName.value = ''
+        if (fileInput.value) {
+            fileInput.value.value = ''
+        }
+    } else if (val instanceof File) {
+        fileName.value = val.name
+    } else if (Array.isArray(val)) {
+        fileName.value = `${val.length} file dipilih`
+    } else if (typeof val === 'string') {
+        fileName.value = val.split('/').pop() || ''
+    }
+}, { immediate: true })
 
 const isDarkMode = ref(false)
 
