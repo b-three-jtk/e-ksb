@@ -1,83 +1,85 @@
 <script setup>
 import { computed } from 'vue'
-import { Doughnut } from 'vue-chartjs'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
-
-ChartJS.register(ArcElement, Tooltip, Legend)
+import VueApexCharts from 'vue3-apexcharts'
 
 const props = defineProps({
-    data: {
-        type: Array,
-        default: () => []
-    },
-    totalPrice: {
-        type: Number,
-        default: 0
-    },
-    totalPaid: {
-        type: Number,
-        default: 0
-    }
+    totalPrice:    { type: Number, default: 0 },
+    totalPaid:     { type: Number, default: 0 },
+    remainingBalance: { type: Number, default: 0 },
 })
 
-// Hitung status count
-const statusCounts = computed(() => {
-    const remaining = Math.max((props.totalPrice || 0) - (props.totalPaid || 0), 0)
-
-    return {
-        'Total Dibayar': props.totalPaid || 0,
-        'Sisa Tagihan': remaining,
-    }
+const percentage = computed(() => {
+    if (!props.totalPrice) return 0
+    if (props.remainingBalance <= 0) return 100
+    return Math.min(Math.round((props.totalPaid / props.totalPrice) * 100), 100)
 })
 
-// Chart data
-const chartData = computed(() => ({
-    labels: Object.keys(statusCounts.value),
-    datasets: [
-        {
-            data: Object.values(statusCounts.value),
-            backgroundColor: [
-                '#10b981', // Dibayar - green
-                '#9ca3af', // Sisa - gray
-            ],
-            borderColor: '#ffffff',
-            borderWidth: 2,
-        }
-    ]
-}))
+const series = computed(() => [props.totalPaid, props.remainingBalance])
 
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-        legend: {
-            position: 'bottom',
-            labels: {
-                padding: 15,
-                font: {
-                    size: 12,
-                    weight: '500',
+const options = computed(() => ({
+    chart: {
+        type: 'donut',
+        animations: { enabled: true, speed: 600 },
+    },
+    labels: ['Total Dibayar', 'Sisa Tagihan'],
+    colors: ['#007031', '#d1d5db'],
+    stroke: { width: 0 },
+    dataLabels: { enabled: false },
+    legend: {
+        position: 'bottom',
+        fontFamily: 'inherit',
+        fontSize: '13px',
+        fontWeight: 500,
+        labels: { colors: '#fff' },
+        markers: { width: 10, height: 10, radius: 3 },
+        itemMargin: { horizontal: 12 },
+    },
+    plotOptions: {
+        pie: {
+            donut: {
+                size: '72%',
+                labels: {
+                    show: true,
+                    value: { show: true, fontSize: '24px', fontFamily: 'inherit', fontWeight: 600, color: '#111827'},
+                    total: {
+                        show: true,
+                        showAlways: true,
+                        label: 'Terbayar',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        fontWeight: 500,
+                        color: '#6b7280',
+                        formatter: () => `${percentage.value} %`,
+                    },
                 },
-                color: '#374151',
             },
         },
-        tooltip: {
-            callbacks: {
-                label: function (context) {
-                    const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                    const percentage = total === 0 ? 0 : ((context.parsed / total) * 100).toFixed(1)
-                    return `${context.label}: ${context.parsed} (${percentage}%)`
-                }
-            }
-        }
     },
-}
+    tooltip: {
+        theme: 'light',
+        style: { fontSize: '14px', fontFamily: 'inherit' },
+        y: {
+            formatter: (val) =>
+                new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val),
+        },
+    },
+}))
 </script>
 
 <template>
     <div class="flex items-center justify-center">
-        <div class="w-80 h-80">
-            <Doughnut :data="chartData" :options="chartOptions" />
+        <div class="w-72 financing-chart">
+            <VueApexCharts type="donut" :series="series" :options="options" />
         </div>
     </div>
 </template>
+
+<style scoped>
+:deep(.apexcharts-tooltip-series-group) {
+    background-color: #ffffff !important;
+}
+
+:deep(.apexcharts-tooltip-text) {
+    color: #1f2937 !important;
+}
+</style>
