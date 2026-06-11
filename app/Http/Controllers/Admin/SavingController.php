@@ -251,9 +251,11 @@ class SavingController extends Controller
     public function show(string $id)
     {
         $data = SavingTransaction::with('savingAccount.member.user', 'memberBankAccount')->find($id);
+        $saving_transaction_receipt = $data->saving_transaction_receipt ? Storage::url($data->saving_transaction_receipt) : null;
 
         return inertia('Admin/Savings/Show', [
             'data' => $data,
+            'saving_transaction_receipt' => $saving_transaction_receipt,
         ]);
     }
 

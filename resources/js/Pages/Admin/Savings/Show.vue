@@ -1,24 +1,16 @@
 <script setup>
 import AdminLayout from '../../../Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
-import { useForm } from '@inertiajs/vue3'
-import Swal from 'sweetalert2'
-import { toast } from "vue3-toastify";
 import dateParser from '@/Composables/dateParser'
 import moneyParser from '@/Composables/moneyParser'
 import Button from '@/Components/Form/Button.vue';
 import { ref } from 'vue'
+import ModalDocument from '@/Components/ModalDocument.vue';
 
 const props = defineProps({
     data: { type: Object, required: true },
+    saving_transaction_receipt: String,
 });
-
-const showModal = () => {
-    document.getElementById('modal').classList.remove('hidden');
-};
-const hideModal = () => {
-    document.getElementById('modal').classList.add('hidden');
-};
 
 const breadcrumbItems = [
     {name: 'Dashboard', link: '/admin'},
@@ -42,7 +34,7 @@ const openModalBukti = () => modalRef.value?.openModal()
                         </h1>
                     </div>
                     <div v-if="data.saving_transaction_receipt" class="flex items-center gap-4">
-                        <Button @click="openModalBukti()" variant="info">Lihat Bukti</Button>
+                        <Button @click="openModalBukti()" variant="primary">Lihat Bukti</Button>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
@@ -133,6 +125,6 @@ const openModalBukti = () => modalRef.value?.openModal()
                 </div>
             </div>
         </div>
-        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="data.saving_transaction_receipt" :attachment="data.saving_transaction_receipt" />
+        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="saving_transaction_receipt" :attachment="saving_transaction_receipt" />
     </AdminLayout>
 </template>
