@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use App\Enums\UserRoleEnum;
@@ -116,9 +117,14 @@ class RoleController extends Controller
         $allowedPermissionIds = Permission::pluck('id')->toArray();
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required', 'string', 'max:255',
+                Rule::unique('roles', 'name')->where('guard_name', 'web')->ignore($role->id),
+            ],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['integer', 'in:' . implode(',', $allowedPermissionIds)],
+        ], [
+            'name.unique' => 'Nama peran sudah digunakan, silakan gunakan nama lain.',
         ]);
 
         $role->update(['name' => $data['name']]);
@@ -154,9 +160,14 @@ class RoleController extends Controller
         $allowedPermissionIds = Permission::pluck('id')->toArray();
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required', 'string', 'max:255',
+                Rule::unique('roles', 'name')->where('guard_name', 'web'),
+            ],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['integer', 'in:' . implode(',', $allowedPermissionIds)],
+        ], [
+            'name.unique' => 'Nama peran sudah digunakan, silakan gunakan nama lain.',
         ]);
 
         $role = Role::create(['name' => $data['name'], 'guard_name' => 'web']);
