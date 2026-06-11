@@ -153,15 +153,25 @@ class FinancingController extends Controller
 
     private function getModalBelumDiputar()
     {
-        $modalCredit = JournalEntry::where('no_ref_account', '102')
-            ->where('position', PositionEnum::CREDIT->value)
-            ->sum('nominal');
+        $modalCredit = JournalEntry::whereHas(
+            'account',
+            function ($q) {
+                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
+            }
+        )
+        ->where('position', PositionEnum::CREDIT->value)
+        ->sum('nominal');
 
-        $modalDebit = JournalEntry::where('no_ref_account', '102')
-            ->where('position', PositionEnum::DEBIT->value)
-            ->sum('nominal');
+        $modalDebit = JournalEntry::whereHas(
+            'account',
+            function ($q) {
+                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
+            }
+        )
+        ->where('position', PositionEnum::DEBIT->value)
+        ->sum('nominal');
 
-        return $modalCredit - $modalDebit;
+        return $modalDebit - $modalCredit;
     }
 
     /**
