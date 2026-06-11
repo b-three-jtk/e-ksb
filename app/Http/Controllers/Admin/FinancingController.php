@@ -123,6 +123,7 @@ class FinancingController extends Controller
                     'user' => $f->member->user
                         ? ($f->member->user->user_code . ' - ' . $f->member->user->name)
                         : '-',
+                    'user_role' => $f->member->user?->getRoleNames()->first() ?? '-',
                     'tenor_left' => $f->installment ? max(0, $f->tenor - ($f->installment->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
                     'product_name' => $f->financingItem?->name,
                     'status' => $f->status,

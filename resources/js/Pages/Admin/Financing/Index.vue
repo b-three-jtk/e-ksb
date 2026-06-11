@@ -190,14 +190,14 @@ watch(() => filters.tab, applyFilters)
                                 Lanjutkan
                             </Button>
                             <Button
-                                v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((row.status === 'Angsuran Berjalan') || (row.status === 'Belum Ditinjau') || (row.status === 'Lunas'))) || (role === 'Ketua Murabahah' && (row.status !== 'Belum Ditinjau')) || (role === 'Ketua' && (row.status !== 'Belum Ditinjau')))"
+                                v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((row.status === 'Angsuran Berjalan') || (row.status === 'Belum Ditinjau') || (row.status === 'Lunas'))) || (role === 'Ketua Murabahah' && (row.status !== 'Belum Ditinjau')) || (role === 'Ketua' && (row.status !== 'Belum Ditinjau' || row.user_role !== 'Ketua Murabahah')))"
                                 :href="`/admin/financings/show/${row.id}`" size="small" variant="secondary">
                                 <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                                 Lihat Detail
                             </Button>
 
                             <Button
-                                v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (row.status === 'Belum Ditinjau'))"
+                                v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (row.status === 'Belum Ditinjau')) || (role === 'Ketua' && (row.status === 'Belum Ditinjau' && row.user_role === 'Ketua Murabahah'))"
                                 :href="`/admin/financings/validation/${row.id}`" size="small" variant="warning">
                                 <ReviewIcon width="18px" height="18px" />
                                 Tinjau
