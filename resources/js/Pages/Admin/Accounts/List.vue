@@ -685,7 +685,7 @@ const nomorAkunGuide = [
 
                                 <select
                                     v-model="statusForm.status"
-                                    class="w-full border rounded-lg px-4 py-2.5 text-sm"
+                                    class="w-full border rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500"
                                 >
                                     <option value="Aktif">Aktif</option>
                                     <option value="Non-Aktif">Non-Aktif</option>
