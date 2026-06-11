@@ -192,7 +192,7 @@ const handleSaveDraft = () => {
                     <div class="flex items-center gap-4 justify-end">
 
                         <Button
-                            v-if="activeStep < totalSteps"
+                            v-if="activeStep < 2"
                             variant="light"
                             @click="handleSaveDraft()"
                         >
@@ -201,11 +201,12 @@ const handleSaveDraft = () => {
 
                         <Button
                             v-if="showSubmitButton"
-                            :disabled="!isStep3Valid"
+                            :disabled="!isStep3Valid || form.processing"
                             type="submit"
                             @click="handleSubmit()"
                             variant="secondary"
                         >
+                            <div v-if="form.processing" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                             Ajukan Permohonan
                         </Button>
 

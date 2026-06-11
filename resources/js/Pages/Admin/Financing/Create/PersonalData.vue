@@ -266,7 +266,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                 </thead>
                 <tbody v-if="form.member.heirs.length > 0">
                     <tr v-for="(item, index) in form.member.heirs" :key="index"
-                        class="bg-white border-b text-dark-text">
+                        class="bg-transparent border-b text-dark-text dark:text-gray-300">
                         <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>
                         <td class="py-2 text-right pr-6">{{ item.heir_name }}</td>
                         <td class="py-2 text-right pr-6">{{ item.relationship }}</td>
@@ -277,7 +277,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     </tr>
                 </tbody>
                 <tbody v-else>
-                    <tr class="bg-white border-b text-dark-text">
+                    <tr class="bg-transparent border-b text-dark-text">
                         <td colspan="5" class="py-4 text-center text-gray-400">Belum ada data ahli waris</td>
                     </tr>
                 </tbody>

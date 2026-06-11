@@ -148,7 +148,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     </thead>
                     <tbody>
                         <tr v-for="expense in expenses" :key="expense.model"
-                            class="bg-white border-b text-dark-text">
+                            class="bg-transparent border-b text-dark-text">
                             <td class="py-2 text-left pl-6">{{ expense.label }}</td>
                             <td class="py-2 text-right pr-6">
                                 <BaseInputAdmin

@@ -105,7 +105,7 @@ const submitForm = () => {
                         </li>
                         <li>
                             <Info label="Informasi Cicilan"
-                                :value="props.data?.total_paid_installments + ' dari ' + props.data?.financing?.installment.tenor + ' Bulan'" />
+                                :value="props.data?.total_paid_installments + ' dari ' + props.data?.financing?.tenor + ' Bulan'" />
                         </li>
                     </ul>
                 </div>
@@ -167,15 +167,15 @@ const submitForm = () => {
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
-                                            <span class="font-head">Uang Muka </span>
+                                            <span class="font-head">Margin</span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data?.financing?.down_payment) }}
+                                                {{ moneyParser(props.data?.financing?.margin_amount) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
-                                            <span class="font-head">Margin</span>
+                                            <span class="font-head">Uang Muka </span>
                                             <span class="font-medium text-blue-500 border-b border-b-gray-300">
-                                                {{ moneyParser(props.data?.financing?.margin_amount) }}
+                                                {{ moneyParser(props.data?.financing?.down_payment) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-1.5">
@@ -289,7 +289,7 @@ const submitForm = () => {
                         {{ methodError }}
                     </p>
                     <div class="self-end mt-4">
-                        <Button @click="submitForm" variant="secondary">Kirim</Button>
+                        <Button @click="submitForm" :disabled="form.processing" variant="secondary">{{ form.processing ? 'Menyimpan...' : 'Kirim' }}</Button>
                     </div>
                 </div>
             </div>

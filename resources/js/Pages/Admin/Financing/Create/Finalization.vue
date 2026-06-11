@@ -240,14 +240,14 @@ const onFieldChange = (field) => emit('validate-field', field)
                     type="file"
                     label="Upload Dokumen Akad Murabahah Tertandatangani"
                     v-model="form.akad_document_file"
-                    accept=".jpg,.jpeg,.png,application/pdf"
+                    accept="application/pdf"
                     required
                     :error="errors?.akad_document_file"
                     @change="onFieldChange('akad_document_file')"
                 />
                 <div class="flex justify-between text-xs text-gray-400 mt-1">
-                    <p>Format: JPG, JPEG, PNG, PDF</p>
-                    <p>Max. 5 MB per file</p>
+                    <p>Format: PDF</p>
+                    <p>Max. 2 MB per file</p>
                 </div>
             </div>
         </div>

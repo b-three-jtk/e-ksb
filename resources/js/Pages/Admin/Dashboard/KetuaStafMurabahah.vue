@@ -8,12 +8,12 @@ import { computed } from 'vue';
 import Button from '@/Components/Form/Button.vue';
 import { Icon } from '@iconify/vue';
 import ReviewIcon from '@/Icons/ReviewIcon.vue';
-import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
 import PieChart from '@/Components/Dashboard/PieChart.vue';
 import SkeletonStatCard from '@/Components/Dashboard/Loading/SkeletonStatCard.vue';
 import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
 import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue';
 import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
+import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
 
 defineProps({
     stats: Object,
@@ -87,7 +87,7 @@ const kolomTabelPermohonanMurabahah = computed(() => {
         <div v-else class="card-layout">
             <div class="flex justify-between items-center">
                 <h1 class="card-title">Pembayaran Angsuran Terlambat</h1>
-                <div class="bg-white border border-stroke px-4 py-2 rounded-lg">Selengkapnya</div>
+                <Button href="/admin/financings" variant="outline">Selengkapnya</Button>
             </div>
             <TransactionTable :columns="kolomTabelPembayaranTerlambat" :rows="pembayaran_terlambat">
                 <template #action="{ item }">
@@ -106,7 +106,7 @@ const kolomTabelPermohonanMurabahah = computed(() => {
                 <Button href="/admin/financings" variant="outline">Selengkapnya</Button>
             </div>
             <TransactionTable :columns="kolomTabelPermohonanMurabahah" :rows="permohonan_murabahah">
-                <template #cell-status="{ item }">
+                <template #status="{ item }">
                     <span :class="useFinancingStatus(item.status)">
                         {{ getStatusLabel(item.status) }}
                     </span>

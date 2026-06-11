@@ -36,7 +36,7 @@ public function calculateDetails(Financing $financing): array
 
         // --- MENGHITUNG QIMAH HALIYYAH ---
         // Jika lunas di bulan ke-0, margin minimal yang diakui adalah 1 bulan
-        $monthsPassedForMargin = max($totalPaidInstallments, 1);
+        $monthsPassedForMargin = max($totalPaidInstallments + 1, 1);
         $marginDiakui = $marginPerMonth * $monthsPassedForMargin;
         $qimahHaliyyah = $basePrincipal + $marginDiakui;
 
@@ -75,6 +75,10 @@ public function calculateDetails(Financing $financing): array
                 ->findOrFail($validatedData['installment_id']);
 
             $financing = $installment->financing;
+
+            Installment::where('financing_id', $installment->financing_id)
+                ->where('due_date', '>=', now())
+                ->update(['status' => InstallmentPaymentScheduleStatusEnum::PAID->value]);
 
             $calculatedData = $this->calculateDetails($financing);
 

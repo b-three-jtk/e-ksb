@@ -5,13 +5,13 @@ const STATUS_MAP = {
         class: `${baseClass} text-yellow-600 bg-yellow-50`
     },
     'Belum Ditinjau': {
-        class: `${baseClass} text-blue-600 bg-blue-50`
+        class: `${baseClass} text-gray-600 bg-gray-100`
     },
     'Disetujui': {
         class: `${baseClass} text-green-600 bg-green-50`
     },
     'Disetujui dengan Catatan': {
-        class: `${baseClass} text-blue-600 bg-blue-50`
+        class: `${baseClass} text-orange-600 bg-orange-50`
     },
     'Ditolak': {
         class: `${baseClass} text-red-600 bg-red-50`

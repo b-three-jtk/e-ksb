@@ -64,7 +64,7 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
                     </tr>
                     <tr class="font-semibold text-dark-text">
                         <td class="pt-4 text-left pl-6">Total Penghasilan Bulanan</td>
-                        <td class="pt-4 text-right pr-6">{{ moneyParser(totalIncome) }}</td>
+                        <td class="pt-4 text-right">{{ moneyParser(totalIncome) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -86,7 +86,7 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
                     </tr>
                     <tr class="font-semibold text-dark-text">
                         <td class="py-4 text-left pl-6">Total Pengeluaran Bulanan</td>
-                        <td class="py-4 text-right pr-6">{{ moneyParser(totalExpense) }}</td>
+                        <td class="py-4 text-right">{{ moneyParser(totalExpense) }}</td>
                     </tr>
                 </tbody>
             </table>

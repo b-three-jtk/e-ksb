@@ -150,9 +150,10 @@ const submit = () => {
                             type="submit"
                             @click="submit"
                             variant="secondary"
-                            :disabled="!isValidationComplete"
+                            :disabled="!isValidationComplete || form.processing"
                         >
-                            Validasi
+                            <div v-if="form.processing" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                            {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                         </Button>
                     </div>
                 </div>
