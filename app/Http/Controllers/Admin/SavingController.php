@@ -55,7 +55,7 @@ class SavingController extends Controller
             'savingAccount'
         ]);
 
-        // ===== khusus PJ anggota =====
+        // khusus PJ anggota
         if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value)) {
             $query->whereHas('savingAccount.member', function ($q) {
                 $q->where('pj_user_id', Auth::id());
@@ -133,23 +133,35 @@ class SavingController extends Controller
         $totalKeluar = (clone $summaryBase)->where('transaction_type', 'Penarikan')->sum('saving_amount');
         $totalPerputaran = $totalMasuk + $totalKeluar;
 
+        $tabLabels = [
+            'semua'              => 'Simpanan & Tabungan',
+            'simpanan'           => 'Semua Simpanan',
+            'pokok'              => 'Simpanan Pokok',
+            'wajib'              => 'Simpanan Wajib',
+            'tabungan'           => 'Semua Tabungan',
+            'tabungan_anggota'   => 'Tabungan Anggota',
+            'tabungan_berjangka' => 'Tabungan Berjangka',
+            'tabungan_ibadah'    => 'Tabungan Ibadah',
+        ];
+        $label = $tabLabels[$tab] ?? 'Simpanan & Tabungan';
+
         $summary = [
             [
-                'title' => 'Total Kas',
+                'title' => "Total {$label}",
                 'value' => 'Rp ' . number_format($totalMasuk - $totalKeluar, 0, ',', '.'),
                 'percentage' => $totalMasuk > 0
                     ? round((($totalMasuk - $totalKeluar) / $totalMasuk) * 100)
                     : 0,
             ],
             [
-                'title' => 'Total Simpanan Masuk',
+                'title' => "Total {$label} Masuk",
                 'value' => 'Rp ' . number_format($totalMasuk, 0, ',', '.'),
                 'percentage' => $totalPerputaran > 0
                     ? round(($totalMasuk / $totalPerputaran) * 100)
                     : 0,
             ],
             [
-                'title' => 'Total Simpanan Keluar',
+                'title' => "Total {$label} Keluar",
                 'value' => 'Rp ' . number_format($totalKeluar, 0, ',', '.'),
                 'percentage' => $totalPerputaran > 0
                     ? round(($totalKeluar / $totalPerputaran) * 100)
