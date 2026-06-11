@@ -11,6 +11,7 @@ const props = defineProps<{
     error?: string
     placeholder?: string
     max?: string
+    maxDate?: Date | string
     min?: string
     pattern?: string
     selectables?: Array<{ value: string | number; text: string }>
@@ -139,6 +140,7 @@ const handleMoneyInput = (event: Event) => {
             :disabled="disabled"
             :placeholder="placeholder || 'Pilih tanggal'"
             :dark="isDarkMode"
+            :max-date="maxDate ? new Date(maxDate) : undefined"
         />
 
         <!-- Select -->
