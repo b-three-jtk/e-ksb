@@ -4,6 +4,7 @@ import AuthLayout from '@/Layouts/AuthLayout.vue';
 import BaseInput from '@/Components/Form/BaseInput.vue';
 import Logo from '@/Components/Logo.vue';
 import { toast } from 'vue3-toastify';
+import { Icon } from '@iconify/vue'
 
 const props = defineProps({
     token: String,
@@ -70,11 +71,16 @@ const submit = () => {
                         <div class="space-y-4">
                             <button
                                 type="submit"
-                                class="w-full bg-secondary hover:bg-primary text-white py-3 rounded-xl transition"
                                 :disabled="form.processing"
+                                class="w-full bg-secondary hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-xl transition inline-flex items-center justify-center gap-2"
                             >
-                                <span v-if="form.processing">Memproses...</span>
-                                <span v-else>Kirim</span>
+                                Kirim
+
+                                <Icon
+                                    v-if="form.processing"
+                                    icon="line-md:loading-alt-loop"
+                                    class="w-5 h-5"
+                                />
                             </button>
                         </div>
                     </form>
