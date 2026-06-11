@@ -40,9 +40,9 @@ class DashboardController extends Controller
 
         $data['rasio_fdr'] = $service->getRasioFDR($tanggalAkhir);
 
-        [$data['total_simpanan_masuk'], $data['total_simpanan_masuk_persen']] = $service->getTotalSimpanan($tanggalAkhir, $tanggalAkhirSebelumnya, 'Debit');
+        [$data['total_simpanan_masuk'], $data['total_simpanan_masuk_persen']] = $service->getTotalSimpanan($tanggalAkhir, $tanggalAkhirSebelumnya, 'Credit');
 
-        [$data['total_simpanan_keluar'], $data['total_simpanan_keluar_persen']] = $service->getTotalSimpanan($tanggalAkhir, $tanggalAkhirSebelumnya, 'Credit');
+        [$data['total_simpanan_keluar'], $data['total_simpanan_keluar_persen']] = $service->getTotalSimpanan($tanggalAkhir, $tanggalAkhirSebelumnya, 'Debit');
 
         $data['total_angsuran_belum_lunas'] = $service->getTotalAngsuranBelumLunas();
 
@@ -89,7 +89,7 @@ class DashboardController extends Controller
                 'pertumbuhan_anggota' => Inertia::lazy(fn() => $service->getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filterBy)),
                 'peta_simpanan' => Inertia::lazy(fn() => $service->getPetaSimpanan($tanggalAkhir, $req->savings_filter ?? 'jenis')),
                 'peta_pembiayaan' => Inertia::lazy(fn() => $service->getPetaPembiayaan($tanggalAkhir)),
-                'transaksi_terbaru' => Inertia::lazy(fn() => $service->getTransaksiTerbaru($req->transaction_filter ?? 'all')),
+                'transaksi_terbaru' => Inertia::lazy(fn() => $service->getTransaksiTerbaru($req->transaction_filter ?? 'all', $role)),
                 'jatuh_tempo_terdekat' => Inertia::lazy(fn() => $service->getJatuhTempoTerdekat($req->nearest_filter ?? 'all')),
                 'permohonan_murabahah' => Inertia::lazy(fn() => $service->getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)),
                 'pembayaran_terlambat' => Inertia::lazy(fn() => $service->getPembayaranTerlambat($tanggalAkhir)),

@@ -108,7 +108,7 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                             </svg>
                         </div>
                     </div>
-                    <h2 class="text-3xl font-semibold text-primary mt-4">{{
+                    <h2 class="text-3xl font-semibold text-primary mt-3">{{
                         parseCurrencyAmount(props.stats.total_simpanan_masuk) }}
                     </h2>
                     <p class="text-gray-500 font-body text-lg mt-2">Total Simpanan Masuk</p>
@@ -124,8 +124,8 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                     parseCurrencyAmount(props.stats.total_pembiayaan_tersalurkan) }}</h2>
                 <p class="text-gray-500 font-body text-lg mt-2">Total Pembiayaan Tersalurkan</p>
             </div>
-            <div class="flex items-center justify-center mt-15">
-                <PieChart :data="props.peta_pembiayaan" class="flex items-center justify-center mt-8" />
+            <div class="flex items-center justify-center mt-6">
+                <PieChart :data="props.peta_pembiayaan" class="flex items-center justify-center" />
             </div>
         </div>
     </div>

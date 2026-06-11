@@ -15,6 +15,7 @@ use App\Models\SavingTransaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Log;
 
 class DashboardService
 {
@@ -90,10 +91,11 @@ class DashboardService
         return [$kas, $persen];
     }
 
-    public function getTransaksiTerbaru($filter)
+    public function getTransaksiTerbaru($filter, $role)
     {
+        $amount = $role === UserRoleEnum::DPS->value ? 5 : 6;
         $transaksiSimpanan = SavingTransaction::with('savingAccount.member.user')
-            ->latest()->take(6)->get()
+            ->latest()->take($amount)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
                 'no_transaksi' => $t->saving_transaction_code,
@@ -105,7 +107,7 @@ class DashboardService
             ]);
 
         $transaksiPembiayaan = Financing::with('member.user', 'financingItem')
-            ->latest()->take(6)->get()
+            ->latest()->take($amount)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
                 'no_transaksi' => $f->financing_transaction_code,
@@ -118,7 +120,7 @@ class DashboardService
 
         $data = $filter === 'all' ? $transaksiSimpanan->concat($transaksiPembiayaan)
             ->sortByDesc('tanggal')
-            ->take(6)
+            ->take($amount)
             ->values()
             ->toArray() : ($filter === 'simpanan' ? $transaksiSimpanan : $transaksiPembiayaan)->toArray();
 

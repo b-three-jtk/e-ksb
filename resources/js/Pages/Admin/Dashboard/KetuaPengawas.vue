@@ -87,7 +87,7 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
             </div>
             <PieChart
                 :data="peta_pembiayaan"
-                class="flex items-center justify-center mt-8"
+                class="flex items-center justify-center mt-6"
             />
         </div>
         <!-- HORIZONTAL BAR CHART PETA SIMPANAN & TRANSAKSI TERBARU - BARIS TIGA -->

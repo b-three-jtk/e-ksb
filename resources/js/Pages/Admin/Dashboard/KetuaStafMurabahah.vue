@@ -54,33 +54,18 @@ const kolomTabelPermohonanMurabahah = computed(() => {
     <!-- INFO -->
     <SkeletonStatCard v-if="!stats" :count="3" />
     <div v-else v-if="role === 'Ketua Murabahah'" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <CardInfo
-            title="Total Modal Belum Diputar"
-            :content="parseCurrencyjumlah(stats.modal_sudah_dialokasi)"
-            :percentage="stats.modal_sudah_dialokasi_persen"
-            :filter="selectedFilter"
-        />
-        <CardInfo
-            title="Jumlah Pembiayaan Aktif"
-            :content="stats.total_pembiayaan_aktif"
-            :percentage="stats.total_pembiayaan_aktif"
-            :filter="selectedFilter"
-        />
-        <CardInfo
-            title="Total Permohonan Pembiayaan"
-            :content="stats.total_permohonan_pembiayaan"
-            :percentage="stats.total_permohonan_pembiayaan_persen"
-            :filter="selectedFilter"
-        />
+        <CardInfo title="Total Modal Belum Diputar" :content="parseCurrencyjumlah(stats.modal_sudah_dialokasi)"
+            :percentage="stats.modal_sudah_dialokasi_persen" :filter="selectedFilter" />
+        <CardInfo title="Jumlah Pembiayaan Aktif" :content="stats.total_pembiayaan_aktif"
+            :percentage="stats.total_pembiayaan_aktif" :filter="selectedFilter" />
+        <CardInfo title="Total Permohonan Pembiayaan" :content="stats.total_permohonan_pembiayaan"
+            :percentage="stats.total_permohonan_pembiayaan_persen" :filter="selectedFilter" />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <SkeletonChartCard v-if="!pertumbuhan_pendapatan" class="col-span-3" :bars="12" :legend="2" />
         <div v-else class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pendapatan Margin</h1>
-            <VerticalBarChart
-                class="col-span-3 pt-10"
-                title="Grafik Pendapatan Margin"
-                :data="pertumbuhan_pendapatan"
+            <VerticalBarChart class="col-span-3 pt-10" title="Grafik Pendapatan Margin" :data="pertumbuhan_pendapatan"
                 :filter="selectedFilter" />
         </div>
         <SkeletonMapCard v-if="!peta_pembiayaan" class="col-span-2" :legend-items="4" />
@@ -97,7 +82,8 @@ const kolomTabelPermohonanMurabahah = computed(() => {
         </div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SkeletonTableCard v-if="!pembayaran_terlambat" class="col-span-1" :columns="kolomTabelPembayaranTerlambat.length" :rows="5" />
+        <SkeletonTableCard v-if="!pembayaran_terlambat" class="col-span-1"
+            :columns="kolomTabelPembayaranTerlambat.length" :rows="5" />
         <div v-else class="card-layout">
             <div class="flex justify-between items-center">
                 <h1 class="card-title">Pembayaran Angsuran Terlambat</h1>
@@ -112,11 +98,12 @@ const kolomTabelPermohonanMurabahah = computed(() => {
                 </template>
             </TransactionTable>
         </div>
-        <SkeletonTableCard v-if="!permohonan_murabahah" class="col-span-1" :columns="kolomTabelPermohonanMurabahah.length" :rows="5" />
+        <SkeletonTableCard v-if="!permohonan_murabahah" class="col-span-1"
+            :columns="kolomTabelPermohonanMurabahah.length" :rows="5" />
         <div v-else class="card-layout">
             <div class="flex justify-between items-center">
                 <h1 class="card-title">Permohonan Pembiayaan Sedang Berjalan</h1>
-                <div class="bg-white border border-stroke px-4 py-2 rounded-lg">Selengkapnya</div>
+                <Button href="/admin/financings" variant="outline">Selengkapnya</Button>
             </div>
             <TransactionTable :columns="kolomTabelPermohonanMurabahah" :rows="permohonan_murabahah">
                 <template #cell-status="{ item }">
@@ -125,22 +112,24 @@ const kolomTabelPermohonanMurabahah = computed(() => {
                     </span>
                 </template>
                 <template #action="{ item }">
-                    <Button
-                        v-if="can['edit_murabahah'] && (role === 'Staf Murabahah' && (item.status === 'Disetujui' || item.status === 'Ditolak' || item.status === 'Menunggu Kelengkapan Dokumen'))"
-                        :href="`/admin/financings/draft/${item.id}`" size="small" variant="transparent">
-                        <ReviewIcon width="18px" height="18px" />
-                    </Button>
-                    <Button
-                        v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((item.status === 'Angsuran Berjalan') || (item.status === 'Belum Ditinjau') || (item.status === 'Lunas'))) || (role === 'Ketua Murabahah' && (item.status !== 'Belum Ditinjau')))"
-                        :href="`/admin/financings/show/${item.id}`" size="small" variant="transparent">
-                        <Icon icon="mdi:eye-outline" class="w-5 h-5" />
-                    </Button>
+                    <div class="flex items-center justify-center">
+                        <Button
+                            v-if="can['edit_murabahah'] && (role === 'Staf Murabahah' && (item.status === 'Disetujui' || item.status === 'Ditolak' || item.status === 'Menunggu Kelengkapan Dokumen'))"
+                            :href="`/admin/financings/draft/${item.id}`" size="small" variant="transparent">
+                            <ReviewIcon width="18px" height="18px" />
+                        </Button>
+                        <Button
+                            v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((item.status === 'Angsuran Berjalan') || (item.status === 'Belum Ditinjau') || (item.status === 'Lunas'))) || (role === 'Ketua Murabahah' && (item.status !== 'Belum Ditinjau')))"
+                            :href="`/admin/financings/show/${item.id}`" size="small" variant="transparent">
+                            <Icon icon="mdi:eye-outline" class="w-5 h-5" />
+                        </Button>
 
-                    <Button
-                        v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (item.status === 'Belum Ditinjau'))"
-                        :href="`/admin/financings/validation/${item.id}`" size="small" variant="transparent">
-                        <ReviewIcon width="18px" height="18px" />
-                    </Button>
+                        <Button
+                            v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (item.status === 'Belum Ditinjau'))"
+                            :href="`/admin/financings/validation/${item.id}`" size="small" variant="transparent">
+                            <ReviewIcon width="18px" height="18px" />
+                        </Button>
+                    </div>
                 </template>
             </TransactionTable>
         </div>
