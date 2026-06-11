@@ -174,49 +174,53 @@ class DashboardService
 
     public function getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filter)
     {
-        $start = Carbon::parse($tanggalAwal);
-        $end = Carbon::parse($tanggalAkhir);
-
-        $skeleton = collect();
+        $data = collect();
         $format = '';
 
-        if ($filter === 'month') {
-            $year = $end->year;
+        if ($filter === 'day') {
+            // 30 hari terakhir dari $tanggalAkhir
+            $tanggalAwal = Carbon::parse($tanggalAkhir)->subDays(6)->startOfDay();
+            $tanggalAkhir = Carbon::parse($tanggalAkhir)->endOfDay();
+            $period = CarbonPeriod::create($tanggalAwal, $tanggalAkhir);
+            foreach ($period as $date) {
+                $data->put($date->format('d M'), 0);
+            }
+            $format = 'd M';
+        } else if ($filter === 'month') {
+            // 12 bulan tahun $tanggalAkhir
+            $tahun = Carbon::parse($tanggalAkhir)->year;
+            $tanggalAwal = Carbon::create($tahun, 1, 1)->startOfDay();
+            $tanggalAkhir = Carbon::create($tahun, 12, 31)->endOfDay();
             for ($m = 1; $m <= 12; $m++) {
-                $date = Carbon::create($year, $m, 1);
-                $skeleton->put($date->format('M'), 0);
+                $date = Carbon::create($tahun, $m, 1);
+                $data->put($date->format('M'), 0);
             }
             $format = 'M';
         } else if ($filter === 'year') {
-            $endYear = $end->year;
-            for ($y = $endYear - 4; $y <= $endYear; $y++) {
+            // 5 tahun terakhir dari $tanggalAkhir
+            $tanggalAwal = Carbon::parse($tanggalAkhir)->subYears(4)->startOfYear();
+            $tanggalAkhir = Carbon::parse($tanggalAkhir)->endOfYear();
+            $tahunAkhir = $tanggalAkhir->year;
+            for ($y = $tahunAkhir - 4; $y <= $tahunAkhir; $y++) {
                 $date = Carbon::create($y, 1, 1);
-                $skeleton->put($date->format('Y'), 0);
+                $data->put($date->format('Y'), 0);
             }
             $format = 'Y';
-        } else {
-            $format = 'd M';
-            $period = CarbonPeriod::create($start, '1 day', $end);
-
-            foreach ($period as $date) {
-                $skeleton->put($date->format($format), 0);
-            }
         }
-        $queryStart = $filter === 'month' || $filter === 'year' ? $end->copy()->startOfYear() : $start->startOfDay();
-        $queryEnd = $filter === 'month' || $filter === 'year' ? $end->copy()->endOfYear() : $end->endOfDay();
 
-        $queryData = User::where('status', UserStatusEnum::ACTIVE->value)
+        $anggota = User::where('status', UserStatusEnum::ACTIVE->value)
             ->with('roles')
             ->whereHas('roles', fn($q) => $q->where('name', UserRoleEnum::ANGGOTA->value))
-            ->whereBetween('created_at', [$queryStart, $queryEnd])
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
             ->get()
             ->groupBy(fn($user) => $user->created_at->format($format))
             ->map(fn($group) => $group->count());
 
-        $data = $skeleton->merge($queryData);
+        $result = $data->replace($anggota);
 
-        return $data->toArray();
+        return $result->toArray();
     }
+
 
     public function getRasioKas($tanggalAkhir) {
         $totalKas = JournalEntry::where('no_ref_account', '101')
