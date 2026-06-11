@@ -366,7 +366,8 @@ class DashboardService
         if ($filter === 'all' || $filter === 'simpanan') {
             $transaksiSimpanan = SavingAccount::with([
                     'member.user',
-                    'transactions' => fn($q) => $q->latest()
+                    'transactions' => fn($q) => $q->latest(),
+                    'transactions.notifications' => fn($q) => $q->latest()
                 ])
                 ->whereHas('member', function($q) {
                     $q->where('pj_user_id', auth()->id());
@@ -377,13 +378,15 @@ class DashboardService
                     $lastTransaction = $t->transactions->first();
                     $baseDate = $lastTransaction ? $lastTransaction->created_at : $t->created_at;
 
+                    $latestNotification = $lastTransaction ? $lastTransaction->notifications->first() : null;
+
                     return [
                         'id' => $t->id,
                         'anggota' => $t->member?->user?->name ?? '-',
                         'nominal' => $savingNominal,
                         'produk' => $t->saving_type,
                         'jatuh_tempo' => Carbon::parse($baseDate)->addDays((int) $savingDueDate)->toDateString(),
-                        'status_notifikasi' => '-'
+                        'status_notifikasi' => $latestNotification?->status ?? 'Belum Terkirim'
                     ];
                 });
         }
@@ -391,7 +394,7 @@ class DashboardService
         if ($filter === 'all' || $filter === 'pembiayaan') {
             $transaksiPembiayaan = Installment::with([
                     'financing.member.user',
-                    'notification'
+                    'notifications' => fn($q) => $q->latest()
                 ])
                 ->whereHas('financing.member', function($query) {
                     $query->where('pj_user_id', auth()->id());
@@ -402,15 +405,19 @@ class DashboardService
                 ->orderBy('due_date', 'asc')
                 ->take(7)
                 ->get()
-                ->map(fn($f) => [
-                    'id' => $f->id,
-                    'anggota' => $f->financing->member?->user?->name ?? '-',
-                    'nominal' => $f->amount,
-                    'produk' => 'Pembiayaan',
-                    'jatuh_tempo' => Carbon::parse($f->due_date)->toDateString(),
-                    // Ambil status notifikasi, jika tidak ada fallback ke string 'Belum Ada'
-                    'status_notifikasi' => $f->notification?->status ?? 'Belum Ada',
-                ]);
+                ->map(function($f) {
+                    // 5. Ambil notifikasi teranyar dari Installment
+                    $latestNotification = $f->notifications->first();
+
+                    return [
+                        'id' => $f->id,
+                        'anggota' => $f->financing->member?->user?->name ?? '-',
+                        'nominal' => $f->amount,
+                        'produk' => 'Pembiayaan',
+                        'jatuh_tempo' => Carbon::parse($f->due_date)->toDateString(),
+                        'status_notifikasi' => $latestNotification?->status ?? 'Belum Terkirim',
+                    ];
+                });
         }
 
         $allTransactions = $transaksiSimpanan->concat($transaksiPembiayaan)

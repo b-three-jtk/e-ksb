@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use App\Enums\NotificationStatusEnum;
-use App\Enums\NotificationTypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Notification extends Model
 {
@@ -41,6 +39,12 @@ class Notification extends Model
     {
         return $this->belongsTo(Member::class);
     }
+
+    public function reference(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
 
     public function installment()
     {
