@@ -72,6 +72,8 @@ function onNominalInput(e) {
 function validateNominal() {
   errors.value.nominal = ''
   
+  if (isNominalLocked.value) return
+
   const nominal = Number(form.value.nominalRaw)
   if (form.value.nominalRaw && nominal <= 0) {
     errors.value.nominal = 'Nominal harus lebih dari 0'
@@ -82,6 +84,10 @@ function validateNominal() {
     errors.value.nominal = `Nominal tidak boleh melebihi saldo (${formatRp(props.selectedSaving.balance)})`
   }
 }
+
+const isNominalLocked = computed(() => {
+  return !!props.selectedSaving?.isFullWithdrawal
+})
 
 function validateWithdrawalDate() {
   errors.value.withdrawalDate = ''
@@ -218,14 +224,22 @@ watch(() => props.selectedSaving?.id, (newId, oldId) => {
   if (!newId || newId === oldId) return
 
   form.value.withdrawalDate = getTodayYmd()
-  form.value.nominalRaw = ''
-  form.value.nominalDisplay = ''
   form.value.method = 'Tunai'
   resetNonCashFields()
   selectedSavedAccountNumber.value = ''
   accountInputMode.value = 'saved'
   form.value.notes = ''
   errors.value = {}
+
+  if (props.selectedSaving?.isFullWithdrawal) {
+    const balance = String(props.selectedSaving.balance || 0)
+    form.value.nominalRaw = balance
+    form.value.nominalDisplay = formatRp(balance)
+  } else {
+    form.value.nominalRaw = ''
+    form.value.nominalDisplay = ''
+  }
+
   updateForm()
 })
 
@@ -274,9 +288,18 @@ defineExpose({
             v-model="form.nominalDisplay"
             type="text"
             placeholder="0"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            :disabled="isNominalLocked"
+            :class="[
+              'w-full px-4 py-2.5 border rounded-lg focus:outline-none',
+              isNominalLocked
+                ? 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700/70 text-gray-900 dark:text-gray-100 cursor-not-allowed'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            ]"
             @input="onNominalInput"
           />
+          <div v-if="isNominalLocked" class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+            Jenis simpanan ini harus dicairkan seluruhnya
+          </div>
           <div v-if="errors.nominal" class="text-red-500 text-sm mt-1">
             {{ errors.nominal }}
           </div>

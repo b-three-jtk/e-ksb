@@ -620,7 +620,7 @@ class SavingController extends Controller
         $validated = $request->validated();
 
         $member = Member::with('user')->findOrFail($validated['member_id']);
-        $savingAccount = SavingAccount::findOrFail($validated['saving_account_id']);
+        $savingAccount = SavingAccount::with(['ibadah', 'berjangka'])->findOrFail($validated['saving_account_id']);
         $savingBalance = $savingAccount->balance;
 
         if ((int) $savingAccount->member_id !== (int) $member->id) {
@@ -637,7 +637,7 @@ class SavingController extends Controller
         $typeLower = mb_strtolower($savingType);
 
         if (str_contains($typeLower, 'berjangka')) {
-            $tenorMonths = (int) ($savingAccount->saving_tenor ?? 0);
+            $tenorMonths = (int) ($savingAccount->berjangka?->tenor ?? 0);
             if ($tenorMonths > 0 && $savingAccount->created_at) {
                 $maturityDate = Carbon::parse($savingAccount->created_at)->addMonths($tenorMonths)->startOfDay();
                 if (Carbon::today()->lt($maturityDate)) {
@@ -649,7 +649,7 @@ class SavingController extends Controller
         }
 
         if (str_contains($typeLower, 'ibadah')) {
-            $targetAmount = (float) ($savingAccount->target_amount ?? 0);
+            $targetAmount = (float) ($savingAccount->ibadah?->target_amount ?? 0);
             if ($targetAmount > 0 && (float) $savingBalance < $targetAmount) {
                 return back()->withErrors([
                     'saving_account_id' => 'Tabungan ibadah belum mencapai target minimal Rp ' . number_format($targetAmount, 0, ',', '.'),
@@ -789,13 +789,14 @@ class SavingController extends Controller
             ->when($includeBankAccounts, function ($q) {
                 $q->with([
                     'user',
-                    'savingAccounts',
+                    'savingAccounts.ibadah',
+                    'savingAccounts.berjangka',
                     'bankAccounts' => function ($subQuery) {
                         $subQuery->latest();
                     },
                 ]);
             }, function ($q) {
-                $q->with(['user:id,user_code,name', 'savingAccounts']);
+                $q->with(['user:id,user_code,name', 'savingAccounts.ibadah', 'savingAccounts.berjangka']);
             })
             ->whereIn('status', [
                 MemberStatusEnum::ACTIVE->value,
@@ -820,8 +821,8 @@ class SavingController extends Controller
                             'id' => $acc->id,
                             'type' => $acc->saving_type ?? '-',
                             'balance' => $acc->balance ?? 0,
-                            'tenor_months' => $acc->saving_tenor,
-                            'target_amount' => $acc->target_amount,
+                            'tenor_months' => $acc->berjangka?->tenor,
+                            'target_amount' => $acc->ibadah?->target_amount,
                             'opened_at' => optional($acc->created_at)->toDateString(),
                         ];
                     })->toArray(),
@@ -842,15 +843,15 @@ class SavingController extends Controller
                 'status' => $member->status,
                 'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
                     'type' => $acc->saving_type ?? null,
-                    'purpose' => $acc->purpose ?? null,
+                    'purpose' => $acc->ibadah?->purpose ?? $acc->berjangka?->purpose ?? null,
                     'balance' => $acc->balance ?? 0,
-                    'target_amount' => $acc->target_amount ?? null,
-                    'matured_at' => $acc->saving_tenor && $acc->created_at
-                        ? $acc->created_at->copy()->addMonths($acc->saving_tenor)->format('d M Y')
+                    'target_amount' => $acc->ibadah?->target_amount ?? null,
+                    'matured_at' => $acc->berjangka?->tenor && $acc->created_at
+                        ? $acc->created_at->copy()->addMonths($acc->berjangka->tenor)->format('d M Y')
                         : null,
-                    'is_frozen' => !is_null($acc->target_amount) && $acc->balance >= $acc->target_amount,
-                    'is_matured' => $acc->saving_tenor && $acc->created_at
-                        ? now()->gte($acc->created_at->copy()->addMonths($acc->saving_tenor))
+                    'is_frozen' => !is_null($acc->ibadah?->target_amount) && $acc->balance >= $acc->ibadah->target_amount,
+                    'is_matured' => $acc->berjangka?->tenor && $acc->created_at
+                        ? now()->gte($acc->created_at->copy()->addMonths($acc->berjangka->tenor))
                         : false,
                 ]),
             ];
