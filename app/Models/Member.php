@@ -24,13 +24,13 @@ class Member extends Model
         'gender',
         'birth_place',
         'birth_date',
-        'spouse_name',
         'status',
         'domicile_address',
         'residential_address',
         'marital_status',
         'last_education',
         'dependents',
+        'resignation_date',
     ];
 
     // Simpanan

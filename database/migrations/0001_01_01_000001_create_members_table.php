@@ -27,6 +27,7 @@ return new class extends Migration
             $table->enum('last_education', array_column(EducationEnum::cases(), 'value'))->nullable();
             $table->integer('dependents')->nullable();
             $table->enum('status', array_column(MemberStatusEnum::cases(), 'value'))->default('Menunggu Pembayaran');
+            $table->date('resignation_date')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
