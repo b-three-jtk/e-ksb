@@ -467,7 +467,7 @@ const nomorAkunGuide = [
                 <!-- Aksi -->
                 <template #cell-aksi="{ row }">
                     <button
-                        v-if="props.can.tambah_akun"
+                        v-if="props.can.edit_akun"
                         @click="openStatusModal(row)"
                         title="Ubah Status"
                     >
