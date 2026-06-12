@@ -16,7 +16,7 @@ const props = defineProps({
 
 const breadcrumbItems = [
     {name: 'Dashboard', link: '/admin'},
-    {name: 'Pengurus', link: '/admin/list'},
+    {name: 'Pengurus', link: '/admin/pengurus'},
     {name: 'Detail Pengurus'},
 ];
 
@@ -46,7 +46,7 @@ console.log(props.user);
                             </p>
                         </div>
                     </div>
-                    <Link v-if="can['edit_pengurus']" :href="`/admin/edit/${user.id}`"
+                    <Link v-if="can['edit_pengurus']" :href="`/admin/pengurus/edit/${user.id}`"
                         class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-theme-sm font-medium text-dark-text shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current fill-white dark:fill-gray-800"
                             width="20" height="20" viewBox="0 0 20 20" fill="none">

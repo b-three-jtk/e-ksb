@@ -114,7 +114,7 @@ const kolomTabelPermohonanMurabahah = computed(() => {
                 <template #action="{ item }">
                     <div class="flex items-center justify-center">
                         <Button
-                            v-if="can['edit_murabahah'] && (role === 'Staf Murabahah' && (item.status === 'Disetujui' || item.status === 'Ditolak' || item.status === 'Menunggu Kelengkapan Dokumen'))"
+                            v-if="can['edit_murabahah'] && (role === 'Staf Murabahah' && (item.status === 'Disetujui' || item.status === 'Ditolak' || item.status === 'Menunggu Kelengkapan Dokumen' || item.status === 'Disetujui dengan Catatan'))"
                             :href="`/admin/financings/draft/${item.id}`" size="small" variant="transparent">
                             <ReviewIcon width="18px" height="18px" />
                         </Button>

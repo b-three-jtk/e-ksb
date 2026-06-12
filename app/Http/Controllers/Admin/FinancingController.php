@@ -577,6 +577,26 @@ class FinancingController extends Controller
                     throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
+                $hasActiveFinancing = $user->member->financings?->whereIn(
+                    'status',
+                    [
+                        FinancingReqStatusEnum::PENDING_REVIEW->value,
+                        FinancingReqStatusEnum::REJECTED->value,
+                        FinancingReqStatusEnum::APPROVED->value,
+                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                        FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                        FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
+                    ]
+                )->isNotEmpty() ?? false;
+
+                if ($hasActiveFinancing) {
+                    throw ValidationException::withMessages(['member' => 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
+                }
+
+                $validated->merge([
+                    'financing.status' => 'Belum Ditinjau',
+                ]);
+
                 $this->financingService->syncMemberData($user, $validated['member'], $request);
                 $this->financingService->syncFinancingData($user, $validated, $request, auth()->id());
             });
@@ -610,6 +630,22 @@ class FinancingController extends Controller
 
                 if (!$hasEligibleSaving) {
                     throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
+                }
+
+                $hasActiveFinancing = $user->member->financings?->whereIn(
+                    'status',
+                    [
+                        FinancingReqStatusEnum::PENDING_REVIEW->value,
+                        FinancingReqStatusEnum::REJECTED->value,
+                        FinancingReqStatusEnum::APPROVED->value,
+                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                        FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                        FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
+                    ]
+                )->isNotEmpty() ?? false;
+
+                if ($hasActiveFinancing) {
+                    throw ValidationException::withMessages(['member' => 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
                 }
 
                 $this->financingService->syncMemberData($user, $validated['member'], $request);

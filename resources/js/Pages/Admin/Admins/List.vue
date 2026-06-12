@@ -62,7 +62,7 @@ const selectFilters = [
 
 const applyFilters = () => {
     router.get(
-        '/admin/list',
+        '/admin/pengurus',
         {
             search: filters.search || undefined,
             status: filters.status || undefined,
@@ -117,10 +117,10 @@ const breadcrumbItems = [
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Pengurus</h2>
                 </div>
                 <Button
-                    v-if="props.can.tambah_pengurus" 
-                    size="medium" 
-                    variant="secondary" 
-                    href="/admin/create">
+                    v-if="props.can.tambah_pengurus"
+                    size="medium"
+                    variant="secondary"
+                    href="/admin/pengurus/create">
                     <Icon icon="mdi:plus" class="w-5 h-5"/>
                     Tambah Pengurus
                 </Button>
@@ -186,7 +186,7 @@ const breadcrumbItems = [
                     <div class="flex justify-center gap-3">
                         <Link
                             v-if="props.can.edit_pengurus"
-                            :href="`/admin/edit/${row.id}`"
+                            :href="`/admin/pengurus/edit/${row.id}`"
                             class="text-gray-500 hover:text-blue-600 transition"
                             title="Edit"
                         >
@@ -194,7 +194,7 @@ const breadcrumbItems = [
                         </Link>
 
                         <Link
-                            :href="`/admin/show/${row.id}`"
+                            :href="`/admin/pengurus/show/${row.id}`"
                             class="text-gray-500 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
                             title="Lihat"
                         >

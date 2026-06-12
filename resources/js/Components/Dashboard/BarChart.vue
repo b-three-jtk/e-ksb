@@ -16,6 +16,16 @@ const series = ref([
     },
 ])
 
+const chartHeight = 300
+const categories = computed(() => props.data ? Object.keys(props.data) : [])
+const values = computed(() => props.data ? Object.values(props.data) : [])
+
+const rowHeight = computed(() => {
+    if (!categories.value.length) return 0
+    let calculatedHeight = categories.value.length === 3 ? (chartHeight - 150) / categories.value.length : (chartHeight - 240) / categories.value.length
+    return calculatedHeight
+})
+
 const chartOptions = ref({
     colors: ['#044B27', '#097939', '#0D9F4A', '#72A36B', '#C3DC6D'],
     chart: {
@@ -83,27 +93,41 @@ watch(() => props.filter, updateChart, { immediate: true })
 watch(() => props.data, updateChart, { deep: true })
 </script>
 
-
 <template>
-    <div class="flex gap-2">
-        <div class="w-xl">
+    <div class="relative flex gap-4 items-start">
+        <!-- Chart -->
+        <div class="flex-1 min-w-0">
             <div class="max-w-full overflow-x-auto custom-scrollbar">
                 <div id="chartOne" class="-ml-5 min-w-162.5 xl:min-w-full pl-2">
-                    <VueApexCharts type="bar" height="300" :key="filter" :options="chartOptions" :series="series" />
+                    <VueApexCharts
+                        type="bar"
+                        :height="chartHeight"
+                        :key="filter"
+                        :options="chartOptions"
+                        :series="series"
+                    />
                 </div>
             </div>
         </div>
-        <ul class="flex flex-col gap-3 mt-2">
-            <li class="text-gray-400 text-sm font-semibold">JUMLAH</li>
 
-            <li v-for="(value, name) in data" :key="name" class="bg-gray-100 text-sm px-3 py-1.5 font-body rounded-lg text-gray-700 whitespace-nowrap">
-                {{ parseCurrencyAmount(value) }}
-
-                <span class="text-gray-500 font-medium ml-1">
-                    ({{ totalSimpanan > 0 ? ((value / totalSimpanan) * 100).toFixed(1).replace('.', ',') : 0 }}%)
-                </span>
-            </li>
-
-        </ul>
+        <div class="shrink-0 flex flex-col">
+            <p class="text-gray-400 text-xs font-semibold tracking-wide mb-2">JUMLAH</p>
+            <div
+                class="flex flex-col mt-3.5"
+                :style="{ gap: rowHeight + 'px' }"
+            >
+                <div
+                    v-for="(value, name) in data"
+                    :key="name"
+                    class="bg-gray-100 text-sm px-3 py-4 rounded-lg text-gray-700 whitespace-nowrap flex items-center"
+                    :style="{ height: rowHeight * 0.5 + 'px' }"
+                >
+                    {{ parseCurrencyAmount(value) }}
+                    <span class="text-gray-500 font-medium ml-1">
+                        ({{ totalSimpanan > 0 ? ((value / totalSimpanan) * 100).toFixed(1).replace('.', ',') : 0 }}%)
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
 </template>

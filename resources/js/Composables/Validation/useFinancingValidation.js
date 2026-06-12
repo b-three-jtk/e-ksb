@@ -38,10 +38,9 @@ export function useFinancingValidation(form) {
         if (!isValidEmail(m.email))
             errs.email = 'Format email tidak valid.'
 
-        if (!m.phone_number)
-            errs.phone_number = 'Nomor telepon wajib diisi.'
-        else if (!isValidPhone(m.phone_number))
-            errs.phone_number = 'Nomor telepon harus 8-14 digit angka.'
+        if (!/^62\d{10,20}$/.test(m.phone_number)) {
+            errs.phone_number = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
+        }
 
         if (!m.gender)
             errs.gender = 'Jenis kelamin wajib dipilih.'

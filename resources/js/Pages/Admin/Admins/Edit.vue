@@ -13,7 +13,6 @@ import { useInputSanitizers } from '@/Composables/useInputSanitizers'
 const props = defineProps({
     admin: { type: Object, required: true },
     roles: { type: Array, required: true },
-    educations: Array
 })
 
 const { onlyNumbers } = useInputSanitizers()
@@ -29,7 +28,7 @@ const form = useForm({
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengurus', link: '/admin/list' },
+    { name: 'Pengurus', link: '/admin/pengurus' },
     { name: 'Edit Pengurus' },
 ];
 
@@ -46,7 +45,7 @@ const submitForm = () => {
         confirmButtonColor: '#007943',
     }).then((result) => {
         if (result.isConfirmed) {
-            form.put(('/admin/update/' + props.admin.id), {
+            form.put(('/admin/pengurus/update/' + props.admin.id), {
                 onSuccess: () => {
                     toast("Pengurus berhasil diperbarui!", {
                         "type": "success",
@@ -104,7 +103,7 @@ const submitForm = () => {
                 </div>
 
                 <div class="flex items-center justify-end gap-6 pb-6">
-                    <Button href="/admin/list" variant="light">
+                    <Button href="/admin/pengurus" variant="light">
                         Batal
                     </Button>
                     <Button @click="submitForm" :disabled="form.processing" variant="secondary">

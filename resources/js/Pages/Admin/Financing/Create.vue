@@ -68,7 +68,7 @@ const prevStep = () => {
 }
 
 const isStep3Valid = computed(() =>
-    form.financing.name && form.collateral.collateral_type
+    form.financing.name && form.collateral.collateral_type && !form.processing
 )
 
 const isFinalizationValid = computed(() =>
@@ -192,7 +192,7 @@ const handleSaveDraft = () => {
                     <div class="flex items-center gap-4 justify-end">
 
                         <Button
-                            v-if="activeStep < 2"
+                            v-if="activeStep >= 3"
                             variant="light"
                             @click="handleSaveDraft()"
                         >
@@ -201,7 +201,7 @@ const handleSaveDraft = () => {
 
                         <Button
                             v-if="showSubmitButton"
-                            :disabled="!isStep3Valid || form.processing"
+                            :disabled="!isStep3Valid"
                             type="submit"
                             @click="handleSubmit()"
                             variant="secondary"

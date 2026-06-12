@@ -2,7 +2,7 @@
 
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Admin\AccountController;
-use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\PengurusController;
 use App\Http\Controllers\Admin\CashFlowController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinancingController;
@@ -100,13 +100,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/financings/{id}/history', [UserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
 
     // Pengelolaan Pengurus
-    Route::get('/list', [AdminController::class, 'index'])->middleware('permission:view_pengurus')->name('admin.index');
-    Route::get('/create', [AdminController::class, 'create'])->middleware('permission:create_pengurus')->name('admin.create');
-    Route::post('/store', [AdminController::class, 'store'])->middleware('permission:create_pengurus')->name('admin.store');
-    Route::get('/edit/{id}', [AdminController::class, 'edit'])->middleware('permission:edit_pengurus')->name('admin.edit');
-    Route::put('/update/{id}', [AdminController::class, 'update'])->middleware('permission:edit_pengurus')->name('admin.update');
-    Route::get('/show/{id}', [AdminController::class, 'show'])->middleware('permission:view_pengurus')->name('admin.show');
-    Route::get('members', [AdminController::class, 'searchMember'])->middleware('permission:view_anggota')->name('members.search');
+    Route::get('/pengurus', [PengurusController::class, 'index'])->middleware('permission:view_pengurus')->name('admin.index');
+    Route::get('/pengurus/create', [PengurusController::class, 'create'])->middleware('permission:create_pengurus')->name('admin.create');
+    Route::post('/pengurus/store', [PengurusController::class, 'store'])->middleware('permission:create_pengurus')->name('admin.store');
+    Route::get('/pengurus/edit/{id}', [PengurusController::class, 'edit'])->middleware('permission:edit_pengurus')->name('admin.edit');
+    Route::put('/pengurus/update/{id}', [PengurusController::class, 'update'])->middleware('permission:edit_pengurus')->name('admin.update');
+    Route::get('/pengurus/show/{id}', [PengurusController::class, 'show'])->middleware('permission:view_pengurus')->name('admin.show');
+    Route::get('/pengurus/members', [PengurusController::class, 'searchMember'])->middleware('permission:view_anggota')->name('members.search');
 
     // Pengelolaan Pengunduran Diri
     Route::get('/resignations/list', [ResignationController::class, 'index'])->middleware('permission:view_pengunduran_diri')->name('resignations.index');
