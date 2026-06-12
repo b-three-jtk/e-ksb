@@ -10,11 +10,13 @@ use App\Models\Financing;
 use App\Models\GlobalSetting;
 use App\Models\Installment;
 use App\Models\JournalEntry;
+use App\Models\Notification;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Log;
 
 class DashboardService
@@ -366,67 +368,73 @@ class DashboardService
         $savingDueDate = GlobalSetting::where('key', 'due_date_simpanan')->first()->value ?? 30;
         $savingNominal = GlobalSetting::where('key', 'saving_wajib_amount')->first()->value ?? 0;
 
-        $transaksiSimpanan = collect();
-        $transaksiPembiayaan = collect();
+        $query = Notification::with([
+            'member.user',
+            'reference' => function (MorphTo $morphTo) {
+                $morphTo->morphWith([
+                    SavingTransaction::class => ['savingAccount'],
+                    Installment::class => ['financing'],
+                ]);
+            }
+        ])
+        ->whereHas('member', function ($q) {
+            $q->where('pj_user_id', auth()->id());
+        });
 
-        if ($filter === 'all' || $filter === 'simpanan') {
-            $transaksiSimpanan = SavingAccount::with([
-                    'member.user',
-                    'transactions' => fn($q) => $q->latest(),
-                    'transactions.notifications' => fn($q) => $q->latest()
-                ])
-                ->whereHas('member', function($q) {
-                    $q->where('pj_user_id', auth()->id());
-                })
-                ->where('saving_type', SavingTypeEnum::SIMPANAN_WAJIB->value)
-                ->get()
-                ->map(function($t) use ($savingDueDate, $savingNominal) {
-                    $lastTransaction = $t->transactions->first();
-                    $baseDate = $lastTransaction ? $lastTransaction->created_at : $t->created_at;
+        if ($filter === 'simpanan') {
+            $query->where('reference_type', SavingTransaction::class);
+        } elseif ($filter === 'pembiayaan') {
+            $query->where('reference_type', Installment::class);
+        } else {
+            $query->whereIn('reference_type', [
+                SavingTransaction::class,
+                Installment::class
+            ]);
+        }
 
-                    $latestNotification = $lastTransaction ? $lastTransaction->notifications->first() : null;
+        $allTransactions = $query->latest()->get()
+            ->map(function ($notif) use ($savingDueDate, $savingNominal) {
+                $ref = $notif->reference;
+
+                if (!$ref) return null;
+
+                if ($notif->reference_type === SavingTransaction::class) {
+                    $account = $ref->savingAccount;
+
+                    if ($account?->saving_type !== SavingTypeEnum::SIMPANAN_WAJIB->value) {
+                        return null;
+                    }
 
                     return [
-                        'id' => $t->id,
-                        'anggota' => $t->member?->user?->name ?? '-',
+                        'id' => $account->id,
+                        'anggota' => $notif->member?->user?->name ?? '-',
                         'nominal' => $savingNominal,
-                        'produk' => $t->saving_type,
-                        'jatuh_tempo' => Carbon::parse($baseDate)->addDays((int) $savingDueDate)->toDateString(),
-                        'status_notifikasi' => $latestNotification?->status ?? 'Belum Terkirim'
+                        'produk' => $account->saving_type,
+                        'jatuh_tempo' => Carbon::parse($ref->created_at)->addDays((int) $savingDueDate)->toDateString(),
+                        'status_notifikasi' => $notif->status ?? 'Belum Terkirim'
                     ];
-                });
-        }
+                }
 
-        if ($filter === 'all' || $filter === 'pembiayaan') {
-            $transaksiPembiayaan = Installment::with([
-                    'financing.member.user',
-                    'notifications' => fn($q) => $q->latest()
-                ])
-                ->whereHas('financing.member', function($query) {
-                    $query->where('pj_user_id', auth()->id());
-                })
-                ->whereIn('status', [
-                    InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
-                ])
-                ->orderBy('due_date', 'asc')
-                ->take(7)
-                ->get()
-                ->map(function($f) {
-                    // 5. Ambil notifikasi teranyar dari Installment
-                    $latestNotification = $f->notifications->first();
+                if ($notif->reference_type === Installment::class) {
+
+                    if ($ref->status !== InstallmentPaymentScheduleStatusEnum::SCHEDULED->value) {
+                        return null;
+                    }
 
                     return [
-                        'id' => $f->id,
-                        'anggota' => $f->financing->member?->user?->name ?? '-',
-                        'nominal' => $f->amount,
+                        'id' => $ref->id,
+                        'anggota' => $notif->member?->user?->name ?? '-',
+                        'nominal' => $ref->amount,
                         'produk' => 'Pembiayaan',
-                        'jatuh_tempo' => Carbon::parse($f->due_date)->toDateString(),
-                        'status_notifikasi' => $latestNotification?->status ?? 'Belum Terkirim',
+                        'jatuh_tempo' => Carbon::parse($ref->due_date)->toDateString(),
+                        'status_notifikasi' => $notif->status ?? 'Belum Terkirim'
                     ];
-                });
-        }
+                }
 
-        $allTransactions = $transaksiSimpanan->concat($transaksiPembiayaan)
+                return null;
+            })
+            ->filter()
+            ->unique('id')
             ->sortBy('jatuh_tempo')
             ->take(7)
             ->values()
