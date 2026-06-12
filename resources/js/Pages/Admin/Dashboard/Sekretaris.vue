@@ -50,7 +50,7 @@ const props = defineProps({
                             <span class="icon-[material-symbols--chevron-right-rounded]"></span>
                         </div>
                     </Link>
-                    <Link href="/admin/create"
+                    <Link href="/admin/pengurus/create"
                         class="bg-white dark:bg-light-bg/20 dark:border-stroke/30 border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3.5">
                             <div

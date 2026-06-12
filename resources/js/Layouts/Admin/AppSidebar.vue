@@ -66,7 +66,7 @@ const menuGroups = [
             {
                 icon: EmployeeIcon,
                 name: "Pengurus",
-                path: "/admin/list",
+                path: "/admin/pengurus",
                 permission: "view_pengurus"
             },
             {

@@ -22,12 +22,11 @@ const form = useForm({
 
 const props = defineProps({
     roles: { type: Array, required: true },
-    educations: Array
 })
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Pengurus', link: '/admin/list' },
+    { name: 'Pengelolaan Pengurus', link: '/admin/pengurus' },
     { name: 'Tambah Pengurus' },
 ];
 
@@ -51,7 +50,7 @@ const searchMembers = async () => {
 
     isSearching.value = true
     try {
-        const response = await fetch(`/admin/members?q=${encodeURIComponent(searchQuery.value)}`)
+        const response = await fetch(`/admin/pengurus/members?q=${encodeURIComponent(searchQuery.value)}`)
         const data = await response.json()
         searchResults.value = data.members
     } catch (error) {
@@ -98,7 +97,7 @@ const submitForm = () => {
         confirmButtonColor: '#007943',
     }).then((result) => {
         if (result.isConfirmed) {
-            form.post('/admin/store', {
+            form.post('/admin/pengurus/store', {
                 onSuccess: () => {
                     toast(isEditingExistingMember.value ? "Member berhasil dipromosikan!" : "Admin berhasil ditambahkan!", {
                         "type": "success",
@@ -207,7 +206,7 @@ const submitForm = () => {
                 </div>
 
                 <div class="flex items-center justify-end gap-6 pb-6 mr-6">
-                    <Button href="/admin/list" variant="light">
+                    <Button href="/admin/pengurus" variant="light">
                         Batal
                     </Button>
                     <Button @click="submitForm" variant="secondary"

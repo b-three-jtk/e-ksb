@@ -21,9 +21,9 @@ const props = defineProps<{
     }
     filters: Record<string, any>
     jenisAkunOptions: string[]
-    accountSummary: { 
-        name: string; 
-        balance: number 
+    accountSummary: {
+        name: string;
+        balance: number
     }[]
     can: Record<string, boolean>
 }>()
@@ -333,7 +333,7 @@ const jenisClass = (jenis: string) => {
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Akun', link: '' },
+    { name: 'Pengelolaan Akun', link: ''},
 ]
 
 const nomorAkunGuide = [
