@@ -1,6 +1,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 import { Icon } from '@iconify/vue'
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
@@ -485,11 +486,10 @@ async function handleSubmit() {
                                     Tanggal Pembayaran
                                 </label>
 
-                                <input
+                                <BaseInputAdmin
                                     v-model="tanggalPembayaran"
                                     type="date"
-                                    readonly
-                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300"
+                                    :disabled="true"
                                 />
                             </div>
 
@@ -620,11 +620,11 @@ async function handleSubmit() {
                             <label class="block text-sm text-gray-600 mb-1">
                                 Pemberlakuan Kembali Pembiayaan
                             </label>
-                            <input
+                            <BaseInputAdmin
                                 v-model="rescheduleDate"
                                 type="date"
-                                :min="today()"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
+                                :max-date="undefined"
+                                placeholder="Pilih tanggal"
                             />
                         </div>
                     </div>
