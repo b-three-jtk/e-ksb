@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use RuntimeException;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -181,7 +182,11 @@ class UserController extends Controller
                     ? round(($newThisMonth / $totalVerifiedMembers) * 100)
                     : 0,
             ],
-            'statuses' => array_column(UserStatusEnum::cases(), 'value')
+            'statuses' => array_column(UserStatusEnum::cases(), 'value'),
+            'can' => [
+                'tambah_anggota' => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
+                'edit_anggota'   => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
+            ],
         ]);
     }
 

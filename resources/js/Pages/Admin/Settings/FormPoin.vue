@@ -11,6 +11,10 @@ defineProps({
         type: Boolean,
         default: false,
     },
+    readonly: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const emit = defineEmits(['submit'])
@@ -27,7 +31,7 @@ const emit = defineEmits(['submit'])
                 min="1"
                 step="1"
                 required
-                :is-disabled="isProcessing"
+                :disabled="readonly || isProcessing"
                 placeholder="Masukkan jumlah simpanan yang diperlukan"
                 is-money
             />
@@ -39,7 +43,7 @@ const emit = defineEmits(['submit'])
                 min="1"
                 step="1"
                 required
-                :is-disabled="isProcessing"
+                :disabled="readonly || isProcessing"
                 placeholder="Masukkan jumlah poin yang diberikan"
             />
         </div>
@@ -50,7 +54,7 @@ const emit = defineEmits(['submit'])
                 label="Tanggal Berlaku"
                 type="date"
                 required
-                :is-disabled="isProcessing"
+                :disabled="readonly || isProcessing"
             />
         </div>
 
@@ -58,7 +62,7 @@ const emit = defineEmits(['submit'])
             Contoh: jika jumlah simpanan ditetapkan Rp100.000 dan poin yang diperoleh 1, maka setiap kelipatan penuh Rp100.000 akan mendapatkan 1 poin.
         </div>
 
-        <div class="flex justify-end">
+        <div v-if="!readonly" class="flex justify-end">
             <Button type="submit" size="medium" variant="secondary" :disabled="isProcessing">
                 {{ isProcessing ? 'Menyimpan...' : 'Simpan Pengaturan' }}
             </Button>

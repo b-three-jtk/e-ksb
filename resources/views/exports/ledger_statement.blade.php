@@ -59,7 +59,7 @@
 
         .member-info {
             margin-bottom: 12px;
-            width: 100%;
+            width: 50%;
         }
 
         .member-card {
@@ -72,6 +72,7 @@
             background: linear-gradient(135deg, #eef4ff 0%, #e8eefc 100%);
             border: 1px solid #cbd5e1;
             box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+            box-sizing: border-box;
         }
 
         .member-avatar {

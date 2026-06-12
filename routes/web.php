@@ -152,15 +152,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/accounts/list', [AccountController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
     Route::post('/accounts/create', [AccountController::class, 'store'])->middleware('permission:create_kas')->name('accounts.create');
     Route::patch('/accounts/{id}/status', [AccountController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
-    Route::get('/kas/list', [CashflowController::class, 'index'])->name('kas.list');
-    Route::post('/kas/store', [CashflowController::class, 'store'])->name('kas.store');
+    Route::get('/kas/list', [CashflowController::class, 'index'])->middleware('permission:view_kas')->name('kas.index');
+    Route::post('/kas/store', [CashflowController::class, 'store'])->middleware('permission:create_kas')->name('kas.store');
     Route::get('/kas/export/csv',[CashflowController::class, 'exportCsv'])->name('kas.export.csv');
 
     // Pengaturan Umum
-    Route::middleware('role:' . UserRoleEnum::KETUA->value)->group(function () {
-        Route::get('/settings', [SettingsController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
-        Route::post('/settings', [SettingsController::class, 'store'])->middleware('permission:create_pengaturan')->name('settings.store');
-    });
+    Route::get('/settings', [SettingsController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
+    Route::post('/settings', [SettingsController::class, 'store'])->middleware('permission:create_pengaturan|edit_pengaturan')->name('settings.store');
 
     // Personal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -175,6 +173,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:view_peran_akses')->name('roles.index');
     Route::get('/roles/create', [RoleController::class, 'create'])->middleware('permission:create_peran_akses')->name('roles.create');
     Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:create_peran_akses')->name('roles.store');
+    Route::get('/roles/{id}', [RoleController::class, 'show'])->middleware('permission:view_peran_akses')->name('roles.show');
     Route::get('/roles/{id}/edit', [RoleController::class, 'edit'])->middleware('permission:edit_peran_akses')->name('roles.edit');
     Route::put('/roles/{id}', [RoleController::class, 'update'])->middleware('permission:edit_peran_akses')->name('roles.update');
 });

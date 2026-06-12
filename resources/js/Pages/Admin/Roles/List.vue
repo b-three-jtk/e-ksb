@@ -1,6 +1,6 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
-import { reactive, watch } from 'vue'
+import { Link, router, usePage } from '@inertiajs/vue3'
+import { reactive, watch, computed } from 'vue'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import BaseTable from '@/Components/Table/BaseTable.vue'
@@ -13,6 +13,9 @@ const props = defineProps({
     roles: Object,
     filters: Object,
 })
+
+const page = usePage()
+const can = computed(() => page.props.auth.can)
 
 const columns = [
     { key: 'no', label: 'No' },
@@ -81,7 +84,7 @@ const breadcrumbItems = [
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Daftar Peran dan Akses</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Kelola hak akses tiap peran dalam aplikasi.</p>
                 </div>
-                <Button href="/admin/roles/create" variant="secondary">
+                <Button href="/admin/roles/create" variant="secondary" v-if="can['create_peran_akses']">
                     <Icon icon="mdi:plus" class="w-5 h-5 mr-1" />
                     Tambah Peran
                 </Button>
@@ -110,9 +113,16 @@ const breadcrumbItems = [
 
                 <template #cell-actions="{ row }">
                     <Button
+                        v-if="can['edit_peran_akses']"
                         :href="`/admin/roles/${row.id}/edit`" size="small" variant="secondary">
                         <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
                         Edit
+                    </Button>
+                    <Button
+                        v-else-if="can['view_peran_akses']"
+                        :href="`/admin/roles/${row.id}`" size="small" variant="secondary">
+                        <Icon icon="mdi:eye-outline" class="w-5 h-5" />
+                        Detail
                     </Button>
                 </template>
             </BaseTable>

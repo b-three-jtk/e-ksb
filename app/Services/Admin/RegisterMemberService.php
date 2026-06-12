@@ -48,17 +48,17 @@ class RegisterMemberService
 
     private function generateMemberNumber(): string
     {
-        $yymm = date('ym'); 
+        $yymm = date('ym');
         $prefix = 'KSB' . $yymm;
 
-        // Cari angka terbesar khusus untuk member yang daftar di bulan ini saja
-        $lastNumeric = User::query()
+        // Ambil suffix 3 digit terakhir saja, bukan seluruh angka
+        $last = User::query()
             ->where('user_code', 'like', $prefix . '%')
-            ->selectRaw("MAX(CAST(REGEXP_REPLACE(user_code, '[^0-9]', '', 'g') AS INTEGER)) as max_number")
-            ->value('max_number');
+            ->orderBy('user_code', 'desc')
+            ->lockForUpdate() // ← cegah race condition
+            ->value('user_code');
 
-        $lastSequence = $lastNumeric ? ($lastNumeric % 1000) : 0;
-        
+        $lastSequence = $last ? (int) substr($last, -3) : 0;
         $nextSequence = $lastSequence + 1;
 
         return $prefix . str_pad((string) $nextSequence, 3, '0', STR_PAD_LEFT);
