@@ -13,7 +13,7 @@ use App\Models\Wakalah;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
-class FinancingService
+class PembiayaanService
 {
     public function syncMemberData(User $user, array $memberData, Request $request): void
     {

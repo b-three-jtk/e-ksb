@@ -5,12 +5,12 @@ namespace App\Http\Controllers\User;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Financing;
-use App\Services\Admin\FinancingService;
+use App\Services\Admin\PembiayaanService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class FinancingController extends Controller
+class PembiayaanController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -119,7 +119,7 @@ class FinancingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id, FinancingService $service)
+    public function show(string $id, PembiayaanService $service)
     {
         $financing = Financing::with([
             'financingItem.productType',

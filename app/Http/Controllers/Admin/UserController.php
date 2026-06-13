@@ -15,7 +15,7 @@ use App\Http\Requests\UpdateMemberRequest;
 use App\Models\Financing;
 use App\Models\SavingAccount;
 use App\Models\User;
-use App\Services\Admin\FinancingService;
+use App\Services\Admin\PembiayaanService;
 use App\Services\Admin\MemberAllocationService;
 use App\Services\Admin\RegisterMemberService;
 use Exception;
@@ -193,7 +193,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id, FinancingService $service)
+    public function show(string $id, PembiayaanService $service)
     {
         $ktpDoc = null;
         $kkDoc = null;

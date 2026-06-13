@@ -12,9 +12,9 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-class RepaymentService
+class PelunasanService
 {
-public function calculateDetails(Financing $financing): array
+    public function calculateDetails(Financing $financing): array
     {
         $tenor = $financing->tenor;
 

@@ -29,9 +29,9 @@ use App\Models\Member;
 use App\Models\MemberDoc;
 use App\Models\SavingAccount;
 use App\Models\User;
-use App\Services\Admin\FinancingService;
+use App\Services\Admin\PembiayaanService;
 use App\Services\Admin\JournalService;
-use App\Services\Admin\RepaymentService;
+use App\Services\Admin\PelunasanService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
@@ -42,9 +42,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
-class FinancingController extends Controller
+class PembiayaanController extends Controller
 {
-    public function __construct(private FinancingService $financingService){}
+    public function __construct(private PembiayaanService $financingService){}
     private function baseQuery(Request $request)
     {
         $verifier = auth()->user();
@@ -236,7 +236,7 @@ class FinancingController extends Controller
         ];
     }
 
-    public function show(string $id, FinancingService $service)
+    public function show(string $id, PembiayaanService $service)
     {
         $financing = Financing::with([
             'financingItem.productType',
@@ -947,7 +947,7 @@ class FinancingController extends Controller
         return response()->json(['suppliers' => $suppliers]);
     }
 
-    public function showRepayment(string $id, RepaymentService $repaymentService)
+    public function showRepayment(string $id, PelunasanService $repaymentService)
     {
         $financing = Financing::with([
             'member.user',
@@ -976,7 +976,7 @@ class FinancingController extends Controller
         ]);
     }
 
-    public function storeRepayment(CreateRepaymentRequest $request, RepaymentService $service)
+    public function storeRepayment(CreateRepaymentRequest $request, PelunasanService $service)
     {
         try {
             $transaction = $service->processRepayment($request->validated(), auth()->id());
