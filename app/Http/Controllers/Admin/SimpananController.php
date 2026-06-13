@@ -541,26 +541,6 @@ class SimpananController extends Controller
             return $trx;
         });
 
-        $kasAccount = Account::where('account_name', 'Kas')->firstOrFail();
-        $savingAccountRef = Account::where('account_name', $data['saving_category'])->firstOrFail();
-
-        app(JournalService::class)->create(
-            [
-                [
-                    'account'  => $kasAccount->no_ref_account,
-                    'position' => PositionEnum::DEBIT->value,
-                    'nominal'  => $transaction->saving_amount,
-                ],
-                [
-                    'account'  => $savingAccountRef->no_ref_account,
-                    'position' => PositionEnum::CREDIT->value,
-                    'nominal'  => $transaction->saving_amount,
-                ],
-            ],
-            $transaction->transaction_date,
-            Auth::id()
-        );
-
         Log::info('Deposit transaction created', [
             'transaction_id' => $transaction->id,
             'saving_account_id' => $savingAccount->id,

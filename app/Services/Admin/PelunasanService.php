@@ -76,10 +76,6 @@ class PelunasanService
 
             $financing = $installment->financing;
 
-            Installment::where('financing_id', $installment->financing_id)
-                ->where('due_date', '>=', now())
-                ->update(['status' => InstallmentPaymentScheduleStatusEnum::PAID->value]);
-
             $calculatedData = $this->calculateDetails($financing);
 
             $remainingPrincipal =
@@ -89,6 +85,10 @@ class PelunasanService
             $marginSettlement =
                 $calculatedData['repayment_total']
                 - $remainingPrincipal;
+
+            Installment::where('financing_id', $installment->financing_id)
+                ->where('due_date', '>=', now())
+                ->update(['status' => InstallmentPaymentScheduleStatusEnum::PAID->value]);
 
             $transCode = 'LP' . str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
 
@@ -125,6 +125,8 @@ class PelunasanService
             $transaction = InstallmentPaymentTransaction::create([
                 'installment_trans_code' => $transCode,
                 'nominal' => $calculatedData['repayment_total'],
+                'principal_amount' => $remainingPrincipal,
+                'margin_amount' => $marginSettlement,
                 'payment_method' => $validatedData['method'],
                 'is_early_repayment' => true,
                 'payment_date' => now(),
@@ -147,28 +149,6 @@ class PelunasanService
                 'account_name',
                 'Pendapatan Margin Murabahah'
             )->firstOrFail();
-
-            app(JournalService::class)->create(
-            [
-                [
-                    'account' => $kas->no_ref_account,
-                    'position' => PositionEnum::DEBIT->value,
-                    'nominal' => $calculatedData['repayment_total'],
-                ],
-                [
-                    'account' => $piutangMurabahah->no_ref_account,
-                    'position' => PositionEnum::CREDIT->value,
-                    'nominal' => $remainingPrincipal,
-                ],
-                [
-                    'account' => $pendapatanMargin->no_ref_account,
-                    'position' => PositionEnum::CREDIT->value,
-                    'nominal' => $marginSettlement,
-                ],
-            ],
-            now()->toDateString(),
-            auth()->id()
-            );
 
             $financing->update([
                 'status' => FinancingReqStatusEnum::PAID->value,
