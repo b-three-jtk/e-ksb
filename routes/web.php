@@ -4,7 +4,7 @@ use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\PengurusController;
 use App\Http\Controllers\Admin\CashFlowController;
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DasborController;
 use App\Http\Controllers\Admin\FinancingController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ProductTypeController;
@@ -161,7 +161,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/settings', [SettingsController::class, 'store'])->middleware('permission:create_pengaturan|edit_pengaturan')->name('settings.store');
 
     // Personal
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DasborController::class, 'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');

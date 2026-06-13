@@ -11,15 +11,13 @@ use App\Models\GlobalSetting;
 use App\Models\Installment;
 use App\Models\JournalEntry;
 use App\Models\Notification;
-use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Log;
 
-class DashboardService
+class DasborService
 {
     public function getPeriodeSebelumnya(Carbon $awal, string $filter): array
     {
