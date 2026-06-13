@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class LedgerService
+class BukuBesarService
 {
     public function transformTransactions(Collection $transactions, bool $includeId = false): Collection
     {

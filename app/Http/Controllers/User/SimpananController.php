@@ -3,24 +3,24 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Services\User\LedgerService;
+use App\Services\User\BukuBesarService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class SavingController extends Controller
+class SimpananController extends Controller
 {
-    public function index(Request $request, LedgerService $ledgerService)
+    public function index(Request $request, BukuBesarService $bukuBesarService)
     {
         $userId = auth()->id();
         $month = $request->input('month');
         $search = $request->input('search');
         $perPage = (int) $request->input('per_page', 10);
 
-        $query = $ledgerService->buildLedgerTransactionQuery($userId, $month, $search);
+        $query = $bukuBesarService->buildLedgerTransactionQuery($userId, $month, $search);
         $query->orderBy('transaction_date', 'desc');
 
         $transactions = $query->paginate($perPage)->withQueryString();
-        $transactions->setCollection($ledgerService->transformTransactions($transactions->getCollection(), true));
+        $transactions->setCollection($bukuBesarService->transformTransactions($transactions->getCollection(), true));
 
         $member = auth()->user();
         $memberInfo = [
@@ -30,7 +30,7 @@ class SavingController extends Controller
             'tanggal_bergabung' => $member->joined_date->format('d F Y'),
         ];
 
-        [$savingSummary, $savingMeta] = $ledgerService->buildSavingSummaryAndMeta($userId);
+        [$savingSummary, $savingMeta] = $bukuBesarService->buildSavingSummaryAndMeta($userId);
 
         return Inertia::render('User/Ledger/List', [
             'transactions' => $transactions,
@@ -45,9 +45,9 @@ class SavingController extends Controller
         ]);
     }
 
-    public function export(Request $request, LedgerService $ledgerService)
+    public function export(Request $request, BukuBesarService $bukuBesarService)
     {
-        $result = $ledgerService->exportLedgerPdf(
+        $result = $bukuBesarService->exportLedgerPdf(
             auth()->id(),
             $request->get('month'),
             $request->get('search')

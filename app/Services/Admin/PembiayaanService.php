@@ -10,11 +10,15 @@ use App\Models\Installment;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
+use App\Services\PembiayaanService as SharedPembiayaanService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PembiayaanService
 {
+    public function __construct(private SharedPembiayaanService $sharedPembiayaanService)
+    {
+    }
     public function syncMemberData(User $user, array $memberData, Request $request): void
     {
         $user->update([
@@ -207,46 +211,11 @@ class PembiayaanService
 
     public function computeFinancingSummary(Financing $financing): void
     {
-        $financing->total_price = ($financing->cost_price ?? 0)
-            + ($financing->margin_amount ?? 0)
-            - ($financing->down_payment ?? 0);
-
-        $installments = $financing->installment;
-        $hasInstallments = $installments && $installments->count() > 0;
-
-        $financing->installment_per_month = $financing->tenor > 0
-            ? $financing->total_price / $financing->tenor
-            : 0;
-
-        if ($hasInstallments) {
-            $financing->total_paid = $installments
-                ->sum(fn($i) => $i->payment?->nominal ?? 0);
-        } else {
-            $financing->total_paid = 0;
-        }
-
-        $hasEarlyRepayment = $installments
-            ? $installments->contains(fn($i) => $i->payment?->is_early_repayment)
-            : false;
-
-        $financing->remaining_balance = $hasEarlyRepayment ? 0 : max(0, $financing->total_price - $financing->total_paid);
+        $this->sharedPembiayaanService->computeFinancingSummary($financing);
     }
 
     public function computeNextDueDate(Financing $financing): void
     {
-        $installments = $financing->installment;
-
-        if (!$installments || !$financing->akad_date) {
-            $financing->next_due_date = null;
-            return;
-        }
-
-        $paidCount = $installments->count();
-
-        $financing->next_due_date = $paidCount < $financing->tenor
-            ? Carbon::parse($financing->akad_date)
-                ->addMonthsNoOverflow($paidCount + 1)
-                ->format('Y-m-d')
-            : null;
+        $this->sharedPembiayaanService->computeNextDueDate($financing);
     }
 }
