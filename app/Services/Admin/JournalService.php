@@ -9,35 +9,30 @@ use App\Enums\PositionEnum;
 
 class JournalService
 {
-    public function create(
-        array $entries,
-        ?string $transactionDate = null,
-        ?string $updatedBy = null
-    ): string {
-
+    public function create(array $entries, ?string $date = null, ?string $userId = null): string
+    {
         $this->validateEntries($entries);
 
-        return DB::transaction(function () use (
-            $entries,
-            $transactionDate,
-            $updatedBy
-        ) {
+        return DB::transaction(function () use ($entries, $date, $userId) {
 
-            $groupId = Str::uuid()->toString();
+            $journal = \App\Models\Journal::create([
+                'tgl_transaksi' => $date ?? now()->toDateString(),
+                'created_by'    => $userId,
+            ]);
 
             foreach ($entries as $entry) {
-
-                JournalEntry::create([
-                    'journal_group_id' => $groupId,
+                \App\Models\JournalEntry::create([
+                    'journal_id'       => $journal->id,
+                    'journal_group_id' => $journal->id,
                     'no_ref_account'   => $entry['account'],
                     'position'         => $entry['position'],
                     'nominal'          => $entry['nominal'],
-                    'transaction_date' => $transactionDate ?? now()->toDateString(),
-                    'updated_by'       => $updatedBy,
+                    'transaction_date' => $date ?? now()->toDateString(),
+                    'updated_by'       => $userId,
                 ]);
             }
 
-            return $groupId;
+            return $journal->id;
         });
     }
 

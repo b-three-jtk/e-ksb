@@ -16,6 +16,8 @@ class InstallmentPaymentTransaction extends Model
         'payment_method',
         'is_early_repayment',
         'nominal',
+        'principal_amount',
+        'margin_amount',
         'payment_date',
         'installment_payment_receipt',
 

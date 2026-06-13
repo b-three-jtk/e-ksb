@@ -118,26 +118,6 @@ class SimpananServices
             return [$transaction, $saldoSebelum];
         });
 
-        $kasAccount = Account::where('account_name', 'Kas')->firstOrFail();
-        $savingAccountRef = Account::where('account_name', $savingType)->firstOrFail();
-
-        $this->journalService->create(
-            [
-                [
-                    'account'  => $savingAccountRef->no_ref_account,
-                    'position' => PositionEnum::DEBIT->value,
-                    'nominal'  => $transaction->saving_amount,
-                ],
-                [
-                    'account'  => $kasAccount->no_ref_account,
-                    'position' => PositionEnum::CREDIT->value,
-                    'nominal'  => $transaction->saving_amount,
-                ],
-            ],
-            $transaction->transaction_date,
-            $userId
-        );
-
         $strukData = [
             'transaction_id' => $transaction->id,
             'no_transaksi' => $transaction->saving_transaction_code,

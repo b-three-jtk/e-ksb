@@ -1132,32 +1132,20 @@ class PembiayaanController extends Controller
                 'installment_id', $validated['installment_id']
             )->count();
 
+            $marginPerMonth    = round($financing->margin_amount / $financing->tenor, 2);
+            $principalPerMonth = round($validated['nominal'] - $marginPerMonth, 2);
+
             $payment = InstallmentPaymentTransaction::create([
                 'installment_trans_code' => 'INS' . strtoupper(substr(uniqid(), -7)),
                 'payment_method'         => $validated['payment_method'],
                 'is_early_repayment'     => false,
                 'nominal'                => $validated['nominal'],
+                'principal_amount'       => $principalPerMonth,
+                'margin_amount'          => $marginPerMonth, 
                 'payment_date'           => $validated['payment_date'],
                 'installment_id'         => $validated['installment_id'],
                 'updated_by'             => auth()->id(),
             ]);
-
-            $marginPerMonth    = round($financing->margin_amount / $financing->tenor, 2);
-            $principalPerMonth = round($validated['nominal'] - $marginPerMonth, 2);
-
-            $kas               = Account::where('account_name', 'Kas')->firstOrFail();
-            $piutangMurabahah  = Account::where('account_name', 'Piutang Murabahah')->firstOrFail();
-            $pendapatanMargin  = Account::where('account_name', 'Pendapatan Margin Murabahah')->firstOrFail();
-
-            app(JournalService::class)->create(
-                [
-                    ['account' => $kas->no_ref_account,              'position' => PositionEnum::DEBIT->value,  'nominal' => $validated['nominal']],
-                    ['account' => $piutangMurabahah->no_ref_account, 'position' => PositionEnum::CREDIT->value, 'nominal' => $principalPerMonth],
-                    ['account' => $pendapatanMargin->no_ref_account, 'position' => PositionEnum::CREDIT->value, 'nominal' => $marginPerMonth],
-                ],
-                now()->toDateString(),
-                auth()->id()
-            );
 
             $installment = Installment::findOrFail($validated['installment_id']);
             $paymentDate = \Carbon\Carbon::parse(
