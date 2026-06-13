@@ -18,13 +18,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use App\Services\User\UserProfileService;
+use App\Services\ProfilPenggunaService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
-class MemberController extends Controller
+class AnggotaController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct(
+        protected ProfilPenggunaService $profilPenggunaService
+    ) {}
+
     public function index(Request $request)
     {
         $user = auth()->user()->load('member');
@@ -174,17 +181,12 @@ class MemberController extends Controller
         }
     }
 
-    // Profile management methods
-    public function __construct(private UserProfileService $userProfileService)
-    {
-    }
-
     public function profileShow()
     {
         $user = auth()->user();
 
         return Inertia::render('User/Profile/Show', [
-            'user' => $this->userProfileService->buildProfilePayload($user),
+            'user' => $this->profilPenggunaService->index($user),
         ]);
     }
 
@@ -194,7 +196,7 @@ class MemberController extends Controller
         $educationOptions = array_column(EducationEnum::cases(), 'value');
 
         return Inertia::render('User/Profile/Edit', [
-            'user' => $this->userProfileService->buildProfilePayload($user),
+            'user' => $this->profilPenggunaService->index($user),
             'educationOptions' => $educationOptions,
         ]);
     }
@@ -222,7 +224,7 @@ class MemberController extends Controller
             'residential_address' => 'nullable|string|max:1000',
         ]);
 
-        $this->userProfileService->updateProfile($user, $validated);
+        $this->profilPenggunaService->update($user, $validated);
 
         return redirect()->route('user.profile.show');
     }
@@ -240,7 +242,7 @@ class MemberController extends Controller
             return back()->withErrors(['profile_picture' => 'File tidak valid sebagai gambar.']);
         }
 
-        $this->userProfileService->updateProfilePicture($user, $request->file('profile_picture'));
+        $this->profilPenggunaService->updateAvatar($user, $request->file('profile_picture'));
 
         return redirect()->back();
     }
@@ -249,7 +251,7 @@ class MemberController extends Controller
     {
         $user = auth()->user();
 
-        $this->userProfileService->deleteProfilePicture($user);
+        $this->profilPenggunaService->deleteAvatar($user);
 
         return redirect()->back();
     }
@@ -284,7 +286,7 @@ class MemberController extends Controller
             'password.confirmed' => 'Konfirmasi password tidak sesuai dengan password baru.',
         ]);
 
-        $this->userProfileService->updatePassword($user, $validated['password']);
+        $this->profilPenggunaService->updatePassword($user, $validated['password']);
 
         return redirect()->back()->with('success', 'Password berhasil diubah');
     }

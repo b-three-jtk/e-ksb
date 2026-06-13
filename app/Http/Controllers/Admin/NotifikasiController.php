@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\NotificationIndexRequest;
-use App\Services\NotificationService;
+use App\Services\NotifikasiService;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class NotificationController extends Controller
+class NotifikasiController extends Controller
 {
-    public function __construct(private NotificationService $notificationService)
+    public function __construct(private NotifikasiService $notificationService)
     {
     }
 

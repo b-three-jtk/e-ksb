@@ -6,13 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\MarkAllNotificationsReadRequest;
 use App\Http\Requests\User\MarkNotificationPopupDisplayedRequest;
 use App\Models\Notification;
-use App\Services\NotificationService;
+use App\Services\NotifikasiService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class NotificationController extends Controller
+class NotifikasiController extends Controller
 {
-    public function __construct(private NotificationService $notificationService)
+    public function __construct(private NotifikasiService $notificationService)
     {
     }
 

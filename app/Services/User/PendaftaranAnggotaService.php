@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Admin;
+namespace App\Services\User;
 
 use App\Enums\MemberStatusEnum;
 use App\Enums\UserStatusEnum;
@@ -11,16 +11,17 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Log;
 
-class RegisterMemberService
+class PendaftaranAnggotaService
 {
     /**
      * Register a new member with heir and optional documents.
      *
      * @param array<string, mixed> $validated
-     * @return array{name: mixed, user_code: string, initial_password: string, phone_number: mixed}
+     * @param Request $request
+     * @return array{name: string, user_code: string, initial_password: string, phone_number: string}
      */
     public function register(array $validated, Request $request): array
     {
@@ -66,6 +67,9 @@ class RegisterMemberService
 
     /**
      * @param array<string, mixed> $validated
+     * @param string $memberNumber
+     * @param string $initialPassword
+     * @return User
      */
     private function createUser(array $validated, string $memberNumber, string $initialPassword): User
     {
@@ -83,6 +87,11 @@ class RegisterMemberService
         ]);
     }
 
+    /**
+     * @param array<string, mixed> $validated
+     * @param string $userId
+     * @return Member
+     */
     private function createMember(array $validated, string $userId): Member
     {
         return Member::create([
@@ -100,6 +109,8 @@ class RegisterMemberService
 
     /**
      * @param array<string, mixed> $validated
+     * @param string $memberId
+     * @return void
      */
     private function createMemberHeir(array $validated, string $memberId): void
     {
@@ -112,6 +123,11 @@ class RegisterMemberService
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param string $memberId
+     * @return void
+     */
     private function createMemberDocuments(Request $request, string $memberId): void
     {
         if ($request->hasFile('ktp_photo')) {

@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\NotificationService;
+use App\Services\NotifikasiService;
 use Inertia\Middleware;
 use Illuminate\Http\Request;
 
@@ -51,7 +51,7 @@ class HandleInertiaRequests extends Middleware
         $pendingPopup = [];
 
         if ($user && $user->member) {
-            $service = app(NotificationService::class);
+            $service = app(NotifikasiService::class);
             $notifications = $service->getNotificationDropdown($user->member->id);
             $unreadCount = $service->getUnreadCount($user->member->id);
             $pendingPopup = $service->getPendingPopupNotifications($user->member->id);

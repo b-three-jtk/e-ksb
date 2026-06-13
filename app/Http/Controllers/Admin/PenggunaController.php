@@ -16,8 +16,8 @@ use App\Models\Financing;
 use App\Models\SavingAccount;
 use App\Models\User;
 use App\Services\Admin\PembiayaanService;
-use App\Services\Admin\MemberAllocationService;
-use App\Services\Admin\RegisterMemberService;
+use App\Services\User\AlokasiAnggotaService;
+use App\Services\User\PendaftaranAnggotaService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +26,7 @@ use Inertia\Inertia;
 use RuntimeException;
 use Illuminate\Support\Facades\Auth;
 
-class UserController extends Controller
+class PenggunaController extends Controller
 {
     public function create()
     {
@@ -37,12 +37,12 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(StoreMemberRequest $request, RegisterMemberService $registerMemberService)
+    public function store(StoreMemberRequest $request, PendaftaranAnggotaService $pendaftaranAnggotaService)
     {
         $validated = $request->validated();
 
         try {
-            $memberCredentials = $registerMemberService->register($validated, $request);
+            $memberCredentials = $pendaftaranAnggotaService->register($validated, $request);
         } catch (RuntimeException $e) {
             return back()->withErrors([
                 'member' => $e->getMessage(),
@@ -55,14 +55,14 @@ class UserController extends Controller
         ]);
     }
 
-    public function allocation(Request $request, MemberAllocationService $memberAllocationService)
+    public function allocation(Request $request, AlokasiAnggotaService $alokasiAnggotaService)
     {
-        return Inertia::render('Admin/User/Allocation/Index', $memberAllocationService->buildPageData($request));
+        return Inertia::render('Admin/User/Allocation/Index', $alokasiAnggotaService->buildPageData($request));
     }
 
-    public function storeAllocation(StoreMemberAllocationRequest $request, MemberAllocationService $memberAllocationService)
+    public function storeAllocation(StoreMemberAllocationRequest $request, AlokasiAnggotaService $alokasiAnggotaService)
     {
-        $memberAllocationService->allocate($request->validated());
+        $alokasiAnggotaService->allocate($request->validated());
 
         return redirect()->route('admin.users.allocation')->with('success', 'Alokasi anggota berhasil disimpan.');
     }

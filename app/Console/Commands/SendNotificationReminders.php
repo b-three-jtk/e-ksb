@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\NotificationService;
+use App\Services\NotifikasiService;
 use Illuminate\Console\Command;
 
 class SendNotificationReminders extends Command
@@ -10,7 +10,7 @@ class SendNotificationReminders extends Command
     protected $signature = 'notifications:send-reminders';
     protected $description = 'Generate and send mandatory saving and installment reminders daily.';
 
-    public function __construct(private NotificationService $notificationService)
+    public function __construct(private NotifikasiService $notificationService)
     {
         parent::__construct();
     }

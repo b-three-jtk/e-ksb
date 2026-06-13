@@ -6,22 +6,22 @@ use App\Http\Controllers\Admin\PengurusController;
 use App\Http\Controllers\Admin\CashFlowController;
 use App\Http\Controllers\Admin\DasborController;
 use App\Http\Controllers\Admin\PembiayaanController;
-use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\NotifikasiController;
 use App\Http\Controllers\Admin\ProductTypeController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ResignationController;
-use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\SavingController;
-use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\PeranAksesController;
+use App\Http\Controllers\Admin\SimpananController;
+use App\Http\Controllers\PengaturanUmumController;
 use App\Http\Controllers\Admin\SupplierController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Auth\AuthenticationController;
+use App\Http\Controllers\Admin\PenggunaController;
+use App\Http\Controllers\AutentikasiController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\PembiayaanController as UserPembiayaanController;
-use App\Http\Controllers\User\MemberController;
-use App\Http\Controllers\User\NotificationController as UserNotificationController;
-use App\Http\Controllers\User\SavingController as UserSavingController;
+use App\Http\Controllers\User\AnggotaController;
+use App\Http\Controllers\User\NotifikasiController as UserNotifikasiController;
+use App\Http\Controllers\User\SimpananController as UserSimpananController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -59,10 +59,10 @@ Route::prefix('auth')
     ->middleware('guest')
     ->group(function () {
 
-        Route::get('/login', [AuthenticationController::class, 'loginPage'])
+        Route::get('/login', [AutentikasiController::class, 'loginPage'])
             ->name('login');
 
-        Route::post('/login', [AuthenticationController::class, 'login'])
+        Route::post('/login', [AutentikasiController::class, 'login'])
             ->name('login.store');
 
         Route::get('/forgot-password', [ForgotPasswordController::class, 'index'])
@@ -81,23 +81,23 @@ Route::prefix('auth')
 
 Route::redirect('/login', '/auth/login')->middleware('guest')->name('login');
 
-Route::post('/auth/logout', [AuthenticationController::class, 'logout'])
+Route::post('/auth/logout', [AutentikasiController::class, 'logout'])
     ->middleware('auth')
     ->name('auth.logout');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'revalidate'])->group(function () {
     //  Pengelolaan Anggota
-    Route::get('/users', [UserController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
-    Route::get('/users/create', [UserController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
-    Route::post('/users/store', [UserController::class, 'store'])->middleware('permission:create_anggota')->name('users.store');
-    Route::get('/users/show/{id}', [UserController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
-    Route::get('/users/edit/{id}', [UserController::class, 'edit'])->middleware('permission:edit_anggota')->name('users.edit');
-    Route::put('/users/{id}/update', [UserController::class, 'update'])->middleware('permission:edit_anggota')->name('users.update');
-    Route::get('/users/allocation', [UserController::class, 'allocation'])->middleware('permission:edit_anggota')->name('users.allocation');
-    Route::post('/users/allocation', [UserController::class, 'storeAllocation'])->middleware('permission:edit_anggota')->name('users.allocation.store');
-    Route::put('/users/{id}/disable', [UserController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
-    Route::get('/accounts/{id}/mutasi', [UserController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
-    Route::get('/financings/{id}/history', [UserController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
+    Route::get('/users', [PenggunaController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
+    Route::get('/users/create', [PenggunaController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
+    Route::post('/users/store', [PenggunaController::class, 'store'])->middleware('permission:create_anggota')->name('users.store');
+    Route::get('/users/show/{id}', [PenggunaController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
+    Route::get('/users/edit/{id}', [PenggunaController::class, 'edit'])->middleware('permission:edit_anggota')->name('users.edit');
+    Route::put('/users/{id}/update', [PenggunaController::class, 'update'])->middleware('permission:edit_anggota')->name('users.update');
+    Route::get('/users/allocation', [PenggunaController::class, 'allocation'])->middleware('permission:edit_anggota')->name('users.allocation');
+    Route::post('/users/allocation', [PenggunaController::class, 'storeAllocation'])->middleware('permission:edit_anggota')->name('users.allocation.store');
+    Route::put('/users/{id}/disable', [PenggunaController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
+    Route::get('/accounts/{id}/mutasi', [PenggunaController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
+    Route::get('/financings/{id}/history', [PenggunaController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
 
     // Pengelolaan Pengurus
     Route::get('/pengurus', [PengurusController::class, 'index'])->middleware('permission:view_pengurus')->name('admin.index');
@@ -114,14 +114,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::put('/resignations/{id}', [ResignationController::class, 'validate'])->middleware('permission:edit_pengunduran_diri')->name('resignations.validate');
 
     // Pengelolaan Simpanan
-    Route::get('/savings', [SavingController::class, 'index'])->middleware('permission:view_simpanan')->name('savings.index');
-    Route::get('/savings/withdrawal', [SavingController::class, 'createWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.create');
-    Route::post('/savings/withdrawal', [SavingController::class, 'storeWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.store');
-    Route::get('/savings/deposit', [SavingController::class, 'createDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.create');
-    Route::post('/savings/deposit', [SavingController::class, 'storeDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.store');
-    Route::get('/savings/show/{id}', [SavingController::class, 'show'])->middleware('permission:view_simpanan')->name('savings.show');
-    Route::get('/savings/export/csv', [SavingController::class, 'exportCsv'])->middleware('permission:view_simpanan')->name('savings.export.csv');
-    Route::get('/savings/export/pdf', [SavingController::class, 'exportPdf'])->middleware('permission:view_simpanan')->name('savings.export.pdf');
+    Route::get('/savings', [SimpananController::class, 'index'])->middleware('permission:view_simpanan')->name('savings.index');
+    Route::get('/savings/withdrawal', [SimpananController::class, 'createWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.create');
+    Route::post('/savings/withdrawal', [SimpananController::class, 'storeWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.store');
+    Route::get('/savings/deposit', [SimpananController::class, 'createDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.create');
+    Route::post('/savings/deposit', [SimpananController::class, 'storeDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.store');
+    Route::get('/savings/show/{id}', [SimpananController::class, 'show'])->middleware('permission:view_simpanan')->name('savings.show');
+    Route::get('/savings/export/csv', [SimpananController::class, 'exportCsv'])->middleware('permission:view_simpanan')->name('savings.export.csv');
+    Route::get('/savings/export/pdf', [SimpananController::class, 'exportPdf'])->middleware('permission:view_simpanan')->name('savings.export.pdf');
 
     // Pengelolaan Pembiayaan Murabahah
     Route::get('/financings', [PembiayaanController::class, 'index'])->middleware('permission:view_murabahah')->name('financings.index');
@@ -159,8 +159,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/kas/export/csv',[CashflowController::class, 'exportCsv'])->name('kas.export.csv');
 
     // Pengaturan Umum
-    Route::get('/settings', [SettingsController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
-    Route::post('/settings', [SettingsController::class, 'store'])->middleware('permission:create_pengaturan|edit_pengaturan')->name('settings.store');
+    Route::get('/settings', [PengaturanUmumController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
+    Route::post('/settings', [PengaturanUmumController::class, 'store'])->middleware('permission:create_pengaturan|edit_pengaturan')->name('settings.store');
 
     // Personal
     Route::get('/dashboard', [DasborController::class, 'index'])->name('dashboard');
@@ -169,40 +169,40 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
     // Notifikasi
-    Route::get('/notifications', [NotificationController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifications.index');
+    Route::get('/notifications', [NotifikasiController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifications.index');
 
     // Peran dan Akses
-    Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:view_peran_akses')->name('roles.index');
-    Route::get('/roles/create', [RoleController::class, 'create'])->middleware('permission:create_peran_akses')->name('roles.create');
-    Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:create_peran_akses')->name('roles.store');
-    Route::get('/roles/{id}', [RoleController::class, 'show'])->middleware('permission:view_peran_akses')->name('roles.show');
-    Route::get('/roles/{id}/edit', [RoleController::class, 'edit'])->middleware('permission:edit_peran_akses')->name('roles.edit');
-    Route::put('/roles/{id}', [RoleController::class, 'update'])->middleware('permission:edit_peran_akses')->name('roles.update');
+    Route::get('/roles', [PeranAksesController::class, 'index'])->middleware('permission:view_peran_akses')->name('roles.index');
+    Route::get('/roles/create', [PeranAksesController::class, 'create'])->middleware('permission:create_peran_akses')->name('roles.create');
+    Route::post('/roles', [PeranAksesController::class, 'store'])->middleware('permission:create_peran_akses')->name('roles.store');
+    Route::get('/roles/{id}', [PeranAksesController::class, 'show'])->middleware('permission:view_peran_akses')->name('roles.show');
+    Route::get('/roles/{id}/edit', [PeranAksesController::class, 'edit'])->middleware('permission:edit_peran_akses')->name('roles.edit');
+    Route::put('/roles/{id}', [PeranAksesController::class, 'update'])->middleware('permission:edit_peran_akses')->name('roles.update');
 });
 
 // User Routes
 Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'revalidate'])->group(function () {
-    Route::get('/dashboard', [MemberController::class, 'index'])->name('userDashboard');
+    Route::get('/dashboard', [AnggotaController::class, 'index'])->name('userDashboard');
 
-    Route::get('/profile', [MemberController::class, 'profileShow'])->name('profile.show');
-    Route::get('/profile/edit', [MemberController::class, 'profileEdit'])->name('profile.edit');
-    Route::put('/profile', [MemberController::class, 'profileUpdate'])->name('profile.update');
-    Route::post('/profile/picture', [MemberController::class, 'updateProfilePicture'])->name('profile.picture.update');
-    Route::delete('/profile/picture', [MemberController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
-    Route::post('/profile/update-password', [MemberController::class, 'updatePassword'])->name('profile.update-password');
+    Route::get('/profile', [AnggotaController::class, 'profileShow'])->name('profile.show');
+    Route::get('/profile/edit', [AnggotaController::class, 'profileEdit'])->name('profile.edit');
+    Route::put('/profile', [AnggotaController::class, 'profileUpdate'])->name('profile.update');
+    Route::post('/profile/picture', [AnggotaController::class, 'updateProfilePicture'])->name('profile.picture.update');
+    Route::delete('/profile/picture', [AnggotaController::class, 'deleteProfilePicture'])->name('profile.picture.delete');
+    Route::post('/profile/update-password', [AnggotaController::class, 'updatePassword'])->name('profile.update-password');
 
-    Route::get('/resign', [MemberController::class, 'createResign'])->name('resign.create');
-    Route::post('/resign', [MemberController::class, 'storeResign'])->name('resign.store');
+    Route::get('/resign', [AnggotaController::class, 'createResign'])->name('resign.create');
+    Route::post('/resign', [AnggotaController::class, 'storeResign'])->name('resign.store');
 
     // Notifikasi
-    Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/notifications/{notification}', [UserNotificationController::class, 'show'])->name('notifications.show');
-    Route::post('/notifications/mark-all-read', [UserNotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
-    Route::post('/notifications/mark-popup-displayed', [UserNotificationController::class, 'markPopupDisplayed'])->name('notifications.markPopupDisplayed');
+    Route::get('/notifications', [UserNotifikasiController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}', [UserNotifikasiController::class, 'show'])->name('notifications.show');
+    Route::post('/notifications/mark-all-read', [UserNotifikasiController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+    Route::post('/notifications/mark-popup-displayed', [UserNotifikasiController::class, 'markPopupDisplayed'])->name('notifications.markPopupDisplayed');
 
     // Ledger
-    Route::get('/ledger', [UserSavingController::class, 'index'])->name('ledger.index');
-    Route::get('/ledger/export', [UserSavingController::class, 'export'])->name('ledger.export');
+    Route::get('/ledger', [UserSimpananController::class, 'index'])->name('ledger.index');
+    Route::get('/ledger/export', [UserSimpananController::class, 'export'])->name('ledger.export');
 
     // Pembiayaan
     Route::get('/financings', [UserPembiayaanController::class, 'index'])->name('financing.index');

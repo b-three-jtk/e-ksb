@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\User;
+namespace App\Services;
 
 use App\Models\PointTransaction;
 use App\Models\User;
@@ -9,9 +9,15 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
-class UserProfileService
+class ProfilPenggunaService
 {
-    public function buildProfilePayload(User $user): array
+    /**
+     * Build profile payload data including point histories and document paths.
+     *
+     * @param User $user
+     * @return array
+     */
+    public function index(User $user): array
     {
         $member = $user->member?->loadMissing(['heirs', 'memberDocs']);
         $pointTransactions = $user->pointTransactions()
@@ -111,7 +117,14 @@ class UserProfileService
         ];
     }
 
-    public function updateProfile(User $user, array $validated): void
+    /**
+     * Update basic user and member profile details.
+     *
+     * @param User $user
+     * @param array $validated
+     * @return void
+     */
+    public function update(User $user, array $validated): void
     {
         $user->update([
             'name' => $validated['name'],
@@ -127,7 +140,14 @@ class UserProfileService
         }
     }
 
-    public function updateProfilePicture(User $user, UploadedFile $profilePicture): void
+    /**
+     * Update/upload user profile avatar picture.
+     *
+     * @param User $user
+     * @param UploadedFile $profilePicture
+     * @return void
+     */
+    public function updateAvatar(User $user, UploadedFile $profilePicture): void
     {
         if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
             Storage::disk('public')->delete($user->profile_picture);
@@ -140,7 +160,13 @@ class UserProfileService
         ]);
     }
 
-    public function deleteProfilePicture(User $user): void
+    /**
+     * Delete user profile avatar picture.
+     *
+     * @param User $user
+     * @return void
+     */
+    public function deleteAvatar(User $user): void
     {
         if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
             Storage::disk('public')->delete($user->profile_picture);
@@ -151,6 +177,13 @@ class UserProfileService
         ]);
     }
 
+    /**
+     * Update user password.
+     *
+     * @param User $user
+     * @param string $password
+     * @return void
+     */
     public function updatePassword(User $user, string $password): void
     {
         $user->update([

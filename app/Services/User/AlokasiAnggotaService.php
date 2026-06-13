@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Admin;
+namespace App\Services\User;
 
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
@@ -9,8 +9,14 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class MemberAllocationService
+class AlokasiAnggotaService
 {
+    /**
+     * Build the pagination and allocation list data for mapping view.
+     *
+     * @param Request $request
+     * @return array
+     */
     public function buildPageData(Request $request): array
     {
         $perPage = (int) $request->input('per_page', 10);
@@ -102,6 +108,12 @@ class MemberAllocationService
         ];
     }
 
+    /**
+     * Allocate members to a specific PJ.
+     *
+     * @param array{pj_user_id: mixed, member_ids: array} $validated
+     * @return void
+     */
     public function allocate(array $validated): void
     {
         DB::transaction(function () use ($validated) {
