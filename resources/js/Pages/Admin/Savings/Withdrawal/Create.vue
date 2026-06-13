@@ -16,7 +16,7 @@ const page = usePage()
 
 const breadcrumbItems = [
   { name: 'Dashboard', link: '/admin' },
-  { name: 'Pengelolaan Simpanan', link: '/admin/savings/list' },
+  { name: 'Pengelolaan Simpanan', link: '/admin/savings' },
   { name: 'Penarikan Simpanan' },
 ]
 

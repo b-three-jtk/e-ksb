@@ -270,10 +270,10 @@ describe('FR-16 Aplikasi harus menyediakan daftar transaksi terbaru anggota kope
         $ketua = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $ketua->assignRole('Ketua');
 
-        $responseSekretaris = $this->actingAs($sekretaris)->get('/admin/savings/list');
+        $responseSekretaris = $this->actingAs($sekretaris)->get('/admin/savings');
         $responseSekretaris->assertStatus(200);
 
-        $responseKetua = $this->actingAs($ketua)->get('/admin/savings/list');
+        $responseKetua = $this->actingAs($ketua)->get('/admin/savings');
         $responseKetua->assertStatus(200);
     });
 
@@ -281,7 +281,7 @@ describe('FR-16 Aplikasi harus menyediakan daftar transaksi terbaru anggota kope
         $anggota = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $anggota->assignRole('Anggota');
 
-        $response = $this->actingAs($anggota)->get('/admin/savings/list');
+        $response = $this->actingAs($anggota)->get('/admin/savings');
         $response->assertStatus(403);
     });
 });

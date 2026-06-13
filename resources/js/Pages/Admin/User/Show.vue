@@ -125,7 +125,7 @@ const openRiwayatModal = async (financing) => {
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
-    { name: 'Pengelolaan Anggota', link: '/admin/users/list' },
+    { name: 'Pengelolaan Anggota', link: '/admin/users' },
     { name: 'Detail Anggota' },
 ];
 </script>
