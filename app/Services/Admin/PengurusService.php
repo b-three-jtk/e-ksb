@@ -5,10 +5,11 @@ use App\Enums\MemberStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
+use App\Services\Admin\PeranAksesService;
 
 class PengurusService
 {
+    public function __construct(private PeranAksesService $peranAksesService) {}
     public function getSemuaPengurus($request, $sortBy, $sortDir)
     {
         return User::with(['roles', 'member'])
@@ -60,16 +61,10 @@ class PengurusService
             ]);
     }
 
-    public function getSemuaPeran()
-    {
-        return Role::where('name', '!=', UserRoleEnum::ANGGOTA->value)->get();
-    }
-
     public function storePengurus($data)
     {
         if (isset($data['user_id']) && $data['user_id']) {
             $user = User::findOrFail($data['user_id']);
-            $role = Role::findOrFail($data['role_id']);
 
             $user->update([
                 'name' => $data['name'],
@@ -78,7 +73,7 @@ class PengurusService
                 'phone_number' => $data['phone_number'],
             ]);
 
-            $user->syncRoles([$role->name]);
+            $this->peranAksesService->syncUserRole($user, $data['role_id']);
 
             $user->save();
         } else {
@@ -93,8 +88,7 @@ class PengurusService
                 'status' => UserStatusEnum::ACTIVE->value,
             ]);
 
-            $role = Role::findOrFail($data['role_id']);
-            $user->assignRole($role->name);
+            $this->peranAksesService->assignRoleToUser($user, $data['role_id']);
         }
     }
 
