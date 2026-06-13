@@ -10,6 +10,7 @@ import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import BaseTable from '../../../Components/Table/BaseTable.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
 import CardInfo from '../../../Components/CardInfo.vue'
+import Button from '../../../Components/Form/Button.vue'
 
 const props = defineProps<{
     accounts: {
@@ -248,7 +249,7 @@ const filters = reactive({
 
 const applyFilters = () => {
     router.get(
-        '/admin/accounts/list',
+        '/admin/accounts',
         {
             search: filters.search || undefined,
             jenis_akun: filters.jenis_akun || undefined,
@@ -357,15 +358,16 @@ const nomorAkunGuide = [
                     Ringkasan
                 </h2>
 
-                <button
+                <Button
                     v-if="props.can.tambah_akun"
+                    size="medium"
                     type="button"
                     @click="openCreateModal"
-                    class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold font-head px-5 py-2 rounded-xl shadow-sm transition-colors"
+                    class="bg-primary hover:bg-secondary text-white transition"
                 >
                     <Icon icon="mdi:plus" class="w-5 h-5" />
                     Tambah Akun
-                </button>
+                </Button>
             </div>
 
             <!-- Card Summary Info -->
