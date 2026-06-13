@@ -7,15 +7,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAdminRequest;
 use App\Http\Requests\UpdateAdminRequest;
 use App\Services\Admin\PengurusService;
+use App\Services\Admin\PeranAksesService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Spatie\Permission\Models\Role;
 
 class PengurusController extends Controller
 {
-    public function __construct(private PengurusService $pengurusService){}
+    public function __construct(
+        private PengurusService $pengurusService,
+        private PeranAksesService $peranAksesService
+    ){}
 
     /**
      * Display a listing of the resource.
@@ -33,9 +36,7 @@ class PengurusController extends Controller
 
         return inertia('Admin/Admins/List', [
             'admins' => $admins,
-            'roles' => Role::whereHas('users')
-                ->whereNotIn('name', [UserRoleEnum::ANGGOTA->value])
-                ->pluck('name'),
+            'roles' => $this->peranAksesService->getPeranNamesWithUsers(),
             'filters' => $request->only(['search', 'status', 'role', 'per_page', 'sort_by', 'sort_dir']),
             'title' => 'Pengelolaan Admin',
             'can' => [
@@ -51,7 +52,7 @@ class PengurusController extends Controller
     public function create()
     {
         return inertia('Admin/Admins/Create', [
-            'roles' => $this->pengurusService->getSemuaPeran(),
+            'roles' => $this->peranAksesService->getSemuaPeran(),
         ]);
     }
 
@@ -94,7 +95,7 @@ class PengurusController extends Controller
     {
         return inertia('Admin/Admins/Edit', [
             'admin' => $this->pengurusService->getPengurusById($id),
-            'roles' => $this->pengurusService->getSemuaPeran(),
+            'roles' => $this->peranAksesService->getSemuaPeran(),
         ]);
     }
 
@@ -108,10 +109,8 @@ class PengurusController extends Controller
             $data = $request->validated();
 
             $admin = $this->pengurusService->getPengurusById($id);
-            $role = Role::findOrFail($data['role_id']);
-
             $admin->update($data);
-            $admin->syncRoles([$role->name]);
+                $this->peranAksesService->syncUserRole($admin, $data['role_id']);
             DB::commit();
             return redirect()->route('admin.admin.index');
         } catch (\Exception $e) {
