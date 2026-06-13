@@ -16,7 +16,6 @@ const props = defineProps({
     pengurus: { type: Object, required: true },
     global_saving: { type: Object, required: true },
 })
-console.log(props.members[0].savingAccounts)
 
 const filteredSavingTypes = computed(() => {
   if (!selectedMember.value) return []
