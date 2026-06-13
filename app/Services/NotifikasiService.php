@@ -80,8 +80,7 @@ class NotifikasiService
     {
         $today = now()->startOfDay();
         $dueDate = now()->endOfMonth();
-        // $daysLeft = $today->diffInDays($dueDate, false);
-        $daysLeft = 1; //test
+        $daysLeft = $today->diffInDays($dueDate, false);
 
         $reminderType = $this->matchReminderType($daysLeft);
         if (!$reminderType) {
