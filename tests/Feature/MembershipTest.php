@@ -360,8 +360,8 @@ describe('FR-07 Aplikasi harus menyediakan daftar anggota dan pengurus untuk ket
         $resKetua = $this->actingAs($ketua)->get('/admin/pengurus');
         $resSekretaris = $this->actingAs($sekretaris)->get('/admin/pengurus');
 
-        $resAnggotabyKetua = $this->actingAs($ketua)->get('/admin/users/list');
-        $resAnggotabySekretaris = $this->actingAs($sekretaris)->get('/admin/users/list');
+        $resAnggotabyKetua = $this->actingAs($ketua)->get('/admin/users');
+        $resAnggotabySekretaris = $this->actingAs($sekretaris)->get('/admin/users');
 
         $resKetua->assertStatus(200);
         $resSekretaris->assertStatus(200);
@@ -376,7 +376,7 @@ describe('FR-07 Aplikasi harus menyediakan daftar anggota dan pengurus untuk ket
         $anggota->assignRole('Anggota');
 
         $res = $this->actingAs($anggota)->get('/admin/pengurus');
-        $resAnggota = $this->actingAs($anggota)->get('/admin/users/list');
+        $resAnggota = $this->actingAs($anggota)->get('/admin/users');
 
         $res->assertStatus(403);
         $resAnggota->assertStatus(403);

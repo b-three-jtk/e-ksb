@@ -12,6 +12,7 @@ import BaseTable from '../../../Components/Table/BaseTable.vue'
 import CardInfo from '../../../Components/CardInfo.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
 import UserIcon from '../../../Icons/UserIcon.vue'
+import Button from '../../../Components/Form/Button.vue'
 
 const props = defineProps({
     members: Object,
@@ -94,7 +95,7 @@ const filters = reactive({
 
 const applyFilters = () => {
     router.get(
-        '/admin/users/list',
+        '/admin/users',
         {
             search: filters.search || undefined,
             status: filters.status || undefined,
@@ -178,13 +179,15 @@ const breadcrumbItems = [
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Anggota</h2>
                 </div>
 
-                <Link
+                <Button
                     v-if="props.can.tambah_anggota"
+                    size="medium"
                     href="/admin/users/create"
-                    class="bg-green-500 hover:bg-green-600 text-white font-semibold font-head px-5 py-2 rounded-xl shadow-sm"
+                    class="text-white bg-primary hover:bg-secondary transition"
                 >
-                    + Tambah Anggota
-                </Link>
+                    <Icon icon="mdi:plus" class="w-5 h-5"/>
+                    Tambah Anggota
+                </Button>
             </div>
 
             <!-- Filter & Search -->
