@@ -7,6 +7,8 @@ import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import BaseTable from '../../../Components/Table/BaseTable.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
+import BaseSelect from '../../../Components/Form/BaseSelect.vue' 
+import BaseInput from '../../../Components/Form/BaseInput.vue'
 
 interface NotificationItem {
     id: number
@@ -110,19 +112,11 @@ watch(() => filters.search, () => {
 
 const getStatusClass = (status: string) => {
     const base = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold'
-
     switch (status) {
-        case 'sent':
-            return `${base} bg-green-100 text-green-700`
-
-        case 'draft':
-            return `${base} bg-yellow-100 text-yellow-700`
-
-        case 'failed':
-            return `${base} bg-red-100 text-red-700`
-
-        default:
-            return `${base} bg-gray-100 text-gray-700`
+        case 'sent': return `${base} bg-green-100 text-green-700`
+        case 'draft': return `${base} bg-yellow-100 text-yellow-700`
+        case 'failed': return `${base} bg-red-100 text-red-700`
+        default: return `${base} bg-gray-100 text-gray-700`
     }
 }
 
@@ -134,28 +128,16 @@ const getReadStatusClass = (isRead: boolean) => {
 
 const normalizeWhatsAppNumber = (phoneNumber: string) => {
     const digits = String(phoneNumber || '').replace(/\D/g, '')
-    if (!digits) {
-        return ''
-    }
-
-    if (digits.startsWith('62')) {
-        return digits
-    }
-
-    if (digits.startsWith('0')) {
-        return `62${digits.slice(1)}`
-    }
-
+    if (!digits) return ''
+    if (digits.startsWith('62')) return digits
+    if (digits.startsWith('0')) return `62${digits.slice(1)}`
     return digits
 }
 
 const createWhatsAppUrl = (phoneNumber: string, message: string) => {
     const waNumber = normalizeWhatsAppNumber(phoneNumber)
     const text = `Assalamualaikum, kami dari KSB ingin memberitahukan ${message || ''}`
-
-    return waNumber
-        ? `https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`
-        : '#'
+    return waNumber ? `https://wa.me/${waNumber}?text=${encodeURIComponent(text)}` : '#'
 }
 </script>
 
@@ -165,7 +147,6 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
 
         <div class="space-y-6">
 
-            <!-- FILTER -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -174,88 +155,53 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
                 </div>
 
                 <div class="p-6">
-                    <div class="grid gap-4 md:grid-cols-5">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">
-                                Periode
-                            </label>
+                    <div class="grid gap-4 md:grid-cols-5 items-end">
+                        
+                        <BaseInput
+                            v-model="filters.periode"
+                            type="month"
+                            label="Periode"
+                        />
 
-                            <input
-                                v-model="filters.periode"
-                                type="month"
-                                class="w-full rounded-lg border-gray-300"
-                            />
-                        </div>
+                        <BaseSelect
+                            v-model="filters.notification_type"
+                            label="Jenis Notifikasi"
+                        >
+                            <option value="">Semua Jenis</option>
+                            <option value="mandatory_saving">Simpanan Wajib</option>
+                            <option value="installment">Angsuran Pembiayaan</option>
+                        </BaseSelect>
 
-                        <div>
-                            <label class="block text-sm font-medium mb-2">
-                                Jenis Notifikasi
-                            </label>
+                        <BaseSelect
+                            v-model="filters.status"
+                            label="Status Pengiriman"
+                        >
+                            <option value="">Semua Status</option>
+                            <option value="draft">Draf</option>
+                            <option value="sent">Terkirim</option>
+                            <option value="failed">Gagal Kirim</option>
+                        </BaseSelect>
 
-                            <select
-                                v-model="filters.notification_type"
-                                class="w-full rounded-lg border-gray-300"
-                            >
-                                <option value="">Semua</option>
-                                <option value="mandatory_saving">
-                                    Simpanan Wajib
-                                </option>
-                                <option value="installment">
-                                    Angsuran Pembiayaan
-                                </option>
-                            </select>
-                        </div>
+                        <BaseSelect
+                            v-model="filters.is_read"
+                            label="Status Dibaca"
+                        >
+                            <option value="">Semua</option>
+                            <option value="0">Belum Dibaca</option>
+                            <option value="1">Sudah Dibaca</option>
+                        </BaseSelect>
 
-                        <div>
-                            <label class="block text-sm font-medium mb-2">
-                                Status Pengiriman
-                            </label>
+                        <BaseInput
+                            v-model="filters.search"
+                            type="text"
+                            label="Cari Nama Anggota"
+                        />
 
-                            <select
-                                v-model="filters.status"
-                                class="w-full rounded-lg border-gray-300"
-                            >
-                                <option value="">Semua</option>
-                                <option value="draft">Draf</option>
-                                <option value="sent">Terkirim</option>
-                                <option value="failed">Gagal Kirim</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium mb-2">
-                                Status Dibaca
-                            </label>
-
-                            <select
-                                v-model="filters.is_read"
-                                class="w-full rounded-lg border-gray-300"
-                            >
-                                <option value="">Semua</option>
-                                <option value="0">Belum Dibaca</option>
-                                <option value="1">Sudah Dibaca</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium mb-2">
-                                Cari Nama Anggota
-                            </label>
-
-                            <input
-                                v-model="filters.search"
-                                type="text"
-                                placeholder="Cari anggota..."
-                                class="w-full rounded-lg border-gray-300"
-                            />
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- TABLE -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                         Data Notifikasi
