@@ -14,7 +14,7 @@ const props = defineProps({
 
 const breadcrumbItems = [
     {name: 'Dashboard', link: '/admin'},
-    {name: 'Pengelolaan Simpanan', link: '/admin/savings/list'},
+    {name: 'Pengelolaan Simpanan', link: '/admin/savings'},
     {name: 'Transaksi Simpanan'},
 ];
 

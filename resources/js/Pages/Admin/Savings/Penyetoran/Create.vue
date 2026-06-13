@@ -381,8 +381,8 @@ function submitDeposit() {
 }
 
 const breadcrumbItems = [
-  { name: 'Dashboard',              link: '/admin' },
-  { name: 'Pengelolaan Simpanan',   link: '/admin/savings/list' },
+  { name: 'Dashboard', link: '/admin' },
+  { name: 'Pengelolaan Simpanan', link: '/admin/savings' },
   { name: 'Penyetoran Simpanan' },
 ]
 

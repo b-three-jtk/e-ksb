@@ -3,13 +3,15 @@ import { Link, usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { Icon } from '@iconify/vue'
 import { ref, computed, reactive, watch } from 'vue'
-import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
-import CardInfo from '../../../Components/CardInfo.vue'
-import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
-import BaseTable from '../../../Components/Table/BaseTable.vue'
-import Pagination from '../../../Components/Table/Pagination.vue'
+import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import CardInfo from '@/Components/CardInfo.vue'
+import BaseFunctionality from '@/Components/Table/BaseFunctionality.vue'
+import BaseTable from '@/Components/Table/BaseTable.vue'
+import Pagination from '@/Components/Table/Pagination.vue'
+import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify'
+import Button from '@/Components/Form/Button.vue'
 
 const isLoading = ref(false)
 
@@ -129,7 +131,7 @@ const applyFilters = () => {
     isLoading.value = true
 
     router.get(
-        '/admin/kas/list',
+        '/admin/kas',
         {
             search: filters.search || undefined,
             per_page: filters.per_page,
@@ -329,14 +331,15 @@ const periodeOptions = [
                     Ringkasan
                 </h2>
 
-                <button
+                <Button
                     v-if="props.can.tambah_alokasi"
                     @click="openModal"
-                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-secondary rounded-lg hover:bg-primary transition"
+                    size="medium"
+                    class="bg-primary hover:bg-secondary transition text-white"
                 >
                     <Icon icon="mdi:plus" class="w-4 h-4" />
                     Tambah Alokasi Kas
-                </button>
+            </Button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -393,33 +396,26 @@ const periodeOptions = [
                     <!-- Range Tanggal — muncul kalau pilih "Pilih Tanggal" -->
                     <template v-if="showDatePicker">
                         <div class="flex items-center gap-2">
-                            <input
+                            <BaseInputAdmin
                                 v-model="filters.date_from"
                                 type="date"
-                                class="border rounded-lg px-3 py-2 text-sm
-                                    bg-white text-gray-900
-                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                    focus:ring-2 focus:ring-blue-500"
+                                placeholder="Dari tanggal"
                             />
                             <span class="text-sm text-gray-500">s/d</span>
-                            <input
+                            <BaseInputAdmin
                                 v-model="filters.date_to"
                                 type="date"
-                                :min="filters.date_from"
-                                class="border rounded-lg px-3 py-2 text-sm
-                                    bg-white text-gray-900
-                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                    focus:ring-2 focus:ring-blue-500"
+                                placeholder="Sampai tanggal"
+                                :max-date="undefined"
                             />
                             <button
                                 @click="applyFilters"
-                                class="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                class="px-3 py-2 text-sm bg-primary text-white rounded-lg hover:bg-secondary transition"
                             >
                                 Terapkan
                             </button>
                         </div>
                     </template>
-
                     <!-- Export CSV -->
                     <a
                         :href="`/admin/kas/export/csv?${exportQuery}`"

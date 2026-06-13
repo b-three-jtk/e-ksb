@@ -19,7 +19,7 @@ const props = defineProps({
 
 const breadcrumbItems = [
   { name: 'Dashboard', link: '/admin/dashboard' },
-  { name: 'Keanggotaan', link: '/admin/users/list' },
+  { name: 'Keanggotaan', link: '/admin/users' },
   { name: 'Alokasi Anggota ke Penanggung Jawab' },
 ]
 

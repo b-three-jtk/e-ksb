@@ -67,7 +67,7 @@ const form = useForm({
 
 const breadcrumbItems = [
 	{ name: 'Dashboard', link: '/admin/dashboard' },
-	{ name: 'Anggota', link: '/admin/users/list' },
+	{ name: 'Anggota', link: '/admin/users' },
 	{ name: 'Tambah Anggota' },
 ]
 
@@ -205,7 +205,7 @@ const submitForm = () => {
 				</div>
 
 				<div class="mt-8 flex items-center justify-end gap-4">
-					<Button href="/admin/users/list" variant="light" size="medium">
+					<Button href="/admin/users" variant="light" size="medium">
 						Batal
 					</Button>
 					<Button @click="submitForm" :disabled="isSaveDisabled" variant="secondary" size="medium">

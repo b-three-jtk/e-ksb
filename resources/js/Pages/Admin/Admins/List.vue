@@ -119,8 +119,9 @@ const breadcrumbItems = [
                 <Button
                     v-if="props.can.tambah_pengurus"
                     size="medium"
-                    variant="secondary"
-                    href="/admin/pengurus/create">
+                    href="/admin/pengurus/create"
+                    class="text-white bg-primary hover:bg-secondary transition"    
+                >
                     <Icon icon="mdi:plus" class="w-5 h-5"/>
                     Tambah Pengurus
                 </Button>

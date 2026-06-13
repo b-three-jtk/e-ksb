@@ -3,11 +3,13 @@ import { Link, usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { Icon } from '@iconify/vue'
 import { ref, computed, reactive, watch } from 'vue'
-import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
-import CardInfo from '../../../Components/CardInfo.vue'
-import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
-import BaseTable from '../../../Components/Table/BaseTable.vue'
-import Pagination from '../../../Components/Table/Pagination.vue'
+import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import CardInfo from '@/Components/CardInfo.vue'
+import BaseFunctionality from '@/Components/Table/BaseFunctionality.vue'
+import BaseTable from '@/Components/Table/BaseTable.vue'
+import Pagination from '@/Components/Table/Pagination.vue'
+import { onMounted } from 'vue'
+import Button from '@/Components/Form/Button.vue'
 
 const isLoading = ref(false)
 const tabGroups = [
@@ -122,7 +124,7 @@ const getProductColor = (produk) => {
 const applyFilters = () => {
     isLoading.value = true
     router.get(
-        '/admin/savings/list',
+        '/admin/savings',
         {
             search:   filters.search || undefined,
             per_page: filters.per_page,
@@ -163,6 +165,10 @@ const handleAction = (type) => {
         router.visit('/admin/savings/withdrawal')
     }
 }
+
+onMounted(() => {
+    router.reload({ only: ['transactions', 'summary'] })
+})
 </script>
 
 <template>
@@ -178,13 +184,15 @@ const handleAction = (type) => {
 
                 <!-- Button + Dropdown -->
                 <div class="relative">
-                    <button v-if="can['create_simpanan']"
+                    <Button 
+                        v-if="can['create_simpanan']"
+                        size="medium"
                         @click="openActionDropdown = !openActionDropdown"
-                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-secondary rounded-lg hover:bg-primary transition"
+                        class="text-white bg-primary rounded-lg hover:bg-secondary transition"
                     >
                         <Icon icon="mdi:plus" class="w-4 h-4" />
                         Tambah Transaksi
-                    </button>
+                    </Button>
 
                     <div
                         v-if="openActionDropdown"

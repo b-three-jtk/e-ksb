@@ -41,7 +41,7 @@ defineProps({
         <div class="card-layout col-span-2 bg-light-bg! dark:bg-brand-900/60!">
             <h1 class="card-title text-center">Menu Pintasan</h1>
             <div class="flex flex-col gap-4 mt-6">
-                <Link href="/admin/kas/list"
+                <Link href="/admin/kas"
                     class="bg-white dark:bg-light-bg/20 dark:border-stroke/30 border border-stroke px-4 py-6 flex justify-between items-center rounded-xl hover:bg-gray-50 transition">
                     <div class="flex items-center gap-4">
                         <div

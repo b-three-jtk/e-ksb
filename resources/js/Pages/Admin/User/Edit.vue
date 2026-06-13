@@ -11,7 +11,7 @@ import Button from '@/Components/Form/Button.vue';
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
-    { name: 'Pengelolaan Anggota', link: '/admin/users/list' },
+    { name: 'Pengelolaan Anggota', link: '/admin/users' },
     { name: 'Edit Anggota' },
 ];
 

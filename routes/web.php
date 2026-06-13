@@ -87,7 +87,7 @@ Route::post('/auth/logout', [AutentikasiController::class, 'logout'])
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'revalidate'])->group(function () {
     //  Pengelolaan Anggota
-    Route::get('/users/list', [PenggunaController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
+    Route::get('/users', [PenggunaController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
     Route::get('/users/create', [PenggunaController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
     Route::post('/users/store', [PenggunaController::class, 'store'])->middleware('permission:create_anggota')->name('users.store');
     Route::get('/users/show/{id}', [PenggunaController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
@@ -114,7 +114,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::put('/resignations/{id}', [ResignationController::class, 'validate'])->middleware('permission:edit_pengunduran_diri')->name('resignations.validate');
 
     // Pengelolaan Simpanan
-    Route::get('/savings/list', [SimpananController::class, 'index'])->middleware('permission:view_simpanan')->name('savings.index');
+    Route::get('/savings', [SimpananController::class, 'index'])->middleware('permission:view_simpanan')->name('savings.index');
     Route::get('/savings/withdrawal', [SimpananController::class, 'createWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.create');
     Route::post('/savings/withdrawal', [SimpananController::class, 'storeWithdrawal'])->middleware('permission:create_simpanan')->name('savings.withdrawal.store');
     Route::get('/savings/deposit', [SimpananController::class, 'createDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.create');
@@ -148,11 +148,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/financings/{financing}/payments/store', [PembiayaanController::class, 'storePayment'])->middleware('permission:edit_murabahah')->name('financing.payments.store');
     Route::post('/financings/{financing}/payments/reschedule', [PembiayaanController::class, 'reschedulePayment'])->middleware('permission:edit_murabahah')->name('financing.payments.reschedule');
 
-    // Pengelolaan Kas
-    Route::get('/accounts/list', [AccountController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
+    // Pengelolaan Akun
+    Route::get('/accounts', [AccountController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
     Route::post('/accounts/create', [AccountController::class, 'store'])->middleware('permission:create_kas')->name('accounts.create');
     Route::patch('/accounts/{id}/status', [AccountController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
-    Route::get('/kas/list', [CashflowController::class, 'index'])->middleware('permission:view_kas')->name('kas.index');
+
+    // Pengelolaan Kas
+    Route::get('/kas', [CashflowController::class, 'index'])->middleware('permission:view_kas')->name('kas.index');
     Route::post('/kas/store', [CashflowController::class, 'store'])->middleware('permission:create_kas')->name('kas.store');
     Route::get('/kas/export/csv',[CashflowController::class, 'exportCsv'])->name('kas.export.csv');
 

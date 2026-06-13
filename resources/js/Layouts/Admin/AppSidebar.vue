@@ -48,7 +48,7 @@ const menuGroups = [
             {
                 icon: MembersIcon,
                 name: "Keanggotaan",
-                path: "/admin/users/list",
+                path: "/admin/users",
                 permission: "view_anggota"
             },
             {
@@ -78,13 +78,13 @@ const menuGroups = [
             {
                 icon: AccountIcon,
                 name: "Pengelolaan Akun",
-                path: "/admin/accounts/list",
+                path: "/admin/accounts",
                 permission: "view_kas"
             },
             {
                 icon: FinanceIcon,
                 name: "Pengelolaan Kas",
-                path: "/admin/kas/list",
+                path: "/admin/kas",
                 permission: "view_kas"
             },
             {
@@ -101,7 +101,7 @@ const menuGroups = [
             {
                 icon: SavingsIcon,
                 name: "Simpanan",
-                path: "/admin/savings/list",
+                path: "/admin/savings",
                 permission: "view_simpanan"
             },
             {
