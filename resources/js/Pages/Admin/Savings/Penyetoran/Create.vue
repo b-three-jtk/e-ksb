@@ -1,11 +1,12 @@
 <script setup>
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { Icon } from '@iconify/vue'
 import { toast } from 'vue3-toastify'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import ConfirmationModal from '@/Components/Savings/ConfirmationModal.vue'
+import ModalDocument from '@/Components/ModalDocument.vue'
 import Struk from '@/Components/Savings/Struk.vue'
 import Swal from 'sweetalert2'
 
@@ -15,6 +16,8 @@ const props = defineProps({
     accounts: { type: Array, required: true },
     pengurus: { type: Object, required: true },
     global_saving: { type: Object, required: true },
+    struk: Object,
+    receipt: String
 })
 
 const filteredSavingTypes = computed(() => {
@@ -100,6 +103,8 @@ const fixedNominal = computed(() => {
   }
   return null
 })
+
+const modalReceipt = ref(null)
 
 watch(jenisSimpanan, () => {
   if (fixedNominal.value) {
@@ -359,14 +364,18 @@ function submitDeposit() {
       })
     },
 
-    onSuccess: (page) => {
+    onSuccess: async (page) => {
       Swal.close()
       showDialog.value = false
-      toast.success('Penyetoran berhasil diposting', { position: 'bottom-right' })
-      dataStruk.value = page.props.struk
-      showStruk.value = true
+
+      toast.success('Penyetoran berhasil diposting', {position: 'bottom-right'})
+
       resetForm()
-      router.reload({ only: ['members'] })  // ← tambah ini
+      router.reload({ only: ['members'] })
+
+      await nextTick()
+
+      modalReceipt.value?.openModal()
     },
 
     onError: (errors) => {
@@ -909,26 +918,13 @@ const akadType = computed(() => {
       @close="showDialog = false"
     />
 
-    <div
-      v-if="showStruk && dataStruk"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-    >
-      <div class="bg-white rounded-xl shadow-lg p-4 max-w-sm w-full relative">
-
-        <!-- tombol close -->
-        <button
-          @click="showStruk = false"
-          class="absolute top-2 right-2 text-gray-500 hover:text-red-500"
-        >
-          ✕
-        </button>
-
-        <Struk
-          :transaksi="dataStruk"
-          mode="deposit"
-        />
-      </div>
-    </div>
+    <ModalDocument
+        ref="modalReceipt"
+        modal-id="receipt-modal"
+        title="Struk Penyetoran"
+        name="Struk Penyetoran"
+        :attachment="$page.props.receipt"
+    />
   </AdminLayout>
 </template>
 

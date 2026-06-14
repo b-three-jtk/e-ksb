@@ -146,7 +146,10 @@ class SimpananServices
             report($receiptException);
         }
 
-        return $strukData;
+        return [
+            'struk' => $strukData,
+            'receipt' => $receiptPath ? Storage::url($receiptPath) : null,
+        ];
     }
 
     private function storeReceiptWithdrawalPdf(SavingTransaction $transaction, array $strukData): ?string
@@ -155,10 +158,10 @@ class SimpananServices
             $pdf = Pdf::loadView('exports.withdrawal_receipt', [
                 'struk' => $strukData,
             ])->setPaper([0, 0, 226.77, 600], 'portrait');
-
+            
             $directory = 'member_docs/receipts/' . now()->format('Y-m');
             Storage::disk('public')->makeDirectory($directory);
-
+            
             $filename = 'struk-withdrawal-' . $transaction->id . '.pdf';
             $path = $directory . '/' . $filename;
 
