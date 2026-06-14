@@ -37,7 +37,7 @@ const totalPrice = ref(0)
 const monthlyInstallment = computed(() => {
     if (tenor.value <= 0) return 0
     const costPrice = Number(props.data.financing.predicted_cost_price)
-    const margin = Math.round(costPrice * 0.08)
+    const margin = Math.round(costPrice * (props.data.margin_percentage / 100))
     totalPrice.value = costPrice + margin
     return Math.round(totalPrice.value / tenor.value)
 })

@@ -28,7 +28,7 @@ watch(() => props.form.financing.price_per_unit, () => {
     const costPrice = (parseFloat(props.form.financing.price_per_unit) || 0)
         * (parseFloat(props.form.financing.qty) || 0)
     props.form.financing.cost_price = costPrice
-    props.form.financing.margin_amount = costPrice * 0.08
+    props.form.financing.margin_amount = costPrice * (props.data.margin_percentage / 100)
 }, { immediate: true })
 
 const totalPrice = computed(() => {

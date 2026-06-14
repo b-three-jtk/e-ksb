@@ -13,6 +13,7 @@ use App\Enums\PositionEnum;
 use App\Models\Financial;
 use App\Models\Financing;
 use App\Models\FinancingItem;
+use App\Models\GlobalSetting;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\JournalEntry;
@@ -127,6 +128,7 @@ class PembiayaanService
             'conditions' => array_column(ConditionEnum::cases(), 'value'),
             'productTypes' => DB::table('product_types')->select('id', 'product_type_name')->get(),
             'suppliers' => DB::table('suppliers')->select('id', 'supplier_name', 'address')->get(),
+            'margin_percentage' => GlobalSetting::where('key', 'murabahah_margin_percentage')->where('effective_date', '<=', now())->latest()->first()?->value,
         ];
     }
 
