@@ -321,11 +321,11 @@ onMounted(() => {
             >
                 <template #actions>
                     <a
-                        :href="`/admin/savings/export/csv?${exportQuery}`"
+                        :href="`/admin/savings/export/excel?${exportQuery}`"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg"
                     >
                         <Icon icon="mdi:file-delimited-outline" class="w-4 h-4" />
-                        Export CSV
+                        Export Excel
                     </a>
                     <!-- <a
                         :href="`/admin/savings/export/pdf?${exportQuery}`"
@@ -388,7 +388,7 @@ onMounted(() => {
                     <div class="flex justify-center">
                         <Link
                             :href="`/admin/savings/show/${row.id}`"
-                            class="text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400 transition-colors"
+                            class="text-gray-400 hover:text-primary dark:text-gray-500 dark:hover:text-blue-400 transition-colors"
                         >
                             <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                         </Link>

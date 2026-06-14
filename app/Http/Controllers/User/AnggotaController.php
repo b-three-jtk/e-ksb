@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Services\ProfilPenggunaService;
+use App\Services\User\DasborService;
+use App\Services\User\PengunduranDiriService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -28,56 +30,20 @@ class AnggotaController extends Controller
     /**
      * Create a new controller instance.
      */
+
     public function __construct(
-        protected ProfilPenggunaService $profilPenggunaService
+        protected DasborService $dasborService,
+        protected ProfilPenggunaService $profilPenggunaService,
+        protected PengunduranDiriService $pengunduranDiriService,
     ) {}
 
     public function index(Request $request)
     {
         $user = auth()->user()->load('member');
 
-        $totalSaving = DB::table('saving_accounts')
-            ->where('member_id', $user->member->id)
-            ->sum('balance');
-
-        $totalInstallment = Installment::whereHas('financing', function ($q) use ($user) {
-            $q->where('member_id', $user->member->id)
-            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value);
-        })
-        ->whereIn('status', [
-            InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
-            InstallmentPaymentScheduleStatusEnum::PENDING->value,
-            InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
-        ])
-        ->sum('amount');
-
-        $ledger = SavingTransaction::whereHas(
-            'savingAccount.member',
-            fn($q) => $q->where('member_id', $user->member->id)
-        )
-            ->with('savingAccount')
-            ->latest('transaction_date')
-            ->limit(5)
-            ->get()
-            ->map(function ($trx) {
-                return [
-                    'date' => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                    'product' => $trx->savingAccount->saving_type,
-                    'type' => $trx->transaction_type,
-                    'amount' => 'Rp ' . number_format($trx->saving_amount, 0, ',', '.'),
-                ];
-            });
-
-        $totalPoints = PointTransaction::where('user_id', $user->id)
-            ->sum('amount_earned');
-
         return inertia('User/Dashboard', [
-            'summary' => [
-                'total_saving' => $totalSaving,
-                'total_installment' => $totalInstallment,
-                'total_points' => $totalPoints,
-            ],
-            'ledger' => $ledger,
+            'summary' => $this->dasborService->getSummary($user->member->id, $user->id),
+            'ledger'  => $this->dasborService->getLedger($user->member->id),
         ]);
     }
 
@@ -87,30 +53,18 @@ class AnggotaController extends Controller
 
         $hasExistingResign = $user->member->status === MemberStatusEnum::RESIGNED_REQUESTED->value;
 
-        Log::info('User ' . $user->id . ' is accessing resignation form with existing resign: ' . ($hasExistingResign ? 'yes' : 'no')) ;
+        Log::info('User ' . $user->id . ' is accessing resignation form with existing resign: ' . ($hasExistingResign ? 'yes' : 'no'));
 
-        $totalSaving = SavingTransaction::whereHas(
-            'savingAccount',
-            fn($q) =>
-            $q->where('member_id', $user->member->id)
-        )
-            ->sum(DB::raw("
-                CASE
-                    WHEN transaction_type = 'Penyetoran' THEN saving_amount
-                    WHEN transaction_type = 'Penarikan' THEN -saving_amount
-                END
-            "));
-
-        $totalObligation = DB::table('get_total_financing')->where('member_id', $user->member->id)->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->sum('total_financing');
+        $resignData = $this->pengunduranDiriService->getResignData($user->member->id);
 
         return inertia('User/Resign/Create', [
             'member' => [
                 ...$user->toArray(),
-                'total_saving' => $totalSaving,
-                'total_obligation' => $totalObligation,
+                'total_saving'     => $resignData['total_saving'],
+                'total_obligation' => $resignData['total_obligation'],
             ],
             'has_existing_resign' => $hasExistingResign,
-            'member_status' => $user->member->status,
+            'member_status'       => $user->member->status,
         ]);
     }
 
@@ -120,7 +74,7 @@ class AnggotaController extends Controller
 
         $hasExistingResign = $user->member->status === MemberStatusEnum::RESIGNED_REQUESTED->value;
 
-        Log::info('User ' . $user->id . ' is trying to submit resignation with existing resign: ' . ($hasExistingResign ? 'yes' : 'no')) ;
+        Log::info('User ' . $user->id . ' is trying to submit resignation with existing resign: ' . ($hasExistingResign ? 'yes' : 'no'));
 
         if ($hasExistingResign) {
             return back()->withErrors([
@@ -134,11 +88,7 @@ class AnggotaController extends Controller
             ]);
         }
 
-        $totalObligation = DB::table('get_total_financing')
-            ->where('member_id', $user->member->id)
-            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->sum('total_financing');
-
+        $totalObligation = $this->pengunduranDiriService->getTotalObligation($user->member->id);
 
         if ($totalObligation > 0) {
             return back()->withErrors([
@@ -148,35 +98,23 @@ class AnggotaController extends Controller
 
         $data = $request->validated();
 
-        $path = $data['document']->store('resign_docs', 'public');
-
-        if (!$path || !Storage::disk('public')->exists($path)) {
-            return back()->withErrors([
-                'document' => 'Gagal menyimpan dokumen. Silakan coba lagi.',
-            ]);
-        }
-
-        DB::beginTransaction();
         try {
-            MemberDoc::create([
-                'doc_name' => 'Dokumen Pengunduran Diri',
-                'doc_attachment' => $path,
-                'member_id' => $user->member->id,
-            ]);
-
-            $member = $user->member;
-            $member->status = MemberStatusEnum::RESIGNED_REQUESTED->value;
-            $member->save();
-
-            DB::commit();
+            $this->pengunduranDiriService->submitResign($data['document'], $user->member->id, $user->member);
 
             return redirect()
                 ->route('user.userDashboard')
                 ->with('success', 'Permohonan pengunduran diri berhasil dikirim.');
+
         } catch (\Exception $e) {
-            DB::rollBack();
+            $errorMsg = $e->getMessage() === 'storage_failed'
+                ? 'Gagal menyimpan dokumen. Silakan coba lagi.'
+                : 'Terjadi kesalahan saat mengajukan pengunduran diri. Silakan coba lagi.';
+
             return back()->withErrors([
-                'resign' => 'Terjadi kesalahan saat mengajukan pengunduran diri. Silakan coba lagi.',
+                match($e->getMessage()) {
+                    'storage_failed' => 'document',
+                    default          => 'resign',
+                } => $errorMsg,
             ]);
         }
     }

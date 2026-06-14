@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Enums\PositionEnum;
 
-class JournalService
+class JurnalService
 {
     public function create(array $entries, ?string $date = null, ?string $userId = null): string
     {

@@ -16,6 +16,7 @@ use App\Models\Financing;
 use App\Models\SavingAccount;
 use App\Models\User;
 use App\Services\Admin\PembiayaanService;
+use App\Services\Admin\AnggotaService;
 use App\Services\User\AlokasiAnggotaService;
 use App\Services\User\PendaftaranAnggotaService;
 use Exception;
@@ -28,6 +29,11 @@ use Illuminate\Support\Facades\Auth;
 
 class PenggunaController extends Controller
 {
+
+    public function __construct(
+        protected AnggotaService $anggotaService
+    ) {}
+
     public function create()
     {
         return Inertia::render('Admin/User/Create/Index', [
@@ -83,105 +89,10 @@ class PenggunaController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
-        $search = $request->input('search');
-        $status = $request->input('status');
-
-        $allowedSorts = ['name', 'joined_date'];
-        $sortBy = in_array($request->sort_by, $allowedSorts)
-            ? $request->sort_by
-            : 'joined_date';
-        $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-
-        $memberBaseQuery = User::with('member.savingAccounts')
-            ->whereHas('member');
-
-        if (auth()->user()->hasRole(UserRoleEnum::PJANGGOTA->value)) {
-            $memberBaseQuery->whereHas('member', function ($q) {
-                $q->where('pj_user_id', auth()->id());
-            });
-        }
-
-        $verifiedMembersQuery = (clone $memberBaseQuery)
-            ->whereNotNull('joined_date');
-
-        $query = clone $memberBaseQuery;
-
-        $query
-            ->whereNotNull('joined_date')
-            ->whereNotNull('user_code');
-
-        $totalVerifiedMembers = $verifiedMembersQuery->count();
-
-        $activeMembers = (clone $verifiedMembersQuery)
-            ->where('status', UserStatusEnum::ACTIVE)
-            ->count();
-
-        $newThisMonth = (clone $verifiedMembersQuery)
-            ->whereMonth('joined_date', now()->month)
-            ->whereYear('joined_date', now()->year)
-            ->count();
-
-        if ($search) {
-            $query->where(
-                fn($q) =>
-                $q->where('name', 'ILIKE', "%{$search}%")
-                    ->orWhere('user_code', 'ILIKE', "%{$search}%")
-                    ->orWhere('phone_number', 'ILIKE', "%{$search}%")
-            );
-        }
-
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        $members = $query
-            ->orderBy($sortBy, $sortDir)
-            ->paginate($perPage)
-            ->withQueryString()
-            ->through(fn($user) => [
-                'id' => $user->id,
-                'no_anggota' => $user->user_code,
-                'name' => $user->name,
-                'joined_at' => $user->joined_date
-                    ? \Carbon\Carbon::parse($user->joined_date)->format('d/m/Y')
-                    : null,
-                'phone' => $user->phone_number,
-                'status' => $user->status,
-                'total_simpanan' => 'Rp ' . number_format(
-                    DB::table('saving_accounts')->where('member_id', $user->member?->id)->sum('balance') ?? 0,
-                    0,
-                    ',',
-                    '.'
-                ),
-                'avatar' => $user->profile_picture
-                    ? asset('storage/' . $user->profile_picture)
-                    : null,
-            ]);
-
         return Inertia::render('Admin/User/List', [
-            'members' => $members,
-            'filters' => $request->only([
-                'search',
-                'status',
-                'per_page',
-                'sort_by',
-                'sort_dir'
-            ]),
-            'summary' => [
-                'total_verified' => $totalVerifiedMembers,
-
-                'active' => $activeMembers,
-                'new_this_month' => $newThisMonth,
-
-                'active_percent' => $totalVerifiedMembers > 0
-                    ? round(($activeMembers / $totalVerifiedMembers) * 100)
-                    : 0,
-
-                'new_percent' => $totalVerifiedMembers > 0
-                    ? round(($newThisMonth / $totalVerifiedMembers) * 100)
-                    : 0,
-            ],
+            'members' => $this->anggotaService->getListAnggota($request),
+            'filters' => $request->only(['search', 'status', 'per_page', 'sort_by', 'sort_dir']),
+            'summary' => $this->anggotaService->getSummary(),
             'statuses' => array_column(UserStatusEnum::cases(), 'value'),
             'can' => [
                 'tambah_anggota' => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),

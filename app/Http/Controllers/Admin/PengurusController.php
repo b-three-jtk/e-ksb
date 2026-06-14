@@ -25,23 +25,14 @@ class PengurusController extends Controller
      */
     public function index(Request $request)
     {
-        $allowedSorts = ['name', 'created_at', 'email'];
-        $sortBy = in_array($request->sort_by, $allowedSorts)
-            ? $request->sort_by
-            : 'created_at';
-
-        $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
-
-        $admins = $this->pengurusService->getSemuaPengurus($request, $sortBy, $sortDir);
-
         return inertia('Admin/Admins/List', [
-            'admins' => $admins,
-            'roles' => $this->peranAksesService->getPeranNamesWithUsers(),
+            'admins'  => $this->pengurusService->getSemuaPengurus($request),
+            'roles'   => $this->peranAksesService->getPeranNamesWithUsers(),
             'filters' => $request->only(['search', 'status', 'role', 'per_page', 'sort_by', 'sort_dir']),
-            'title' => 'Pengelolaan Admin',
-            'can' => [
+            'title'   => 'Pengelolaan Admin',
+            'can'     => [
                 'tambah_pengurus' => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
-                'edit_pengurus' => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
+                'edit_pengurus'   => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
             ],
         ]);
     }

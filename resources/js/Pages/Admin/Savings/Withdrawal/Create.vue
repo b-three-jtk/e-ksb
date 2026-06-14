@@ -6,13 +6,12 @@ import SavingListSection from './SavingListSection.vue'
 import DetailSection from './DetailSection.vue'
 import ConfirmationModal from '@/Components/Savings/ConfirmationModal.vue'
 import Struk from '@/Components/Savings/Struk.vue'
+import ModalDocument from '@/Components/ModalDocument.vue'
 import { Icon } from '@iconify/vue'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { toast } from 'vue3-toastify'
 import { getTodayYmd } from '@/utils/date'
-
-const page = usePage()
 
 const breadcrumbItems = [
   { name: 'Dashboard', link: '/admin' },
@@ -20,36 +19,38 @@ const breadcrumbItems = [
   { name: 'Penarikan Simpanan' },
 ]
 
-const members = computed(() => page.props.members || [])
-const initialStruk = computed(() => page.props.flash?.struk || null)
+const page = usePage()
 
-const showStrukInitial = ref(!!initialStruk.value)
-const dataStruk = ref(initialStruk.value)
+const members = computed(() => page.props.members || [])
+
 
 const selectedMember = ref(null)
 const selectedSaving = ref(null)
 const withdrawalFormRef = ref(null)
 const currentFormData = ref({})
 const showConfirmation = ref(false)
-const showStruk = ref(showStrukInitial.value)
+const showStruk = ref(false)
+const dataStruk = ref(null)
+const receipt = ref(null)
 const isSubmitting = ref(false)
-
-async function handleFlashReceipt(struk) {
-  if (!struk) return
-
-  dataStruk.value = struk
-  showStruk.value = true
-
-  toast('Penarikan simpanan berhasil disimpan!', {
-    type: 'success',
-    position: 'bottom-right',
-  })
-}
+const modalReceipt = ref(null)
 
 watch(
   () => page.props.flash?.struk,
   (struk) => {
-    handleFlashReceipt(struk)
+    if (!struk) return
+
+    dataStruk.value = struk
+    receipt.value = page.props.flash?.receipt || null
+    showStruk.value = true
+
+    nextTick(() => {
+      modalReceipt.value?.openModal?.()
+    })
+
+    toast.success('Penarikan simpanan berhasil disimpan', {
+      position: 'bottom-right'
+    })
   },
   { immediate: true }
 )
@@ -217,31 +218,14 @@ function reset() {
           </button>
         </div>
 
-        <Transition name="modal">
-          <div
-            v-if="showStruk && dataStruk"
-            class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50"
-            @click.self="showStruk = false"
-          >
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-full max-w-sm">
-              <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div>
-                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">Transaksi Berhasil</h3>
-                  <p class="text-sm text-gray-500 mt-0.5">Berikut kuitansi penarikan</p>
-                </div>
-                <button
-                  @click="showStruk = false"
-                  class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                >
-                  <Icon icon="mdi:close" width="22" />
-                </button>
-              </div>
-              <div class="overflow-y-auto max-h-[70vh] p-5 flex justify-center">
-                <Struk mode="withdrawal" :transaksi="dataStruk" />
-              </div>
-            </div>
-          </div>
-        </Transition>
+        <ModalDocument
+          v-if="showStruk"
+          ref="modalReceipt"
+          modal-id="withdrawal-receipt"
+          title="Struk Penarikan"
+          name="Struk Penarikan"
+          :attachment="receipt"
+        />
       </div>
     </div>
   </AdminLayout>
