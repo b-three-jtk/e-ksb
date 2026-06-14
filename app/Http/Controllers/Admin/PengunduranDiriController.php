@@ -2,19 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\FinancingReqStatusEnum;
-use App\Enums\InstallmentPaymentScheduleStatusEnum;
-use App\Enums\MemberStatusEnum;
-use App\Enums\UserRoleEnum;
-use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Models\Financing;
-use App\Models\Member;
-use App\Models\User;
+use App\Services\Admin\PengunduranDiriService;
 use Illuminate\Http\Request;
 
 class PengunduranDiriController extends Controller
 {
+    public function __construct(private PengunduranDiriService $service){}
     /**
      * Display a listing of the resource.
      */
@@ -25,23 +19,8 @@ class PengunduranDiriController extends Controller
         $sort_by = $request->input('sort_by', 'created_at');
         $sort_dir = $request->input('sort_dir', 'desc');
 
-        $query = User::whereHas('roles', function ($q) {
-                $q->where('name', UserRoleEnum::ANGGOTA->value);
-            })
-            ->whereHas('member', function ($q) {
-                $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
-            })
-            ->when($search, function ($q) use ($search) {
-                return $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('user_code', 'like', "%{$search}%")
-                    ->orWhere('phone_number', 'like', "%{$search}%");
-            });
-
-        // Apply sorting
-        $query->orderBy($sort_by, $sort_dir);
-
         // Paginate results
-        $members = $query->paginate($per_page)->withQueryString();
+        $members = $this->service->getSemuaPengunduranDiri($search, $per_page, $sort_by, $sort_dir);
 
         return inertia('Admin/User/Resignation/List', [
             'members' => $members,
@@ -60,24 +39,12 @@ class PengunduranDiriController extends Controller
     public function validation($id)
     {
         $data = [];
-        $data['user'] = User::with(['member' => function ($q) {
-            $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
-        }, 'member.memberDocs'])->findOrFail($id);
+        $data['user'] = $this->service->getAnggotaMengundurkanDiri($id);
 
         $resignationDoc = $data['user']->member->memberDocs?->first()?->doc_attachment ? asset('storage/' . $data['user']->member->memberDocs->first()->doc_attachment) : null;
 
         $totalSavings = $data['user']->member->savingAccounts()->sum('balance');
-        $totalObligation = Financing::with('installment.payment')->where('member_id', $data['user']->member->id)
-            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->get()
-            ->sum(function ($financing) {
-                $installment = $financing->installment;
-                if (!$installment) return 0;
-                $totalPrice = $financing->cost_price + $financing->margin - $financing->down_payment;
-                $totalUnpaid = $totalPrice - $installment->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)->sum('amount');
-
-                return $totalUnpaid;
-        });
+        $totalObligation = $this->service->getTotalKewajiban($data['user']);
 
         return inertia('Admin/User/Resignation/Validation', [
             'data' => [
@@ -91,16 +58,8 @@ class PengunduranDiriController extends Controller
 
     public function validate(string $id)
     {
-        $member = Member::with('user')
-            ->where('status', MemberStatusEnum::RESIGNED_REQUESTED)
-            ->where('user_id', $id)
-            ->firstOrFail();
-
-        $member->status = MemberStatusEnum::RESIGNED->value;
-        $member->save();
-
-        $member->user->status = UserStatusEnum::INACTIVE->value;
-        $member->user->save();
+        $member = $this->service->getAnggotaMengundurkanDiri($id);
+        $this->service->updateStatusAnggota($member);
 
         return to_route('admin.resignations.index')->with([
             'success' => 'Pengunduran diri berhasil divalidasi.',
