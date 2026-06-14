@@ -13,7 +13,7 @@ use App\Models\Member;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class ResignationController extends Controller
+class PengunduranDiriController extends Controller
 {
     /**
      * Display a listing of the resource.

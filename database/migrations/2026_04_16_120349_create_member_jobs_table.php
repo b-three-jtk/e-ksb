@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('member_id');
             $table->string('employment_status');
-            $table->string('job_title');
+            $table->string('job_title')->nullable();
             $table->string('company_or_business_name')->nullable();
             $table->string('business_field')->nullable();
             $table->integer('tenure_year')->nullable();

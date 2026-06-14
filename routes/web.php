@@ -7,13 +7,12 @@ use App\Http\Controllers\Admin\CashFlowController;
 use App\Http\Controllers\Admin\DasborController;
 use App\Http\Controllers\Admin\PembiayaanController;
 use App\Http\Controllers\Admin\NotifikasiController;
-use App\Http\Controllers\Admin\ProductTypeController;
 use App\Http\Controllers\Admin\ProfileController;
-use App\Http\Controllers\Admin\ResignationController;
+use App\Http\Controllers\Admin\PengunduranDiriController;
 use App\Http\Controllers\Admin\PeranAksesController;
 use App\Http\Controllers\Admin\SimpananController;
 use App\Http\Controllers\PengaturanUmumController;
-use App\Http\Controllers\Admin\SupplierController;
+use App\Http\Controllers\Admin\PemasokController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\AutentikasiController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -109,9 +108,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/pengurus/members', [PengurusController::class, 'searchMember'])->middleware('permission:view_anggota')->name('members.search');
 
     // Pengelolaan Pengunduran Diri
-    Route::get('/resignations/list', [ResignationController::class, 'index'])->middleware('permission:view_pengunduran_diri')->name('resignations.index');
-    Route::get('/resignations/{id}', [ResignationController::class, 'validation'])->middleware('permission:edit_pengunduran_diri')->name('resignations.validation');
-    Route::put('/resignations/{id}', [ResignationController::class, 'validate'])->middleware('permission:edit_pengunduran_diri')->name('resignations.validate');
+    Route::get('/resignations/list', [PengunduranDiriController::class, 'index'])->middleware('permission:view_pengunduran_diri')->name('resignations.index');
+    Route::get('/resignations/{id}', [PengunduranDiriController::class, 'validation'])->middleware('permission:edit_pengunduran_diri')->name('resignations.validation');
+    Route::put('/resignations/{id}', [PengunduranDiriController::class, 'validate'])->middleware('permission:edit_pengunduran_diri')->name('resignations.validate');
 
     // Pengelolaan Simpanan
     Route::get('/savings', [SimpananController::class, 'index'])->middleware('permission:view_simpanan')->name('savings.index');
@@ -132,8 +131,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/financings/draft', [PembiayaanController::class, 'saveDraft'])->middleware('permission:create_murabahah')->name('financings.draft');
     Route::post('/financings/finalize', [PembiayaanController::class, 'finalize'])->middleware('permission:create_murabahah')->name('financings.finalize');
     Route::post('/financings/store', [PembiayaanController::class, 'store'])->middleware('permission:create_murabahah')->name('financings.store');
-    Route::resource('product-types', ProductTypeController::class)->middleware('permission:create_murabahah');
-    Route::resource('suppliers', SupplierController::class)->middleware('permission:create_murabahah');
+    Route::post('/product-types', [PembiayaanController::class, 'storeProductType'])->middleware('permission:create_murabahah')->name('product-types.store');
+    Route::post('/suppliers', [PembiayaanController::class, 'storeSupplier'])->middleware('permission:create_murabahah')->name('suppliers.store');
     Route::get('/financings/draft/{id}', [PembiayaanController::class, 'loadDraft'])->middleware('permission:create_murabahah')->name('financings.load-draft');
     Route::get('/financings/validation/{id}', [PembiayaanController::class, 'showValidation'])->middleware('permission:approve_murabahah')->name('financings.validation');
     Route::put('/financings/validate/{id}', [PembiayaanController::class, 'validate'])->middleware('permission:approve_murabahah')->name('financings.validation.submit');

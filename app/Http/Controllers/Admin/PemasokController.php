@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 
-class SupplierController extends Controller
+class PemasokController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,17 +27,7 @@ class SupplierController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'supplier_name' => 'required|string|max:255|unique:suppliers,supplier_name',
-            'address' => 'required|string|max:255',
-        ]);
 
-        $supplier = Supplier::create($validatedData);
-
-        return response()->json($supplier);
-    }
 
     /**
      * Display the specified resource.

@@ -27,11 +27,13 @@ use App\Models\InstallmentPaymentTransaction;
 use App\Models\JournalEntry;
 use App\Models\Member;
 use App\Models\MemberDoc;
+use App\Models\ProductType;
 use App\Models\SavingAccount;
+use App\Models\Supplier;
 use App\Models\User;
-use App\Services\Admin\PembiayaanService;
 use App\Services\Admin\JournalService;
 use App\Services\Admin\PelunasanService;
+use App\Services\Admin\PembiayaanService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
@@ -1141,7 +1143,7 @@ class PembiayaanController extends Controller
                 'is_early_repayment'     => false,
                 'nominal'                => $validated['nominal'],
                 'principal_amount'       => $principalPerMonth,
-                'margin_amount'          => $marginPerMonth, 
+                'margin_amount'          => $marginPerMonth,
                 'payment_date'           => $validated['payment_date'],
                 'installment_id'         => $validated['installment_id'],
                 'updated_by'             => auth()->id(),
@@ -1319,5 +1321,28 @@ class PembiayaanController extends Controller
                 'message' => $th->getMessage(),
             ]);
         }
+    }
+
+    public function storeProductType(Request $request)
+    {
+        $validatedData = $request->validate([
+            'product_type_name' => 'required|string|max:255|unique:product_types,product_type_name',
+        ]);
+
+        $productType = ProductType::create($validatedData);
+
+        return response()->json($productType);
+    }
+
+    public function storeSupplier(Request $request)
+    {
+        $validatedData = $request->validate([
+            'supplier_name' => 'required|string|max:255|unique:suppliers,supplier_name',
+            'address' => 'required|string|max:255',
+        ]);
+
+        $supplier = Supplier::create($validatedData);
+
+        return response()->json($supplier);
     }
 }
