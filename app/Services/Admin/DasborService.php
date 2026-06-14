@@ -648,11 +648,23 @@ public function getPetaPembiayaan($tanggalAkhir)
 
     public function getTotalPermohonanPembiayaan($tanggalAkhir, $tanggalAkhirSebelumnya)
     {
-        $total = Financing::whereIn('status', [FinancingReqStatusEnum::PENDING_REVIEW->value, FinancingReqStatusEnum::APPROVED->value, FinancingReqStatusEnum::REJECTED->value])->where('requested_date', '<=', $tanggalAkhir)->count();
+        $total = Financing::whereIn('status', [
+            FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+            FinancingReqStatusEnum::PENDING_REVIEW->value,
+            FinancingReqStatusEnum::APPROVED->value,
+            FinancingReqStatusEnum::REJECTED->value,
+            FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
+        ])->where('requested_date', '<=', $tanggalAkhir)->count();
 
         $persen = $this->hitungPersen(
             $total,
-            Financing::whereIn('status', [FinancingReqStatusEnum::PENDING_REVIEW->value, FinancingReqStatusEnum::APPROVED->value, FinancingReqStatusEnum::REJECTED->value])->where('requested_date', '<=', $tanggalAkhirSebelumnya)->count()
+            Financing::whereIn('status', [
+                FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                FinancingReqStatusEnum::PENDING_REVIEW->value,
+                FinancingReqStatusEnum::APPROVED->value,
+                FinancingReqStatusEnum::REJECTED->value,
+                FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
+            ])->where('requested_date', '<=', $tanggalAkhirSebelumnya)->count()
         );
 
         return [$total, $persen];

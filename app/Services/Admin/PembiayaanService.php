@@ -1,30 +1,199 @@
 <?php
 namespace App\Services\Admin;
 
+use App\Enums\ConditionEnum;
+use App\Enums\EducationEnum;
+use App\Enums\FinancialCostEnum;
+use App\Enums\FinancialIncomeEnum;
 use App\Enums\FinancingReqStatusEnum;
+use App\Enums\HeirEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
+use App\Enums\MaritalStatusEnum;
+use App\Enums\PositionEnum;
 use App\Models\Financial;
 use App\Models\Financing;
 use App\Models\FinancingItem;
-use App\Models\InstallmentPaymentTransaction;
-use App\Models\MemberDoc;
 use App\Models\Installment;
+use App\Models\InstallmentPaymentTransaction;
+use App\Models\JournalEntry;
+use App\Models\MemberDoc;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
 use App\Services\PembiayaanService as SharedPembiayaanService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class PembiayaanService
 {
     public function __construct(private SharedPembiayaanService $sharedPembiayaanService)
     {
     }
+
+    public function getSemuaPembiayaan($search, $tab, $verifier)
+    {
+        return Financing::with([
+            'member.user' => function ($query) {
+                $query->select('id', 'name', 'user_code');
+            },
+            'installment',
+            'financingItem.productType' => function ($query) {
+                $query->select('product_types.id', 'product_types.product_type_name');
+            }
+        ])
+            ->when($search, function ($q) use ($search) {
+                $q->whereHas('member.user', function ($userQuery) use ($search) {
+                    $userQuery->where(function ($userSearchQuery) use ($search) {
+                        $userSearchQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('user_code', 'like', "%{$search}%");
+                    });
+                });
+            })
+            ->when($tab === 'request', function ($q) use ($verifier) {
+                if (in_array($verifier->getRoleNames()->first(), ['Ketua Murabahah'])) {
+                    $q->where(
+                        'status',
+                        FinancingReqStatusEnum::PENDING_REVIEW->value,
+                    );
+                } else if (in_array($verifier->getRoleNames()->first(), ['Staf Murabahah'])) {
+                    $q->whereIn('status', [
+                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                    ]);
+                } else {
+                    $q->where('status', FinancingReqStatusEnum::WAITING_DOCUMENTS->value);
+                }
+            })
+            ->when($tab === 'validated', function ($q) {
+                $q->whereIn('status', [
+                    FinancingReqStatusEnum::APPROVED->value,
+                    FinancingReqStatusEnum::REJECTED->value,
+                    FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
+                ]);
+            })
+            ->when($tab === 'active', function ($q) {
+                $q->where(
+                    'status',
+                    FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                );
+            })->latest('updated_at');
+    }
+
+    public function getTotalPermohonanPembiayaan()
+    {
+        return Financing::whereIn('status', [
+            FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+            FinancingReqStatusEnum::PENDING_REVIEW->value,
+            FinancingReqStatusEnum::APPROVED->value,
+            FinancingReqStatusEnum::REJECTED->value,
+            FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
+        ])->count();
+    }
+
+    public function getModalBelumDiputar()
+    {
+        $modalCredit = JournalEntry::whereHas(
+            'account',
+            function ($q) {
+                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
+            }
+        )
+        ->where('position', PositionEnum::CREDIT->value)
+        ->sum('nominal');
+
+        $modalDebit = JournalEntry::whereHas(
+            'account',
+            function ($q) {
+                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
+            }
+        )
+        ->where('position', PositionEnum::DEBIT->value)
+        ->sum('nominal');
+
+        return $modalDebit - $modalCredit;
+    }
+
+    public function getDataOpsi()
+    {
+        return [
+            'educations' => array_column(EducationEnum::cases(), 'value'),
+            'marriageStatuses' => array_column(MaritalStatusEnum::cases(), 'value'),
+            'incomes' => array_column(FinancialIncomeEnum::cases(), 'value'),
+            'expenses' => array_column(FinancialCostEnum::cases(), 'value'),
+            'relationships' => array_column(HeirEnum::cases(), 'value'),
+            'conditions' => array_column(ConditionEnum::cases(), 'value'),
+            'productTypes' => DB::table('product_types')->select('id', 'product_type_name')->get(),
+            'suppliers' => DB::table('suppliers')->select('id', 'supplier_name', 'address')->get(),
+        ];
+    }
+
+    public function getPembiataanById($id)
+    {
+        return Financing::with([
+            'member.user',
+            'member.heirs',
+            'member.financials',
+            'member.memberDocs',
+            'member.memberJobs',
+            'financingItem.productType',
+            'collateral',
+            'installment' => function ($q) {
+                $q->orderBy('installment_no');
+            },
+            'wakalah',
+        ])->findOrFail($id);
+    }
+
+    public function getDraftPembiayaan($id)
+    {
+        return Financing::where('id', $id)
+            ->whereIn('status', [
+                FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                FinancingReqStatusEnum::APPROVED->value,
+                FinancingReqStatusEnum::REJECTED->value,
+                FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
+            ])
+            ->with([
+                'member.user',
+                'member.financials',
+                'member.memberDocs',
+                'member.heirs',
+                'member.memberJobs',
+                'financingItem.productType',
+                'financingItem.supplier',
+                'collateral',
+                'wakalah',
+            'verification.verifier'
+            ])
+            ->first();
+    }
+
+    public function getTotalPembiayaanBerlangsung()
+    {
+        return Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->count();
+    }
+
+    public function getPembiayaanBelumDireview($id)
+    {
+        return Financing::where('id', $id)
+            ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
+            ->with([
+                'member.user',
+                'member.financials',
+                'member.memberDocs',
+                'member.heirs',
+                'member.memberJobs',
+                'financingItem.productType',
+                'financingItem.supplier',
+                'collateral',
+                'wakalah',
+            ])
+            ->first();
+    }
+
     public function syncMemberData(User $user, array $memberData, Request $request): void
     {
         $user->update([

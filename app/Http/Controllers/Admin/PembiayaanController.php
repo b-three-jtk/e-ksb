@@ -47,50 +47,7 @@ class PembiayaanController extends Controller
         $search = $request->input('search');
         $tab = $request->input('tab', 'all');
 
-        return Financing::with([
-            'member.user' => function ($query) {
-                $query->select('id', 'name', 'user_code');
-            },
-            'installment',
-            'financingItem.productType' => function ($query) {
-                $query->select('product_types.id', 'product_types.product_type_name');
-            }
-        ])
-            ->when($search, function ($q) use ($search) {
-                $q->whereHas('member.user', function ($userQuery) use ($search) {
-                    $userQuery->where(function ($userSearchQuery) use ($search) {
-                        $userSearchQuery->where('name', 'like', "%{$search}%")
-                            ->orWhere('user_code', 'like', "%{$search}%");
-                    });
-                });
-            })
-            ->when($tab === 'request', function ($q) use ($verifier) {
-                if (in_array($verifier->getRoleNames()->first(), ['Ketua Murabahah'])) {
-                    $q->where(
-                        'status',
-                        FinancingReqStatusEnum::PENDING_REVIEW->value,
-                    );
-                } else if (in_array($verifier->getRoleNames()->first(), ['Staf Murabahah'])) {
-                    $q->whereIn('status', [
-                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-                    ]);
-                } else {
-                    $q->where('status', FinancingReqStatusEnum::WAITING_DOCUMENTS->value);
-                }
-            })
-            ->when($tab === 'validated', function ($q) {
-                $q->whereIn('status', [
-                    FinancingReqStatusEnum::APPROVED->value,
-                    FinancingReqStatusEnum::REJECTED->value,
-                    FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
-                ]);
-            })
-            ->when($tab === 'active', function ($q) {
-                $q->where(
-                    'status',
-                    FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-                );
-            })->latest('updated_at');
+        return $this->financingService->getSemuaPembiayaan($search, $tab, $verifier);
     }
 
     /**
@@ -127,18 +84,9 @@ class PembiayaanController extends Controller
             });
 
         $summary = [
-            [
-                'title' => 'Total Pengajuan Pembiayaan Murabahah',
-                'value' => Financing::whereIn('status', [
-                    FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-                    FinancingReqStatusEnum::PENDING_REVIEW->value,
-                    FinancingReqStatusEnum::APPROVED->value,
-                    FinancingReqStatusEnum::REJECTED->value,
-                    FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
-                ])->count()
-            ],
-            ['title' => 'Total Pembiayaan Berlangsung', 'value' => Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->count()],
-            ['title' => 'Total Modal Belum Diputar', 'value' => $this->getModalBelumDiputar()],
+            ['title' => 'Total Pengajuan Pembiayaan Murabahah','value' => $this->financingService->getTotalPermohonanPembiayaan()],
+            ['title' => 'Total Pembiayaan Berlangsung', 'value' => $this->financingService->getTotalPembiayaanBerlangsung()],
+            ['title' => 'Total Modal Belum Diputar', 'value' => $this->financingService->getModalBelumDiputar()],
         ];
 
         return inertia('Admin/Financing/Index', [
@@ -146,46 +94,6 @@ class PembiayaanController extends Controller
             'summary' => $summary,
             'filters' => compact('search', 'perPage', 'tab', 'sortBy', 'sortDir'),
         ]);
-    }
-
-    private function getModalBelumDiputar()
-    {
-        $modalCredit = JournalEntry::whereHas(
-            'account',
-            function ($q) {
-                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
-            }
-        )
-        ->where('position', PositionEnum::CREDIT->value)
-        ->sum('nominal');
-
-        $modalDebit = JournalEntry::whereHas(
-            'account',
-            function ($q) {
-                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
-            }
-        )
-        ->where('position', PositionEnum::DEBIT->value)
-        ->sum('nominal');
-
-        return $modalDebit - $modalCredit;
-    }
-
-    /**
-     * Get common dropdown data
-     */
-    private function getCommonData(): array
-    {
-        return [
-            'educations' => array_column(EducationEnum::cases(), 'value'),
-            'marriageStatuses' => array_column(MaritalStatusEnum::cases(), 'value'),
-            'incomes' => array_column(FinancialIncomeEnum::cases(), 'value'),
-            'expenses' => array_column(FinancialCostEnum::cases(), 'value'),
-            'relationships' => array_column(HeirEnum::cases(), 'value'),
-            'conditions' => array_column(ConditionEnum::cases(), 'value'),
-            'productTypes' => DB::table('product_types')->select('id', 'product_type_name')->get(),
-            'suppliers' => DB::table('suppliers')->select('id', 'supplier_name', 'address')->get(),
-        ];
     }
 
     /**
@@ -232,18 +140,12 @@ class PembiayaanController extends Controller
         ];
     }
 
-    public function show(string $id, PembiayaanService $service)
+    public function show(string $id)
     {
-        $financing = Financing::with([
-            'financingItem.productType',
-            'financingItem.supplier',
-            'installment' => fn($q) => $q->orderBy('installment_no'),
-            'installment.payment',
-            'collateral',
-        ])->findOrFail($id);
+        $financing = $this->financingService->getPembiataanById($id);
 
-        $service->computeFinancingSummary($financing);
-        $service->computeNextDueDate($financing);
+        $this->financingService->computeFinancingSummary($financing);
+        $this->financingService->computeNextDueDate($financing);
 
         $financing->setRelation('installment', $financing->installment->map(function ($item) {
             return [
@@ -265,82 +167,21 @@ class PembiayaanController extends Controller
      */
     public function create()
     {
-        // Pre-load members dengan criteria tertentu untuk search
-        $activeMembers = Member::with([
-            'user:id,user_code,name,email,nik,phone_number',
-            'memberDocs:id,member_id,doc_name,doc_attachment',
-            'financials',
-            'financings:id,member_id,status',
-            'savingAccounts:id,member_id,saving_type,created_at,balance'
-        ])
-            ->whereHas('user', fn($q) =>
-                $q->whereHas('roles', fn($roleQ) => $roleQ->where('name', 'Anggota'))
-                    ->where('status', UserStatusEnum::ACTIVE->value)
-            )
-            ->limit(20)
-            ->get()
-            ->map(function ($member) {
-                $hasActiveFinancing = $member->financings?->whereIn(
-                    'status',
-                    [
-                        FinancingReqStatusEnum::PENDING_REVIEW->value,
-                        FinancingReqStatusEnum::REJECTED->value,
-                        FinancingReqStatusEnum::APPROVED->value,
-                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-                        FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-                    ]
-                )->isNotEmpty() ?? false;
-
-                $member->is_have_no_obligation = !$hasActiveFinancing;
-
-                $hasEligibleSaving = $member->savingAccounts
-                    ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
-                    ->where('created_at', '<=', now()->subMonth())
-                    ->isNotEmpty();
-
-                $member->is_have_eligible_saving = $hasEligibleSaving;
-                $member->family_card = $member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kk')->first()->doc_attachment) : null;
-                $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
-                $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
-
-                return $member;
-            });
-
         return inertia('Admin/Financing/Create', [
-            'data' => $this->getCommonData(),
-            'preloadedMembers' => $activeMembers,
+            'data' => $this->financingService->getDataOpsi(),
         ]);
     }
 
     public function loadDraft(string $id)
     {
-        $financing = Financing::where('id', $id)
-            ->whereIn('status', [
-                FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-                FinancingReqStatusEnum::APPROVED->value,
-                FinancingReqStatusEnum::REJECTED->value,
-                FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
-            ])
-            ->with([
-                'member.user',
-                'member.financials',
-                'member.memberDocs',
-                'member.heirs',
-                'member.memberJobs',
-                'financingItem.productType',
-                'financingItem.supplier',
-                'collateral',
-                'wakalah',
-            'verification.verifier'
-            ])
-            ->first();
+        $financing = $this->financingService->getDraftPembiayaan($id);
 
         if (!$financing) {
             throw ValidationException::withMessages(['Data pembiayaan tidak ditemukan atau tidak dalam status yang valid untuk dimuat sebagai draft']);
         }
 
         return inertia('Admin/Financing/Create', [
-            'data' => $this->getCommonData(),
+            'data' => $this->financingService->getDataOpsi(),
             'financing' => [
                 'member' => $this->formatMemberData($financing->member),
                 'financing' => [
@@ -398,20 +239,7 @@ class PembiayaanController extends Controller
 
     public function showValidation(string $id)
     {
-        $financing = Financing::where('id', $id)
-            ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
-            ->with([
-                'member.user',
-                'member.financials',
-                'member.memberDocs',
-                'member.heirs',
-                'member.memberJobs',
-                'financingItem.productType',
-                'financingItem.supplier',
-                'collateral',
-                'wakalah',
-            ])
-            ->first();
+        $financing = $this->financingService->getPembiayaanBelumDireview($id);
 
         return inertia('Admin/Financing/Validation', [
             'data' => [
@@ -462,9 +290,7 @@ class PembiayaanController extends Controller
         ]);
 
         try {
-            $financing = Financing::where('id', $id)
-                ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
-                ->firstOrFail();
+            $financing = $this->financingService->getPembiayaanBelumDireview($id);
 
                 if ($validated['status'] === FinancingReqStatusEnum::APPROVED->value) {
 
