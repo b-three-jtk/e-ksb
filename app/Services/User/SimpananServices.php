@@ -9,7 +9,7 @@ use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Models\MemberBankAccount;
 use App\Models\Account;
-use App\Services\Admin\JournalService;
+use App\Services\Admin\JurnalService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +19,7 @@ use Illuminate\Validation\ValidationException;
 
 class SimpananServices
 {
-    public function __construct(private JournalService $journalService)
+    public function __construct(private JurnalService $jurnalService)
     {
     }
 

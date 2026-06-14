@@ -30,7 +30,7 @@ use App\Models\MemberDoc;
 use App\Models\SavingAccount;
 use App\Models\User;
 use App\Services\Admin\PembiayaanService;
-use App\Services\Admin\JournalService;
+use App\Services\Admin\JurnalService;
 use App\Services\Admin\PelunasanService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -525,7 +525,7 @@ class PembiayaanController extends Controller
                     'Dana Alokasi Pembiayaan Murabahah'
                 )->firstOrFail();
 
-                app(JournalService::class)->create(
+                app(JurnalService::class)->create(
                     [
                         [
                             'account' => $pembiayaanDalamProses->no_ref_account,
@@ -702,7 +702,7 @@ class PembiayaanController extends Controller
 
                     if ($selisih > 0) {
 
-                        app(JournalService::class)->create(
+                        app(JurnalService::class)->create(
                             [
                                 [
                                     'account' => $danaAlokasi->no_ref_account,
@@ -725,7 +725,7 @@ class PembiayaanController extends Controller
                         );
                     } elseif ($selisih == 0){
 
-                        app(JournalService::class)->create(
+                        app(JurnalService::class)->create(
                             [
                                 [
                                     'account' => $piutangMurabahah->no_ref_account,
@@ -749,7 +749,7 @@ class PembiayaanController extends Controller
 
                     if ($downPayment > 0)
                     {
-                        app(JournalService::class)->create(
+                        app(JurnalService::class)->create(
                             [
                                 [
                                     'account' => $kas->no_ref_account,
@@ -766,7 +766,7 @@ class PembiayaanController extends Controller
                             auth()->id()
                         );
 
-                        app(JournalService::class)->create(
+                        app(JurnalService::class)->create(
                             [
                                 [
                                     'account' => $uangMukaMurabahah->no_ref_account,
@@ -803,7 +803,7 @@ class PembiayaanController extends Controller
 
                     if ($selisih > 0)
                     {
-                        app(JournalService::class)->create(
+                        app(JurnalService::class)->create(
                         [
                             [
                                 'account' => $danaAlokasi->no_ref_account,
@@ -831,7 +831,7 @@ class PembiayaanController extends Controller
                         );
                     } elseif ($selisih == 0)
                     {
-                        app(JournalService::class)->create(
+                        app(JurnalService::class)->create(
                         [
                             [
                                 'account' => $kas->no_ref_account,

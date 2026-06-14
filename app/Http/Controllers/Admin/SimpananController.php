@@ -18,7 +18,7 @@ use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Models\Account;
-use App\Services\Admin\JournalService;
+use App\Services\Admin\JurnalService;
 use App\Services\User\SimpananServices;
 use App\Services\PengaturanUmumService;
 use Barryvdh\DomPDF\Facade\Pdf;
