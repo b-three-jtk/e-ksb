@@ -10,8 +10,12 @@ use App\Services\Admin\PeranAksesService;
 class PengurusService
 {
     public function __construct(private PeranAksesService $peranAksesService) {}
-    public function getSemuaPengurus($request, $sortBy, $sortDir)
+    public function getSemuaPengurus($request)
     {
+        $allowedSorts = ['name', 'created_at', 'email'];
+        $sortBy  = in_array($request->sort_by, $allowedSorts) ? $request->sort_by : 'created_at';
+        $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
+
         return User::with(['roles', 'member'])
             ->whereHas('roles', function ($q) {
                 $q->whereNotIn('name', [UserRoleEnum::ANGGOTA->value]);
