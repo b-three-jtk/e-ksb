@@ -292,7 +292,7 @@ const columns = computed(() => {
     const base = [
         { key: 'no', label: 'No', align: 'left' as const },
         { key: 'nomor_akun', label: 'Nomor Akun', sortable: true, align: 'left' as const },
-        { key: 'nama_akun', label: 'Nama Akun', sortable: true },
+        { key: 'nama_akun', label: 'Nama Akun' },
         { key: 'jenis_akun', label: 'Jenis Akun', align: 'left' as const },
         { key: 'saldo', label: 'Saldo', align: 'left' as const },
         { key: 'status', label: 'Status', align: 'left' as const },
