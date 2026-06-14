@@ -3,7 +3,7 @@
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Admin\AkunController;
 use App\Http\Controllers\Admin\PengurusController;
-use App\Http\Controllers\Admin\CashFlowController;
+use App\Http\Controllers\Admin\AruskasController;
 use App\Http\Controllers\Admin\DasborController;
 use App\Http\Controllers\Admin\PembiayaanController;
 use App\Http\Controllers\Admin\NotifikasiController;
@@ -154,9 +154,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::patch('/accounts/{id}/status', [AkunController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
 
     // Pengelolaan Kas
-    Route::get('/kas', [CashflowController::class, 'index'])->middleware('permission:view_kas')->name('kas.index');
-    Route::post('/kas/store', [CashflowController::class, 'store'])->middleware('permission:create_kas')->name('kas.store');
-    Route::get('/kas/export/csv',[CashflowController::class, 'exportCsv'])->name('kas.export.csv');
+    Route::get('/kas', [AruskasController::class, 'index'])->middleware('permission:view_kas')->name('kas.index');
+    Route::post('/kas/store', [AruskasController::class, 'store'])->middleware('permission:create_kas')->name('kas.store');
+    Route::get('/kas/export/csv',[AruskasController::class, 'exportCsv'])->name('kas.export.csv');
 
     // Pengaturan Umum
     Route::get('/settings', [PengaturanUmumController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
