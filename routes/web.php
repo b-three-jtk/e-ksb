@@ -156,7 +156,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     // Pengelolaan Kas
     Route::get('/kas', [AruskasController::class, 'index'])->middleware('permission:view_kas')->name('kas.index');
     Route::post('/kas/store', [AruskasController::class, 'store'])->middleware('permission:create_kas')->name('kas.store');
-    Route::get('/kas/export/csv',[AruskasController::class, 'exportCsv'])->name('kas.export.csv');
+    Route::get('/kas/export/excel',[AruskasController::class, 'exportExcel'])->name('kas.export.excel');
 
     // Pengaturan Umum
     Route::get('/settings', [PengaturanUmumController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');

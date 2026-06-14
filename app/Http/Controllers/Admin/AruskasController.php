@@ -11,6 +11,9 @@ use App\Services\Admin\JurnalService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use App\Exports\ArusKasExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AruskasController extends Controller
 {
@@ -72,45 +75,37 @@ class AruskasController extends Controller
         return back()->with('success', 'Alokasi kas berhasil diposting');
     }
 
-    public function exportCsv(Request $request)
+    public function exportExcel(Request $request)
     {
-        $filters  = $request->only(['search', 'periode', 'date_from', 'date_to']);
-        $filename = 'arus_kas_' . now()->format('Ymd_His') . '.csv';
-        $rows     = $this->aruskasService->buildCsvRows($filters);
+        $filters = $request->only([
+            'search',
+            'periode',
+            'date_from',
+            'date_to',
+            'sort_by',
+            'sort_dir'
+        ]);
 
-        $headers = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => "attachment; filename={$filename}",
-        ];
+        $rows = $this->aruskasService->buildCsvRows($filters);
 
-        $callback = function () use ($rows) {
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, ['Koperasi Syariah Berkah']);
-            fputcsv($handle, ['Laporan Arus Kas']);
-
-            $periode = 'Semua Periode';
-            if (
-                !empty($filters['date_from']) &&
-                !empty($filters['date_to'])
-            ) {
-                $periode =
-                    Carbon\Carbon::parse($filters['date_from'])->format('d/m/Y')
-                    . ' s.d. '
-                    . Carbon\Carbon::parse($filters['date_to'])->format('d/m/Y');
-            }
-
-            fputcsv($handle, ["Periode : {$periode}"]);
-            fputcsv($handle, []);
-            fputcsv($handle, ['Tanggal', 'Akun', 'Jenis Akun', 'Debit', 'Kredit']);
-
-            foreach ($rows as $row) {
-                fputcsv($handle, $row);
-            }
-
-            fclose($handle);
+        $periode = match ($filters['periode'] ?? '') {
+            '1_minggu' => '1 Minggu Terakhir',
+            '1_bulan'  => '1 Bulan Terakhir',
+            '3_bulan'  => '3 Bulan Terakhir',
+            '1_tahun'  => '1 Tahun Terakhir',
+            'custom' => (
+                !empty($filters['date_from']) && !empty($filters['date_to'])
+                    ? Carbon::parse($filters['date_from'])->format('d/m/Y')
+                        .' s.d. '.
+                    Carbon::parse($filters['date_to'])->format('d/m/Y')
+                    : 'Periode Kustom'
+            ),
+            default => 'Semua Periode',
         };
 
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(
+            new ArusKasExport($rows, $periode),
+            'arus_kas_'.now()->format('Ymd_His').'.xlsx'
+        );
     }
 }

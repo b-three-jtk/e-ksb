@@ -418,11 +418,11 @@ const periodeOptions = [
                     </template>
                     <!-- Export CSV -->
                     <a
-                        :href="`/admin/kas/export/csv?${exportQuery}`"
+                        :href="`/admin/kas/export/excel?${exportQuery}`"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                     >
                         <Icon icon="mdi:file-delimited-outline" class="w-4 h-4" />
-                        Export CSV
+                        Export Excel
                     </a>
                 </template>
             </BaseFunctionality>
