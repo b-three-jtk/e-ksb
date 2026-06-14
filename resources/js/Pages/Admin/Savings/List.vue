@@ -388,7 +388,7 @@ onMounted(() => {
                     <div class="flex justify-center">
                         <Link
                             :href="`/admin/savings/show/${row.id}`"
-                            class="text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400 transition-colors"
+                            class="text-gray-400 hover:text-primary dark:text-gray-500 dark:hover:text-blue-400 transition-colors"
                         >
                             <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                         </Link>
