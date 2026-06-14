@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\UserRoleEnum;
-use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\AkunController;
 use App\Http\Controllers\Admin\PengurusController;
 use App\Http\Controllers\Admin\CashFlowController;
 use App\Http\Controllers\Admin\DasborController;
@@ -149,9 +149,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/financings/{financing}/payments/reschedule', [PembiayaanController::class, 'reschedulePayment'])->middleware('permission:edit_murabahah')->name('financing.payments.reschedule');
 
     // Pengelolaan Akun
-    Route::get('/accounts', [AccountController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
-    Route::post('/accounts/create', [AccountController::class, 'store'])->middleware('permission:create_kas')->name('accounts.create');
-    Route::patch('/accounts/{id}/status', [AccountController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
+    Route::get('/accounts', [AkunController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
+    Route::post('/accounts/create', [AkunController::class, 'store'])->middleware('permission:create_kas')->name('accounts.create');
+    Route::patch('/accounts/{id}/status', [AkunController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
 
     // Pengelolaan Kas
     Route::get('/kas', [CashflowController::class, 'index'])->middleware('permission:view_kas')->name('kas.index');
