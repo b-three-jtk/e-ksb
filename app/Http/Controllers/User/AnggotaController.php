@@ -7,6 +7,7 @@ use App\Enums\MemberStatusEnum;
 use App\Enums\EducationEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Services\User\DasborService;
 use App\Models\Installment;
 use App\Http\Requests\CreateResignRequest;
 use App\Models\Financing;
@@ -28,7 +29,9 @@ class AnggotaController extends Controller
     /**
      * Create a new controller instance.
      */
+
     public function __construct(
+        protected DasborService $dasborService,
         protected ProfilPenggunaService $profilPenggunaService
     ) {}
 
@@ -36,48 +39,9 @@ class AnggotaController extends Controller
     {
         $user = auth()->user()->load('member');
 
-        $totalSaving = DB::table('saving_accounts')
-            ->where('member_id', $user->member->id)
-            ->sum('balance');
-
-        $totalInstallment = Installment::whereHas('financing', function ($q) use ($user) {
-            $q->where('member_id', $user->member->id)
-            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value);
-        })
-        ->whereIn('status', [
-            InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
-            InstallmentPaymentScheduleStatusEnum::PENDING->value,
-            InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
-        ])
-        ->sum('amount');
-
-        $ledger = SavingTransaction::whereHas(
-            'savingAccount.member',
-            fn($q) => $q->where('member_id', $user->member->id)
-        )
-            ->with('savingAccount')
-            ->latest('transaction_date')
-            ->limit(5)
-            ->get()
-            ->map(function ($trx) {
-                return [
-                    'date' => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                    'product' => $trx->savingAccount->saving_type,
-                    'type' => $trx->transaction_type,
-                    'amount' => 'Rp ' . number_format($trx->saving_amount, 0, ',', '.'),
-                ];
-            });
-
-        $totalPoints = PointTransaction::where('user_id', $user->id)
-            ->sum('amount_earned');
-
         return inertia('User/Dashboard', [
-            'summary' => [
-                'total_saving' => $totalSaving,
-                'total_installment' => $totalInstallment,
-                'total_points' => $totalPoints,
-            ],
-            'ledger' => $ledger,
+            'summary' => $this->dasborService->getSummary($user->member->id, $user->id),
+            'ledger'  => $this->dasborService->getLedger($user->member->id),
         ]);
     }
 

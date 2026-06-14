@@ -160,7 +160,7 @@ const rupiah = (value) =>
                         <Link
                             href="/user/ledger"
                             class="text-sm text-primary font-medium border border-primary hover:bg-secondary dark:hover:bg-accent/20 px-3 py-1.5 rounded-lg transition-colors">
-                            See All
+                            Lihat Semua
                         </Link>
                     </div>
 
