@@ -321,11 +321,11 @@ onMounted(() => {
             >
                 <template #actions>
                     <a
-                        :href="`/admin/savings/export/csv?${exportQuery}`"
+                        :href="`/admin/savings/export/excel?${exportQuery}`"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg"
                     >
                         <Icon icon="mdi:file-delimited-outline" class="w-4 h-4" />
-                        Export CSV
+                        Export Excel
                     </a>
                     <!-- <a
                         :href="`/admin/savings/export/pdf?${exportQuery}`"

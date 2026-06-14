@@ -120,7 +120,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/savings/deposit', [SimpananController::class, 'createDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.create');
     Route::post('/savings/deposit', [SimpananController::class, 'storeDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.store');
     Route::get('/savings/show/{id}', [SimpananController::class, 'show'])->middleware('permission:view_simpanan')->name('savings.show');
-    Route::get('/savings/export/csv', [SimpananController::class, 'exportCsv'])->middleware('permission:view_simpanan')->name('savings.export.csv');
+    Route::get('/savings/export/excel', [SimpananController::class, 'exportExcel'])->middleware('permission:view_simpanan')->name('savings.export.excel');
     Route::get('/savings/export/pdf', [SimpananController::class, 'exportPdf'])->middleware('permission:view_simpanan')->name('savings.export.pdf');
 
     // Pengelolaan Pembiayaan Murabahah

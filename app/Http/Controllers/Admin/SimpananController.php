@@ -8,6 +8,7 @@ use App\Enums\TransactionTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Enums\PositionEnum;
+use App\Exports\SimpananExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDepositRequest;
 use App\Http\Requests\StoreWithdrawalRequest;
@@ -22,6 +23,7 @@ use App\Services\Admin\JurnalService;
 use App\Services\User\SimpananServices;
 use App\Services\PengaturanUmumService;
 use App\Services\Admin\SimpananService;
+use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -49,44 +51,21 @@ class SimpananController extends Controller
         return Inertia::render('Admin/Savings/List', $data);
     }
 
-    public function exportCsv(Request $request)
+    public function exportExcel(Request $request)
     {
-        $tab      = $request->input('tab', 'semua');
-        $title    = $this->simpananService->getExportTitle($tab);
-        $filename = Str::slug($title) . '_' . now()->format('Ymd_His') . '.csv';
+        $tab = $request->input('tab', 'semua');
 
-        $transactions = $this->simpananService->buildBaseQuery($request)
+        $title = $this->simpananService->getExportTitle($tab);
+
+        $transactions = $this->simpananService
+            ->buildBaseQuery($request)
             ->orderBy('transaction_date', 'desc')
             ->get();
 
-        $headers = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => "attachment; filename={$filename}",
-        ];
-
-        $callback = function () use ($transactions, $title) {
-            $handle = fopen('php://output', 'w');
-            fputcsv($handle, [$title]);
-            fputcsv($handle, []);
-            fputcsv($handle, ['No Transaksi', 'Tanggal', 'Anggota', 'Produk', 'Jenis', 'Nominal']);
-
-            foreach ($transactions as $trx) {
-                fputcsv($handle, [
-                    $trx->saving_transaction_code,
-                    Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                    $trx->savingAccount->member->user->user_code . ' - ' . $trx->savingAccount->member->user->name,
-                    $trx->savingAccount->saving_type ?? '-',
-                    $trx->transaction_type,
-                    $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
-                        ? -$trx->saving_amount
-                        : $trx->saving_amount,
-                ]);
-            }
-
-            fclose($handle);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(
+            new SimpananExport($transactions, $title),
+            'data_simpanan_' . now()->format('Ymd_His') . '.xlsx'
+        );
     }
 
     public function exportPdf(Request $request)
