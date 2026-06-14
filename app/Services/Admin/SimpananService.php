@@ -7,6 +7,7 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
+use App\Models\GlobalSetting;
 use App\Models\BerjangkaAccount;
 use App\Models\IbadahAccount;
 use App\Models\Member;
@@ -33,7 +34,10 @@ class SimpananService
 
     public function getSettingValue(string $key): float
     {
-        return $this->pengaturanUmumService->getSettingValue($key);
+        return (float) GlobalSetting::where('key', $key)
+            ->where('effective_date', '<=', now())
+            ->orderByDesc('effective_date')
+            ->value('value') ?? 0;
     }
 
     public function getTrxPrefix(string $category): string
@@ -309,7 +313,10 @@ class SimpananService
                 ]);
             }
 
-            if (SavingTransaction::where('saving_account_id', $savingAccount->id)->exists()) {
+            if (SavingTransaction::where('saving_account_id', $savingAccount->id)
+                ->where('transaction_type', TransactionTypeEnum::DEPOSIT->value)
+                ->exists()
+            ) {
                 throw ValidationException::withMessages([
                     'saving_category' => 'Simpanan Pokok hanya boleh dibayar sekali.',
                 ]);
