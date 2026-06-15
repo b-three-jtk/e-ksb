@@ -44,6 +44,7 @@ class PengurusController extends Controller
     {
         return inertia('Admin/Admins/Create', [
             'roles' => $this->peranAksesService->getSemuaPeran(),
+            'members' => $this->pengurusService->getAnggotaAktif(),
         ]);
     }
 
@@ -108,16 +109,5 @@ class PengurusController extends Controller
             DB::rollBack();
             return redirect()->back()->withInput();
         }
-    }
-
-    public function searchMember(Request $request)
-    {
-        $query = $request->input('q', '');
-
-        if (strlen($query) < 2) {
-            return response()->json(['members' => []]);
-        }
-
-        return response()->json(['members' => $this->pengurusService->searchAnggotaAktif($query)]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 use App\Enums\MemberStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
+use App\Models\Member;
 use App\Models\User;
 use App\Services\Admin\PeranAksesService;
 
@@ -107,32 +108,25 @@ class PengurusService
         return $admin;
     }
 
-    public function searchAnggotaAktif($query)
+    public function getAnggotaAktif()
     {
-        return User::with('member')
-            ->whereHas('member', function ($q) {
-                $q->where('status', MemberStatusEnum::ACTIVE->value);
-            })
-            ->whereHas('roles', function ($q) {
+        return Member::whereIn('status', [
+            MemberStatusEnum::ACTIVE->value,
+        ])
+        ->with(['user:id,user_code,name,nik,email,phone_number',
+            'user.roles' => function ($q) {
                 $q->where('name', UserRoleEnum::ANGGOTA->value);
-            })
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('user_code', 'like', "%{$query}%")
-                    ->orWhere('nik', 'like', "%{$query}%")
-                    ->orWhere('email', 'like', "%{$query}%");
-            })
-            ->limit(10)
-            ->get(['id', 'user_code', 'name', 'nik', 'email', 'phone_number'])
-            ->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'user_code' => $user->user_code,
-                    'name' => $user->name,
-                    'nik' => $user->nik,
-                    'email' => $user->email,
-                    'phone_number' => $user->phone_number,
-                ];
-            });
+            }])
+        ->get()
+        ->map(function ($member) {
+            return [
+                'id' => $member->user->id,
+                'user_code' => $member->user->user_code,
+                'name' => $member->user->name,
+                'nik' => $member->user->nik,
+                'email' => $member->user->email,
+                'phone_number' => $member->user->phone_number,
+            ];
+        });
     }
 }

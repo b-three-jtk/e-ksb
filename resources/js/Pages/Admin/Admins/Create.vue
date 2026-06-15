@@ -22,6 +22,7 @@ const form = useForm({
 
 const props = defineProps({
     roles: { type: Array, required: true },
+    members: { type: Array, required: true },
 })
 
 const breadcrumbItems = [
@@ -34,7 +35,6 @@ const { errors } = useUserValidation(form)
 
 const searchQuery = ref('')
 const searchResults = ref([])
-const isSearching = ref(false)
 const selectedMember = ref(null)
 
 const { onlyNumbers } = useInputSanitizers()
@@ -42,26 +42,19 @@ const { normalizePhoneNumber } = useFormatter()
 
 const isEditingExistingMember = computed(() => !!form.user_id)
 
-const searchMembers = async () => {
+const searchMembers = () => {
     if (searchQuery.value.length < 2) {
         searchResults.value = []
         return
     }
 
-    isSearching.value = true
-    try {
-        const response = await fetch(`/admin/pengurus/members?q=${encodeURIComponent(searchQuery.value)}`)
-        const data = await response.json()
-        searchResults.value = data.members
-    } catch (error) {
-        toast("Gagal mencari member", {
-            "type": "error",
-            "position": "bottom-right",
-            "transition": "slide"
-        })
-    } finally {
-        isSearching.value = false
-    }
+    const q = searchQuery.value.toLowerCase().trim()
+    searchResults.value = props.members.filter(m =>
+        m.name?.toLowerCase().includes(q) ||
+        m.nik?.toLowerCase().includes(q) ||
+        m.email?.toLowerCase().includes(q) ||
+        m.user_code?.toLowerCase().includes(q)
+    ).slice(0, 6)
 }
 
 const selectMember = (member) => {
@@ -159,15 +152,9 @@ const submitForm = () => {
                             </div>
 
                             <!-- No Results Message -->
-                            <div v-else-if="searchQuery.length >= 2 && !isSearching && searchResults.length === 0"
+                            <div v-else-if="searchQuery.length >= 2 && searchResults.length === 0"
                                 class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg p-4">
                                 <p class="text-gray-500 text-sm">Tidak ada member aktif yang ditemukan</p>
-                            </div>
-
-                            <!-- Loading State -->
-                            <div v-if="isSearching"
-                                class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg p-4">
-                                <p class="text-gray-500 text-sm">Mencari...</p>
                             </div>
                         </div>
 
