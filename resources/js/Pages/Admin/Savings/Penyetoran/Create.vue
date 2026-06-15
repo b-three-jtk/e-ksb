@@ -104,6 +104,8 @@ const fixedNominal = computed(() => {
   return null
 })
 
+const isSubmitting = ref(false)
+
 const modalReceipt = ref(null)
 
 watch(jenisSimpanan, () => {
@@ -313,20 +315,13 @@ async function handleConfirm() {
 }
 
 function submitDeposit() {
-  console.log('selectedAccount:', selectedAccount.value)
-  console.log('isCreatingNew:', isCreatingNew.value)
-  console.log('savingAccounts:', selectedMember.value?.savingAccounts)
   if (!selectedMember.value) return
 
   const formData = new FormData()
-
   const accountId = selectedAccount.value?.id
 
-  if (
-      accountId &&
-      accountId !== 'undefined'
-  ) {
-      formData.append('saving_account_id', accountId)
+  if (accountId && accountId !== 'undefined') {
+    formData.append('saving_account_id', accountId)
   }
 
   formData.append('member_id', selectedMember.value.id)
@@ -337,17 +332,15 @@ function submitDeposit() {
   formData.append('notes', catatan.value)
 
   if (isMultiAccountType.value) {
-      formData.append(
-          'purpose',
-          isCreatingNew.value
-              ? purposeInput.value
-              : selectedAccount.value?.purpose 
-      )
+    formData.append(
+      'purpose',
+      isCreatingNew.value ? purposeInput.value : selectedAccount.value?.purpose
+    )
   }
 
   if (isNewAccount.value) {
-      formData.append('tenor_months', tenorMonths.value)
-      formData.append('target_amount', targetAmount.value)
+    formData.append('tenor_months', tenorMonths.value)
+    formData.append('target_amount', targetAmount.value)
   }
 
   router.post('/admin/savings/deposit', formData, {
@@ -355,36 +348,26 @@ function submitDeposit() {
     preserveScroll: true,
 
     onStart: () => {
-      Swal.fire({
-        title: 'Memproses transaksi...',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading()
-        }
-      })
+      isSubmitting.value = true
     },
 
-    onSuccess: async (page) => {
-      Swal.close()
+    onSuccess: async () => {
       showDialog.value = false
-
-      toast.success('Penyetoran berhasil diposting', {position: 'bottom-right'})
-
+      toast.success('Penyetoran berhasil diposting', { position: 'bottom-right' })
       resetForm()
       router.reload({ only: ['members'] })
-
       await nextTick()
-
       modalReceipt.value?.openModal()
     },
 
     onError: (errors) => {
-      Swal.close()
-
       const msg = Object.values(errors).flat().join('\n')
+      toast.error(msg || 'Gagal menyimpan transaksi', { position: 'bottom-right' })
+    },
 
-      toast.error(msg || 'Gagal menyimpan transaksi', {position: 'bottom-right'})
-    }
+    onFinish: () => {
+      isSubmitting.value = false
+    },
   })
 }
 
@@ -903,6 +886,7 @@ const akadType = computed(() => {
             class="px-8 py-2.5 bg-secondary text-white text-sm font-medium rounded-lg
                    hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
+            <Icon v-if="isSubmitting" icon="tabler:loader-2" class="w-4 h-4 animate-spin" />
             Posting
           </button>
         </div>
