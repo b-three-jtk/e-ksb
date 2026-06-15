@@ -14,6 +14,11 @@ class PeranAksesService
         return Role::where('name', '!=', UserRoleEnum::ANGGOTA->value)->get();
     }
 
+    public function getSemuaPeranDenganAnggota()
+    {
+        return Role::get();
+    }
+
     public function getPeranNamesWithUsers()
     {
         return Role::whereHas('users')

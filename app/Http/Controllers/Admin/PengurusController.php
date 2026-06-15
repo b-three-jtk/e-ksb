@@ -87,7 +87,7 @@ class PengurusController extends Controller
     {
         return inertia('Admin/Admins/Edit', [
             'admin' => $this->pengurusService->getPengurusById($id),
-            'roles' => $this->peranAksesService->getSemuaPeran(),
+            'roles' => $this->peranAksesService->getSemuaPeranDenganAnggota(),
         ]);
     }
 
