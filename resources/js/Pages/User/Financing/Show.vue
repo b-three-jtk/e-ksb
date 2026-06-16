@@ -184,6 +184,12 @@ const openReceiptModal = (receiptPath) => {
 
             </div>
         </div>
-        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="installment_payment_receipt" :attachment="installment_payment_receipt" />
+        <ModalDocument
+            ref="modalRef"
+            modal-id="buktiModal"
+            title="Bukti Penyetoran Angsuran"
+            :name="selectedReceipt"
+            :attachment="selectedReceipt"
+        />
     </BaseLayout>
 </template>
