@@ -54,7 +54,7 @@ const selectedReceipt = ref(null)
 
 const openReceiptModal = (receiptPath) => {
     selectedReceipt.value = receiptPath
-    modalRef.value.open()
+    modalRef.value.openModal()
 }
 </script>
 
