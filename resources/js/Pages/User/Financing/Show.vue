@@ -57,6 +57,7 @@ const openReceiptModal = (receiptPath) => {
     if (modalRef.value && typeof modalRef.value.open === 'function') {
         modalRef.value.open()
     }
+}
 </script>
 
 <template>
