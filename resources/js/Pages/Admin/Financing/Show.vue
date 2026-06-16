@@ -56,10 +56,9 @@ const selectedReceipt = ref(null)
 
 const openReceiptModal = (receiptPath) => {
     selectedReceipt.value = receiptPath
-    if (modalRef.value && typeof modalRef.value.open === 'function') {
-        modalRef.value.open()
-    }
+    modalRef.value.openModal()
 }
+
 </script>
 
 <template>
@@ -109,7 +108,7 @@ const openReceiptModal = (receiptPath) => {
                 <div class="flex justify-between items-center">
                     <h1 class="dark:text-gray-200">Ringkasan Pembiayaan</h1>
                     <div v-if="canPayBill" class="flex items-center gap-4">
-                    <Button :href="`/admin/financings/repayment/${data.id}`" variant="secondary" size="small">
+                    <Button v-if="data.payment_method === 'Cicilan'" :href="`/admin/financings/repayment/${data.id}`" variant="secondary" size="small">
                             <span class="icon-[tabler--moneybag-move]" style="width:18px;height:18px;" />
                             Pelunasan Dipercepat
                         </Button>

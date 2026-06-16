@@ -54,9 +54,7 @@ const selectedReceipt = ref(null)
 
 const openReceiptModal = (receiptPath) => {
     selectedReceipt.value = receiptPath
-    if (modalRef.value && typeof modalRef.value.open === 'function') {
-        modalRef.value.open()
-    }
+    modalRef.value.open()
 }
 </script>
 
