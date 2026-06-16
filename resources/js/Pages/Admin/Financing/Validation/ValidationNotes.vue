@@ -33,18 +33,23 @@ const totalExpense = computed(() => {
     return expenses.value.reduce((total, item) => total + (Number(props.data.member[item.model]) || 0), 0)
 })
 
-const totalPrice = ref(0)
+const totalPrice = computed(() => {
+    const costPrice = Number(props.data?.financing?.predicted_cost_price || 0)
+    const marginPercentage = Number(props.data?.margin_percentage || 0)
+    console.log('Cost Price:', costPrice, 'Margin Percentage:', marginPercentage)
+    const margin = Math.round(costPrice * (marginPercentage / 100))
+    return costPrice + margin
+})
+
 const monthlyInstallment = computed(() => {
     if (tenor.value <= 0) return 0
-    const costPrice = Number(props.data.financing.predicted_cost_price)
-    const margin = Math.round(costPrice * (props.data.margin_percentage / 100))
-    totalPrice.value = costPrice + margin
     return Math.round(totalPrice.value / tenor.value)
 })
+
 const monthlyIncome = computed(() => totalIncome.value - totalExpense.value)
 const remainingIncome = computed(() => monthlyIncome.value - monthlyInstallment.value)
 
-watch([tenor, totalPrice, monthlyIncome], () => {
+watch([monthlyInstallment, monthlyIncome], () => {
     props.form.monthly_installment = monthlyInstallment.value
     props.form.monthly_income = monthlyIncome.value
 }, { immediate: true })

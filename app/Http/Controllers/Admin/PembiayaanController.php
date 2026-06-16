@@ -16,6 +16,7 @@ use App\Http\Requests\StoreFinancingRequest;
 use App\Models\Account;
 use App\Models\Financing;
 use App\Models\FinancingVerification;
+use App\Models\GlobalSetting;
 use App\Models\JournalEntry;
 use App\Models\Member;
 use App\Models\ProductType;
@@ -239,6 +240,7 @@ class PembiayaanController extends Controller
         return inertia('Admin/Financing/Validation', [
             'data' => [
                 'member' => $this->formatMemberData($financing->member),
+                'margin_percentage' => GlobalSetting::where('key', 'murabahah_margin_percentage')->where('effective_date', '<=', now())->latest()->first()?->value,
                 'financing' => [
                     'id' => $financing->id,
                     'financing_transaction_code' => $financing->financing_transaction_code,
