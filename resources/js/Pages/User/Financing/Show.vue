@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import BaseLayout from '@/Layouts/Base.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
@@ -12,6 +12,7 @@ import EyeIcon from '@/Icons/EyeIcon.vue'
 import moneyParser from '@/Composables/moneyParser.js'
 import dateParser from '@/Composables/dateParser.js'
 import useFinancingStatus from '@/Composables/useFinancingStatus.js'
+import ModalDocument from '@/Components/ModalDocument.vue'
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -46,6 +47,16 @@ const BREADCRUMBS = [
     { name: 'Dashboard', link: '/user/dashboard' },
     { name: 'Pengelolaan Pembiayaan' },
 ]
+
+const modalRef = ref(null)
+
+const selectedReceipt = ref(null)
+
+const openReceiptModal = (receiptPath) => {
+    selectedReceipt.value = receiptPath
+    if (modalRef.value && typeof modalRef.value.open === 'function') {
+        modalRef.value.open()
+    }
 </script>
 
 <template>
@@ -158,8 +169,7 @@ const BREADCRUMBS = [
                             </template>
                             <template #cell-installment_payment_receipt="{ row }">
                                 <Button v-if="row.installment_payment_receipt" size="small" variant="primary"
-                                    target="_blank" :href="`/storage/${row.installment_payment_receipt}`">
-                                    <EyeIcon width="18px" height="18px" />
+                                    @click="openReceiptModal(row.installment_payment_receipt)"> <EyeIcon width="18px" height="18px" />
                                     Lihat Bukti
                                 </Button>
                                 <Button v-else size="small" variant="gray" disabled>
@@ -167,7 +177,6 @@ const BREADCRUMBS = [
                                     Lihat Bukti
                                 </Button>
                             </template>
-
                         </BaseTable>
                         <Pagination :links="installments.links" :total="installments.total" />
                     </div>
@@ -175,5 +184,6 @@ const BREADCRUMBS = [
 
             </div>
         </div>
+        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="installment_payment_receipt" :attachment="installment_payment_receipt" />
     </BaseLayout>
 </template>

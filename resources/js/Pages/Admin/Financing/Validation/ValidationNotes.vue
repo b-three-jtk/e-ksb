@@ -36,7 +36,6 @@ const totalExpense = computed(() => {
 const totalPrice = computed(() => {
     const costPrice = Number(props.data?.financing?.predicted_cost_price || 0)
     const marginPercentage = Number(props.data?.margin_percentage || 0)
-    console.log('Cost Price:', costPrice, 'Margin Percentage:', marginPercentage)
     const margin = Math.round(costPrice * (marginPercentage / 100))
     return costPrice + margin
 })

@@ -152,7 +152,7 @@ const logout = () => {
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div v-if="isUserDropdownOpen && role === 'Anggota'"
+                        <div v-if="isUserDropdownOpen"
                             class="absolute right-0 z-10 mt-2 w-44 divide-y divide-gray-100 rounded-lg hover:rounded-lg shadow bg-white dark:bg-gray-800 dark:divide-gray-600">
                             <div
                                 class="px-4 py-3 text-sm cursor-default text-gray-900 dark:text-white dark:hover:bg-gray-600">
@@ -166,7 +166,7 @@ const logout = () => {
                                         Profil
                                     </Link>
                                 </li>
-                                <li>
+                                <li v-if="role === 'Anggota'">
                                     <Link href="/user/resign"
                                         class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">
                                         Pengunduran Diri
