@@ -158,17 +158,17 @@
             <tr>
                 <td></td>
                 <td>Qimah Haliyyah (Harga Jual Saat ini)</td>
-                <td>{{ $qimah_haliyyah }}</td>
+                <td>Rp{{ number_format($qimah_haliyyah, 2, ',', '.') }}</td>
             </tr>
             <tr>
                 <td></td>
                 <td>Total Angsuran Dibayar</td>
-                <td>{{ $total_paid_amount }}</td>
+                <td>Rp{{ number_format($total_paid_amount, 2, ',', '.') }}</td>
             </tr>
             <tr>
                 <td></td>
                 <td><strong>Total Pelunasan</strong></td>
-                <td><strong>{{ $repayment_total }}</strong></td>
+                <td><strong>Rp{{ number_format($repayment_total, 2, ',', '.') }}</strong></td>
             </tr>
         </table>
     </div>
