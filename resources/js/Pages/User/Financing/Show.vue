@@ -30,7 +30,7 @@ const hasInstallmentHistory = computed(() => props.data?.installment?.data?.leng
 const canPayBill = computed(() =>
     can.value['edit_murabahah']
     && props.data.installment
-    && props.data.status === 'Angsuran Berjalan'
+    && (props.data.status === 'Angsuran Berjalan' || props.data.status === 'Pembayaran Tangguh')
 )
 
 const INSTALLMENT_COLUMNS = [

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
@@ -12,6 +12,7 @@ import EyeIcon from '@/Icons/EyeIcon.vue'
 import moneyParser from '@/Composables/moneyParser.js'
 import dateParser from '@/Composables/dateParser.js'
 import useFinancingStatus from '@/Composables/useFinancingStatus.js'
+import ModalDocument from '@/Components/ModalDocument.vue'
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -24,12 +25,14 @@ const installments = computed(() => props.data?.installment ?? {
     data: [], current_page: 1, per_page: 10, total: 0, links: [],
 })
 
+console.log('data', props.data)
+
 const hasInstallmentHistory = computed(() => Number(props.data.total_price) > 0)
 
 const canPayBill = computed(() =>
     can.value['edit_murabahah']
     && props.data.installment
-    && props.data.status === 'Angsuran Berjalan'
+    && (props.data.status === 'Angsuran Berjalan' || props.data.status === 'Pembayaran Tangguh')
 )
 
 const INSTALLMENT_COLUMNS = [
@@ -46,6 +49,17 @@ const BREADCRUMBS = [
     { name: 'Dashboard', link: '/admin/dashboard' },
     { name: 'Pengelolaan Pembiayaan' },
 ]
+
+const modalRef = ref(null)
+
+const selectedReceipt = ref(null)
+
+const openReceiptModal = (receiptPath) => {
+    selectedReceipt.value = receiptPath
+    if (modalRef.value && typeof modalRef.value.open === 'function') {
+        modalRef.value.open()
+    }
+}
 </script>
 
 <template>
@@ -95,7 +109,7 @@ const BREADCRUMBS = [
                 <div class="flex justify-between items-center">
                     <h1 class="dark:text-gray-200">Ringkasan Pembiayaan</h1>
                     <div v-if="canPayBill" class="flex items-center gap-4">
-                        <Button :href="`/admin/financings/repayment/${data.id}`" variant="secondary" size="small">
+                    <Button :href="`/admin/financings/repayment/${data.id}`" variant="secondary" size="small">
                             <span class="icon-[tabler--moneybag-move]" style="width:18px;height:18px;" />
                             Pelunasan Dipercepat
                         </Button>
@@ -155,8 +169,7 @@ const BREADCRUMBS = [
                         </template>
                         <template #cell-installment_payment_receipt="{ row }">
                             <Button v-if="row.installment_payment_receipt" size="small" variant="primary"
-                                target="_blank" :href="`/storage/${row.installment_payment_receipt}`">
-                                <EyeIcon width="18px" height="18px" />
+                                @click="openReceiptModal(row.installment_payment_receipt)"> <EyeIcon width="18px" height="18px" />
                                 Lihat Bukti
                             </Button>
                             <Button v-else size="small" variant="gray" disabled>
@@ -171,5 +184,12 @@ const BREADCRUMBS = [
             </section>
 
         </div>
+        <ModalDocument
+            ref="modalRef"
+            modal-id="buktiModal"
+            title="Bukti Penyetoran Angsuran"
+            :name="selectedReceipt"
+            :attachment="selectedReceipt"
+        />
     </AdminLayout>
 </template>
