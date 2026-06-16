@@ -24,7 +24,7 @@ const installments = computed(() => props.data?.installment ?? {
     data: [], current_page: 1, per_page: 10, total: 0, links: [],
 })
 
-const hasInstallmentHistory = computed(() => Number(props.data.total_price) > 0)
+const hasInstallmentHistory = computed(() => props.data?.installment?.data?.length > 0)
 
 const canPayBill = computed(() =>
     can.value['edit_murabahah']

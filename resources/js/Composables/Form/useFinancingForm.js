@@ -96,6 +96,7 @@ export function useFinancingForm(initialData = null) {
         supplier: {
             supplier_name: initialData?.supplier?.supplier_name || '',
             address: initialData?.supplier?.address || '',
+            contact: initialData?.supplier?.contact || '',
         },
         // Local state untuk temporary input
         monthly_installment: null,
@@ -261,6 +262,7 @@ export function useFinancingForm(initialData = null) {
         form.supplier = {
             supplier_name: '',
             address: '',
+            contact: '',
         }
         isMemberSelected.value = false
     }
@@ -302,6 +304,7 @@ export function useFinancingForm(initialData = null) {
 
         form.supplier.supplier_name = supplier.supplier_name || ''
         form.supplier.address = supplier.address || ''
+        form.supplier.contact = supplier.contact || ''
 
         supplierResults.value = []
         isSupplierSelected.value = true
@@ -313,6 +316,7 @@ export function useFinancingForm(initialData = null) {
         form.supplier = {
             supplier_name: '',
             address: '',
+            contact: '',
         }
         isSupplierSelected.value = false
     }

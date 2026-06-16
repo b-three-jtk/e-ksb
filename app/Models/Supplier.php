@@ -13,6 +13,7 @@ class Supplier extends Model
     protected $fillable = [
         'supplier_name',
         'address',
+        'contact'
     ];
 
     public function financingItems()

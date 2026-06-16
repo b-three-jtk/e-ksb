@@ -2,15 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\ConditionEnum;
-use App\Enums\EducationEnum;
-use App\Enums\FinancialCostEnum;
-use App\Enums\FinancialIncomeEnum;
 use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
-use App\Enums\HeirEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
-use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
@@ -22,7 +16,6 @@ use App\Http\Requests\StoreFinancingRequest;
 use App\Models\Account;
 use App\Models\Financing;
 use App\Models\FinancingVerification;
-use App\Models\GlobalSetting;
 use App\Models\JournalEntry;
 use App\Models\Member;
 use App\Models\ProductType;
@@ -216,7 +209,7 @@ class PembiayaanController extends Controller
                         'verified_by_name' => $item->verifier?->name,
                         'verified_at' => $item->verified_at?->format('Y-m-d H:i:s'),
                     ];
-                })->values(),
+                })->sortByDesc('verified_at')->values(),
                 'documents' => [
                     'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
@@ -228,6 +221,7 @@ class PembiayaanController extends Controller
                 'supplier' => $financing->financingItem->supplier ? [
                     'supplier_name' => $financing->financingItem->supplier->supplier_name,
                     'address' => $financing->financingItem->supplier->address,
+                    'contact' => $financing->financingItem->supplier->contact,
                 ] : null,
             ],
         ]);
@@ -278,6 +272,7 @@ class PembiayaanController extends Controller
                 'supplier' => $financing->financingItem->supplier ? [
                     'supplier_name' => $financing->financingItem->supplier->supplier_name,
                     'address' => $financing->financingItem->supplier->address,
+                    'contact' => $financing->financingItem->supplier->contact,
                 ] : null,
             ],
         ]);
@@ -400,25 +395,14 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
-                $hasActiveFinancing = $user->member->financings?->whereIn(
-                    'status',
-                    [
-                        FinancingReqStatusEnum::PENDING_REVIEW->value,
-                        FinancingReqStatusEnum::REJECTED->value,
-                        FinancingReqStatusEnum::APPROVED->value,
-                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-                        FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-                        FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
-                    ]
-                )->isNotEmpty() ?? false;
+                $hasActiveFinancing = $user->member->financings?->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+                ->isNotEmpty() ?? false;
 
                 if ($hasActiveFinancing) {
                     throw ValidationException::withMessages(['member' => 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
                 }
 
-                $validated->merge([
-                    'financing.status' => 'Belum Ditinjau',
-                ]);
+                $validated['financing']['status'] = 'Belum Ditinjau';
 
                 $this->financingService->syncMemberData($user, $validated['member'], $request);
                 $this->financingService->syncFinancingData($user, $validated, $request, auth()->id());
@@ -455,17 +439,8 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
-                $hasActiveFinancing = $user->member->financings?->whereIn(
-                    'status',
-                    [
-                        FinancingReqStatusEnum::PENDING_REVIEW->value,
-                        FinancingReqStatusEnum::REJECTED->value,
-                        FinancingReqStatusEnum::APPROVED->value,
-                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-                        FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-                        FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
-                    ]
-                )->isNotEmpty() ?? false;
+                $hasActiveFinancing = $user->member->financings?->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+                ->isNotEmpty() ?? false;
 
                 if ($hasActiveFinancing) {
                     throw ValidationException::withMessages(['member' => 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
@@ -480,7 +455,7 @@ class PembiayaanController extends Controller
                     ]);
                 }
 
-                if (isset($validated['financing']['tenor'])) {
+                if (isset($validated['financing']['tenor']) && $validated['financing']['payment_method'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
                     $this->financingService->generateInstallments($financing);
                 }
 
@@ -889,6 +864,7 @@ class PembiayaanController extends Controller
         $validatedData = $request->validate([
             'supplier_name' => 'required|string|max:255|unique:suppliers,supplier_name',
             'address' => 'required|string|max:255',
+            'contact' => 'required|string|max:255',
         ]);
 
         $supplier = Supplier::create($validatedData);

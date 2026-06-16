@@ -5,6 +5,7 @@ use App\Enums\ConditionEnum;
 use App\Enums\EducationEnum;
 use App\Enums\FinancialCostEnum;
 use App\Enums\FinancialIncomeEnum;
+use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\HeirEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
@@ -288,11 +289,16 @@ class PembiayaanService
                 'cost_price'     => $financingData['cost_price'] ?? null,
                 'margin_amount'  => $financingData['margin_amount'] ?? null,
                 'payment_method' => $financingData['payment_method'] ?? null,
-                'tenor'          => $financingData['tenor'] ?? null,
                 'updated_by'     => $updatedBy,
                 'predicted_cost_price' => $financingData['predicted_cost_price'] ?? null,
                 'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
             ]);
+
+            if ($financingData['payment_method'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
+                $existingFinancing->update([
+                    'tenor' => $financingData['tenor'] ?? null,
+                ]);
+            }
             $financing = $existingFinancing;
         } else {
             // Buat baru kalau memang belum ada sama sekali
@@ -318,7 +324,8 @@ class PembiayaanService
         if ($supplierData && isset($supplierData['supplier_name'])) {
             $supplier = Supplier::updateOrCreate(
                 ['supplier_name' => $supplierData['supplier_name']],
-                ['address' => $supplierData['address'] ?? null]
+                ['address' => $supplierData['address'] ?? null,
+                'contact' => $supplierData['contact'] ?? null]
             );
         }
 

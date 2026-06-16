@@ -224,6 +224,7 @@ const handleSaveDraft = () => {
                             @click="handleFinalize()"
                             variant="secondary"
                         >
+                            <div v-if="form.processing" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                             Finalisasi Pembiayaan
                         </Button>
                     </div>

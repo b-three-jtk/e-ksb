@@ -88,6 +88,7 @@ class StoreFinancingDraftRequest extends FormRequest
             // Supplier data
             'supplier.supplier_name' => 'nullable|string|max:255',
             'supplier.address' => 'nullable|string|max:500',
+            'supplier.contact' => 'nullable|string|max:255',
 
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',

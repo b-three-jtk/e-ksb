@@ -63,7 +63,7 @@ class StoreFinancingRequest extends FormRequest
             'financing.margin_amount' => 'required|numeric|min:0',
             'financing.payment_method' => 'required|string|max:255',
             'financing.akad_date' => 'required|date',
-            'financing.down_payment' => 'required|numeric|min:0',
+            'financing.down_payment' => 'nullable|numeric|min:0',
             'financing.status' => 'required|string|max:255',
             'financing.tenor' => 'nullable|integer',
             'financing.akad_wakalah_date' => 'nullable|date',
@@ -79,6 +79,7 @@ class StoreFinancingRequest extends FormRequest
             // Supplier data
             'supplier.supplier_name' => 'required|string|max:255',
             'supplier.address' => 'required|string|max:500',
+            'supplier.contact' => 'nullable|string|max:255',
 
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',

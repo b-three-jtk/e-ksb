@@ -101,12 +101,12 @@ const formatMoney = (val: string | number | File) => {
 const handleMoneyInput = (event: Event) => {
     const input = event.target as HTMLInputElement
     const cursorPos = input.selectionStart ?? 0
-    
+
     const beforeCursor = input.value.slice(0, cursorPos)
     const digitsBeforeCursor = beforeCursor.replace(/\D/g, '').length
 
     const raw = input.value.replace(/\D/g, '')
-    
+
     const formatted = raw ? new Intl.NumberFormat('id-ID').format(+raw) : ''
     input.value = formatted
 
@@ -119,11 +119,11 @@ const handleMoneyInput = (event: Event) => {
             break
         }
     }
-    
+
     if (digitCount < digitsBeforeCursor) newCursorPos = formatted.length
 
     input.setSelectionRange(newCursorPos, newCursorPos)
-    
+
     emit('update:modelValue', raw || '')
 }
 </script>
@@ -145,8 +145,8 @@ const handleMoneyInput = (event: Event) => {
                 :disabled="disabled"
                 :placeholder="placeholder || '0'"
                 :class="[
-                    'h-11 w-full rounded-lg border bg-transparent font-body pl-9 pr-4 py-2.5 text-sm font-medium ...',
-                    error ? 'border-red-500 ...' : 'border-gray-300 ...'
+                    'h-11 w-full rounded-lg font-body pl-9 pr-4 py-2.5 text-sm font-medium border bg-transparent text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
+                    error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                 ]"
             />
         </div>
