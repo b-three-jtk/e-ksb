@@ -150,7 +150,7 @@ class PembiayaanController extends Controller
                 'payment_date'               => $item->payment?->payment_date,
                 'amount'                     => $item->payment?->nominal,
                 'is_early_repayment'         => $item->payment?->is_early_repayment ?? false,
-                'installment_payment_receipt' => $item->payment?->installment_payment_receipt,
+                'installment_payment_receipt' => $item->payment?->installment_payment_receipt ? asset('storage/' . $item->payment->installment_payment_receipt) : null,
             ];
         }));
 
@@ -459,6 +459,8 @@ class PembiayaanController extends Controller
 
                 if (isset($validated['financing']['tenor']) && $validated['financing']['payment_method'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
                     $this->financingService->generateInstallments($financing);
+                } else if ($validated['financing']['payment_method'] === FinancingPaymentMethodEnum::TANGGUH->value) {
+                    $this->financingService->generateTangguhSchedule($financing, $validated['financing']['tangguh_payment_date']);
                 }
 
                 $pembiayaanDalamProses = Account::where(
