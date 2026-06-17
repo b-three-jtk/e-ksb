@@ -75,7 +75,7 @@ const logout = () => {
         showCancelButton: true,
         confirmButtonText: 'Ya, keluar',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
     }).then((result) => {
         if (result.isConfirmed) {
             form.post(('/auth/logout'), {

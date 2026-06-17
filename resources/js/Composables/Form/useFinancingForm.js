@@ -352,7 +352,7 @@ export function useFinancingForm(initialData = null) {
             showCancelButton: true,
             confirmButtonText: 'Ya, kirim',
             cancelButtonText: 'Batal',
-            confirmButtonColor: '#007943',
+            confirmButtonColor: '#009141',
         }).then((result) => {
             if (result.isConfirmed) {
                 form.post('/admin/financings/store', {
@@ -401,7 +401,7 @@ export function useFinancingForm(initialData = null) {
             showCancelButton: true,
             confirmButtonText: 'Ya, simpan',
             cancelButtonText: 'Batal',
-            confirmButtonColor: '#007943',
+            confirmButtonColor: '#009141',
         }).then((result) => {
             if (result.isConfirmed) {
                 form.post('/admin/financings/finalize', {
@@ -445,7 +445,7 @@ export function useFinancingForm(initialData = null) {
             showCancelButton: true,
             confirmButtonText: 'Ya, simpan',
             cancelButtonText: 'Batal',
-            confirmButtonColor: '#007943',
+            confirmButtonColor: '#009141',
         }).then((result) => {
             if (result.isConfirmed) {
                 form.post('/admin/financings/draft', {

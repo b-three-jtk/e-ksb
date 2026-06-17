@@ -35,10 +35,11 @@ const acceptTransaction = () => {
         title: 'Konfirmasi',
         text: 'Apakah Anda yakin ingin menerima permohonan pengunduran diri ini?',
         icon: 'question',
+        iconColor: '#009141',
         showCancelButton: true,
         confirmButtonText: 'Ya, terima',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
     }).then((result) => {
         if (result.isConfirmed) {
             form.put('/admin/resignations/' + props.data.id, {
@@ -53,7 +54,7 @@ const acceptTransaction = () => {
                         `,
                         icon: 'success',
                         confirmButtonText: 'Kirim ke WhatsApp',
-                        confirmButtonColor: '#007943',
+                        confirmButtonColor: '#009141',
                         showCancelButton: true,
                         cancelButtonText: 'Tutup',
                     }).then((result) => {

@@ -119,7 +119,7 @@ const showResignationInfo = async () => {
         `,
         icon: 'success',
         confirmButtonText: 'Kirim ke WhatsApp',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
         showCancelButton: true,
         cancelButtonText: 'Tutup',
     })

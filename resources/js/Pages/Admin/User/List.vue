@@ -44,7 +44,7 @@ const showNewMemberCredentials = async () => {
         `,
         icon: 'success',
         confirmButtonText: 'Kirim ke WhatsApp',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
     })
 
     if (result.isConfirmed) {

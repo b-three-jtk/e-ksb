@@ -251,10 +251,11 @@ const submitForm = async () => {
         title: 'Posting Alokasi Kas?',
         text: 'Data yang diposting akan dicatat ke jurnal.',
         icon: 'question',
+        iconColor: '#009141',
         showCancelButton: true,
         confirmButtonText: 'Ya, Posting',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#16a34a',
+        confirmButtonColor: '#009141',
     })
 
     if (!result.isConfirmed) {

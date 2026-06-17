@@ -234,7 +234,7 @@ function close() {
 
                         <label
                             class="flex items-start gap-3 cursor-pointer p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                            <input v-model="agreed" type="checkbox" class="mt-0.5 text-blue-600" />
+                            <input v-model="agreed" type="checkbox" class="mt-0.5 accent-primary" />
                             <span class="text-sm text-gray-700 dark:text-gray-300">{{ agreementText }}</span>
                         </label>
                     </div>
@@ -245,8 +245,7 @@ function close() {
                             Batal
                         </button>
                         <button @click="confirm" :disabled="!agreed || loading"
-                            class="px-6 py-2 text-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            :class="buttonClass">
+                            class="px-6 py-2 text-sm text-white bg-primary border border-primary font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                             {{ loading ? 'Memproses...' : 'Posting Sekarang' }}
                         </button>
                     </div>

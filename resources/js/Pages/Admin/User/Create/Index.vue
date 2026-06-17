@@ -96,12 +96,13 @@ const openImageOptions = (target, onReplace) => {
 		title: 'Pilih Aksi',
 		text: 'Anda ingin melihat detail gambar atau mengganti gambar?',
 		icon: 'question',
+		iconColor: '#009141',
 		showCancelButton: true,
 		showDenyButton: true,
 		confirmButtonText: 'Lihat Detail',
 		denyButtonText: 'Ganti Gambar',
 		cancelButtonText: 'Tutup',
-		confirmButtonColor: '#007943',
+		confirmButtonColor: '#009141',
 
 	}).then((result) => {
 		if (result.isConfirmed) {
@@ -110,7 +111,7 @@ const openImageOptions = (target, onReplace) => {
 				imageAlt: 'Preview gambar',
 				text: `Ukuran file: ${(selectedFile.size / 1024).toFixed(1)} KB`,
 				confirmButtonText: 'Tutup',
-				confirmButtonColor: '#007943',
+				confirmButtonColor: '#009141',
 			})
 			return
 		}
@@ -140,7 +141,7 @@ const submitForm = () => {
 		showCancelButton: true,
 		confirmButtonText: 'Ya, tambahkan',
 		cancelButtonText: 'Batal',
-		confirmButtonColor: '#007943',
+		confirmButtonColor: '#009141',
 	}).then((result) => {
 		if (result.isConfirmed) {
 			form.post('/admin/users/store', {

@@ -62,7 +62,7 @@ const submitForm = () => {
         showCancelButton: true,
         confirmButtonText: 'Ya, ubah profil',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
     }).then((result) => {
         if (result.isConfirmed) {
             form.transform((data) => ({

@@ -106,12 +106,13 @@ const submitForm = async () => {
             </div>
         `,
         icon: 'question',
+        iconColor: '#009141',
         showCancelButton: true,
         confirmButtonText: 'Ya, Tambahkan',
         cancelButtonText: 'Batal',
         reverseButtons: true,
-        confirmButtonColor: '#16a34a',
-        cancelButtonColor: '#6b7280',
+        confirmButtonColor: '#009141',
+        cancelButtonColor: 'gray',
     })
 
     if (!result.isConfirmed) return
@@ -187,12 +188,13 @@ const updateStatus = async () => {
         title: 'Konfirmasi Perubahan Status',
         text: `Apakah Anda yakin ingin mengubah status akun menjadi ${statusForm.status}?`,
         icon: 'question',
+        iconColor: '#009141',
         showCancelButton: true,
         confirmButtonText: 'Ya, Simpan',
         cancelButtonText: 'Batal',
         reverseButtons: true,
-        confirmButtonColor: '#16a34a',
-        cancelButtonColor: '#6b7280',
+        confirmButtonColor: '#009141',
+        cancelButtonColor: 'gray',
     })
 
     if (!result.isConfirmed) return

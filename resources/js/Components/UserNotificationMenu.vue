@@ -78,7 +78,8 @@ onMounted(async () => {
                 title: notification.title,
                 text: notification.message,
                 icon: 'info',
-                confirmButtonColor: '#007031',
+                iconColor: '#009141',
+                confirmButtonColor: '#009141',
                 confirmButtonText: 'Tutup',
                 position: 'middle',
                 customClass: {

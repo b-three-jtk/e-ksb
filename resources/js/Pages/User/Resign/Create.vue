@@ -85,7 +85,7 @@ const submitResignation = () => {
             icon: 'warning',
             title: 'Permohonan Sudah Diajukan',
             text: 'Permohonan pengunduran diri sudah pernah diajukan. Harap menunggu peninjauan dari petugas koperasi.',
-            confirmButtonColor: '#f59e0b',
+            confirmButtonColor: '#009141',
             confirmButtonText: 'Kembali ke Dashboard'
         }).then((result) => {
             if (result.isConfirmed) {
@@ -100,7 +100,7 @@ const submitResignation = () => {
             icon: 'error',
             title: 'Data Belum Lengkap',
             text: 'Harap lengkapi semua persyaratan (upload dokumen dan centang pernyataan)',
-            confirmButtonColor: '#ef4444'
+            confirmButtonColor: '#009141'
         });
         return;
     }
@@ -112,7 +112,7 @@ const submitResignation = () => {
         showCancelButton: true,
         confirmButtonText: 'Ya, Ajukan',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
     }).then((result) => {
         if (result.isConfirmed) {
             isSubmitting.value = true
@@ -152,7 +152,7 @@ const submitResignation = () => {
                                 icon: 'warning',
                                 title: 'Permohonan Tidak Dapat Diajukan',
                                 text: errors.resign,
-                                confirmButtonColor: '#f59e0b',
+                                confirmButtonColor: '#009141',
                                 confirmButtonText: 'Kembali ke Dashboard'
                             }).then((result) => {
                                 if (result.isConfirmed) {

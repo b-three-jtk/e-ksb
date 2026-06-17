@@ -190,8 +190,8 @@ const handleDeletePicture = () => {
         text: 'Apakah Anda yakin ingin menghapus foto profil?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#009141',
+        cancelButtonColor: 'gray',
         confirmButtonText: 'Ya, Hapus!',
         cancelButtonText: 'Batal'
     }).then((result) => {
@@ -209,8 +209,8 @@ const handleCancel = () => {
             text: 'Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin membatalkan?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
+            confirmButtonColor: '#009141',
+            cancelButtonColor: 'gray',
             confirmButtonText: 'Ya, Batalkan',
             cancelButtonText: 'Tetap di Halaman Ini'
         }).then((result) => {
@@ -230,9 +230,10 @@ const submit = () => {
         title: 'Simpan Perubahan?',
         text: 'Apakah Anda yakin ingin menyimpan perubahan profil?',
         icon: 'question',
+        iconColor: '#009141',
         showCancelButton: true,
-        confirmButtonColor: '#008E43',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#009141',
+        cancelButtonColor: 'gray',
         confirmButtonText: 'Ya, Simpan!',
         cancelButtonText: 'Batal'
     }).then((result) => {

@@ -55,7 +55,7 @@ const nonactiveUser = () => {
         showCancelButton: true,
         confirmButtonText: 'Ya, nonaktifkan',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
     }).then((result) => {
         if (result.isConfirmed) {
             form.put((`/admin/users/${props.user.id}/disable`), {

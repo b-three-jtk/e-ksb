@@ -304,7 +304,7 @@ async function handleConfirm() {
     confirmButtonText: 'Ya, Posting',
     cancelButtonText: 'Batal',
     reverseButtons: true,
-    confirmButtonColor: '#15803d',
+    confirmButtonColor: '#009141',
   })
 
   if (!result.isConfirmed) {
