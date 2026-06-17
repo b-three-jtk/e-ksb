@@ -143,8 +143,8 @@ const submitForm = () => {
         text: "Perubahan akan disimpan ke database.",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#008E43',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#009141',
+        cancelButtonColor: 'gray',
         confirmButtonText: 'Ya, simpan!',
         cancelButtonText: 'Batal'
     }).then((result) => {

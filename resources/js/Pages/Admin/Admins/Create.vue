@@ -87,7 +87,7 @@ const submitForm = () => {
         showCancelButton: true,
         confirmButtonText: 'Ya, lanjutkan',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
     }).then((result) => {
         if (result.isConfirmed) {
             form.post('/admin/pengurus/store', {

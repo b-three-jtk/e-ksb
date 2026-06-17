@@ -75,7 +75,7 @@ const submitForm = () => {
         showCancelButton: true,
         confirmButtonText: 'Ya, simpan',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
     }).then((result) => {
         if (result.isConfirmed) {
             form.put(`/admin/roles/${props.role.id}`, {

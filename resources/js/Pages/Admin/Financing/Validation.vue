@@ -72,7 +72,7 @@ const submit = () => {
         showCancelButton: true,
         confirmButtonText: 'Ya, simpan',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#007943',
+        confirmButtonColor: '#009141',
     }).then((result) => {
         if (result.isConfirmed) {
             const submitForm = useForm({

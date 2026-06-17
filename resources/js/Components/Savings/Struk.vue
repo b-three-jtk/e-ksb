@@ -320,7 +320,7 @@ defineExpose({ cetak })
     <button
       v-if="showPrintButton"
       @click="cetak"
-      class="mt-4 w-full flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+      class="mt-4 w-full flex items-center justify-center gap-2 px-6 py-2.5 bg-primary hover:bg-secondary text-white text-sm font-medium rounded-lg transition-colors"
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>

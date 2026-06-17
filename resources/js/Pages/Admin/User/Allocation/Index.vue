@@ -54,7 +54,7 @@ const updateFilterState = (value) => {
 
 const applyFilters = () => {
   router.get(
-    '/admin/users/allocation',
+    '/admin/allocation',
     {
       search: filterState.search || undefined,
       per_page: filterState.per_page,

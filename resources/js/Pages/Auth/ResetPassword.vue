@@ -72,7 +72,7 @@ const submit = () => {
                             <button
                                 type="submit"
                                 :disabled="form.processing"
-                                class="w-full bg-secondary hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-xl transition inline-flex items-center justify-center gap-2"
+                                class="w-full bg-primary hover:bg-secondary disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-xl transition inline-flex items-center justify-center gap-2"
                             >
                                 Kirim
 

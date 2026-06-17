@@ -118,7 +118,7 @@ async function submitReschedule() {
         confirmButtonText: 'Ya, Reschedule',
         cancelButtonText: 'Batal',
         reverseButtons: true,
-        confirmButtonColor: '#15803d'
+        confirmButtonColor: '#009141'
     })
 
     if (!result.isConfirmed) {
@@ -180,11 +180,12 @@ async function handleSubmit() {
         title: 'Posting Pembayaran?',
         text: 'Pembayaran akan diproses dan tidak dapat dibatalkan.',
         icon: 'question',
+        iconColor: '#009141',
         showCancelButton: true,
         confirmButtonText: 'Ya, Posting',
         cancelButtonText: 'Batal',
         reverseButtons: true,
-        confirmButtonColor: '#15803d'
+        confirmButtonColor: '#009141'
     })
 
     if (!result.isConfirmed) {
@@ -580,7 +581,7 @@ async function handleSubmit() {
                         @click="handleSubmit"
                         type="button"
                         :disabled="isSubmittingPayment"
-                        class="inline-flex items-center gap-2 px-8 py-2.5 rounded-lg bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white transition-colors"
+                        class="inline-flex items-center gap-2 px-8 py-2.5 rounded-lg bg-primary hover:bg-secondary disabled:opacity-60 text-white transition-colors"
                     >
                         Posting
 
@@ -640,7 +641,7 @@ async function handleSubmit() {
                             type="button"
                             @click="submitReschedule"
                             :disabled="rescheduleLoading"
-                            class="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
+                            class="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-primary hover:bg-secondary disabled:opacity-60 text-white text-sm font-medium transition-colors"
                         >
                             <Icon
                                 v-if="rescheduleLoading"

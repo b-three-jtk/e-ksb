@@ -224,7 +224,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                         Batal
                     </button>
                     <button @click="createNewSupplier" :disabled="isCreatingSupplier || !newSupplierName.trim()"
-                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium">
+                        class="px-6 py-2 bg-primary hover:bg-secondary text-white rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium">
                         <span v-if="!isCreatingSupplier">Buat</span>
                         <span v-else class="flex items-center gap-2">
                             <div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />

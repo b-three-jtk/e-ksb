@@ -106,12 +106,13 @@ const submitForm = async () => {
             </div>
         `,
         icon: 'question',
+        iconColor: '#009141',
         showCancelButton: true,
         confirmButtonText: 'Ya, Tambahkan',
         cancelButtonText: 'Batal',
         reverseButtons: true,
-        confirmButtonColor: '#16a34a',
-        cancelButtonColor: '#6b7280',
+        confirmButtonColor: '#009141',
+        cancelButtonColor: 'gray',
     })
 
     if (!result.isConfirmed) return
@@ -187,12 +188,13 @@ const updateStatus = async () => {
         title: 'Konfirmasi Perubahan Status',
         text: `Apakah Anda yakin ingin mengubah status akun menjadi ${statusForm.status}?`,
         icon: 'question',
+        iconColor: '#009141',
         showCancelButton: true,
         confirmButtonText: 'Ya, Simpan',
         cancelButtonText: 'Batal',
         reverseButtons: true,
-        confirmButtonColor: '#16a34a',
-        cancelButtonColor: '#6b7280',
+        confirmButtonColor: '#009141',
+        cancelButtonColor: 'gray',
     })
 
     if (!result.isConfirmed) return
@@ -608,7 +610,7 @@ const nomorAkunGuide = [
                                 type="button"
                                 @click="submitForm"
                                 :disabled="isSubmitting"
-                                class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60
+                                class="inline-flex items-center gap-2 bg-primary hover:bg-secondary disabled:opacity-60
                                        text-white font-semibold px-8 py-2.5 rounded-lg transition-colors"
                             >
                                 <Icon v-if="isSubmitting" icon="tabler:loader-2" class="w-4 h-4 animate-spin" />
@@ -717,7 +719,7 @@ const nomorAkunGuide = [
 
                             <button
                                 @click="updateStatus"
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg"
+                                class="px-4 py-2 bg-primary hover:bg-secondary text-white rounded-lg"
                             >
                                 Simpan
                             </button>

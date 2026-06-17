@@ -159,7 +159,7 @@ const rupiah = (value) =>
                         <h3 class="font-semibold text-lg">Riwayat Transaksi Terbaru Anda</h3>
                         <Link
                             href="/user/ledger"
-                            class="text-sm text-primary font-medium border border-primary hover:bg-secondary dark:hover:bg-accent/20 px-3 py-1.5 rounded-lg transition-colors">
+                            class="text-sm text-primary font-medium border border-primary hover:bg-secondary hover:text-white dark:hover:bg-accent/20 px-3 py-1.5 rounded-lg transition-colors">
                             Lihat Semua
                         </Link>
                     </div>

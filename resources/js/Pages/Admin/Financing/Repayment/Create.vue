@@ -42,8 +42,8 @@ const submitForm = () => {
         text: "Pastikan semua informasi yang Anda masukkan sudah benar.",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#009141',
+        cancelButtonColor: 'gray',
         confirmButtonText: 'Ya, ajukan pelunasan!',
         cancelButtonText: 'Batal'
     }).then((result) => {

@@ -98,10 +98,11 @@ export default function useUserAllocation(props) {
       title: 'Konfirmasi alokasi',
       text: `Alokasikan ${selectedCount.value} anggota ke ${selectedPj.value?.name ?? 'penanggung jawab ini'}?`,
       icon: 'question',
+      iconColor: '#009141',
       showCancelButton: true,
       confirmButtonText: 'Ya, simpan',
       cancelButtonText: 'Batal',
-      confirmButtonColor: '#007943',
+      confirmButtonColor: '#009141',
     }).then((result) => {
       if (!result.isConfirmed) {
         return
@@ -110,7 +111,7 @@ export default function useUserAllocation(props) {
       form.pj_user_id = selectedPjId.value
       form.member_ids = selectedMemberIds.value
 
-      form.post('/admin/users/allocation', {
+      form.post('/admin/allocation', {
         preserveScroll: true,
         onSuccess: () => {
           toast('Alokasi anggota berhasil disimpan.', {

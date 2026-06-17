@@ -189,8 +189,7 @@ defineExpose({ cetak })
     <button
       @click="cetak"
       class="mt-4 w-full flex items-center justify-center gap-2 px-6 py-2.5
-             bg-blue-600 text-white text-sm font-medium rounded-lg
-             hover:bg-blue-700 transition-colors"
+             bg-primary hover:bg-secondary text-white text-sm font-medium rounded-lg transition-colors"
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="2">

@@ -298,8 +298,8 @@ const submitAlert = async (section) => {
         confirmButtonText: 'Ya, Simpan',
         cancelButtonText: 'Batal',
         reverseButtons: true,
-        confirmButtonColor: '#007943',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#009141',
+        cancelButtonColor: 'gray',
     })
 
     if (result.isConfirmed) {

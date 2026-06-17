@@ -67,7 +67,7 @@ const submit = () => {
 
                   <button
                     type="submit"
-                    class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-semibold font-head py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
+                    class="mt-4 w-full bg-primary hover:bg-secondary text-white font-semibold font-head py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
                     :disabled="form.processing"
                     >
                     <span v-if="form.processing">Memproses...</span>
