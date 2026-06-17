@@ -581,7 +581,7 @@ async function handleSubmit() {
                         @click="handleSubmit"
                         type="button"
                         :disabled="isSubmittingPayment"
-                        class="inline-flex items-center gap-2 px-8 py-2.5 rounded-lg bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white transition-colors"
+                        class="inline-flex items-center gap-2 px-8 py-2.5 rounded-lg bg-primary hover:bg-secondary disabled:opacity-60 text-white transition-colors"
                     >
                         Posting
 
@@ -641,7 +641,7 @@ async function handleSubmit() {
                             type="button"
                             @click="submitReschedule"
                             :disabled="rescheduleLoading"
-                            class="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
+                            class="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-primary hover:bg-secondary disabled:opacity-60 text-white text-sm font-medium transition-colors"
                         >
                             <Icon
                                 v-if="rescheduleLoading"

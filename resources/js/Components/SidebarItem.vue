@@ -1,7 +1,7 @@
 <template>
     <button @click="$emit('click')"
         class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm border-l-2 transition-colors" :class="active
-            ? 'border-blue-600 text-blue-600 bg-blue-50 font-medium'
+            ? 'border-primary text-primary bg-primary/10 font-medium'
             : 'border-transparent text-gray-500 hover:text-gray-900 hover:bg-gray-50'">
         {{ label }}
     </button>

@@ -245,7 +245,7 @@ function close() {
                             Batal
                         </button>
                         <button @click="confirm" :disabled="!agreed || loading"
-                            class="px-6 py-2 text-sm text-white bg-primary border border-primary font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            class="px-6 py-2 text-sm text-white bg-primary hover:bg-secondary font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                             {{ loading ? 'Memproses...' : 'Posting Sekarang' }}
                         </button>
                     </div>

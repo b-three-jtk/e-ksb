@@ -126,7 +126,7 @@ const onSearchClick = () => {
                     type="button"
                     @click="onSearchClick"
                     class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
-                           bg-green-600 hover:bg-green-800 text-white transition-colors
+                           bg-primary hover:bg-secondary text-white transition-colors
                            focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                     <Icon icon="ic:baseline-search" class="w-4 h-4" />

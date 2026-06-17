@@ -438,7 +438,7 @@ const akadType = computed(() => {
                 <button
                   v-for="m in memberSuggestions" :key="m.id"
                   @click="pilihAnggota(m)"
-                  class="w-full text-left px-4 py-2.5 hover:bg-light-accent dark:hover:bg-gray-700
+                  class="w-full text-left px-4 py-2.5 bg-primary hover:bg-secondary dark:hover:bg-gray-700
                          flex items-center gap-3 transition-colors"
                 >
                   <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-primary flex items-center
