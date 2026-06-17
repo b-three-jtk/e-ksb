@@ -35,7 +35,7 @@ class Financing extends Model
     ];
 
     protected $casts = [
-        'akad_date' => 'date',
+        'akad_date' => 'datetime',
         'requested_date' => 'date',
         'paid_date' => 'date',
     ];

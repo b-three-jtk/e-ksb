@@ -26,6 +26,7 @@ use App\Models\User;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PelunasanService;
 use App\Services\Admin\PembiayaanService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -59,7 +60,7 @@ class PembiayaanController extends Controller
                 return [
                     'id' => $f->id,
                     'financing_transaction_code' => $f->financing_transaction_code,
-                    'akad_date' => $f->akad_date?->format('Y-m-d') ?? '',
+                    'akad_date' => Carbon::parse($f->akad_date)->format('Y-m-d') ?? '',
                     'user' => $f->member->user
                         ? ($f->member->user->user_code . ' - ' . $f->member->user->name)
                         : '-',
@@ -161,7 +162,7 @@ class PembiayaanController extends Controller
                     ];
                 })->sortByDesc('verified_at')->values(),
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                     'purchase_receipt' => $this->getDocumentUrl($financing->financingItem->purchase_receipt),
@@ -217,7 +218,7 @@ class PembiayaanController extends Controller
                     'collateral_location' => $financing->collateral?->collateral_location,
                 ],
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                 ],
@@ -672,7 +673,7 @@ class PembiayaanController extends Controller
                     ->exists();
 
                 $member->is_have_eligible_saving = $hasEligibleSaving;
-                $member->family_card = $member->memberDocs->where('doc_name', 'kk')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kk')->first()->doc_attachment) : null;
+                $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
                 $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
                 $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
 

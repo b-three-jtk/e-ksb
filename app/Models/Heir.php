@@ -17,13 +17,11 @@ class Heir extends Model
     protected $fillable = [
         'heir_nik',
         'heir_name',
-        'relationship',
         'heir_contact',
-        'member_id',
     ];
 
     public function member()
     {
-        return $this->belongsTo(Member::class, 'member_id', 'member_id');
+        return $this->belongsToMany(Member::class);
     }
 }

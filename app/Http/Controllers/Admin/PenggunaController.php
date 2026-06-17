@@ -13,19 +13,20 @@ use App\Http\Requests\StoreMemberAllocationRequest;
 use App\Http\Requests\StoreMemberRequest;
 use App\Http\Requests\UpdateMemberRequest;
 use App\Models\Financing;
+use App\Models\Heir;
 use App\Models\SavingAccount;
 use App\Models\User;
-use App\Services\Admin\PembiayaanService;
 use App\Services\Admin\AnggotaService;
+use App\Services\Admin\PembiayaanService;
 use App\Services\User\AlokasiAnggotaService;
 use App\Services\User\PendaftaranAnggotaService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use RuntimeException;
-use Illuminate\Support\Facades\Auth;
 
 class PenggunaController extends Controller
 {
@@ -147,7 +148,7 @@ class PenggunaController extends Controller
     public function edit(string $id)
     {
         $user = User::with(['member', 'member.memberDocs' => function ($query) {
-            $query->whereIn('doc_name', ['ktp', 'kk']);
+            $query->whereIn('doc_name', ['ktp', 'kartu_keluarga']);
         }, 'member.heirs'])->findOrFail($id);
 
         $user->kk = $user->member?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga')?->doc_attachment
@@ -194,12 +195,24 @@ class PenggunaController extends Controller
                     ]);
                 }
 
-                if (isset($validated['heirs'])) {
-                    $user->member->heirs()->delete();
+                if (!empty($validated['heirs'])) {
+                    $syncData = [];
 
-                    foreach ($validated['heirs'] as $heirData) {
-                        $user->member->heirs()->create($heirData);
+                    foreach ($validated['heirs'] as $heirInput) {
+                        $heir = Heir::firstOrCreate(
+                            ['heir_nik' => $heirInput['heir_nik']],
+                            [
+                                'heir_name' => $heirInput['heir_name'],
+                                'heir_contact' => $heirInput['heir_contact'] ?? null,
+                            ]
+                        );
+
+                        $syncData[$heir->heir_nik] = ['relationship' => $heirInput['relationship']];
                     }
+
+                    $user->member->heirs()->sync($syncData);
+                } else {
+                    $user->member->heirs()->detach();
                 }
 
                 if (isset($validated['ktp_file'])) {
@@ -212,7 +225,7 @@ class PenggunaController extends Controller
 
                 if (isset($validated['kk_file'])) {
                     $user->member->memberDocs()->firstOrCreate([
-                        'doc_name' => 'kk',
+                        'doc_name' => 'kartu_keluarga',
                         'doc_attachment' => $validated['kk_file']->store('member_docs', 'public'),
                         'member_id' => $user->member->id
                     ]);
@@ -221,6 +234,7 @@ class PenggunaController extends Controller
 
             return redirect()->route('admin.users.index');
         } catch (Exception $e) {
+            Log::info('error'. $e->getMessage());
             return back()->withErrors([
                 'member' => $e->getMessage(),
             ]);

@@ -62,7 +62,9 @@ class Member extends Model
 
     public function heirs()
     {
-        return $this->hasMany(Heir::class);
+        return $this->belongsToMany(Heir::class, 'member_heirs', 'member_id', 'heir_nik')
+                    ->withPivot('relationship')
+                    ->withTimestamps();
     }
 
     public function memberDocs()

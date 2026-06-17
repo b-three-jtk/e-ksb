@@ -22,7 +22,7 @@ class Installment extends Model
     ];
 
     protected $casts = [
-        'due_date' => 'date',
+        'due_date' => 'datetime',
     ];
 
     public function financing()

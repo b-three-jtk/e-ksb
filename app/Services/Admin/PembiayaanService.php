@@ -15,9 +15,11 @@ use App\Models\Financial;
 use App\Models\Financing;
 use App\Models\FinancingItem;
 use App\Models\GlobalSetting;
+use App\Models\Heir;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\JournalEntry;
+use App\Models\Member;
 use App\Models\MemberDoc;
 use App\Models\Supplier;
 use App\Models\User;
@@ -218,9 +220,24 @@ class PembiayaanService
         ]);
 
         // Sync heirs
-        $user->member->heirs()->delete();
         if (!empty($memberData['heirs'])) {
-            $user->member->heirs()->createMany($memberData['heirs']);
+            $syncData = [];
+
+            foreach ($memberData['heirs'] as $heirInput) {
+                $heir = Heir::firstOrCreate(
+                    ['heir_nik' => $heirInput['heir_nik']],
+                    [
+                        'heir_name' => $heirInput['heir_name'],
+                        'heir_contact' => $heirInput['heir_contact'] ?? null,
+                    ]
+                );
+
+                $syncData[$heir->heir_nik] = ['relationship' => $heirInput['relationship']];
+            }
+
+            $user->member->heirs()->sync($syncData);
+        } else {
+            $user->member->heirs()->detach();
         }
 
         // Sync documents
