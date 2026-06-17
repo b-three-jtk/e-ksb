@@ -47,7 +47,7 @@ const submitForm = () => {
         if (result.isConfirmed) {
             form.put(('/admin/pengurus/update/' + props.admin.id), {
                 onSuccess: () => {
-                    toast("Pengurus berhasil diperbarui!", {
+                    toast("Data engurus berhasil diperbarui!", {
                         "type": "success",
                         "position": "bottom-right",
                         "transition": "slide",
@@ -57,7 +57,7 @@ const submitForm = () => {
                     })
                 },
                 onError: () => {
-                    toast("Gagal memperbarui pengurus.", {
+                    toast("Gagal memperbarui data pengurus.", {
                         "type": "error",
                         "position": "bottom-right",
                         "transition": "slide",
