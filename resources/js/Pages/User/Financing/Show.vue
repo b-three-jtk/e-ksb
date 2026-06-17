@@ -13,6 +13,7 @@ import moneyParser from '@/Composables/moneyParser.js'
 import dateParser from '@/Composables/dateParser.js'
 import useFinancingStatus from '@/Composables/useFinancingStatus.js'
 import ModalDocument from '@/Components/ModalDocument.vue'
+import Documents from '../../Admin/Financing/Show/Documents.vue'
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -27,14 +28,8 @@ const installments = computed(() => props.data?.installment ?? {
 
 const hasInstallmentHistory = computed(() => props.data?.installment?.data?.length > 0)
 
-const canPayBill = computed(() =>
-    can.value['edit_murabahah']
-    && props.data.installment
-    && (props.data.status === 'Angsuran Berjalan' || props.data.status === 'Pembayaran Tangguh')
-)
-
 const INSTALLMENT_COLUMNS = [
-    { key: 'installment_no', label: 'Angsuran Ke' },
+    { key: 'installment_no', label: 'Pembayaran Ke' },
     { key: 'installment_trans_code', label: 'No. Transaksi' },
     { key: 'due_date', label: 'Tanggal Jatuh Tempo' },
     { key: 'payment_date', label: 'Tanggal Pembayaran' },
@@ -63,132 +58,122 @@ const openReceiptModal = (receiptPath) => {
         <div class="container mx-auto pt-30 pb-10">
             <PageBreadcrumb page-title="Detail Pembiayaan" :items="BREADCRUMBS" />
 
-            <div class="card-layout px-0!">
-
-                <!-- Header -->
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-600 pb-4 px-8">
-                    <div class="flex flex-col">
-                        <h1 class="uppercase font-medium text-lg dark:text-gray-200">Detail Pembiayaan Murabahah</h1>
-                        <p class="text-sm font-light text-gray-500">
-                            No. Pembiayaan: {{ data.financing_transaction_code }}
-                        </p>
+            <div class="flex flex-col gap-4">
+                <div class="card-layout flex justify-between">
+                    <div class="flex gap-2 items-center">
+                        <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{
+                            data.financing_transaction_code }} <span class="my-auto ml-2"
+                                :class="useFinancingStatus(data.status)">{{ data.status }}</span>
+                        </h1>
                     </div>
-                    <span class="my-auto" :class="useFinancingStatus(data.status)">{{ data.status }}</span>
                 </div>
+                <div class="grid grid-cols-1 lg:grid-cols-7 gap-4">
+                    <div class="flex flex-col justify-end col-span-1 lg:col-span-5">
+                        <div class="card-layout flex flex-col gap-4 col-span-1 lg:col-span-3">
+                            <div class="card-layout">
+                                <h2 class="card-title mb-4">Detail Transaksi</h2>
+                                <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
+                                    <Info label="Harga Pokok" :value="moneyParser(data.cost_price)" />
+                                    <Info label="Margin" :value="moneyParser(data.margin_amount)" />
+                                    <Info label="Uang Muka" :value="moneyParser(data.down_payment)" />
+                                    <Info label="Total Pembiayaan" :value="moneyParser(data.total_price)" />
+                                    <Info label="Total Dibayar" :value="moneyParser(data.total_paid)" />
+                                    <Info label="Sisa Tagihan" :value="moneyParser(data.remaining_balance)" />
+                                    <Info label="Angsuran/Bulan" :value="moneyParser(data.installment_per_month)" />
+                                    <Info v-if="data.tenor" label="Tenor" :value="`${data.tenor} Bulan`" />
+                                    <Info v-if="data.next_due_date" label="Jatuh Tempo Terdekat"
+                                        :value="dateParser(data.next_due_date)" />
+                                </ul>
+                            </div>
+                            <div class="card-layout">
+                                <h1 class="card-title mb-4">Detail Objek Pembiayaan</h1>
+                                <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <Info label="Kategori Produk"
+                                        :value="data.financing_item?.product_type?.product_type_name" />
+                                    <Info label="Nama Produk" :value="data.financing_item?.name" />
+                                    <Info label="Tanggal Akad" :value="dateParser(data.akad_date)" />
+                                    <Info label="Jumlah/Kuantitas" :value="data.financing_item?.qty" />
+                                    <Info label="Kondisi" :value="data.financing_item?.condition" />
+                                    <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.specification" />
+                                </ul>
+                            </div>
+                            <section class="flex flex-col py-2 gap-2">
+                                <h1 class="card-title mb-4">Jadwal Pembayaran</h1>
+                                <div class="card-layout p-0!">
+                                    <BaseTable :columns="INSTALLMENT_COLUMNS" :data="installments">
 
-                <!-- Objek Pembiayaan -->
-                <section class="flex flex-col px-12 pb-2 pt-4 gap-2">
-                    <h1 class="dark:text-gray-200">Detail Objek Pembiayaan Murabahah</h1>
-                    <div class="card-layout grid grid-cols-2 gap-6">
-                        <Info label="Kategori Produk" :value="data.financing_item?.product_type?.product_type_name" />
-                        <Info label="Nama Produk" :value="data.financing_item?.name" />
-                        <Info label="Tanggal Akad" :value="dateParser(data.akad_date)" />
-                        <Info label="Jumlah/Kuantitas" :value="data.financing_item?.qty" />
-                        <Info label="Kondisi" :value="data.financing_item?.condition" />
-                        <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.specification" />
-                        <Info label="Supplier" :value="data.financing_item?.supplier?.supplier_name" />
-                    </div>
-                </section>
+                                        <template #cell-installment_trans_code="{ row }">
+                                            {{ row.installment_trans_code ?? '-' }}
+                                        </template>
+                                        <template #cell-due_date="{ row }">
+                                            {{ dateParser(row.due_date) }}
+                                        </template>
+                                        <template #cell-payment_date="{ row }">
+                                            {{ dateParser(row.payment_date) }}
+                                        </template>
+                                        <template #cell-amount="{ row }">
+                                            {{ moneyParser(row.amount) }}
+                                        </template>
+                                        <template #cell-is_early_repayment="{ row }">
+                                            <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="row.is_early_repayment
+                                                ? 'text-blue-600 bg-blue-50'
+                                                : 'text-green-600 bg-green-50'">
+                                                {{ row.is_early_repayment ? 'Pelunasan Dipercepat' : 'Reguler' }}
+                                            </span>
+                                        </template>
+                                        <template #cell-installment_payment_receipt="{ row }">
+                                            <Button v-if="row.installment_payment_receipt" size="small"
+                                                variant="primary"
+                                                @click="openReceiptModal(row.installment_payment_receipt)">
+                                                <EyeIcon width="18px" height="18px" />
+                                                Lihat Bukti
+                                            </Button>
+                                            <Button v-else size="small" variant="gray" disabled>
+                                                <EyeIcon width="18px" height="18px" />
+                                                Lihat Bukti
+                                            </Button>
+                                        </template>
 
-                <!-- Jaminan (opsional) -->
-                <section v-if="data.collateral" class="flex flex-col px-12 pb-2 pt-4 gap-2">
-                    <h1 class="dark:text-gray-200">Detail Jaminan</h1>
-                    <div class="card-layout grid grid-cols-2 gap-6">
-                        <Info label="Tipe Jaminan" :value="data.collateral.collateral_type" />
-                        <Info label="Nama Pemilik" :value="data.collateral.owner_name" />
-                        <Info label="Lokasi Jaminan" :value="data.collateral.collateral_location" />
-                        <Info label="Nilai Pasar Estimasi"
-                            :value="moneyParser(data.collateral.estimated_market_value)" />
-                    </div>
-                </section>
-
-                <!-- Ringkasan Pembiayaan -->
-                <section class="flex flex-col px-12 py-2 gap-2">
-                    <div class="flex justify-between items-center">
-                        <h1 class="dark:text-gray-200">Ringkasan Pembiayaan</h1>
-                        <div v-if="canPayBill" class="flex items-center gap-4">
-                            <Button :href="`/admin/financings/repayment/${data.id}`" variant="secondary" size="small">
-                                <span class="icon-[tabler--moneybag-move]" style="width:18px;height:18px;" />
-                                Pelunasan Dipercepat
-                            </Button>
-                            <Button :href="`/admin/financings/${data.id}/payments/create`" variant="info" size="small">
-                                <span class="icon-[tabler--credit-card-pay]" style="width:18px;height:18px;" />
-                                Bayar Tagihan
-                            </Button>
+                                    </BaseTable>
+                                    <Pagination :links="installments.links" :total="installments.total" />
+                                </div>
+                            </section>
                         </div>
+
                     </div>
-
-                    <div class="card-layout px-0!">
-                        <div class="grid grid-cols-2 gap-6 border-b border-gray-200 dark:border-gray-600 pb-4 px-8">
-                            <Info label="Harga Pokok" :value="moneyParser(data.cost_price)" />
-                            <Info label="Margin" :value="moneyParser(data.margin_amount)" />
-                            <Info label="Uang Muka" :value="moneyParser(data.down_payment)" />
-                            <Info label="Total Pembiayaan" :value="moneyParser(data.total_price)" />
-                            <Info label="Total Dibayar" :value="moneyParser(data.total_paid)" />
-                            <Info label="Sisa Tagihan" :value="moneyParser(data.remaining_balance)" />
-                            <Info label="Angsuran/Bulan" :value="moneyParser(data.installment_per_month)" />
-                            <Info v-if="data.tenor" label="Tenor" :value="`${data.tenor} Bulan`" />
-                            <Info v-if="data.next_due_date" label="Jatuh Tempo Terdekat"
-                                :value="dateParser(data.next_due_date)" />
-                        </div>
-
-                        <div v-if="hasInstallmentHistory" class="py-8 px-8">
-                            <h3 class="font-semibold mb-4 dark:text-gray-200">Progres Angsuran</h3>
+                    <div class="flex flex-col col-span-1 lg:col-span-2 gap-2">
+                        <div v-if="hasInstallmentHistory" class="card-layout">
+                            <h1 class="card-title mb-4">Progres Angsuran</h1>
                             <FinancingChart :total-price="Number(data.total_price)"
                                 :total-paid="Number(data.total_paid)"
                                 :remaining-balance="Number(data.remaining_balance)" />
                         </div>
+                        <div v-if="data.supplier" class="card-layout h-fit flex flex-col gap-6">
+                            <h1 class="card-title">Informasi Pemasok</h1>
+                            <ul class="grid grid-cols-1 gap-6">
+                                <Info label="Nama Pemasok" :value="data.supplier?.supplier_name" />
+                                <Info label="Alamat Pemasok" :value="data.supplier?.supplier_address" />
+                                <Info label="Kontak Pemasok" :value="data.supplier?.supplier_contact" />
+                            </ul>
+                        </div>
+                        <div v-if="data.collateral" class="card-layout flex flex-col pb-12.5! gap-6">
+                            <h1 class="card-title">Informasi Jaminan</h1>
+                            <ul class="grid grid-cols-1 gap-6">
+                                <Info label="Tipe Jaminan" :value="data.collateral.collateral_type" />
+                                <Info label="Nama Pemilik" :value="data.collateral.owner_name" />
+                                <Info label="Lokasi Jaminan" :value="data.collateral.collateral_location" />
+                                <Info label="Nilai Pasar Estimasi"
+                                    :value="moneyParser(data.collateral.estimated_market_value)" />
+                            </ul>
+                        </div>
+                        <Documents :data="data" />
+
                     </div>
-                </section>
-
-                <!-- Riwayat Angsuran -->
-                <section class="flex flex-col px-12 py-2 gap-2">
-                    <h1 class="dark:text-gray-200">Riwayat Angsuran</h1>
-                    <div class="card-layout p-0!">
-                        <BaseTable :columns="INSTALLMENT_COLUMNS" :data="installments">
-
-                            <template #cell-installment_trans_code="{ row }">
-                                {{ row.installment_trans_code ?? '-' }}
-                            </template>
-                            <template #cell-due_date="{ row }">
-                                {{ dateParser(row.due_date) }}
-                            </template>
-                            <template #cell-payment_date="{ row }">
-                                {{ dateParser(row.payment_date) }}
-                            </template>
-                            <template #cell-amount="{ row }">
-                                {{ moneyParser(row.amount) }}
-                            </template>
-                            <template #cell-is_early_repayment="{ row }">
-                                <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="row.is_early_repayment
-                                    ? 'text-blue-600 bg-blue-50'
-                                    : 'text-green-600 bg-green-50'">
-                                    {{ row.is_early_repayment ? 'Pelunasan Dipercepat' : 'Reguler' }}
-                                </span>
-                            </template>
-                            <template #cell-installment_payment_receipt="{ row }">
-                                <Button v-if="row.installment_payment_receipt" size="small" variant="primary"
-                                    @click="openReceiptModal(row.installment_payment_receipt)"> <EyeIcon width="18px" height="18px" />
-                                    Lihat Bukti
-                                </Button>
-                                <Button v-else size="small" variant="gray" disabled>
-                                    <EyeIcon width="18px" height="18px" />
-                                    Lihat Bukti
-                                </Button>
-                            </template>
-                        </BaseTable>
-                        <Pagination :links="installments.links" :total="installments.total" />
-                    </div>
-                </section>
-
+                </div>
             </div>
         </div>
-        <ModalDocument
-            ref="modalRef"
-            modal-id="buktiModal"
-            title="Bukti Penyetoran Angsuran"
-            :name="selectedReceipt"
-            :attachment="selectedReceipt"
-        />
+
+        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Angsuran" :name="selectedReceipt"
+            :attachment="selectedReceipt" />
     </BaseLayout>
 </template>

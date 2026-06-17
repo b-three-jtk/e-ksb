@@ -12,7 +12,7 @@ class PembiayaanService
         return Financing::query()
             ->with(['financingItem.productType'])
             ->where('member_id', $memberId)
-            ->whereIn('status', ['Lunas', 'Angsuran Berjalan'])
+            ->whereIn('status', ['Lunas', 'Angsuran Berjalan', 'Pembayaran Tangguh'])
             ->when($search !== '', function ($q) use ($search) {
                 $q->whereRaw(
                     'LOWER(financing_transaction_code) LIKE ?',
@@ -71,6 +71,17 @@ class PembiayaanService
             ? $financing->total_price / $financing->tenor
             : 0;
 
+        $dokumenPendukung = [
+            'akad_document'    => getDocumentUrl($financing->signed_akad_document),
+            'purchase_receipt' => getDocumentUrl($financing->purchase_receipt),
+        ];
+
+        if ($financing->wakalah) {
+            $dokumenPendukung['akad_wakalah_document'] = getDocumentUrl($financing->wakalah->signed_akad_document);
+        }
+
+        $financing->setAttribute('documents', $dokumenPendukung);
+
         if ($hasInstallments) {
             $financing->total_paid = $installments
                 ->sum(fn($i) => $i->payment?->nominal ?? 0);
@@ -101,5 +112,22 @@ class PembiayaanService
                 ->addMonthsNoOverflow($paidCount + 1)
                 ->format('Y-m-d')
             : null;
+    }
+
+    public function getPembiayaanById($id)
+    {
+        return Financing::with([
+            'member.user',
+            'member.heirs',
+            'member.financials',
+            'member.memberDocs',
+            'member.memberJobs',
+            'financingItem.productType',
+            'collateral',
+            'installment' => function ($q) {
+                $q->orderBy('installment_no');
+            },
+            'wakalah',
+        ])->findOrFail($id);
     }
 }

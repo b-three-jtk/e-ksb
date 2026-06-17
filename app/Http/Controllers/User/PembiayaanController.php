@@ -61,13 +61,7 @@ class PembiayaanController extends Controller
      */
     public function show(string $id)
     {
-        $financing = Financing::with([
-            'financingItem.productType',
-            'financingItem.supplier',
-            'installment' => fn($q) => $q->orderBy('installment_no'),
-            'installment.payment',
-            'collateral',
-        ])->findOrFail($id);
+        $financing = $this->pembiayaanService->getPembiayaanById($id);
 
         $this->pembiayaanService->computeFinancingSummary($financing);
         $this->pembiayaanService->computeNextDueDate($financing);

@@ -86,7 +86,7 @@ class PembiayaanController extends Controller
 
     public function show(string $id)
     {
-        $financing = $this->financingService->getPembiataanById($id);
+        $financing = $this->financingService->getPembiayaanById($id);
 
         $this->financingService->computeFinancingSummary($financing);
         $this->financingService->computeNextDueDate($financing);
@@ -97,7 +97,7 @@ class PembiayaanController extends Controller
                 'installment_trans_code'      => $item->payment?->installment_trans_code,
                 'due_date'                    => $item->due_date,
                 'payment_date'               => $item->payment?->payment_date,
-                'amount'                     => $item->payment?->nominal,
+                'amount'                     => $item->amount,
                 'is_early_repayment'         => $item->payment?->is_early_repayment ?? false,
                 'installment_payment_receipt' => $item->payment?->installment_payment_receipt ? asset('storage/' . $item->payment->installment_payment_receipt) : null,
             ];

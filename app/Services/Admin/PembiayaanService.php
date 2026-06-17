@@ -135,23 +135,6 @@ class PembiayaanService
         ];
     }
 
-    public function getPembiataanById($id)
-    {
-        return Financing::with([
-            'member.user',
-            'member.heirs',
-            'member.financials',
-            'member.memberDocs',
-            'member.memberJobs',
-            'financingItem.productType',
-            'collateral',
-            'installment' => function ($q) {
-                $q->orderBy('installment_no');
-            },
-            'wakalah',
-        ])->findOrFail($id);
-    }
-
     public function getDraftPembiayaan($id)
     {
         return Financing::where('id', $id)
