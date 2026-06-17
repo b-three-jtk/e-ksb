@@ -36,14 +36,6 @@ use Inertia\Inertia;
 class PembiayaanController extends Controller
 {
     public function __construct(private PembiayaanService $financingService){}
-    private function baseQuery(Request $request)
-    {
-        $verifier = auth()->user();
-        $search = $request->input('search');
-        $tab = $request->input('tab', 'all');
-
-        return $this->financingService->getSemuaPembiayaan($search, $tab, $verifier);
-    }
 
     /**
      * Display a listing of the resource.
@@ -58,7 +50,7 @@ class PembiayaanController extends Controller
         $sortBy = $request->input('sort_by', 'created_at');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $query = $this->baseQuery($request)->orderBy($sortBy, $sortDir);
+        $query = $this->financingService->getSemuaPembiayaan($search, $tab, $user);
 
         $financings = $query
             ->paginate($perPage)
@@ -89,50 +81,6 @@ class PembiayaanController extends Controller
             'summary' => $summary,
             'filters' => compact('search', 'perPage', 'tab', 'sortBy', 'sortDir'),
         ]);
-    }
-
-    /**
-     * Format member data untuk response
-     */
-    private function formatMemberData(Member $member): array
-    {
-        return [
-            'id' => $member->id,
-            'user_code' => $member->user->user_code,
-            'name' => $member->user->name,
-            'email' => $member->user->email,
-            'nik' => $member->user->nik,
-            'phone_number' => $member->user->phone_number,
-            'gender' => $member->gender,
-            'birth_place' => $member->birth_place,
-            'birth_date' => $member->birth_date,
-            'marital_status' => $member->marital_status,
-            'last_education' => $member->last_education,
-            'dependents' => $member->dependents,
-            'domicile_address' => $member->domicile_address,
-            'residential_address' => $member->residential_address,
-            'employment_status' => $member->memberJobs?->employment_status,
-            'job_title' => $member->memberJobs?->job_title,
-            'company_or_business_name' => $member->memberJobs?->company_or_business_name,
-            'business_field' => $member->memberJobs?->business_field,
-            'tenure_year' => $member->memberJobs?->tenure_year,
-            'workplace_address' => $member->memberJobs?->workplace_address,
-            'workplace_contact' => $member->memberJobs?->workplace_contact,
-            'gaji_pokok_amount' => $member->financials?->gaji_pokok_amount ?? 0,
-            'penghasilan_usaha_amount' => $member->financials?->penghasilan_usaha_amount ?? 0,
-            'penghasilan_pasangan_amount' => $member->financials?->penghasilan_pasangan_amount ?? 0,
-            'penghasilan_lainnya_amount' => $member->financials?->penghasilan_lainnya_amount ?? 0,
-            'biaya_hidup_keluarga_amount' => $member->financials?->biaya_hidup_keluarga_amount ?? 0,
-            'biaya_pendidikan_amount' => $member->financials?->biaya_pendidikan_amount ?? 0,
-            'jumlah_cicilan_amount' => $member->financials?->jumlah_cicilan_amount ?? 0,
-            'jumlah_biaya_lainnya_amount' => $member->financials?->jumlah_biaya_lainnya_amount ?? 0,
-            'heirs' => $member->heirs->map(fn($h) => [
-                'heir_nik' => $h->heir_nik,
-                'heir_name' => $h->heir_name,
-                'relationship' => $h->relationship,
-                'heir_contact' => $h->heir_contact,
-            ])->values(),
-        ];
     }
 
     public function show(string $id)
@@ -178,7 +126,7 @@ class PembiayaanController extends Controller
         return inertia('Admin/Financing/Create', [
             'data' => $this->financingService->getDataOpsi(),
             'financing' => [
-                'member' => $this->formatMemberData($financing->member),
+                'member' => $this->financingService->formatMemberData($financing->member),
                 'financing' => [
                     'name' => $financing->financingItem->name,
                     'product_type_id' => $financing->financingItem->product_type_id,
@@ -196,6 +144,7 @@ class PembiayaanController extends Controller
                     'status' => $financing->status,
                     'tenor' => $financing->tenor,
                     'predicted_cost_price' => $financing->predicted_cost_price,
+                    'tangguh_payment_date' => $financing->tangguh_payment_date,
                 ],
                 'collateral' => [
                     'collateral_type' => $financing->collateral?->collateral_type,
@@ -239,7 +188,7 @@ class PembiayaanController extends Controller
 
         return inertia('Admin/Financing/Validation', [
             'data' => [
-                'member' => $this->formatMemberData($financing->member),
+                'member' => $this->financingService->formatMemberData($financing->member),
                 'margin_percentage' => GlobalSetting::where('key', 'murabahah_margin_percentage')->where('effective_date', '<=', now())->latest()->first()?->value,
                 'financing' => [
                     'id' => $financing->id,
@@ -259,6 +208,7 @@ class PembiayaanController extends Controller
                     'product_type' => $financing->financingItem->productType?->product_type_name,
                     'tenor' => $financing->tenor,
                     'predicted_cost_price' => $financing->predicted_cost_price,
+                    'tangguh_payment_date' => $financing->tangguh_payment_date,
                 ],
                 'collateral' => [
                     'collateral_type' => $financing->collateral?->collateral_type,
@@ -397,7 +347,7 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
-                $hasActiveFinancing = $user->member->financings?->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+                $hasActiveFinancing = $user->member->financings?->whereIn('status', [FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, FinancingReqStatusEnum::TANGGUH->value])
                 ->isNotEmpty() ?? false;
 
                 if ($hasActiveFinancing) {
@@ -422,7 +372,7 @@ class PembiayaanController extends Controller
     public function finalize(StoreFinancingRequest $request)
     {
         try {
-            $financing = DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request) {
                 $validated = $request->validated();
                 $user = User::with('member.savingAccounts')
                     ->where('user_code', $validated['member']['user_code'])
@@ -709,15 +659,9 @@ class PembiayaanController extends Controller
             ->limit(5)
             ->get()
             ->map(function ($member) {
-                $hasActiveFinancing = $member->financings?->whereIn(
+                $hasActiveFinancing = $member->financings?->where(
                     'status',
-                    [
-                        FinancingReqStatusEnum::PENDING_REVIEW->value,
-                        FinancingReqStatusEnum::REJECTED->value,
-                        FinancingReqStatusEnum::APPROVED->value,
-                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                         FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-                    ]
                 )->isNotEmpty() ?? false;
 
                 $member->is_have_no_obligation = !$hasActiveFinancing;

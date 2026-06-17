@@ -76,6 +76,7 @@ export function useFinancingForm(initialData = null) {
             tenor: initialData?.financing?.tenor || null,
             predicted_cost_price: initialData?.financing?.predicted_cost_price || null,
             supplier_id: initialData?.financing?.supplier_id || null,
+            tangguh_payment_date: initialData?.financing?.tangguh_payment_date || null,
         },
         collateral: {
             collateral_type: initialData?.collateral?.collateral_type || '',
@@ -387,6 +388,8 @@ export function useFinancingForm(initialData = null) {
     const finalize = () => {
         if (form.financing.payment_method === 'Cicilan') {
             form.financing.status = 'Angsuran Berjalan'
+        } else if (form.financing.payment_method === 'Tangguh') {
+            form.financing.status = 'Pembayaran Tangguh'
         } else {
             form.financing.status = 'Lunas'
         }

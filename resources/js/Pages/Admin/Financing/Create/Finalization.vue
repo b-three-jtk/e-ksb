@@ -143,6 +143,16 @@ const onFieldChange = (field) => emit('validate-field', field)
             </div>
         </div>
 
+        <section v-if="form.financing.payment_method === 'Tangguh'" class="px-8 py-4">
+            <BaseInputAdmin
+                v-model="form.financing.tangguh_payment_date"
+                label="Tanggal Pembayaran Tangguh"
+                type="date"
+                :error="errors?.tangguh_payment_date"
+                @change="onFieldChange('tangguh_payment_date')"
+            />
+        </section>
+
         <!-- Simulasi Cicilan (hanya jika Cicilan) -->
         <section v-if="form.financing.payment_method === 'Cicilan'" class="px-8 py-4">
             <h1 class="card-title text-lg!">Simulasi Cicilan</h1>

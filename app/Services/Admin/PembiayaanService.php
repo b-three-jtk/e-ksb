@@ -393,6 +393,60 @@ class PembiayaanService
         }
     }
 
+    public function formatMemberData(Member $member): array
+    {
+        return [
+            'id' => $member->id,
+            'user_code' => $member->user->user_code,
+            'name' => $member->user->name,
+            'email' => $member->user->email,
+            'nik' => $member->user->nik,
+            'phone_number' => $member->user->phone_number,
+            'gender' => $member->gender,
+            'birth_place' => $member->birth_place,
+            'birth_date' => $member->birth_date,
+            'marital_status' => $member->marital_status,
+            'last_education' => $member->last_education,
+            'dependents' => $member->dependents,
+            'domicile_address' => $member->domicile_address,
+            'residential_address' => $member->residential_address,
+            'employment_status' => $member->memberJobs?->employment_status,
+            'job_title' => $member->memberJobs?->job_title,
+            'company_or_business_name' => $member->memberJobs?->company_or_business_name,
+            'business_field' => $member->memberJobs?->business_field,
+            'tenure_year' => $member->memberJobs?->tenure_year,
+            'workplace_address' => $member->memberJobs?->workplace_address,
+            'workplace_contact' => $member->memberJobs?->workplace_contact,
+            'gaji_pokok_amount' => $member->financials?->gaji_pokok_amount ?? 0,
+            'penghasilan_usaha_amount' => $member->financials?->penghasilan_usaha_amount ?? 0,
+            'penghasilan_pasangan_amount' => $member->financials?->penghasilan_pasangan_amount ?? 0,
+            'penghasilan_lainnya_amount' => $member->financials?->penghasilan_lainnya_amount ?? 0,
+            'biaya_hidup_keluarga_amount' => $member->financials?->biaya_hidup_keluarga_amount ?? 0,
+            'biaya_pendidikan_amount' => $member->financials?->biaya_pendidikan_amount ?? 0,
+            'jumlah_cicilan_amount' => $member->financials?->jumlah_cicilan_amount ?? 0,
+            'jumlah_biaya_lainnya_amount' => $member->financials?->jumlah_biaya_lainnya_amount ?? 0,
+            'heirs' => $member->heirs->map(fn($h) => [
+                'heir_nik' => $h->heir_nik,
+                'heir_name' => $h->heir_name,
+                'relationship' => $h->relationship,
+                'heir_contact' => $h->heir_contact,
+            ])->values(),
+        ];
+    }
+
+    public function generateTangguhSchedule(Financing $financing, $tangguhPaymentDate): void
+    {
+        if (!$tangguhPaymentDate) return;
+
+        Installment::create([
+            'financing_id'   => $financing->id,
+            'installment_no' => 1,
+            'amount'         => $financing->cost_price + $financing->margin_amount - $financing->down_payment,
+            'due_date'       => $tangguhPaymentDate,
+            'status'         => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+        ]);
+    }
+
     public function computeFinancingSummary(Financing $financing): void
     {
         $this->sharedPembiayaanService->computeFinancingSummary($financing);

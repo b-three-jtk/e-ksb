@@ -12,4 +12,5 @@ enum FinancingReqStatusEnum: string
     case PAID = 'Lunas';
 
     case APPROVED_WITH_CONDITIONS = 'Disetujui dengan Catatan';
+    case TANGGUH = 'Pembayaran Tangguh';
 }
