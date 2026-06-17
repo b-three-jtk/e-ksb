@@ -40,13 +40,15 @@ class StorePreFinancingRequest extends FormRequest
             'member.domicile_address' => 'nullable|string|max:500',
             'member.residential_address' => 'nullable|string|max:500',
             'member.dependents' => 'nullable|integer|min:0',
-            'member.employment_status' => 'nullable|string|max:255',
+
+            'member.employment_status' => 'required|string|max:255',
             'member.job_title' => 'nullable|string|max:255',
             'member.company_or_business_name' => 'nullable|string|max:255',
             'member.business_field' => 'nullable|string|max:500',
             'member.tenure_year' => 'nullable|integer|min:0',
             'member.workplace_address' => 'nullable|string|max:500',
             'member.workplace_contact' => 'nullable|string|max:20',
+
             'member.heirs.*.heir_name' => 'required|string|max:255',
             'member.heirs.*.heir_nik' => 'required|string|digits:16',
             'member.heirs.*.relationship' => 'required|string|max:255',
@@ -68,10 +70,11 @@ class StorePreFinancingRequest extends FormRequest
             'financing.specification' => 'required|string|max:1000',
             'financing.status' => 'required|string|max:255',
             'financing.predicted_cost_price' => 'required|numeric|min:0',
+            'financing.down_payment' => 'nullable|numeric|min:0',
 
             // Collateral data
-            'collateral.collateral_type' => 'nullable|string|max:255',
-            'collateral.owner_name' => 'nullable|string|max:255',
+            'collateral.collateral_type' => 'required|string|max:255',
+            'collateral.owner_name' => 'required|string|max:255',
             'collateral.estimated_market_value' => 'nullable|numeric|min:0',
             'collateral.collateral_location' => 'nullable|string|max:500',
 

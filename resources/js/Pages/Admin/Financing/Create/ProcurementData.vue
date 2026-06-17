@@ -132,12 +132,11 @@ const onFieldChange = (field) => emit('validate-field', field)
                         <p>Max. 2 MB per file</p>
                     </div>
                 </div>
-                <BaseInputAdmin v-model.number="form.financing.down_payment" label="Uang Muka" isMoney
-                    placeholder="Masukkan uang muka" />
-                <BaseInputAdmin v-model.number="form.financing.price_per_unit" label="Harga Per Item" isMoney
+                <BaseInputAdmin v-model.number="form.financing.price_per_unit" label="Harga Per Item" required isMoney
                     placeholder="Masukkan harga per item" :error="errors?.cost_price"
                     @input="onFieldChange('cost_price')" />
                 <Info label="Harga Perolehan Barang" :value="parseCurrencyAmount(form.financing.cost_price)" />
+                <Info label="Uang Muka" :value="parseCurrencyAmount(form.financing.down_payment)" />
                 <Info :label="`Margin (${data.margin_percentage}%)`" :value="parseCurrencyAmount(form.financing.margin_amount)" />
             </div>
 
@@ -150,13 +149,13 @@ const onFieldChange = (field) => emit('validate-field', field)
             <div class="mt-6 flex items-center gap-2">
                 <input v-model="form.is_wakalah" type="checkbox" id="wakalah"
                     class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary-500" />
-                <label for="wakalah" class="text-sm text-gray-700">
+                <label for="wakalah" class="text-sm text-gray-700 dark:text-gray-300">
                     Pengadaan dengan Skema Wakalah
                 </label>
             </div>
 
             <!-- Wakalah section -->
-            <div v-if="form.is_wakalah" class="grid grid-cols-2 items-end gap-6 mt-4">
+            <div v-if="form.is_wakalah || form.financing.akad_wakalah_date" class="grid grid-cols-2 items-end gap-6 mt-4">
                 <a href="/docs/AkadWakalah.docx" target="_blank"
                     class="border border-gray-300 flex justify-between rounded-lg p-4">
                     <div class="text-sm text-primary hover:underline">
@@ -173,7 +172,8 @@ const onFieldChange = (field) => emit('validate-field', field)
                             <p>Max. 2 MB per file</p>
                         </div>
                     </div>
-                    <BaseInputAdmin v-model="form.financing.akad_wakalah_date" label="Tanggal Akad Wakalah"
+                    <BaseInputAdmin v-model="form.financing.akad_wakalah_date" required label="Tanggal Akad Wakalah"
+                        errors="errors?.akad_wakalah_date"
                         type="date" />
                 </div>
             </div>
@@ -198,24 +198,24 @@ const onFieldChange = (field) => emit('validate-field', field)
 
     <Teleport to="body">
         <div v-if="showNewSupplierInput" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">Tambah Pemasok Baru</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-200 mb-4">Tambah Pemasok Baru</h2>
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pemasok</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Pemasok</label>
                     <input v-model="newSupplierName" type="text" placeholder="Masukkan nama pemasok..."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
+                        class="w-full px-4 py-2 border border-gray-300 dark:text-gray-300 font-body rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
                         @keyup.enter="createNewSupplier" />
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Pemasok</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Alamat Pemasok</label>
                     <input v-model="newSupplierAddress" type="text" placeholder="Masukkan alamat pemasok..."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
+                        class="w-full px-4 py-2 border border-gray-300 dark:text-gray-300 font-body rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
                         @keyup.enter="createNewSupplier" />
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Kontak Pemasok</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kontak Pemasok</label>
                     <input v-model="props.form.supplier.contact" type="text" placeholder="Masukkan kontak pemasok..."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
+                        class="w-full px-4 py-2 border border-gray-300 dark:text-gray-300 font-body rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
                         @keyup.enter="createNewSupplier" />
                 </div>
                 <div class="flex gap-3 justify-end">

@@ -97,6 +97,10 @@ const showNextButton = computed(() => {
         return false
     }
 
+    if (activeStep.value === 4 && form.is_wakalah && form.wakala) {
+        return false
+    }
+
     return true
 })
 
@@ -124,7 +128,7 @@ const handleSaveDraft = () => {
 <template>
     <AdminLayout title="Permohonan Pembiayaan Murabahah">
         <PageBreadcrumb page-title="Permohonan Pembiayaan Murabahah" :items="breadcrumbItems" />
-        <div class="grid grid-cols-6 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-6 gap-4">
             <div class="card-layout justify-between flex flex-col col-span-4 px-0!">
 
                 <PersonalData
@@ -231,7 +235,7 @@ const handleSaveDraft = () => {
                 </div>
             </div>
 
-            <div class="flex flex-col w-full col-span-2 gap-6">
+            <div class="flex flex-col w-full col-span-2 gap-4">
                 <Stepper :active-step="activeStep" />
                 <Documents :form="form" />
             </div>

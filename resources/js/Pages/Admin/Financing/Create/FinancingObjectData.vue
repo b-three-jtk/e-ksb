@@ -92,10 +92,12 @@ const onFieldChange = (field) => emit('validate-field', field)
             <BaseInputAdmin required v-model="form.financing.condition" label="Kondisi" type="select"
                 :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
             <BaseInputAdmin required v-model="form.financing.qty" label="Jumlah" type="number" />
-            <BaseInputAdmin v-model="form.financing.specification" label="Deskripsi" type="textarea" rows="4" required
-                :error="errors?.specification" placeholder="Masukkan deskripsi produk" />
             <BaseInputAdmin required v-model="form.financing.predicted_cost_price" label="Harga Perkiraan"
                 :error="errors?.predicted_cost_price" isMoney />
+            <BaseInputAdmin v-model.number="form.financing.down_payment" label="Uang Muka" isMoney
+                    placeholder="Masukkan uang muka" />
+            <BaseInputAdmin v-model="form.financing.specification" label="Deskripsi" type="textarea" rows="4" required
+                :error="errors?.specification" placeholder="Masukkan deskripsi produk" />
         </div>
 
         <!-- Jaminan -->
@@ -115,12 +117,12 @@ const onFieldChange = (field) => emit('validate-field', field)
         </div>
 
         <!-- Hasil verifikasi -->
-        <div class="card-layout mx-4">
+        <div v-if="form.financing.status !== 'Menunggu Kelengkapan Dokumen'" class="card-layout mx-4">
             <h1 class="card-title">Hasil Verifikasi</h1>
             <div class="pt-4">
                 <template v-if="form.verification.length > 0">
                     <div v-for="(verification, index) in form.verification" :key="index"
-                        class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                        class="bg-gray-50 dark:bg-gray-700 border border-gray-200 rounded-lg p-4 mb-4">
                         <div class="flex items-center gap-3 mb-2">
                             <span :class="{
                                 'text-green-500': verification.final_verification_status === 'Disetujui',
@@ -128,10 +130,10 @@ const onFieldChange = (field) => emit('validate-field', field)
                                 'text-yellow-500': verification.final_verification_status === 'Disetujui dengan Catatan',
                             }" class="icon-[tabler--circle-check] w-5 h-5"></span>
                             <div>
-                                <p class="text-sm font-medium text-gray-900 capitalize">
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-200 capitalize">
                                     {{ verification.final_verification_status.replace(/_/g, ' ') }}
                                 </p>
-                                <p class="text-xs text-gray-500">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
                                     {{ new Date(verification.verified_at).toLocaleString() }} oleh {{
                                     verification.verified_by_name }}
                                 </p>
@@ -148,12 +150,12 @@ const onFieldChange = (field) => emit('validate-field', field)
     <!-- Modal tambah kategori -->
     <Teleport to="body">
         <div v-if="showNewProductTypeInput" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">Tambah Kategori Produk Baru</h2>
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md dark:bg-gray-800">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 dark:text-gray-300">Tambah Kategori Produk Baru</h2>
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Kategori</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Kategori</label>
                     <input v-model="newProductTypeName" type="text" placeholder="Masukkan nama kategori..."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 font-body rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
                         @keyup.enter="createNewProductType" />
                 </div>
                 <div class="flex gap-3 justify-end">

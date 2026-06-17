@@ -38,7 +38,7 @@ defineProps({
                 </thead>
                 <tbody v-if="data.member.heirs.length > 0">
                     <tr v-for="(item, index) in data.member.heirs" :key="index"
-                        class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
+                        class="bg-white border-b text-dark-text dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700">
                         <td class="py-2 text-left pl-6">{{ item.heir_name }}</td>
                         <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>
                         <td class="py-2 text-left pl-6">{{ item.relationship }}</td>

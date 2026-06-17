@@ -119,5 +119,13 @@ class UserSeeder extends Seeder
         ]);
         $pjAnggota->assignRole(UserRoleEnum::PJANGGOTA->value);
 
+        // create 110 random users with Anggota role
+        User::factory(110)->create()->each(function ($user) {
+            $user->assignRole(UserRoleEnum::ANGGOTA->value);
+            Member::factory()->create([
+                'user_id' => $user->id,
+            ]);
+        });
+
     }
 }

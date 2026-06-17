@@ -41,9 +41,9 @@ const handleDownload = (url, label) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 @click.prevent="handleDownload(props.form?.documents?.[doc.key], doc.label)"
-                class="border flex justify-between p-4 rounded-xl items-center font-body hover:bg-gray-50 hover:border-secondary cursor-pointer transition-all"
+                class="border flex justify-between p-4 rounded-xl items-center font-body hover:bg-gray-50 hover:border-secondary cursor-pointer transition-all group"
             >
-                <p class="font-medium">{{ doc.label }}</p>
+                <p class="font-medium text-dark-text group-hover:text-secondary dark:text-gray-300 group-hover:dark:text-secondary">{{ doc.label }}</p>
                 <span class="icon-[tabler--download] text-green-500"></span>
             </a>
         </div>

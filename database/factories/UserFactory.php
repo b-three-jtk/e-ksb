@@ -27,7 +27,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_code' => 'KSB' . date('ym') . str_pad(User::count() + 1, 4, '0', STR_PAD_LEFT),
+            'user_code' => 'KSB' . date('ym') . fake()->unique()->numerify('####'),
             'nik' => fake()->unique()->numerify('################'),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),

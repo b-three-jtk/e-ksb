@@ -91,13 +91,13 @@ const onFieldChange = (field) => emit('validate-field', field)
             <h1 class="card-title text-lg!">Rincian Harga Murabahah</h1>
             <div class="border rounded-2xl overflow-hidden mt-2">
                 <table class="w-full text-sm text-left text-gray-500">
-                    <thead class="text-dark-text border-y">
+                    <thead class="text-dark-text dark:text-gray-300 border-y">
                         <tr class="border-b">
                             <th class="text-left pl-6 py-4">Komponen</th>
                             <th class="text-right pr-6 py-4">Nilai</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white text-dark-text">
+                    <tbody class="bg-white dark:bg-gray-800 text-dark-text dark:text-gray-200">
                         <tr class="border-b">
                             <td class="text-left pl-6 py-4">Harga Perolehan Barang</td>
                             <td class="text-right pr-6 py-4">{{ parseCurrencyAmount(form.financing.cost_price) }}</td>
@@ -110,7 +110,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                             <td class="text-left pl-6 py-4">Uang Muka</td>
                             <td class="text-right pr-6 py-4">{{ parseCurrencyAmount(form.financing.down_payment) }}</td>
                         </tr>
-                        <tr class="border-b bg-light-bg text-primary">
+                        <tr class="border-b bg-light-bg dark:bg-gray-700 text-primary dark:text-secondary">
                             <td class="text-left pl-6 py-4 font-semibold">Total Harga Murabahah</td>
                             <td class="text-right pr-6 py-4 font-semibold">{{ parseCurrencyAmount(totalPrice) }}</td>
                         </tr>
@@ -149,6 +149,8 @@ const onFieldChange = (field) => emit('validate-field', field)
                 label="Tanggal Pembayaran Tangguh"
                 type="date"
                 :error="errors?.tangguh_payment_date"
+                required
+                hint="Tanggal pembayaran tangguh harus setelah tanggal akad"
                 @change="onFieldChange('tangguh_payment_date')"
             />
         </section>
@@ -156,12 +158,12 @@ const onFieldChange = (field) => emit('validate-field', field)
         <!-- Simulasi Cicilan (hanya jika Cicilan) -->
         <section v-if="form.financing.payment_method === 'Cicilan'" class="px-8 py-4">
             <h1 class="card-title text-lg!">Simulasi Cicilan</h1>
-            <div class="bg-white border rounded-2xl p-6 mt-4">
+            <div class="bg-white dark:bg-gray-800 border rounded-2xl p-6 mt-4">
                 <!-- Tenor Slider -->
                 <div class="mb-8">
                     <div class="flex justify-between items-center mb-4">
-                        <label class="text-sm font-medium text-gray-700">Jangka Waktu Cicilan</label>
-                        <span class="text-lg font-semibold text-primary">{{ tenor }} Bulan</span>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Jangka Waktu Cicilan</label>
+                        <span class="text-lg font-semibold text-primary dark:text-secondary">{{ tenor }} Bulan</span>
                     </div>
                     <input
                         v-model.number="tenor"
@@ -174,29 +176,30 @@ const onFieldChange = (field) => emit('validate-field', field)
                             background: `linear-gradient(to right, #007943 0%, #007943 ${((tenor - 3) / 57) * 100}%, #e5e7eb ${((tenor - 3) / 57) * 100}%, #e5e7eb 100%)`
                         }"
                     />
-                    <div class="flex justify-between text-xs text-gray-500 mt-2">
+                    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
                         <span>3</span><span>60</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-6">
+                    <!-- Jumlah Pembiayaan -->
                     <div>
-                        <p class="text-xs text-gray-500 mb-2">Jumlah Pembiayaan</p>
-                        <p class="text-lg font-semibold text-dark-text">{{ parseCurrencyAmount(totalPrice) }}</p>
+                        <p class="text-gray-500 dark:text-gray-300 mb-2">Jumlah Pembiayaan</p>
+                        <p class="text-lg font-semibold text-dark-text dark:text-gray-200">{{ parseCurrencyAmount(totalPrice) }}</p>
                     </div>
+
+                    <!-- Perkiraan Cicilan -->
                     <div>
-                        <p class="text-xs text-gray-500 mb-2">Perkiraan Cicilan</p>
-                        <p class="text-lg font-semibold text-dark-text">
-                            {{ parseCurrencyAmount(monthlyInstallment) }}
-                            <span class="text-sm text-gray-500">/bulan</span>
-                        </p>
+                        <p class="text-gray-500 dark:text-gray-300 mb-2">Perkiraan Cicilan</p>
+                        <p class="text-lg font-semibold text-dark-text dark:text-gray-200">{{ parseCurrencyAmount(monthlyInstallment)
+                        }}<span class="text-sm text-gray-500 dark:text-gray-300">/bulan</span></p>
                     </div>
                 </div>
 
+                <!-- Sisa Penghasilan -->
                 <div class="mt-6 pt-6 border-t">
-                    <p class="text-xs text-gray-500 mb-2">Sisa Penghasilan Bulanan (setelah cicilan)</p>
-                    <p class="text-lg font-semibold"
-                        :class="remainingIncome >= 0 ? 'text-green-600' : 'text-red-600'">
+                    <p class="text-gray-500 mb-2 dark:text-gray-300">Sisa Penghasilan Bulanan (setelah cicilan)</p>
+                    <p class="text-lg font-semibold" :class="remainingIncome >= 0 ? 'text-secondary' : 'text-red-600'">
                         {{ parseCurrencyAmount(remainingIncome) }}
                     </p>
                 </div>
@@ -208,13 +211,13 @@ const onFieldChange = (field) => emit('validate-field', field)
             <h1 class="card-title text-lg!">Skema Angsuran</h1>
             <div class="border rounded-2xl overflow-hidden mt-2">
                 <table class="w-full text-sm text-left text-gray-500">
-                    <thead class="text-dark-text border-y">
+                    <thead class="text-dark-text dark:text-gray-300 border-y">
                         <tr class="border-b">
                             <th class="text-left pl-6 py-4">Keterangan</th>
                             <th class="text-right pr-6 py-4">Nilai</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white text-dark-text">
+                    <tbody class="bg-white dark:bg-gray-800 text-dark-text dark:text-gray-200">
                         <tr class="border-b">
                             <td class="text-left pl-6 py-4">Tenor / Jangka Waktu</td>
                             <td class="text-right pr-6 py-4">{{ tenor }} Bulan</td>

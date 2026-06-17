@@ -16,7 +16,7 @@ defineProps({
                 <UserIcon class="w-5 h-5" />
             </div>
             <div class="flex flex-col">
-                <h1 class="font-medium text-dark-text">Identitas Pribadi</h1>
+                <h1 class="font-medium text-dark-text dark:text-gray-300">Identitas Pribadi</h1>
                 <p class="text-sm text-gray-400 font-body">Detail identitas pemohon</p>
             </div>
         </div>
@@ -27,7 +27,7 @@ defineProps({
                 <span class="icon-[fa7-solid--hands-holding-child]" style="height: 20px; width: 20px;"></span>
             </div>
             <div class="flex flex-col">
-                <h1 class="font-medium text-dark-text">Data Tanggungan dan Penghasilan</h1>
+                <h1 class="font-medium text-dark-text dark:text-gray-300">Data Tanggungan dan Penghasilan</h1>
                 <p class="text-sm text-gray-400 font-body">Validasi kemampuan pemohon membayar angsuran</p>
             </div>
         </div>
@@ -38,7 +38,7 @@ defineProps({
                 <span class="icon-[tabler--archive]" style="height: 20px; width: 20px;"></span>
             </div>
             <div class="flex flex-col">
-                <h1 class="font-medium text-dark-text">Catatan Pemeriksaan</h1>
+                <h1 class="font-medium text-dark-text dark:text-gray-300">Catatan Pemeriksaan</h1>
                 <p class="text-sm text-gray-400 font-body">Catatan dan komentar dari pemeriksa</p>
             </div>
         </div>

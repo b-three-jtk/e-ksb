@@ -71,7 +71,7 @@ const onFieldChange = (field) => emit('validate-field', field)
 
             <!-- Nomor Anggota -->
             <div class="col-span-1 relative">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                     Nomor Anggota <span class="text-red-500">*</span>
                 </label>
 
@@ -87,6 +87,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                                 ? 'border-red-400 focus:border-red-400 focus:ring-red-500/10'
                                 : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                         ]"
+                        class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                     />
                     <div v-if="isLoadingSearch" class="absolute right-5 top-10">
                         <div class="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
@@ -103,17 +104,17 @@ const onFieldChange = (field) => emit('validate-field', field)
                 <p v-if="errors?.user_code" class="mt-1 text-xs text-red-500">{{ errors.user_code }}</p>
 
                 <div v-if="memberResults.length > 0 && !isMemberSelected"
-                    class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                    class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 dark:border-gray-600 border border-gray-300 rounded-lg shadow-lg z-10">
                     <div v-for="member in memberResults" :key="member.id"
                         @click="$emit('selectMember', member)"
-                        class="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b last:border-0">
-                        <div class="font-medium text-dark-text">{{ member.user.name }}</div>
-                        <div class="text-sm text-gray-500">{{ member.user.user_code }} | {{ member.user.email }}</div>
+                        class="px-4 py-3 hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer border-b last:border-0">
+                        <div class="font-medium text-dark-text dark:text-gray-300">{{ member.user.name }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ member.user.user_code }} | {{ member.user.email }}</div>
                     </div>
                 </div>
 
                 <div v-else-if="searchQuery && !isLoadingSearch && !isMemberSelected"
-                    class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg p-2.5 text-center text-gray-500 z-10">
+                    class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 border border-gray-300 rounded-lg p-2.5 text-center text-gray-500 z-10">
                     Anggota tidak ditemukan
                 </div>
             </div>

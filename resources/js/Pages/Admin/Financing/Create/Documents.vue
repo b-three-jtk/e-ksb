@@ -38,7 +38,7 @@ const hasDocuments = computed(() => availableDocuments.value.length > 0)
                 target="_blank"
                 class="border flex justify-between p-4 rounded-xl items-center font-body hover:bg-gray-50 hover:border-secondary cursor-pointer transition-all group"
             >
-                <p class="font-medium text-dark-text group-hover:text-secondary">{{ doc.label }}</p>
+                <p class="font-medium text-dark-text group-hover:text-secondary dark:text-gray-300 group-hover:dark:text-secondary">{{ doc.label }}</p>
                 <span class="icon-[tabler--download] text-secondary group-hover:scale-110 transition-transform"></span>
             </a>
         </div>

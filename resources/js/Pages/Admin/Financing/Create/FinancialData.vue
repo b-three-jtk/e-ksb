@@ -56,7 +56,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 />
                 <BaseInputAdmin
                     v-model="form.member.job_title"
-                    required
                     label="Jabatan"
                     placeholder="Masukkan jabatan"
                     :error="errors?.job_title"
@@ -64,7 +63,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 />
                 <BaseInputAdmin
                     v-model="form.member.company_or_business_name"
-                    required
                     label="Nama Perusahaan atau Bisnis"
                     placeholder="Masukkan nama perusahaan atau bisnis"
                     :error="errors?.company_or_business_name"
@@ -72,7 +70,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 />
                 <BaseInputAdmin
                     v-model="form.member.business_field"
-                    required
                     label="Bidang Pekerjaan"
                     placeholder="Masukkan bidang pekerjaan"
                     :error="errors?.business_field"
@@ -80,7 +77,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 />
                 <BaseInputAdmin
                     v-model="form.member.tenure_year"
-                    required
                     label="Lama Bekerja (Tahun)"
                     type="number"
                     placeholder="Masukkan lama bekerja"
@@ -90,7 +86,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 <BaseInputAdmin
                     v-model="form.member.workplace_contact"
                     max="13"
-                    required
                     label="Kontak Perusahaan"
                     placeholder="Masukkan kontak perusahaan"
                     :error="errors?.workplace_contact"
@@ -99,7 +94,6 @@ const onFieldChange = (field) => emit('validate-field', field)
                 <BaseInputAdmin
                     rows="3"
                     v-model="form.member.workplace_address"
-                    required
                     label="Alamat Perusahaan"
                     type="textarea"
                     placeholder="Masukkan alamat perusahaan"
@@ -119,7 +113,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     </thead>
                     <tbody>
                         <tr v-for="income in incomes" :key="income.model"
-                            class="bg-white border-b text-dark-text">
+                            class="border-b text-dark-text dark:text-gray-300">
                             <td class="py-2 text-left pl-6">{{ income.label }}</td>
                             <td class="py-2 text-right pr-6">
                                 <BaseInputAdmin
@@ -129,7 +123,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                                 />
                             </td>
                         </tr>
-                        <tr class="font-semibold text-dark-text">
+                        <tr class="font-semibold text-dark-text dark:text-gray-200">
                             <td class="pt-4 text-left pl-6">Total Penghasilan Bulanan</td>
                             <td class="pt-4 text-right pr-6">{{ moneyParser(totalIncome) }}</td>
                         </tr>
@@ -148,7 +142,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     </thead>
                     <tbody>
                         <tr v-for="expense in expenses" :key="expense.model"
-                            class="bg-transparent border-b text-dark-text">
+                            class="bg-transparent border-b text-dark-text dark:text-gray-300">
                             <td class="py-2 text-left pl-6">{{ expense.label }}</td>
                             <td class="py-2 text-right pr-6">
                                 <BaseInputAdmin
@@ -158,7 +152,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                                 />
                             </td>
                         </tr>
-                        <tr class="font-semibold text-dark-text">
+                        <tr class="font-semibold text-dark-text dark:text-gray-200">
                             <td class="py-4 text-left pl-6">Total Pengeluaran Bulanan</td>
                             <td class="py-4 text-right pr-6">{{ moneyParser(totalExpense) }}</td>
                         </tr>

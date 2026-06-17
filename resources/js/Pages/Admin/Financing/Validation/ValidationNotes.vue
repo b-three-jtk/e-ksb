@@ -93,12 +93,12 @@ watch([
         </div>
         <section class="card-layout">
             <h1 class="card-title text-lg!">Simulasi Cicilan</h1>
-            <div class="bg-white rounded-2xl mt-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl mt-4">
                 <!-- Tenor Slider -->
                 <div class="mb-8">
                     <div class="flex justify-between items-center mb-4">
-                        <label class="text-sm font-medium text-gray-700">Jangka Waktu Cicilan</label>
-                        <span class="text-lg font-semibold text-primary">{{ tenor }} Bulan</span>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Jangka Waktu Cicilan</label>
+                        <span class="text-lg font-semibold text-primary dark:text-secondary">{{ tenor }} Bulan</span>
                     </div>
                     <input v-model.number="tenor" type="range" min="3" max="60" step="1"
                         class="w-full h-2 rounded-lg appearance-none cursor-pointer" :style="{
@@ -114,22 +114,22 @@ watch([
                 <div class="grid grid-cols-2 gap-6">
                     <!-- Jumlah Pembiayaan -->
                     <div>
-                        <p class="text-xs text-gray-500 mb-2">Jumlah Pembiayaan</p>
-                        <p class="text-lg font-semibold text-dark-text">{{ moneyParser(totalPrice) }}</p>
+                        <p class="text-gray-500 dark:text-gray-300 mb-2">Jumlah Pembiayaan</p>
+                        <p class="text-lg font-semibold text-dark-text dark:text-gray-200">{{ moneyParser(totalPrice) }}</p>
                     </div>
 
                     <!-- Perkiraan Cicilan -->
                     <div>
-                        <p class="text-xs text-gray-500 mb-2">Perkiraan Cicilan</p>
-                        <p class="text-lg font-semibold text-dark-text">{{ moneyParser(monthlyInstallment)
-                        }}<span class="text-sm text-gray-500">/bulan</span></p>
+                        <p class="text-gray-500 dark:text-gray-300 mb-2">Perkiraan Cicilan</p>
+                        <p class="text-lg font-semibold text-dark-text dark:text-gray-200">{{ moneyParser(monthlyInstallment)
+                        }}<span class="text-sm text-gray-500 dark:text-gray-300">/bulan</span></p>
                     </div>
                 </div>
 
                 <!-- Sisa Penghasilan -->
                 <div class="mt-6 pt-6 border-t">
-                    <p class="text-xs text-gray-500 mb-2">Sisa Penghasilan Bulanan (setelah cicilan)</p>
-                    <p class="text-lg font-semibold" :class="remainingIncome >= 0 ? 'text-green-600' : 'text-red-600'">
+                    <p class="text-gray-500 mb-2 dark:text-gray-300">Sisa Penghasilan Bulanan (setelah cicilan)</p>
+                    <p class="text-lg font-semibold" :class="remainingIncome >= 0 ? 'text-secondary' : 'text-red-600'">
                         {{ moneyParser(remainingIncome) }}
                     </p>
                 </div>
@@ -146,7 +146,7 @@ watch([
                 </thead>
                 <tbody>
                     <!-- Dokumen Jaminan -->
-                    <tr class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
+                    <tr class="bg-white border-b text-dark-text dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700">
                         <td class="py-4 text-left pl-6">
                             <div class="flex items-center gap-4">
                                 <span>Dokumen Jaminan</span>
@@ -167,7 +167,7 @@ watch([
                     </tr>
 
                     <!-- Kesesuaian -->
-                    <tr class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
+                    <tr class="bg-white border-b text-dark-text dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700">
                         <td class="py-4 text-left pl-6">
                             <div class="flex items-center gap-4">
                                 <span>Kesesuaian dengan Kebutuhan</span>
@@ -188,7 +188,7 @@ watch([
                     </tr>
 
                     <!-- Kelayakan Penghasilan -->
-                    <tr class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
+                    <tr class="bg-white border-b text-dark-text dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700">
                         <td class="py-4 text-left pl-6">
                             <div class="flex items-center gap-4">
                                 <span>Kelayakan Penghasilan</span>

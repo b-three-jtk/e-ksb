@@ -114,7 +114,7 @@ const submit = () => {
     <AdminLayout title="Validasi Permohonan Pembiayaan Murabahah">
         <PageBreadcrumb page-title="Validasi Permohonan Pembiayaan Murabahah" :items="breadcrumbItems" />
         <div class="grid grid-cols-6 gap-6">
-            <div class="bg-secondary flex flex-col col-span-6 rounded-2xl">
+            <div class="bg-secondary dark:bg-primary flex flex-col col-span-6 rounded-2xl">
                 <div class="px-10 py-6 flex justify-between items-center">
                     <h1 class="font-semibold text-white">{{ data.financing.name }}</h1>
                     <div class="flex items-center gap-4">
@@ -124,19 +124,20 @@ const submit = () => {
                         </span>
                     </div>
                 </div>
-                <div class="bg-white grid grid-cols-3 gap-6 p-6 rounded-2xl">
+                <div class="bg-white dark:bg-gray-800 grid grid-cols-3 gap-6 p-6 rounded-2xl">
                     <Info label="Spesifikasi Produk" :value="data.financing.specification" />
                     <Info label="Kategori Produk" :value="data.financing.product_type" />
                     <Info label="Kondisi" :value="data.financing.condition" />
                     <Info label="Kuantitas" :value="data.financing.qty" />
                     <Info label="Harga Perkiraan" :value="moneyParser(data.financing.predicted_cost_price)" />
+                    <Info label="Uang Muka" :value="moneyParser(data.financing.down_payment)" />
                 </div>
             </div>
             <div class="justify-between card-layout flex flex-col col-span-4">
                 <PersonalData v-if="activeStep === 1" :data="data" />
                 <FinancialData v-if="activeStep === 2" :data="data" />
                 <ValidationNotes v-if="activeStep === 3" :data="data" :form="form" />
-                <div :class="activeStep === 1 ? 'justify-end' : 'justify-between'" class="flex gap-4 p-4">
+                <div :class="activeStep === 1 ? 'justify-end' : 'justify-between'" class="flex gap-4 py-4">
                     <Button v-if="activeStep > 1" @click="prevStep" variant="gray">
                         Kembali
                     </Button>

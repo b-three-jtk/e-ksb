@@ -42,7 +42,7 @@ const steps = [
                 <span :class="step.icon" style="height:20px;width:20px" />
             </div>
             <div class="flex flex-col">
-                <h1 class="font-medium text-dark-text">{{ step.title }}</h1>
+                <h1 class="font-medium text-dark-text dark:text-gray-300">{{ step.title }}</h1>
                 <p class="text-sm text-gray-400 font-body">{{ step.description }}</p>
             </div>
         </div>

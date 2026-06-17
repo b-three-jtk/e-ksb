@@ -53,40 +53,40 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
                 <thead class="text-gray-400 border-y dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                         <th class="py-4 text-left pl-6">Sumber Penghasilan</th>
-                        <th class="py-4 text-right pl-6">Jumlah (Rp)</th>
+                        <th class="py-4 text-right pr-6">Jumlah (Rp)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="item in incomes" :key="item.model"
-                        class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
+                        class="bg-white border-b text-dark-text dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700">
                         <td class="py-4 text-left pl-6">{{ item.label }}</td>
-                        <td class="py-4 text-right pl-6">{{ moneyParser(data.member[item.model]) }}</td>
+                        <td class="py-4 text-right pr-6">{{ moneyParser(data.member[item.model]) }}</td>
                     </tr>
-                    <tr class="font-semibold text-dark-text">
+                    <tr class="font-semibold text-dark-text dark:text-gray-200">
                         <td class="pt-4 text-left pl-6">Total Penghasilan Bulanan</td>
-                        <td class="pt-4 text-right">{{ moneyParser(totalIncome) }}</td>
+                        <td class="pt-4 text-right pr-6">{{ moneyParser(totalIncome) }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <div class="card-layout">
-            <h1 class="card-title">Data Penghasilan</h1>
+            <h1 class="card-title">Data Pengeluaran</h1>
             <table class="w-full text-sm text-center mt-8 text-gray-500 dark:text-gray-400">
                 <thead class="text-gray-400 border-y dark:bg-gray-700 dark:text-gray-400">
                     <tr>
-                        <th class="py-4 text-left pl-6">Sumber Penghasilan</th>
-                        <th class="py-4 text-right pl-6">Jumlah (Rp)</th>
+                        <th class="py-4 text-left pl-6">Jenis Pengeluaran</th>
+                        <th class="py-4 text-right pr-6">Jumlah (Rp)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="item in expenses" :key="item.model"
-                        class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
+                        class="bg-white border-b text-dark-text dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700">
                         <td class="py-4 text-left pl-6">{{ item.label }}</td>
-                        <td class="py-4 text-right pl-6">{{ moneyParser(data.member[item.model]) }}</td>
+                        <td class="py-4 text-right pr-6">{{ moneyParser(data.member[item.model]) }}</td>
                     </tr>
-                    <tr class="font-semibold text-dark-text">
+                    <tr class="font-semibold text-dark-text dark:text-gray-200">
                         <td class="py-4 text-left pl-6">Total Pengeluaran Bulanan</td>
-                        <td class="py-4 text-right">{{ moneyParser(totalExpense) }}</td>
+                        <td class="py-4 text-right pr-6">{{ moneyParser(totalExpense) }}</td>
                     </tr>
                 </tbody>
             </table>

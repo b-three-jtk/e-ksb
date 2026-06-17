@@ -347,10 +347,10 @@ export function useFinancingForm(initialData = null) {
     const submit = () => {
         Swal.fire({
             title: 'Konfirmasi',
-            text: 'Apakah Anda yakin ingin menyimpan permohonan ini?',
+            text: 'Apakah Anda yakin ingin mengirim permohonan ini?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Ya, simpan',
+            confirmButtonText: 'Ya, kirim',
             cancelButtonText: 'Batal',
             confirmButtonColor: '#007943',
         }).then((result) => {

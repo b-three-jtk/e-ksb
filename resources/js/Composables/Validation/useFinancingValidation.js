@@ -143,12 +143,27 @@ export function useFinancingValidation(form) {
         if (!form.financing.cost_price)
             errs.cost_price = 'Harga pokok wajib diisi.'
 
+        if (!form.financing.price_per_unit)
+            errs.price_per_unit = 'Harga per unit wajib diisi.'
+
         if (!form.purchase_receipt_file && !form.documents?.purchase_receipt)
             errs.purchase_receipt_file = 'Nota pembelian wajib diunggah.'
         else if (form.purchase_receipt_file && !['image/jpeg', 'image/png'].includes(form.purchase_receipt_file.type))
             errs.purchase_receipt_file = 'Format nota pembelian harus JPG, JPEG, atau PNG.'
         else if (form.purchase_receipt_file && form.purchase_receipt_file.size > 2 * 1024 * 1024)
             errs.purchase_receipt_file = 'Ukuran nota pembelian maksimal 2 MB.'
+
+        if (form.is_wakalah) {
+            if (!form.akad_wakalah_file && !form.documents?.akad_wakalah)
+                errs.akad_wakalah_file = 'Dokumen akad wakalah wajib diunggah.'
+            else if (form.akad_wakalah_file && !['application/pdf'].includes(form.akad_wakalah_file.type))
+                errs.akad_wakalah_file = 'Format dokumen akad wakalah harus PDF.'
+            else if (form.akad_wakalah_file && form.akad_wakalah_file.size > 2 * 1024 * 1024)
+                errs.akad_wakalah_file = 'Ukuran dokumen akad wakalah maksimal 2 MB.'
+
+            if (!form.financing.akad_wakalah_date || form.financing.akad_wakalah_date === '')
+                errs.akad_wakalah_date = 'Tanggal akad wakalah wajib diisi.'
+        }
 
         return errs
     }
@@ -167,6 +182,13 @@ export function useFinancingValidation(form) {
 
         if (!form.financing.payment_method)
             errs.payment_method = 'Metode pembayaran wajib dipilih.'
+
+        if (form.financing.payment_method === 'Tangguh') {
+            if (!form.financing.tangguh_payment_date)
+                errs.tangguh_payment_date = 'Tanggal pembayaran tangguh wajib diisi.'
+            else if (new Date(form.financing.tangguh_payment_date) <= new Date(form.financing.akad_date))
+                errs.tangguh_payment_date = 'Tanggal pembayaran tangguh harus setelah tanggal akad.'
+        }
 
         return errs
     }

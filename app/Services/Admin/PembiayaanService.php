@@ -311,7 +311,7 @@ class PembiayaanService
                 'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
             ]);
 
-            if ($financingData['payment_method'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
+            if (($financingData['payment_method'] ?? null) === FinancingPaymentMethodEnum::INSTALLMENT->value) {
                 $existingFinancing->update([
                     'tenor' => $financingData['tenor'] ?? null,
                 ]);
@@ -445,7 +445,7 @@ class PembiayaanService
             'heirs' => $member->heirs->map(fn($h) => [
                 'heir_nik' => $h->heir_nik,
                 'heir_name' => $h->heir_name,
-                'relationship' => $h->relationship,
+                'relationship' => $h->pivot->relationship,
                 'heir_contact' => $h->heir_contact,
             ])->values(),
         ];
