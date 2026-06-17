@@ -6,7 +6,6 @@ use App\Enums\EducationEnum;
 use App\Enums\HeirEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
-use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMemberAllocationRequest;
@@ -71,7 +70,7 @@ class PenggunaController extends Controller
     {
         $alokasiAnggotaService->allocate($request->validated());
 
-        return redirect()->route('admin.users.allocation')->with('success', 'Alokasi anggota berhasil disimpan.');
+        return redirect()->route('admin.allocation')->with('success', 'Alokasi anggota berhasil disimpan.');
     }
 
     private function enumOptions(array $cases): array
@@ -96,8 +95,8 @@ class PenggunaController extends Controller
             'summary' => $this->anggotaService->getSummary(),
             'statuses' => array_column(UserStatusEnum::cases(), 'value'),
             'can' => [
-                'tambah_anggota' => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
-                'edit_anggota'   => Auth::user()->hasRole(UserRoleEnum::SEKRETARIS->value),
+                'tambah_anggota' => Auth::user()->hasPermissionTo('create_anggota'),
+                'edit_anggota'   => Auth::user()->hasPermissionTo('edit_anggota'),
             ],
         ]);
     }
