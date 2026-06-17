@@ -54,7 +54,7 @@ const menuGroups = [
             {
                 icon: MembersIcon,
                 name: "Alokasi Penanggung Jawab",
-                path: "/admin/users/allocation",
+                path: "/admin/allocation",
                 permission: "edit_anggota"
             },
             {

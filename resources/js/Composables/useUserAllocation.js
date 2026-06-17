@@ -110,7 +110,7 @@ export default function useUserAllocation(props) {
       form.pj_user_id = selectedPjId.value
       form.member_ids = selectedMemberIds.value
 
-      form.post('/admin/users/allocation', {
+      form.post('/admin/allocation', {
         preserveScroll: true,
         onSuccess: () => {
           toast('Alokasi anggota berhasil disimpan.', {

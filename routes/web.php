@@ -92,8 +92,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/users/show/{id}', [PenggunaController::class, 'show'])->middleware('permission:view_anggota')->name('users.show');
     Route::get('/users/edit/{id}', [PenggunaController::class, 'edit'])->middleware('permission:edit_anggota')->name('users.edit');
     Route::put('/users/{id}/update', [PenggunaController::class, 'update'])->middleware('permission:edit_anggota')->name('users.update');
-    Route::get('/users/allocation', [PenggunaController::class, 'allocation'])->middleware('permission:edit_anggota')->name('users.allocation');
-    Route::post('/users/allocation', [PenggunaController::class, 'storeAllocation'])->middleware('permission:edit_anggota')->name('users.allocation.store');
+    Route::get('/allocation', [PenggunaController::class, 'allocation'])->middleware('permission:edit_anggota')->name('allocation');
+    Route::post('/allocation', [PenggunaController::class, 'storeAllocation'])->middleware('permission:edit_anggota')->name('allocation.store');
     Route::put('/users/{id}/disable', [PenggunaController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
     Route::get('/accounts/{id}/mutasi', [PenggunaController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
     Route::get('/financings/{id}/history', [PenggunaController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
