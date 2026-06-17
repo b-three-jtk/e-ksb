@@ -20,7 +20,7 @@ const STATUS_MAP = {
         class: `${baseClass} text-blue-600 bg-blue-50`
     },
     'Lunas': {
-        class: `${baseClass} text-green-600 bg-gre,en-50`
+        class: `${baseClass} text-green-600 bg-green-50`
     },
     'Pembayaran Tangguh': {
         class: `${baseClass} text-yellow-600 bg-yellow-50`

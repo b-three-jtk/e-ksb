@@ -83,7 +83,7 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                 <h1 class="card-title">Peta Pembiayaan</h1>
                 <h2 class="text-3xl font-semibold text-primary mt-4">{{
                     parseCurrencyAmount(props.stats.total_pembiayaan_tersalurkan) }}</h2>
-                <p class="text-gray-500 font-body text-lg mt-2">Total Pembiayaan Tersalurkan</p>
+                <p class="text-gray-500 font-body text-lg mt-2">Jumlah Piutang Murabahah Aktif</p>
             </div>
             <PieChart
                 :data="peta_pembiayaan"

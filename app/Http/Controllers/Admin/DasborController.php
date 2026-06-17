@@ -46,7 +46,7 @@ class DasborController extends Controller
 
         $data['total_angsuran_belum_lunas'] = $service->getTotalAngsuranBelumLunas();
 
-        [$data['total_pembiayaan_tersalurkan'], $data['total_pembiayaan_tersalurkan_persen']] = $service->getTotalPembiayaanTersalurkan($tanggalAkhir, $tanggalAkhirSebelumnya);
+        [$data['total_pembiayaan_tersalurkan'], $data['total_pembiayaan_tersalurkan_persen']] = $service->getJumlahPiutangMurabahahAktif($tanggalAkhir, $tanggalAkhirSebelumnya);
 
         [$data['modal_sudah_dialokasi'], $data['modal_sudah_dialokasi_persen']] = $service->getTotalModalSudahDialokasi($tanggalAkhir, $tanggalAkhirSebelumnya);
 

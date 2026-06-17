@@ -38,6 +38,15 @@ const kolomTabelTransaksiSimpanan = computed(() => {
     return cols;
 });
 
+const getStatusClass = (status) => {
+    const base = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold'
+    switch (status) {
+        case 'sent': return `${base} bg-green-100 text-green-700`
+        case 'draft': return `${base} bg-yellow-100 text-yellow-700`
+        case 'failed': return `${base} bg-red-100 text-red-700`
+        default: return `${base} bg-gray-100 text-gray-700`
+    }
+}
 </script>
 
 <template>
@@ -80,6 +89,11 @@ const kolomTabelTransaksiSimpanan = computed(() => {
                 </div>
             </div>
             <TransactionTable :columns="kolomTabelJatuhTempoTerdekat" :rows="jatuh_tempo_terdekat">
+                <template #cell-status_notifikasi="{ row }">
+                    <span :class="getStatusClass(row.status)">
+                        {{ row.status }}
+                    </span>
+                </template>
                 <template #nominal="{ item }">
                     {{ parseCurrencyAmount(item.nominal) }}
                 </template>

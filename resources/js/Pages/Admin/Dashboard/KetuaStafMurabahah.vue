@@ -14,6 +14,8 @@ import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.
 import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue';
 import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
 import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
+import { Link } from '@inertiajs/vue3';
+import dateParser from '@/Composables/dateParser.js'
 
 defineProps({
     stats: Object,
@@ -56,7 +58,7 @@ const kolomTabelPermohonanMurabahah = computed(() => {
     <div v-else v-if="role === 'Ketua Murabahah'" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <CardInfo title="Total Modal Belum Diputar" :content="parseCurrencyjumlah(stats.modal_sudah_dialokasi)"
             :percentage="stats.modal_sudah_dialokasi_persen" :filter="selectedFilter" />
-        <CardInfo title="Jumlah Pembiayaan Aktif" :content="stats.total_pembiayaan_aktif"
+        <CardInfo title="Jumlah Piutang Murabahah Aktif" :content="stats.total_pembiayaan_aktif"
             :percentage="stats.total_pembiayaan_aktif" :filter="selectedFilter" />
         <CardInfo title="Total Permohonan Pembiayaan" :content="stats.total_permohonan_pembiayaan"
             :percentage="stats.total_permohonan_pembiayaan_persen" :filter="selectedFilter" />
@@ -74,7 +76,7 @@ const kolomTabelPermohonanMurabahah = computed(() => {
                 <h1 class="card-title">Peta Pembiayaan</h1>
                 <h2 class="text-2xl font-semibold text-primary mt-2">{{
                     parseCurrencyjumlah(stats.total_pembiayaan_tersalurkan) }}</h2>
-                <p class="text-gray-500 font-body text-sm">Total Pembiayaan Tersalurkan</p>
+                <p class="text-gray-500 font-body text-sm">Jumlah Piutang Murabahah Aktif</p>
             </div>
             <div class="flex items-center justify-center">
                 <PieChart :data="peta_pembiayaan" class="flex items-center justify-center mt-8" />
@@ -87,13 +89,15 @@ const kolomTabelPermohonanMurabahah = computed(() => {
         <div v-else class="card-layout">
             <div class="flex justify-between items-center">
                 <h1 class="card-title">Pembayaran Angsuran Terlambat</h1>
-                <Button href="/admin/financings" variant="outline">Selengkapnya</Button>
             </div>
             <TransactionTable :columns="kolomTabelPembayaranTerlambat" :rows="pembayaran_terlambat">
+                <template #jumlah="{ item }">
+                    dateParser({{ item.jumlah }})
+                </template>
                 <template #action="{ item }">
                     <Link :href="`/admin/financings/show/${item.id}`">
-                    <EyeIcon
-                        class="w-5 h-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
+                        <EyeIcon
+                            class="w-5 h-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
                     </Link>
                 </template>
             </TransactionTable>
