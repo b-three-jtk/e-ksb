@@ -92,7 +92,7 @@ const submitForm = () => {
         if (result.isConfirmed) {
             form.post('/admin/pengurus/store', {
                 onSuccess: () => {
-                    toast(isEditingExistingMember.value ? "Member berhasil dipromosikan!" : "Admin berhasil ditambahkan!", {
+                    toast(isEditingExistingMember.value ? "Member berhasil dipromosikan!" : "Pengurus berhasil ditambahkan!", {
                         "type": "success",
                         "position": "bottom-right",
                         "transition": "slide",
