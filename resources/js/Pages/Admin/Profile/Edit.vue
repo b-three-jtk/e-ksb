@@ -10,7 +10,8 @@ import { ref } from 'vue';
 import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify';
 import { computed } from 'vue';
-import Base from '../../../Layouts/Base.vue';
+import { useFormatter } from '@/Composables/Form/useFormatter'
+import { useInputSanitizers } from '@/Composables/useInputSanitizers'
 
 const props = defineProps({
     user: Object,
@@ -27,13 +28,7 @@ const form = useForm({
     nik: props.user.nik || '',
     name: props.user.name || '',
     email: props.user.email || '',
-    birth_place: props.user.birth_place || '',
-    birth_date: props.user.birth_date || '',
-    gender: props.user.gender || '',
-    address: props.user.address || '',
-    residential_address: props.user.residential_address || '',
     phone_number: props.user.phone_number || '',
-    last_education: props.user.last_education || '',
     profile_picture: props.user.profile_picture,
     profile_picture_file: null
 })
@@ -53,6 +48,9 @@ const onFileChange = (event) => {
         form.profile_picture = URL.createObjectURL(file);
     }
 }
+
+const { onlyNumbers } = useInputSanitizers()
+const { normalizePhoneNumber } = useFormatter()
 
 const submitForm = () => {
     Swal.fire({
@@ -123,77 +121,40 @@ const photoUrl = computed(() => {
                     format JPG atau PNG, Maksimal Ukuran Gambar 1MB</p>
                 <p class="text-error-500 text-sm">{{ errors.profile_picture }}</p>
             </div>
-            <div class="card-layout flex flex-col gap-6">
-                <div class="card-layout flex flex-col gap-4">
-                    <h1 class="card-title">Identitas Pribadi</h1>
-                    <ul class="grid md:grid-cols-2 grid-cols-1 gap-4">
-                        <li>
-                            <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
-                                placeholder="Masukkan nama lengkap" :error="errors.name">
-                            </BaseInputAdmin>
-                        </li>
-                        <li>
-                            <BaseInputAdmin v-model="form.nik" label="NIK" type="text" required
-                                placeholder="Masukkan 16 digit NIK" max="16" min="16" pattern="[0-9]*"
-                                :error="errors.nik">
-                            </BaseInputAdmin>
-                        </li>
-                        <li>
-                            <BaseInputAdmin v-model="form.birth_place" label="Tempat Lahir" type="text"
-                                placeholder="Masukkan tempat lahir" :error="errors.birth_place">
-                            </BaseInputAdmin>
-                        </li>
-                        <li>
-                            <BaseInputAdmin v-model="form.birth_date" label="Tanggal Lahir" type="date"
-                                :error="errors.birth_date">
-                            </BaseInputAdmin>
-                        </li>
-                        <li>
-                            <BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required
-                                :selectables="[
-                                    { value: 'Laki-laki', text: 'Laki-laki' },
-                                    { value: 'Perempuan', text: 'Perempuan' }
-                        ]" :error="errors.gender">
-                            </BaseInputAdmin>
-                        </li>
-                        <li>
-                            <BaseInputAdmin v-model="form.last_education" label="Pendidikan Terakhir" type="select"
-                                :selectables="educations.map(unit => ({ value: unit, text: unit }))"
-                                :error="errors.last_education">
-                            </BaseInputAdmin>
-                        </li>
-                    </ul>
-                </div>
-                <div class="card-layout flex flex-col gap-4">
-                    <h1 class="card-title">Kontak dan Alamat</h1>
-                    <ul class="grid md:grid-cols-2 grid-cols-1 gap-4">
-                        <li>
-                            <BaseInputAdmin v-model="form.email" label="Email" type="email"
-                                placeholder="Masukkan email" :error="errors.email">
-                            </BaseInputAdmin>
-                        </li>
-                        <li>
-                            <BaseInputAdmin v-model="form.phone_number" label="Nomor Telepon" type="text"
-                                placeholder="Masukkan nomor telepon" max="16" min="16" pattern="[0-9]*"
-                                :error="errors.phone_number">
-                            </BaseInputAdmin>
-                        </li>
-                        <li class="flex flex-col cols-span-1 gap-4">
-                            <BaseInputAdmin v-model="form.address" label="Alamat Sesuai KTP" type="textarea"
-                                placeholder="Masukkan alamat" :error="errors.address">
-                            </BaseInputAdmin>
-                            <BaseInputAdmin v-model="form.residential_address" label="Alamat Domisili" type="textarea"
-                                placeholder="Masukkan alamat domisili" :error="errors.residential_address">
-                            </BaseInputAdmin>
-                        </li>
-                    </ul>
-                </div>
+            <div class="card-layout flex flex-col gap-4">
+                <h1 class="card-title">Identitas Pribadi</h1>
+                <ul class="grid md:grid-cols-2 grid-cols-1 gap-4">
+                    <li>
+                        <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
+                            placeholder="Masukkan nama lengkap" :error="errors.name">
+                        </BaseInputAdmin>
+                    </li>
+                    <li>
+                        <BaseInputAdmin v-model="form.nik" label="NIK" type="text" required
+                            placeholder="Masukkan 16 digit NIK" max="16" min="16" pattern="[0-9]*" :error="errors.nik">
+                        </BaseInputAdmin>
+                    </li>
+                    <li>
+                        <BaseInputAdmin v-model="form.email" label="Email" type="email" placeholder="Masukkan email"
+                            :error="errors.email">
+                        </BaseInputAdmin>
+                    </li>
+                    <li>
+                        <BaseInputAdmin v-model="form.phone_number" label="Nomor Telepon" type="text"
+                            placeholder="Masukkan nomor telepon" max="16" min="16" pattern="[0-9]*"
+                            @input="form.phone_number = normalizePhoneNumber(form.phone_number, onlyNumbers)"
+                            :error="errors.phone_number">
+                        </BaseInputAdmin>
+                    </li>
+                </ul>
             </div>
             <div class="flex items-center justify-center gap-4">
                 <Button href="/admin/profile" variant="light">
                     Batal
                 </Button>
-                <Button @click="submitForm" variant="secondary">
+                <Button @click="submitForm" :disabled="form.processing" variant="secondary">
+                    <div v-if="form.processing"
+                        class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                     {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                 </Button>
             </div>

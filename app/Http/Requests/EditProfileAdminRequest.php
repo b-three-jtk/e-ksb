@@ -24,14 +24,8 @@ class EditProfileAdminRequest extends FormRequest
         return [
             'nik' => 'required|string|size:16',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,'. $this->user()->id,
-            'birth_place' => 'nullable|string|max:255',
-            'birth_date' => 'nullable|date',
-            'gender' => 'nullable|in:Laki-laki,Perempuan',
-            'address' => 'nullable|string|max:500',
-            'residential_address' => 'nullable|string|max:500',
-            'phone_number' => 'nullable|string|size:16',
-            'last_education' => 'nullable|string|max:100',
+            'email' => 'nullable|email|max:255|unique:users,email,'. $this->user()->id,
+            'phone_number' => 'required|string',
             'profile_picture_file' => 'nullable|image|mimes:png,jpg,jpeg,gif|max:2048',
         ];
     }

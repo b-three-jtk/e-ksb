@@ -4,13 +4,14 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import ChevronDownIcon from '@/Icons/ChevronDownIcon.vue'
 import LogoutIcon from '@/Icons/LogoutIcon.vue'
 import UserIcon from '@/Icons/UserIcon.vue'
-import SettingsIcon from '@/Icons/SettingsIcon.vue'
-import InfoCircleIcon from '@/Icons/InfoCircleIcon.vue'
+import Swal from 'sweetalert2'
+import { toast } from "vue3-toastify"
+import { useForm } from '@inertiajs/vue3'
 
 const page = usePage()
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
-
+const form = useForm({})
 // Get actual user data from auth
 const user = computed(() => page.props.auth?.user || {
     name: 'User',
@@ -52,6 +53,41 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
 })
+
+const logout = () => {
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin keluar?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, keluar',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#009141',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.post(('/auth/logout'), {
+                onSuccess: () => {
+                    toast("Sampai jumpa!", {
+                        "type": "success",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
+                    }).then(() => {
+                        window.location.href = route('landing')
+                    })
+                },
+                onError: () => {
+                    toast("Gagal keluar.", {
+                        "type": "error",
+                        "position": "bottom-right",
+                        "transition": "slide",
+                        "dangerouslyHTMLString": true
+                    })
+                }
+            })
+        }
+    })
+}
 </script>
 
 
@@ -97,11 +133,11 @@ onUnmounted(() => {
                     </Link>
                 </li>
             </ul>
-            <Link href="/auth/logout" method="post" as="button"
+            <button @click="logout" type="button"
                 class="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
                 <LogoutIcon class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300" />
                 Keluar
-            </Link>
+            </button>
         </div>
         <!-- Dropdown End -->
     </div>

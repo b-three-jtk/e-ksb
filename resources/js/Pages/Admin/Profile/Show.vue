@@ -8,11 +8,7 @@ import { computed } from 'vue';
 
 const page = usePage();
 
-const user = computed(() => page.props.auth?.user || {
-    name: 'User',
-    email: 'user@example.com',
-    profile_picture: '/public/images/user/owner.jpg',
-})
+const user = computed(() => page.props.auth?.user)
 
 const breadcrumbItems = [
     {name: 'Dashboard', link: '/admin'},
@@ -45,7 +41,7 @@ const photoUrl = computed(() => {
                         <div class="flex flex-col justify-center gap-1">
                             <h1 class="card-title">{{ user.name }}</h1>
                             <p class="text-gray-500">
-                                {{ user.role.name }}
+                                {{ user.roles[0]?.name }}
                             </p>
                         </div>
                     </div>
@@ -70,29 +66,6 @@ const photoUrl = computed(() => {
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.nik }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Jenis Kelamin</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.gender ?? '-'
-                                        }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Lahir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.birth_date ?? '-'
-                                    }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Pendidikan Terakhir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.last_education ??
-                                        '-'
-                                        }}</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="card-layout py-0! grid grid-cols-2">
-                        <div class="grid grid-cols-1 gap-8 py-6">
-                            <h1 class="card-title">Kontak dan Alamat</h1>
-                            <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
-                                <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Telepon</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.phone_number ?? '-'
                                     }}</span>
@@ -100,17 +73,6 @@ const photoUrl = computed(() => {
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Email</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{ user.email }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Sesuai KTP</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.address ?? '-'
-                                        }}</span>
-                                </li>
-                                <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Domisili</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.residential_address
-                                        ?? '-'
-                                        }}</span>
                                 </li>
                             </ul>
                         </div>
