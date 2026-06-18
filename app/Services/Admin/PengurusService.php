@@ -129,4 +129,14 @@ class PengurusService
             ];
         });
     }
+
+    public function updateProfil($user, $data)
+    {
+        if ($data->hasFile('profile_picture_file')) {
+                $path = $data->file('profile_picture_file')->store('profile_pictures', 'public');
+                $data['profile_picture'] = $path;
+            }
+
+        $user->update($data);
+    }
 }

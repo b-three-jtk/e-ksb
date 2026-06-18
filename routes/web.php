@@ -163,9 +163,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     // Personal
     Route::get('/dashboard', [DasborController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [PengurusController::class, 'showProfil'])->name('profile.show');
+    Route::get('/profile/edit', [PengurusController::class, 'editProfil'])->name('profile.edit');
+    Route::put('/profile/update', [PengurusController::class, 'updateProfil'])->name('profile.update');
 
     // Notifikasi
     Route::get('/notifications', [NotifikasiController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifications.index');

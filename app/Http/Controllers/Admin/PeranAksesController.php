@@ -7,8 +7,6 @@ use App\Services\Admin\PeranAksesService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
-use App\Enums\UserRoleEnum;
 
 class PeranAksesController extends Controller
 {
