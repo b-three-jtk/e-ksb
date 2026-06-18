@@ -318,6 +318,60 @@ class PembiayaanController extends Controller
                     now()->toDateString(),
                     auth()->id()
                 );
+
+                // Jurnal uang muka saat approval (semua payment method)
+                if ($financing->down_payment > 0) {
+                    $uangMukaMurabahah = Account::where(
+                        'account_name',
+                        'Uang Muka Murabahah'
+                    )->firstOrFail();
+
+                    $kas = Account::where(
+                        'account_name',
+                        'Kas'
+                    )->firstOrFail();
+
+                    // Penerimaan uang muka dari anggota
+                    app(JurnalService::class)->create(
+                        [
+                            [
+                                'account' => $kas->no_ref_account,
+                                'position' => PositionEnum::DEBIT->value,
+                                'nominal' => $financing->down_payment,
+                            ],
+                            [
+                                'account' => $uangMukaMurabahah->no_ref_account,
+                                'position' => PositionEnum::CREDIT->value,
+                                'nominal' => $financing->down_payment,
+                            ],
+                        ],
+                        now()->toDateString(),
+                        auth()->id()
+                    );
+
+                    // Offset uang muka ke piutang murabahah
+                    $piutangMurabahah = Account::where(
+                        'account_name',
+                        'Piutang Murabahah'
+                    )->firstOrFail();
+
+                    app(JurnalService::class)->create(
+                        [
+                            [
+                                'account' => $uangMukaMurabahah->no_ref_account,
+                                'position' => PositionEnum::DEBIT->value,
+                                'nominal' => $financing->down_payment,
+                            ],
+                            [
+                                'account' => $piutangMurabahah->no_ref_account,
+                                'position' => PositionEnum::CREDIT->value,
+                                'nominal' => $financing->down_payment,
+                            ],
+                        ],
+                        now()->toDateString(),
+                        auth()->id()
+                    );
+                }
             }
 
             return redirect()->route('admin.financings.index')->with('success', 'Keputusan validasi berhasil disimpan');
@@ -451,10 +505,6 @@ class PembiayaanController extends Controller
                 // Kalo pembayaran pembiayaannya cicilan
                 if ($financing->payment_method === FinancingPaymentMethodEnum::INSTALLMENT->value)
                 {
-                    $uangMukaMurabahah = Account::where(
-                        'account_name',
-                        'Uang Muka Murabahah'
-                    )->firstOrFail();
                     $allocatedAmount = $financing->predicted_cost_price ?? 0;
                     $piutang = $costPrice;
                     $selisih = $allocatedAmount - $piutang;
@@ -505,54 +555,7 @@ class PembiayaanController extends Controller
                             'cost_price' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
                         ]);
                     }
-
-                    if ($downPayment > 0)
-                    {
-                        app(JurnalService::class)->create(
-                            [
-                                [
-                                    'account' => $kas->no_ref_account,
-                                    'position' => PositionEnum::DEBIT->value,
-                                    'nominal' => $downPayment,
-                                ],
-                                [
-                                    'account' => $uangMukaMurabahah->no_ref_account,
-                                    'position' => PositionEnum::CREDIT->value,
-                                    'nominal' => $downPayment,
-                                ],
-                            ],
-                            now()->toDateString(),
-                            auth()->id()
-                        );
-
-                        app(JurnalService::class)->create(
-                            [
-                                [
-                                    'account' => $uangMukaMurabahah->no_ref_account,
-                                    'position' => PositionEnum::DEBIT->value,
-                                    'nominal' => $downPayment,
-                                ],
-                                [
-                                    'account' => $piutangMurabahah->no_ref_account,
-                                    'position' => PositionEnum::CREDIT->value,
-                                    'nominal' => $downPayment,
-                                ],
-                            ],
-                            now()->toDateString(),
-                            auth()->id()
-                        );
-                    }
                 }
-
-                // Klo pembayaran pembiayaannya cash
-                if (
-                        $financing->payment_method === FinancingPaymentMethodEnum::CASH->value
-                        && $downPayment > 0
-                    ) {
-                        throw ValidationException::withMessages([
-                            'down_payment' => 'Pembayaran cash tidak boleh menggunakan uang muka.'
-                        ]);
-                    }
 
                 if ($financing->payment_method === FinancingPaymentMethodEnum::CASH->value)
                 {
