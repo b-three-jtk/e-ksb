@@ -224,15 +224,15 @@ async function handleSubmit() {
                     },
                 )
 
-                const pdfUrl =
-                    page.props.flash?.pdf_url
+                // const pdfUrl =
+                //     page.props.flash?.pdf_url
 
-                if (pdfUrl) {
-                    window.open(pdfUrl, '_blank')
-                }
-                if (page.props.financing) {
-                    selectedFinancing.value = page.props.financing
-                }
+                // if (pdfUrl) {
+                //     window.open(pdfUrl, '_blank')
+                // }
+                // if (page.props.financing) {
+                //     selectedFinancing.value = page.props.financing
+                // }
             },
             onError: (errors) => {
 

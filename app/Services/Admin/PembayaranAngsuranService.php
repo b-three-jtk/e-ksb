@@ -304,7 +304,6 @@ class PembayaranAngsuranService
                 'no_anggota'       => $financing->member?->user?->user_code,
                 'diterima_dari'    => $financing->member?->user?->name,
                 'sejumlah_uang'    => $payment->nominal,
-                'terbilang'        => ucfirst(\Riskihajar\Terbilang\Facades\Terbilang::make($payment->nominal)) . ' rupiah',
                 'items'            => [[
                     'no'         => 1,
                     'keterangan' => 'Angsuran ke ' . $installment->installment_no,
