@@ -25,7 +25,9 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PelunasanService;
+
 use App\Services\Admin\PembiayaanService;
+use App\Services\PembiayaanService as SharedPembiayaanService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -36,7 +38,7 @@ use Inertia\Inertia;
 
 class PembiayaanController extends Controller
 {
-    public function __construct(private PembiayaanService $financingService){}
+    public function __construct(private PembiayaanService $financingService, private SharedPembiayaanService $sharedFinancingService){}
 
     /**
      * Display a listing of the resource.
@@ -86,7 +88,7 @@ class PembiayaanController extends Controller
 
     public function show(string $id)
     {
-        $financing = $this->financingService->getPembiayaanById($id);
+        $financing = $this->sharedFinancingService->getPembiayaanById($id);
 
         $this->financingService->computeFinancingSummary($financing);
         $this->financingService->computeNextDueDate($financing);
