@@ -25,7 +25,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PelunasanService;
-
+use App\Services\Admin\PembayaranAngsuranService;
 use App\Services\Admin\PembiayaanService;
 use App\Services\PembiayaanService as SharedPembiayaanService;
 use Carbon\Carbon;
@@ -38,7 +38,11 @@ use Inertia\Inertia;
 
 class PembiayaanController extends Controller
 {
-    public function __construct(private PembiayaanService $financingService, private SharedPembiayaanService $sharedFinancingService){}
+    public function __construct(
+        private PembiayaanService $financingService, 
+        private SharedPembiayaanService $sharedFinancingService,
+        protected PembayaranAngsuranService $pembayaranAngsuranService
+    ){}
 
     /**
      * Display a listing of the resource.
@@ -745,7 +749,7 @@ class PembiayaanController extends Controller
     public function createPayment(Financing $financing)
     {
         return Inertia::render('Admin/Financing/Payment/Create', [
-            'financing' => app(PembiayaanService::class)->getCreatePaymentData($financing),
+            'financing' => $this->pembayaranAngsuranService->getCreatePaymentData($financing),
         ]);
     }
 
@@ -761,14 +765,14 @@ class PembiayaanController extends Controller
 
         DB::beginTransaction();
         try {
-            $paymentData = app(PembiayaanService::class)->processPayment($validated);
+            $paymentData = $this->pembayaranAngsuranService->processPayment($validated);
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->withErrors(['message' => $th->getMessage()]);
         }
 
-        $fileName = app(PembiayaanService::class)->generateAndStoreReceipt($paymentData);
+        $fileName = $this->pembayaranAngsuranService->generateAndStoreReceipt($paymentData);
 
         return redirect("/admin/financings/show/{$paymentData['financing']->id}")
             ->with([
@@ -785,7 +789,7 @@ class PembiayaanController extends Controller
         ]);
 
         try {
-            app(PembiayaanService::class)->rescheduleInstallments(
+            $this->pembayaranAngsuranService->rescheduleInstallments(
                 $financing,
                 $validated['installment_id'],
                 $validated['due_date']
