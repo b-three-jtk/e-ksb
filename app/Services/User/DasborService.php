@@ -39,7 +39,7 @@ class DasborService
         ];
     }
 
-    public function getLedger(int $memberId): \Illuminate\Support\Collection
+    public function getTabungan(int $memberId): \Illuminate\Support\Collection
     {
         return SavingTransaction::whereHas(
             'savingAccount.member',

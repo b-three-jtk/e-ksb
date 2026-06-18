@@ -215,7 +215,7 @@ test('FR-13 Aplikasi harus menyediakan detail transaksi simpanan beserta peroleh
     );
 });
 
-test('FR-14 Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan saldo setiap produk simpanan berupa ledger pribadi untuk anggota.', function () {
+test('FR-14 Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan saldo setiap produk simpanan berupa tabungan pribadi untuk anggota.', function () {
     $member = Member::factory()->create();
     $user = User::where('id', $member->user_id)->first();
     $user->assignRole('Anggota');
@@ -233,12 +233,12 @@ test('FR-14 Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan
     ]);
 
     $res = $this->actingAs($user)
-        ->get('/user/ledger');
+        ->get('/user/tabungan');
 
     $res->assertStatus(200);
 });
 
-test('FR-15 Aplikasi harus menyediakan ekspor ledger pribadi untuk anggota.', function () {
+test('FR-15 Aplikasi harus menyediakan ekspor tabungan pribadi untuk anggota.', function () {
     $member = Member::factory()->create();
     $user = User::where('id', $member->user_id)->first();
     $user->assignRole('Anggota');
@@ -256,7 +256,7 @@ test('FR-15 Aplikasi harus menyediakan ekspor ledger pribadi untuk anggota.', fu
     ]);
 
     $res = $this->actingAs($user)
-        ->get('/user/ledger/export');
+        ->get('/user/tabungan/export');
 
     $res->assertStatus(200);
     $res->assertHeader('Content-Type', 'application/pdf');

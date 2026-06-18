@@ -199,9 +199,9 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'reval
     Route::post('/notifications/mark-all-read', [UserNotifikasiController::class, 'markAllAsRead'])->name('notifications.markAllRead');
     Route::post('/notifications/mark-popup-displayed', [UserNotifikasiController::class, 'markPopupDisplayed'])->name('notifications.markPopupDisplayed');
 
-    // Ledger
-    Route::get('/ledger', [UserSimpananController::class, 'index'])->name('ledger.index');
-    Route::get('/ledger/export', [UserSimpananController::class, 'export'])->name('ledger.export');
+    // Tabungan
+    Route::get('/tabungan', [UserSimpananController::class, 'index'])->name('tabungan.index');
+    Route::get('/tabungan/export', [UserSimpananController::class, 'export'])->name('tabungan.export');
 
     // Pembiayaan
     Route::get('/financings', [UserPembiayaanController::class, 'index'])->name('financing.index');

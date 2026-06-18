@@ -9,7 +9,7 @@ import Table from './Table.vue'
 import { formatCurrency } from '../../../utils/currency'
 
 defineOptions({
-    layout: (h: any, page: any) => h(BaseLayout, { title: 'Buku Besar Personal' }, () => page),
+    layout: (h: any, page: any) => h(BaseLayout, { title: 'Buku Tabungan Anggota' }, () => page),
 })
 
 const props = withDefaults(defineProps<{
@@ -137,7 +137,7 @@ const memberStatusLabel = computed(() => {
 })
 
 const applyFilters = () => {
-    router.get('/user/ledger', {
+    router.get('/user/tabungan', {
         search: filters.value.search || undefined,
         month: filters.value.month || undefined,
         per_page: filters.value.per_page,
@@ -162,7 +162,7 @@ const handleExport = () => {
         params.append('month', filters.value.month)
     }
 
-    window.location.href = `/user/ledger/export?${params.toString()}`
+    window.location.href = `/user/tabungan/export?${params.toString()}`
 }
 </script>
 <template>
@@ -170,7 +170,7 @@ const handleExport = () => {
         <div class="space-y-8 p-2 sm:p-4 lg:p-6">
             <div v-if="memberInfo" class="w-full">
                 <h1 class="text-3xl font-bold font-head text-emerald-800 dark:text-emerald-500 mb-4">
-                    Buku Besar Personal
+                    Buku Tabungan Anggota
                 </h1>
 
                 <div class="rounded-xl bg-[#ecf3ff] dark:bg-gray-800 text-emerald-900 dark:text-emerald-300 shadow-sm overflow-hidden">
