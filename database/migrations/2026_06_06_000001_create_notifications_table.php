@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\NotificationReminderTypeEnum;
-use App\Enums\NotificationStatusEnum;
 use App\Enums\NotificationTypeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -21,7 +20,7 @@ return new class extends Migration
             $table->string('reference_id')->nullable();
             $table->string('notification_period', 7);
             $table->enum('reminder_type', array_column(NotificationReminderTypeEnum::cases(), 'value'));
-            $table->enum('status', array_column(NotificationStatusEnum::cases(), 'value'))->default(NotificationStatusEnum::DRAFT->value);
+            $table->enum('status', ['draf', 'terkirim', 'gagal_kirim'])->default('draf');
             $table->boolean('is_read')->default(false);
             $table->timestamp('scheduled_at')->nullable();
             $table->timestamp('sent_at')->nullable();

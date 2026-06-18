@@ -422,27 +422,25 @@ const akadType = computed(() => {
                 <input
                   v-model="memberQuery"
                   type="text"
-                  placeholder="Nama / No. Anggota..."
+                  placeholder="Search Nama / No. Anggota"
                   class="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600
                          rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               <!-- Suggestions dropdown -->
               <div
                 v-if="showSuggestions"
-                class="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-200
-                       dark:border-gray-600 rounded-lg shadow-lg mt-1 max-h-64 overflow-auto"
+                class="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg mt-1 max-h-64 overflow-auto"
               >
                 <button
                   v-for="m in memberSuggestions" :key="m.id"
-                  @click="pilihAnggota(m)"
-                  class="w-full text-left px-4 py-2.5 bg-primary hover:bg-secondary dark:hover:bg-gray-700
-                         flex items-center gap-3 transition-colors"
+                  @mousedown.prevent="pilihAnggota(m)"
+                  type="button"
+                  class="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
                 >
-                  <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-primary flex items-center
-                              justify-center text-primary dark:text-gray-300 font-semibold text-sm shrink-0">
+                  <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-700 dark:text-blue-300 font-semibold text-sm shrink-0">
                     {{ initials(m.name) }}
                   </div>
                   <div>
@@ -457,18 +455,16 @@ const akadType = computed(() => {
             <Transition name="fade">
               <div
                 v-if="selectedMember"
-                class="flex items-center gap-4 p-4 bg-light-accent dark:bg-gray-900/20
-                       border border-accent dark:border-gray-600 rounded-lg"
+                class="flex items-center gap-4 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg"
               >
-                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-primary flex items-center
-                            justify-center text-xl font-bold text-secondary dark:text-light-accent shrink-0">
+                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xl font-bold text-blue-700 dark:text-blue-300 shrink-0">
                   {{ initials(selectedMember.name) }}
                 </div>
                 <div class="flex-1 min-w-0">
-                  <div class="font-medium text-primary dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
+                  <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
                   <div class="text-sm text-gray-500">{{ selectedMember.user_code }}</div>
                 </div>
-                <button @click="resetAnggota" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
+                <button @click="resetAnggota" type="button" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
                   <Icon icon="mdi:close" width="20" />
                 </button>
               </div>

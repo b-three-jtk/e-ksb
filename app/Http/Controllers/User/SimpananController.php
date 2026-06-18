@@ -16,7 +16,7 @@ class SimpananController extends Controller
         $search = $request->input('search');
         $perPage = (int) $request->input('per_page', 10);
 
-        $query = $bukuBesarService->buildLedgerTransactionQuery($userId, $month, $search);
+        $query = $bukuBesarService->buildTabunganTransactionQuery($userId, $month, $search);
         $query->orderBy('transaction_date', 'desc');
 
         $transactions = $query->paginate($perPage)->withQueryString();
@@ -32,7 +32,7 @@ class SimpananController extends Controller
 
         [$savingSummary, $savingMeta] = $bukuBesarService->buildSavingSummaryAndMeta($userId);
 
-        return Inertia::render('User/Ledger/List', [
+        return Inertia::render('User/Tabungan/List', [
             'transactions' => $transactions,
             'memberInfo' => $memberInfo,
             'savings' => $savingSummary,
@@ -47,7 +47,7 @@ class SimpananController extends Controller
 
     public function export(Request $request, BukuBesarService $bukuBesarService)
     {
-        $result = $bukuBesarService->exportLedgerPdf(
+        $result = $bukuBesarService->exportTabunganPdf(
             auth()->id(),
             $request->get('month'),
             $request->get('search')

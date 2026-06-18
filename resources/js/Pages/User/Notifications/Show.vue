@@ -34,9 +34,6 @@ const props = defineProps({
                         <span class="font-semibold">Status Dibaca:</span> {{ notification.is_read ? 'Sudah' : 'Belum' }}
                     </div>
                     <div>
-                        <span class="font-semibold">Dijadwalkan Pada:</span> {{ notification.scheduled_at }}
-                    </div>
-                    <div>
                         <span class="font-semibold">Dikirim Pada:</span> {{ notification.sent_at }}
                     </div>
                     <div>

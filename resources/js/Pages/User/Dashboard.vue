@@ -9,7 +9,7 @@ const page = usePage()
 
 const user = computed(() => page.props.auth.user)
 const summary = computed(() => page.props.summary)
-const ledger = computed(() => page.props.ledger)
+const tabungan = computed(() => page.props.tabungan)
 
 const rupiah = (value) =>
     'Rp ' + new Intl.NumberFormat('id-ID').format(value ?? 0)
@@ -103,14 +103,14 @@ const rupiah = (value) =>
                     <h3 class="font-semibold text-lg mb-6">Akses Cepat</h3>
 
                     <div class="flex justify-around text-center">
-                        <Link href="/user/ledger" class="group">
+                        <Link href="/user/tabungan" class="group">
                             <div class="flex flex-col items-center gap-3">
                                 <div class="w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
                                     <Icon icon="uil:transaction" class="w-9 h-9" />
                                 </div>
                                 <div class="mt-1">
                                     <p class="text-sm font-medium">
-                                        Ledger
+                                        Tabungan
                                     </p>
                                     <p class="text-sm font-medium mt-0.5 ">
                                         Pribadi
@@ -153,12 +153,12 @@ const rupiah = (value) =>
                     </div>
                 </div>
 
-                <!-- Mini Ledger -->
+                <!-- Mini Tabungan -->
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow dark:text-gray-100 h-62.5 flex flex-col">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-lg">Riwayat Transaksi Terbaru Anda</h3>
                         <Link
-                            href="/user/ledger"
+                            href="/user/tabungan"
                             class="text-sm text-primary font-medium border border-primary hover:bg-secondary hover:text-white dark:hover:bg-accent/20 px-3 py-1.5 rounded-lg transition-colors">
                             Lihat Semua
                         </Link>
@@ -171,7 +171,7 @@ const rupiah = (value) =>
                             { key: 'type', label: 'Jenis' },
                             { key: 'amount', label: 'Saldo', align: 'right' }
                         ]"
-                        :data="ledger"
+                        :data="tabungan"
                     />
                 </div>
             </section>

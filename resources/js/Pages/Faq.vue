@@ -87,7 +87,7 @@ onUnmounted(() => {
                             ariaTitle="Apakah simpanan saya dijamin aman">
                             <p class="font-body text-md py-4 dark:text-gray-200">
                                 Ya, simpanan anggota dijaga dengan baik oleh Koperasi Syariah Berkah. Setiap simpanan
-                                anggota tercatat dengan jelas dalam ledger anggota. Pengelolaan keuangan koperasi diawasi oleh
+                                anggota tercatat dengan jelas dalam tabungan anggota. Pengelolaan keuangan koperasi diawasi oleh
                                 Pengurus dan Pengawas sesuai dengan Anggaran Dasar dan Anggaran Rumah Tangga (AD/ART) koperasi.
                             </p>
                         </AccordionPanel>

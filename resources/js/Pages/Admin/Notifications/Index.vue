@@ -66,7 +66,6 @@ const columns = [
     { key: 'reminder_type', label: 'Reminder' },
     { key: 'status', label: 'Status Pengiriman' },
     { key: 'is_read', label: 'Status Dibaca' },
-    { key: 'scheduled_at', label: 'Dijadwalkan Pada' },
     { key: 'sent_at', label: 'Dikirim Pada' },
     { key: 'actions', label: 'Aksi' },
 ]
@@ -113,10 +112,19 @@ watch(() => filters.search, () => {
 const getStatusClass = (status: string) => {
     const base = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold'
     switch (status) {
-        case 'sent': return `${base} bg-green-100 text-green-700`
-        case 'draft': return `${base} bg-yellow-100 text-yellow-700`
-        case 'failed': return `${base} bg-red-100 text-red-700`
+        case 'terkirim': return `${base} bg-green-100 text-green-700`
+        case 'draf': return `${base} bg-yellow-100 text-yellow-700`
+        case 'gagal_kirim': return `${base} bg-red-100 text-red-700`
         default: return `${base} bg-gray-100 text-gray-700`
+    }
+}
+
+const getStatusLabel = (status: string) => {
+    switch (status) {
+        case 'draf': return 'Draf'
+        case 'terkirim': return 'Terkirim'
+        case 'gagal_kirim': return 'Gagal Kirim'
+        default: return status
     }
 }
 
@@ -177,9 +185,9 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
                             label="Status Pengiriman"
                         >
                             <option value="">Semua Status</option>
-                            <option value="draft">Draf</option>
-                            <option value="sent">Terkirim</option>
-                            <option value="failed">Gagal Kirim</option>
+                            <option value="draf">Draf</option>
+                            <option value="terkirim">Terkirim</option>
+                            <option value="gagal_kirim">Gagal Kirim</option>
                         </BaseSelect>
 
                         <BaseSelect
@@ -238,7 +246,7 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
 
                     <template #cell-status="{ row }">
                         <span :class="getStatusClass(row.status)">
-                            {{ row.status }}
+                            {{ getStatusLabel(row.status) }}
                         </span>
                     </template>
 

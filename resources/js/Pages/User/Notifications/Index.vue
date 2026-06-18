@@ -64,7 +64,7 @@ const columns = [
     { key: 'notification_type', label: 'Jenis' },
     { key: 'reminder_type', label: 'Pengingat' },
     { key: 'is_read', label: 'Status' },
-    { key: 'scheduled_at', label: 'Tanggal' },
+    { key: 'scheduled_at', label: 'Tanggal Dikirim' },
     { key: 'actions', label: 'Aksi' },
 ]
 

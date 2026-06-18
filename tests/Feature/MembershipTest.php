@@ -139,7 +139,7 @@ describe('FR-03: Aplikasi harus menyediakan dashboard operasional yang menyajika
         $res->assertInertia(fn (AssertableInertia $page) =>
             $page->component('User/Dashboard')
                 ->has('summary')
-                ->has('ledger')
+                ->has('tabungan')
         );
     });
 

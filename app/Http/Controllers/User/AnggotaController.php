@@ -43,7 +43,7 @@ class AnggotaController extends Controller
 
         return inertia('User/Dashboard', [
             'summary' => $this->dasborService->getSummary($user->member->id, $user->id),
-            'ledger'  => $this->dasborService->getLedger($user->member->id),
+            'tabungan'  => $this->dasborService->getTabungan($user->member->id),
         ]);
     }
 

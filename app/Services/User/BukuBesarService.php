@@ -78,7 +78,7 @@ class BukuBesarService
         });
     }
 
-    public function buildLedgerTransactionQuery(int|string $userId, ?string $month, ?string $search): Builder
+    public function buildTabunganTransactionQuery(int|string $userId, ?string $month, ?string $search): Builder
     {
         $query = SavingTransaction::query()
             ->with(['savingAccount.member.bankAccounts', 'savingAccount', 'updatedBy', 'memberBankAccount'])
@@ -189,9 +189,9 @@ class BukuBesarService
         return [$savingSummary, $savingMeta];
     }
 
-    public function exportLedgerPdf(int|string $userId, ?string $month, ?string $search): array
+    public function exportTabunganPdf(int|string $userId, ?string $month, ?string $search): array
     {
-        $query = $this->buildLedgerTransactionQuery($userId, $month, $search);
+        $query = $this->buildTabunganTransactionQuery($userId, $month, $search);
         $query->orderBy('transaction_date', 'asc');
 
         $transactions = $query->get();
@@ -214,7 +214,7 @@ class BukuBesarService
 
         $filename = 'Mutasi_Simpanan_' . $member->user_code . '_' . now()->format('Ymd_His') . '.pdf';
 
-        $pdf = Pdf::loadView('exports.ledger_statement', [
+        $pdf = Pdf::loadView('exports.tabungan_statement', [
             'transactions' => $rows,
             'member' => $memberInfo,
             'startDate' => $startDate,
