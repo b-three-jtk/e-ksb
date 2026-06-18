@@ -64,16 +64,16 @@ Route::prefix('auth')
         Route::post('/login', [AutentikasiController::class, 'login'])
             ->name('login.store');
 
-        Route::get('/forgot-password', [ForgotPasswordController::class, 'index'])
+        Route::get('/forgot-password', [AutentikasiController::class, 'formForgotPassword'])
             ->name('password.request');
 
-        Route::post('/forgot-password', [ForgotPasswordController::class, 'submitRequest'])
+        Route::post('/forgot-password', [AutentikasiController::class, 'submitForgotPasswordRequest'])
             ->name('password.email');
 
-        Route::get('/reset-password/{token}', [ResetPasswordController::class, 'index'])
+        Route::get('/reset-password/{token}', [AutentikasiController::class, 'formResetPassword'])
             ->name('password.reset');
 
-        Route::post('/reset-password', [ResetPasswordController::class, 'submitRequest'])
+        Route::post('/reset-password', [AutentikasiController::class, 'submitResetPasswordRequest'])
             ->name('password.update');
 
     });
