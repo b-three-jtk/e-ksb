@@ -251,15 +251,15 @@ class PembayaranAngsuranService
 
         $installment->update(['status' => $status]);
 
-        $hargaJual     = $financing->cost_price + $financing->margin_amount;
+        $totalTagihan  = ($financing->cost_price - ($financing->down_payment ?? 0)) + $financing->margin_amount;
         $totalTerbayar = InstallmentPaymentTransaction::whereHas('installment', fn($q) =>
             $q->where('financing_id', $financing->id)
         )->sum('nominal');
 
-        $sisa = $hargaJual - $totalTerbayar;
+        $sisa = $totalTagihan - $totalTerbayar;
 
         if ($sisa <= 0) {
-            $financing->update(['status' => 'Lunas']);
+            $financing->update(['status' => FinancingReqStatusEnum::PAID->value]);
         }
 
         $nextInstallment = Installment::where('financing_id', $financing->id)
@@ -269,6 +269,7 @@ class PembayaranAngsuranService
 
         $financing->load('member.user');
 
+        $hargaJual = $totalTagihan;
         return compact('financing', 'payment', 'installment', 'nextInstallment', 'hargaJual', 'sisa');
     }
 
