@@ -17,35 +17,312 @@ beforeEach(function () {
     $this->seed(RoleSeeder::class);
 });
 
-describe('FR-01 Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris.', function () {
+describe('Aplikasi harus menyediakan pendaftaran pengurus baru dari anggota aktif maupun non-anggota oleh sekretaris.', function () {
+    it('Sekretaris dapat menambah data pengurus koperasi non-anggota', function () {
+        $sekretaris = User::factory()->create();
+        $sekretaris->assignRole('Sekretaris');
 
-    it('Sekretaris dapat meregistrasi anggota baru dan status otomatis Menunggu Pembayaran', function () {
+        $role = Role::where('name', 'Bendahara')->first();
+
+        $res = $this->actingAs($sekretaris)
+            ->post('/admin/pengurus/store', [
+                'name' => 'Leon S Kennedy',
+                'email' => 'asep@example.com',
+                'nik' => '1111222233334444',
+                'phone_number' => '081234567890',
+                'role_id' => $role->id,
+            ]);
+
+        $res->assertStatus(302);
+        $this->assertDatabaseHas('users', [
+            'name' => 'Leon S Kennedy',
+            'nik' => '1111222233334444',
+            'phone_number' => '081234567890',
+            'email' => 'asep@example.com',
+            'status' => 'Aktif'
+        ]);
+    });
+
+    it('Sekretaris dapat menambah data pengurus koperasi dari anggota aktif', function () {
+        $sekretaris = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $sekretaris->assignRole('Sekretaris');
+
+        $anggota = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota->assignRole('Anggota');
+        Member::factory()->create([
+            'user_id' => $anggota->id,
+            'status' => 'Aktif',
+        ]);
+
+        $role = Role::where('name', 'Bendahara')->first();
+
+        $this->actingAs($sekretaris)
+            ->post('/admin/pengurus/store', [
+                'user_id' => $anggota->id,
+                'name' => 'Leon S Kennedy',
+                'email' => 'asep@example.com',
+                'nik' => '1111222233334444',
+                'phone_number' => '081234567890',
+                'role_id' => $role->id,
+            ]);
+
+        $this->assertDatabaseHas('model_has_roles', [
+            'role_id' => $role->id,
+            'model_id' => $anggota->id
+        ]);
+        $this->assertDatabaseHas('users', [
+            'name' => 'Leon S Kennedy',
+            'nik' => '1111222233334444',
+            'phone_number' => '081234567890',
+            'email' => 'asep@example.com',
+            'status' => 'Aktif'
+        ]);
+        $this->assertDatabaseHas('members', [
+            'user_id' => $anggota->id,
+            'status' => 'Aktif',
+        ]);
+    });
+
+    it('Sekretaris tidak dapat menambah data pengurus koperasi dengan data yang tidak valid', function () {
+        $sekretaris = User::factory()->create();
+        $sekretaris->assignRole('Sekretaris');
+
+        $role = Role::where('name', 'Bendahara')->first();
+
+        $res = $this->actingAs($sekretaris)
+            ->post('/admin/pengurus/store', [
+                'name' => 'Leon S Kennedy',
+                'email' => 'asep@example.com',
+                'nik' => '111122223333',
+                'phone_number' => '081234567890081234567890',
+                'role_id' => $role->id,
+            ]);
+
+        $res->assertSessionHasErrors([
+            'nik' => 'The nik field must be 16 digits.',
+            'phone_number' => 'The phone number field must not be greater than 20 characters.',
+        ]);
+        $this->assertDatabaseMissing('users', [
+            'name' => 'Leon S Kennedy',
+            'nik' => '111122223333',
+            'phone_number' => '081234567890081234567890',
+            'email' => 'asep@example.com',
+        ]);
+    });
+
+    it('Selain Sekretaris tidak dapat menambah data pengurus koperasi', function () {
+        $anggota = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota->assignRole('Anggota');
+        $role = Role::where('name', 'Bendahara')->first();
+
+        $responseAnggota = $this->actingAs($anggota)
+            ->post('/admin/pengurus/store', [
+                'name' => 'Leon S Kennedy',
+                'email' => 'asep@example.com',
+                'nik' => '1111222233334444',
+                'role_id' => $role->id,
+            ]);
+
+        $responseAnggota->assertStatus(403);
+        $this->assertDatabaseMissing('users', [
+            'name' => 'Leon S Kennedy',
+            'nik' => '1111222233334444',
+            'email' => 'asep@example.com',
+            'status' => 'Aktif'
+        ]);
+    });
+});
+
+describe('Aplikasi harus menyediakan daftar pengurus untuk ketua koperasi dan sekretaris.', function () {
+    it('Ketua dan Sekretaris dapat melihat daftar pengurus', function () {
+        $ketua = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $ketua->assignRole('Ketua');
+
+        $sekretaris = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $sekretaris->assignRole('Sekretaris');
+
+        $resKetua = $this->actingAs($ketua)->get('/admin/pengurus');
+        $resSekretaris = $this->actingAs($sekretaris)->get('/admin/pengurus');
+
+        $resKetua->assertStatus(200);
+        $resSekretaris->assertStatus(200);
+    });
+
+    it('Selain Ketua dan Sekretaris tidak dapat melihat daftar pengurus', function () {
+        $anggota = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota->assignRole('Anggota');
+
+        $res = $this->actingAs($anggota)->get('/admin/pengurus');
+
+        $res->assertStatus(403);
+    });
+});
+
+describe('Aplikasi harus menyediakan detail informasi masing-masing pengurus.', function () {
+    it('Ketua dan Sekretaris dapat melihat detail informasi pengurus', function () {
+        $ketua = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $ketua->assignRole('Ketua');
+
+        $sekretaris = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $sekretaris->assignRole('Sekretaris');
+
+        $resPengurusbyKetua = $this->actingAs($ketua)->get('/admin/pengurus/show/' . $sekretaris->id);
+        $resPengurusbySekretaris = $this->actingAs($sekretaris)->get('/admin/pengurus/show/' . $ketua->id);
+
+        $resPengurusbyKetua->assertStatus(200);
+        $resPengurusbySekretaris->assertStatus(200);
+    });
+
+    it('Selain Ketua dan Sekretaris tidak dapat melihat detail informasi pengurus', function () {
+        $anggota1 = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota1->assignRole('Anggota');
+
+        $anggota2 = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota2->assignRole('Anggota');
+
+        $resPengurus = $this->actingAs($anggota1)->get('/admin/pengurus/show/' . $anggota2->id);
+
+        $resPengurus->assertStatus(403);
+    });
+});
+
+describe('Aplikasi harus menyediakan pembaruan informasi pengurus oleh sekretaris.', function () {
+    it('Sekretaris dapat mengubah data pengurus', function () {
+        $sekretaris = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $sekretaris->assignRole('Sekretaris');
+        $role = Role::where('name', 'Staf Murabahah')->first();
+
+        $pengurus = User::factory([
+            'status' => 'Aktif',
+            'name' => 'Leon Lama'
+        ])->create();
+        $pengurus->assignRole('Staf Murabahah');
+
+        $responseSekretaris = $this->actingAs($sekretaris)
+            ->put('/admin/pengurus/update/' . $pengurus->id, [
+                'name' => 'Leon Baru',
+                'nik' => '1234567890123456',
+                'phone_number' => '08934673463',
+                'role_id' => $role->id,
+            ]);
+
+        $responseSekretaris->assertStatus(302);
+        $this->assertDatabaseHas('users', [
+            'id' => $pengurus->id,
+            'name' => 'Leon Baru',
+            'nik' => '1234567890123456',
+            'phone_number' => '08934673463'
+        ]);
+    });
+
+    it('Sekretaris tidak dapat mengubah data pengurus dengan data tidak valid', function () {
+        $sekretaris = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $sekretaris->assignRole('Sekretaris');
+
+        $pengurus = User::factory([
+            'status' => 'Aktif',
+            'name' => 'Leon Lama'
+        ])->create();
+        $pengurus->assignRole('Staf Murabahah');
+
+        $responseSekretaris = $this->actingAs($sekretaris)
+            ->put('/admin/pengurus/update/' . $pengurus->id, [
+                'name' => 'Leon Baru',
+                'nik' => '12345678901',
+                'phone_number' => '0893467346308934673463',
+                'role_id' => 123,
+            ]);
+
+        $responseSekretaris->assertSessionHasErrors([
+            'nik' => 'The nik field must be 16 digits.',
+            'phone_number' => 'The phone number field must not be greater than 20 characters.',
+            'role_id' => 'The selected role id is invalid.',
+        ]);
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $pengurus->id,
+            'name' => 'Leon Baru',
+            'nik' => '1234567890123456',
+            'phone_number' => '0893467346308934673463'
+        ]);
+    });
+
+    it('Selain Sekretaris tidak dapat mengubah data pengurus', function () {
+        $anggota = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota->assignRole('Anggota');
+        $role = Role::where('name', 'Staf Murabahah')->first();
+
+        $pengurus = User::factory(['name' => 'Nama Lama', 'status' => 'Aktif'])->create();
+        $pengurus->assignRole('Staf Murabahah');
+
+        $responseAnggota = $this->actingAs($anggota)
+            ->put('/admin/pengurus/update/' . $pengurus->id, [
+                'name' => 'Leon Baru',
+                'nik' => '1234567890123456',
+                'phone_number' => '08934673463',
+                'role_id' => $role->id,
+            ]);
+
+        $responseAnggota->assertStatus(403);
+    });
+});
+
+describe('Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris.', function () {
+
+    it('Sekretaris dapat mendaftarkan anggota baru dan status otomatis Menunggu Pembayaran', function () {
         $user = User::factory()->create();
         $user->assignRole('Sekretaris');
 
         $res = $this->actingAs($user)
             ->post('/admin/users/store', [
-                'name' => 'Test Member',
+                'name' => 'Leon S Kennedy',
                 'gender' => 'Laki-laki',
                 'birth_place' => 'Bandung',
                 'birth_date' => '1990-01-01',
                 'marital_status' => 'Kawin',
-                'email' => 'test@example.com',
+                'email' => 'leon@example.com',
                 'password' => 'password',
-                'domicile_address' => 'Jl. Test No. 123',
+                'domicile_address' => 'Jl. Ennerdale No. 123',
                 'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
                 'nik' => '1234567890123456',
                 'phone_number' => '081234567890',
                 'heir_nik' => '6543210987654321',
-                'heir_name' => 'Heir Test',
-                'heir_relationship' => 'Saudara',
+                'heir_name' => 'Ada Wong',
+                'heir_relationship' => 'Istri',
                 'heir_contact' => '081234567891',
             ]);
 
         $res->assertStatus(302);
 
         $this->assertDatabaseHas('users', [
-            'email' => 'test@example.com',
+            'name' => 'Leon S Kennedy',
+            'email' => 'leon@example.com',
         ]);
 
         $this->assertDatabaseHas('members', [
@@ -54,7 +331,40 @@ describe('FR-01 Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekr
         ]);
     });
 
-    it('Selain Sekretaris tidak dapat melakukan registrasi anggota baru (403 Forbidden)', function () {
+    it('Sekretaris tidak dapat mendaftarkan anggota baru dengan data yang tidak lengkap', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Sekretaris');
+
+        $res = $this->actingAs($user)
+            ->post('/admin/users/store', [
+                'gender' => 'Laki-laki',
+                'birth_place' => 'Bandung',
+                'birth_date' => '1990-01-01',
+                'marital_status' => 'Kawin',
+                'heiger_nik' => '6543210987654321',
+                'heir_name' => 'Ada Wong',
+                'heir_relationship' => 'Istri',
+                'heir_contact' => '081234567891',
+            ]);
+
+            $res->assertSessionHasErrors([
+                'name' => 'The name field is required.',
+                'domicile_address' => 'The domicile address field is required.',
+                'last_education' => 'The last education field is required.',
+                'nik' => 'The nik field is required.',
+                'phone_number' => 'The phone number field is required.',
+            ]);
+
+            $this->assertDatabaseMissing('members', [
+                'gender' => 'Laki-laki',
+                'birth_place' => 'Bandung',
+                'birth_date' => '1990-01-01',
+                'marital_status' => 'Kawin'
+                ]
+            );
+    });
+
+    it('Selain Sekretaris tidak dapat melakukan registrasi anggota baru', function () {
         $anggota = User::factory([
             'status' => 'Aktif'
         ])->create();
@@ -62,66 +372,164 @@ describe('FR-01 Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekr
 
         $res = $this->actingAs($anggota)
             ->post('/admin/users/store', [
-                'name' => 'Test Member',
+                'name' => 'Leon S Kennedy',
                 'gender' => 'Laki-laki',
                 'birth_place' => 'Bandung',
                 'birth_date' => '1990-01-01',
                 'marital_status' => 'Kawin',
-                'email' => 'test@example.com',
+                'email' => 'leon@example.com',
                 'password' => 'password',
-                'domicile_address' => 'Jl. Test No. 123',
+                'domicile_address' => 'Jl. Ennerdale No. 123',
                 'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
                 'nik' => '1234567890123456',
                 'phone_number' => '081234567890',
                 'heir_nik' => '6543210987654321',
-                'heir_name' => 'Heir Test',
-                'heir_relationship' => 'Saudara',
+                'heir_name' => 'Ada Wong',
+                'heir_relationship' => 'Istri',
                 'heir_contact' => '081234567891',
             ]);
+
+        $res->assertStatus(403);
+        $this->assertDatabaseMissing('users', [
+            'name' => 'Leon S Kennedy',
+            'email' => 'leon@example.com',
+        ]);
+    });
+});
+
+describe('Aplikasi harus menyediakan daftar anggota untuk ketua koperasi dan sekretaris.', function () {
+    it('Ketua dan Sekretaris dapat melihat daftar anggota', function () {
+        $ketua = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $ketua->assignRole('Ketua');
+
+        $sekretaris = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $sekretaris->assignRole('Sekretaris');
+
+        $resAnggotabyKetua = $this->actingAs($ketua)->get('/admin/users');
+        $resAnggotabySekretaris = $this->actingAs($sekretaris)->get('/admin/users');
+
+        $resAnggotabyKetua->assertStatus(200);
+        $resAnggotabySekretaris->assertStatus(200);
+    });
+
+    it('Selain Ketua dan Sekretaris tidak dapat melihat daftar anggota', function () {
+        $anggota = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota->assignRole('Anggota');
+
+        $resAnggota = $this->actingAs($anggota)->get('/admin/users');
+
+        $resAnggota->assertStatus(403);
+    });
+});
+
+describe('Aplikasi harus menyediakan detail informasi masing-masing anggota.', function () {
+    it('Ketua dan Sekretaris dapat melihat detail informasi anggota', function () {
+        $ketua = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $ketua->assignRole('Ketua');
+
+        $sekretaris = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $sekretaris->assignRole('Sekretaris');
+
+        $anggota = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota->assignRole('Anggota');
+
+        $resKetua = $this->actingAs($ketua)->get('/admin/users/show/' . $anggota->id);
+        $resSekretaris = $this->actingAs($sekretaris)->get('/admin/users/show/' . $anggota->id);
+
+        $resKetua->assertStatus(200);
+        $resSekretaris->assertStatus(200);
+    });
+
+    it('Selain Ketua dan Sekretaris tidak dapat melihat detail informasi anggota', function () {
+        $anggota1 = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota1->assignRole('Anggota');
+
+        $anggota2 = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota2->assignRole('Anggota');
+
+        $res = $this->actingAs($anggota1)->get('/admin/users/show/' . $anggota2->id);
 
         $res->assertStatus(403);
     });
 });
 
-describe('FR-02: Aplikasi harus menyediakan autentikasi akun pengguna berdasarkan kode keanggotaan dan kata sandi.', function () {
-    it('Pengguna dengan kode keanggotaan dan kata sandi yang benar dapat masuk ke dalam sistem', function () {
-        $user = User::factory()->create([
-            'user_code' => 'MEMBER123',
-            'password' => bcrypt('password123'),
+describe('Aplikasi harus menyediakan pembaruan data anggota oleh sekretaris.', function () {
+    it('Sekretaris dapat mengubah data anggota', function () {
+        $sekretaris = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $sekretaris->assignRole('Sekretaris');
+
+        $anggota = User::factory([
             'status' => 'Aktif',
-        ]);
-        Member::factory()->create([
-            'user_id' => $user->id,
-        ]);
-        $user->assignRole('Anggota');
+            'name' => 'Leona S Kennedy',
+            'nik' => '3214567890123456',
+            'phone_number' => '08934673463'
+        ])->create();
+        $anggota->assignRole('Anggota');
 
-        $res = $this->post('auth/login', [
-            'user_code' => 'MEMBER123',
-            'password' => 'password123',
+        $responseSekretaris = $this->actingAs($sekretaris)
+            ->put('/admin/users/' . $anggota->id . '/update', [
+                'name' => 'Leon S Kennedy',
+                'nik' => '1234567890123456',
+                'phone_number' => '628934673463',
+                'gender' => 'Laki-laki',
+                'birth_place' => 'Bandung',
+                'birth_date' => '1990-01-01',
+                'marital_status' => 'Kawin',
+                'domicile_address' => 'Jl. Ennerdale No. 123',
+                'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
+                'heirs[0][heir_nik]' => '6543210987654321',
+                'heirs[0][heir_name]' => 'Ada Wong',
+                'heirs[0][relationship]' => 'Istri',
+                'heirs[0][heir_contact]' => '081234567891',
+            ]);
+
+        $responseSekretaris->assertStatus(302);
+        $this->assertDatabaseHas('users', [
+            'id' => $anggota->id,
+            'name' => 'Leon S Kennedy',
+            'nik' => '1234567890123456',
+            'phone_number' => '628934673463',
         ]);
+    })->only();
 
-        $res->assertStatus(302);
-        $this->assertAuthenticatedAs($user);
-    });
+    it('Selain Sekretaris tidak dapat mengubah data anggota', function () {
+        $anggota1 = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota1->assignRole('Anggota');
 
-    it('Pengguna dengan kode keanggotaan atau kata sandi yang salah tidak dapat masuk ke dalam sistem', function () {
-        $user = User::factory()->create([
-            'user_code' => 'MEMBER123',
-            'password' => bcrypt('password123'),
+        $anggota2 = User::factory([
             'status' => 'Aktif',
-        ]);
-        Member::factory()->create([
-            'user_id' => $user->id,
-        ]);
-        $user->assignRole('Anggota');
+            'name' => 'Nama Lama'
+        ])->create();
+        $anggota2->assignRole('Anggota');
 
-        $res = $this->post('auth/login', [
-            'user_code' => $user->user_code,
-            'password' => 'wrongpassword',
-        ]);
+        $responseAnggota = $this->actingAs($anggota1)
+            ->put('/admin/users/update/' . $anggota2->id, [
+                'name' => 'Nama Baru',
+                'nik' => '1234567890123456',
+                'phone_number' => '08934673463',
+            ]);
 
-        $res->assertSessionHasErrors();
-        $this->assertGuest();
+        $responseAnggota->assertStatus(403);
     });
 });
 
@@ -267,122 +675,6 @@ describe('FR-05 Aplikasi harus menyediakan penanganan permohonan pengajuan diri 
     });
 });
 
-describe('FR-06 Aplikasi harus menyediakan pendaftaran pengurus baru dari anggota aktif maupun non-anggota oleh sekretaris.', function () {
-    it('Sekretaris dapat menambah data pengurus koperasi non-anggota', function () {
-        $sekretaris = User::factory()->create();
-        $sekretaris->assignRole('Sekretaris');
-
-        $role = Role::where('name', 'Bendahara')->first();
-
-        $res = $this->actingAs($sekretaris)
-            ->post('/admin/store', [
-                'name' => 'Test Pengurus',
-                'email' => 'pengurus@example.com',
-                'nik' => '1111222233334444',
-                'phone_number' => '081234567890',
-                'role_id' => $role->id,
-            ]);
-
-        $res->assertStatus(302);
-        $this->assertDatabaseHas('users', [
-            'email' => 'pengurus@example.com',
-            'status' => 'Aktif'
-        ]);
-    });
-
-    it('Sekretaris dapat menambah data pengurus koperasi dari anggota aktif', function () {
-        $sekretaris = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $sekretaris->assignRole('Sekretaris');
-
-        $anggota = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $anggota->assignRole('Anggota');
-        Member::factory()->create([
-            'user_id' => $anggota->id,
-            'status' => 'Aktif',
-        ]);
-
-        $role = Role::where('name', 'Bendahara')->first();
-
-        $res = $this->actingAs($sekretaris)
-            ->post('/admin/store', [
-                'user_id' => $anggota->id,
-                'name' => 'Test Pengurus',
-                'email' => 'pengurus@example.com',
-                'nik' => '1111222233334444',
-                'phone_number' => '081234567890',
-                'role_id' => $role->id,
-            ]);
-
-        Log::info('Add admin from member response: ' . $res->getContent());
-
-        $res->assertStatus(302);
-        $this->assertDatabaseHas('model_has_roles', [
-            'role_id' => $role->id,
-            'model_id' => $anggota->id
-        ]);
-    });
-
-    it('Selain Sekretaris tidak dapat menambah data pengurus koperasi', function () {
-        $anggota = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $anggota->assignRole('Anggota');
-        $role = Role::where('name', 'Bendahara')->first();
-
-        $responseAnggota = $this->actingAs($anggota)
-            ->post('/admin/store', [
-                'name' => 'Test Pengurus',
-                'email' => 'pengurus2@example.com',
-                'nik' => '1111222233334444',
-                'role_id' => $role->id,
-            ]);
-
-        $responseAnggota->assertStatus(403);
-    });
-});
-
-describe('FR-07 Aplikasi harus menyediakan daftar anggota dan pengurus untuk ketua koperasi dan sekretaris.', function () {
-    it('Ketua dan Sekretaris dapat melihat daftar anggota dan pengurus', function () {
-        $ketua = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $ketua->assignRole('Ketua');
-
-        $sekretaris = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $sekretaris->assignRole('Sekretaris');
-
-        $resKetua = $this->actingAs($ketua)->get('/admin/pengurus');
-        $resSekretaris = $this->actingAs($sekretaris)->get('/admin/pengurus');
-
-        $resAnggotabyKetua = $this->actingAs($ketua)->get('/admin/users');
-        $resAnggotabySekretaris = $this->actingAs($sekretaris)->get('/admin/users');
-
-        $resKetua->assertStatus(200);
-        $resSekretaris->assertStatus(200);
-        $resAnggotabyKetua->assertStatus(200);
-        $resAnggotabySekretaris->assertStatus(200);
-    });
-
-    it('Selain Ketua dan Sekretaris tidak dapat melihat daftar anggota dan pengurus', function () {
-        $anggota = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $anggota->assignRole('Anggota');
-
-        $res = $this->actingAs($anggota)->get('/admin/pengurus');
-        $resAnggota = $this->actingAs($anggota)->get('/admin/users');
-
-        $res->assertStatus(403);
-        $resAnggota->assertStatus(403);
-    });
-});
-
 // describe('FR-08 Aplikasi harus menyediakan pengalokasian anggota ke penanggung jawab anggota oleh ketua koperasi.', function () {
 //     it('Ketua dapat mengalokasikan anggota ke penanggung jawab anggota', function () {
 
@@ -393,97 +685,4 @@ describe('FR-07 Aplikasi harus menyediakan daftar anggota dan pengurus untuk ket
 //     });
 // });
 
-describe('FR-09 Aplikasi harus menyediakan detail informasi masing-masing anggota dan pengurus.', function () {
-    it('Ketua dan Sekretaris dapat melihat detail informasi anggota dan pengurus', function () {
-        $ketua = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $ketua->assignRole('Ketua');
 
-        $sekretaris = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $sekretaris->assignRole('Sekretaris');
-
-        $anggota = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $anggota->assignRole('Anggota');
-
-        $resKetua = $this->actingAs($ketua)->get('/admin/users/show/' . $anggota->id);
-        $resSekretaris = $this->actingAs($sekretaris)->get('/admin/users/show/' . $anggota->id);
-        $resPengurusbyKetua = $this->actingAs($ketua)->get('/admin/show/' . $sekretaris->id);
-        $resPengurusbySekretaris = $this->actingAs($sekretaris)->get('/admin/show/' . $ketua->id);
-
-        $resKetua->assertStatus(200);
-        $resSekretaris->assertStatus(200);
-        $resPengurusbyKetua->assertStatus(200);
-        $resPengurusbySekretaris->assertStatus(200);
-    });
-
-    it('Selain Ketua dan Sekretaris tidak dapat melihat detail informasi anggota dan pengurus', function () {
-        $anggota1 = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $anggota1->assignRole('Anggota');
-
-        $anggota2 = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $anggota2->assignRole('Anggota');
-
-        $res = $this->actingAs($anggota1)->get('/admin/users/show/' . $anggota2->id);
-        $resPengurus = $this->actingAs($anggota1)->get('/admin/show/' . $anggota2->id);
-
-        $res->assertStatus(403);
-        $resPengurus->assertStatus(403);
-    });
-});
-
-describe('FR-11 Aplikasi harus menyediakan pembaruan informasi pengurus oleh sekretaris.', function () {
-    it('Sekretaris dapat mengubah data pengurus', function () {
-        $sekretaris = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $sekretaris->assignRole('Sekretaris');
-
-        $pengurus = User::factory([
-            'status' => 'Aktif',
-            'name' => 'Nama Lama'
-        ])->create();
-        $pengurus->assignRole('Staf Murabahah');
-
-        $responseSekretaris = $this->actingAs($sekretaris)
-            ->put('/admin/update/' . $pengurus->id, [
-                'name' => 'Nama Baru Diupdate',
-                'email' => $pengurus->email,
-                'nik' => $pengurus->nik,
-                'phone_number' => '08999999999'
-            ]);
-
-        $responseSekretaris->assertStatus(302);
-        $this->assertDatabaseHas('users', [
-            'id' => $pengurus->id,
-            'name' => 'Nama Baru Diupdate'
-        ]);
-    });
-
-    it('Selain Sekretaris tidak dapat mengubah data pengurus', function () {
-        $anggota = User::factory([
-            'status' => 'Aktif'
-        ])->create();
-        $anggota->assignRole('Anggota');
-
-        $pengurus = User::factory(['name' => 'Nama Lama', 'status' => 'Aktif'])->create();
-        $pengurus->assignRole('Staf Murabahah');
-
-        $responseAnggota = $this->actingAs($anggota)
-            ->put('/admin/update/' . $pengurus->id, [
-                'nik' => '1111222233334444',
-                'email' => $pengurus->email,
-                'name' => 'Hacked Name',
-            ]);
-
-        $responseAnggota->assertStatus(403);
-    });
-});
