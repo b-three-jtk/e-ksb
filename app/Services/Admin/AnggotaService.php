@@ -95,7 +95,7 @@ class AnggotaService
         ];
     }
 
-    public function getDetailAnggota(int $id)
+    public function getDetailAnggota(string $id)
     {
         $user = User::with([
             'member.memberDocs',
