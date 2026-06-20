@@ -87,6 +87,11 @@ class SimpananController extends Controller
 
     public function show(string $id)
     {
+        $member = SavingTransaction::with('savingAccount.member.user')->findOrFail($id)->savingAccount->member;
+        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_user_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki izin untuk melihat detail transaksi simpanan ini.');
+        }
+
         $data = SavingTransaction::with('savingAccount.member.user', 'memberBankAccount')->find($id);
         $saving_transaction_receipt = $data->saving_transaction_receipt ? Storage::url($data->saving_transaction_receipt) : null;
 
