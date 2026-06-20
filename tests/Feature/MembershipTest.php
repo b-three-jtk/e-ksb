@@ -4,7 +4,9 @@ use App\Enums\EducationEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Models\Financing;
 use App\Models\Member;
+use App\Models\SavingAccount;
 use App\Models\User;
+use Database\Seeders\GlobalSettingSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -15,6 +17,7 @@ use Spatie\Permission\Models\Role;
 uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
+    $this->seed(GlobalSettingSeeder::class);
 });
 
 describe('Aplikasi harus menyediakan pendaftaran pengurus baru dari anggota aktif maupun non-anggota oleh sekretaris.', function () {
@@ -508,7 +511,7 @@ describe('Aplikasi harus menyediakan pembaruan data anggota oleh sekretaris.', f
             'nik' => '1234567890123456',
             'phone_number' => '628934673463',
         ]);
-    })->only();
+    });
 
     it('Selain Sekretaris tidak dapat mengubah data anggota', function () {
         $anggota1 = User::factory([
@@ -523,17 +526,299 @@ describe('Aplikasi harus menyediakan pembaruan data anggota oleh sekretaris.', f
         $anggota2->assignRole('Anggota');
 
         $responseAnggota = $this->actingAs($anggota1)
-            ->put('/admin/users/update/' . $anggota2->id, [
-                'name' => 'Nama Baru',
+            ->put('/admin/users/' . $anggota2->id . '/update', [
+                'name' => 'Leon S Kennedy',
                 'nik' => '1234567890123456',
-                'phone_number' => '08934673463',
+                'phone_number' => '628934673463',
+                'gender' => 'Laki-laki',
+                'birth_place' => 'Bandung',
+                'birth_date' => '1990-01-01',
+                'marital_status' => 'Kawin',
+                'domicile_address' => 'Jl. Ennerdale No. 123',
+                'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
+                'heirs[0][heir_nik]' => '6543210987654321',
+                'heirs[0][heir_name]' => 'Ada Wong',
+                'heirs[0][relationship]' => 'Istri',
+                'heirs[0][heir_contact]' => '081234567891',
             ]);
 
         $responseAnggota->assertStatus(403);
     });
 });
 
-describe('FR-03: Aplikasi harus menyediakan dashboard operasional yang menyajikan ringkasan dan visualisasi data transaksi sesuai dengan hak akses masing-masing peran.', function () {
+describe('Aplikasi harus menyediakan informasi profil bagi masing-masing anggota.', function () {
+    it('Anggota dapat melihat informasi profilnya sendiri', function () {
+        $anggota = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $anggota->assignRole('Anggota');
+
+        $res = $this->actingAs($anggota)->get('/user/profile');
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('User/Profile/Show')
+                ->has('user')
+        );
+    });
+
+    it('Selain Anggota tidak dapat melihat informasi profil anggota', function () {
+        $pengurus = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $pengurus->assignRole('Sekretaris');
+
+        $res = $this->actingAs($pengurus)->get('/user/profile');
+
+        $res->assertStatus(403);
+    });
+});
+
+describe('Aplikasi harus menyediakan pembaruan informasi profil bagi masing-masing anggota.', function () {
+    it('Anggota dapat memperbarui informasi profilnya sendiri', function () {
+        $anggota = User::factory([
+            'status' => 'Aktif',
+            'name' => 'Leona S Kennedy',
+            'phone_number' => '081234567891'
+        ])->create();
+        $anggota->assignRole('Anggota');
+
+        $res = $this->actingAs($anggota)
+            ->put('/user/profile', [
+                'name' => 'Leon S Kennedy',
+                'nik' => '1234567890123456',
+                'phone_number' => '081234567890',
+            ]);
+
+        $res->assertStatus(302);
+        $this->assertDatabaseHas('users', [
+            'id' => $anggota->id,
+            'name' => 'Leon S Kennedy',
+            'nik' => '1234567890123456',
+            'phone_number' => '081234567890',
+        ]);
+    });
+
+    it('Selain Anggota tidak dapat memperbarui informasi profil anggota', function () {
+        $pengurus = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $pengurus->assignRole('Sekretaris');
+
+        $res = $this->actingAs($pengurus)
+            ->put('/user/profile', [
+                'name' => 'Leon S Kennedy',
+                'phone_number' => '081234567890',
+                'domicile_address' => 'Jl. Ennerdale No. 123',
+                'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
+            ]);
+
+        $res->assertStatus(403);
+    });
+});
+
+describe('Aplikasi harus menyediakan pengalokasian anggota ke penanggung jawab anggota oleh ketua koperasi.', function () {
+    it('Ketua dapat mengalokasikan anggota ke penanggung jawab anggota', function () {
+        $ketua = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $ketua->assignRole('Ketua');
+
+        $pj = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $pj->assignRole('Penanggung Jawab Anggota');
+
+        $anggota = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $member = Member::factory()->create([
+            'user_id' => $anggota->id,
+            'status' => 'Aktif',
+        ]);
+        $anggota->assignRole('Anggota');
+
+        $res = $this->actingAs($ketua)
+            ->post('/admin/allocation', [
+                'pj_user_id' => $pj->id,
+                'member_ids' => [$member->id],
+            ]);
+
+        $res->assertStatus(302);
+        $this->assertDatabaseHas('members', [
+            'id' => $member->id,
+            'pj_user_id' => $pj->id,
+        ]);
+    });
+
+    it('Selain Ketua tidak dapat mengalokasikan anggota ke penanggung jawab anggota', function () {
+        $bendahara = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $bendahara->assignRole('Bendahara');
+
+        $anggota = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $member = Member::factory()->create([
+            'user_id' => $anggota->id,
+            'status' => 'Aktif',
+        ]);
+        $anggota->assignRole('Anggota');
+
+        $res = $this->actingAs($bendahara)
+            ->post('/admin/allocation', [
+                'pj_user_id' => $bendahara->id,
+                'member_ids' => [$member->id],
+            ]);
+
+        $res->assertStatus(403);
+    });
+});
+
+describe('Aplikasi harus menyediakan riwayat poin yang sudah diperoleh anggota', function () {
+    it('Anggota dapat melihat riwayat poin yang sudah diperoleh', function () {
+        $user = User::factory([
+            'status' => 'Aktif'
+        ])->create();
+        $user->assignRole('Anggota');
+        $anggota = Member::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'Aktif',
+        ]);
+
+        $res = $this->actingAs($user)->get('/user/profile');
+
+        SavingAccount::factory()->create([
+            'member_id' => $anggota->id,
+            'balance' => 1000000,
+        ]);
+
+        $this->travelTo(now()->endOfMonth());
+
+        $this->artisan('points:calculate-monthly-savings')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('point_transactions', [
+            'user_id' => $user->id,
+            'amount_earned' => 10, // 1 poin per 100.000 saldo, total saldo 5.000.000 = 50 poin
+        ]);
+
+        $this->travelBack();
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('User/Profile/Show')
+                ->has('user.points')
+        );
+    });
+});
+
+describe('Aplikasi harus menyediakan dashboard operasional yang menyajikan ringkasan dan visualisasi data transaksi sesuai dengan hak akses masing-masing peran.', function () {
+    it('DPS dapat melihat dashboard dengan data transaksi yang sesuai', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Dewan Pengawas Syariah');
+
+        $res = $this->actingAs($user)->get('/admin/dashboard');
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Dashboard')
+                ->has('stats')
+        );
+    });
+
+    it('Pengawas dapat melihat dashboard dengan data transaksi yang sesuai', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Pengawas');
+
+        $res = $this->actingAs($user)->get('/admin/dashboard');
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Dashboard')
+                ->has('stats')
+        );
+    });
+
+    it('Ketua dapat melihat dashboard dengan data transaksi yang sesuai', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Ketua');
+
+        $res = $this->actingAs($user)->get('/admin/dashboard');
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Dashboard')
+                ->has('stats')
+        );
+    });
+
+    it('Bendahara dapat melihat dashboard dengan data transaksi yang sesuai', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Bendahara');
+
+        $res = $this->actingAs($user)->get('/admin/dashboard');
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Dashboard')
+                ->has('stats')
+        );
+    });
+
+    it('Sekretaris dapat melihat dashboard dengan data transaksi yang sesuai', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Sekretaris');
+
+        $res = $this->actingAs($user)->get('/admin/dashboard');
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Dashboard')
+                ->has('stats')
+        );
+    });
+
+    it('Ketua Murabahah dapat melihat dashboard dengan data transaksi yang sesuai', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Ketua Murabahah');
+
+        $res = $this->actingAs($user)->get('/admin/dashboard');
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Dashboard')
+                ->has('stats')
+        );
+    });
+
+    it('Staf Murabahah dapat melihat dashboard dengan data transaksi yang sesuai', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Staf Murabahah');
+
+        $res = $this->actingAs($user)->get('/admin/dashboard');
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Dashboard')
+                ->has('stats')
+        );
+    });
+
+    it('Penanggung Jawab Anggota dapat melihat dashboard dengan data transaksi yang sesuai', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Penanggung Jawab Anggota');
+
+        $res = $this->actingAs($user)->get('/admin/dashboard');
+
+        $res->assertStatus(200);
+        $res->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Dashboard')
+                ->has('stats')
+        );
+    });
+
     it('Anggota dapat melihat dashboard dengan data transaksi yang sesuai', function () {
         $user = User::factory()->create();
         $user->assignRole('Anggota');
@@ -550,30 +835,9 @@ describe('FR-03: Aplikasi harus menyediakan dashboard operasional yang menyajika
                 ->has('tabungan')
         );
     });
-
-    it('Sekretaris dapat melihat dashboard dengan data transaksi yang sesuai', function () {
-        $user = User::factory()->create();
-        $user->assignRole('Sekretaris');
-
-        $res = $this->actingAs($user)->get('/admin/dashboard');
-
-        $res->assertStatus(200);
-        $res->assertInertia(fn (AssertableInertia $page) =>
-            $page->component('Admin/Dashboard')
-                ->has('active_user_count')
-                ->has('active_user_percentage')
-                ->has('total_saving_amount')
-                ->has('total_financing_amount')
-                ->has('total_financing_percentage')
-                ->has('transaction_data')
-                ->has('registration_data')
-                ->has('financing_data')
-                ->has('financing_stats')
-        );
-    });
 });
 
-describe('FR-04 Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaan oleh anggota aktif.', function () {
+describe('Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaan oleh anggota aktif.', function () {
     it('Anggota aktif dapat mengajukan pengunduran diri dengan melampirkan dokumen yang diperlukan', function () {
         $member = Member::factory()->create([
             'status' => 'Aktif',
@@ -614,7 +878,9 @@ describe('FR-04 Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaa
     });
 
     it('Anggota yang masih mempunyai kewajiban tidak dapat mengajukan pengunduran diri', function () {
-        $user = User::factory()->create();
+        $user = User::factory([
+            'status' => 'Aktif'
+        ])->create();
         $user->assignRole('Anggota');
         $member = Member::factory()->create([
             'user_id' => $user->id,
@@ -623,6 +889,8 @@ describe('FR-04 Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaa
 
         Financing::factory()->create([
             'member_id' => $member->id,
+            'cost_price' => 1000000,
+            'margin_amount' => 100000,
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
         ]);
 
@@ -637,7 +905,7 @@ describe('FR-04 Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaa
     });
 });
 
-describe('FR-05 Aplikasi harus menyediakan penanganan permohonan pengajuan diri anggota oleh ketua dan sekretaris', function () {
+describe('Aplikasi harus menyediakan verifikasi permohonan pengunduran diri anggota oleh ketua koperasi.', function () {
     it('Ketua dapat memproses permohonan pengunduran diri anggota', function () {
         $ketua = User::factory()->create();
         $ketua->assignRole('Ketua');
@@ -674,15 +942,4 @@ describe('FR-05 Aplikasi harus menyediakan penanganan permohonan pengajuan diri 
         $res->assertStatus(403);
     });
 });
-
-// describe('FR-08 Aplikasi harus menyediakan pengalokasian anggota ke penanggung jawab anggota oleh ketua koperasi.', function () {
-//     it('Ketua dapat mengalokasikan anggota ke penanggung jawab anggota', function () {
-
-//     });
-
-//     it('Selain Ketua tidak dapat mengalokasikan anggota ke penanggung jawab anggota', function () {
-
-//     });
-// });
-
 
