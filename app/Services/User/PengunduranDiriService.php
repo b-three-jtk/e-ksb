@@ -4,6 +4,7 @@ namespace App\Services\User;
 
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\MemberStatusEnum;
+use App\Models\Financing;
 use App\Models\MemberDoc;
 use App\Models\SavingTransaction;
 use Illuminate\Support\Facades\DB;
@@ -24,10 +25,7 @@ class PengunduranDiriService
             END
         "));
 
-        $totalObligation = DB::table('get_total_financing')
-            ->where('member_id', $memberId)
-            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->sum('total_financing');
+        $totalObligation = $this->getTotalObligation($memberId);
 
         return [
             'total_saving'      => $totalSaving,
@@ -37,10 +35,15 @@ class PengunduranDiriService
 
     public function getTotalObligation(int $memberId): float
     {
-        return DB::table('get_total_financing')
-            ->where('member_id', $memberId)
+        $costPriceSum = Financing::where('member_id', $memberId)
             ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->sum('total_financing');
+            ->sum('cost_price');
+
+        $marginAmountSum = Financing::where('member_id', $memberId)
+            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+            ->sum('margin_amount');
+
+        return $costPriceSum + $marginAmountSum;
     }
 
     /**
