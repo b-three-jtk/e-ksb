@@ -39,7 +39,7 @@ use Inertia\Inertia;
 class PembiayaanController extends Controller
 {
     public function __construct(
-        private PembiayaanService $financingService, 
+        private PembiayaanService $financingService,
         private SharedPembiayaanService $sharedFinancingService,
         protected PembayaranAngsuranService $pembayaranAngsuranService
     ){}
@@ -345,6 +345,13 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['member' => 'Pemohon harus dalam status aktif']);
                 }
 
+                $hasActiveFinancing = $user->member->financings?->whereIn('status', [FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, FinancingReqStatusEnum::TANGGUH->value])
+                ->isNotEmpty() ?? false;
+
+                if ($hasActiveFinancing) {
+                    throw ValidationException::withMessages(['member' => 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
+                }
+
                 $hasEligibleSaving = SavingAccount::where('member_id', $user->member->id)
                     ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
                     ->where('created_at', '<=', now()->subMonth())
@@ -352,13 +359,6 @@ class PembiayaanController extends Controller
 
                 if (!$hasEligibleSaving) {
                     throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
-                }
-
-                $hasActiveFinancing = $user->member->financings?->whereIn('status', [FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, FinancingReqStatusEnum::TANGGUH->value])
-                ->isNotEmpty() ?? false;
-
-                if ($hasActiveFinancing) {
-                    throw ValidationException::withMessages(['member' => 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
                 }
 
                 $validated['financing']['status'] = 'Belum Ditinjau';
@@ -700,7 +700,7 @@ class PembiayaanController extends Controller
         return response()->json(['suppliers' => $suppliers]);
     }
 
-    public function showRepayment(string $id, PelunasanService $repaymentService)
+    public function showRepayment(string $id)
     {
         $financing = Financing::with([
             'member.user',
@@ -710,7 +710,7 @@ class PembiayaanController extends Controller
             'collateral'
         ])->where('status', '!=', FinancingReqStatusEnum::PAID->value)->findOrFail($id);
 
-        $data = $repaymentService->calculateDetails($financing);
+        $data = $this->pembayaranAngsuranService->calculateDetails($financing);
 
         $data['pengurus'] = auth()->user()->name;
 
@@ -729,10 +729,10 @@ class PembiayaanController extends Controller
         ]);
     }
 
-    public function storeRepayment(CreateRepaymentRequest $request, PelunasanService $service)
+    public function storeRepayment(CreateRepaymentRequest $request)
     {
         try {
-            $transaction = $service->processRepayment($request->validated(), auth()->id());
+            $transaction = $this->pembayaranAngsuranService->processRepayment($request->validated(), auth()->id());
 
             return inertia('Admin/Financing/Repayment/Result', [
                 'data' => $transaction,
