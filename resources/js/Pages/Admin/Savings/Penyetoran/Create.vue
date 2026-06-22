@@ -425,7 +425,7 @@ const akadType = computed(() => {
                   placeholder="Search Nama / No. Anggota"
                   class="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600
                          rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
 
@@ -455,9 +455,9 @@ const akadType = computed(() => {
             <Transition name="fade">
               <div
                 v-if="selectedMember"
-                class="flex items-center gap-4 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg"
+                class="flex items-center gap-4 p-2 bg-green-50 dark:bg-blue-900/20 border border-green-100 dark:border-blue-800 rounded-lg"
               >
-                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xl font-bold text-blue-700 dark:text-blue-300 shrink-0">
+                <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-blue-900 flex items-center justify-center text-xl font-bold text-green-700 dark:text-blue-300 shrink-0">
                   {{ initials(selectedMember.name) }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -809,7 +809,7 @@ const akadType = computed(() => {
                     <Icon icon="mdi:lock-outline" class="text-gray-400" width="16" />
                   </span>
                 </div>
-                <p v-if="fixedNominal" class="mt-1 text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                <p v-if="fixedNominal" class="mt-1 text-xs text-primary dark:text-blue-400 flex items-center gap-1">
                   <Icon icon="mdi:information-outline" width="13" />
                   Nominal ditetapkan sesuai ketentuan koperasi dan tidak dapat diubah.
                 </p>

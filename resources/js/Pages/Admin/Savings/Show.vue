@@ -125,6 +125,6 @@ const openModalBukti = () => modalRef.value?.openModal()
                 </div>
             </div>
         </div>
-        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Simpanan" :name="saving_transaction_receipt" :attachment="saving_transaction_receipt" />
+        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Transaksi Simpanan" :name="saving_transaction_receipt" :attachment="saving_transaction_receipt" />
     </AdminLayout>
 </template>

@@ -17,7 +17,7 @@ const rupiah = (value) =>
 
 <template>
     <Base title="Dashboard">
-        <div class="font-head min-h-screen bg-brand-900/20 dark:bg-gray-900 transition-colors">
+        <div class="font-head min-h-screen bg-gray-900/20 dark:bg-gray-900 transition-colors">
             <section
                 class="relative h-112.5 flex items-center"
                 style="background-image: url('/images/home/al-hikmah.png');
