@@ -218,6 +218,17 @@ class PembayaranAngsuranService
         ];
     }
 
+    public function generateTransactionCode(): string
+    {
+        $prefix = 'TPA';
+        $yymm   = now()->format('ym');
+        $lastNo = InstallmentPaymentTransaction::where('installment_trans_code', 'like', "{$prefix}{$yymm}%")
+            ->count();
+        $seq    = str_pad((string)($lastNo + 1), 4, '0', STR_PAD_LEFT);
+
+        return "{$prefix}{$yymm}{$seq}";
+    }
+
     public function processPayment(array $validated): array
     {
         $financing = Financing::with([
@@ -226,11 +237,16 @@ class PembayaranAngsuranService
             'installment',
         ])->findOrFail($validated['financing_id']);
 
-        $marginPerMonth    = round($financing->margin_amount / $financing->tenor, 2);
-        $principalPerMonth = round($validated['nominal'] - $marginPerMonth, 2);
+        if ($financing->payment_method === \App\Enums\FinancingPaymentMethodEnum::TANGGUH->value) {
+            $principalPerMonth = $financing->cost_price - ($financing->down_payment ?? 0);
+            $marginPerMonth    = $financing->margin_amount;
+        } else {
+            $marginPerMonth    = round($financing->margin_amount / $financing->tenor, 2);
+            $principalPerMonth = round($validated['nominal'] - $marginPerMonth, 2);
+        }
 
         $payment = InstallmentPaymentTransaction::create([
-            'installment_trans_code' => 'INS' . strtoupper(substr(uniqid(), -7)),
+            'installment_trans_code' => $this->generateTransactionCode(),
             'payment_method'         => $validated['payment_method'],
             'is_early_repayment'     => false,
             'nominal'                => $validated['nominal'],
