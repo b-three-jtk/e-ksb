@@ -2,22 +2,12 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Enums\FinancingReqStatusEnum;
 use App\Enums\MemberStatusEnum;
 use App\Enums\EducationEnum;
-use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Models\Installment;
 use App\Http\Requests\CreateResignRequest;
-use App\Models\Financing;
-use App\Models\PointTransaction;
-use App\Models\MemberDoc;
-use App\Models\SavingTransaction;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use App\Services\ProfilPenggunaService;
 use App\Services\User\DasborService;
 use App\Services\User\PengunduranDiriService;

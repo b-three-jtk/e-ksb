@@ -19,7 +19,7 @@ class PembayaranAngsuranService
 {
     public function calculateDetails(Financing $financing): array
     {
-        $tenor = $financing->tenor;
+        $tenor = $financing->tenor == 0 ? 1 : $financing->tenor;
 
         $basePrincipal = $financing->cost_price - $financing->down_payment;
         $marginAmount = $financing->margin_amount;
@@ -111,7 +111,7 @@ class PembayaranAngsuranService
                 'nama_anggota' => $financing->member->user->name,
                 'no_telp' => $financing->member->user->phone_number,
                 'financing_transaction_code' => $financing->financing_transaction_code,
-                'product_name' => $financing->financingItem->name,
+                'product_name' => $financing->financingItem->name ?? '-',
                 'total_paid_amount' => $calculatedData['total_paid_amount'],
                 'metode' => $validatedData['method'],
                 'repayment_total' => $calculatedData['repayment_total'],
@@ -257,15 +257,15 @@ class PembayaranAngsuranService
             'updated_by'             => auth()->id(),
         ]);
 
-        $installment = Installment::findOrFail($validated['installment_id']);
-        $paymentDate = Carbon::parse($validated['payment_date']);
-        $dueDate     = $installment->due_date;
+            $installment = Installment::findOrFail($validated['installment_id']);
+            $paymentDate = Carbon::parse($validated['payment_date']);
+            $dueDate     = $installment->due_date;
 
-        $status = $paymentDate->startOfDay()->gt($dueDate->copy()->startOfDay())
-            ? InstallmentPaymentScheduleStatusEnum::OVERDUE->value
-            : InstallmentPaymentScheduleStatusEnum::PAID->value;
+            $status = $paymentDate->startOfDay()->gt($dueDate->copy()->startOfDay())
+                ? InstallmentPaymentScheduleStatusEnum::OVERDUE->value
+                : InstallmentPaymentScheduleStatusEnum::PAID->value;
 
-        $installment->update(['status' => $status]);
+            $installment->update(['status' => $status]);
 
         $totalTagihan  = ($financing->cost_price - ($financing->down_payment ?? 0)) + $financing->margin_amount;
         $totalTerbayar = InstallmentPaymentTransaction::whereHas('installment', fn($q) =>
@@ -278,12 +278,12 @@ class PembayaranAngsuranService
             $financing->update(['status' => FinancingReqStatusEnum::PAID->value]);
         }
 
-        $nextInstallment = Installment::where('financing_id', $financing->id)
-            ->where('installment_no', '>', $installment->installment_no)
-            ->orderBy('installment_no')
-            ->first();
+            $nextInstallment = Installment::where('financing_id', $financing->id)
+                ->where('installment_no', '>', $installment->installment_no)
+                ->orderBy('installment_no')
+                ->first();
 
-        $financing->load('member.user');
+            $financing->load('member.user');
 
         $hargaJual = $totalTagihan;
         return compact('financing', 'payment', 'installment', 'nextInstallment', 'hargaJual', 'sisa');

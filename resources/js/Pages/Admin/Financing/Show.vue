@@ -29,7 +29,7 @@ const installments = computed(() => props.data?.installment ?? {
 const hasInstallmentHistory = computed(() => Number(props.data.total_price) > 0)
 
 const canPayBill = computed(() =>
-    can.value['edit_murabahah']
+    can.value['payment_murabahah']
     && props.data.installment
 )
 

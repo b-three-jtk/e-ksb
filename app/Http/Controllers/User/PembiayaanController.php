@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\Financing;
 use App\Services\PembiayaanService;
 use Illuminate\Http\Request;
 
@@ -61,7 +60,13 @@ class PembiayaanController extends Controller
      */
     public function show(string $id)
     {
+        $user = auth()->user();
+        $member = $user->member;
         $financing = $this->pembiayaanService->getPembiayaanById($id);
+
+        if ($financing->member_id !== $member->id) {
+            abort(403, 'Anggota tidak memiliki akses ke pembiayaan ini.');
+        }
 
         $this->pembiayaanService->computeFinancingSummary($financing);
         $this->pembiayaanService->computeNextDueDate($financing);

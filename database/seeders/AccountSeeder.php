@@ -100,5 +100,10 @@ class AccountSeeder extends Seeder
             'status' => 'Aktif',
             'balance' => 0,
         ]);
+
+        // mengisi dana alokasi pembiayaan murabahah dengan saldo awal
+        $danaAlokasiPembiayaanMurabahah = Account::where('no_ref_account', '102')->first();
+        $danaAlokasiPembiayaanMurabahah->balance = 100000000; // saldo awal sebesar 100 juta
+        $danaAlokasiPembiayaanMurabahah->save();
     }
 }

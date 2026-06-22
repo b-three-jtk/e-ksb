@@ -27,13 +27,13 @@ class GlobalSettingSeeder extends Seeder
         ]);
         GlobalSetting::factory()->create([
             'key' => 'saving_point_amount',
-            'value' => '1',
+            'value' => '100000',
             'effective_date' => now(),
             'description' => 'Saving point conversion rate, where 1 point is equivalent to a certain amount of money.',
         ]);
         GlobalSetting::factory()->create([
             'key' => 'saving_point_reward',
-            'value' => '100000',
+            'value' => '1',
             'effective_date' => now(),
             'description' => 'Saving point reward threshold, where members can redeem their points for rewards once they reach this amount.',
         ]);

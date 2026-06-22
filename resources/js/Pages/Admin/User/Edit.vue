@@ -194,20 +194,20 @@ const submitForm = () => {
                         { value: 'Perempuan', text: 'Perempuan' }
                     ]" :error="errors.gender">
                     </BaseInputAdmin>
-                    <BaseInputAdmin label="Tempat Lahir" v-model="form.birth_place" :error="errors.birth_place"
+                    <BaseInputAdmin label="Tempat Lahir" required v-model="form.birth_place" :error="errors.birth_place"
                         placeholder="Masukkan tempat lahir" @input="onlyAlpha" />
-                    <BaseInputAdmin label="Tanggal Lahir" type="date" v-model="form.birth_date"
+                    <BaseInputAdmin label="Tanggal Lahir" required type="date" v-model="form.birth_date"
                         :maxDate="maxBirthDate"
                         :error="errors.birth_date" />
-                    <BaseInputAdmin v-model="form.residential_address" label="Alamat" type="textarea"
+                    <BaseInputAdmin v-model="form.residential_address" label="Alamat KTP" type="textarea"
                         placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address"
                         @input="onlyAlphaNumericDash" />
                     <BaseInputAdmin v-model="form.domicile_address" label="Alamat Domisili" type="textarea"
                         placeholder="Masukkan alamat domisili" rows="4" :error="errors.domicile_address"
                         @input="onlyAlphaNumericDash" />
-                    <BaseInputAdmin v-model="form.last_education" label="Pendidikan Terakhir" type="select"
+                    <BaseInputAdmin v-model="form.last_education" required label="Pendidikan Terakhir" type="select"
                         :selectables="props.opsiPendidikan.map((item) => ({ value: item.value, text: item.text }))" :error="errors.last_education" />
-                    <BaseInputAdmin v-model="form.marital_status" label="Status Perkawinan" type="select"
+                    <BaseInputAdmin v-model="form.marital_status" required label="Status Perkawinan" type="select"
                         :selectables="props.opsiStatusPerkawinan" />
                     <BaseInputAdmin v-model="form.dependents" label="Jumlah Tanggungan Keluarga" type="number"
                         @input="onlyNumbers" inputmode="numeric" min="0" />
@@ -244,7 +244,7 @@ const submitForm = () => {
                                 class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
                                 <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>
                                 <td class="py-2 text-right pr-6">{{ item.heir_name }}</td>
-                                <td class="py-2 text-right pr-6">{{ item.relationship }}</td>
+                                <td class="py-2 text-right pr-6">{{ item.pivot.relationship }}</td>
                                 <td class="py-2 text-right pr-6">{{ item.heir_contact }}</td>
                                 <td class="py-2 text-center flex justify-center">
                                     <Button size="small" variant="light" @click="removeHeir(index)">

@@ -58,15 +58,15 @@ class PengunduranDiriController extends Controller
 
     public function validate(string $id)
     {
-        $member = $this->service->getAnggotaMengundurkanDiri($id);
-        $this->service->updateStatusAnggota($member);
+        $user = $this->service->getAnggotaMengundurkanDiri($id);
+        $this->service->updateStatusAnggota($user);
 
         return to_route('admin.resignations.index')->with([
             'success' => 'Pengunduran diri berhasil divalidasi.',
             'resignation_info' => [
-                'name'      => $member->user->name,
-                'user_code' => $member->user->user_code,
-                'phone'     => $member->user->phone,
+                'name'      => $user->name,
+                'user_code' => $user->user_code,
+                'phone'     => $user->phone_number,
             ],
         ]);
     }

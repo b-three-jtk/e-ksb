@@ -7,16 +7,12 @@ use App\Http\Controllers\Admin\AruskasController;
 use App\Http\Controllers\Admin\DasborController;
 use App\Http\Controllers\Admin\PembiayaanController;
 use App\Http\Controllers\Admin\NotifikasiController;
-use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\PengunduranDiriController;
 use App\Http\Controllers\Admin\PeranAksesController;
 use App\Http\Controllers\Admin\SimpananController;
 use App\Http\Controllers\PengaturanUmumController;
-use App\Http\Controllers\Admin\PemasokController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\AutentikasiController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\PembiayaanController as UserPembiayaanController;
 use App\Http\Controllers\User\AnggotaController;
 use App\Http\Controllers\User\NotifikasiController as UserNotifikasiController;
@@ -105,7 +101,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/pengurus/edit/{id}', [PengurusController::class, 'edit'])->middleware('permission:edit_pengurus')->name('admin.edit');
     Route::put('/pengurus/update/{id}', [PengurusController::class, 'update'])->middleware('permission:edit_pengurus')->name('admin.update');
     Route::get('/pengurus/show/{id}', [PengurusController::class, 'show'])->middleware('permission:view_pengurus')->name('admin.show');
-    Route::get('/pengurus/members', [PengurusController::class, 'searchMember'])->middleware('permission:view_anggota')->name('members.search');
 
     // Pengelolaan Pengunduran Diri
     Route::get('/resignations/list', [PengunduranDiriController::class, 'index'])->middleware('permission:view_pengunduran_diri')->name('resignations.index');
@@ -136,16 +131,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/financings/draft/{id}', [PembiayaanController::class, 'loadDraft'])->middleware('permission:create_murabahah')->name('financings.load-draft');
     Route::get('/financings/validation/{id}', [PembiayaanController::class, 'showValidation'])->middleware('permission:approve_murabahah')->name('financings.validation');
     Route::put('/financings/validate/{id}', [PembiayaanController::class, 'validate'])->middleware('permission:approve_murabahah')->name('financings.validation.submit');
-    Route::get('/financings/repayment/{id}', [PembiayaanController::class, 'showRepayment'])->middleware('permission:edit_murabahah')->name('financings.repayment');
-    Route::post('/financings/repayment', [PembiayaanController::class, 'storeRepayment'])->middleware('permission:edit_murabahah')->name('financings.repayment.request');
-    Route::get('repayment/{id}/receipt', [PembiayaanController::class, 'viewRepaymentReceipt'])->middleware('permission:edit_murabahah')->name('financings.repayment.view');
-    Route::get('repayment/{id}/download', [PembiayaanController::class, 'downloadRepaymentReceipt'])->middleware('permission:edit_murabahah')->name('financings.repayment.download');
-    Route::get('/financings/{financing}/payments/create',[PembiayaanController::class, 'createPayment'])->middleware('permission:edit_murabahah')->name('financing.payments.create');
-    Route::post('/financings/{financing}/payments/store', [PembiayaanController::class, 'storePayment'])->middleware('permission:edit_murabahah')->name('financing.payments.store');
-    Route::post('/financings/{financing}/payments/reschedule', [PembiayaanController::class, 'reschedulePayment'])->middleware('permission:edit_murabahah')->name('financing.payments.reschedule');
-    Route::get('/financings/{financing}/payments/create',[PembiayaanController::class, 'createPayment'])->middleware('permission:edit_murabahah')->name('financing.payments.create');
-    Route::post('/financings/{financing}/payments/store', [PembiayaanController::class, 'storePayment'])->middleware('permission:edit_murabahah')->name('financing.payments.store');
-    Route::post('/financings/{financing}/payments/reschedule', [PembiayaanController::class, 'reschedulePayment'])->middleware('permission:edit_murabahah')->name('financing.payments.reschedule');
+    Route::get('/financings/repayment/{id}', [PembiayaanController::class, 'showRepayment'])->middleware('permission:payment_murabahah')->name('financings.repayment');
+    Route::post('/financings/repayment', [PembiayaanController::class, 'storeRepayment'])->middleware('permission:payment_murabahah')->name('financings.repayment.request');
+    Route::get('repayment/{id}/receipt', [PembiayaanController::class, 'viewRepaymentReceipt'])->middleware('permission:payment_murabahah')->name('financings.repayment.view');
+    Route::get('repayment/{id}/download', [PembiayaanController::class, 'downloadRepaymentReceipt'])->middleware('permission:payment_murabahah')->name('financings.repayment.download');
+    Route::get('/financings/{financing}/payments/create',[PembiayaanController::class, 'createPayment'])->middleware('permission:payment_murabahah')->name('financing.payments.create');
+    Route::post('/financings/{financing}/payments/store', [PembiayaanController::class, 'storePayment'])->middleware('permission:payment_murabahah')->name('financing.payments.store');
+    Route::post('/financings/{financing}/payments/reschedule', [PembiayaanController::class, 'reschedulePayment'])->middleware('permission:payment_murabahah')->name('financing.payments.reschedule');
 
     // Pengelolaan Akun
     Route::get('/accounts', [AkunController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
@@ -163,9 +155,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 
     // Personal
     Route::get('/dashboard', [DasborController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [PengurusController::class, 'showProfil'])->name('profile.show');
+    Route::get('/profile/edit', [PengurusController::class, 'editProfil'])->name('profile.edit');
+    Route::put('/profile/update', [PengurusController::class, 'updateProfil'])->name('profile.update');
 
     // Notifikasi
     Route::get('/notifications', [NotifikasiController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifications.index');

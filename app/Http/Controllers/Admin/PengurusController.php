@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\EducationEnum;
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EditProfileAdminRequest;
 use App\Http\Requests\StoreAdminRequest;
 use App\Http\Requests\UpdateAdminRequest;
 use App\Services\Admin\PengurusService;
 use App\Services\Admin\PeranAksesService;
+use App\Services\Admin\ProfilPenggunaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -107,6 +110,36 @@ class PengurusController extends Controller
             return redirect()->route('admin.admin.index');
         } catch (\Exception $e) {
             DB::rollBack();
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function showProfil()
+    {
+        return inertia('Admin/Profile/Show');
+    }
+
+    public function editProfil()
+    {
+        $user = auth()->user();
+        $educations = array_column(EducationEnum::cases(), 'value');
+
+        return inertia('Admin/Profile/Edit', [
+            'user' => $user,
+            'educations' => $educations
+        ]);
+    }
+
+    public function updateProfil(EditProfileAdminRequest $request)
+    {
+        try {
+            $user = auth()->user();
+            $data = $request->validated();
+
+            $this->pengurusService->updateProfil($user, $data);
+
+            return redirect()->route('admin.profile.show');
+        } catch (\Exception $e) {
             return redirect()->back()->withInput();
         }
     }
