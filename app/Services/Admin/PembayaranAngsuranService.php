@@ -19,7 +19,7 @@ class PembayaranAngsuranService
 {
     public function calculateDetails(Financing $financing): array
     {
-        $tenor = $financing->tenor;
+        $tenor = $financing->tenor == 0 ? 1 : $financing->tenor;
 
         $basePrincipal = $financing->cost_price - $financing->down_payment;
         $marginAmount = $financing->margin_amount;
@@ -111,7 +111,7 @@ class PembayaranAngsuranService
                 'nama_anggota' => $financing->member->user->name,
                 'no_telp' => $financing->member->user->phone_number,
                 'financing_transaction_code' => $financing->financing_transaction_code,
-                'product_name' => $financing->financingItem->name,
+                'product_name' => $financing->financingItem->name ?? '-',
                 'total_paid_amount' => $calculatedData['total_paid_amount'],
                 'metode' => $validatedData['method'],
                 'repayment_total' => $calculatedData['repayment_total'],
@@ -220,56 +220,63 @@ class PembayaranAngsuranService
 
     public function processPayment(array $validated): array
     {
-        $financing = Financing::with([
-            'member.user',
-            'financingItem.productType',
-            'installment',
-        ])->findOrFail($validated['financing_id']);
+        try {
+            $financing = Financing::with([
+                'member.user',
+                'financingItem.productType',
+                'installment',
+            ])->findOrFail($validated['financing_id']);
 
-        $marginPerMonth    = round($financing->margin_amount / $financing->tenor, 2);
-        $principalPerMonth = round($validated['nominal'] - $marginPerMonth, 2);
+            $marginPerMonth = $financing->tenor > 0
+                ? round($financing->margin_amount / $financing->tenor, 2)
+                : 0;
+            $principalPerMonth = round($validated['nominal'] - $marginPerMonth, 2);
 
-        $payment = InstallmentPaymentTransaction::create([
-            'installment_trans_code' => 'INS' . strtoupper(substr(uniqid(), -7)),
-            'payment_method'         => $validated['payment_method'],
-            'is_early_repayment'     => false,
-            'nominal'                => $validated['nominal'],
-            'principal_amount'       => $principalPerMonth,
-            'margin_amount'          => $marginPerMonth,
-            'payment_date'           => $validated['payment_date'],
-            'installment_id'         => $validated['installment_id'],
-            'updated_by'             => auth()->id(),
-        ]);
+            $payment = InstallmentPaymentTransaction::create([
+                'installment_trans_code' => 'INS' . strtoupper(substr(uniqid(), -7)),
+                'payment_method'         => $validated['payment_method'],
+                'is_early_repayment'     => false,
+                'nominal'                => $validated['nominal'],
+                'principal_amount'       => $principalPerMonth,
+                'margin_amount'          => $marginPerMonth,
+                'payment_date'           => $validated['payment_date'],
+                'installment_id'         => $validated['installment_id'],
+                'updated_by'             => auth()->id(),
+            ]);
 
-        $installment = Installment::findOrFail($validated['installment_id']);
-        $paymentDate = Carbon::parse($validated['payment_date']);
-        $dueDate     = $installment->due_date;
+            $installment = Installment::findOrFail($validated['installment_id']);
+            $paymentDate = Carbon::parse($validated['payment_date']);
+            $dueDate     = $installment->due_date;
 
-        $status = $paymentDate->startOfDay()->gt($dueDate->copy()->startOfDay())
-            ? InstallmentPaymentScheduleStatusEnum::OVERDUE->value
-            : InstallmentPaymentScheduleStatusEnum::PAID->value;
+            $status = $paymentDate->startOfDay()->gt($dueDate->copy()->startOfDay())
+                ? InstallmentPaymentScheduleStatusEnum::OVERDUE->value
+                : InstallmentPaymentScheduleStatusEnum::PAID->value;
 
-        $installment->update(['status' => $status]);
+            $installment->update(['status' => $status]);
 
-        $hargaJual     = $financing->cost_price + $financing->margin_amount;
-        $totalTerbayar = InstallmentPaymentTransaction::whereHas('installment', fn($q) =>
-            $q->where('financing_id', $financing->id)
-        )->sum('nominal');
+            $hargaJual     = $financing->cost_price + $financing->margin_amount;
+            $totalTerbayar = InstallmentPaymentTransaction::whereHas('installment', fn($q) =>
+                $q->where('financing_id', $financing->id)
+            )->sum('nominal');
 
-        $sisa = $hargaJual - $totalTerbayar;
+            $sisa = $hargaJual - $totalTerbayar;
 
-        if ($sisa <= 0) {
-            $financing->update(['status' => 'Lunas']);
+            if ($sisa <= 0) {
+                $financing->update(['status' => 'Lunas']);
+            }
+
+            $nextInstallment = Installment::where('financing_id', $financing->id)
+                ->where('installment_no', '>', $installment->installment_no)
+                ->orderBy('installment_no')
+                ->first();
+
+            $financing->load('member.user');
+
+            return compact('financing', 'payment', 'installment', 'nextInstallment', 'hargaJual', 'sisa');
+        } catch (\Throwable $th) {
+            Log::error('Payment processing failed: ' . $th->getMessage());
+            throw $th;
         }
-
-        $nextInstallment = Installment::where('financing_id', $financing->id)
-            ->where('installment_no', '>', $installment->installment_no)
-            ->orderBy('installment_no')
-            ->first();
-
-        $financing->load('member.user');
-
-        return compact('financing', 'payment', 'installment', 'nextInstallment', 'hargaJual', 'sisa');
     }
 
     public function generateAndStoreReceipt(array $paymentData): ?string
