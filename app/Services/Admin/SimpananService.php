@@ -52,6 +52,52 @@ class SimpananService
         };
     }
 
+    public function getAccountPrefix(string $category): string
+    {
+        return match ($category) {
+            'Tabungan Anggota'   => 'TA',
+            'Simpanan Pokok'     => 'SP',
+            'Simpanan Wajib'     => 'SW',
+            'Tabungan Berjangka' => 'TB',
+            'Tabungan Ibadah'    => 'TI',
+            default              => 'ST',
+        };
+    }
+
+    public function getTrxCodePrefix(string $category): string
+    {
+        return match ($category) {
+            'Tabungan Anggota'   => 'TTA',
+            'Simpanan Pokok'     => 'TSP',
+            'Simpanan Wajib'     => 'TSW',
+            'Tabungan Berjangka' => 'TTB',
+            'Tabungan Ibadah'    => 'TTI',
+            default              => 'TST',
+        };
+    }
+
+    public function generateAccountCode(string $category): string
+    {
+        $prefix  = $this->getAccountPrefix($category);
+        $yymm    = now()->format('ym');
+        $lastNo  = SavingAccount::where('saving_account_code', 'like', "{$prefix}{$yymm}%")
+            ->count();
+        $seq     = str_pad((string)($lastNo + 1), 4, '0', STR_PAD_LEFT);
+
+        return "{$prefix}{$yymm}{$seq}";
+    }
+
+    public function generateTransactionCode(string $category): string
+    {
+        $prefix  = $this->getTrxCodePrefix($category);
+        $yymm    = now()->format('ym'); // e.g. 2506
+        $lastNo  = SavingTransaction::where('saving_transaction_code', 'like', "{$prefix}{$yymm}%")
+            ->count();
+        $seq     = str_pad((string)($lastNo + 1), 4, '0', STR_PAD_LEFT);
+
+        return "{$prefix}{$yymm}{$seq}";
+    }
+
     public function getExportTitle(string $tab): string
     {
         return match ($tab) {
@@ -270,14 +316,14 @@ class SimpananService
         ])) {
             return SavingAccount::firstOrCreate(
                 ['member_id' => $member->id, 'saving_type' => $data['saving_category']],
-                ['saving_account_code' => $this->getTrxPrefix($data['saving_category']) . '-SA-' . strtoupper(Str::random(6))]
+                ['saving_account_code' => $this->generateAccountCode($data['saving_category'])]
             );
         }
 
         return SavingAccount::create([
             'member_id'           => $member->id,
             'saving_type'         => $data['saving_category'],
-            'saving_account_code' => $this->getTrxPrefix($data['saving_category']) . '-SA-' . strtoupper(Str::random(6)),
+            'saving_account_code' => $this->generateAccountCode($data['saving_category']),
         ]);
     }
 
@@ -374,7 +420,7 @@ class SimpananService
             $savingAccount->refresh();
             $newBalance = $savingAccount->balance + $data['amount'];
             $trx = SavingTransaction::create([
-                'saving_transaction_code'    => $this->getTrxPrefix($data['saving_category']) . strtoupper(Str::random(8)),
+                'saving_transaction_code' => $this->generateTransactionCode($data['saving_category']),
                 'saving_amount'              => $data['amount'],
                 'balance_after_transaction'  => $newBalance,
                 'transaction_type'           => TransactionTypeEnum::DEPOSIT->value,

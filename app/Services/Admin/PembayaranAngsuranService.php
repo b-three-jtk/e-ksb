@@ -218,31 +218,44 @@ class PembayaranAngsuranService
         ];
     }
 
+    public function generateTransactionCode(): string
+    {
+        $prefix = 'TPA';
+        $yymm   = now()->format('ym');
+        $lastNo = InstallmentPaymentTransaction::where('installment_trans_code', 'like', "{$prefix}{$yymm}%")
+            ->count();
+        $seq    = str_pad((string)($lastNo + 1), 4, '0', STR_PAD_LEFT);
+
+        return "{$prefix}{$yymm}{$seq}";
+    }
+
     public function processPayment(array $validated): array
     {
-        try {
-            $financing = Financing::with([
-                'member.user',
-                'financingItem.productType',
-                'installment',
-            ])->findOrFail($validated['financing_id']);
+        $financing = Financing::with([
+            'member.user',
+            'financingItem.productType',
+            'installment',
+        ])->findOrFail($validated['financing_id']);
 
-            $marginPerMonth = $financing->tenor > 0
-                ? round($financing->margin_amount / $financing->tenor, 2)
-                : 0;
+        if ($financing->payment_method === \App\Enums\FinancingPaymentMethodEnum::TANGGUH->value) {
+            $principalPerMonth = $financing->cost_price - ($financing->down_payment ?? 0);
+            $marginPerMonth    = $financing->margin_amount;
+        } else {
+            $marginPerMonth    = round($financing->margin_amount / $financing->tenor, 2);
             $principalPerMonth = round($validated['nominal'] - $marginPerMonth, 2);
+        }
 
-            $payment = InstallmentPaymentTransaction::create([
-                'installment_trans_code' => 'INS' . strtoupper(substr(uniqid(), -7)),
-                'payment_method'         => $validated['payment_method'],
-                'is_early_repayment'     => false,
-                'nominal'                => $validated['nominal'],
-                'principal_amount'       => $principalPerMonth,
-                'margin_amount'          => $marginPerMonth,
-                'payment_date'           => $validated['payment_date'],
-                'installment_id'         => $validated['installment_id'],
-                'updated_by'             => auth()->id(),
-            ]);
+        $payment = InstallmentPaymentTransaction::create([
+            'installment_trans_code' => $this->generateTransactionCode(),
+            'payment_method'         => $validated['payment_method'],
+            'is_early_repayment'     => false,
+            'nominal'                => $validated['nominal'],
+            'principal_amount'       => $principalPerMonth,
+            'margin_amount'          => $marginPerMonth,
+            'payment_date'           => $validated['payment_date'],
+            'installment_id'         => $validated['installment_id'],
+            'updated_by'             => auth()->id(),
+        ]);
 
             $installment = Installment::findOrFail($validated['installment_id']);
             $paymentDate = Carbon::parse($validated['payment_date']);
@@ -254,16 +267,16 @@ class PembayaranAngsuranService
 
             $installment->update(['status' => $status]);
 
-            $hargaJual     = $financing->cost_price + $financing->margin_amount;
-            $totalTerbayar = InstallmentPaymentTransaction::whereHas('installment', fn($q) =>
-                $q->where('financing_id', $financing->id)
-            )->sum('nominal');
+        $totalTagihan  = ($financing->cost_price - ($financing->down_payment ?? 0)) + $financing->margin_amount;
+        $totalTerbayar = InstallmentPaymentTransaction::whereHas('installment', fn($q) =>
+            $q->where('financing_id', $financing->id)
+        )->sum('nominal');
 
-            $sisa = $hargaJual - $totalTerbayar;
+        $sisa = $totalTagihan - $totalTerbayar;
 
-            if ($sisa <= 0) {
-                $financing->update(['status' => 'Lunas']);
-            }
+        if ($sisa <= 0) {
+            $financing->update(['status' => FinancingReqStatusEnum::PAID->value]);
+        }
 
             $nextInstallment = Installment::where('financing_id', $financing->id)
                 ->where('installment_no', '>', $installment->installment_no)
@@ -272,11 +285,8 @@ class PembayaranAngsuranService
 
             $financing->load('member.user');
 
-            return compact('financing', 'payment', 'installment', 'nextInstallment', 'hargaJual', 'sisa');
-        } catch (\Throwable $th) {
-            Log::error('Payment processing failed: ' . $th->getMessage());
-            throw $th;
-        }
+        $hargaJual = $totalTagihan;
+        return compact('financing', 'payment', 'installment', 'nextInstallment', 'hargaJual', 'sisa');
     }
 
     public function generateAndStoreReceipt(array $paymentData): ?string
@@ -311,7 +321,6 @@ class PembayaranAngsuranService
                 'no_anggota'       => $financing->member?->user?->user_code,
                 'diterima_dari'    => $financing->member?->user?->name,
                 'sejumlah_uang'    => $payment->nominal,
-                'terbilang'        => ucfirst(\Riskihajar\Terbilang\Facades\Terbilang::make($payment->nominal)) . ' rupiah',
                 'items'            => [[
                     'no'         => 1,
                     'keterangan' => 'Angsuran ke ' . $installment->installment_no,

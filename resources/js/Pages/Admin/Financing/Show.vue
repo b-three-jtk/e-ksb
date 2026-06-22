@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
@@ -52,8 +52,23 @@ const modalRef = ref(null)
 
 const selectedReceipt = ref(null)
 
+onMounted(() => {
+    const pdfUrl = page.props.flash?.pdf_url
+
+    if (pdfUrl) {
+        selectedReceipt.value = pdfUrl
+
+        setTimeout(() => {
+            modalRef.value?.openModal()
+        }, 100)
+    }
+})
+
 const openReceiptModal = (receiptPath) => {
-    selectedReceipt.value = receiptPath
+    selectedReceipt.value = receiptPath.startsWith('http')
+        ? receiptPath
+        : `/storage/${receiptPath}`
+
     modalRef.value.openModal()
 }
 </script>

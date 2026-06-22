@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('installment_payment_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('installment_trans_code', 10)->unique();
+            $table->string('installment_trans_code', 20)->unique();
             $table->decimal('nominal', 15, 2);
             $table->enum('payment_method', array_column(PaymentMethodsEnum::cases(), 'value'));
             $table->boolean('is_early_repayment')->default(false);

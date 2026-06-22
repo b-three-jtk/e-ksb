@@ -224,15 +224,15 @@ async function handleSubmit() {
                     },
                 )
 
-                const pdfUrl =
-                    page.props.flash?.pdf_url
+                // const pdfUrl =
+                //     page.props.flash?.pdf_url
 
-                if (pdfUrl) {
-                    window.open(pdfUrl, '_blank')
-                }
-                if (page.props.financing) {
-                    selectedFinancing.value = page.props.financing
-                }
+                // if (pdfUrl) {
+                //     window.open(pdfUrl, '_blank')
+                // }
+                // if (page.props.financing) {
+                //     selectedFinancing.value = page.props.financing
+                // }
             },
             onError: (errors) => {
 
@@ -524,8 +524,15 @@ async function handleSubmit() {
                                 </label>
 
                                 <input
+                                    v-if="selectedFinancing.next_due_date"
                                     :value="selectedFinancing.next_due_date"
                                     type="date"
+                                    readonly
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
+                                />
+                                <input
+                                    v-else
+                                    value="-"
                                     readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />
