@@ -557,6 +557,7 @@ class PembiayaanController extends Controller
                     }
                 }
 
+                // Klo pembayaran Cash
                 if ($financing->payment_method === FinancingPaymentMethodEnum::CASH->value)
                 {
                     $allocatedAmount = $financing->predicted_cost_price ?? 0;
@@ -620,6 +621,59 @@ class PembiayaanController extends Controller
                         ]);
                     }
                 }
+
+                // Klo pembiayaan tangguh
+                if ($financing->payment_method === FinancingPaymentMethodEnum::TANGGUH->value)
+                {
+                    $allocatedAmount = $financing->predicted_cost_price ?? 0;
+                    $piutang = $costPrice;
+                    $selisih = $allocatedAmount - $piutang;
+
+                    if ($selisih > 0) {
+                        app(JurnalService::class)->create(
+                            [
+                                [
+                                    'account' => $danaAlokasi->no_ref_account,
+                                    'position' => PositionEnum::DEBIT->value,
+                                    'nominal' => $selisih,
+                                ],
+                                [
+                                    'account' => $piutangMurabahah->no_ref_account,
+                                    'position' => PositionEnum::DEBIT->value,
+                                    'nominal' => $piutang,
+                                ],
+                                [
+                                    'account' => $pembiayaanDalamProses->no_ref_account,
+                                    'position' => PositionEnum::CREDIT->value,
+                                    'nominal' => $allocatedAmount,
+                                ],
+                            ],
+                            now()->toDateString(),
+                            auth()->id()
+                        );
+                    } elseif ($selisih == 0) {
+                        app(JurnalService::class)->create(
+                            [
+                                [
+                                    'account' => $piutangMurabahah->no_ref_account,
+                                    'position' => PositionEnum::DEBIT->value,
+                                    'nominal' => $piutang,
+                                ],
+                                [
+                                    'account' => $pembiayaanDalamProses->no_ref_account,
+                                    'position' => PositionEnum::CREDIT->value,
+                                    'nominal' => $allocatedAmount,
+                                ],
+                            ],
+                            now()->toDateString(),
+                            auth()->id()
+                        );
+                    } else {
+                        throw ValidationException::withMessages([
+                            'cost_price' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
+                        ]);
+                    }
+                }
                 return $financing;
             });
             return redirect()->route('admin.financings.index')
@@ -672,6 +726,7 @@ class PembiayaanController extends Controller
                 $hasActiveFinancing = $member->financings?->where(
                     'status',
                         FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                        FinancingReqStatusEnum::TANGGUH->value,
                 )->isNotEmpty() ?? false;
 
                 $member->is_have_no_obligation = !$hasActiveFinancing;
@@ -703,7 +758,7 @@ class PembiayaanController extends Controller
         return response()->json(['suppliers' => $suppliers]);
     }
 
-    public function showRepayment(string $id, PelunasanService $repaymentService)
+    public function showRepayment(string $id, PembayaranAngsuranService $repaymentService)
     {
         $financing = Financing::with([
             'member.user',
@@ -732,7 +787,7 @@ class PembiayaanController extends Controller
         ]);
     }
 
-    public function storeRepayment(CreateRepaymentRequest $request, PelunasanService $service)
+    public function storeRepayment(CreateRepaymentRequest $request, PembayaranAngsuranService $service)
     {
         try {
             $transaction = $service->processRepayment($request->validated(), auth()->id());
