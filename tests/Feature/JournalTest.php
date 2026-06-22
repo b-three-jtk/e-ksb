@@ -174,5 +174,5 @@ describe('Aplikasi harus menyediakan pencatatan alokasi kas koperasi untuk setia
             'position' => 'Credit',
             'nominal' => 100000.00,
         ]);
-    })->only();
+    });
 });
