@@ -15,7 +15,7 @@ import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue'
 import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
 import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
 import { Link } from '@inertiajs/vue3';
-import dateParser from '@/Composables/dateParser.js'
+import parseCurrencyAmount from '@/Composables/moneyParser.js'
 
 defineProps({
     stats: Object,
@@ -93,7 +93,7 @@ const kolomTabelPermohonanMurabahah = computed(() => {
                 </div>
                 <TransactionTable :columns="kolomTabelPembayaranTerlambat" :rows="pembayaran_terlambat">
                     <template #jumlah="{ item }">
-                        dateParser({{ item.jumlah }})
+                        {{ parseCurrencyAmount(item.jumlah) }}
                     </template>
                     <template #action="{ item }">
                         <Link :href="`/admin/financings/show/${item.id}`">

@@ -27,7 +27,7 @@ defineProps({
             :filter="selectedFilter"
         />
     </div>
-    <div class="grid grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <SkeletonChartCard v-if="!pertumbuhan_pendapatan" class="col-span-3" :bars="12" :legend="2" />
         <div v-else class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pendapatan Margin</h1>

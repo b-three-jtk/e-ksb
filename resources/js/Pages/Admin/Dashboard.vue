@@ -96,7 +96,7 @@ watch(selectedSavingTransactionFilter, () => applyFilter('selectedSavingTransact
     <AdminLayout title="Dashboard Admin">
         <div class="flex flex-col gap-4">
             <!-- FILTER -->
-            <div class="flex justify-between items-center">
+            <div v-if="role !== 'Penanggung Jawab Anggota'" class="flex justify-between items-center">
                 <div class="mr-auto min-w-75">
                     <VueDatePicker v-model="dates" :dark="isDarkMode" range></VueDatePicker>
                 </div>

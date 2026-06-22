@@ -12,13 +12,13 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="grid grid-cols-5 gap-3.5">
+    <div class="grid grid-cols-1 lg:grid-cols-5 lg:gap-3.5">
         <SkeletonChartCard v-if="!pertumbuhan_anggota" class="col-span-3" :bars="12" :legend="2" />
         <div v-else class="card-layout col-span-3">
             <h1 class="card-title">Grafik Pertumbuhan Anggota</h1>
             <AreaChart :data="pertumbuhan_anggota" />
         </div>
-        <div class="col-span-2 grid grid-cols-2 gap-3.5">
+        <div class="col-span-2 grid grid-cols-2 gap-3.5 mt-4 lg:mt-0">
             <CardInfo
                 title="Total Anggota Aktif"
                 :content="props.stats.total_anggota_aktif"
