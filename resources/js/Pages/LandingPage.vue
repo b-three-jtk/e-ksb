@@ -298,9 +298,9 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
                     </svg>
                     <img src="/public/images/home/about_us.webp" class="w-full max-w-3xl h-auto md:h-full mx-auto object-cover rounded-xl" />
                 </div>
-                <div class="flex flex-col gap-4 sm:gap-6 lg:mt-auto">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-primary dark:text-green-accent">Tentang Kami</h2>
-                    <p class="text-base sm:text-lg md:text-xl text-dark-text leading-7 md:leading-8 dark:text-gray-300">Koperasi Syariah Berkah didirikan
+                <div class="flex flex-col gap-6 mt-auto">
+                    <h2 class="text-3xl font-bold text-primary dark:text-green-accent">Tentang Kami</h2>
+                    <p class="text-lg text-dark-text leading-8 dark:text-gray-300">Koperasi Syariah Berkah didirikan
                         pada tahun
                         2020 dengan tujuan memberikan solusi keuangan yang sesuai dengan prinsip-prinsip syariah
                         kepada masyarakat. Kami berkomitmen untuk menyediakan layanan keuangan yang transparan,
@@ -403,7 +403,7 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
                             {{ p.title }}
                         </h3>
                         <p
-                            class="text-sm leading-6 z-2 transition-colors duration-300 text-dark-text/60 group-hover:text-white/70 dark:text-gray-400">
+                            class="text-base leading-6 z-2 transition-colors duration-300 text-dark-text/60 group-hover:text-white/70 dark:text-gray-400">
                             {{ p.desc }}
                         </p>
 

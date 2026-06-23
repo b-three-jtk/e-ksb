@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\MemberStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Member;
@@ -124,6 +125,14 @@ class UserSeeder extends Seeder
             $user->assignRole(UserRoleEnum::ANGGOTA->value);
             Member::factory()->create([
                 'user_id' => $user->id,
+            ]);
+        });
+
+        User::factory(10)->create()->each(function ($user) {
+            $user->assignRole(UserRoleEnum::ANGGOTA->value);
+            Member::factory()->create([
+                'user_id' => $user->id,
+                'status' => MemberStatusEnum::RESIGNED_REQUESTED->value,
             ]);
         });
 

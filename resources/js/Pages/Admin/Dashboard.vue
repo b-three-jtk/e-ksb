@@ -69,8 +69,6 @@ const filterDataMap = {
 
 const applyFilter = (changedKey) => {
     router.get('/admin/dashboard', {
-        start_date: dates.value[0] ? dates.value[0].toISOString().split('T')[0] : null,
-        end_date:   dates.value[1] ? dates.value[1].toISOString().split('T')[0] : null,
         filter_by:                selectedFilter.value,
         transaction_filter:       selectedTransactionFilter.value,
         savings_filter:           selectedSavingsFilter.value,
@@ -118,7 +116,7 @@ watch(selectedSavingTransactionFilter, () => applyFilter('selectedSavingTransact
             <KetuaPengawas
                 @update:selected-transaction-filter="selectedTransactionFilter = $event"
                 :selected-transaction-filter="selectedTransactionFilter"
-                @update:selected-filter="selectedFilter"
+                @update:selected-filter="selectedFilter = $event"
                 :selected-filter="selectedFilter"
                 @update:selected-savings-filter="selectedSavingsFilter = $event"
                 :selected-savings-filter="selectedSavingsFilter"
@@ -135,7 +133,7 @@ watch(selectedSavingTransactionFilter, () => applyFilter('selectedSavingTransact
                 v-if="role === 'Dewan Pengawas Syariah'"
                 @update:selected-transaction-filter="selectedTransactionFilter = $event"
                 :selected-transaction-filter="selectedTransactionFilter"
-                @update:selected-filter="selectedFilter"
+                @update:selected-filter="selectedFilter = $event"
                 :selected-filter="selectedFilter"
                 @update:selected-savings-filter="selectedSavingsFilter = $event"
                 :selected-savings-filter="selectedSavingsFilter"
@@ -150,12 +148,15 @@ watch(selectedSavingTransactionFilter, () => applyFilter('selectedSavingTransact
                 v-if="role === 'Bendahara'"
                 :stats="props.stats"
                 :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
+                @update:selected-filter="selectedFilter = $event"
                 :selected-filter="selectedFilter"
             />
             <!-- Dashboard Sekretaris -->
             <Sekretaris
                 v-if="role === 'Sekretaris'"
                 :stats="props.stats"
+                @update:selected-filter="selectedFilter = $event"
+                :selected-filter="selectedFilter"
                 :pertumbuhan_anggota="props.pertumbuhan_anggota"
             />
             <!-- Dashboard Ketua Staf Murabahah -->
@@ -163,6 +164,8 @@ watch(selectedSavingTransactionFilter, () => applyFilter('selectedSavingTransact
                 v-if="role === 'Ketua Murabahah' || role === 'Staf Murabahah'"
                 @update:selected-transaction-filter="selectedTransactionFilter = $event"
                 :selected-transaction-filter="selectedTransactionFilter"
+                @update:selected-filter="selectedFilter = $event"
+                :selected-filter="selectedFilter"
                 :peta_pembiayaan="props.peta_pembiayaan"
                 :pembayaran_terlambat="props.pembayaran_terlambat"
                 :permohonan_murabahah="props.permohonan_murabahah"
