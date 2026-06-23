@@ -41,10 +41,14 @@ class MurabahaProductSeeder extends Seeder
             return; // Skip jika tidak ada member
         }
 
-        $statuses = [
-            FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-            FinancingReqStatusEnum::PENDING_REVIEW->value,
-            FinancingReqStatusEnum::PAID->value,
+        // Mapping skenario status dan kolektibilitas
+        $scenarios = [
+            ['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, 'kolektibilitas' => 'lancar'],
+            ['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, 'kolektibilitas' => 'kurang_lancar'],
+            ['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, 'kolektibilitas' => 'diragukan'],
+            ['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, 'kolektibilitas' => 'macet'],
+            ['status' => FinancingReqStatusEnum::PENDING_REVIEW->value, 'kolektibilitas' => null],
+            ['status' => FinancingReqStatusEnum::PAID->value, 'kolektibilitas' => null],
         ];
 
         $items = [
@@ -59,14 +63,16 @@ class MurabahaProductSeeder extends Seeder
         for ($j = 0; $j < 100; $j++) {
             $memberIndex = $j % $members->count();
             $member = $members[$memberIndex];
-            $statusIndex = $j % count($statuses);
-            $status = $statuses[$statusIndex];
+
+            $scenarioIndex = $j % count($scenarios);
+            $scenario = $scenarios[$scenarioIndex];
+
             $itemIndex = $j % count($items);
             $item = $items[$itemIndex];
 
-            if ($status === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
-                $this->seedActiveFinancing($member, $item);
-            } elseif ($status === FinancingReqStatusEnum::PENDING_REVIEW->value) {
+            if ($scenario['status'] === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
+                $this->seedActiveFinancing($member, $item, $scenario['kolektibilitas']);
+            } elseif ($scenario['status'] === FinancingReqStatusEnum::PENDING_REVIEW->value) {
                 $this->seedPendingFinancing($member, $item);
             } else {
                 $this->seedCompletedFinancing($member, $item);
@@ -79,11 +85,41 @@ class MurabahaProductSeeder extends Seeder
         return 'TP' . str_pad(self::$transCodeCounter++, 8, '0', STR_PAD_LEFT);
     }
 
-    private function seedActiveFinancing(Member $member, array $item): void
+    private function seedActiveFinancing(Member $member, array $item, string $kolektibilitas = 'lancar'): void
     {
         $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? User::first();
         $margin = (int)($item['price'] * 0.1); // 10% margin
         $downPayment = (int)($item['price'] * 0.1); // 10% down payment
+
+        // 1. Atur Tenor & Rentang Waktu berdasarkan Kolektibilitas
+        $tenor = 12;
+        $akadMonthsAgo = 2; // Default lancar
+        $unpaidMonthsAgo = 0; // Kapan tunggakan mulai terjadi
+
+        switch ($kolektibilitas) {
+            case 'kurang_lancar':
+                $tenor = 24;
+                $akadMonthsAgo = 10;
+                $unpaidMonthsAgo = 5; // Nunggak 5 bulan
+                break;
+            case 'diragukan':
+                $tenor = 24;
+                $akadMonthsAgo = 15;
+                $unpaidMonthsAgo = 8; // Nunggak 8 bulan
+                break;
+            case 'macet':
+                $tenor = 12;
+                $akadMonthsAgo = 18; // Kontrak habis 6 bulan lalu
+                $unpaidMonthsAgo = 7; // Masih nunggak sejak 7 bulan lalu
+                break;
+            case 'lancar':
+            default:
+                $tenor = 12;
+                $akadMonthsAgo = 2;
+                break;
+        }
+
+        $akadDate = now()->subMonths($akadMonthsAgo)->startOfDay();
 
         $financing = Financing::create([
             'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
@@ -91,11 +127,11 @@ class MurabahaProductSeeder extends Seeder
             'cost_price' => $item['price'],
             'margin_amount' => $margin,
             'down_payment' => $downPayment,
-            'akad_date' => now()->subMonths(rand(1, 6)),
+            'akad_date' => $akadDate,
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
             'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
-            'updated_by' => $admin->id,
-            'tenor' => 12,
+            'updated_by' => $admin?->id,
+            'tenor' => $tenor,
         ]);
 
         // Create Financing Item
@@ -109,52 +145,63 @@ class MurabahaProductSeeder extends Seeder
             'product_type_id' => ProductType::where('product_type_name', $item['type'])->first()?->id,
         ]);
 
-        // Create Installment (tenor 12 bulan)
-        for ($i = 1; $i <= 12; $i++) {
-            $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / 12;
+        // 2. Buat Installment sesuai skenario kolektibilitas
+        for ($i = 1; $i <= $tenor; $i++) {
+            $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $tenor;
+            $dueDate = $akadDate->copy()->addMonths($i);
+
+            // Tentukan status pembayaran cicilan
+            $isPaid = false;
+            if ($kolektibilitas === 'lancar') {
+                $isPaid = $dueDate->isPast();
+            } else {
+                $batasTunggakan = now()->subMonths($unpaidMonthsAgo)->startOfDay();
+                $isPaid = $dueDate->isBefore($batasTunggakan);
+            }
 
             $installment = Installment::create([
                 'financing_id' => $financing->id,
                 'installment_no' => $i,
-                'due_date' => now()->addMonths($i),
+                'due_date' => $dueDate,
                 'amount' => $monthlyPayment,
-                'status' => now()->addMonths($i)->isPast() ? InstallmentPaymentScheduleStatusEnum::PENDING->value : InstallmentPaymentScheduleStatusEnum::PAID->value,
+                'status' => $isPaid ? InstallmentPaymentScheduleStatusEnum::PAID->value : InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             ]);
 
-            $akadDate = Carbon::parse($financing->akad_date);
+            // Jika dibayar, buat history transaksinya
+            if ($isPaid) {
+                InstallmentPaymentTransaction::create([
+                    'installment_trans_code' => $this->getUniqueTransCode(),
+                    'installment_id' => $installment->id,
+                    'nominal' => $monthlyPayment,
+                    'payment_method' => PaymentMethodsEnum::CASHLESS->value,
+                    'is_early_repayment' => false,
+                    'payment_date' => $dueDate,
+                    'updated_by' => $admin?->id,
+                ]);
 
-            InstallmentPaymentTransaction::create([
-                'installment_trans_code' => $this->getUniqueTransCode(),
-                'installment_id' => $installment->id,
-                'nominal' => $monthlyPayment,
-                'payment_method' => PaymentMethodsEnum::CASHLESS->value,
-                'is_early_repayment' => false,
-                'payment_date' => $akadDate->copy()->addMonths($i),
-                'updated_by' => $admin->id,
-            ]);
+                $journal = Journal::create([
+                    'tgl_transaksi' => $dueDate,
+                    'created_by' => $admin?->id,
+                ]);
 
-            $journal = Journal::create([
-                'tgl_transaksi' => $akadDate->copy()->addMonths($i),
-                'created_by' => $admin->id,
-            ]);
+                JournalEntry::create([
+                    'journal_group_id' => $journal->id,
+                    'no_ref_account' => '101',
+                    'position' => 'Debit',
+                    'nominal' => $monthlyPayment,
+                    'updated_by' => $admin?->id,
+                    'transaction_date' => $dueDate,
+                ]);
 
-            JournalEntry::create([
-                'journal_group_id' => $journal->id,
-                'no_ref_account' => '101',
-                'position' => 'Debit',
-                'nominal' => $monthlyPayment,
-                'updated_by' => $admin->id,
-                'transaction_date' => $akadDate->copy()->addMonths($i),
-            ]);
-
-            JournalEntry::create([
-                'journal_group_id' => $journal->id,
-                'no_ref_account' => '401',
-                'position' => 'Credit',
-                'nominal' => $monthlyPayment,
-                'updated_by' => $admin->id,
-                'transaction_date' => $akadDate->copy()->addMonths($i),
-            ]);
+                JournalEntry::create([
+                    'journal_group_id' => $journal->id,
+                    'no_ref_account' => '401',
+                    'position' => 'Credit',
+                    'nominal' => $monthlyPayment,
+                    'updated_by' => $admin?->id,
+                    'transaction_date' => $dueDate,
+                ]);
+            }
         }
     }
 
@@ -173,7 +220,7 @@ class MurabahaProductSeeder extends Seeder
             'requested_date' => now(),
             'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
             'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
-            'updated_by' => $admin->id,
+            'updated_by' => $admin?->id,
         ]);
 
         // Create Financing Item
@@ -189,7 +236,7 @@ class MurabahaProductSeeder extends Seeder
 
         $journal = Journal::create([
             'tgl_transaksi' => now(),
-            'created_by' => $admin->id,
+            'created_by' => $admin?->id,
         ]);
 
         JournalEntry::create([
@@ -197,7 +244,7 @@ class MurabahaProductSeeder extends Seeder
             'no_ref_account' => '103',
             'position' => 'Debit',
             'nominal' => $financing->cost_price,
-            'updated_by' => $admin->id,
+            'updated_by' => $admin?->id,
             'transaction_date' => now(),
         ]);
 
@@ -206,7 +253,7 @@ class MurabahaProductSeeder extends Seeder
             'no_ref_account' => '102',
             'position' => 'Credit',
             'nominal' => $financing->cost_price,
-            'updated_by' => $admin->id,
+            'updated_by' => $admin?->id,
             'transaction_date' => now(),
         ]);
     }
@@ -228,7 +275,7 @@ class MurabahaProductSeeder extends Seeder
             'paid_date' => now(),
             'status' => FinancingReqStatusEnum::PAID->value,
             'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
-            'updated_by' => $admin->id,
+            'updated_by' => $admin?->id,
         ]);
 
         // Create Financing Item
@@ -247,15 +294,16 @@ class MurabahaProductSeeder extends Seeder
             $monthlyMargin = $financing->margin_amount / $tenor;
             $monthlyCostPrice = ($financing->cost_price - $financing->down_payment) / $tenor;
 
+            $akadDate = Carbon::parse($financing->akad_date);
+            $dueDate = $akadDate->copy()->addMonths($i);
+
             $installment = Installment::create([
                 'financing_id' => $financing->id,
                 'installment_no' => $i,
-                'due_date' => now()->addMonths($i),
+                'due_date' => $dueDate,
                 'amount' => $monthlyPayment,
-                'status' => now()->addMonths($i)->isPast() ? InstallmentPaymentScheduleStatusEnum::PENDING->value : InstallmentPaymentScheduleStatusEnum::PAID->value,
+                'status' => $dueDate->isPast() ? InstallmentPaymentScheduleStatusEnum::PENDING->value : InstallmentPaymentScheduleStatusEnum::PAID->value,
             ]);
-
-            $akadDate = Carbon::parse($financing->akad_date);
 
             InstallmentPaymentTransaction::create([
                 'installment_trans_code' => $this->getUniqueTransCode(),
@@ -265,13 +313,13 @@ class MurabahaProductSeeder extends Seeder
                 'margin_amount' => $monthlyMargin,
                 'payment_method' => PaymentMethodsEnum::CASHLESS->value,
                 'is_early_repayment' => false,
-                'payment_date' => $akadDate->copy()->addMonths($i),
-                'updated_by' => $admin->id,
+                'payment_date' => $dueDate,
+                'updated_by' => $admin?->id,
             ]);
 
             $journal = Journal::create([
-                'tgl_transaksi' => $akadDate->copy()->addMonths($i),
-                'created_by' => $admin->id,
+                'tgl_transaksi' => $dueDate,
+                'created_by' => $admin?->id,
             ]);
 
             // kas
@@ -280,8 +328,8 @@ class MurabahaProductSeeder extends Seeder
                 'no_ref_account' => '101',
                 'position' => 'Debit',
                 'nominal' => $monthlyPayment,
-                'updated_by' => $admin->id,
-                'transaction_date' => $akadDate->copy()->addMonths($i),
+                'updated_by' => $admin?->id,
+                'transaction_date' => $dueDate,
             ]);
 
             // murabahah
@@ -290,10 +338,9 @@ class MurabahaProductSeeder extends Seeder
                 'no_ref_account' => '401',
                 'position' => 'Credit',
                 'nominal' => $monthlyMargin,
-                'updated_by' => $admin->id,
-                'transaction_date' => $akadDate->copy()->addMonths($i),
+                'updated_by' => $admin?->id,
+                'transaction_date' => $dueDate,
             ]);
         }
     }
 }
-
