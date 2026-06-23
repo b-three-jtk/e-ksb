@@ -25,7 +25,7 @@ class PembayaranAngsuranService
         $marginAmount = $financing->margin_amount;
         $totalPaidInstallments = $financing->installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
 
-        // Asumsi menggunakan metode margin Flat
+        // menggunakan metode margin Flat
         $principalPerMonth = $basePrincipal / $tenor;
         $marginPerMonth = $marginAmount / $tenor;
         $installmentPerMonth = $principalPerMonth + $marginPerMonth;

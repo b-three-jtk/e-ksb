@@ -21,7 +21,7 @@ const emit = defineEmits(['update:selectedFilter']);
         <CardInfo title="Total Modal Sudah Dialokasi" :content="parseCurrencyAmount(stats.modal_sudah_dialokasi)"
             :percentage="stats.modal_sudah_dialokasi_persen" :filter="selectedFilter" />
     </div>
-    <div class="grid grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <SkeletonChartCard v-if="!pertumbuhan_pendapatan" class="col-span-3" :bars="12" :legend="2" />
         <div v-else class="card-layout col-span-3">
             <div class="flex justify-between">

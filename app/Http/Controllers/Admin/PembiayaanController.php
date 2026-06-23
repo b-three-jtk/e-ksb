@@ -24,7 +24,6 @@ use App\Models\SavingAccount;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Services\Admin\JurnalService;
-use App\Services\Admin\PelunasanService;
 use App\Services\Admin\PembayaranAngsuranService;
 use App\Services\Admin\PembiayaanService;
 use App\Services\PembiayaanService as SharedPembiayaanService;

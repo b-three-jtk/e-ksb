@@ -9,7 +9,7 @@ import Swal from 'sweetalert2'
 import { toast } from "vue3-toastify";
 import ChevronDownIcon from '@/Icons/ChevronDownIcon.vue'
 
-const isMenuOpen = ref(true)
+const isMenuOpen = ref(false)
 const isUserDropdownOpen = ref(false)
 const page = usePage()
 const isActive = (url) => {
@@ -62,6 +62,10 @@ const menuItems = [
     {
         name: "Bantuan",
         path: "/faq"
+    },
+    {
+        name: "Masuk",
+        path: "/auth/login"
     }
 ]
 

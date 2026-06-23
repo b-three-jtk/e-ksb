@@ -14,7 +14,7 @@ const emit = defineEmits(['update:selectedFilter']);
 </script>
 
 <template>
-    <div class="grid grid-cols-5 gap-3.5">
+    <div class="grid grid-cols-1 lg:grid-cols-5 lg:gap-3.5">
         <SkeletonChartCard v-if="!pertumbuhan_anggota" class="col-span-3" :bars="12" :legend="2" />
         <div v-else class="card-layout col-span-3">
             <div class="flex justify-between">
@@ -35,11 +35,19 @@ const emit = defineEmits(['update:selectedFilter']);
             </div>
             <AreaChart :data="pertumbuhan_anggota" />
         </div>
-        <div class="col-span-2 grid grid-cols-2 gap-3.5">
-            <CardInfo title="Total Anggota Aktif" :content="props.stats.total_anggota_aktif"
-                :percentage="props.stats.total_anggota_aktif_persen" :filter="selectedFilter" />
-            <CardInfo title="Total Anggota Non-Aktif" :content="props.stats.total_anggota_non_aktif"
-                :percentage="props.stats.total_anggota_non_aktif_persen" :filter="selectedFilter" />
+        <div class="col-span-2 grid grid-cols-2 gap-3.5 mt-4 lg:mt-0">
+            <CardInfo
+                title="Total Anggota Aktif"
+                :content="props.stats.total_anggota_aktif"
+                :percentage="props.stats.total_anggota_aktif_persen"
+                :filter="selectedFilter"
+            />
+            <CardInfo
+                title="Total Anggota Non-Aktif"
+                :content="props.stats.total_anggota_non_aktif"
+                :percentage="props.stats.total_anggota_non_aktif_persen"
+                :filter="selectedFilter"
+            />
             <div class="card-layout col-span-2 bg-light-bg! dark:bg-brand-900/60!">
                 <h1 class="card-title text-center">Menu Pintasan</h1>
                 <div class="flex flex-col gap-3.5 mt-6">
