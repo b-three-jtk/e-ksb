@@ -1,14 +1,15 @@
 # E-KSB (Koperasi Syariah Berkah Elektronik)
 
 ## Tentang E-KSB
-E-KSB (Koperasi Syariah Berkah Elektronik) adalah aplikasi web yang dibangun menggunakan framework Laravel dan Inertia. Aplikasi ini berfungsi sebagai platform untuk mengelola operasional koperasi, memberikan pengalaman yang lancar bagi pengguna dalam melakukan berbagai tugas terkait koperasi.
+E-KSB (Koperasi Syariah Berkah Elektronik) adalah aplikasi web yang dibangun menggunakan framework Laravel dan Inertia. Aplikasi ini berfungsi sebagai platform untuk mengelola operasional dan layanan koperasi.
 
 Fitur-fitur E-KSB meliputi:
-- Autentikasi dan registrasi pengguna
 - Manajemen anggota dan pengurus koperasi
 - Manajemen simpanan dan tabungan
 - Manajemen pembiayaan murabahah
 - Pelacakan angsuran murabahah
+- Manajemen kas dan penjurnalan umum keuangan koperasi
+- Buku Tabungan
 - Notifikasi Jatuh Tempo
 
 ## Instalasi
@@ -16,7 +17,7 @@ Untuk menjalankan aplikasi E-KSB secara lokal, ikuti langkah-langkah berikut:
 
 1. Klon repositori:
 ```bash
-   git clone [https://github.com/your-username/e-ksb.git](https://github.com/your-username/e-ksb.git)
+   git clone [https://github.com/b-three-jtk/e-ksb.git]
 
 ```
 
@@ -41,7 +42,7 @@ Untuk menjalankan aplikasi E-KSB secara lokal, ikuti langkah-langkah berikut:
 
 ```
 
-Perbarui file `.env` dengan kredensial database MySQL Anda beserta pengaturan konfigurasi lainnya.
+Perbarui file `.env` dengan kredensial database PostgreSQL Anda beserta pengaturan konfigurasi lainnya.
 
 5. Hasilkan kunci aplikasi (*application key*):
 
@@ -78,12 +79,10 @@ Di terminal terpisah, kompilasi aset *frontend*:
 
 ```
 
-## Hak Cipta
-
 Proyek ini dikembangkan dan dikelola oleh Tim Kelompok Tugas Akhir-203 2026.
 
 [Anggota Tim]
 
-* Alanna Tanisya Anwar (231511034)
-* Dhira Ramadini (231511041)
-* Erina Dwi Yanti (231511043)
+* Alanna Tanisya Anwar
+* Dhira Ramadini
+* Erina Dwi Yanti
