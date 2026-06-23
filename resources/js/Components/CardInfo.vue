@@ -46,7 +46,7 @@ const filterText = computed(() => {
                 </Tooltip>
             </div>
 
-            <div v-if="percentage != 0" class="text-sm flex items-center font-body gap-2 text-gray-text">
+            <div v-if="percentage != 0" class="text-base flex items-center font-body gap-2 text-gray-text">
                 <span
                     :class="percentage >= 0 ? 'font-semibold text-green-600 bg-green-50 rounded-2xl px-4 py-1' : 'text-error-600 font-semibold bg-error-50 rounded-2xl px-4 py-1'">{{
                     percentage }}%</span>
