@@ -17,20 +17,14 @@ use App\Models\FinancingItem;
 use App\Models\GlobalSetting;
 use App\Models\Heir;
 use App\Models\Installment;
-use App\Models\InstallmentPaymentTransaction;
 use App\Models\JournalEntry;
 use App\Models\Member;
-use App\Models\MemberDoc;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Wakalah;
 use App\Services\PembiayaanService as SharedPembiayaanService;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class PembiayaanService
 {
@@ -68,7 +62,10 @@ class PembiayaanService
                         FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                     ]);
                 } else {
-                    $q->where('status', FinancingReqStatusEnum::WAITING_DOCUMENTS->value);
+                    $q->whereIn('status', [
+                        FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                        FinancingReqStatusEnum::PENDING_REVIEW->value,
+                    ]);
                 }
             })
             ->when($tab === 'validated', function ($q) {

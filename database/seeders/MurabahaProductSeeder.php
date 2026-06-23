@@ -10,6 +10,8 @@ use App\Models\Financing;
 use App\Models\FinancingItem;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
+use App\Models\Journal;
+use App\Models\JournalEntry;
 use App\Models\Member;
 use App\Models\ProductType;
 use App\Models\User;
@@ -130,6 +132,29 @@ class MurabahaProductSeeder extends Seeder
                 'payment_date' => $akadDate->copy()->addMonths($i),
                 'updated_by' => $admin->id,
             ]);
+
+            $journal = Journal::create([
+                'tgl_transaksi' => $akadDate->copy()->addMonths($i),
+                'created_by' => $admin->id,
+            ]);
+
+            JournalEntry::create([
+                'journal_group_id' => $journal->id,
+                'no_ref_account' => '101',
+                'position' => 'Debit',
+                'nominal' => $monthlyPayment,
+                'updated_by' => $admin->id,
+                'transaction_date' => $akadDate->copy()->addMonths($i),
+            ]);
+
+            JournalEntry::create([
+                'journal_group_id' => $journal->id,
+                'no_ref_account' => '401',
+                'position' => 'Credit',
+                'nominal' => $monthlyPayment,
+                'updated_by' => $admin->id,
+                'transaction_date' => $akadDate->copy()->addMonths($i),
+            ]);
         }
     }
 
@@ -160,6 +185,29 @@ class MurabahaProductSeeder extends Seeder
             'condition' => 'Baru',
             'price_per_unit' => $item['price'],
             'product_type_id' => ProductType::where('product_type_name', $item['type'])->first()?->id,
+        ]);
+
+        $journal = Journal::create([
+            'tgl_transaksi' => now(),
+            'created_by' => $admin->id,
+        ]);
+
+        JournalEntry::create([
+            'journal_group_id' => $journal->id,
+            'no_ref_account' => '103',
+            'position' => 'Debit',
+            'nominal' => $financing->cost_price,
+            'updated_by' => $admin->id,
+            'transaction_date' => now(),
+        ]);
+
+        JournalEntry::create([
+            'journal_group_id' => $journal->id,
+            'no_ref_account' => '102',
+            'position' => 'Credit',
+            'nominal' => $financing->cost_price,
+            'updated_by' => $admin->id,
+            'transaction_date' => now(),
         ]);
     }
 
@@ -196,6 +244,8 @@ class MurabahaProductSeeder extends Seeder
 
         for ($i = 1; $i <= 12; $i++) {
             $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $tenor;
+            $monthlyMargin = $financing->margin_amount / $tenor;
+            $monthlyCostPrice = ($financing->cost_price - $financing->down_payment) / $tenor;
 
             $installment = Installment::create([
                 'financing_id' => $financing->id,
@@ -211,10 +261,37 @@ class MurabahaProductSeeder extends Seeder
                 'installment_trans_code' => $this->getUniqueTransCode(),
                 'installment_id' => $installment->id,
                 'nominal' => $monthlyPayment,
+                'principal_amount' => $monthlyCostPrice,
+                'margin_amount' => $monthlyMargin,
                 'payment_method' => PaymentMethodsEnum::CASHLESS->value,
                 'is_early_repayment' => false,
                 'payment_date' => $akadDate->copy()->addMonths($i),
                 'updated_by' => $admin->id,
+            ]);
+
+            $journal = Journal::create([
+                'tgl_transaksi' => $akadDate->copy()->addMonths($i),
+                'created_by' => $admin->id,
+            ]);
+
+            // kas
+            JournalEntry::create([
+                'journal_group_id' => $journal->id,
+                'no_ref_account' => '101',
+                'position' => 'Debit',
+                'nominal' => $monthlyPayment,
+                'updated_by' => $admin->id,
+                'transaction_date' => $akadDate->copy()->addMonths($i),
+            ]);
+
+            // murabahah
+            JournalEntry::create([
+                'journal_group_id' => $journal->id,
+                'no_ref_account' => '401',
+                'position' => 'Credit',
+                'nominal' => $monthlyMargin,
+                'updated_by' => $admin->id,
+                'transaction_date' => $akadDate->copy()->addMonths($i),
             ]);
         }
     }
