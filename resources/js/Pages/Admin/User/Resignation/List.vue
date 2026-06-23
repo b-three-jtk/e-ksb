@@ -171,8 +171,8 @@ onMounted(() => {
                 <template #cell-no="{ index }">
                     {{ (members.current_page - 1) * members.per_page + index + 1 }}
                 </template>
-                <template #cell-action="{ row }">
-                    <Button variant="warning" size="small" :href="`/admin/resignations/${row.id}`">
+                <template #cell-aksi="{ row }">
+                    <Button  variant="warning" size="small" :href="`/admin/resignations/${row.id}`">
                         <Icon icon="tabler:checklist" class="w-4 h-4" />
                         Tinjau
                     </Button>
