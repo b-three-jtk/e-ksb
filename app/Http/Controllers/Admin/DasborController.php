@@ -17,13 +17,9 @@ class DasborController extends Controller
         $role = auth()->user()->getRoleNames()->first();
 
         $data = [];
-        $tanggalAwal = $req->start_date
-            ? Carbon::parse($req->start_date)->startOfDay()
-            : now()->startOfMonth()->startOfDay();
+        $tanggalAwal = now()->startOfMonth()->startOfDay();
+        $tanggalAkhir = now()->endOfMonth()->endOfDay();
 
-        $tanggalAkhir = $req->end_date
-            ? Carbon::parse($req->end_date)->endOfDay()
-            : now()->endOfMonth()->endOfDay();
         $filterBy = $req->filter_by ?? 'month';
 
         [$tanggalAwalSebelumnya, $tanggalAkhirSebelumnya] = $service->getPeriodeSebelumnya($tanggalAwal, $filterBy);

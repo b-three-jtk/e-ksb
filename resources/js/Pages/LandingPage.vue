@@ -297,7 +297,7 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
                 </div>
                 <div class="flex flex-col gap-6 mt-auto">
                     <h2 class="text-3xl font-bold text-primary dark:text-green-accent">Tentang Kami</h2>
-                    <p class="text-xl text-dark-text leading-8 dark:text-gray-300">Koperasi Syariah Berkah didirikan
+                    <p class="text-lg text-dark-text leading-8 dark:text-gray-300">Koperasi Syariah Berkah didirikan
                         pada tahun
                         2020 dengan tujuan memberikan solusi keuangan yang sesuai dengan prinsip-prinsip syariah
                         kepada masyarakat. Kami berkomitmen untuk menyediakan layanan keuangan yang transparan,
@@ -315,7 +315,7 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
                             :class="activeTab === 'simpanan'
                                 ? 'bg-secondary text-white'
                                 : 'bg-white text-dark-text dark:bg-brand-900 border border-stroke dark:text-gray-300 hover:bg-gray-200'"
-                            class="px-5 py-2 rounded-xl text-sm font-medium transition-colors duration-200 flex items-center gap-1">
+                            class="px-5 py-2 rounded-xl text-base font-medium transition-colors duration-200 flex items-center gap-1">
                             Simpanan & Tabungan
                             <span class="icon-[tabler--chevron-right]" style="width:16px;height:16px;"></span>
                         </button>
@@ -323,7 +323,7 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
                             :class="activeTab === 'pembiayaan'
                                 ? 'bg-secondary text-white'
                                 : 'bg-white text-dark-text border border-stroke dark:bg-brand-900 dark:text-gray-300 hover:bg-gray-200'"
-                            class="px-5 py-2 rounded-xl text-sm font-medium transition-colors duration-200 flex items-center gap-1">
+                            class="px-5 py-2 rounded-xl text-base font-medium transition-colors duration-200 flex items-center gap-1">
                             Pembiayaan & Penjualan
                             <span class="icon-[tabler--chevron-right]" style="width:16px;height:16px;"></span>
                         </button>
@@ -411,7 +411,7 @@ const next = () => { if (currentIndex.value < maxIndex.value) currentIndex.value
                             {{ p.title }}
                         </h3>
                         <p
-                            class="text-sm leading-6 z-2 transition-colors duration-300 text-dark-text/60 group-hover:text-white/70 dark:text-gray-400">
+                            class="text-base leading-6 z-2 transition-colors duration-300 text-dark-text/60 group-hover:text-white/70 dark:text-gray-400">
                             {{ p.desc }}
                         </p>
 
