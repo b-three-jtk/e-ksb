@@ -16,7 +16,6 @@ use Database\Seeders\ProductTypeSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
 
 uses(RefreshDatabase::class);
 
@@ -745,5 +744,78 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pelunasan sebelum jat
             ]);
 
         $response->assertStatus(403);
+    });
+});
+
+describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function () {
+    it('Sistem dapat memetakan 4 data pembiayaan (Lancar, Kurang Lancar, Diragukan, Macet)', function () {
+        // kunci waktu ke 26 Juni 2026 biar tesnya nggak basi
+        $this->travelTo(\Carbon\Carbon::parse('2026-06-26 12:00:00'));
+
+        $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+
+        // bikin data pembiayaan yang lancar (belum jatuh tempo cicilannya)
+        $finLancar = Financing::factory()->create([
+            'member_id' => $member->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'akad_date' => '2026-05-01',
+            'tenor' => 12,
+        ]);
+        Installment::factory()->create([
+            'financing_id' => $finLancar->id,
+            'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            'due_date' => '2026-07-26',
+        ]);
+
+        // bikin data kurang lancar: ceritanya dia nunggak 5 bulan tapi akadnya masih jalan
+        $finKurangLancar = Financing::factory()->create([
+            'member_id' => $member->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'akad_date' => '2025-12-01',
+            'tenor' => 12,
+        ]);
+        Installment::factory()->create([
+            'financing_id' => $finKurangLancar->id,
+            'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            'due_date' => '2026-01-26',
+        ]);
+
+        // bikin data diragukan: nunggaknya udah 8 bulan
+        $finDiragukan = Financing::factory()->create([
+            'member_id' => $member->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'akad_date' => '2025-09-01',
+            'tenor' => 12,
+        ]);
+        Installment::factory()->create([
+            'financing_id' => $finDiragukan->id,
+            'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            'due_date' => '2025-10-26',
+        ]);
+
+        // bikin data macet: kontraknya udah expired dari akhir tahun kemaren (Desember 2025)
+        $finMacet = Financing::factory()->create([
+            'member_id' => $member->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'akad_date' => '2024-12-01',
+            'tenor' => 12,
+        ]);
+        Installment::factory()->create([
+            'financing_id' => $finMacet->id,
+            'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            'due_date' => '2025-11-26',
+        ]);
+
+        $dasborService = app(\App\Services\Admin\DasborService::class);
+        $petaPembiayaan = $dasborService->getPetaPembiayaan('2026-06-26 23:59:59');
+
+        $this->assertEquals([
+            'Lancar' => 1,
+            'Kurang Lancar' => 1,
+            'Diragukan' => 1,
+            'Macet' => 1,
+        ], $petaPembiayaan);
+
+        $this->travelBack();
     });
 });

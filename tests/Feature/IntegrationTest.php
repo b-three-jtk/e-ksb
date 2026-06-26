@@ -291,4 +291,46 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             'status' => FinancingReqStatusEnum::PAID->value,
         ]);
     });
+
+});
+
+describe('IT02 Skenario Pengunduran Diri Anggota', function () {
+    beforeEach(function () {
+        $this->userMember = User::factory()->create(['name' => 'Claire Redfield', 'status' => UserStatusEnum::ACTIVE->value]);
+        $this->userMember->assignRole('Anggota');
+        $this->member = Member::factory()->create(['user_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
+    });
+
+    it('Skenario Pengunduran Diri Anggota: Pengajuan -> Verifikasi', function () {
+        $this->actingAs($this->userMember)
+            ->post('/user/resign', [
+                'document' => UploadedFile::fake()->create('surat_resign.pdf'),
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('user.userDashboard'));
+
+        $this->assertDatabaseHas('members', [
+            'id' => $this->member->id,
+            'status' => MemberStatusEnum::RESIGNED_REQUESTED->value,
+        ]);
+
+        // admin (ketua) nge-acc pengajuan resign
+        $ketua = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $ketua->assignRole('Ketua');
+
+        $this->actingAs($ketua)
+            ->put("/admin/resignations/{$this->userMember->id}")
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.resignations.index'));
+
+        $this->assertDatabaseHas('members', [
+            'id' => $this->member->id,
+            'status' => MemberStatusEnum::RESIGNED->value,
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $this->userMember->id,
+            'status' => UserStatusEnum::INACTIVE->value,
+        ]);
+    });
 });
