@@ -417,7 +417,7 @@ class PembiayaanController extends Controller
                 $validated['financing']['status'] = 'Belum Ditinjau';
 
                 $this->financingService->syncMemberData($user, $validated['member'], $request);
-                $this->financingService->syncFinancingData($user, $validated, $request, auth()->id());
+                $this->financingService->syncFinancingData($user, $request, auth()->id());
             });
 
             return redirect()->route('admin.financings.index')
@@ -459,7 +459,7 @@ class PembiayaanController extends Controller
                 }
 
                 $this->financingService->syncMemberData($user, $validated['member'], $request);
-                $financing = $this->financingService->syncFinancingData($user, $validated, $request, auth()->id());
+                $financing = $this->financingService->syncFinancingData($user, $request, auth()->id());
 
                 if ($request->hasFile('akad_document_file')) {
                     $financing->update([
@@ -499,7 +499,6 @@ class PembiayaanController extends Controller
 
                 $costPrice = $financing->cost_price;
                 $margin = $financing->margin_amount;
-                $downPayment = $financing->down_payment ??0;
 
                 // Kalo pembayaran pembiayaannya cicilan
                 if ($financing->payment_method === FinancingPaymentMethodEnum::INSTALLMENT->value)
