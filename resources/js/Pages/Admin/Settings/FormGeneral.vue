@@ -18,6 +18,11 @@ defineProps({
 })
 
 const emit = defineEmits(['submit'])
+
+const statusOptions = [
+    { value: 'open', text: 'Buka' },
+    { value: 'closed', text: 'Tutup' },
+]
 </script>
 
 <template>
@@ -39,8 +44,9 @@ const emit = defineEmits(['submit'])
             />
             <BaseInputAdmin
                 v-model="form.status_tutup_buku"
-                label="Status Tutup Buku"
+                label="Status Penutupan Buku"
                 type="select"
+                :selectables="statusOptions"
                 required
                 :disabled="readonly || isProcessing"
             />

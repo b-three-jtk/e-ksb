@@ -5,6 +5,7 @@ import { router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import { formatCurrency } from '../../../utils/currency'
+import FormGeneral from './FormGeneral.vue'
 import FormPoin from './FormPoin.vue'
 import FormSimpanan from './FormSimpanan.vue'
 import FormPembiayaan from './FormPembiayaan.vue'
@@ -49,22 +50,44 @@ const readonlySavings = computed(() => {
     return hasSavingsData.value ? !canEdit : !canCreate
 })
 
+const hasGeneralData = computed(() => {
+    const awal = props.settings?.general?.tanggal_awal_periode?.value
+    const akhir = props.settings?.general?.tanggal_akhir_periode?.value
+    const status = props.settings?.general?.status_tutup_buku?.value
+    return awal !== null && awal !== undefined && awal !== '' &&
+           akhir !== null && akhir !== undefined && akhir !== '' &&
+           status !== null && status !== undefined && status !== ''
+})
+
 const readonlyFinancing = computed(() => {
     const canCreate = !!page.props.auth?.can?.['create_pengaturan']
     const canEdit = !!page.props.auth?.can?.['edit_pengaturan']
     return hasFinancingData.value ? !canEdit : !canCreate
 })
 
+const readonlyGeneral = computed(() => {
+    const canCreate = !!page.props.auth?.can?.['create_pengaturan']
+    const canEdit = !!page.props.auth?.can?.['edit_pengaturan']
+    return hasGeneralData.value ? !canEdit : !canCreate
+})
+
 const tabs = [
+    { key: 'general', label: 'Umum' },
     { key: 'points', label: 'Poin' },
     { key: 'savings', label: 'Simpanan' },
     { key: 'financing', label: 'Pembiayaan Murabahah' },
 ]
 
-const activeTab = ref('points')
+const activeTab = ref('general')
 const processingSection = ref(null)
 
 const forms = reactive({
+    general: {
+        tanggal_awal_periode: '',
+        tanggal_akhir_periode: '',
+        status_tutup_buku: 'open',
+        period_effective_date: '',
+    },
     points: {
         saving_point_amount: '',
         saving_point_reward: '',
@@ -121,6 +144,10 @@ const formatMoney = (value) => {
 }
 
 const formatHistoryValue = (value, key) => {
+    if (key === 'status_tutup_buku') {
+        return value === 'open' ? 'Buka' : (value === 'closed' ? 'Tutup' : value)
+    }
+
     if (key === 'murabahah_margin_percentage') {
         return `${formatInteger(value)} %`
     }
@@ -138,6 +165,7 @@ const formatHistoryValue = (value, key) => {
 
 
 const sectionTitle = computed(() => {
+    if (activeTab.value === 'general') return 'Pengaturan Umum Periode'
     if (activeTab.value === 'points') return 'Penetapan Besaran Poin'
     if (activeTab.value === 'savings') return 'Penetapan Besaran Simpanan'
 
@@ -145,6 +173,7 @@ const sectionTitle = computed(() => {
 })
 
 const summaryGridClass = computed(() => {
+    if (activeTab.value === 'general') return 'grid grid-cols-1 gap-4 md:grid-cols-4'
     if (activeTab.value === 'points') return 'grid grid-cols-1 gap-4 md:grid-cols-4'
     if (activeTab.value === 'savings') return 'grid grid-cols-1 gap-4 md:grid-cols-2'
 
@@ -152,6 +181,31 @@ const summaryGridClass = computed(() => {
 })
 
 const summaryCards = computed(() => {
+    if (activeTab.value === 'general') {
+        const awal = getSetting('general', 'tanggal_awal_periode')
+        const akhir = getSetting('general', 'tanggal_akhir_periode')
+        const status = getSetting('general', 'status_tutup_buku')
+
+        return [
+            {
+                value: formatDate(awal.value),
+                label: 'Awal Periode',
+            },
+            {
+                value: formatDate(akhir.value),
+                label: 'Akhir Periode',
+            },
+            {
+                value: status.value === 'open' ? 'Buka' : (status.value === 'closed' ? 'Tutup' : '-'),
+                label: 'Status Buku',
+            },
+            {
+                value: formatDate(awal.effective_date || akhir.effective_date || status.effective_date),
+                label: 'Berlaku Sejak',
+            },
+        ]
+    }
+
     if (activeTab.value === 'points') {
         const pointsAmount = getSetting('points', 'saving_point_amount')
         const pointReward = getSetting('points', 'saving_point_reward')
@@ -222,6 +276,14 @@ const summaryCards = computed(() => {
 })
 
 const syncForms = () => {
+    forms.general.tanggal_awal_periode = props.settings?.general?.tanggal_awal_periode?.value ?? ''
+    forms.general.tanggal_akhir_periode = props.settings?.general?.tanggal_akhir_periode?.value ?? ''
+    forms.general.status_tutup_buku = props.settings?.general?.status_tutup_buku?.value ?? 'open'
+    forms.general.period_effective_date = props.settings?.general?.tanggal_awal_periode?.effective_date
+        ?? props.settings?.general?.tanggal_akhir_periode?.effective_date
+        ?? props.settings?.general?.status_tutup_buku?.effective_date
+        ?? ''
+
     forms.points.saving_point_amount = props.settings?.points?.saving_point_amount?.value ?? ''
     forms.points.saving_point_reward = props.settings?.points?.saving_point_reward?.value ?? ''
     forms.points.effective_date = props.settings?.points?.saving_point_amount?.effective_date
@@ -288,7 +350,9 @@ const historyColumns = [
 const submitAlert = async (section) => {
     const result = await Swal.fire({
         title: 'Simpan Pengaturan?',
-        text: activeTab.value === 'points'
+        text: activeTab.value === 'general'
+            ? 'Perubahan konfigurasi umum periode akan disimpan.'
+            : activeTab.value === 'points'
             ? 'Perubahan konfigurasi poin akan disimpan.'
             : activeTab.value === 'savings'
                 ? 'Perubahan konfigurasi simpanan akan disimpan.'
@@ -364,7 +428,16 @@ const isProcessing = (section) => processingSection.value === section
                         </h3>
                     </div>
 
-                    <div v-if="activeTab === 'points'" class="p-6 md:p-8">
+                    <div v-if="activeTab === 'general'" class="p-6 md:p-8">
+                        <FormGeneral
+                            :form="forms.general"
+                            :is-processing="isProcessing('general')"
+                            :readonly="readonlyGeneral"
+                            @submit="submitAlert('general')"
+                        />
+                    </div>
+
+                    <div v-else-if="activeTab === 'points'" class="p-6 md:p-8">
                         <FormPoin
                             :form="forms.points"
                             :is-processing="isProcessing('points')"

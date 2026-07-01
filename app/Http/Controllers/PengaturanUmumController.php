@@ -27,6 +27,12 @@ class PengaturanUmumController extends Controller
         $section = $request->string('section')->toString();
 
         $rules = match ($section) {
+            'general' => [
+                'tanggal_awal_periode' => ['required', 'date'],
+                'tanggal_akhir_periode' => ['required', 'date', 'after_or_equal:tanggal_awal_periode'],
+                'status_tutup_buku' => ['required', 'in:open,closed'],
+                'period_effective_date' => ['required', 'date'],
+            ],
             'points' => [
                 'saving_point_amount' => ['required', 'numeric', 'min:1'],
                 'saving_point_reward' => ['required', 'numeric', 'min:1'],
@@ -50,6 +56,7 @@ class PengaturanUmumController extends Controller
         }
 
         $keys = match ($section) {
+            'general' => ['tanggal_awal_periode', 'tanggal_akhir_periode', 'status_tutup_buku'],
             'points' => ['saving_point_amount', 'saving_point_reward'],
             'savings' => ['saving_pokok_amount', 'saving_wajib_amount'],
             'financing' => ['murabahah_margin_percentage'],

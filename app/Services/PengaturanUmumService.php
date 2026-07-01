@@ -8,6 +8,20 @@ use Illuminate\Support\Facades\DB;
 class PengaturanUmumService
 {
     public const SETTING_MAP = [
+        'general' => [
+            'tanggal_awal_periode' => [
+                'label' => 'Tanggal Awal Periode',
+                'description' => 'Tanggal awal periode keuangan.',
+            ],
+            'tanggal_akhir_periode' => [
+                'label' => 'Tanggal Akhir Periode',
+                'description' => 'Tanggal akhir periode keuangan.',
+            ],
+            'status_tutup_buku' => [
+                'label' => 'Status Tutup Buku',
+                'description' => 'Status dari penutupan buku (open/closed).',
+            ],
+        ],
         'points' => [
             'saving_point_amount' => [
                 'label' => 'Jumlah Simpanan',
@@ -136,6 +150,23 @@ class PengaturanUmumService
     {
         DB::transaction(function () use ($section, $validated, $userId): void {
             match ($section) {
+                'general' => $this->saveSettingGroup([
+                    'tanggal_awal_periode' => [
+                        'value' => $validated['tanggal_awal_periode'],
+                        'effective_date' => $validated['period_effective_date'],
+                        'description' => self::SETTING_MAP['general']['tanggal_awal_periode']['description'],
+                    ],
+                    'tanggal_akhir_periode' => [
+                        'value' => $validated['tanggal_akhir_periode'],
+                        'effective_date' => $validated['period_effective_date'],
+                        'description' => self::SETTING_MAP['general']['tanggal_akhir_periode']['description'],
+                    ],
+                    'status_tutup_buku' => [
+                        'value' => $validated['status_tutup_buku'],
+                        'effective_date' => $validated['period_effective_date'],
+                        'description' => self::SETTING_MAP['general']['status_tutup_buku']['description'],
+                    ],
+                ], $userId),
                 'points' => $this->saveSettingGroup([
                     'saving_point_amount' => [
                         'value' => $validated['saving_point_amount'],
