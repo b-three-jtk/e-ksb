@@ -9,7 +9,8 @@ import Swal from 'sweetalert2'
 import { toast } from "vue3-toastify";
 import ChevronDownIcon from '@/Icons/ChevronDownIcon.vue'
 
-const isMenuOpen = ref(false)
+const isMenuOpen = ref(true)
+const isMobileMenuOpen = ref(false)
 const isUserDropdownOpen = ref(false)
 const page = usePage()
 const isActive = (url) => {
@@ -39,7 +40,7 @@ const csrfToken = computed(() => {
 })
 
 const toggleMenu = () => {
-    isMenuOpen.value = !isMenuOpen.value
+    isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
 
 const toggleUserDropdown = () => {
@@ -63,10 +64,6 @@ const menuItems = [
         name: "Bantuan",
         path: "/faq"
     },
-    {
-        name: "Masuk",
-        path: "/auth/login"
-    }
 ]
 
 const form = useForm({})
@@ -118,7 +115,7 @@ const logout = () => {
                 <ThemeToggler />
                 <!-- Guest Auth Section -->
                 <template v-if="!user">
-                    <div class="flex items-center gap-4 opacity-0 lg:opacity-100">
+                    <div class="hidden md:flex items-center gap-4">
                         <Link href="/auth/login"
                             class="inline-flex items-center justify-center rounded-xl bg-white px-8 py-2 font-body font-semibold text-brand-600 shadow-lg transition-colors hover:text-brand-700 hover:bg-gray-100">
                             Masuk
@@ -197,16 +194,37 @@ const logout = () => {
                 </button>
             </div>
 
-            <!-- Navigation Menu -->
-            <div v-if="isMenuOpen" class="w-full md:flex md:w-auto md:order-1">
+            <!-- Navigation Menu Desktop -->
+            <div class="hidden w-full md:flex md:w-auto md:order-1">
                 <ul
                     class="flex flex-col gap-2 p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 dark:border-gray-700">
-                    <li v-for="menu in menuItems">
+                    <li v-for="menu in menuItems" :key="menu.path">
                         <Link :href="menu.path"
                             :class="isActive(menu.path) ? 'block pb-2! px-3 text-gray-900 hover:bg-gray-100 font-semibold md:hover:bg-transparent md:p-0 dark:text-white border-b-accent border-b-2' : 'block pb-2! px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:p-0 dark:text-white'">
                             {{ menu.name }}
                         </Link>
                     </li>
+                </ul>
+            </div>
+
+            <!-- Navigation Menu Mobile -->
+            <div v-if="isMobileMenuOpen" class="w-full md:hidden md:order-1">
+                <ul
+                    class="flex flex-col gap-2 p-4 mt-4 border border-gray-100 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <li v-for="menu in menuItems" :key="menu.path">
+                        <Link :href="menu.path"
+                            :class="isActive(menu.path) ? 'block px-3 py-2 text-brand-600 font-semibold bg-gray-100 rounded dark:bg-gray-700 dark:text-white' : 'block px-3 py-2 text-gray-900 rounded hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'">
+                            {{ menu.name }}
+                        </Link>
+                    </li>
+                    <template v-if="!user">
+                        <li class="mt-2 border-t border-gray-200 dark:border-gray-700 pt-2">
+                            <Link href="/auth/login"
+                                class="block text-center w-full rounded-xl bg-brand-600 text-white px-4 py-2 font-semibold transition-colors hover:bg-brand-700">
+                                Masuk
+                            </Link>
+                        </li>
+                    </template>
                 </ul>
             </div>
         </div>

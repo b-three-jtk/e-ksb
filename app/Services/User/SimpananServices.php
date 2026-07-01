@@ -2,19 +2,18 @@
 
 namespace App\Services\User;
 
+use App\Enums\MemberStatusEnum;
+use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
-use App\Enums\PositionEnum;
 use App\Models\Member;
+use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
-use App\Models\MemberBankAccount;
-use App\Models\Account;
 use App\Services\Admin\JurnalService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class SimpananServices
@@ -41,7 +40,13 @@ class SimpananServices
             ]);
         }
 
-        $savingType = (string) ($savingAccount->saving_type ?? '');
+        if ($member->status === MemberStatusEnum::ACTIVE->value && in_array($savingAccount->saving_type, [SavingTypeEnum::SIMPANAN_POKOK->value, SavingTypeEnum::SIMPANAN_WAJIB->value])) {
+            throw ValidationException::withMessages([
+                'saving_account_id' => $savingAccount->saving_type . ' tidak dapat ditarik selama status keanggotaan masih aktif.'
+            ]);
+        }
+
+        $savingType = (string)($savingAccount->saving_type ?? '');
         $typeLower = mb_strtolower($savingType);
 
         if (str_contains($typeLower, 'berjangka')) {

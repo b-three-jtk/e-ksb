@@ -461,12 +461,6 @@ class PembiayaanController extends Controller
                 $this->financingService->syncMemberData($user, $validated['member'], $request);
                 $financing = $this->financingService->syncFinancingData($user, $request, auth()->id());
 
-                if ($request->hasFile('akad_document_file')) {
-                    $financing->update([
-                        'signed_akad_document' => $request->file('akad_document_file')->store('documents', 'public'),
-                    ]);
-                }
-
                 if (isset($validated['financing']['tenor']) && $validated['financing']['payment_method'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
                     $this->financingService->generateInstallments($financing);
                 } else if ($validated['financing']['payment_method'] === FinancingPaymentMethodEnum::TANGGUH->value) {
@@ -692,7 +686,7 @@ class PembiayaanController extends Controller
                     ->firstOrFail();
 
                 $this->financingService->syncMemberData($user, $validated['member'], $request);
-                $this->financingService->syncFinancingData($user, $validated, $request, auth()->id());
+                $this->financingService->syncFinancingData($user, $request, auth()->id());
             });
 
             return redirect()->route('admin.financings.index')
@@ -733,6 +727,11 @@ class PembiayaanController extends Controller
                     ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
                     ->where('created_at', '<=', now()->subMonth())
                     ->exists();
+
+                $member->heirs = $member->heirs->map(function ($heir) {
+                    $heir->relationship = $heir->pivot->relationship;
+                    return $heir;
+                });
 
                 $member->is_have_eligible_saving = $hasEligibleSaving;
                 $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;

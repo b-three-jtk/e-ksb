@@ -289,6 +289,7 @@ class PembiayaanService
                 'updated_by'     => $updatedBy,
                 'predicted_cost_price' => $financingData['predicted_cost_price'] ?? null,
                 'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                'signed_akad_document' => $request->hasFile('akad_document_file') ? $request->file('akad_document_file')->store('documents', 'public') : $existingFinancing->signed_akad_document ?? null,
             ]);
 
             if (($financingData['payment_method'] ?? null) === FinancingPaymentMethodEnum::INSTALLMENT->value) {
@@ -301,13 +302,13 @@ class PembiayaanService
             // Buat baru kalau memang belum ada sama sekali
             $financing = Financing::create([
                 'member_id'      => $user->member->id,
-                'tenor'          => $financingData['tenor'] ?? null,
                 'down_payment'   => $financingData['down_payment'] ?? 0,
-                'akad_date'      => $financingData['akad_date'] ?? null,
+                'predicted_cost_price' => $financingData['predicted_cost_price'] ?? null,
                 'cost_price'     => $financingData['cost_price'] ?? null,
                 'margin_amount'  => $financingData['margin_amount'] ?? null,
+                'akad_date'      => $financingData['akad_date'] ?? null,
                 'payment_method' => $financingData['payment_method'] ?? null,
-                'predicted_cost_price' => $financingData['predicted_cost_price'] ?? null,
+                'tenor'          => $financingData['tenor'] ?? null,
                 'updated_by'     => $updatedBy,
                 'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
             ]);
@@ -326,7 +327,7 @@ class PembiayaanService
             );
         }
 
-        $financingItem = FinancingItem::updateOrCreate(
+        FinancingItem::updateOrCreate(
             ['financing_id' => $financing->id],
             [
                 'name'            => $financingData['name'] ?? null,
@@ -336,14 +337,9 @@ class PembiayaanService
                 'price_per_unit'  => $financingData['price_per_unit'] ?? null,
                 'product_type_id' => $financingData['product_type_id'] ?? null,
                 'supplier_id'     => $financingData['supplier_id'] ?? null,
+                'purchase_receipt' => $request->hasFile('purchase_receipt_file') ? $request->file('purchase_receipt_file')->store('documents', 'public') : null,
             ]
         );
-
-        if ($request->hasFile('purchase_receipt_file')) {
-            $financingItem->update([
-                'purchase_receipt' => $request->file('purchase_receipt_file')->store('documents', 'public'),
-            ]);
-        }
 
         if (isset($financingData['akad_wakalah_date'])) {
             $wakalah = Wakalah::updateOrCreate(

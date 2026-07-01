@@ -129,6 +129,7 @@ describe('Aplikasi harus menyediakan pendaftaran pengurus baru dari anggota akti
                 'name' => 'Leon S Kennedy',
                 'email' => 'asep@example.com',
                 'nik' => '1111222233334444',
+                'phone_number' => '0823982938213',
                 'role_id' => $role->id,
             ]);
 
@@ -165,7 +166,7 @@ describe('Aplikasi harus menyediakan daftar pengurus untuk ketua koperasi dan se
         $anggota = User::factory([
             'status' => 'Aktif'
         ])->create();
-        $anggota->assignRole('Anggota');
+        $anggota->assignRole('Staf Murabahah');
 
         $res = $this->actingAs($anggota)->get('/admin/pengurus');
 
@@ -196,12 +197,12 @@ describe('Aplikasi harus menyediakan detail informasi masing-masing pengurus.', 
         $anggota1 = User::factory([
             'status' => 'Aktif'
         ])->create();
-        $anggota1->assignRole('Anggota');
+        $anggota1->assignRole('Bendahara');
 
         $anggota2 = User::factory([
             'status' => 'Aktif'
         ])->create();
-        $anggota2->assignRole('Anggota');
+        $anggota2->assignRole('Sekretaris');
 
         $resPengurus = $this->actingAs($anggota1)->get('/admin/pengurus/show/' . $anggota2->id);
 
@@ -587,15 +588,15 @@ describe('Aplikasi harus menyediakan pembaruan informasi profil bagi masing-masi
             ->put('/user/profile', [
                 'name' => 'Leon S Kennedy',
                 'nik' => '1234567890123456',
-                'phone_number' => '081234567890',
+                'phone_number' => '0987654321',
             ]);
 
         $res->assertStatus(302);
         $this->assertDatabaseHas('users', [
             'id' => $anggota->id,
             'name' => 'Leon S Kennedy',
-            'nik' => '1234567890123456',
-            'phone_number' => '081234567890',
+            'nik' => $anggota->nik,
+            'phone_number' => '0987654321',
         ]);
     });
 

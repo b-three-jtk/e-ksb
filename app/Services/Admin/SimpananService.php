@@ -353,18 +353,18 @@ class SimpananService
                 ]);
             }
 
-            if ($member->status !== MemberStatusEnum::PAYMENT_PENDING->value) {
-                throw ValidationException::withMessages([
-                    'saving_category' => 'Simpanan Pokok hanya untuk anggota Menunggu Pembayaran.',
-                ]);
-            }
-
             if (SavingTransaction::where('saving_account_id', $savingAccount->id)
                 ->where('transaction_type', TransactionTypeEnum::DEPOSIT->value)
                 ->exists()
             ) {
                 throw ValidationException::withMessages([
                     'saving_category' => 'Simpanan Pokok hanya boleh dibayar sekali.',
+                ]);
+            }
+
+            if ($member->status !== MemberStatusEnum::PAYMENT_PENDING->value) {
+                throw ValidationException::withMessages([
+                    'saving_category' => 'Simpanan Pokok hanya untuk anggota Menunggu Pembayaran.',
                 ]);
             }
         }
