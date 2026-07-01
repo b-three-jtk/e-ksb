@@ -43,8 +43,6 @@ class AnggotaController extends Controller
 
         $hasExistingResign = $user->member->status === MemberStatusEnum::RESIGNED_REQUESTED->value;
 
-        Log::info('User ' . $user->id . ' is accessing resignation form with existing resign: ' . ($hasExistingResign ? 'yes' : 'no'));
-
         $resignData = $this->pengunduranDiriService->getResignData($user->member->id);
 
         return inertia('User/Resign/Create', [
@@ -135,19 +133,13 @@ class AnggotaController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'nik' => [
-                'required',
-                'string',
-                'size:16',
-                Rule::unique('users', 'nik')->ignore($user->id, 'id'),
-            ],
             'email' => [
                 'nullable',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($user->id, 'id'),
             ],
-            'phone_number' => 'nullable|string|max:20',
+            'phone_number' => 'required|string|max:20',
             'last_education' => 'nullable|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
             'residential_address' => 'nullable|string|max:1000',
         ]);

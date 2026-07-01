@@ -2,10 +2,10 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\PositionEnum;
+use App\Models\Journal;
 use App\Models\JournalEntry;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use App\Enums\PositionEnum;
 
 class JurnalService
 {
@@ -15,13 +15,13 @@ class JurnalService
 
         return DB::transaction(function () use ($entries, $date, $userId) {
 
-            $journal = \App\Models\Journal::create([
+            $journal = Journal::create([
                 'tgl_transaksi' => $date ?? now()->toDateString(),
                 'created_by'    => $userId,
             ]);
 
             foreach ($entries as $entry) {
-                \App\Models\JournalEntry::create([
+                JournalEntry::create([
                     'journal_id'       => $journal->id,
                     'journal_group_id' => $journal->id,
                     'no_ref_account'   => $entry['account'],

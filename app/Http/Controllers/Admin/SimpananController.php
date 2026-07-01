@@ -197,6 +197,11 @@ class SimpananController extends Controller
     public function storeWithdrawal(StoreWithdrawalRequest $request)
     {
         try {
+            $member = Member::with('user')->findOrFail($request->member_id);
+            if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_user_id !== Auth::id()) {
+                abort(403, 'Anda tidak berhak melakukan transaksi untuk anggota ini.');
+            }
+
             $result = $this->simpananServices->storeWithdrawal(
                 $request->validated(),
                 Auth::id()

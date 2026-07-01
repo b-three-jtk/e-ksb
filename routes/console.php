@@ -12,5 +12,8 @@ Schedule::command('points:calculate-monthly-savings')
     ->dailyAt('23:59')
     ->when(fn () => now()->isLastOfMonth());
 
+Schedule::command('points:calculate-murabahah-points')
+    ->daily();
+
 Schedule::command('notifications:send-reminders')
     ->daily();

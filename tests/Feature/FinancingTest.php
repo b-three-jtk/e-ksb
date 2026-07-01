@@ -2,6 +2,7 @@
 
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\MemberStatusEnum;
+use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Financing;
 use App\Models\FinancingItem;
@@ -29,11 +30,12 @@ beforeEach(function () {
 describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan murabahah anggota oleh staf murabahah.', function () {
     it('Staf Murabahah dapat mencatat permohonan dengan data yang valid', function () {
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $staffMurabahah->assignRole('Staf Murabahah');
+        $staffMurabahah->syncRoles('Staf Murabahah');
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
 
         SavingAccount::factory()->create([
             'member_id' => $member->id,
+            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 10000000,
             'created_at' => now()->subMonths(6),
         ]);
@@ -57,7 +59,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => 1,
+                    'product_type_id' => \App\Models\ProductType::first()->id,
                     'predicted_cost_price' => 50000000,
                     'qty' => 1,
                     'condition' => 'Baru',
@@ -85,7 +87,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
 
     it('Pemohon yang tidak berstatus aktif tidak dapat mengajukan pembiayaan', function () {
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $staffMurabahah->assignRole('Staf Murabahah');
+        $staffMurabahah->syncRoles('Staf Murabahah');
 
         $user = User::factory()->create(['status' => UserStatusEnum::INACTIVE->value]);
         $member = Member::factory()->create(['user_id' => $user->id]);
@@ -109,7 +111,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => 1,
+                    'product_type_id' => \App\Models\ProductType::first()->id,
                     'predicted_cost_price' => 50000000,
                     'qty' => 1,
                     'condition' => 'Baru',
@@ -134,7 +136,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
 
     it('Pemohon yang masih mempunyai tunggakan tidak dapat mengajukan pembiayaan', function () {
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $staffMurabahah->assignRole('Staf Murabahah');
+        $staffMurabahah->syncRoles('Staf Murabahah');
 
         $user = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $member = Member::factory()->create(['user_id' => $user->id]);
@@ -146,6 +148,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
 
         SavingAccount::factory()->create([
             'member_id' => $member->id,
+            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 10000000,
             'created_at' => now()->subMonths(6),
         ]);
@@ -169,7 +172,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => 1,
+                    'product_type_id' => \App\Models\ProductType::first()->id,
                     'predicted_cost_price' => 50000000,
                     'qty' => 1,
                     'condition' => 'Baru',
@@ -194,7 +197,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
 
     it('Pemohon yang tidak mempunyai tabungan anggota yang sudah berjalan minimal 1 bulan tidak dapat mengajukan pembiayaan', function () {
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $staffMurabahah->assignRole('Staf Murabahah');
+        $staffMurabahah->syncRoles('Staf Murabahah');
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
 
         $response = $this->actingAs($staffMurabahah)
@@ -216,7 +219,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => 1,
+                    'product_type_id' => \App\Models\ProductType::first()->id,
                     'predicted_cost_price' => 50000000,
                     'qty' => 1,
                     'condition' => 'Baru',
@@ -241,7 +244,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
 
     it('Selain Staf Murabahah tidak dapat mencatat permohonan pembiayaan', function () {
         $user = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $user->assignRole('Ketua Murabahah');
+        $user->syncRoles('Ketua Murabahah');
 
         $response = $this->actingAs($user)
             ->post('/admin/financings/store', [
@@ -269,12 +272,13 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
     it('Staf Murabahah dapat melakukan finalisasi pembiayaan murabahah bil wakalah', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user = User::where('id', $member->user_id)->first();
-        $user->assignRole('Anggota');
+        $user->syncRoles('Anggota');
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $staffMurabahah->assignRole('Staf Murabahah');
+        $staffMurabahah->syncRoles('Staf Murabahah');
 
         SavingAccount::factory()->create([
             'member_id' => $member->id,
+            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 10000000,
             'created_at' => now()->subMonths(6),
         ]);
@@ -304,7 +308,7 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => 1,
+                    'product_type_id' => \App\Models\ProductType::first()->id,
                     'predicted_cost_price' => 50000000,
                     'price_per_unit' => 50000000,
                     'cost_price' => 50000000,
@@ -335,6 +339,7 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
                 'bank_book_file' => UploadedFile::fake()->create('bank_book.jpg'),
             ]);
 
+        $response->assertSessionHasNoErrors();
         $response->assertStatus(302);
         $this->assertDatabaseHas('financings', [
             'cost_price' => 50000000,
@@ -349,7 +354,7 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
 describe('Aplikasi harus menyediakan verifikasi permohonan pembiayaan murabahah beserta catatan pemeriksaan oleh ketua murabahah atau ketua koperasi.', function () {
     it('Ketua Murabahah dapat menyetujui permohonan pembiayaan', function () {
         $ketuaMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $ketuaMurabahah->assignRole('Ketua Murabahah');
+        $ketuaMurabahah->syncRoles('Ketua Murabahah');
 
         $financing = Financing::factory()->create([
             'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
@@ -369,7 +374,7 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pembiayaan murabahah 
 
     it('Ketua Murabahah dapat menolak permohonan pembiayaan beserta alasan', function () {
         $ketuaMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $ketuaMurabahah->assignRole('Ketua Murabahah');
+        $ketuaMurabahah->syncRoles('Ketua Murabahah');
 
         $financing = Financing::factory()->create([
             'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
@@ -390,11 +395,11 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pembiayaan murabahah 
 
     it('Ketua koperasi dapat menyetujui permohonan pembiayaan yang diajukan oleh ketua murabahah', function () {
         $ketuaKoperasi = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $ketuaKoperasi->assignRole('Ketua');
+        $ketuaKoperasi->syncRoles('Ketua');
 
         $ketuaMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $ketuaMurabahahMember = Member::factory()->create(['user_id' => $ketuaMurabahah->id, 'status' => MemberStatusEnum::ACTIVE->value]);
-        $ketuaMurabahah->assignRole('Ketua Murabahah');
+        $ketuaMurabahah->syncRoles('Ketua Murabahah');
 
         $financing = Financing::factory()->create([
             'member_id' => $ketuaMurabahahMember->id,
@@ -417,7 +422,7 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pembiayaan murabahah 
 describe('Aplikasi harus menyediakan daftar pembiayaan murabahah untuk ketua koperasi, ketua murabahah, dan staf murabahah.', function () {
     it('Ketua Murabahah dapat melihat daftar pembiayaan aktif dan riwayat semua anggota', function () {
         $ketuaMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $ketuaMurabahah->assignRole('Ketua Murabahah');
+        $ketuaMurabahah->syncRoles('Ketua Murabahah');
         Financing::factory()->count(3)->create(['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value]);
 
         $responseActive = $this->actingAs($ketuaMurabahah)->get('/admin/financings');
@@ -426,7 +431,7 @@ describe('Aplikasi harus menyediakan daftar pembiayaan murabahah untuk ketua kop
 
     it('Selain pengurus terkait tidak dapat mengakses daftar pembiayaan', function () {
         $user = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $user->assignRole('Sekretaris');
+        $user->syncRoles('Sekretaris');
 
         $response = $this->actingAs($user)->get('/admin/financings');
         $response->assertStatus(403);
@@ -436,7 +441,7 @@ describe('Aplikasi harus menyediakan daftar pembiayaan murabahah untuk ketua kop
 describe('Aplikasi harus menyediakan detail pembiayaan murabahah yang memuat riwayat pembayaran.', function () {
     it('Ketua Murabahah dapat melihat detail pembiayaan beserta riwayat pembayaran', function () {
         $ketuaMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $ketuaMurabahah->assignRole('Ketua Murabahah');
+        $ketuaMurabahah->syncRoles('Ketua Murabahah');
         $financing = Financing::factory()->create(['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value]);
 
         $response = $this->actingAs($ketuaMurabahah)->get("/admin/financings/show/{$financing->id}");
@@ -445,7 +450,7 @@ describe('Aplikasi harus menyediakan detail pembiayaan murabahah yang memuat riw
 
     it('Selain pengurus terkait tidak dapat mengakses detail pembiayaan', function () {
         $user = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $user->assignRole('Sekretaris');
+        $user->syncRoles('Sekretaris');
         $financing = Financing::factory()->create(['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value]);
 
         $response = $this->actingAs($user)->get("/admin/financings/show/{$financing->id}");
@@ -457,7 +462,7 @@ describe('Aplikasi harus menyediakan informasi pembiayaan murabahah yang masih b
     it('Anggota dapat melihat pembiayaan yang masih berjalan dan selesai', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user = User::where('id', $member->user_id)->first();
-        $user->assignRole('Anggota');
+        $user->syncRoles('Anggota');
 
         Financing::factory()->create([
             'member_id' => $member->id,
@@ -478,7 +483,7 @@ describe('Aplikasi harus menyediakan informasi pembiayaan murabahah yang masih b
     it('Anggota tidak dapat melihat pembiayaan anggota lain', function () {
         $member1 = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user1 = User::where('id', $member1->user_id)->first();
-        $user1->assignRole('Anggota');
+        $user1->syncRoles('Anggota');
 
         $member2 = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $financing2 = Financing::factory()->create([
@@ -495,7 +500,7 @@ describe('Aplikasi harus dapat mengirimkan notifikasi jatuh tempo pembayaran ang
     it('Sistem mengirimkan notifikasi H-1 sebelum jatuh tempo pembayaran angsuran', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user = User::where('id', $member->user_id)->first();
-        $user->assignRole('Anggota');
+        $user->syncRoles('Anggota');
 
         $financing = Financing::factory()->create([
             'member_id' => $member->id,
@@ -523,10 +528,10 @@ describe('Aplikasi harus menyediakan pemantauan notifikasi koperasi oleh penangg
     it('Penanggung Jawab Anggota dapat melihat notifikasi terkait pembiayaan anggota', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user = User::where('id', $member->user_id)->first();
-        $user->assignRole('Anggota');
+        $user->syncRoles('Anggota');
 
         $pjAnggota = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $pjAnggota->assignRole('Penanggung Jawab Anggota');
+        $pjAnggota->syncRoles('Penanggung Jawab Anggota');
 
         $financing = Financing::factory()->create([
             'member_id' => $member->id,
@@ -557,16 +562,18 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
     it('Staf Murabahah dapat mencatat pembayaran angsuran', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user = User::where('id', $member->user_id)->first();
-        $user->assignRole('Anggota');
+        $user->syncRoles('Anggota');
 
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $staffMurabahah->assignRole('Staf Murabahah');
+        $staffMurabahah->syncRoles('Staf Murabahah');
         $financing = Financing::factory()->create(['status' => 'Angsuran Berjalan']);
 
         $financing = Financing::factory()->create([
             'member_id' => $member->id,
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
             'akad_date' => now()->subMonths(11),
+            'tenor' => 12,
+            'payment_method' => \App\Enums\FinancingPaymentMethodEnum::INSTALLMENT->value,
         ]);
 
         $installment = Installment::factory()->create([
@@ -578,7 +585,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
         ]);
 
         $response = $this->actingAs($staffMurabahah)
-            ->post("/admin/financings/{$financing}/payments/store", [
+            ->post("/admin/financings/{$financing->id}/payments/store", [
                 'installment_id' => $installment->id,
                 'financing_id' => $financing->id,
                 'nominal' => 1833333,
@@ -586,6 +593,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
                 'payment_method' => 'Tunai',
             ]);
 
+        $response->assertSessionHasNoErrors();
         $response->assertStatus(302);
         $this->assertDatabaseHas('installment_payment_transactions', [
             'installment_id' => $installment->id,
@@ -596,10 +604,10 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
     it('Selain Staf Murabahah tidak dapat mencatat pembayaran angsuran', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user = User::where('id', $member->user_id)->first();
-        $user->assignRole('Anggota');
+        $user->syncRoles('Anggota');
 
         $user = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $user->assignRole('Ketua Murabahah');
+        $user->syncRoles('Ketua Murabahah');
         $financing = Financing::factory()->create([
             'member_id' => $member->id,
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
@@ -630,10 +638,10 @@ describe('Aplikasi harus dapat menyediakan penjadwalan ulang pembayaran angsuran
     it('Staf Murabahah dapat menjadwalkan ulang pembayaran angsuran', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user = User::where('id', $member->user_id)->first();
-        $user->assignRole('Anggota');
+        $user->syncRoles('Anggota');
 
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $staffMurabahah->assignRole('Staf Murabahah');
+        $staffMurabahah->syncRoles('Staf Murabahah');
 
         $financing = Financing::factory()->create([
             'member_id' => $member->id,
@@ -667,10 +675,10 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pelunasan sebelum jat
     it('Staf Murabahah dapat memproses permohonan pelunasan sebelum jatuh tempo', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user = User::where('id', $member->user_id)->first();
-        $user->assignRole('Anggota');
+        $user->syncRoles('Anggota');
 
         $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $staffMurabahah->assignRole('Staf Murabahah');
+        $staffMurabahah->syncRoles('Staf Murabahah');
 
         $financing = Financing::factory()->create([
             'member_id' => $member->id,
@@ -710,10 +718,10 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pelunasan sebelum jat
     it('Selain Staf Murabahah tidak dapat memproses permohonan pelunasan sebelum jatuh tempo', function () {
         $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
         $user = User::where('id', $member->user_id)->first();
-        $user->assignRole('Anggota');
+        $user->syncRoles('Anggota');
 
         $user = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
-        $user->assignRole('Ketua Murabahah');
+        $user->syncRoles('Ketua Murabahah');
 
         $financing = Financing::factory()->create([
             'member_id' => $member->id,
@@ -815,6 +823,95 @@ describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', func
             'Diragukan' => 1,
             'Macet' => 1,
         ], $petaPembiayaan);
+
+        $this->travelBack();
+    });
+});
+
+describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pembiayaan berdasarkan periode buku secara otomatis.', function () {
+    it('Menghitung poin anggota dari pembayaran margin pembiayaan berdasarkan periode buku secara otomatis.', function () {
+        $user = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $user->syncRoles('Anggota');
+        $member = Member::factory([
+            'user_id' => $user->id,
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ])->create();
+
+        \App\Models\GlobalSetting::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
+        \App\Models\GlobalSetting::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
+        \App\Models\GlobalSetting::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
+        \App\Models\GlobalSetting::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
+        \App\Models\GlobalSetting::where('key', 'murabaha_point_reward')->update(['value' => '1']);
+
+        $financing = Financing::factory()->create([
+            'member_id' => $member->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+        ]);
+
+        $installment = Installment::factory()->create([
+            'financing_id' => $financing->id,
+        ]);
+
+        \App\Models\InstallmentPaymentTransaction::factory()->create([
+            'installment_id' => $installment->id,
+            'margin_amount' => 150000,
+            'principal_amount' => 0,
+            'nominal' => 150000,
+            'payment_date' => '2026-06-15',
+        ]);
+
+        $this->travelTo(\Carbon\Carbon::parse('2026-12-31'));
+
+        $this->artisan('points:calculate-murabahah-points')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('point_transactions', [
+            'user_id' => $user->id,
+            'amount_earned' => 1,
+        ]);
+
+        $this->travelBack();
+    });
+
+    it('Tidak menghitung poin anggota dari pembayaran margin pembiayaan kurang dari threshold', function () {
+        $user = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $user->syncRoles('Anggota');
+        $member = Member::factory([
+            'user_id' => $user->id,
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ])->create();
+
+        \App\Models\GlobalSetting::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
+        \App\Models\GlobalSetting::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
+        \App\Models\GlobalSetting::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
+        \App\Models\GlobalSetting::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
+        \App\Models\GlobalSetting::where('key', 'murabaha_point_reward')->update(['value' => '1']);
+
+        $financing = Financing::factory()->create([
+            'member_id' => $member->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+        ]);
+
+        $installment = Installment::factory()->create([
+            'financing_id' => $financing->id,
+        ]);
+
+        \App\Models\InstallmentPaymentTransaction::factory()->create([
+            'installment_id' => $installment->id,
+            'margin_amount' => 50000,
+            'principal_amount' => 0,
+            'nominal' => 50000,
+            'payment_date' => '2026-06-15',
+        ]);
+
+        $this->travelTo(\Carbon\Carbon::parse('2026-12-31'));
+
+        $this->artisan('points:calculate-murabahah-points')
+            ->assertSuccessful();
+
+        $this->assertDatabaseMissing('point_transactions', [
+            'user_id' => $user->id,
+        ]);
 
         $this->travelBack();
     });
