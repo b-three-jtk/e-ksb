@@ -46,6 +46,9 @@ public function run(): void
 
             // Assign permissions berdasarkan role
             switch ($case) {
+                case UserRoleEnum::ADMIN:
+                    $role->givePermissionTo(Permission::all());
+                    break;
                 case UserRoleEnum::DPS:
                     $role->givePermissionTo(['view_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'view_peran_akses', 'view_alokasi_pj']);
                     break;

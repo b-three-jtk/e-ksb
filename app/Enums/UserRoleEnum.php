@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum UserRoleEnum: string
 {
+    case ADMIN = 'Administrator Sistem';
     case DPS = 'Dewan Pengawas Syariah';
     case PENGAWAS = 'Pengawas';
     case KETUA = 'Ketua';

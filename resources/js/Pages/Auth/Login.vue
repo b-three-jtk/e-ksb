@@ -58,12 +58,12 @@ const submit = () => {
                 </div>
 
                 <div class="space-y-4">
-                  <div class="flex justify-end">
+                  <!-- <div class="flex justify-end">
                       <Link href="/auth/forgot-password"
                           class="text-gray-500 hover:text-accent hover:underline dark:text-white font-head">
                           Lupa password?
                       </Link>
-                  </div>
+                  </div> -->
 
                   <button
                     type="submit"
