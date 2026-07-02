@@ -147,13 +147,9 @@ class DasborService
 
     public function getRasioKas($tanggalAkhir)
     {
-        $totalKas = JournalEntry::where('no_ref_account', '101')
-            ->where('transaction_date', '<=', $tanggalAkhir)
-            ->sum('nominal');
+        $totalKas = $this->getSaldoAkun('101', $tanggalAkhir, 'Debit', 'Credit');
 
-        $totalLiabilitas = JournalEntry::whereIn('no_ref_account', ['201', '202', '203'])
-            ->where('transaction_date', '<=', $tanggalAkhir)
-            ->sum('nominal');
+        $totalLiabilitas = $this->getSaldoAkun(['201', '202', '203'], $tanggalAkhir, 'Credit', 'Debit');
 
         $rasioKas = 0;
         if ($totalLiabilitas > 0) {
@@ -165,13 +161,9 @@ class DasborService
 
     public function getRasioFDR($tanggalAkhir)
     {
-        $totalPembiayaan = JournalEntry::where('no_ref_account', '104')
-            ->where('transaction_date', '<=', $tanggalAkhir)
-            ->sum('nominal');
+        $totalPembiayaan = $this->getSaldoAkun('104', $tanggalAkhir, 'Debit', 'Credit');
 
-        $totalDeposit = JournalEntry::whereIn('no_ref_account', ['201', '202', '203'])
-            ->where('transaction_date', '<=', $tanggalAkhir)
-            ->sum('nominal');
+        $totalDeposit = $this->getSaldoAkun(['201', '202', '203'], $tanggalAkhir, 'Credit', 'Debit');
 
         $rasioFDR = 0;
         if ($totalDeposit > 0) {
@@ -349,7 +341,7 @@ class DasborService
                 'no_transaksi' => $i->financing->financing_transaction_code,
                 'anggota' => $i->financing->member->user->name,
                 'jumlah' => $i->amount,
-                'hari_terlambat' => Carbon::parse($i->due_date)->diffInDays(Carbon::parse($tanggalAkhir)),
+                'hari_terlambat' => round(Carbon::parse($i->due_date)->diffInDays(Carbon::parse($tanggalAkhir))),
             ]);
 
         return $data->toArray();

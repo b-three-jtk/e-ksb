@@ -6,7 +6,9 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Financing;
 use App\Models\FinancingItem;
+use App\Models\GlobalSetting;
 use App\Models\Installment;
+use App\Models\InstallmentPaymentTransaction;
 use App\Models\Member;
 use App\Models\SavingAccount;
 use App\Models\Supplier;
@@ -17,6 +19,7 @@ use Database\Seeders\ProductTypeSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -837,11 +840,11 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
-        \App\Models\GlobalSetting::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
-        \App\Models\GlobalSetting::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
-        \App\Models\GlobalSetting::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
-        \App\Models\GlobalSetting::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
-        \App\Models\GlobalSetting::where('key', 'murabaha_point_reward')->update(['value' => '1']);
+        GlobalSetting::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
+        GlobalSetting::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
+        GlobalSetting::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
+        GlobalSetting::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
+        GlobalSetting::where('key', 'murabaha_point_reward')->update(['value' => '1']);
 
         $financing = Financing::factory()->create([
             'member_id' => $member->id,
@@ -852,7 +855,7 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'financing_id' => $financing->id,
         ]);
 
-        \App\Models\InstallmentPaymentTransaction::factory()->create([
+        InstallmentPaymentTransaction::factory()->create([
             'installment_id' => $installment->id,
             'margin_amount' => 150000,
             'principal_amount' => 0,
@@ -881,11 +884,11 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
-        \App\Models\GlobalSetting::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
-        \App\Models\GlobalSetting::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
-        \App\Models\GlobalSetting::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
-        \App\Models\GlobalSetting::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
-        \App\Models\GlobalSetting::where('key', 'murabaha_point_reward')->update(['value' => '1']);
+        GlobalSetting::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
+        GlobalSetting::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
+        GlobalSetting::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
+        GlobalSetting::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
+        GlobalSetting::where('key', 'murabaha_point_reward')->update(['value' => '1']);
 
         $financing = Financing::factory()->create([
             'member_id' => $member->id,
@@ -896,7 +899,7 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'financing_id' => $financing->id,
         ]);
 
-        \App\Models\InstallmentPaymentTransaction::factory()->create([
+        InstallmentPaymentTransaction::factory()->create([
             'installment_id' => $installment->id,
             'margin_amount' => 50000,
             'principal_amount' => 0,
@@ -916,3 +919,47 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
         $this->travelBack();
     });
 });
+
+    it('Bukti transaksi berupa file PDF dihasilkan setelah transaksi pembayaran angsuran berhasil dicatat', function () {
+        Storage::fake('public');
+
+        $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+        $user = User::where('id', $member->user_id)->first();
+        $user->syncRoles('Anggota');
+
+        $staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $staffMurabahah->syncRoles('Staf Murabahah');
+
+        $financing = Financing::factory()->create([
+            'member_id' => $member->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'akad_date' => now()->subMonths(11),
+            'tenor' => 12,
+            'payment_method' => \App\Enums\FinancingPaymentMethodEnum::INSTALLMENT->value,
+        ]);
+
+        $installment = Installment::factory()->create([
+            'financing_id' => $financing->id,
+            'installment_no' => 1,
+            'amount' => 1833333,
+            'due_date' => now()->addDays(3)->startOfDay(),
+            'status' => 'Terjadwal',
+        ]);
+
+        $response = $this->actingAs($staffMurabahah)
+            ->post("/admin/financings/{$financing->id}/payments/store", [
+                'installment_id' => $installment->id,
+                'financing_id' => $financing->id,
+                'nominal' => 1833333,
+                'payment_date' => now()->format('Y-m-d'),
+                'payment_method' => 'Tunai',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertStatus(302);
+        
+        $response->assertSessionHas('pdf_url');
+
+        $files = Storage::disk('public')->allFiles('receipts/' . $member->id);
+        expect($files)->not->toBeEmpty();
+    });

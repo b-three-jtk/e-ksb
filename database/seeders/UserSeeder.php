@@ -7,6 +7,7 @@ use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Member;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -17,6 +18,17 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // DEFAULT USERS
+        $adminSistem = User::create([
+            'user_code' => 'KSB2607000',
+            'nik' => '0000000000',
+            'name' => 'Administrator Sistem',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('password'),
+            'status' => UserStatusEnum::ACTIVE->value,
+            'phone_number' => '081234567800',
+        ]);
+        $adminSistem->assignRole(UserRoleEnum::ADMIN->value);
+
         $dps = User::create([
             'user_code' => 'KSB2607001',
             'nik' => '0000000099',
@@ -120,19 +132,70 @@ class UserSeeder extends Seeder
         ]);
         $pjAnggota->assignRole(UserRoleEnum::PJANGGOTA->value);
 
+        $startDate = Carbon::create(2017, 1, 1);
+        $endDate = Carbon::create(2026, 12, 31);
+        
+        $getRandomDate = function () use ($startDate, $endDate) {
+            $randomTimestamp = mt_rand($startDate->timestamp, $endDate->timestamp);
+            return Carbon::createFromTimestamp($randomTimestamp);
+        };
+
         // create 110 random users with Anggota role
-        User::factory(110)->create()->each(function ($user) {
+        User::factory(110)->create()->each(function ($user) use ($getRandomDate) {
+            $randomDate = $getRandomDate();
+            $user->update([
+                'created_at' => $randomDate,
+                'updated_at' => $randomDate,
+            ]);
             $user->assignRole(UserRoleEnum::ANGGOTA->value);
             Member::factory()->create([
                 'user_id' => $user->id,
+                'created_at' => $randomDate,
+                'updated_at' => $randomDate,
             ]);
         });
 
-        User::factory(10)->create()->each(function ($user) {
+        // create 10-15 random pengurus
+        $pengurusRoles = [
+            UserRoleEnum::DPS->value,
+            UserRoleEnum::PENGAWAS->value,
+            UserRoleEnum::KETUA->value,
+            UserRoleEnum::SEKRETARIS->value,
+            UserRoleEnum::BENDAHARA->value,
+            UserRoleEnum::KETUAMURABAHAH->value,
+            UserRoleEnum::STAFMURABAHAH->value,
+            UserRoleEnum::PJANGGOTA->value,
+        ];
+        
+        $jumlahPengurus = rand(10, 15);
+        User::factory($jumlahPengurus)->create()->each(function ($user) use ($getRandomDate, $pengurusRoles) {
+            $randomDate = $getRandomDate();
+            $user->update([
+                'created_at' => $randomDate,
+                'updated_at' => $randomDate,
+            ]);
+            $randomRole = $pengurusRoles[array_rand($pengurusRoles)];
+            $user->assignRole($randomRole);
+            
+            Member::factory()->create([
+                'user_id' => $user->id,
+                'created_at' => $randomDate,
+                'updated_at' => $randomDate,
+            ]);
+        });
+
+        User::factory(10)->create()->each(function ($user) use ($getRandomDate) {
+            $randomDate = $getRandomDate();
+            $user->update([
+                'created_at' => $randomDate,
+                'updated_at' => $randomDate,
+            ]);
             $user->assignRole(UserRoleEnum::ANGGOTA->value);
             Member::factory()->create([
                 'user_id' => $user->id,
                 'status' => MemberStatusEnum::RESIGNED_REQUESTED->value,
+                'created_at' => $randomDate,
+                'updated_at' => $randomDate,
             ]);
         });
 
