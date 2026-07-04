@@ -54,7 +54,7 @@ class StoreFinancingRequest extends FormRequest
 
             // Financing data
             'financing.name' => 'required|string|max:255',
-            'financing.product_type_id' => 'required|exists:product_types,id',
+            'financing.jenis_barang_id' => 'required|exists:jenis_barang,id',
             'financing.condition' => 'required|string|max:255',
             'financing.qty' => 'required|integer|min:1',
             'financing.specification' => 'required|string|max:1000',

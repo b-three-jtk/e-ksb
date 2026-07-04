@@ -168,7 +168,7 @@ class PembayaranAngsuranService
     {
         $financing->load([
             'anggota.user',
-            'financingItem.productType',
+            'financingItem.jenisBarang',
             'installment',
         ]);
 
@@ -199,7 +199,7 @@ class PembayaranAngsuranService
             'id'                      => $financing->id,
             'transaction_code'        => $financing->financing_transaction_code,
             'product_name'            => $financing->financingItem?->name,
-            'product_type'            => $financing->financingItem?->productType?->product_type_name,
+            'jenis_barang'            => $financing->financingItem?->jenisBarang?->nama_jenis_barang,
             'product_specification'   => $financing->financingItem?->specification,
             'color'                   => '-',
             'qty'                     => $financing->financingItem?->qty,
@@ -233,7 +233,7 @@ class PembayaranAngsuranService
     {
         $financing = Financing::with([
             'anggota.user',
-            'financingItem.productType',
+            'financingItem.jenisBarang',
             'installment',
         ])->findOrFail($validated['financing_id']);
 

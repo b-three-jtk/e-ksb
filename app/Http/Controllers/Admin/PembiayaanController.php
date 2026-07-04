@@ -19,7 +19,7 @@ use App\Models\FinancingVerification;
 use App\Models\GlobalSetting;
 use App\Models\JournalEntry;
 use App\Models\Anggota;
-use App\Models\ProductType;
+use App\Models\JenisBarang;
 use App\Models\AkunSimpanan;
 use App\Models\Supplier;
 use App\Models\Pengguna;
@@ -135,7 +135,7 @@ class PembiayaanController extends Controller
                 'anggota' => $this->financingService->formatMemberData($financing->anggota),
                 'financing' => [
                     'name' => $financing->financingItem->name,
-                    'product_type_id' => $financing->financingItem->product_type_id,
+                    'jenis_barang_id' => $financing->financingItem->jenis_barang_id,
                     'condition' => $financing->financingItem->condition,
                     'qty' => $financing->financingItem->qty,
                     'specification' => $financing->financingItem->specification,
@@ -200,7 +200,7 @@ class PembiayaanController extends Controller
                     'id' => $financing->id,
                     'financing_transaction_code' => $financing->financing_transaction_code,
                     'name' => $financing->financingItem->name,
-                    'product_type_id' => $financing->financingItem->product_type_id,
+                    'jenis_barang_id' => $financing->financingItem->jenis_barang_id,
                     'condition' => $financing->financingItem->condition,
                     'qty' => $financing->financingItem->qty,
                     'specification' => $financing->financingItem->specification,
@@ -211,7 +211,7 @@ class PembiayaanController extends Controller
                     'payment_method' => $financing->payment_method,
                     'akad_date' => $financing->akad_date,
                     'status' => $financing->status,
-                    'product_type' => $financing->financingItem->productType?->product_type_name,
+                    'jenis_barang' => $financing->financingItem->jenisBarang?->nama_jenis_barang,
                     'tenor' => $financing->tenor,
                     'predicted_cost_price' => $financing->predicted_cost_price,
                     'tangguh_payment_date' => $financing->tangguh_payment_date,
@@ -760,7 +760,7 @@ class PembiayaanController extends Controller
         $financing = Financing::with([
             'anggota.user',
             'installment.payment',
-            'financingItem.productType',
+            'financingItem.jenisBarang',
             'financingItem.supplier',
             'collateral'
         ])->where('status', '!=', FinancingReqStatusEnum::PAID->value)->findOrFail($id);
@@ -858,15 +858,15 @@ class PembiayaanController extends Controller
         }
     }
 
-    public function storeProductType(Request $request)
+    public function storeJenisBarang(Request $request)
     {
         $validatedData = $request->validate([
-            'product_type_name' => 'required|string|max:255|unique:product_types,product_type_name',
+            'nama_jenis_barang' => 'required|string|max:255|unique:jenis_barang,nama_jenis_barang',
         ]);
 
-        $productType = ProductType::create($validatedData);
+        $jenisBarang = JenisBarang::create($validatedData);
 
-        return response()->json($productType);
+        return response()->json($jenisBarang);
     }
 
     public function storeSupplier(Request $request)

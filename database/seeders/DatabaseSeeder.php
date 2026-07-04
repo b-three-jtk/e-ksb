@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             PenggunaSeeder::class,
-            ProductTypeSeeder::class,
+            JenisBarangSeeder::class,
             AccountSeeder::class,
             SavingProductSeeder::class,
             MurabahaProductSeeder::class,

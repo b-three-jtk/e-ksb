@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductType>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\JenisBarang>
  */
-class ProductTypeFactory extends Factory
+class JenisBarangFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,7 +17,7 @@ class ProductTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_type_name' => fake()->word(),
+            'nama_jenis_barang' => fake()->word(),
         ];
     }
 }

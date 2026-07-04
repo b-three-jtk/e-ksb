@@ -11,14 +11,14 @@ const props = defineProps({
 
 const emit = defineEmits(['validate-field'])
 
-const showNewProductTypeInput = ref(false)
-const newProductTypeName = ref('')
-const isCreatingProductType = ref(false)
+const showNewJenisBarangInput = ref(false)
+const newJenisBarangName = ref('')
+const isCreatingJenisBarang = ref(false)
 
-const productTypeSelectables = computed(() => {
-    const items = props.data.productTypes.map((pt) => ({
+const jenisBarangelectables = computed(() => {
+    const items = props.data.jenisBarang.map((pt) => ({
         value: pt.id,
-        text: pt.product_type_name,
+        text: pt.nama_jenis_barang,
     }))
     return [
         ...items,
@@ -26,38 +26,38 @@ const productTypeSelectables = computed(() => {
     ]
 })
 
-const handleProductTypeChange = (value) => {
+const handleJenisBarangChange = (value) => {
     if (value === 'NEW') {
-        showNewProductTypeInput.value = true
-        props.form.financing.product_type_id = null
+        showNewJenisBarangInput.value = true
+        props.form.financing.jenis_barang_id = null
     } else {
-        showNewProductTypeInput.value = false
-        props.form.financing.product_type_id = value
+        showNewJenisBarangInput.value = false
+        props.form.financing.jenis_barang_id = value
     }
 }
 
-const createNewProductType = async () => {
-    if (!newProductTypeName.value.trim()) return
-    isCreatingProductType.value = true
+const createNewJenisBarang = async () => {
+    if (!newJenisBarangName.value.trim()) return
+    isCreatingJenisBarang.value = true
     try {
         const response = await axios.post('/admin/product-types', {
-            product_type_name: newProductTypeName.value,
+            nama_jenis_barang: newJenisBarangName.value,
         })
-        props.data.productTypes.push(response.data)
-        props.form.financing.product_type_id = response.data.id
-        newProductTypeName.value = ''
-        showNewProductTypeInput.value = false
+        props.data.jenisBarang.push(response.data)
+        props.form.financing.jenis_barang_id = response.data.id
+        newJenisBarangName.value = ''
+        showNewJenisBarangInput.value = false
     } catch (error) {
         console.error('Error creating product type:', error)
         alert('Gagal membuat kategori produk')
     } finally {
-        isCreatingProductType.value = false
+        isCreatingJenisBarang.value = false
     }
 }
 
 const closeModal = () => {
-    showNewProductTypeInput.value = false
-    newProductTypeName.value = ''
+    showNewJenisBarangInput.value = false
+    newJenisBarangName.value = ''
 }
 
 const onFieldChange = (field) => emit('validate-field', field)
@@ -87,8 +87,8 @@ const onFieldChange = (field) => emit('validate-field', field)
 
             <BaseInputAdmin v-model="form.financing.name" label="Nama Produk" placeholder="Masukkan nama produk"
                 required :error="errors?.financing_name" @input="onFieldChange('financing_name')" />
-            <BaseInputAdmin v-model="form.financing.product_type_id" label="Kategori Produk" type="select"
-                :selectables="productTypeSelectables" @update:modelValue="handleProductTypeChange" />
+            <BaseInputAdmin v-model="form.financing.jenis_barang_id" label="Kategori Produk" type="select"
+                :selectables="jenisBarangelectables" @update:modelValue="handleJenisBarangChange" />
             <BaseInputAdmin required v-model="form.financing.condition" label="Kondisi" type="select"
                 :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
             <BaseInputAdmin required v-model="form.financing.qty" label="Jumlah" type="number" />
@@ -149,24 +149,24 @@ const onFieldChange = (field) => emit('validate-field', field)
 
     <!-- Modal tambah kategori -->
     <Teleport to="body">
-        <div v-if="showNewProductTypeInput" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div v-if="showNewJenisBarangInput" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md dark:bg-gray-800">
                 <h2 class="text-lg font-bold text-gray-900 mb-4 dark:text-gray-300">Tambah Kategori Produk Baru</h2>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Kategori</label>
-                    <input v-model="newProductTypeName" type="text" placeholder="Masukkan nama kategori..."
+                    <input v-model="newJenisBarangName" type="text" placeholder="Masukkan nama kategori..."
                         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 font-body rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
-                        @keyup.enter="createNewProductType" />
+                        @keyup.enter="createNewJenisBarang" />
                 </div>
                 <div class="flex gap-3 justify-end">
                     <button @click="closeModal"
                         class="px-4 py-2 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400 transition font-medium">
                         Batal
                     </button>
-                    <button @click="createNewProductType"
-                        :disabled="isCreatingProductType || !newProductTypeName.trim()"
+                    <button @click="createNewJenisBarang"
+                        :disabled="isCreatingJenisBarang || !newJenisBarangName.trim()"
                         class="px-6 py-2 bg-primary hover:bg-secondary text-white rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium">
-                        <span v-if="!isCreatingProductType">Buat</span>
+                        <span v-if="!isCreatingJenisBarang">Buat</span>
                         <span v-else class="flex items-center gap-2">
                             <div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                             Membuat...

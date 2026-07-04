@@ -15,7 +15,7 @@ use App\Models\Supplier;
 use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\GlobalSettingSeeder;
-use Database\Seeders\ProductTypeSeeder;
+use Database\Seeders\JenisBarangSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -27,7 +27,7 @@ beforeEach(function () {
     $this->seed(RoleSeeder::class);
     $this->seed(AccountSeeder::class);
     $this->seed(GlobalSettingSeeder::class);
-    $this->seed(ProductTypeSeeder::class);
+    $this->seed(JenisBarangSeeder::class);
 });
 
 describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan murabahah anggota oleh staf murabahah.', function () {
@@ -62,7 +62,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => \App\Models\ProductType::first()->id,
+                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'predicted_cost_price' => 50000000,
                     'qty' => 1,
                     'condition' => 'Baru',
@@ -114,7 +114,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => \App\Models\ProductType::first()->id,
+                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'predicted_cost_price' => 50000000,
                     'qty' => 1,
                     'condition' => 'Baru',
@@ -175,7 +175,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => \App\Models\ProductType::first()->id,
+                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'predicted_cost_price' => 50000000,
                     'qty' => 1,
                     'condition' => 'Baru',
@@ -222,7 +222,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => \App\Models\ProductType::first()->id,
+                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'predicted_cost_price' => 50000000,
                     'qty' => 1,
                     'condition' => 'Baru',
@@ -311,7 +311,7 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
                 ],
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => \App\Models\ProductType::first()->id,
+                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'predicted_cost_price' => 50000000,
                     'price_per_unit' => 50000000,
                     'cost_price' => 50000000,

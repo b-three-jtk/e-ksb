@@ -353,7 +353,7 @@ async function handleSubmit() {
                                 </label>
 
                                 <input
-                                    :value="selectedFinancing.product_type"
+                                    :value="selectedFinancing.jenis_barang"
                                     readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />

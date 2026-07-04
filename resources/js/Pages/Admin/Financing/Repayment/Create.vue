@@ -101,7 +101,7 @@ const submitForm = () => {
                         </li>
                         <li>
                             <Info label="Kategori Objek Pembiayaan"
-                                :value="props.data?.financing?.financing_item.product_type.product_type_name" />
+                                :value="props.data?.financing?.financing_item.jenis_barang.nama_jenis_barang" />
                         </li>
                         <li>
                             <Info label="Informasi Cicilan"

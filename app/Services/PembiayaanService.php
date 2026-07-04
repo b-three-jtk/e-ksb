@@ -10,7 +10,7 @@ class PembiayaanService
     public function getPersonalFinancings(string $anggotaId, int $perPage = 10, string $search = '')
     {
         return Financing::query()
-            ->with(['financingItem.productType'])
+            ->with(['financingItem.jenisBarang'])
             ->where('anggota_id', $anggotaId)
             ->whereIn('status', ['Lunas', 'Angsuran Berjalan', 'Pembayaran Tangguh'])
             ->when($search !== '', function ($q) use ($search) {
@@ -29,7 +29,7 @@ class PembiayaanService
     public function getActiveFinancing(string $anggotaId): ?array
     {
         $activeFinancingModel = Financing::query()
-            ->with(['financingItem.productType'])
+            ->with(['financingItem.jenisBarang'])
             ->where('anggota_id', $anggotaId)
             ->where('status', 'Angsuran Berjalan')
             ->orderByDesc('akad_date')
@@ -122,7 +122,7 @@ class PembiayaanService
             'anggota.financials',
             'anggota.memberDocs',
             'anggota.memberJobs',
-            'financingItem.productType',
+            'financingItem.jenisBarang',
             'collateral',
             'installment' => function ($q) {
                 $q->orderBy('installment_no');

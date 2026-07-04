@@ -9,7 +9,7 @@ use App\Services\Admin\DasborService;
 use App\Services\Admin\PembayaranAngsuranService;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\GlobalSettingSeeder;
-use Database\Seeders\ProductTypeSeeder;
+use Database\Seeders\JenisBarangSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(Tests\TestCase::class, RefreshDatabase::class);
@@ -18,7 +18,7 @@ beforeEach(function () {
     $this->seed(RoleSeeder::class);
     $this->seed(AccountSeeder::class);
     $this->seed(GlobalSettingSeeder::class);
-    $this->seed(ProductTypeSeeder::class);
+    $this->seed(JenisBarangSeeder::class);
 });
 
 it('Menghitung detail pelunasan sebelum jatuh tempo', function () {

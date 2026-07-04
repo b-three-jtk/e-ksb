@@ -39,8 +39,8 @@ class PembiayaanService
                 $query->select('id', 'nama', 'kode_pengguna');
             },
             'installment',
-            'financingItem.productType' => function ($query) {
-                $query->select('product_types.id', 'product_types.product_type_name');
+            'financingItem.jenisBarang' => function ($query) {
+                $query->select('jenis_barang.id', 'jenis_barang.nama_jenis_barang');
             }
         ])
             ->when($search, function ($q) use ($search) {
@@ -126,7 +126,7 @@ class PembiayaanService
             'expenses' => array_column(FinancialCostEnum::cases(), 'value'),
             'relationships' => array_column(HeirEnum::cases(), 'value'),
             'conditions' => array_column(ConditionEnum::cases(), 'value'),
-            'productTypes' => DB::table('product_types')->select('id', 'product_type_name')->get(),
+            'jenisBarang' => DB::table('jenis_barang')->select('id', 'nama_jenis_barang')->get(),
             'suppliers' => DB::table('suppliers')->select('id', 'supplier_name', 'address')->get(),
             'margin_percentage' => GlobalSetting::where('key', 'murabahah_margin_percentage')->where('effective_date', '<=', now())->latest()->first()?->value,
         ];
@@ -147,7 +147,7 @@ class PembiayaanService
                 'anggota.memberDocs',
                 'anggota.heirs',
                 'anggota.memberJobs',
-                'financingItem.productType',
+                'financingItem.jenisBarang',
                 'financingItem.supplier',
                 'collateral',
                 'wakalah',
@@ -171,7 +171,7 @@ class PembiayaanService
                 'anggota.memberDocs',
                 'anggota.heirs',
                 'anggota.memberJobs',
-                'financingItem.productType',
+                'financingItem.jenisBarang',
                 'financingItem.supplier',
                 'collateral',
                 'wakalah',
@@ -335,7 +335,7 @@ class PembiayaanService
                 'qty'             => $financingData['qty'] ?? null,
                 'condition'       => $financingData['condition'] ?? null,
                 'price_per_unit'  => $financingData['price_per_unit'] ?? null,
-                'product_type_id' => $financingData['product_type_id'] ?? null,
+                'jenis_barang_id' => $financingData['jenis_barang_id'] ?? null,
                 'supplier_id'     => $financingData['supplier_id'] ?? null,
                 'purchase_receipt' => $request->hasFile('purchase_receipt_file') ? $request->file('purchase_receipt_file')->store('documents', 'public') : null,
             ]

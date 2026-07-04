@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('price_per_unit', 15, 2)->nullable();
             $table->string('purchase_receipt')->nullable();
 
-            $table->foreignId('product_type_id')->nullable()->references('id')->on('product_types')->onDelete('set null');
+            $table->foreignId('jenis_barang_id')->nullable()->references('id')->on('jenis_barang')->onDelete('set null');
             $table->foreignId('supplier_id')->nullable()->references('id')->on('suppliers')->onDelete('set null');
             $table->foreignUuid('financing_id')->references('id')->on('financings')->onDelete('cascade');
             $table->timestamps();

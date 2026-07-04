@@ -13,7 +13,7 @@ use App\Models\InstallmentPaymentTransaction;
 use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\Anggota;
-use App\Models\ProductType;
+use App\Models\JenisBarang;
 use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -178,7 +178,7 @@ class MurabahaProductSeeder extends Seeder
             'qty' => 1,
             'condition' => 'Baru',
             'price_per_unit' => $item['price'],
-            'product_type_id' => ProductType::where('product_type_name', $item['type'])->first()?->id,
+            'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
         $akadJournal = Journal::create([
@@ -349,7 +349,7 @@ class MurabahaProductSeeder extends Seeder
             'qty' => 1,
             'condition' => 'Baru',
             'price_per_unit' => $item['price'],
-            'product_type_id' => ProductType::where('product_type_name', $item['type'])->first()?->id,
+            'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
         $journal = Journal::create([
@@ -404,7 +404,7 @@ class MurabahaProductSeeder extends Seeder
             'qty' => 1,
             'condition' => 'Baru',
             'price_per_unit' => $item['price'],
-            'product_type_id' => ProductType::where('product_type_name', $item['type'])->first()?->id,
+            'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
         $akadDate = Carbon::parse($financing->akad_date);

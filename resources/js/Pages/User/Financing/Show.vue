@@ -89,7 +89,7 @@ const openReceiptModal = (receiptPath) => {
                                 <h1 class="card-title mb-4">Detail Objek Pembiayaan</h1>
                                 <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <Info label="Kategori Produk"
-                                        :value="data.financing_item?.product_type?.product_type_name" />
+                                        :value="data.financing_item?.jenis_barang?.nama_jenis_barang" />
                                     <Info label="Nama Produk" :value="data.financing_item?.name" />
                                     <Info label="Tanggal Akad" :value="dateParser(data.akad_date)" />
                                     <Info label="Jumlah/Kuantitas" :value="data.financing_item?.qty" />

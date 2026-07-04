@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\Financing;
-use App\Models\ProductType;
+use App\Models\JenisBarang;
 use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +22,7 @@ class FinancingItem extends Model
         
         'supplier_id',
         'financing_id',
-        'product_type_id'
+        'jenis_barang_id'
     ];
 
     public function financing()
@@ -30,9 +30,9 @@ class FinancingItem extends Model
         return $this->belongsTo(Financing::class);
     }
 
-    public function productType()
+    public function jenisBarang()
     {
-        return $this->belongsTo(ProductType::class);
+        return $this->belongsTo(JenisBarang::class);
     }
 
     public function supplier()

@@ -59,7 +59,7 @@ export function useFinancingForm(initialData = null) {
         // Financing data
         financing: {
             name: initialData?.financing?.name || '',
-            product_type_id: initialData?.financing?.product_type_id || null,
+            jenis_barang_id: initialData?.financing?.jenis_barang_id || null,
             brand: initialData?.financing?.brand || '',
             condition: initialData?.financing?.condition || '',
             qty: initialData?.financing?.qty || null,
@@ -239,7 +239,7 @@ export function useFinancingForm(initialData = null) {
         }
         form.financing = {
             name: '',
-            product_type_id: null,
+            jenis_barang_id: null,
             brand: '',
             condition: '',
             qty: null,

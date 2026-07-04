@@ -6,13 +6,13 @@ use App\Enums\UserStatusEnum;
 use App\Models\Financing;
 use App\Models\Installment;
 use App\Models\Anggota;
-use App\Models\ProductType;
+use App\Models\JenisBarang;
 use App\Models\AkunSimpanan;
 use App\Models\Supplier;
 use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\GlobalSettingSeeder;
-use Database\Seeders\ProductTypeSeeder;
+use Database\Seeders\JenisBarangSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->seed(RoleSeeder::class);
     $this->seed(AccountSeeder::class);
     $this->seed(GlobalSettingSeeder::class);
-    $this->seed(ProductTypeSeeder::class);
+    $this->seed(JenisBarangSeeder::class);
 });
 
 describe('IT01 Skenario Pembiayaan Murabahah', function () {
@@ -64,7 +64,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             ]);
         }
 
-        $this->productType = ProductType::first();
+        $this->jenisBarang = JenisBarang::first();
 
         $this->payloadPengajuan = [
             'anggota'=> [
@@ -91,7 +91,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $payload = $this->payloadPengajuan;
         $payload['financing'] = [
             'name' => 'Laptop ASUS',
-            'product_type_id' => $this->productType->id,
+            'jenis_barang_id' => $this->jenisBarang->id,
             'predicted_cost_price' => 10000000,
             'qty' => 1,
             'condition' => 'Baru',
@@ -116,7 +116,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             ->post('/admin/financings/finalize', array_merge($payload, [
                 'financing' => [
                     'name' => 'Laptop ASUS',
-                    'product_type_id' => $this->productType->id,
+                    'jenis_barang_id' => $this->jenisBarang->id,
                     'price_per_unit' => 10000000,
                     'cost_price' => 10000000,
                     'margin_amount' => 1000000, // Margin koperasi
@@ -148,7 +148,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $payload = $this->payloadPengajuan;
         $payload['financing'] = [
             'name' => 'Bahan Baku Usaha',
-            'product_type_id' => $this->productType->id,
+            'jenis_barang_id' => $this->jenisBarang->id,
             'predicted_cost_price' => 5000000,
             'qty' => 1,
             'condition' => 'Baru',
@@ -169,7 +169,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             ->post('/admin/financings/finalize', array_merge($payload, [
                 'financing' => [
                     'name' => 'Bahan Baku Usaha',
-                    'product_type_id' => $this->productType->id,
+                    'jenis_barang_id' => $this->jenisBarang->id,
                     'price_per_unit' => 5000000,
                     'cost_price' => 5000000,
                     'margin_amount' => 500000,
@@ -217,7 +217,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $payload = $this->payloadPengajuan;
         $payload['financing'] = [
             'name' => 'Motor Honda',
-            'product_type_id' => $this->productType->id,
+            'jenis_barang_id' => $this->jenisBarang->id,
             'predicted_cost_price' => 24000000,
             'qty' => 1,
             'condition' => 'Baru',
@@ -239,7 +239,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             ->post('/admin/financings/finalize', array_merge($payload, [
                 'financing' => [
                     'name' => 'Motor Honda',
-                    'product_type_id' => $this->productType->id,
+                    'jenis_barang_id' => $this->jenisBarang->id,
                     'price_per_unit' => 24000000,
                     'cost_price' => 24000000,
                     'margin_amount' => 2400000,
