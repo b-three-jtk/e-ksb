@@ -30,13 +30,13 @@ const props = defineProps({
 })
 
 const requiredMemberFields = computed(() => [
-	'name',
+	'nama',
 	'gender',
 	'nik',
 	'birth_place',
 	'birth_date',
 	'marital_status',
-	'phone_number',
+	'no_telp',
 	'domicile_address',
 	'last_education',
 	'heir_nik',
@@ -46,13 +46,13 @@ const requiredMemberFields = computed(() => [
 ])
 
 const form = useForm({
-	name: '',
+	nama: '',
 	gender: '',
 	nik: '',
 	birth_place: '',
 	birth_date: '',
 	marital_status: '',
-	phone_number: '',
+	no_telp: '',
 	email: '',
 	domicile_address: '',
 	last_education: '',

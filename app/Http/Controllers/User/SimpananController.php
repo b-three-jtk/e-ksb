@@ -24,10 +24,10 @@ class SimpananController extends Controller
 
         $member = auth()->user();
         $memberInfo = [
-            'nama' => $member->name,
-            'no_anggota' => $member->user_code,
+            'nama' => $member->nama,
+            'no_anggota' => $member->kode_pengguna,
             'status' => $member->status,
-            'tanggal_bergabung' => $member->joined_date->format('d F Y'),
+            'tanggal_bergabung' => $member->tgl_bergabung->format('d F Y'),
         ];
 
         [$savingSummary, $savingMeta] = $bukuBesarService->buildSavingSummaryAndMeta($userId);

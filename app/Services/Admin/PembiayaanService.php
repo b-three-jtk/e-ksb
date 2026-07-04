@@ -20,7 +20,7 @@ use App\Models\Installment;
 use App\Models\JournalEntry;
 use App\Models\Member;
 use App\Models\Supplier;
-use App\Models\User;
+use App\Models\Pengguna;
 use App\Models\Wakalah;
 use App\Services\PembiayaanService as SharedPembiayaanService;
 use Illuminate\Http\Request;
@@ -36,7 +36,7 @@ class PembiayaanService
     {
         return Financing::with([
             'member.user' => function ($query) {
-                $query->select('id', 'name', 'user_code');
+                $query->select('id', 'nama', 'kode_pengguna');
             },
             'installment',
             'financingItem.productType' => function ($query) {
@@ -46,8 +46,8 @@ class PembiayaanService
             ->when($search, function ($q) use ($search) {
                 $q->whereHas('member.user', function ($userQuery) use ($search) {
                     $userQuery->where(function ($userSearchQuery) use ($search) {
-                        $userSearchQuery->where('name', 'like', "%{$search}%")
-                            ->orWhere('user_code', 'like', "%{$search}%");
+                        $userSearchQuery->where('nama', 'like', "%{$search}%")
+                            ->orWhere('kode_pengguna', 'like', "%{$search}%");
                     });
                 });
             })
@@ -179,13 +179,13 @@ class PembiayaanService
             ->first();
     }
 
-    public function syncMemberData(User $user, array $memberData, Request $request): void
+    public function syncMemberData(Pengguna $user, array $memberData, Request $request): void
     {
         $user->update([
-            'name'         => $memberData['name'],
+            'nama'         => $memberData['nama'],
             'nik'          => $memberData['nik'],
             'email'        => $memberData['email'] ?? $user->email,
-            'phone_number' => $memberData['phone_number'] ?? $user->phone_number,
+            'no_telp' => $memberData['no_telp'] ?? $user->no_telp,
         ]);
 
         $user->member->update([
@@ -260,7 +260,7 @@ class PembiayaanService
         }
     }
 
-    public function syncFinancingData(User $user, Request $request, string $updatedBy): ?Financing
+    public function syncFinancingData(Pengguna $user, Request $request, string $updatedBy): ?Financing
     {
         if (!isset($request['financing']['name'])) return null;
 
@@ -390,11 +390,11 @@ class PembiayaanService
     {
         return [
             'id' => $member->id,
-            'user_code' => $member->user->user_code,
-            'name' => $member->user->name,
+            'kode_pengguna' => $member->user->kode_pengguna,
+            'nama' => $member->user->nama,
             'email' => $member->user->email,
             'nik' => $member->user->nik,
-            'phone_number' => $member->user->phone_number,
+            'no_telp' => $member->user->no_telp,
             'gender' => $member->gender,
             'birth_place' => $member->birth_place,
             'birth_date' => $member->birth_date,

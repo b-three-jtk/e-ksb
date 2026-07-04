@@ -22,7 +22,7 @@ use App\Models\Member;
 use App\Models\ProductType;
 use App\Models\SavingAccount;
 use App\Models\Supplier;
-use App\Models\User;
+use App\Models\Pengguna;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PembayaranAngsuranService;
 use App\Services\Admin\PembiayaanService;
@@ -67,7 +67,7 @@ class PembiayaanController extends Controller
                     'financing_transaction_code' => $f->financing_transaction_code,
                     'akad_date' => Carbon::parse($f->akad_date)->format('Y-m-d') ?? '',
                     'user' => $f->member->user
-                        ? ($f->member->user->user_code . ' - ' . $f->member->user->name)
+                        ? ($f->member->user->kode_pengguna . ' - ' . $f->member->user->nama)
                         : '-',
                     'user_role' => $f->member->user?->getRoleNames()->first() ?? '-',
                     'tenor_left' => $f->installment ? max(0, $f->tenor - ($f->installment->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
@@ -162,7 +162,7 @@ class PembiayaanController extends Controller
                     return [
                         'final_verification_status' => $item->final_verification_status,
                         'notes' => $item->notes,
-                        'verified_by_name' => $item->verifier?->name,
+                        'verified_by_name' => $item->verifier?->nama,
                         'verified_at' => $item->verified_at?->format('Y-m-d H:i:s'),
                     ];
                 })->sortByDesc('verified_at')->values(),
@@ -390,8 +390,8 @@ class PembiayaanController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $validated = $request->validated();
-                $user = User::with('member.savingAccounts')
-                    ->where('user_code', $validated['member']['user_code'])
+                $user = Pengguna::with('member.savingAccounts')
+                    ->where('kode_pengguna', $validated['member']['kode_pengguna'])
                     ->firstOrFail();
 
                 if ($user->status !== UserStatusEnum::ACTIVE->value) {
@@ -434,8 +434,8 @@ class PembiayaanController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $validated = $request->validated();
-                $user = User::with('member.savingAccounts')
-                    ->where('user_code', $validated['member']['user_code'])
+                $user = Pengguna::with('member.savingAccounts')
+                    ->where('kode_pengguna', $validated['member']['kode_pengguna'])
                     ->firstOrFail();
 
                 if ($user->status !== UserStatusEnum::ACTIVE->value) {
@@ -681,8 +681,8 @@ class PembiayaanController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $validated = $request->validated();
-                $user = User::with('member.savingAccounts')
-                    ->where('user_code', $validated['member']['user_code'])
+                $user = Pengguna::with('member.savingAccounts')
+                    ->where('kode_pengguna', $validated['member']['kode_pengguna'])
                     ->firstOrFail();
 
                 $this->financingService->syncMemberData($user, $validated['member'], $request);
@@ -703,13 +703,13 @@ class PembiayaanController extends Controller
         $query = $request->input('q');
 
         $members = Member::query()
-            ->with(['user:id,user_code,name,email,nik,phone_number', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'financings:id,status', 'savingAccounts:id,balance,created_at'])
+            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'financings:id,status', 'savingAccounts:id,balance,created_at'])
             ->whereHas('user', function ($q) use ($query) {
                 $q->whereHas('roles', fn($roleQ) => $roleQ->where('name', 'Anggota'))
                     ->where('status', UserStatusEnum::ACTIVE->value)
                     ->where(function ($searchQ) use ($query) {
-                        $searchQ->where('name', 'ILIKE', "%{$query}%")
-                            ->orWhere('user_code', 'ILIKE', "%{$query}%");
+                        $searchQ->where('nama', 'ILIKE', "%{$query}%")
+                            ->orWhere('kode_pengguna', 'ILIKE', "%{$query}%");
                     });
             })
             ->limit(5)
@@ -767,7 +767,7 @@ class PembiayaanController extends Controller
 
         $data = $this->pembayaranAngsuranService->calculateDetails($financing);
 
-        $data['pengurus'] = auth()->user()->name;
+        $data['pengurus'] = auth()->user()->nama;
 
         $unpaidInstallment = $financing->installment
             ->whereNotIn('status', [

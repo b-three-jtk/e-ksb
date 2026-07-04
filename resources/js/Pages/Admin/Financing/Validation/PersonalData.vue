@@ -11,7 +11,7 @@ defineProps({
         <div class="card-layout">
             <h1 class="card-title">Identitas Pemohon</h1>
             <div class="grid grid-cols-2 gap-6 mt-8">
-                <Info label="Nomor Anggota KSB" :value="data.member.user_code" />
+                <Info label="Nomor Anggota KSB" :value="data.member.kode_pengguna" />
                 <Info label="Nama Lengkap" :value="data.member.name" />
                 <Info label="NIK" :value="data.member.nik" />
                 <Info label="Jenis Kelamin" :value="data.member.gender" />
@@ -21,7 +21,7 @@ defineProps({
                 <Info label="Pendidikan Terakhir" :value="data.member.last_education" />
                 <Info label="Status Perkawinan" :value="data.member.marital_status" />
                 <Info label="Jumlah Tanggungan Keluarga" :value="data.member.dependents" />
-                <Info label="Nomor Telepon" :value="data.member.phone_number" />
+                <Info label="Nomor Telepon" :value="data.member.no_telp" />
                 <Info label="Email" :value="data.member.email" />
             </div>
         </div>

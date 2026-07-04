@@ -17,7 +17,7 @@ return new class extends Migration
     {
         Schema::create('members', function (Blueprint $table) {
             $table->id();
-            $table->uuid('user_id');
+            $table->uuid('pengguna_id');
             $table->enum('gender', array_column(GenderEnum::cases(), 'value'))->nullable();
             $table->string('birth_place', 150)->nullable();
             $table->date('birth_date')->nullable();
@@ -30,8 +30,8 @@ return new class extends Migration
             $table->date('resignation_date')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->index('user_id');
+            $table->foreign('pengguna_id')->references('id')->on('pengguna')->onDelete('cascade');
+            $table->index('pengguna_id');
         });
     }
 

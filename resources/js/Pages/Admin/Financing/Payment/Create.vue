@@ -295,7 +295,7 @@ async function handleSubmit() {
                             </p>
 
                             <p class="font-medium text-gray-800">
-                                {{ selectedFinancing.user.name }}
+                                {{ selectedFinancing.user.nama }}
                             </p>
                         </div>
 

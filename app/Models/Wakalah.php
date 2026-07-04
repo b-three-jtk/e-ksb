@@ -24,6 +24,6 @@ class Wakalah extends Model
 
     public function updatedBy()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Pengguna::class);
     }
 }

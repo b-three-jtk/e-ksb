@@ -24,8 +24,8 @@ export function useFinancingValidation(form) {
         const errs = {}
         const m = form.member
 
-        if (!m.user_code)
-            errs.user_code = 'Nomor anggota wajib dipilih.'
+        if (!m.kode_pengguna)
+            errs.kode_pengguna = 'Nomor anggota wajib dipilih.'
 
         if (!m.name?.trim())
             errs.name = 'Nama lengkap wajib diisi.'
@@ -38,8 +38,8 @@ export function useFinancingValidation(form) {
         if (!isValidEmail(m.email))
             errs.email = 'Format email tidak valid.'
 
-        if (!/^62\d{10,20}$/.test(m.phone_number)) {
-            errs.phone_number = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
+        if (!/^62\d{10,20}$/.test(m.no_telp)) {
+            errs.no_telp = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
         }
 
         if (!m.gender)
@@ -266,7 +266,7 @@ export function useFinancingValidation(form) {
 
 function getAllKeysForStep(step) {
     const map = {
-        1: ['user_code', 'name', 'nik', 'email', 'phone_number', 'gender',
+        1: ['kode_pengguna', 'name', 'nik', 'email', 'no_telp', 'gender',
             'residential_address', 'heirs', 'eligible_saving', 'no_obligation'],
         2: ['job_title', 'company_or_business_name', 'business_field',
             'tenure_year', 'workplace_contact', 'workplace_address',

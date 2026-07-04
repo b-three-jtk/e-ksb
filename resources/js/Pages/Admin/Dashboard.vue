@@ -101,7 +101,7 @@ watch(selectedSavingTransactionFilter, () => applyFilter('selectedSavingTransact
                 @update:selected-savings-filter="selectedSavingsFilter = $event"
                 :selected-savings-filter="selectedSavingsFilter"
                 :can="can"
-                v-if="role === 'Ketua' || role === 'Pengawas'"
+                v-if="role === 'Ketua' || role === 'Pengawas' || 'Administrator Sistem'"
                 :stats="props.stats"
                 :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
                 :peta_simpanan="props.peta_simpanan"

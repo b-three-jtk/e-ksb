@@ -20,10 +20,10 @@ const { normalizePhoneNumber } = useFormatter()
 
 const form = useForm({
     nik: props.admin.nik || '',
-    name: props.admin.name || '',
+    nama: props.admin.nama || '',
     email: props.admin.email || '',
     role_id: props.admin.roles[0]?.id || '',
-    phone_number: props.admin.phone_number || '',
+    no_telp: props.admin.no_telp || '',
 })
 
 const breadcrumbItems = [
@@ -82,8 +82,8 @@ const submitForm = () => {
                     </BaseInputAdmin>
 
                     <!-- Nama -->
-                    <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
-                        placeholder="Masukkan nama lengkap" :error="errors.name"></BaseInputAdmin>
+                    <BaseInputAdmin v-model="form.nama" label="Nama Lengkap" type="text" required
+                        placeholder="Masukkan nama lengkap" :error="errors.nama"></BaseInputAdmin>
 
                     <!-- Posisi -->
                     <BaseInputAdmin v-model="form.role_id" label="Posisi" type="select" required
@@ -95,9 +95,9 @@ const submitForm = () => {
                         placeholder="Masukkan email" :error="errors.email"></BaseInputAdmin>
 
                     <!-- No. Telp -->
-                    <BaseInputAdmin v-model="form.phone_number" max="20" required label="Nomor Telepon" type="text"
-                            @input="form.phone_number = normalizePhoneNumber(form.phone_number, onlyNumbers)"
-                            placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number"
+                    <BaseInputAdmin v-model="form.no_telp" max="20" required label="Nomor Telepon" type="text"
+                            @input="form.no_telp = normalizePhoneNumber(form.no_telp, onlyNumbers)"
+                            placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.no_telp"
                         >
                     </BaseInputAdmin>
                 </div>

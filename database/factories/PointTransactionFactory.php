@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\PointTransaction;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PointTransactionFactory extends Factory
@@ -15,7 +15,7 @@ class PointTransactionFactory extends Factory
         return [
             'amount_earned' => $this->faker->numberBetween(10, 1000),
             'activity_description' => $this->faker->sentence(),
-            'user_id' => User::factory(),
+            'pengguna_id' => Pengguna::factory(),
         ];
     }
 }

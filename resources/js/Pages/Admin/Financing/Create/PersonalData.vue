@@ -83,7 +83,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                         placeholder="Cari nomor anggota aktif..."
                         :class="[
                             'flex-1 px-4 font-body text-sm py-2.5 border rounded-lg focus:ring-3 shadow-theme-xs focus:outline-hidden',
-                            errors?.user_code
+                            errors?.kode_pengguna
                                 ? 'border-red-400 focus:border-red-400 focus:ring-red-500/10'
                                 : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                         ]"
@@ -95,21 +95,21 @@ const onFieldChange = (field) => emit('validate-field', field)
                 </div>
 
                 <div v-else class="flex items-center justify-between bg-light-bg border border-green-200 rounded-lg p-2.5">
-                    <p class="text-sm text-green-600">{{ form.member.user_code }}</p>
+                    <p class="text-sm text-green-600">{{ form.member.kode_pengguna }}</p>
                     <button class="text-primary" @click="$emit('resetMemberSelection')">
                         <span class="icon-[tabler--x]"></span>
                     </button>
                 </div>
 
-                <p v-if="errors?.user_code" class="mt-1 text-xs text-red-500">{{ errors.user_code }}</p>
+                <p v-if="errors?.kode_pengguna" class="mt-1 text-xs text-red-500">{{ errors.kode_pengguna }}</p>
 
                 <div v-if="memberResults.length > 0 && !isMemberSelected"
                     class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 dark:border-gray-600 border border-gray-300 rounded-lg shadow-lg z-10">
                     <div v-for="member in memberResults" :key="member.id"
                         @click="$emit('selectMember', member)"
                         class="px-4 py-3 hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer border-b last:border-0">
-                        <div class="font-medium text-dark-text dark:text-gray-300">{{ member.user.name }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ member.user.user_code }} | {{ member.user.email }}</div>
+                        <div class="font-medium text-dark-text dark:text-gray-300">{{ member.user.nama }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ member.user.kode_pengguna }} | {{ member.user.email }}</div>
                     </div>
                 </div>
 
@@ -122,9 +122,9 @@ const onFieldChange = (field) => emit('validate-field', field)
             <BaseInputAdmin
                 label="Nama Lengkap"
                 placeholder="Masukkan nama lengkap"
-                v-model="form.member.name"
+                v-model="form.member.nama"
                 required
-                :error="errors?.name"
+                :error="errors?.nama"
             />
             <BaseInputAdmin
                 label="NIK"
@@ -149,9 +149,9 @@ const onFieldChange = (field) => emit('validate-field', field)
                 required
                 placeholder="Masukkan nomor telepon"
                 max="14"
-                v-model="form.member.phone_number"
-                :error="errors?.phone_number"
-                @input="form.member.phone_number = normalizePhoneNumber(form.member.phone_number, props.onlyNumbers)"
+                v-model="form.member.no_telp"
+                :error="errors?.no_telp"
+                @input="form.member.no_telp = normalizePhoneNumber(form.member.no_telp, props.onlyNumbers)"
                 inputmode="numeric"
             />
             <BaseInputAdmin

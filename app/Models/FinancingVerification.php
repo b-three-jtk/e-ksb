@@ -25,6 +25,6 @@ class FinancingVerification extends Model
 
     public function verifier()
     {
-        return $this->belongsTo(User::class, 'verified_by');
+        return $this->belongsTo(Pengguna::class, 'verified_by');
     }
 }

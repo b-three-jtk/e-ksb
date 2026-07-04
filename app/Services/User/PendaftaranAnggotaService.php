@@ -7,7 +7,7 @@ use App\Enums\UserStatusEnum;
 use App\Models\Heir;
 use App\Models\Member;
 use App\Models\MemberDoc;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -21,7 +21,7 @@ class PendaftaranAnggotaService
      *
      * @param array<string, mixed> $validated
      * @param Request $request
-     * @return array{name: string, user_code: string, initial_password: string, phone_number: string}
+     * @return array{nama: string, kode_pengguna: string, initial_password: string, no_telp: string}
      */
     public function register(array $validated, Request $request): array
     {
@@ -40,10 +40,10 @@ class PendaftaranAnggotaService
         });
 
         return [
-            'name' => $validated['name'],
-            'user_code' => $memberNumber,
+            'nama' => $validated['nama'],
+            'kode_pengguna' => $memberNumber,
             'initial_password' => $initialPassword,
-            'phone_number' => $validated['phone_number'],
+            'no_telp' => $validated['no_telp'],
         ];
     }
 
@@ -53,11 +53,11 @@ class PendaftaranAnggotaService
         $prefix = 'KSB' . $yymm;
 
         // Ambil suffix 3 digit terakhir saja, bukan seluruh angka
-        $last = User::query()
-            ->where('user_code', 'like', $prefix . '%')
-            ->orderBy('user_code', 'desc')
+        $last = Pengguna::query()
+            ->where('kode_pengguna', 'like', $prefix . '%')
+            ->orderBy('kode_pengguna', 'desc')
             ->lockForUpdate() // ← cegah race condition
-            ->value('user_code');
+            ->value('kode_pengguna');
 
         $lastSequence = $last ? (int) substr($last, -3) : 0;
         $nextSequence = $lastSequence + 1;
@@ -69,20 +69,20 @@ class PendaftaranAnggotaService
      * @param array<string, mixed> $validated
      * @param string $memberNumber
      * @param string $initialPassword
-     * @return User
+     * @return Pengguna
      */
-    private function createUser(array $validated, string $memberNumber, string $initialPassword): User
+    private function createUser(array $validated, string $memberNumber, string $initialPassword): Pengguna
     {
         $email = $validated['email'] ?? null;
 
-        return User::create([
-            'user_code' => $memberNumber,
-            'name' => $validated['name'],
+        return Pengguna::create([
+            'kode_pengguna' => $memberNumber,
+            'nama' => $validated['nama'],
             'nik' => $validated['nik'],
-            'phone_number' => $validated['phone_number'],
+            'no_telp' => $validated['no_telp'],
             'email' => $email,
             'status' => UserStatusEnum::ACTIVE->value,
-            'joined_date' => now()->toDateString(),
+            'tgl_bergabung' => now()->toDateString(),
             'password' => Hash::make($initialPassword),
         ]);
     }
@@ -95,7 +95,7 @@ class PendaftaranAnggotaService
     private function createMember(array $validated, string $userId): Member
     {
         return Member::create([
-            'user_id' => $userId,
+            'pengguna_id' => $userId,
             'gender' => $validated['gender'],
             'birth_place' => $validated['birth_place'],
             'birth_date' => $validated['birth_date'],
@@ -114,12 +114,16 @@ class PendaftaranAnggotaService
      */
     private function createMemberHeir(array $validated, string $memberId): void
     {
-        Heir::create([
-            'heir_nik' => $validated['heir_nik'],
-            'heir_name' => $validated['heir_name'],
-            'relationship' => $validated['heir_relationship'],
-            'heir_contact' => $validated['heir_contact'],
-            'member_id' => $memberId,
+        $heir = Heir::firstOrCreate(
+            ['heir_nik' => $validated['heir_nik']],
+            [
+                'heir_name' => $validated['heir_name'],
+                'heir_contact' => $validated['heir_contact'],
+            ]
+        );
+
+        Member::find($memberId)->heirs()->syncWithoutDetaching([
+            $heir->heir_nik => ['relationship' => $validated['heir_relationship']]
         ]);
     }
 

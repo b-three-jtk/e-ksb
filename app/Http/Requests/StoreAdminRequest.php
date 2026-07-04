@@ -22,11 +22,11 @@ class StoreAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'nullable|exists:users,id',
-            'name' => 'required|string|max:255',
+            'pengguna_id' => 'nullable|exists:pengguna,id',
+            'nama' => 'required|string|max:255',
             'nik' => 'required|string|digits:16',
             'email' => 'required|email|max:255',
-            'phone_number' => 'required|string|max:20',
+            'no_telp' => 'required|string|max:20',
             'role_id' => 'required|exists:roles,id',
         ];
     }

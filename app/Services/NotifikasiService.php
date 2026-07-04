@@ -40,7 +40,7 @@ class NotifikasiService
         $query = Notification::with(['member.user'])
             ->when($pjUserId, function ($query, $pjUserId) {
                 $query->whereHas('member', function ($memberQuery) use ($pjUserId) {
-                    $memberQuery->where('pj_user_id', $pjUserId);
+                    $memberQuery->where('pj_anggota_id', $pjUserId);
                 });
             })
             ->orderBy('scheduled_at', 'desc');
@@ -63,7 +63,7 @@ class NotifikasiService
 
         if (!empty($filters['search'])) {
             $query->whereHas('member.user', function ($q) use ($filters) {
-                $q->where('name', 'ILIKE', '%' . $filters['search'] . '%');
+                $q->where('nama', 'ILIKE', '%' . $filters['search'] . '%');
             });
         }
 

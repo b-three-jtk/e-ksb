@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('installment_payment_receipt')->nullable();
 
             $table->foreignUuid('installment_id')->nullable()->references('id')->on('installments')->onDelete('set null');
-            $table->foreignUuid('updated_by')->constrained('users')->onDelete('set null');
+            $table->foreignUuid('updated_by')->constrained('pengguna')->onDelete('set null');
             $table->timestamps();
         });
     }

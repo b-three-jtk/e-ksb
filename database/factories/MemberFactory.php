@@ -7,7 +7,7 @@ use App\Enums\GenderEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\MemberStatusEnum;
 use App\Models\Member;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MemberFactory extends Factory
@@ -17,7 +17,7 @@ class MemberFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
+            'pengguna_id' => Pengguna::factory(),
             'gender' => $this->faker->randomElement(GenderEnum::cases())->value,
             'birth_place' => $this->faker->city(),
             'birth_date' => $this->faker->dateTimeBetween('-60 years', '-18 years'),

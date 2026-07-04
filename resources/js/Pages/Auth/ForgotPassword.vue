@@ -10,7 +10,7 @@ import { useInputSanitizers } from '@/Composables/useInputSanitizers'
 import Button from '@/Components/Form/Button.vue'
 
 const form = useForm({
-    phone_number: '',
+    no_telp: '',
 })
 
 const { onlyNumbers } = useInputSanitizers()
@@ -27,13 +27,13 @@ const submit = () => {
         },
         onError: (errors) => {
             console.error(errors)
-            form.reset('phone_number')
+            form.reset('no_telp')
             toast.error('Gagal mengirim link reset password. Periksa kembali nomor telepon Anda.', {
                 autoClose: 3000,
                 position: 'bottom-right',
             })
         },
-        onFinish: () => form.reset('phone_number'),
+        onFinish: () => form.reset('no_telp'),
     })
 }
 </script>
@@ -54,10 +54,10 @@ const submit = () => {
                     </div>
 
                     <form @submit.prevent="submit" class="space-y-8">
-                        <BaseInputAdmin v-model="form.phone_number"
+                        <BaseInputAdmin v-model="form.no_telp"
                             placeholder="Masukkan nomor telepon. contoh: 628XXXXXXX" label="Nomor Telepon"
-                            @input="form.phone_number = normalizePhoneNumber(form.phone_number, onlyNumbers)"
-                            type="text" required :error="errors.phone_number" />
+                            @input="form.no_telp = normalizePhoneNumber(form.no_telp, onlyNumbers)"
+                            type="text" required :error="errors.no_telp" />
 
                         <div class="space-y-4">
                             <Button type="primary" :disabled="form.processing" full>

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->datetime('transaction_date');
             $table->string('saving_transaction_receipt')->nullable();
 
-            $table->foreignUuid('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignUuid('updated_by')->nullable()->constrained('pengguna')->onDelete('set null');
             $table->foreignUuid('saving_account_id')->nullable()->constrained('saving_accounts')->onDelete('set null');
             $table->string('account_number')->nullable();
             $table->foreign('account_number')->references('account_number')->on('member_bank_accounts')->onDelete('set null');

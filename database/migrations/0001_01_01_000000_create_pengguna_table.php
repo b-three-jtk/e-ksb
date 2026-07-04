@@ -11,28 +11,28 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('pengguna', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('user_code', 20)->unique();
-            $table->string('profile_picture')->nullable();
+            $table->string('kode_pengguna', 15)->unique();
+            $table->string('foto_profil')->nullable();
             $table->string('nik', 16)->unique();
-            $table->string('name');
+            $table->string('nama');
             $table->enum('status', array_column(UserStatusEnum::cases(), 'value'))->default('Aktif');
             $table->string('email')->unique()->nullable();
-            $table->string('phone_number', 20)->unique();
-            $table->date('joined_date')->nullable();
+            $table->string('no_telp', 20)->unique();
+            $table->date('tgl_bergabung')->nullable();
 
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
 
-            $table->index('name');
-            $table->index('user_code');
+            $table->index('nama');
+            $table->index('kode_pengguna');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('phone_number')->primary();
+            $table->string('no_telp')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
@@ -52,7 +52,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('pengguna');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }

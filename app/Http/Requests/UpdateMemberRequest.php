@@ -25,10 +25,10 @@ class UpdateMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nik' => 'required|digits:16|unique:users,nik,' . $this->route('id'),
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255|unique:users,email,' . $this->route('id'),
-            'phone_number' => 'required|string|max:20',
+            'nik' => 'required|digits:16|unique:pengguna,nik,' . $this->route('id'),
+            'nama' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255|unique:pengguna,email,' . $this->route('id'),
+            'no_telp' => 'required|string|max:20',
             'gender' => 'nullable|in:'. implode(',', ['Laki-laki', 'Perempuan']),
             'birth_place' => 'required|string|max:255',
             'birth_date' => 'required|date',

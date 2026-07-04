@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class Pengguna extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasUuids, HasRoles;
@@ -27,14 +27,16 @@ class User extends Authenticatable
     protected $keyType = 'string';
     public $incrementing = false;
 
+    protected $table = 'pengguna';
+
     protected $fillable = [
-        'profile_picture',
-        'user_code',
+        'foto_profil',
+        'kode_pengguna',
         'nik',
-        'name',
+        'nama',
         'email',
-        'phone_number',
-        'joined_date',
+        'no_telp',
+        'tgl_bergabung',
         'status',
         'password',
     ];
@@ -59,7 +61,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'joined_date' => 'date',
+            'tgl_bergabung' => 'date',
         ];
     }
 
@@ -68,8 +70,8 @@ class User extends Authenticatable
      */
     public function getProfilePictureUrlAttribute()
     {
-        if ($this->profile_picture) {
-            return asset('storage/' . $this->profile_picture);
+        if ($this->foto_profil) {
+            return asset('storage/' . $this->foto_profil);
         }
         return asset('images/default-avatar.png');
     }
@@ -79,10 +81,10 @@ class User extends Authenticatable
         parent::boot();
 
         static::creating(function ($model) {
-            if (!$model->user_code) {
-                $last = User::max('user_code');
+            if (!$model->kode_pengguna) {
+                $last = Pengguna::max('kode_pengguna');
                 $lastNumber = $last ? (int) substr($last, -4) : 0;
-                $model->user_code = 'KSB' . date('ym') . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+                $model->kode_pengguna = 'KSB' . date('ym') . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
             }
         });
     }
@@ -106,7 +108,7 @@ class User extends Authenticatable
 
     public function allocatedMembers()
     {
-        return $this->hasMany(Member::class, 'pj_user_id');
+        return $this->hasMany(Member::class, 'pj_anggota_id');
     }
 
     // Verifies if the user has a specific role

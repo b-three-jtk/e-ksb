@@ -9,7 +9,7 @@ use App\Models\Member;
 use App\Models\ProductType;
 use App\Models\SavingAccount;
 use App\Models\Supplier;
-use App\Models\User;
+use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\GlobalSettingSeeder;
 use Database\Seeders\ProductTypeSeeder;
@@ -29,9 +29,9 @@ beforeEach(function () {
 
 describe('IT01 Skenario Pembiayaan Murabahah', function () {
     beforeEach(function () {
-        $this->userMember = User::factory()->create(['name' => 'Leon S Kennedy', 'status' => UserStatusEnum::ACTIVE->value]);
+        $this->userMember = Pengguna::factory()->create(['nama' => 'Leon S Kennedy', 'status' => UserStatusEnum::ACTIVE->value]);
         $this->userMember->assignRole('Anggota');
-        $this->member = Member::factory()->create(['user_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
+        $this->member = Member::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
 
         SavingAccount::factory()->create([
             'member_id' => $this->member->id,
@@ -40,10 +40,10 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             'created_at' => now()->subMonths(6),
         ]);
 
-        $this->staffMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $this->staffMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $this->staffMurabahah->assignRole('Staf Murabahah');
 
-        $this->ketuaMurabahah = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $this->ketuaMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $this->ketuaMurabahah->assignRole('Ketua Murabahah');
 
         $this->supplier = Supplier::create([
@@ -68,10 +68,10 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
 
         $this->payloadPengajuan = [
             'member' => [
-                'user_code' => $this->member->user->user_code,
-                'name' => 'Dhira Ramadini',
+                'kode_pengguna' => $this->member->user->kode_pengguna,
+                'nama' => 'Dhira Ramadini',
                 'nik' => '1234567890123456',
-                'phone_number' => '08123456789',
+                'no_telp' => '08123456789',
                 'employment_status' => 'Karyawan Swasta',
                 'heirs' => [['heir_name' => 'Ahli Waris', 'heir_nik' => '1234567890654321', 'relationship' => 'Anak', 'heir_contact' => '081234567890']],
             ],
@@ -296,9 +296,9 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
 
 describe('IT02 Skenario Pengunduran Diri Anggota', function () {
     beforeEach(function () {
-        $this->userMember = User::factory()->create(['name' => 'Claire Redfield', 'status' => UserStatusEnum::ACTIVE->value]);
+        $this->userMember = Pengguna::factory()->create(['nama' => 'Claire Redfield', 'status' => UserStatusEnum::ACTIVE->value]);
         $this->userMember->assignRole('Anggota');
-        $this->member = Member::factory()->create(['user_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
+        $this->member = Member::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
     });
 
     it('Skenario Pengunduran Diri Anggota: Pengajuan -> Verifikasi', function () {
@@ -315,7 +315,7 @@ describe('IT02 Skenario Pengunduran Diri Anggota', function () {
         ]);
 
         // admin (ketua) nge-acc pengajuan resign
-        $ketua = User::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $ketua = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $ketua->assignRole('Ketua');
 
         $this->actingAs($ketua)
@@ -328,7 +328,7 @@ describe('IT02 Skenario Pengunduran Diri Anggota', function () {
             'status' => MemberStatusEnum::RESIGNED->value,
         ]);
 
-        $this->assertDatabaseHas('users', [
+        $this->assertDatabaseHas('pengguna', [
             'id' => $this->userMember->id,
             'status' => UserStatusEnum::INACTIVE->value,
         ]);

@@ -88,7 +88,7 @@ class SimpananController extends Controller
     public function show(string $id)
     {
         $member = SavingTransaction::with('savingAccount.member.user')->findOrFail($id)->savingAccount->member;
-        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_user_id !== Auth::id()) {
+        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_anggota_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki izin untuk melihat detail transaksi simpanan ini.');
         }
 
@@ -106,7 +106,7 @@ class SimpananController extends Controller
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
             'members'      => $this->simpananService->getMembersForDeposit(),
             'saving_types' => collect(SavingTypeEnum::cases())->map(fn($c) => $c->value),
-            'pengurus'     => ['name' => Auth::user()->name ?? 'Pengurus'],
+            'pengurus'     => ['nama' => Auth::user()->nama ?? 'Pengurus'],
             'global_saving' => [
                 'pokok' => $this->simpananService->getSettingValue('saving_pokok_amount'),
                 'wajib' => $this->simpananService->getSettingValue('saving_wajib_amount'),
@@ -131,7 +131,7 @@ class SimpananController extends Controller
 
         $member = Member::with('user')->findOrFail($data['member_id']);
 
-        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_user_id !== Auth::id()) {
+        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_anggota_id !== Auth::id()) {
             abort(403, 'Anda tidak berhak melakukan transaksi untuk anggota ini.');
         }
 
@@ -158,9 +158,9 @@ class SimpananController extends Controller
         $strukData = [
             'no_transaksi'  => $transaction->saving_transaction_code,
             'tanggal'       => $transaction->transaction_date,
-            'pengurus'      => Auth::user()->name,
-            'nama_anggota'  => $member->user->name,
-            'no_anggota'    => $member->user->user_code,
+            'pengurus'      => Auth::user()->nama,
+            'nama_anggota'  => $member->user->nama,
+            'no_anggota'    => $member->user->kode_pengguna,
             'jenis'         => $data['saving_category'],
             'metode'        => $transaction->saving_payment_method,
             'nominal'       => $transaction->saving_amount,
@@ -175,7 +175,7 @@ class SimpananController extends Controller
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
             'members'      => $this->simpananService->getMembersForDeposit(),
             'saving_types' => collect(SavingTypeEnum::cases())->map(fn($c) => $c->value),
-            'pengurus'     => ['name' => Auth::user()->name ?? 'Pengurus'],
+            'pengurus'     => ['nama' => Auth::user()->nama ?? 'Pengurus'],
             'global_saving' => [
                 'pokok' => $this->simpananService->getSettingValue('saving_pokok_amount'),
                 'wajib' => $this->simpananService->getSettingValue('saving_wajib_amount'),
@@ -198,7 +198,7 @@ class SimpananController extends Controller
     {
         try {
             $member = Member::with('user')->findOrFail($request->member_id);
-            if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_user_id !== Auth::id()) {
+            if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_anggota_id !== Auth::id()) {
                 abort(403, 'Anda tidak berhak melakukan transaksi untuk anggota ini.');
             }
 
@@ -232,7 +232,7 @@ class SimpananController extends Controller
                     },
                 ]);
             }, function ($q) {
-                $q->with(['user:id,user_code,name', 'savingAccounts.ibadah', 'savingAccounts.berjangka']);
+                $q->with(['user:id,kode_pengguna,nama', 'savingAccounts.ibadah', 'savingAccounts.berjangka']);
             })
             ->whereIn('status', [
                 MemberStatusEnum::ACTIVE->value,
@@ -243,15 +243,15 @@ class SimpananController extends Controller
             });
 
         if (Auth::user()?->hasRole(UserRoleEnum::PJANGGOTA->value)) {
-            $query->where('pj_user_id', Auth::id());
+            $query->where('pj_anggota_id', Auth::id());
         }
 
         return $query->get()->map(function ($member) use ($includeBankAccounts) {
             if ($includeBankAccounts) {
                 return [
                     'id' => $member->id,
-                    'name' => $member->user?->name,
-                    'user_code' => $member->user?->user_code,
+                    'nama' => $member->user?->nama,
+                    'kode_pengguna' => $member->user?->kode_pengguna,
                     'savingAccounts' => $member->savingAccounts->map(function ($acc) {
                         return [
                             'id' => $acc->id,
@@ -274,8 +274,8 @@ class SimpananController extends Controller
 
             return [
                 'id' => $member->id,
-                'user_code' => $member->user->user_code,
-                'name' => $member->user->name,
+                'kode_pengguna' => $member->user->kode_pengguna,
+                'nama' => $member->user->nama,
                 'status' => $member->status,
                 'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
                     'type' => $acc->saving_type ?? null,

@@ -7,22 +7,22 @@ use App\Enums\MemberStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Financing;
-use App\Models\User;
+use App\Models\Pengguna;
 
 class PengunduranDiriService
 {
     public function getSemuaPengunduranDiri($search, $per_page, $sort_by, $sort_dir)
     {
-        $query = User::whereHas('roles', function ($q) {
+        $query = Pengguna::whereHas('roles', function ($q) {
                 $q->where('name', UserRoleEnum::ANGGOTA->value);
             })
             ->whereHas('member', function ($q) {
                 $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
             })
             ->when($search, function ($q) use ($search) {
-                return $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('user_code', 'like', "%{$search}%")
-                    ->orWhere('phone_number', 'like', "%{$search}%");
+                return $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('kode_pengguna', 'like', "%{$search}%")
+                    ->orWhere('no_telp', 'like', "%{$search}%");
             });
 
         // Apply sorting
@@ -34,12 +34,12 @@ class PengunduranDiriService
 
     public function getAnggotaMengundurkanDiri($id)
     {
-        return User::with(['member' => function ($q) {
+        return Pengguna::with(['member' => function ($q) {
             $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
         }, 'member.memberDocs'])->findOrFail($id);
     }
 
-    public function getTotalKewajiban(User $user)
+    public function getTotalKewajiban(Pengguna $user)
     {
         return Financing::with('installment.payment')->where('member_id', $user->member->id)
             ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
@@ -63,7 +63,7 @@ class PengunduranDiriService
             });
     }
 
-    public function updateStatusAnggota(User $user)
+    public function updateStatusAnggota(Pengguna $user)
     {
         $member = $user->member;
         $member->status = MemberStatusEnum::RESIGNED->value;

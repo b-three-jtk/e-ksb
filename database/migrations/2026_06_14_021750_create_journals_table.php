@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('tgl_transaksi');
             $table->foreignUuid('created_by')
                   ->nullable()
-                  ->references('id')->on('users')
+                  ->references('id')->on('pengguna')
                   ->onDelete('set null');
             $table->timestamps();
         });

@@ -41,13 +41,14 @@ const normalizePhoneNumber = (value, onlyNumbers) => {
 
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<BaseInputAdmin
-				v-model="form.phone_number"
+				v-model="form.no_telp"
 				label="Nomor Telepon"
 				type="text"
-				placeholder="Contoh: 81234567890"
+				max="20"
+				placeholder="Contoh: 6281234567890"
 				required
-				@input="form.phone_number = normalizePhoneNumber(form.phone_number, props.onlyNumbers)"
-				:error="getFieldError('phone_number', errors.phone_number)"
+				@input="form.no_telp = normalizePhoneNumber(form.no_telp, props.onlyNumbers)"
+				:error="getFieldError('no_telp', errors.no_telp)"
 			/>
 
 			<BaseInputAdmin

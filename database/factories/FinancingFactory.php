@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Models\Member;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -36,7 +36,7 @@ class FinancingFactory extends Factory
             'payment_method' => $this->faker->randomElement(FinancingPaymentMethodEnum::cases())->value,
             'signed_akad_document' => null,
 
-            'updated_by' => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'updated_by' => Pengguna::inRandomOrder()->first()?->id ?? Pengguna::factory(),
             'member_id' => Member::inRandomOrder()->first()?->id ?? Member::factory()->create()->id,
         ];
     }

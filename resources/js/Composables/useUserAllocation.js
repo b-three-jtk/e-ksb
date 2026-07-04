@@ -11,7 +11,7 @@ export default function useUserAllocation(props) {
   const brokenPjAvatarIds = ref(new Set())
 
   const form = useForm({
-    pj_user_id: '',
+    pj_anggota_id: '',
     member_ids: [],
   })
 
@@ -28,7 +28,7 @@ export default function useUserAllocation(props) {
     }
 
     return props.pjUsers.filter((pj) => {
-      return [pj.name, pj.user_code, pj.phone_number]
+      return [pj.name, pj.kode_pengguna, pj.no_telp]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(keyword))
     })
@@ -108,7 +108,7 @@ export default function useUserAllocation(props) {
         return
       }
 
-      form.pj_user_id = selectedPjId.value
+      form.pj_anggota_id = selectedPjId.value
       form.member_ids = selectedMemberIds.value
 
       form.post('/admin/allocation', {

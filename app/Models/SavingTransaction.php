@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Models\MemberBankAccount;
 use App\Models\PointTransaction;
 use App\Models\SavingAccount;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -40,7 +40,7 @@ class SavingTransaction extends Model
 
     public function updatedBy()
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->belongsTo(Pengguna::class, 'updated_by');
     }
 
     public function memberBankAccount()

@@ -49,9 +49,9 @@ class BukuBesarService
                 'jenis' => $transaction->transaction_type,
                 'jenis_simpanan' => $transaction->savingAccount?->saving_type ?? 'N/A',
                 'metode' => $transaction->saving_payment_method ?? 'N/A',
-                'petugas' => $transaction->updatedBy?->name ?? 'System',
-                'nama_anggota' => $transaction->savingAccount?->member?->user?->name ?? '-',
-                'no_anggota' => $transaction->savingAccount?->member?->user?->user_code ?? '-',
+                'petugas' => $transaction->updatedBy?->nama ?? 'System',
+                'nama_anggota' => $transaction->savingAccount?->member?->user?->nama ?? '-',
+                'no_anggota' => $transaction->savingAccount?->member?->user?->kode_pengguna ?? '-',
                 'debit' => $isDeposit ? $amount : 0,
                 'kredit' => !$isDeposit ? $amount : 0,
                 'saldo' => $saldoSesudah,
@@ -83,7 +83,7 @@ class BukuBesarService
         $query = SavingTransaction::query()
             ->with(['savingAccount.member.bankAccounts', 'savingAccount', 'updatedBy', 'memberBankAccount'])
             ->whereHas('savingAccount.member', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
+                $q->where('pengguna_id', $userId);
             });
 
         if ($month && $month !== '') {
@@ -123,7 +123,7 @@ class BukuBesarService
     {
         $savingAccounts = SavingAccount::query()
             ->whereHas('member', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
+                $q->where('pengguna_id', $userId);
             })
             ->get();
 
@@ -206,13 +206,13 @@ class BukuBesarService
         $endDate = $rows->max('tanggal_raw') ? Carbon::parse($rows->max('tanggal_raw')) : now();
 
         $memberInfo = [
-            'nama' => $member->name,
-            'no_anggota' => $member->user_code,
+            'nama' => $member->nama,
+            'no_anggota' => $member->kode_pengguna,
             'status' => $member->status,
             'tanggal_bergabung' => optional($member->created_at)->format('d F Y'),
         ];
 
-        $filename = 'Mutasi_Simpanan_' . $member->user_code . '_' . now()->format('Ymd_His') . '.pdf';
+        $filename = 'Mutasi_Simpanan_' . $member->kode_pengguna . '_' . now()->format('Ymd_His') . '.pdf';
 
         $pdf = Pdf::loadView('exports.tabungan_statement', [
             'transactions' => $rows,

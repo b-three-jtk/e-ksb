@@ -9,7 +9,7 @@ use App\Models\MemberBankAccount;
 use App\Models\PointTransaction;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SavingTransactionFactory extends Factory
@@ -27,7 +27,7 @@ class SavingTransactionFactory extends Factory
             'transaction_date' => $this->faker->dateTime(),
             'balance_after_transaction' => $this->faker->numberBetween(0, 100000000),
             'saving_transaction_receipt' => $this->faker->optional()->filePath(),
-            'updated_by' => User::factory(),
+            'updated_by' => Pengguna::factory(),
             'saving_account_id' => SavingAccount::factory(),
             'account_number' => MemberBankAccount::factory(),
             'point_id' => PointTransaction::factory(),

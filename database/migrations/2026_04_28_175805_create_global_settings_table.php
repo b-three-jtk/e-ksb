@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('value')->nullable();
             $table->date('effective_date')->nullable();
             $table->text('description')->nullable();
-            $table->foreignUuid('updated_by')->constrained('users')->onDelete('restrict');
+            $table->foreignUuid('updated_by')->constrained('pengguna')->onDelete('restrict');
             $table->timestamps();
         });
     }

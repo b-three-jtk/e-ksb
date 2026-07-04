@@ -5,7 +5,7 @@ use App\Enums\MemberStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Member;
-use App\Models\User;
+use App\Models\Pengguna;
 use App\Services\Admin\PeranAksesService;
 
 class PengurusService
@@ -17,7 +17,7 @@ class PengurusService
         $sortBy  = in_array($request->sort_by, $allowedSorts) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        return User::with(['roles', 'member'])
+        return Pengguna::with(['roles', 'member'])
             ->whereHas('roles', function ($q) {
                 $q->whereNotIn('name', [UserRoleEnum::ANGGOTA->value]);
             })
@@ -27,7 +27,7 @@ class PengurusService
             ])
             ->when($request->search, function ($q) use ($request) {
                 $q->where(function ($qq) use ($request) {
-                    $qq->where('name', 'like', "%{$request->search}%")
+                    $qq->where('nama', 'like', "%{$request->search}%")
                         ->orWhere('nik', 'like', "%{$request->search}%")
                         ->orWhere('email', 'like', "%{$request->search}%");
                 });
@@ -44,7 +44,7 @@ class PengurusService
                 $q->whereHas(
                     'roles',
                     fn($r) =>
-                    $r->where('name', $request->role)
+                    $r->where('nama', $request->role)
                 )
             )
             ->orderBy($sortBy, $sortDir)
@@ -53,29 +53,29 @@ class PengurusService
             ->through(fn($user) => [
                 'id' => $user->id,
                 'nik' => $user->nik,
-                'name' => $user->name,
+                'nama' => $user->nama,
                 'email' => $user->email,
                 'posisi' => $user->getRoleNames()->first(),
                 'status' => $user->member
                     ? 'Anggota'
                     : 'Non Anggota',
 
-                'avatar' => $user->profile_picture
-                    ? asset('storage/' . $user->profile_picture)
+                'avatar' => $user->foto_profil
+                    ? asset('storage/' . $user->foto_profil)
                     : null,
             ]);
     }
 
     public function storePengurus($data)
     {
-        if (isset($data['user_id']) && $data['user_id']) {
-            $user = User::findOrFail($data['user_id']);
+        if (isset($data['pengguna_id']) && $data['pengguna_id']) {
+            $user = Pengguna::findOrFail($data['pengguna_id']);
 
             $user->update([
-                'name' => $data['name'],
+                'nama' => $data['nama'],
                 'nik' => $data['nik'],
                 'email' => $data['email'],
-                'phone_number' => $data['phone_number'],
+                'no_telp' => $data['no_telp'],
             ]);
 
             $this->peranAksesService->syncUserRole($user, $data['role_id']);
@@ -83,12 +83,12 @@ class PengurusService
             $user->save();
         } else {
 
-            $user = User::create([
-                'name' => $data['name'],
+            $user = Pengguna::create([
+                'nama' => $data['nama'],
                 'nik' => $data['nik'],
                 'email' => $data['email'],
-                'phone_number' => $data['phone_number'],
-                'user_code' => 'KSP' . now()->format('Ym') . str_pad(User::count() + 1, 4, '0', STR_PAD_LEFT),
+                'no_telp' => $data['no_telp'],
+                'kode_pengguna' => 'KSP' . now()->format('ym') . str_pad(Pengguna::count() + 1, 4, '0', STR_PAD_LEFT),
                 'password' => bcrypt('Password123'),
                 'status' => UserStatusEnum::ACTIVE->value,
             ]);
@@ -99,10 +99,10 @@ class PengurusService
 
     public function getPengurusById($id)
     {
-        $admin = User::with('roles')->findOrFail($id);
+        $admin = Pengguna::with('roles')->findOrFail($id);
 
-        $admin->profile_picture = $admin->profile_picture
-            ? asset('storage/' . $admin->profile_picture)
+        $admin->foto_profil = $admin->foto_profil
+            ? asset('storage/' . $admin->foto_profil)
             : null;
 
         return $admin;
@@ -113,7 +113,7 @@ class PengurusService
         return Member::whereIn('status', [
             MemberStatusEnum::ACTIVE->value,
         ])
-        ->with(['user:id,user_code,name,nik,email,phone_number',
+        ->with(['user:id,kode_pengguna,nama,nik,email,no_telp',
             'user.roles' => function ($q) {
                 $q->where('name', UserRoleEnum::ANGGOTA->value);
             }])
@@ -121,20 +121,20 @@ class PengurusService
         ->map(function ($member) {
             return [
                 'id' => $member->user->id,
-                'user_code' => $member->user->user_code,
-                'name' => $member->user->name,
+                'kode_pengguna' => $member->user->kode_pengguna,
+                'nama' => $member->user->nama,
                 'nik' => $member->user->nik,
                 'email' => $member->user->email,
-                'phone_number' => $member->user->phone_number,
+                'no_telp' => $member->user->no_telp,
             ];
         });
     }
 
-    public function updateProfil($user, $data)
+    public function updateProfil($user, array $data)
     {
-        if ($data->hasFile('profile_picture_file')) {
-                $path = $data->file('profile_picture_file')->store('profile_pictures', 'public');
-                $data['profile_picture'] = $path;
+        if (isset($data['foto_profile_file'])) {
+                $path = $data['foto_profile_file']->store('profil', 'public');
+                $data['foto_profil'] = $path;
             }
 
         $user->update($data);

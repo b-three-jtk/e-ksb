@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Pengguna;
 use App\Services\AutentikasiService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class AutentikasiController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'user_code' => ['required'],
+            'kode_pengguna' => ['required'],
             'password' => ['required'],
         ]);
 
@@ -75,21 +75,21 @@ class AutentikasiController extends Controller
     public function submitForgotPasswordRequest(Request $request)
     {
         $request->validate([
-            'phone_number' => 'required|string|exists:users,phone_number'
+            'no_telp' => 'required|string|exists:penggunano_telp'
         ], [
-            'phone_number.exists' => 'Nomor WhatsApp tidak ditemukan di sistem kami.'
+            'no_telp.exists' => 'Nomor WhatsApp tidak ditemukan di sistem kami.'
         ]);
 
-        $phone = $request->phone_number;
+        $phone = $request->no_telp;
 
         $token = Str::random(60);
 
         DB::table('password_reset_tokens')->updateOrInsert(
-            ['phone_number' => $phone],
+            ['no_telp' => $phone],
             ['token' => $token, 'created_at' => now()]
         );
 
-        $resetLink = route('password.reset', ['token' => $token, 'phone_number' => $phone]);
+        $resetLink = route('password.reset', ['token' => $token, 'no_telp' => $phone]);
 
         $message = "*RESET PASSWORD*\n\n";
         $message .= "Halo, kami menerima permintaan untuk mereset password akun Anda.\n";
@@ -122,7 +122,7 @@ class AutentikasiController extends Controller
             $error_msg = curl_error($curl);
             // Jika error, log atau tampilkan
             Log::error('WhatsApp API Error: ' . $error_msg);
-            return back()->withErrors(['phone_number' => 'Gagal mengirim pesan WhatsApp. Coba beberapa saat lagi.']);
+            return back()->withErrors(['no_telp' => 'Gagal mengirim pesan WhatsApp. Coba beberapa saat lagi.']);
         }
         curl_close($curl);
         // arahkan ke login
@@ -131,10 +131,10 @@ class AutentikasiController extends Controller
 
     public function formResetPassword(Request $request, string $token)
     {
-        // Lempar token dan phone_number (dari query URL) ke halaman Vue
+        // Lempar token dan no_telp (dari query URL) ke halaman Vue
         return Inertia::render('Auth/ResetPassword', [
             'token' => $token,
-            'phone_number' => $request->query('phone_number'),
+            'no_telp' => $request->query('no_telp'),
         ]);
     }
 
@@ -146,35 +146,35 @@ class AutentikasiController extends Controller
         // 1. Validasi input
         $request->validate([
             'token' => 'required',
-            'phone_number' => 'required|string|exists:users,phone_number',
+            'no_telp' => 'required|string|exists:penggunano_telp',
             'password' => 'required|min:8|confirmed',
         ]);
 
-        // 2. Cek kesesuaian token dan phone_number di database
+        // 2. Cek kesesuaian token dan no_telp di database
         $resetRecord = DB::table('password_reset_tokens')
-            ->where('phone_number', $request->phone_number)
+            ->where('no_telp', $request->no_telp)
             ->where('token', $request->token)
             ->first();
 
         // Jika tidak ada record yang cocok
         if (!$resetRecord) {
-            return back()->withErrors(['phone_number' => 'Token reset password tidak valid.']);
+            return back()->withErrors(['no_telp' => 'Token reset password tidak valid.']);
         }
 
         // 3. Cek apakah token sudah kedaluwarsa (misal batas waktunya 60 menit)
         if (Carbon::parse($resetRecord->created_at)->addMinutes(60)->isPast()) {
-            DB::table('password_reset_tokens')->where('phone_number', $request->phone_number)->delete();
-            return back()->withErrors(['phone_number' => 'Link reset password sudah kedaluwarsa. Silakan minta link baru.']);
+            DB::table('password_reset_tokens')->where('no_telp', $request->no_telp)->delete();
+            return back()->withErrors(['no_telp' => 'Link reset password sudah kedaluwarsa. Silakan minta link baru.']);
         }
 
         // 4. Jika valid, update password user
-        $user = User::where('phone_number', $request->phone_number)->first();
+        $user = Pengguna::where('no_telp', $request->no_telp)->first();
         $user->forceFill([
             'password' => Hash::make($request->password),
         ])->save();
 
         // 5. Hapus token setelah password berhasil diubah agar tidak bisa dipakai lagi
-        DB::table('password_reset_tokens')->where('phone_number', $request->phone_number)->delete();
+        DB::table('password_reset_tokens')->where('no_telp', $request->no_telp)->delete();
 
         // 6. Redirect ke halaman login dengan pesan sukses
         return redirect()->route('login')->with('success', 'Password berhasil direset! Silakan login dengan password baru.');

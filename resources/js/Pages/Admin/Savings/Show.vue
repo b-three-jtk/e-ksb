@@ -87,12 +87,12 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Anggota</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.member.user.user_code }}</span>
+                                        data.saving_account.member.user.kode_pengguna }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Anggota</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.member.user.name }}</span>
+                                        data.saving_account.member.user.nama }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Status Keanggotaan</span>

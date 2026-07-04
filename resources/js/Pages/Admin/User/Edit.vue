@@ -25,11 +25,11 @@ const props = defineProps({
 const form = useForm({
     _method: 'put',
     id: props.data.id,
-    user_code: props.data.user_code || '',
+    kode_pengguna: props.data.kode_pengguna || '',
     nik: props.data.nik || '',
-    name: props.data.name || '',
+    nama: props.data.nama || '',
     email: props.data.email || '',
-    phone_number: props.data.phone_number || '',
+    no_telp: props.data.no_telp || '',
     gender: props.data.member.gender || '',
     birth_place: props.data.member.birth_place || '',
     birth_date: props.data.member.birth_date || '',
@@ -45,7 +45,12 @@ const form = useForm({
     kk_file: null,
     ktp_file: null,
 
-    heirs: props.data.member.heirs || [],
+    heirs: (props.data.member.heirs || []).map(h => ({
+        heir_nik: h.heir_nik,
+        heir_name: h.heir_name,
+        heir_contact: h.heir_contact,
+        relationship: h.pivot ? h.pivot.relationship : h.relationship
+    })),
 });
 
 const { errors } = useUserValidation(form)
@@ -121,8 +126,23 @@ const heirInput = ref({
 
 const addHeir = (heirData) => {
     if (!heirData.heir_nik || !heirData.heir_name || !heirData.relationship || !heirData.heir_contact) {
-        alert('Lengkapi semua field untuk menambahkan ahli waris!')
+        toast.error('Lengkapi semua field untuk menambahkan ahli waris!', { position: 'bottom-right' });
         return
+    }
+
+    if (heirData.heir_nik.length !== 16) {
+        toast.error('NIK Ahli Waris harus terdiri dari 16 digit.', { position: 'bottom-right' });
+        return;
+    }
+
+    if (form.heirs.some(h => h.heir_nik === heirData.heir_nik)) {
+        toast.error('Ahli waris dengan NIK ini sudah ditambahkan.', { position: 'bottom-right' });
+        return;
+    }
+
+    if (!/^\d+$/.test(heirData.heir_contact)) {
+        toast.error('Kontak Ahli Waris harus terdiri dari angka.', { position: 'bottom-right' });
+        return;
     }
 
     form.heirs.push({
@@ -131,6 +151,13 @@ const addHeir = (heirData) => {
         relationship: heirData.relationship,
         heir_contact: heirData.heir_contact,
     })
+
+    heirInput.value = {
+        heir_nik: '',
+        heir_name: '',
+        relationship: '',
+        heir_contact: '',
+    }
 }
 
 const removeHeir = (index) => {
@@ -159,7 +186,8 @@ const submitForm = () => {
                     })
                 },
                 onError: (err) => {
-                    toast("Gagal memperbarui data anggota.", {
+                    const errorMessage = err && Object.values(err)[0] ? Object.values(err)[0] : "Terjadi kesalahan.";
+                    toast("Gagal memperbarui data anggota. " + errorMessage, {
                         "type": "error",
                         "position": "bottom-right",
                         "transition": "slide",
@@ -179,15 +207,15 @@ const submitForm = () => {
             <div class="card-layout flex flex-col gap-4">
                 <div class="grid grid-cols-2 gap-4">
                     <BaseInputAdmin label="Nomor Anggota" placeholder="Masukkan nomor anggota"
-                        v-model="form.user_code" disabled :errors="errors.user_code" @input="onlyAlpha" />
-                    <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" v-model="form.name"
-                        required :errors="errors.name" @input="onlyAlpha" />
+                        v-model="form.kode_pengguna" disabled :errors="errors.kode_pengguna" @input="onlyAlpha" />
+                    <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" v-model="form.nama"
+                        required :errors="errors.nama" @input="onlyAlpha" />
                     <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" v-model="form.nik" max="16" required
                         :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" />
                     <BaseInputAdmin label="Email" placeholder="Masukkan email" v-model="form.email"
                         :errors="errors.email" type="email" />
                     <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="14"
-                        v-model="form.phone_number" :errors="errors.phone_number" @input="onlyNumbers"
+                        v-model="form.no_telp" :errors="errors.no_telp" @input="onlyNumbers"
                         inputmode="numeric" />
                     <BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required :selectables="[
                         { value: 'Laki-laki', text: 'Laki-laki' },
@@ -241,10 +269,10 @@ const submitForm = () => {
                         </thead>
                         <tbody v-if="form.heirs.length > 0">
                             <tr v-for="(item, index) in form.heirs" :key="index"
-                                class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
+                                class="bg-white border-b text-dark-text dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
                                 <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>
                                 <td class="py-2 text-right pr-6">{{ item.heir_name }}</td>
-                                <td class="py-2 text-right pr-6">{{ item.pivot.relationship }}</td>
+                                <td class="py-2 text-right pr-6">{{ item.relationship }}</td>
                                 <td class="py-2 text-right pr-6">{{ item.heir_contact }}</td>
                                 <td class="py-2 text-center flex justify-center">
                                     <Button size="small" variant="light" @click="removeHeir(index)">

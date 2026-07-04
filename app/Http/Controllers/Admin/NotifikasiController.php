@@ -23,10 +23,10 @@ class NotifikasiController extends Controller
         $notifications = $this->notificationService->getAdminNotifications($filters, $perPage)
             ->through(fn($notification) => [
                 'id' => $notification->id,
-                'member_name' => $notification->member?->user?->name,
+                'member_name' => $notification->member?->user?->nama,
                 'title' => $notification->title,
                 'message' => $notification->message,
-                'phone_number' => $notification->member?->user?->phone_number,
+                'no_telp' => $notification->member?->user?->no_telp,
                 'notification_type' => $notification->notification_type,
                 'reminder_type' => $notification->reminder_type,
                 'status' => $notification->status,
@@ -48,7 +48,7 @@ class NotifikasiController extends Controller
         return Inertia::render('Admin/Notifications/Show', [
             'notification' => [
                 'id' => $notification->id,
-                'member_name' => $notification->member?->user?->name,
+                'member_name' => $notification->member?->user?->nama,
                 'title' => $notification->title,
                 'message' => $notification->message,
                 'notification_type' => $notification->notification_type,

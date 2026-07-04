@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Account;
-use App\Models\User;
+use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\GlobalSettingSeeder;
 use Database\Seeders\RoleSeeder;
@@ -16,7 +16,7 @@ beforeEach(function () {
 
 describe('Aplikasi harus menyediakan pengelolaan akun koperasi oleh bendahara.', function () {
     it('Bendahara dapat menambahkan akun koperasi.', function () {
-        $bendahara = User::factory()->create();
+        $bendahara = Pengguna::factory()->create();
         $bendahara->assignRole('Bendahara');
 
         $response = $this->actingAs($bendahara)->post('/admin/accounts/create', [
@@ -33,7 +33,7 @@ describe('Aplikasi harus menyediakan pengelolaan akun koperasi oleh bendahara.',
     });
 
     it('Selain bendahara, pengguna lain tidak dapat menambahkan akun koperasi.', function () {
-        $user = User::factory()->create();
+        $user = Pengguna::factory()->create();
         $user->assignRole('Pengawas');
         $response = $this->actingAs($user)->post('/admin/accounts/create', [
             'nama_akun' => 'Akun Baru',
@@ -44,7 +44,7 @@ describe('Aplikasi harus menyediakan pengelolaan akun koperasi oleh bendahara.',
     });
 
     it('Bendahara dapat memperbarui status akun koperasi.', function () {
-        $bendahara = User::factory()->create();
+        $bendahara = Pengguna::factory()->create();
         $bendahara->assignRole('Bendahara');
 
         $account = Account::factory()->create([
@@ -67,7 +67,7 @@ describe('Aplikasi harus menyediakan pengelolaan akun koperasi oleh bendahara.',
 
 describe('Aplikasi harus menyediakan ekspor laporan arus kas dengan format excel bagi pengawas, DPS, ketua koperasi, dan bendahara.', function () {
     it('Pengawas dapat mengekspor laporan arus kas dengan format excel.', function () {
-        $pengawas = User::factory()->create();
+        $pengawas = Pengguna::factory()->create();
         $pengawas->assignRole('Pengawas');
 
         $response = $this->actingAs($pengawas)->get('/admin/kas/export/excel');
@@ -76,7 +76,7 @@ describe('Aplikasi harus menyediakan ekspor laporan arus kas dengan format excel
     });
 
     it('DPS dapat mengekspor laporan arus kas dengan format excel.', function () {
-        $dps = User::factory()->create();
+        $dps = Pengguna::factory()->create();
         $dps->assignRole('Dewan Pengawas Syariah');
 
         $response = $this->actingAs($dps)->get('/admin/kas/export/excel');
@@ -85,7 +85,7 @@ describe('Aplikasi harus menyediakan ekspor laporan arus kas dengan format excel
     });
 
     it('Ketua koperasi dapat mengekspor laporan arus kas dengan format excel.', function () {
-        $ketua = User::factory()->create();
+        $ketua = Pengguna::factory()->create();
         $ketua->assignRole('Ketua');
 
         $response = $this->actingAs($ketua)->get('/admin/kas/export/excel');
@@ -94,7 +94,7 @@ describe('Aplikasi harus menyediakan ekspor laporan arus kas dengan format excel
     });
 
     it('Bendahara dapat mengekspor laporan arus kas dengan format excel.', function () {
-        $bendahara = User::factory()->create();
+        $bendahara = Pengguna::factory()->create();
         $bendahara->assignRole('Bendahara');
 
         $response = $this->actingAs($bendahara)->get('/admin/kas/export/excel');
@@ -105,7 +105,7 @@ describe('Aplikasi harus menyediakan ekspor laporan arus kas dengan format excel
 
 describe('Aplikasi harus menyediakan pencatatan alokasi kas koperasi untuk setiap produk oleh bendahara.', function () {
     it('Bendahara dapat mencatat alokasi kas koperasi untuk setiap produk.', function () {
-        $bendahara = User::factory()->create();
+        $bendahara = Pengguna::factory()->create();
         $bendahara->assignRole('Bendahara');
 
         $akunDebit = Account::factory()->create([
@@ -141,7 +141,7 @@ describe('Aplikasi harus menyediakan pencatatan alokasi kas koperasi untuk setia
     });
 
     it('Selain bendahara, pengguna lain tidak dapat mencatat alokasi kas koperasi untuk setiap produk.', function () {
-        $user = User::factory()->create();
+        $user = Pengguna::factory()->create();
         $user->assignRole('Pengawas');
 
         $akunDebit = Account::factory()->create([

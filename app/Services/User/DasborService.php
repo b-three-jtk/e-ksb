@@ -29,7 +29,7 @@ class DasborService
         ])
         ->sum('amount');
 
-        $totalPoints = PointTransaction::where('user_id', $userId)
+        $totalPoints = PointTransaction::where('pengguna_id', $userId)
             ->sum('amount_earned');
 
         return [

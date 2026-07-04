@@ -1,6 +1,6 @@
 export function useWhatsAppResignation(toast) {
     const sendResignationToWhatsApp = (data) => {
-        let phone = data.phone_number?.replace(/\D/g, '')
+        let phone = data.no_telp?.replace(/\D/g, '')
         if (!phone) {
             toast.error('Nomor WhatsApp tidak ditemukan')
             return
@@ -18,7 +18,7 @@ export function useWhatsAppResignation(toast) {
 
 Kami informasikan bahwa permohonan pengunduran diri Anda sebagai anggota koperasi telah *disetujui*.
 
-Nomor Anggota: ${data.user_code}${savingsLine}
+Nomor Anggota: ${data.kode_pengguna}${savingsLine}
 
 Terima kasih atas kontribusi Anda selama ini.`)
 

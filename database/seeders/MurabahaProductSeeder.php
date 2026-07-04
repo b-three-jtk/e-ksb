@@ -14,7 +14,7 @@ use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\Member;
 use App\Models\ProductType;
-use App\Models\User;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -80,7 +80,7 @@ class MurabahaProductSeeder extends Seeder
         }
 
         // PENYESUAIAN RUMUS DASHBOARD: KAS (101) JADI 70M, PIUTANG (104) JADI 150M
-        $admin = User::first();
+        $admin = Pengguna::first();
         $date = now()->endOfDay();
         
         $kasBalance = JournalEntry::where('no_ref_account', '101')
@@ -123,7 +123,7 @@ class MurabahaProductSeeder extends Seeder
 
     private function seedActiveFinancing(Member $member, array $item, string $kolektibilitas = 'lancar'): void
     {
-        $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? User::first();
+        $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.2); // 20% margin
         $downPayment = (int)($item['price'] * 0.1); // 10% DP
 
@@ -325,7 +325,7 @@ class MurabahaProductSeeder extends Seeder
 
     private function seedPendingFinancing(Member $member, array $item): void
     {
-        $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? User::first();
+        $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.1);
         $downPayment = (int)($item['price'] * 0.1);
 
@@ -378,7 +378,7 @@ class MurabahaProductSeeder extends Seeder
 
     private function seedCompletedFinancing(Member $member, array $item): void
     {
-        $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? User::first();
+        $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.1);
         $downPayment = (int)($item['price'] * 0.1);
         $tenor = 10;

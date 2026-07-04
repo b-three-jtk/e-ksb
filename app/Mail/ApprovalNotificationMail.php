@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -13,7 +13,7 @@ class ApprovalNotificationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public User $user)
+    public function __construct(public Pengguna $user)
     {
     }
 

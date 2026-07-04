@@ -132,14 +132,14 @@ class AnggotaController extends Controller
         $user = auth()->user();
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'email' => [
                 'nullable',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email')->ignore($user->id, 'id'),
+                Rule::unique('pengguna', 'email')->ignore($user->id, 'id'),
             ],
-            'phone_number' => 'required|string|max:20',
+            'no_telp' => 'required|string|max:20',
             'last_education' => 'nullable|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
             'residential_address' => 'nullable|string|max:1000',
         ]);
@@ -154,15 +154,15 @@ class AnggotaController extends Controller
         $user = auth()->user();
 
         $request->validate([
-            'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto_profil' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $tmpPath = $request->file('profile_picture')->getPathname();
+        $tmpPath = $request->file('foto_profil')->getPathname();
         if (!@getimagesize($tmpPath)) {
-            return back()->withErrors(['profile_picture' => 'File tidak valid sebagai gambar.']);
+            return back()->withErrors(['foto_profil' => 'File tidak valid sebagai gambar.']);
         }
 
-        $this->profilPenggunaService->updateAvatar($user, $request->file('profile_picture'));
+        $this->profilPenggunaService->updateAvatar($user, $request->file('foto_profil'));
 
         return redirect()->back();
     }

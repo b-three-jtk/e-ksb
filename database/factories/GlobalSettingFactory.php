@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\GlobalSetting;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +23,7 @@ class GlobalSettingFactory extends Factory
             'value' => $this->faker->sentence(),
             'effective_date' => $this->faker->date(),
             'description' => $this->faker->paragraph(),
-            'updated_by' => User::factory(),
+            'updated_by' => Pengguna::factory(),
         ];
     }
 }

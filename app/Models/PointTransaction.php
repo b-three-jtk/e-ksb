@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\SavingTransaction;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +16,7 @@ class PointTransaction extends Model
         'activity_description',
         'saving_balance_snapshot',
         'calculation_period',
-        'user_id',
+        'pengguna_id',
     ];
 
     protected function casts(): array
@@ -29,7 +29,7 @@ class PointTransaction extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Pengguna::class);
     }
 
     public function savingTransactions()

@@ -64,9 +64,9 @@ class PengunduranDiriController extends Controller
         return to_route('admin.resignations.index')->with([
             'success' => 'Pengunduran diri berhasil divalidasi.',
             'resignation_info' => [
-                'name'      => $user->name,
-                'user_code' => $user->user_code,
-                'phone'     => $user->phone_number,
+                'nama'      => $user->nama,
+                'kode_pengguna' => $user->kode_pengguna,
+                'phone'     => $user->no_telp,
             ],
         ]);
     }

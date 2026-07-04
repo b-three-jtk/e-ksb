@@ -19,10 +19,10 @@ class StoreFinancingRequest extends FormRequest
 
         return [
             // Member data
-            'member.user_code' => 'required|string|max:255',
-            'member.name' => 'required|string|max:255',
+            'member.kode_pengguna' => 'required|string|max:255',
+            'member.nama' => 'required|string|max:255',
             'member.nik' => 'required|string|digits:16',
-            'member.phone_number' => 'required|string|max:20',
+            'member.no_telp' => 'required|string|max:20',
             'member.email' => 'nullable|email|max:255',
             'member.birth_place' => 'nullable|string|max:255',
             'member.birth_date' => 'nullable|date',

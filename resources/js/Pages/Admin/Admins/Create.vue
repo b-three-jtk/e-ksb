@@ -12,12 +12,12 @@ import { useFormatter } from '@/Composables/Form/useFormatter'
 import { useInputSanitizers } from '@/Composables/useInputSanitizers'
 
 const form = useForm({
-    user_id: '',
+    pengguna_id: '',
     email: '',
     nik: '',
     role_id: '',
     name: '',
-    phone_number: '',
+    no_telp: '',
 })
 
 const props = defineProps({
@@ -40,7 +40,7 @@ const selectedMember = ref(null)
 const { onlyNumbers } = useInputSanitizers()
 const { normalizePhoneNumber } = useFormatter()
 
-const isEditingExistingMember = computed(() => !!form.user_id)
+const isEditingExistingMember = computed(() => !!form.pengguna_id)
 
 const searchMembers = () => {
     if (searchQuery.value.length < 2) {
@@ -53,28 +53,28 @@ const searchMembers = () => {
         m.name?.toLowerCase().includes(q) ||
         m.nik?.toLowerCase().includes(q) ||
         m.email?.toLowerCase().includes(q) ||
-        m.user_code?.toLowerCase().includes(q)
+        m.kode_pengguna?.toLowerCase().includes(q)
     ).slice(0, 6)
 }
 
 const selectMember = (member) => {
     selectedMember.value = member
-    form.user_id = member.id
+    form.pengguna_id = member.id
     form.name = member.name
     form.nik = member.nik
     form.email = member.email
-    form.phone_number = member.phone_number
+    form.no_telp = member.no_telp
     searchQuery.value = ''
     searchResults.value = []
 }
 
 const clearSelectedMember = () => {
     selectedMember.value = null
-    form.user_id = ''
+    form.pengguna_id = ''
     form.name = ''
     form.nik = ''
     form.email = ''
-    form.phone_number = ''
+    form.no_telp = ''
 }
 
 const submitForm = () => {
@@ -132,7 +132,7 @@ const submitForm = () => {
                             <!-- Selected Member Info -->
                             <div v-else class="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
                                 <div class="flex justify-between items-center">
-                                    <p class="font-semibold font-body text-md text-green-900">{{ selectedMember.user_code }}</p>
+                                    <p class="font-semibold font-body text-md text-green-900">{{ selectedMember.kode_pengguna }}</p>
                                     <button class="text-primary flex items-center" @click="clearSelectedMember">
                                         <span class="icon-[tabler--x]"></span>
                                     </button>
@@ -145,7 +145,7 @@ const submitForm = () => {
                                 <div v-for="member in searchResults" :key="member.id" @click="selectMember(member)"
                                     class="px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-100">
                                     <div class="font-semibold">{{ member.name }}</div>
-                                    <div class="text-sm text-gray-600">{{ member.user_code }} | NIK: {{ member.nik }}
+                                    <div class="text-sm text-gray-600">{{ member.kode_pengguna }} | NIK: {{ member.nik }}
                                     </div>
                                     <div class="text-sm text-gray-600">{{ member.email }}</div>
                                 </div>
@@ -184,9 +184,9 @@ const submitForm = () => {
                         </BaseInputAdmin>
 
                         <!-- No. Telp -->
-                        <BaseInputAdmin v-model="form.phone_number" max="20" required label="Nomor Telepon" type="text"
-                            @input="form.phone_number = normalizePhoneNumber(form.phone_number, onlyNumbers)"
-                            placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.phone_number"
+                        <BaseInputAdmin v-model="form.no_telp" max="20" required label="Nomor Telepon" type="text"
+                            @input="form.no_telp = normalizePhoneNumber(form.no_telp, onlyNumbers)"
+                            placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.no_telp"
                         >
                         </BaseInputAdmin>
                     </div>

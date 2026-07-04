@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,6 +23,6 @@ class GlobalSetting extends Model
 
     public function updatedBy()
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->belongsTo(Pengguna::class, 'updated_by');
     }
 }

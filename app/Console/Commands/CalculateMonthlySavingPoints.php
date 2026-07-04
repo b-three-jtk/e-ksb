@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\GlobalSetting;
 use App\Models\PointTransaction;
-use App\Models\User;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +36,7 @@ class CalculateMonthlySavingPoints extends Command
             return self::FAILURE;
         }
 
-        $users = User::query()
+        $users = Pengguna::query()
             ->whereHas('member.savingAccounts')
             ->with([
                 'member.savingAccounts',
@@ -65,7 +65,7 @@ class CalculateMonthlySavingPoints extends Command
 
             DB::transaction(function () use ($user, $periodDate, $periodLabel, $totalSavings, $pointsEarned): void {
                 PointTransaction::create([
-                    'user_id' => $user->id,
+                    'pengguna_id' => $user->id,
                     'amount_earned' => $pointsEarned,
                     'activity_description' => sprintf(
                         'Perhitungan poin simpanan periode %s dengan total simpanan Rp %s',

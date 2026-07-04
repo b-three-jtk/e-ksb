@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\PointTransaction;
-use App\Models\User;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -14,10 +14,10 @@ class ProfilPenggunaService
     /**
      * Build profile payload data including point histories and document paths.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @return array
      */
-    public function index(User $user): array
+    public function index(Pengguna $user): array
     {
         $member = $user->member?->loadMissing(['heirs', 'memberDocs']);
         $pointTransactions = $user->pointTransactions()
@@ -53,7 +53,7 @@ class ProfilPenggunaService
 
         $latestPointTransaction = $pointTransactions->last();
 
-        $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
+        $photoUrl = $user->foto_profil ? asset('storage/' . $user->foto_profil) : null;
         $heirs = $member?->heirs?->map(function ($heir) {
             return [
                 'heir_nik' => $heir->heir_nik,
@@ -72,12 +72,12 @@ class ProfilPenggunaService
 
         return [
             'id' => $user->id,
-            'user_code' => $user->user_code,
-            'name' => $user->name,
+            'kode_pengguna' => $user->kode_pengguna,
+            'nama' => $user->nama,
             'nik' => $user->nik,
             'email' => $user->email,
-            'phone_number' => $user->phone_number,
-            'profile_picture' => $user->profile_picture,
+            'no_telp' => $user->no_telp,
+            'foto_profil' => $user->foto_profil,
             'photo_url' => $photoUrl,
             'role_name' => $user->getRoleNames()->first() ?? 'Anggota',
             'member' => [
@@ -120,16 +120,16 @@ class ProfilPenggunaService
     /**
      * Update basic user and member profile details.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @param array $validated
      * @return void
      */
-    public function update(User $user, array $validated): void
+    public function update(Pengguna $user, array $validated): void
     {
         $user->update([
-            'name' => $validated['name'],
+            'nama' => $validated['nama'],
             'email' => $validated['email'] ?? null,
-            'phone_number' => $validated['phone_number'] ?? null,
+            'no_telp' => $validated['no_telp'] ?? null,
         ]);
 
         if ($user->member) {
@@ -143,48 +143,48 @@ class ProfilPenggunaService
     /**
      * Update/upload user profile avatar picture.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @param UploadedFile $profilePicture
      * @return void
      */
-    public function updateAvatar(User $user, UploadedFile $profilePicture): void
+    public function updateAvatar(Pengguna $user, UploadedFile $profilePicture): void
     {
-        if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
-            Storage::disk('public')->delete($user->profile_picture);
+        if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {
+            Storage::disk('public')->delete($user->foto_profil);
         }
 
-        $path = $profilePicture->store('profile_pictures', 'public');
+        $path = $profilePicture->store('profil', 'public');
 
         $user->update([
-            'profile_picture' => $path,
+            'foto_profil' => $path,
         ]);
     }
 
     /**
      * Delete user profile avatar picture.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @return void
      */
-    public function deleteAvatar(User $user): void
+    public function deleteAvatar(Pengguna $user): void
     {
-        if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
-            Storage::disk('public')->delete($user->profile_picture);
+        if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {
+            Storage::disk('public')->delete($user->foto_profil);
         }
 
         $user->update([
-            'profile_picture' => null,
+            'foto_profil' => null,
         ]);
     }
 
     /**
      * Update user password.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @param string $password
      * @return void
      */
-    public function updatePassword(User $user, string $password): void
+    public function updatePassword(Pengguna $user, string $password): void
     {
         $user->update([
             'password' => Hash::make($password),

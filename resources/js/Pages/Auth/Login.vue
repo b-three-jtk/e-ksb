@@ -5,7 +5,7 @@ import BaseInput from '@/Components/Form/BaseInput.vue'
 import { toast } from 'vue3-toastify'
 
 const form = useForm({
-  user_code: '',
+  kode_pengguna: '',
   password: '',
 })
 
@@ -40,11 +40,11 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="space-y-8">
                 <BaseInput
-                  v-model="form.user_code"
+                  v-model="form.kode_pengguna"
                   label="Kode Pengguna"
                   type="text"
                   required
-                  :error="form.errors.user_code"
+                  :error="form.errors.kode_pengguna"
                 />
 
                 <div class="space-y-4">

@@ -6,7 +6,7 @@ use App\Enums\SavingTypeEnum;
 use App\Models\Member;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
-use App\Models\User;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -26,7 +26,7 @@ class SavingProductSeeder extends Seeder
             return; // Skip jika tidak ada member
         }
 
-        $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? User::first();
+        $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? Pengguna::first();
 
         foreach ($members as $index => $member) {
             // Semua member punya Simpanan Pokok dan Wajib
@@ -48,7 +48,7 @@ class SavingProductSeeder extends Seeder
         }
     }
 
-    private function seedSimpananPokok(Member $member, User $admin): void
+    private function seedSimpananPokok(Member $member, Pengguna $admin): void
     {
         $account = SavingAccount::create([
             'saving_account_code' => 'SP-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),
@@ -72,7 +72,7 @@ class SavingProductSeeder extends Seeder
         ]);
     }
 
-    private function seedSimpananWajib(Member $member, User $admin): void
+    private function seedSimpananWajib(Member $member, Pengguna $admin): void
     {
         $account = SavingAccount::create([
             'saving_account_code' => 'SW-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),
@@ -100,7 +100,7 @@ class SavingProductSeeder extends Seeder
         }
     }
 
-    private function seedTabunganAnggota(Member $member, User $admin, $amount): void
+    private function seedTabunganAnggota(Member $member, Pengguna $admin, $amount): void
     {
         $account = SavingAccount::create([
             'saving_account_code' => 'TA-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),
@@ -123,7 +123,7 @@ class SavingProductSeeder extends Seeder
         ]);
     }
 
-    private function seedTabunganBerjangka(Member $member, User $admin, $amount): void
+    private function seedTabunganBerjangka(Member $member, Pengguna $admin, $amount): void
     {
         $account = SavingAccount::create([
             'saving_account_code' => 'TB-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),
@@ -146,7 +146,7 @@ class SavingProductSeeder extends Seeder
         ]);
     }
 
-    private function seedTabunganIbadah(Member $member, User $admin, $amount): void
+    private function seedTabunganIbadah(Member $member, Pengguna $admin, $amount): void
     {
         $account = SavingAccount::create([
             'saving_account_code' => 'TI-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),

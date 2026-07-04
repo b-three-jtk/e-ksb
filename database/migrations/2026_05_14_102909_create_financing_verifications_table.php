@@ -21,7 +21,7 @@ return new class extends Migration
             $table->dateTime('verified_at')->nullable();
 
             $table->foreign('financing_id')->references('id')->on('financings')->onDelete('cascade');
-            $table->foreign('verified_by')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('verified_by')->references('id')->on('pengguna')->onDelete('set null');
             $table->index('financing_id');
             $table->timestamps();
         });

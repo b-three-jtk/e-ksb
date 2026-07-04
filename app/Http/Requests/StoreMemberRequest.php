@@ -35,14 +35,14 @@ class StoreMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'gender' => 'required|in:Laki-laki,Perempuan',
-            'nik' => 'required|digits:16|unique:users,nik',
+            'nik' => 'required|digits:16|unique:pengguna,nik',
             'birth_place' => 'required|string|max:255',
             'birth_date' => 'required|date',
             'marital_status' => 'required|in:' . implode(',', array_column(MaritalStatusEnum::cases(), 'value')),
-            'phone_number' => 'required|string|max:20|unique:users,phone_number',
-            'email' => 'nullable|email|max:255|unique:users,email',
+            'no_telp' => 'required|string|max:20|unique:pengguna,no_telp',
+            'email' => 'nullable|email|max:255|unique:pengguna,email',
             'domicile_address' => 'required|string|max:500',
             'residential_address' => 'nullable|string|max:500',
             'last_education' => 'required|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),

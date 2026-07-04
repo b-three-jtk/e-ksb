@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\JournalEntry;
 use Database\Seeders\AccountSeeder;
-use Database\Seeders\UserSeeder;
+use Database\Seeders\PenggunaSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
-            UserSeeder::class,
+            PenggunaSeeder::class,
             ProductTypeSeeder::class,
             AccountSeeder::class,
             SavingProductSeeder::class,

@@ -15,7 +15,7 @@ interface NotificationItem {
     member_name: string
     title: string
     message: string
-    phone_number: string | null
+    no_telp: string | null
     notification_type: string
     reminder_type: string
     status: string
@@ -266,8 +266,8 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
 
                     <template #cell-actions="{ row }">
                         <a
-                            v-if="row.phone_number"
-                            :href="createWhatsAppUrl(row.phone_number, row.message)"
+                            v-if="row.no_telp"
+                            :href="createWhatsAppUrl(row.no_telp, row.message)"
                             class="inline-flex items-center justify-center rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-600"
                             target="_blank"
                             rel="noopener noreferrer"

@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('members', function (Blueprint $table) {
-            if (!Schema::hasColumn('members', 'pj_user_id')) {
-                $table->uuid('pj_user_id')->nullable()->after('user_id');
-                $table->foreign('pj_user_id')->references('id')->on('users')->nullOnDelete();
+            if (!Schema::hasColumn('members', 'pj_anggota_id')) {
+                $table->uuid('pj_anggota_id')->nullable()->after('pengguna_id');
+                $table->foreign('pj_anggota_id')->references('id')->on('pengguna')->nullOnDelete();
             }
         });
     }
@@ -25,9 +25,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('members', function (Blueprint $table) {
-            if (Schema::hasColumn('members', 'pj_user_id')) {
-                $table->dropForeign(['pj_user_id']);
-                $table->dropColumn('pj_user_id');
+            if (Schema::hasColumn('members', 'pj_anggota_id')) {
+                $table->dropForeign(['pj_anggota_id']);
+                $table->dropColumn('pj_anggota_id');
             }
         });
     }

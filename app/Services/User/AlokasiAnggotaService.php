@@ -5,7 +5,7 @@ namespace App\Services\User;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Member;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -23,73 +23,73 @@ class AlokasiAnggotaService
         $search = trim((string) $request->input('search', ''));
         $allocationStatus = (string) $request->input('allocation_status', '');
 
-        $memberBaseQuery = User::query()
+        $memberBaseQuery = Pengguna::query()
             ->with(['member.penanggungJawab'])
             ->whereHas('roles', fn ($roleQuery) => $roleQuery->where('name', UserRoleEnum::ANGGOTA->value))
-            ->whereNotNull('joined_date')
-            ->whereNotNull('user_code')
+            ->whereNotNull('tgl_bergabung')
+            ->whereNotNull('kode_pengguna')
             ->where('status', UserStatusEnum::ACTIVE->value);
 
         $query = clone $memberBaseQuery;
 
         if ($search !== '') {
             $query->where(function ($memberQuery) use ($search) {
-                $memberQuery->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('user_code', 'like', '%' . $search . '%')
-                    ->orWhere('phone_number', 'like', '%' . $search . '%');
+                $memberQuery->where('nama', 'like', '%' . $search . '%')
+                    ->orWhere('kode_pengguna', 'like', '%' . $search . '%')
+                    ->orWhere('no_telp', 'like', '%' . $search . '%');
             });
         }
 
         if ($allocationStatus === 'allocated') {
-            $query->whereHas('member', fn ($memberQuery) => $memberQuery->whereNotNull('pj_user_id'));
+            $query->whereHas('member', fn ($memberQuery) => $memberQuery->whereNotNull('pj_anggota_id'));
         } elseif ($allocationStatus === 'unallocated') {
-            $query->whereHas('member', fn ($memberQuery) => $memberQuery->whereNull('pj_user_id'));
+            $query->whereHas('member', fn ($memberQuery) => $memberQuery->whereNull('pj_anggota_id'));
         }
 
         $members = $query
-            ->orderByDesc('joined_date')
+            ->orderByDesc('tgl_bergabung')
             ->paginate($perPage)
             ->withQueryString();
 
         $members->setCollection(
-            $members->getCollection()->map(function (User $user) {
+            $members->getCollection()->map(function (Pengguna $user) {
                 $member = $user->member;
 
                 return [
                     'id' => $user->id,
                     'member_id' => $member?->id,
-                    'user_code' => $user->user_code,
-                    'name' => $user->name,
-                    'avatar' => $user->profile_picture_url,
-                    'phone_number' => $user->phone_number,
-                    'joined_date' => optional($user->joined_date)->format('d M Y'),
+                    'kode_pengguna' => $user->kode_pengguna,
+                    'nama' => $user->nama,
+                    'avatar' => $user->foto_profile_url,
+                    'no_telp' => $user->no_telp,
+                    'tgl_bergabung' => optional($user->tgl_bergabung)->format('d M Y'),
                     'status' => $user->status,
-                    'pj_id' => $member?->pj_user_id,
-                    'pj_name' => $member?->penanggungJawab?->name,
-                    'allocation_status' => $member?->pj_user_id ? 'Sudah Dialokasikan' : 'Belum Dialokasikan',
+                    'pj_id' => $member?->pj_anggota_id,
+                    'pj_name' => $member?->penanggungJawab?->nama,
+                    'allocation_status' => $member?->pj_anggota_id ? 'Sudah Dialokasikan' : 'Belum Dialokasikan',
                 ];
             })
         );
 
-        $pjUsers = User::query()
+        $pjUsers = Pengguna::query()
             ->withCount('allocatedMembers')
             ->whereHas('roles', fn ($roleQuery) => $roleQuery->where('name', UserRoleEnum::PJANGGOTA->value))
             ->where('status', UserStatusEnum::ACTIVE->value)
-            ->orderBy('name')
+            ->orderBy('nama')
             ->get()
-            ->map(fn (User $user) => [
+            ->map(fn (Pengguna $user) => [
                 'id' => $user->id,
-                'name' => $user->name,
-                'user_code' => $user->user_code,
-                'avatar' => $user->profile_picture_url,
-                'phone_number' => $user->phone_number,
+                'nama' => $user->nama,
+                'kode_pengguna' => $user->kode_pengguna,
+                'avatar' => $user->foto_profile_url,
+                'no_telp' => $user->no_telp,
                 'allocated_members_count' => $user->allocated_members_count,
             ])
             ->values();
 
         $totalMembers = (clone $memberBaseQuery)->count();
         $allocatedMembers = (clone $memberBaseQuery)
-            ->whereHas('member', fn ($memberQuery) => $memberQuery->whereNotNull('pj_user_id'))
+            ->whereHas('member', fn ($memberQuery) => $memberQuery->whereNotNull('pj_anggota_id'))
             ->count();
 
         return [
@@ -111,21 +111,21 @@ class AlokasiAnggotaService
     /**
      * Allocate members to a specific PJ.
      *
-     * @param array{pj_user_id: mixed, member_ids: array} $validated
+     * @param array{pj_anggota_id: mixed, member_ids: array} $validated
      * @return void
      */
     public function allocate(array $validated): void
     {
         DB::transaction(function () use ($validated) {
-            $pjUser = User::query()
+            $pjUser = Pengguna::query()
                 ->whereHas('roles', fn ($roleQuery) => $roleQuery->where('name', UserRoleEnum::PJANGGOTA->value))
-                ->findOrFail($validated['pj_user_id']);
+                ->findOrFail($validated['pj_anggota_id']);
 
             Member::query()
                 ->whereHas('user', fn ($userQuery) => $userQuery->where('status', UserStatusEnum::ACTIVE->value))
                 ->whereIn('id', $validated['member_ids'])
                 ->update([
-                    'pj_user_id' => $pjUser->id,
+                    'pj_anggota_id' => $pjUser->id,
                 ]);
         });
     }

@@ -73,7 +73,7 @@ class PengaturanUmumService
                     'value' => $setting?->value,
                     'effective_date' => $setting?->effective_date?->toDateString(),
                     'updated_at' => $setting?->updated_at?->toDateTimeString(),
-                    'updated_by' => $setting?->updatedBy?->name,
+                    'updated_by' => $setting?->updatedBy?->nama,
                 ];
             }
         }
@@ -99,7 +99,7 @@ class PengaturanUmumService
                 'value' => $record->value,
                 'effective_date' => $record->effective_date?->toDateString(),
                 'updated_at' => $record->updated_at?->toDateTimeString(),
-                'updated_by' => $record->updatedBy?->name,
+                'updated_by' => $record->updatedBy?->nama,
             ];
         }
 
@@ -115,7 +115,7 @@ class PengaturanUmumService
         }
 
         return GlobalSetting::query()
-            ->with(['updatedBy:id,name'])
+            ->with(['updatedBy:id,nama'])
             ->whereIn('key', $allKeys)
             ->orderByDesc('created_at')
             ->orderByDesc('id')

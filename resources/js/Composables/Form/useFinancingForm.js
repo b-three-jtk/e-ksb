@@ -21,11 +21,11 @@ export function useFinancingForm(initialData = null) {
     const form = useForm({
         // Member data
         member: {
-            user_code: initialData?.member?.user_code || '',
+            kode_pengguna: initialData?.member?.kode_pengguna || '',
             name: initialData?.member?.name || '',
             nik: initialData?.member?.nik || '',
             email: initialData?.member?.email || '',
-            phone_number: initialData?.member?.phone_number || '',
+            no_telp: initialData?.member?.no_telp || '',
             gender: initialData?.member?.gender || '',
             birth_place: initialData?.member?.birth_place || '',
             birth_date: initialData?.member?.birth_date || '',
@@ -153,11 +153,11 @@ export function useFinancingForm(initialData = null) {
         console.log('member:',member);
 
         // Update member form
-        form.member.user_code = member.user.user_code || ''
-        form.member.name = member.user.name || ''
+        form.member.kode_pengguna = member.user.kode_pengguna || ''
+        form.member.name = member.user.nama || ''
         form.member.nik = member.user.nik || ''
         form.member.email = member.user.email || ''
-        form.member.phone_number = member.user.phone_number || ''
+        form.member.no_telp = member.user.no_telp || ''
         form.member.gender = member.gender || ''
         form.member.birth_place = member.birth_place || ''
         form.member.birth_date = member.birth_date || ''
@@ -201,11 +201,11 @@ export function useFinancingForm(initialData = null) {
         selectedMember.value = null
         searchQuery.value = ''
         form.member = {
-            user_code: '',
+            kode_pengguna: '',
             name: '',
             nik: '',
             email: '',
-            phone_number: '',
+            no_telp: '',
             gender: '',
             birth_place: '',
             birth_date: '',

@@ -62,8 +62,8 @@ public function handle(): int
             ->join('members', 'financings.member_id', '=', 'members.id')
             ->whereDate('installment_payment_transactions.payment_date', '>=', $startDate)
             ->whereDate('installment_payment_transactions.payment_date', '<=', $endDate)
-            ->select('members.user_id', DB::raw('SUM(installment_payment_transactions.margin_amount) as total_margin'))
-            ->groupBy('members.user_id')
+            ->select('members.pengguna_id', DB::raw('SUM(installment_payment_transactions.margin_amount) as total_margin'))
+            ->groupBy('members.pengguna_id')
             ->get();
 
         $created = 0;
@@ -79,7 +79,7 @@ public function handle(): int
             }
 
             $hasPoint = PointTransaction::query()
-                ->where('user_id', $data->user_id)
+                ->where('pengguna_id', $data->pengguna_id)
                 ->whereDate('calculation_period', $endDate)
                 ->where('activity_description', 'LIKE', '%murabahah%')
                 ->exists();
@@ -91,7 +91,7 @@ public function handle(): int
 
             DB::transaction(function () use ($data, $endDate, $periodLabel, $totalMargin, $pointsEarned): void {
                 PointTransaction::create([
-                    'user_id' => $data->user_id,
+                    'pengguna_id' => $data->pengguna_id,
                     'amount_earned' => $pointsEarned,
                     'activity_description' => sprintf(
                         'Perhitungan poin murabahah periode %s dengan total margin Rp %s',

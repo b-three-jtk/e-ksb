@@ -20,7 +20,7 @@ const visiblePjUsers = computed(() => {
   }
 
   return props.pjUsers.filter((pj) => {
-    return [pj.name, pj.user_code, pj.phone_number]
+    return [pj.nama, pj.kode_pengguna, pj.no_telp]
       .filter(Boolean)
       .some((value) => String(value).toLowerCase().includes(keyword))
   })
@@ -66,19 +66,19 @@ const choosePj = (pjId) => {
               <img
                 v-if="pj.avatar && !brokenPjAvatarIds.has(pj.id)"
                 :src="pj.avatar"
-                :alt="pj.name"
+                :alt="pj.nama"
                 class="h-full w-full object-cover"
                 @error="$emit('mark-broken-pj-avatar', pj.id)"
               />
               <UserIcon v-else class="h-6 w-6" />
             </div>
             <div class="min-w-0 flex-1">
-              <div class="truncate font-semibold text-slate-900 dark:text-white">{{ pj.name }}</div>
-              <div class="truncate text-sm text-slate-500 dark:text-slate-400">{{ pj.user_code || '-' }}</div>
+              <div class="truncate font-semibold text-slate-900 dark:text-white">{{ pj.nama }}</div>
+              <div class="truncate text-sm text-slate-500 dark:text-slate-400">{{ pj.kode_pengguna || '-' }}</div>
             </div>
           </div>
           <div class="mt-3 flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
-            <span>{{ pj.phone_number || '-' }}</span>
+            <span>{{ pj.no_telp || '-' }}</span>
             <span>{{ pj.allocated_members_count }} anggota</span>
           </div>
         </button>

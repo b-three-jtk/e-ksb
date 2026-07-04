@@ -11,7 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMemberAllocationRequest;
 use App\Http\Requests\StoreMemberRequest;
 use App\Http\Requests\UpdateMemberRequest;
-use App\Models\User;
+use App\Models\Pengguna;
 use App\Services\Admin\AnggotaService;
 use App\Services\Admin\PembiayaanService;
 use App\Services\User\AlokasiAnggotaService;
@@ -187,11 +187,11 @@ class PenggunaController extends Controller
         return response()->json($financing->installment);
     }
 
-    public function verificationDetail(User $user)
+    public function verificationDetail(Pengguna $user)
     {
         $user->load('userDocs');
 
-        $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
+        $photoUrl = $user->foto_profil ? asset('storage/' . $user->foto_profil) : null;
         $idCard = $user->userDocs
             ->firstWhere('name', 'ktp');
         $idCardUrl = $idCard?->attachment ? asset('storage/' . $idCard->attachment) : null;
@@ -199,8 +199,8 @@ class PenggunaController extends Controller
         return Inertia::render('Admin/User/Verification/Show', [
             'member' => [
                 'id' => $user->id,
-                'user_code' => $user->user_code,
-                'name' => $user->name,
+                'kode_pengguna' => $user->kode_pengguna,
+                'nama' => $user->nama,
                 'nik' => $user->nik,
                 'email' => $user->email,
                 'photo_url' => $photoUrl,
@@ -211,7 +211,7 @@ class PenggunaController extends Controller
 
     public function updateStatusToInactive(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = Pengguna::findOrFail($id);
         $user->update([
             'status' => UserStatusEnum::INACTIVE,
         ]);

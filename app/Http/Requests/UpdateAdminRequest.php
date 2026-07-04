@@ -22,10 +22,10 @@ class UpdateAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'nik' => 'required|string|digits:16|unique:users,nik,' . $this->route('id'),
-            'email' => 'nullable|email|max:255|unique:users,email,' . $this->route('id'),
-            'phone_number' => 'required|string|max:20',
+            'nama' => 'required|string|max:255',
+            'nik' => 'required|string|digits:16|unique:pengguna,nik,' . $this->route('id'),
+            'email' => 'nullable|email|max:255|unique:pengguna,email,' . $this->route('id'),
+            'no_telp' => 'required|string|max:20',
             'role_id' => 'nullable|exists:roles,id',
         ];
     }

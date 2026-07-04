@@ -49,13 +49,13 @@ const maxBirthDate = computed(() => {
 
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<BaseInputAdmin
-				v-model="form.name"
+				v-model="form.nama"
 				label="Nama Anggota"
 				type="text"
 				placeholder="Isi dengan huruf"
 				required
-				@input="form.name = onlyLetters(form.name)"
-				:error="getFieldError('name', errors.name)"
+				@input="form.nama = onlyLetters(form.nama)"
+				:error="getFieldError('nama', errors.nama)"
 			/>
 
 			<BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required :selectables="genderOptions" :error="getFieldError('gender', errors.gender)" />

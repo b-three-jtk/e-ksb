@@ -6,7 +6,7 @@ use App\Models\Collateral;
 use App\Models\FinancingItem;
 use App\Models\Installment;
 use App\Models\Member;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -58,7 +58,7 @@ class Financing extends Model
 
     public function updatedBy()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Pengguna::class);
     }
 
     // Angsuran

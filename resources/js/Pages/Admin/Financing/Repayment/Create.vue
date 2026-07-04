@@ -85,10 +85,10 @@ const submitForm = () => {
                 <div class="card-layout mx-8 mt-8">
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                         <li>
-                            <Info label="Nomor Anggota KSPPS" :value="props.data?.financing?.member.user.user_code" />
+                            <Info label="Nomor Anggota KSPPS" :value="props.data?.financing?.member.user.kode_pengguna" />
                         </li>
                         <li>
-                            <Info label="Nama Lengkap" :value="props.data?.financing?.member.user.name" />
+                            <Info label="Nama Lengkap" :value="props.data?.financing?.member.user.nama" />
                         </li>
                         <li>
                             <Info label="Tanggal Akad" :value="dateParser(props.data?.financing?.akad_date)" />

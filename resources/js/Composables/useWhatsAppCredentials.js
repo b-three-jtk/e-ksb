@@ -17,7 +17,7 @@ export const useWhatsAppCredentials = (toast) => {
 	}
 
 	const sendCredentialsToWhatsApp = (credentials) => {
-		const waNumber = normalizeWhatsAppNumber(credentials?.phone_number)
+		const waNumber = normalizeWhatsAppNumber(credentials?.no_telp)
 		if (!waNumber) {
 			toast('Nomor WhatsApp anggota tidak valid.', {
 				type: 'error',
@@ -31,7 +31,7 @@ export const useWhatsAppCredentials = (toast) => {
 		const message = [
 			'Halo, akun anggota Anda sudah dibuat.',
 			`Nama: ${credentials?.name ?? '-'}`,
-			`Kode Pengguna: ${credentials?.user_code ?? '-'}`,
+			`Kode Pengguna: ${credentials?.kode_pengguna ?? '-'}`,
 			`Password Awal: ${credentials?.initial_password ?? '-'}`,
 			'Silakan login dan segera ubah password Anda.',
 		].join('\n')

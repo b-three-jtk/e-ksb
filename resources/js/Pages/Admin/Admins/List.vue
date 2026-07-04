@@ -13,7 +13,7 @@ import Button from '../../../Components/Form/Button.vue'
 const columns = [
     { key: 'no', label: 'No' },
     { key: 'nik', label: 'NIK' },
-    { key: 'name', label: 'Nama Pengurus', sortable: true },
+    { key: 'nama', label: 'Nama Pengurus', sortable: true },
     { key: 'email', label: 'Email' },
     { key: 'posisi', label: 'Posisi' },
     { key: 'status', label: 'Status' },

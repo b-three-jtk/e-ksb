@@ -2,17 +2,15 @@
 
 namespace Database\Factories;
 
-use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<\App\Models\Pengguna>
  */
-class UserFactory extends Factory
+class PenggunaFactory extends Factory
 {
     /**
      * The current password being used by the factory.
@@ -27,12 +25,12 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_code' => 'KSB' . date('ym') . fake()->unique()->numerify('####'),
+            'kode_pengguna' => 'KSB' . date('ym') . fake()->unique()->numerify('###'),
             'nik' => fake()->unique()->numerify('################'),
-            'name' => fake()->name(),
+            'nama' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'phone_number' => fake()->unique()->numerify('08##########'),
-            'joined_date' => fake()->date(),
+            'no_telp' => fake()->unique()->numerify('08##########'),
+            'tgl_bergabung' => fake()->date(),
             'status' => UserStatusEnum::ACTIVE->value,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

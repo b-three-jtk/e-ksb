@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('amount_earned');
             $table->text('activity_description');
-            $table->foreignUuid('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignUuid('pengguna_id')->nullable()->constrained('pengguna')->onDelete('set null');
             $table->timestamps();
         });
     }

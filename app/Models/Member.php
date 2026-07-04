@@ -10,7 +10,7 @@ use App\Models\MemberDoc;
 use App\Models\MemberJob;
 use App\Models\Notification;
 use App\Models\SavingAccount;
-use App\Models\User;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -19,8 +19,8 @@ class Member extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'pj_user_id',
+        'pengguna_id',
+        'pj_anggota_id',
         'gender',
         'birth_place',
         'birth_date',
@@ -42,12 +42,12 @@ class Member extends Model
     // Detail Member
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Pengguna::class, 'pengguna_id');
     }
 
     public function penanggungJawab()
     {
-        return $this->belongsTo(User::class, 'pj_user_id');
+        return $this->belongsTo(Pengguna::class, 'pj_anggota_id');
     }
 
     public function financials()

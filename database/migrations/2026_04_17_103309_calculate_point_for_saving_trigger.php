@@ -15,7 +15,7 @@ return new class extends Migration {
             DECLARE
                 points_earned INTEGER;
                 activity_desc TEXT;
-                v_user_id UUID;
+                v_pengguna_id UUID;
                 v_point_trans_id INTEGER;
             BEGIN
             IF NEW.balance_after_transaction < 100000 THEN
@@ -24,10 +24,10 @@ return new class extends Migration {
                 points_earned := FLOOR(NEW.balance_after_transaction / 100000);
                 activity_desc := \'Mendapatkan \' || points_earned || \' poin dari transaksi sebesar \' || NEW.saving_amount;
 
-                SELECT user_id INTO v_user_id FROM members WHERE id = (SELECT member_id FROM saving_accounts WHERE id = NEW.saving_account_id);
+                SELECT pengguna_id INTO v_pengguna_id FROM members WHERE id = (SELECT member_id FROM saving_accounts WHERE id = NEW.saving_account_id);
 
-                INSERT INTO point_transactions (amount_earned, activity_description, user_id, created_at, updated_at)
-                VALUES (points_earned, activity_desc, v_user_id, NOW(), NOW())
+                INSERT INTO point_transactions (amount_earned, activity_description, pengguna_id, created_at, updated_at)
+                VALUES (points_earned, activity_desc, v_pengguna_id, NOW(), NOW())
                 RETURNING id INTO v_point_trans_id;
 
                 NEW.point_id := v_point_trans_id;

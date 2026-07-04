@@ -28,7 +28,8 @@ $adminRoles = [
     UserRoleEnum::DPS->value,
     UserRoleEnum::KETUAMURABAHAH->value,
     UserRoleEnum::STAFMURABAHAH->value,
-    UserRoleEnum::PJANGGOTA->value
+    UserRoleEnum::PJANGGOTA->value,
+    UserRoleEnum::ADMIN->value,
 ];
 
 Route::get('/', function () {

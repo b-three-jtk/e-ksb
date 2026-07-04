@@ -47,7 +47,7 @@ const memberSuggestions = computed(() => {
   return props.members
     .filter(m =>
       m.name?.toLowerCase().includes(q) ||
-      m.user_code?.toLowerCase().includes(q)
+      m.kode_pengguna?.toLowerCase().includes(q)
     )
     .slice(0, 6)
 })
@@ -282,7 +282,7 @@ function bukaDialog() {
 
 const confirmationData = computed(() => ({
   memberName: selectedMember.value?.name,
-  memberNumber: selectedMember.value?.user_code,
+  memberNumber: selectedMember.value?.kode_pengguna,
   savingType: jenisSimpanan.value,
   method: depositMethod.value,
   amount: nominalRaw.value,
@@ -445,7 +445,7 @@ const akadType = computed(() => {
                   </div>
                   <div>
                     <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ m.name }}</div>
-                    <div class="text-xs text-gray-500">{{ m.user_code }}</div>
+                    <div class="text-xs text-gray-500">{{ m.kode_pengguna }}</div>
                   </div>
                 </button>
               </div>
@@ -462,7 +462,7 @@ const akadType = computed(() => {
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
-                  <div class="text-sm text-gray-500">{{ selectedMember.user_code }}</div>
+                  <div class="text-sm text-gray-500">{{ selectedMember.kode_pengguna }}</div>
                 </div>
                 <button @click="resetAnggota" type="button" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
                   <Icon icon="mdi:close" width="20" />

@@ -134,16 +134,16 @@ class SimpananService
 
         if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value)) {
             $query->whereHas('savingAccount.member', function ($q) {
-                $q->where('pj_user_id', Auth::id());
+                $q->where('pj_anggota_id', Auth::id());
             });
         }
 
         return $query
             ->when($search, function ($q) use ($search) {
                 $q->whereHas('savingAccount.member.user', function ($m) use ($search) {
-                    $m->where('name', 'like', "%{$search}%")
+                    $m->where('nama', 'like', "%{$search}%")
                         ->orWhere('nik', 'like', "%{$search}%")
-                        ->orWhere('user_code', 'like', "%{$search}%");
+                        ->orWhere('kode_pengguna', 'like', "%{$search}%");
                 });
             })
             ->when(isset($typeMap[$tab]), function ($q) use ($typeMap, $tab) {
@@ -185,9 +185,9 @@ class SimpananService
                 'id'           => $trx->id,
                 'no_transaksi' => $trx->saving_transaction_code,
                 'tanggal'      => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                'anggota'      => $trx->savingAccount->member->user->user_code
+                'anggota'      => $trx->savingAccount->member->user->kode_pengguna
                                 . ' - '
-                                . $trx->savingAccount->member->user->name,
+                                . $trx->savingAccount->member->user->nama,
                 'nominal'      => $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
                                 ? -$trx->saving_amount
                                 : $trx->saving_amount,
@@ -259,18 +259,18 @@ class SimpananService
         ])
         ->when(
             Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value),
-            fn($q) => $q->where('pj_user_id', Auth::id())
+            fn($q) => $q->where('pj_anggota_id', Auth::id())
         )
         ->with([
-            'user:id,user_code,name',
+            'user:id,kode_pengguna,nama',
             'savingAccounts.ibadah',
             'savingAccounts.berjangka',
         ]);
 
         return $query->get()->map(fn($member) => [
             'id'            => $member->id,
-            'user_code'     => $member->user->user_code,
-            'name'          => $member->user->name,
+            'kode_pengguna'     => $member->user->kode_pengguna,
+            'nama'          => $member->user->nama,
             'status'        => $member->status,
             'savingAccounts' => $member->savingAccounts
                 ->filter(function ($acc) {
