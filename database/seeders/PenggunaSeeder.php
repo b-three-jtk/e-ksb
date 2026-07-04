@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Enums\MemberStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -73,7 +73,7 @@ class PenggunaSeeder extends Seeder
             'tgl_bergabung' => now()->subDays(30),
         ]);
         $anggota->assignRole(UserRoleEnum::ANGGOTA->value);
-        Member::factory()->create([
+        Anggota::factory()->create([
             'pengguna_id' => $anggota->id,
         ]);
 
@@ -148,7 +148,7 @@ class PenggunaSeeder extends Seeder
                 'updated_at' => $randomDate,
             ]);
             $user->assignRole(UserRoleEnum::ANGGOTA->value);
-            Member::factory()->create([
+            Anggota::factory()->create([
                 'pengguna_id' => $user->id,
                 'created_at' => $randomDate,
                 'updated_at' => $randomDate,
@@ -177,7 +177,7 @@ class PenggunaSeeder extends Seeder
             $randomRole = $pengurusRoles[array_rand($pengurusRoles)];
             $user->assignRole($randomRole);
             
-            Member::factory()->create([
+            Anggota::factory()->create([
                 'pengguna_id' => $user->id,
                 'created_at' => $randomDate,
                 'updated_at' => $randomDate,
@@ -191,7 +191,7 @@ class PenggunaSeeder extends Seeder
                 'updated_at' => $randomDate,
             ]);
             $user->assignRole(UserRoleEnum::ANGGOTA->value);
-            Member::factory()->create([
+            Anggota::factory()->create([
                 'pengguna_id' => $user->id,
                 'status' => MemberStatusEnum::RESIGNED_REQUESTED->value,
                 'created_at' => $randomDate,

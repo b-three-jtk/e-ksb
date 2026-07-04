@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('financials', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('member_id');
+            $table->unsignedBigInteger('anggota_id');
             $table->decimal('gaji_pokok_amount', 15, 2);
             $table->decimal('penghasilan_usaha_amount', 15, 2);
             $table->decimal('penghasilan_pasangan_amount', 15, 2);
@@ -23,8 +23,8 @@ return new class extends Migration
             $table->decimal('jumlah_cicilan_amount', 15, 2);
             $table->decimal('jumlah_biaya_lainnya_amount', 15, 2);
 
-            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
-            $table->unique('member_id');
+            $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('cascade');
+            $table->unique('anggota_id');
             $table->timestamps();
         });
     }

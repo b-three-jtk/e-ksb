@@ -15,7 +15,7 @@ import UserIcon from '../../../Icons/UserIcon.vue'
 import Button from '../../../Components/Form/Button.vue'
 
 const props = defineProps({
-    members: Object,
+    anggota: Object,
     filters: Object,
     statuses: Array,
     summary: Object,
@@ -204,14 +204,14 @@ const breadcrumbItems = [
             <!-- Table -->
             <BaseTable
                 :columns="columns"
-                :data="members.data"
-                :pagination="members"
+                :data="anggota.data"
+                :pagination="anggota"
                 :sort-by="filters.sort_by"
                 :sort-dir="filters.sort_dir"
                 @sort="toggleSort"
             >
                 <template #cell-no="{ index }">
-                    {{ (members.current_page - 1) * members.per_page + index + 1 }}
+                    {{ (anggota.current_page - 1) * anggota.per_page + index + 1 }}
                 </template>
 
                 <template #cell-profil="{ row }">
@@ -266,8 +266,8 @@ const breadcrumbItems = [
 
             <!-- Pagination -->
             <Pagination
-                :links="members.links"
-                :total="members.total"
+                :links="anggota.links"
+                :total="anggota.total"
             />
         </div>
     </AdminLayout>

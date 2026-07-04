@@ -12,7 +12,7 @@ use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Journal;
 use App\Models\JournalEntry;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\ProductType;
 use App\Models\Pengguna;
 use Carbon\Carbon;
@@ -32,13 +32,13 @@ class MurabahaProductSeeder extends Seeder
         // Reset counter setiap kali seeder dijalankan
         self::$transCodeCounter = 1000000;
 
-        Member::factory()->count(100)->create();
+        Anggota::factory()->count(100)->create();
 
-        // Ambil semua members
-        $members = Member::all();
+        // Ambil semua anggota
+        $anggota = Anggota::all();
 
-        if ($members->isEmpty()) {
-            return; // Skip jika tidak ada member
+        if ($anggota->isEmpty()) {
+            return; // Skip jika tidak ada anggota
         }
 
         // Mapping skenario
@@ -61,8 +61,8 @@ class MurabahaProductSeeder extends Seeder
 
         // Generate 50 pembiayaan yang bervariasi agar grafiknya penuh
         for ($j = 0; $j < 50; $j++) {
-            $memberIndex = $j % $members->count();
-            $member = $members[$memberIndex];
+            $memberIndex = $j % $anggota->count();
+            $currentAnggota = $anggota[$memberIndex];
 
             $scenarioIndex = $j % count($scenarios);
             $scenario = $scenarios[$scenarioIndex];
@@ -71,11 +71,11 @@ class MurabahaProductSeeder extends Seeder
             $item = $items[$itemIndex];
 
             if ($scenario['status'] === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
-                $this->seedActiveFinancing($member, $item, $scenario['kolektibilitas']);
+                $this->seedActiveFinancing($currentAnggota, $item, $scenario['kolektibilitas']);
             } elseif ($scenario['status'] === FinancingReqStatusEnum::PENDING_REVIEW->value) {
-                $this->seedPendingFinancing($member, $item);
+                $this->seedPendingFinancing($currentAnggota, $item);
             } else {
-                $this->seedCompletedFinancing($member, $item);
+                $this->seedCompletedFinancing($currentAnggota, $item);
             }
         }
 
@@ -121,7 +121,7 @@ class MurabahaProductSeeder extends Seeder
         return 'TP' . str_pad(self::$transCodeCounter++, 8, '0', STR_PAD_LEFT);
     }
 
-    private function seedActiveFinancing(Member $member, array $item, string $kolektibilitas = 'lancar'): void
+    private function seedActiveFinancing(Anggota $anggota, array $item, string $kolektibilitas = 'lancar'): void
     {
         $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.2); // 20% margin
@@ -159,7 +159,7 @@ class MurabahaProductSeeder extends Seeder
 
         $financing = Financing::create([
             'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'cost_price' => $item['price'],
             'margin_amount' => $margin,
             'down_payment' => $downPayment,
@@ -323,7 +323,7 @@ class MurabahaProductSeeder extends Seeder
         }
     }
 
-    private function seedPendingFinancing(Member $member, array $item): void
+    private function seedPendingFinancing(Anggota $anggota, array $item): void
     {
         $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.1);
@@ -331,7 +331,7 @@ class MurabahaProductSeeder extends Seeder
 
         $financing = Financing::create([
             'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'cost_price' => $item['price'],
             'margin_amount' => $margin,
             'down_payment' => $downPayment,
@@ -376,7 +376,7 @@ class MurabahaProductSeeder extends Seeder
         ]);
     }
 
-    private function seedCompletedFinancing(Member $member, array $item): void
+    private function seedCompletedFinancing(Anggota $anggota, array $item): void
     {
         $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.1);
@@ -385,7 +385,7 @@ class MurabahaProductSeeder extends Seeder
 
         $financing = Financing::create([
             'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'cost_price' => $item['price'],
             'margin_amount' => $margin,
             'down_payment' => $downPayment,

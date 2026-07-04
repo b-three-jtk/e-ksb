@@ -5,15 +5,15 @@ import Pagination from '@/Components/Table/Pagination.vue'
 import UserIcon from '@/Icons/UserIcon.vue'
 
 const props = defineProps({
-  members: { type: Object, required: true },
+  anggota: { type: Object, required: true },
   selectedMemberIds: { type: Array, required: true },
   allVisibleSelected: { type: Boolean, required: true },
   brokenMemberAvatarIds: { type: Object, required: true },
 })
 
-defineEmits(['toggle-visible-selection', 'update-selection', 'mark-broken-member-avatar'])
+defineEmits(['toggle-visible-selection', 'update-selection', 'mark-broken-anggota-avatar'])
 
-const memberRows = computed(() => props.members?.data ?? [])
+const memberRows = computed(() => props.anggota?.data ?? [])
 
 const memberColumns = [
   { key: 'selection', label: '', align: 'center' },
@@ -55,8 +55,8 @@ const allocationBadgeClass = (status) => {
     <template #cell-selection="{ row }">
       <input
         type="checkbox"
-        :checked="selectedMemberIds.includes(row.member_id)"
-        @change="$emit('update-selection', row.member_id, $event.target.checked)"
+        :checked="selectedMemberIds.includes(row.anggota_id)"
+        @change="$emit('update-selection', row.anggota_id, $event.target.checked)"
         class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
       />
     </template>
@@ -69,7 +69,7 @@ const allocationBadgeClass = (status) => {
             :src="row.avatar"
             :alt="row.nama"
             class="h-full w-full object-cover"
-            @error="$emit('mark-broken-member-avatar', row.id)"
+            @error="$emit('mark-broken-anggota-avatar', row.id)"
           />
           <UserIcon v-else class="h-6 w-6" />
         </div>
@@ -109,5 +109,5 @@ const allocationBadgeClass = (status) => {
     </template>
   </BaseTable>
 
-  <Pagination :links="members.links" :total="members.total" />
+  <Pagination :links="anggota.links" :total="anggota.total" />
 </template>

@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\MemberDoc;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -15,7 +15,7 @@ class MemberDocFactory extends Factory
         return [
             'doc_name' => $this->faker->randomElement(['KTP', 'Passport', 'SIM', 'Birth Certificate', 'Marriage Certificate']),
             'doc_attachment' => $this->faker->filePath(),
-            'member_id' => Member::factory(),
+            'anggota_id' => Anggota::factory(),
         ];
     }
 }

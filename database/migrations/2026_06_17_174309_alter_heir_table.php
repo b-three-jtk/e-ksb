@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('heirs', function (Blueprint $table) {
-            $table->dropForeign(['member_id']);
-            $table->dropColumn(['member_id', 'relationship']);
+            $table->dropForeign(['anggota_id']);
+            $table->dropColumn(['anggota_id', 'relationship']);
         });
     }
 
@@ -23,10 +23,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('heirs', function (Blueprint $table) {
-            $table->unsignedBigInteger('member_id')->after('heir_nik')->nullable();
+            $table->unsignedBigInteger('anggota_id')->after('heir_nik')->nullable();
             $table->enum('relationship', array_column(\App\Enums\HeirEnum::cases(), 'value'))->after('heir_name');
 
-            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
+            $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('cascade');
         });
     }
 };

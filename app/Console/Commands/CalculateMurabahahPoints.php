@@ -23,7 +23,7 @@ class CalculateMurabahahPoints extends Command
      *
      * @var string
      */
-    protected $description = 'Calculate and store murabahah points for members';
+    protected $description = 'Calculate and store murabahah points for anggota';
 
     /**
      * Execute the console command.
@@ -59,11 +59,11 @@ public function handle(): int
         $userMargins = InstallmentPaymentTransaction::query()
             ->join('installments', 'installment_payment_transactions.installment_id', '=', 'installments.id')
             ->join('financings', 'installments.financing_id', '=', 'financings.id')
-            ->join('members', 'financings.member_id', '=', 'members.id')
+            ->join('anggota', 'financings.anggota_id', '=', 'anggota.id')
             ->whereDate('installment_payment_transactions.payment_date', '>=', $startDate)
             ->whereDate('installment_payment_transactions.payment_date', '<=', $endDate)
-            ->select('members.pengguna_id', DB::raw('SUM(installment_payment_transactions.margin_amount) as total_margin'))
-            ->groupBy('members.pengguna_id')
+            ->select('anggota.pengguna_id', DB::raw('SUM(installment_payment_transactions.margin_amount) as total_margin'))
+            ->groupBy('anggota.pengguna_id')
             ->get();
 
         $created = 0;

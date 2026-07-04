@@ -38,8 +38,8 @@ const expenseKeys = [
 ]
 
 const monthlyIncome = computed(() => {
-    const totalIn  = incomes.reduce((s, i) => s + (Number(props.form.member[i.model]) || 0), 0)
-    const totalOut = expenseKeys.reduce((s, k) => s + (Number(props.form.member[k]) || 0), 0)
+    const totalIn  = incomes.reduce((s, i) => s + (Number(props.form.anggota[i.model]) || 0), 0)
+    const totalOut = expenseKeys.reduce((s, k) => s + (Number(props.form.anggota[k]) || 0), 0)
     return totalIn - totalOut
 })
 

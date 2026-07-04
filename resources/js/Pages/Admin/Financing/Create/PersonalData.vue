@@ -10,8 +10,8 @@ const props = defineProps({
     form: Object,
     searchQuery: String,
     isLoadingSearch: Boolean,
-    isMemberSelected: Boolean,
-    memberResults: Array,
+    isAnggotaSelected: Boolean,
+    anggotaResults: Array,
     data: Object,
     errors: Object,
     onlyLetters: Function,
@@ -20,10 +20,10 @@ const props = defineProps({
 
 const emit = defineEmits([
     'update:searchQuery',
-    'selectMember',
+    'selectAnggota',
     'addHeir',
     'removeHeir',
-    'resetMemberSelection',
+    'resetAnggotaSelection',
     'validate-field',
 ])
 
@@ -52,15 +52,15 @@ const onFieldChange = (field) => emit('validate-field', field)
 
         <!-- Warning eligibility -->
         <Transition name="fade"
-            v-if="form.member.is_have_eligible_saving === false || form.member.is_have_no_obligation === false"
+            v-if="form.anggota.is_have_eligible_saving === false || form.anggota.is_have_no_obligation === false"
             class="bg-yellow-100 mx-4 mt-4 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg relative">
             <div class="flex flex-col gap-2">
                 <p>Pemohon tidak memenuhi syarat mengajukan pembiayaan murabahah:</p>
                 <ul class="list-disc list-inside mt-2">
-                    <li v-if="form.member.is_have_eligible_saving === false">
+                    <li v-if="form.anggota.is_have_eligible_saving === false">
                         Memiliki tabungan anggota yang sudah berjalan selama 1 bulan
                     </li>
-                    <li v-if="form.member.is_have_no_obligation === false">
+                    <li v-if="form.anggota.is_have_no_obligation === false">
                         Tidak memiliki kewajiban atau permohonan pembiayaan aktif
                     </li>
                 </ul>
@@ -75,7 +75,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     Nomor Anggota <span class="text-red-500">*</span>
                 </label>
 
-                <div v-if="!isMemberSelected" class="flex gap-2">
+                <div v-if="!isAnggotaSelected" class="flex gap-2">
                     <input
                         :value="searchQuery"
                         @input="$emit('update:searchQuery', $event.target.value)"
@@ -95,25 +95,25 @@ const onFieldChange = (field) => emit('validate-field', field)
                 </div>
 
                 <div v-else class="flex items-center justify-between bg-light-bg border border-green-200 rounded-lg p-2.5">
-                    <p class="text-sm text-green-600">{{ form.member.kode_pengguna }}</p>
-                    <button class="text-primary" @click="$emit('resetMemberSelection')">
+                    <p class="text-sm text-green-600">{{ form.anggota.kode_pengguna }}</p>
+                    <button class="text-primary" @click="$emit('resetAnggotaSelection')">
                         <span class="icon-[tabler--x]"></span>
                     </button>
                 </div>
 
                 <p v-if="errors?.kode_pengguna" class="mt-1 text-xs text-red-500">{{ errors.kode_pengguna }}</p>
 
-                <div v-if="memberResults.length > 0 && !isMemberSelected"
+                <div v-if="anggotaResults.length > 0 && !isAnggotaSelected"
                     class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 dark:border-gray-600 border border-gray-300 rounded-lg shadow-lg z-10">
-                    <div v-for="member in memberResults" :key="member.id"
-                        @click="$emit('selectMember', member)"
+                    <div v-for="anggota in anggotaResults" :key="anggota.id"
+                        @click="$emit('selectAnggota', anggota)"
                         class="px-4 py-3 hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer border-b last:border-0">
-                        <div class="font-medium text-dark-text dark:text-gray-300">{{ member.user.nama }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ member.user.kode_pengguna }} | {{ member.user.email }}</div>
+                        <div class="font-medium text-dark-text dark:text-gray-300">{{ anggota.user.nama }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ anggota.user.kode_pengguna }} | {{ anggota.user.email }}</div>
                     </div>
                 </div>
 
-                <div v-else-if="searchQuery && !isLoadingSearch && !isMemberSelected"
+                <div v-else-if="searchQuery && !isLoadingSearch && !isAnggotaSelected"
                     class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 border border-gray-300 rounded-lg p-2.5 text-center text-gray-500 z-10">
                     Anggota tidak ditemukan
                 </div>
@@ -122,14 +122,14 @@ const onFieldChange = (field) => emit('validate-field', field)
             <BaseInputAdmin
                 label="Nama Lengkap"
                 placeholder="Masukkan nama lengkap"
-                v-model="form.member.nama"
+                v-model="form.anggota.nama"
                 required
                 :error="errors?.nama"
             />
             <BaseInputAdmin
                 label="NIK"
                 placeholder="Masukkan NIK (16 digit)"
-                v-model="form.member.nik"
+                v-model="form.anggota.nik"
                 max="16"
                 required
                 :error="errors?.nik"
@@ -138,7 +138,7 @@ const onFieldChange = (field) => emit('validate-field', field)
             <BaseInputAdmin
                 label="Email"
                 placeholder="Masukkan email"
-                v-model="form.member.email"
+                v-model="form.anggota.email"
                 :error="errors?.email"
                 type="email"
                 @input="onFieldChange('email')"
@@ -149,13 +149,13 @@ const onFieldChange = (field) => emit('validate-field', field)
                 required
                 placeholder="Masukkan nomor telepon"
                 max="14"
-                v-model="form.member.no_telp"
+                v-model="form.anggota.no_telp"
                 :error="errors?.no_telp"
-                @input="form.member.no_telp = normalizePhoneNumber(form.member.no_telp, props.onlyNumbers)"
+                @input="form.anggota.no_telp = normalizePhoneNumber(form.anggota.no_telp, props.onlyNumbers)"
                 inputmode="numeric"
             />
             <BaseInputAdmin
-                v-model="form.member.gender"
+                v-model="form.anggota.jenis_kelamin"
                 label="Jenis Kelamin"
                 type="radio"
                 required
@@ -163,58 +163,58 @@ const onFieldChange = (field) => emit('validate-field', field)
                     { value: 'Laki-laki', text: 'Laki-laki' },
                     { value: 'Perempuan', text: 'Perempuan' }
                 ]"
-                :error="errors?.gender"
-                @change="onFieldChange('gender')"
+                :error="errors?.jenis_kelamin"
+                @change="onFieldChange('jenis_kelamin')"
             />
             <BaseInputAdmin
                 label="Tempat Lahir"
-                v-model="form.member.birth_place"
-                :error="errors?.birth_place"
+                v-model="form.anggota.tempat_lahir"
+                :error="errors?.tempat_lahir"
                 placeholder="Masukkan tempat lahir"
                 @input="onlyAlpha"
             />
             <BaseInputAdmin
                 label="Tanggal Lahir"
                 type="date"
-                v-model="form.member.birth_date"
-                :error="errors?.birth_date"
+                v-model="form.anggota.tgl_lahir"
+                :error="errors?.tgl_lahir"
             />
             <BaseInputAdmin
-                v-model="form.member.residential_address"
+                v-model="form.anggota.alamat_ktp"
                 label="Alamat"
                 type="textarea"
                 placeholder="Masukkan alamat lengkap sesuai KTP"
                 rows="4"
-                :error="errors?.residential_address"
+                :error="errors?.alamat_ktp"
             />
             <BaseInputAdmin
-                v-model="form.member.domicile_address"
+                v-model="form.anggota.alamat_domisili"
                 label="Alamat Domisili"
                 type="textarea"
                 placeholder="Masukkan alamat domisili"
                 rows="4"
-                :error="errors?.domicile_address"
+                :error="errors?.alamat_domisili"
             />
             <BaseInputAdmin
-                v-model="form.member.last_education"
+                v-model="form.anggota.pendidikan_terakhir"
                 label="Pendidikan Terakhir"
                 type="select"
                 :selectables="data.educations.map(unit => ({ value: unit, text: unit }))"
-                :error="errors?.last_education"
+                :error="errors?.pendidikan_terakhir"
             />
             <BaseInputAdmin
-                v-model="form.member.marital_status"
+                v-model="form.anggota.status_pernikahan"
                 label="Status Perkawinan"
                 type="select"
                 :selectables="data.marriageStatuses.map(unit => ({ value: unit, text: unit }))"
             />
             <BaseInputAdmin
-                v-model="form.member.dependents"
+                v-model="form.anggota.jml_tanggungan"
                 label="Jumlah Tanggungan Keluarga"
                 type="number"
                 inputmode="numeric"
                 min="0"
-                :error="errors?.dependents"
+                :error="errors?.jml_tanggungan"
             />
         </div>
 
@@ -265,8 +265,8 @@ const onFieldChange = (field) => emit('validate-field', field)
                         <th class="py-4 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody v-if="form.member.heirs.length > 0">
-                    <tr v-for="(item, index) in form.member.heirs" :key="index"
+                <tbody v-if="form.anggota.heirs.length > 0">
+                    <tr v-for="(item, index) in form.anggota.heirs" :key="index"
                         class="bg-transparent border-b text-dark-text dark:text-gray-300">
                         <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>
                         <td class="py-2 text-right pr-6">{{ item.heir_name }}</td>

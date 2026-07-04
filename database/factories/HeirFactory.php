@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\HeirEnum;
-use App\Models\Member;
+use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +23,7 @@ class HeirFactory extends Factory
             'heir_name' => $this->faker->name(),
             'relationship' => $this->faker->randomElement(HeirEnum::cases())->value,
             'heir_contact' => $this->faker->phoneNumber(),
-            'member_id' => Member::factory(),
+            'anggota_id' => Anggota::factory(),
         ];
     }
 }

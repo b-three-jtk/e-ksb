@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Financial;
-use App\Models\Member;
+use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FinancialFactory extends Factory
@@ -13,7 +13,7 @@ class FinancialFactory extends Factory
     public function definition(): array
     {
         return [
-            'member_id' => Member::factory(),
+            'anggota_id' => Anggota::factory(),
             'gaji_pokok_amount' => $this->faker->numberBetween(1000000, 10000000),
             'penghasilan_usaha_amount' => $this->faker->numberBetween(1000000, 10000000),
             'penghasilan_pasangan_amount' => $this->faker->numberBetween(1000000, 10000000),

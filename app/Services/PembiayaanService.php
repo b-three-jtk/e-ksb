@@ -7,11 +7,11 @@ use Carbon\Carbon;
 
 class PembiayaanService
 {
-    public function getPersonalFinancings(string $memberId, int $perPage = 10, string $search = '')
+    public function getPersonalFinancings(string $anggotaId, int $perPage = 10, string $search = '')
     {
         return Financing::query()
             ->with(['financingItem.productType'])
-            ->where('member_id', $memberId)
+            ->where('anggota_id', $anggotaId)
             ->whereIn('status', ['Lunas', 'Angsuran Berjalan', 'Pembayaran Tangguh'])
             ->when($search !== '', function ($q) use ($search) {
                 $q->whereRaw(
@@ -26,11 +26,11 @@ class PembiayaanService
             ->through(fn (Financing $financing) => $this->mapFinancingForList($financing));
     }
 
-    public function getActiveFinancing(string $memberId): ?array
+    public function getActiveFinancing(string $anggotaId): ?array
     {
         $activeFinancingModel = Financing::query()
             ->with(['financingItem.productType'])
-            ->where('member_id', $memberId)
+            ->where('anggota_id', $anggotaId)
             ->where('status', 'Angsuran Berjalan')
             ->orderByDesc('akad_date')
             ->orderByDesc('created_at')
@@ -117,11 +117,11 @@ class PembiayaanService
     public function getPembiayaanById($id)
     {
         return Financing::with([
-            'member.user',
-            'member.heirs',
-            'member.financials',
-            'member.memberDocs',
-            'member.memberJobs',
+            'anggota.user',
+            'anggota.heirs',
+            'anggota.financials',
+            'anggota.memberDocs',
+            'anggota.memberJobs',
             'financingItem.productType',
             'collateral',
             'installment' => function ($q) {

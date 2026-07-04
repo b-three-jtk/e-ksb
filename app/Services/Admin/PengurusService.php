@@ -4,7 +4,7 @@ namespace App\Services\Admin;
 use App\Enums\MemberStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\Pengguna;
 use App\Services\Admin\PeranAksesService;
 
@@ -17,7 +17,7 @@ class PengurusService
         $sortBy  = in_array($request->sort_by, $allowedSorts) ? $request->sort_by : 'created_at';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        return Pengguna::with(['roles', 'member'])
+        return Pengguna::with(['roles', 'anggota'])
             ->whereHas('roles', function ($q) {
                 $q->whereNotIn('name', [UserRoleEnum::ANGGOTA->value]);
             })
@@ -33,10 +33,10 @@ class PengurusService
                 });
             })
             ->when($request->status === 'Anggota', function ($q) {
-                $q->whereHas('member');
+                $q->whereHas('anggota');
             })
             ->when($request->status === 'Non Anggota', function ($q) {
-                $q->whereDoesntHave('member');
+                $q->whereDoesntHave('anggota');
             })
             ->when(
                 $request->role,
@@ -56,7 +56,7 @@ class PengurusService
                 'nama' => $user->nama,
                 'email' => $user->email,
                 'posisi' => $user->getRoleNames()->first(),
-                'status' => $user->member
+                'status' => $user->anggota
                     ? 'Anggota'
                     : 'Non Anggota',
 
@@ -110,7 +110,7 @@ class PengurusService
 
     public function getAnggotaAktif()
     {
-        return Member::whereIn('status', [
+        return Anggota::whereIn('status', [
             MemberStatusEnum::ACTIVE->value,
         ])
         ->with(['user:id,kode_pengguna,nama,nik,email,no_telp',
@@ -118,14 +118,14 @@ class PengurusService
                 $q->where('name', UserRoleEnum::ANGGOTA->value);
             }])
         ->get()
-        ->map(function ($member) {
+        ->map(function ($anggota) {
             return [
-                'id' => $member->user->id,
-                'kode_pengguna' => $member->user->kode_pengguna,
-                'nama' => $member->user->nama,
-                'nik' => $member->user->nik,
-                'email' => $member->user->email,
-                'no_telp' => $member->user->no_telp,
+                'id' => $anggota->user->id,
+                'kode_pengguna' => $anggota->user->kode_pengguna,
+                'nama' => $anggota->user->nama,
+                'nik' => $anggota->user->nik,
+                'email' => $anggota->user->email,
+                'no_telp' => $anggota->user->no_telp,
             ];
         });
     }

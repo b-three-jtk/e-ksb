@@ -12,14 +12,14 @@ use Illuminate\Support\Facades\DB;
 
 class DasborService
 {
-    public function getSummary(int $memberId, string $userId): array
+    public function getSummary(int $anggotaId, string $userId): array
     {
         $totalSaving = DB::table('saving_accounts')
-            ->where('member_id', $memberId)
+            ->where('anggota_id', $anggotaId)
             ->sum('balance');
 
-        $totalInstallment = Installment::whereHas('financing', function ($q) use ($memberId) {
-            $q->where('member_id', $memberId)
+        $totalInstallment = Installment::whereHas('financing', function ($q) use ($anggotaId) {
+            $q->where('anggota_id', $anggotaId)
                 ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value);
         })
         ->whereIn('status', [
@@ -39,11 +39,11 @@ class DasborService
         ];
     }
 
-    public function getTabungan(int $memberId): \Illuminate\Support\Collection
+    public function getTabungan(int $anggotaId): \Illuminate\Support\Collection
     {
         return SavingTransaction::whereHas(
-            'savingAccount.member',
-            fn($q) => $q->where('member_id', $memberId)
+            'savingAccount.anggota',
+            fn($q) => $q->where('anggota_id', $anggotaId)
         )
         ->with('savingAccount')
         ->latest('transaction_date')

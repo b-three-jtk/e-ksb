@@ -28,8 +28,8 @@ const form = useForm({
     nik: props.user.nik || "",
     email: props.user.email || "",
     no_telp: props.user.no_telp || "",
-    last_education: props.user.member?.last_education || "",
-    residential_address: props.user.member?.residential_address || "",
+    pendidikan_terakhir: props.user.anggota?.pendidikan_terakhir || "",
+    alamat_ktp: props.user.anggota?.alamat_ktp || "",
 });
 
 const fileInput = ref(null);
@@ -45,8 +45,8 @@ const initialData = {
     nik: props.user.nik || "",
     email: props.user.email || "",
     no_telp: props.user.no_telp || "",
-    last_education: props.user.member?.last_education || "",
-    residential_address: props.user.member?.residential_address || "",
+    pendidikan_terakhir: props.user.anggota?.pendidikan_terakhir || "",
+    alamat_ktp: props.user.anggota?.alamat_ktp || "",
 };
 
 const hasDataChanged = computed(() => {
@@ -55,40 +55,40 @@ const hasDataChanged = computed(() => {
         form.nik !== initialData.nik ||
         form.email !== initialData.email ||
         form.no_telp !== initialData.no_telp ||
-        form.last_education !== initialData.last_education ||
-        form.residential_address !== initialData.residential_address ||
+        form.pendidikan_terakhir !== initialData.pendidikan_terakhir ||
+        form.alamat_ktp !== initialData.alamat_ktp ||
         selectedFile.value !== null
     );
 });
 
-const member = computed(() => props.user.member || {});
-const documents = computed(() => member.value.documents || {});
+const anggota = computed(() => props.user.anggota || {});
+const documents = computed(() => anggota.value.documents || {});
 
 const identityFields = computed(() => [
     { label: "NIK", value: user.value.nik || "", disabled: true },
     {
         label: "Jenis Kelamin",
-        value: member.value.gender || "",
+        value: anggota.value.jenis_kelamin || "",
         disabled: true,
     },
     {
         label: "Tanggal Lahir",
-        value: member.value.birth_date || "",
+        value: anggota.value.tgl_lahir || "",
         disabled: true,
     },
     {
         label: "Tempat Lahir",
-        value: member.value.birth_place || "",
+        value: anggota.value.tempat_lahir || "",
         disabled: true,
     },
     {
         label: "Pendidikan Terakhir",
-        value: form.last_education || "",
+        value: form.pendidikan_terakhir || "",
         disabled: false,
     },
     {
         label: "Status Pernikahan",
-        value: member.value.marital_status || "",
+        value: anggota.value.status_pernikahan || "",
         disabled: true,
     },
 ]);
@@ -106,7 +106,7 @@ const documentState = computed(() => [
     },
 ]);
 
-const heirFields = computed(() => member.value.heirs || []);
+const heirFields = computed(() => anggota.value.heirs || []);
 
 const handleChangePicture = () => {
     fileInput.value.click();
@@ -454,10 +454,10 @@ const submit = () => {
                                                 field.label ===
                                                 'Pendidikan Terakhir'
                                             "
-                                            v-model="form.last_education"
+                                            v-model="form.pendidikan_terakhir"
                                             :label="field.label"
                                             :disabled="form.processing"
-                                            :error="form.errors.last_education"
+                                            :error="form.errors.pendidikan_terakhir"
                                         >
                                             <option
                                                 v-for="education in props.educationOptions"
@@ -557,7 +557,7 @@ const submit = () => {
                                     <li class="flex flex-col gap-2">
                                         <BaseInput
                                             :model-value="
-                                                member.domicile_address || ''
+                                                anggota.alamat_domisili || ''
                                             "
                                             label="Alamat Sesuai KTP"
                                             type="text"
@@ -569,14 +569,14 @@ const submit = () => {
                                     </li>
                                     <li class="flex flex-col gap-2">
                                         <BaseInput
-                                            v-model="form.residential_address"
+                                            v-model="form.alamat_ktp"
                                             label="Alamat Domisili"
                                             type="text"
                                             multiline
                                             :rows="3"
                                             :disabled="form.processing"
                                             :error="
-                                                form.errors.residential_address
+                                                form.errors.alamat_ktp
                                             "
                                         />
                                     </li>

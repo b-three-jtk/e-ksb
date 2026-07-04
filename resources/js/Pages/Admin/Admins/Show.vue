@@ -96,7 +96,7 @@ console.log(props.user);
                                     >
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
-                                        >{{ user.gender ?? "-" }}</span
+                                        >{{ user.jenis_kelamin ?? "-" }}</span
                                     >
                                 </li>
                                 <li class="flex flex-col gap-2">
@@ -107,10 +107,10 @@ console.log(props.user);
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.birth_place && user.birth_date
-                                                ? user.birth_place +
+                                            user.tempat_lahir && user.tgl_lahir
+                                                ? user.tempat_lahir +
                                                   ", " +
-                                                  user.birth_date
+                                                  user.tgl_lahir
                                                 : "-"
                                         }}</span
                                     >
@@ -122,7 +122,7 @@ console.log(props.user);
                                     >
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
-                                        >{{ user.last_education ?? "-" }}</span
+                                        >{{ user.pendidikan_terakhir ?? "-" }}</span
                                     >
                                 </li>
                             </ul>
@@ -160,7 +160,7 @@ console.log(props.user);
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.domicile_address ?? "-"
+                                            user.alamat_domisili ?? "-"
                                         }}</span
                                     >
                                 </li>
@@ -172,7 +172,7 @@ console.log(props.user);
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.residential_address ?? "-"
+                                            user.alamat_ktp ?? "-"
                                         }}</span
                                     >
                                 </li>

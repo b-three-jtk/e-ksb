@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Member;
+use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,8 +20,8 @@ class Heir extends Model
         'heir_contact',
     ];
 
-    public function member()
+    public function anggota()
     {
-        return $this->belongsToMany(Member::class);
+        return $this->belongsToMany(Anggota::class);
     }
 }

@@ -21,13 +21,13 @@ class AnggotaService
         $sortBy  = in_array($request->sort_by, $allowedSorts) ? $request->sort_by : 'tgl_bergabung';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $query = Pengguna::with('member.savingAccounts')
-            ->whereHas('member')
+        $query = Pengguna::with('anggota.savingAccounts')
+            ->whereHas('anggota')
             ->whereNotNull('tgl_bergabung')
             ->whereNotNull('kode_pengguna');
 
         if (auth()->user()->hasRole(UserRoleEnum::PJANGGOTA->value)) {
-            $query->whereHas('member', function ($q) {
+            $query->whereHas('anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             });
         }
@@ -59,7 +59,7 @@ class AnggotaService
                 'status'        => $user->status,
                 'total_simpanan' => 'Rp ' . number_format(
                     DB::table('saving_accounts')
-                        ->where('member_id', $user->member?->id)
+                        ->where('anggota_id', $user->anggota?->id)
                         ->sum('balance') ?? 0,
                     0, ',', '.'
                 ),
@@ -71,12 +71,12 @@ class AnggotaService
 
     public function getSummary(): array
     {
-        $baseQuery = Pengguna::with('member')
-            ->whereHas('member')
+        $baseQuery = Pengguna::with('anggota')
+            ->whereHas('anggota')
             ->whereNotNull('tgl_bergabung');
 
         if (auth()->user()->hasRole(UserRoleEnum::PJANGGOTA->value)) {
-            $baseQuery->whereHas('member', function ($q) {
+            $baseQuery->whereHas('anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             });
         }
@@ -100,13 +100,13 @@ class AnggotaService
     public function getDetailAnggota(string $id)
     {
         $user = Pengguna::with([
-            'member.memberDocs',
+            'anggota.memberDocs',
             'roles',
-            'member.savingAccounts.transactions' => fn($q) => $q->orderBy('transaction_date', 'desc'),
-            'member.savingAccounts',
-            'member.heirs',
-            'member.financings.installment.payment',
-            'member.financings.financingItem',
+            'anggota.savingAccounts.transactions' => fn($q) => $q->orderBy('transaction_date', 'desc'),
+            'anggota.savingAccounts',
+            'anggota.heirs',
+            'anggota.financings.installment.payment',
+            'anggota.financings.financingItem',
         ])->findOrFail($id);
 
         $user->foto_profil = $user->foto_profil ? asset('storage/' . $user->foto_profil) : null;
@@ -127,20 +127,20 @@ class AnggotaService
                     'no_telp' => $validated['no_telp'] ?? $user->no_telp,
                 ]);
 
-                if ($user->member) {
-                    $user->member->update([
-                        'gender' => $validated['gender'] ?? $user->member->gender,
-                        'birth_place' => $validated['birth_place'] ?? $user->member->birth_place,
-                        'birth_date' => $validated['birth_date'] ?? $user->member->birth_date,
-                        'residential_address' => $validated['residential_address'] ?? $user->member->residential_address,
-                        'domicile_address' => $validated['domicile_address'] ?? $user->member->domicile_address,
-                        'last_education' => $validated['last_education'] ?? $user->member->last_education,
-                        'marital_status' => $validated['marital_status'] ?? $user->member->marital_status,
-                        'dependents' => $validated['dependents'] ?? $user->member->dependents,
+                if ($user->anggota) {
+                    $user->anggota->update([
+                        'jenis_kelamin' => $validated['jenis_kelamin'] ?? $user->anggota->jenis_kelamin,
+                        'tempat_lahir' => $validated['tempat_lahir'] ?? $user->anggota->tempat_lahir,
+                        'tgl_lahir' => $validated['tgl_lahir'] ?? $user->anggota->tgl_lahir,
+                        'alamat_ktp' => $validated['alamat_ktp'] ?? $user->anggota->alamat_ktp,
+                        'alamat_domisili' => $validated['alamat_domisili'] ?? $user->anggota->alamat_domisili,
+                        'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? $user->anggota->pendidikan_terakhir,
+                        'status_pernikahan' => $validated['status_pernikahan'] ?? $user->anggota->status_pernikahan,
+                        'jml_tanggungan' => $validated['jml_tanggungan'] ?? $user->anggota->jml_tanggungan,
                     ]);
                 }
 
-                if (!empty($validated['heirs']) && $user->member) {
+                if (!empty($validated['heirs']) && $user->anggota) {
                     $syncData = [];
 
                     foreach ($validated['heirs'] as $heirInput) {
@@ -155,21 +155,21 @@ class AnggotaService
                         $syncData[$heir->heir_nik] = ['relationship' => $heirInput['relationship']];
                     }
 
-                    $user->member->heirs()->sync($syncData);
-                } elseif ($user->member) {
-                    $user->member->heirs()->detach();
+                    $user->anggota->heirs()->sync($syncData);
+                } elseif ($user->anggota) {
+                    $user->anggota->heirs()->detach();
                 }
 
-                if (isset($validated['ktp_file']) && $user->member) {
-                    $user->member->memberDocs()->updateOrCreate(
-                        ['doc_name' => 'ktp', 'member_id' => $user->member->id],
+                if (isset($validated['ktp_file']) && $user->anggota) {
+                    $user->anggota->memberDocs()->updateOrCreate(
+                        ['doc_name' => 'ktp', 'anggota_id' => $user->anggota->id],
                         ['doc_attachment' => $validated['ktp_file']->store('member_docs', 'public')]
                     );
                 }
 
-                if (isset($validated['kk_file']) && $user->member) {
-                    $user->member->memberDocs()->updateOrCreate(
-                        ['doc_name' => 'kartu_keluarga', 'member_id' => $user->member->id],
+                if (isset($validated['kk_file']) && $user->anggota) {
+                    $user->anggota->memberDocs()->updateOrCreate(
+                        ['doc_name' => 'kartu_keluarga', 'anggota_id' => $user->anggota->id],
                         ['doc_attachment' => $validated['kk_file']->store('member_docs', 'public')]
                     );
                 }

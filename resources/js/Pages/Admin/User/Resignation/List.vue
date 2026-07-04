@@ -15,7 +15,7 @@ import { toast } from 'vue3-toastify'
 const isLoading = ref(false)
 
 const props = defineProps({
-    members: Object,
+    anggota: Object,
     filters: Object,
 })
 
@@ -61,7 +61,7 @@ const toggleSort = (column) => {
     applyFilters()
 }
 
-const members = computed(() => page.props.members ?? {
+const anggota = computed(() => page.props.anggota ?? {
     data: [],
     current_page: 1,
     per_page: 10,
@@ -161,15 +161,15 @@ onMounted(() => {
 
             <BaseTable
                 :columns="columns"
-                :data="members.data"
+                :data="anggota.data"
                 :is-loading="isLoading"
-                :pagination="members"
+                :pagination="anggota"
                 :sort-by="filters.sort_by"
                 :sort-dir="filters.sort_dir"
                 @sort="toggleSort"
             >
                 <template #cell-no="{ index }">
-                    {{ (members.current_page - 1) * members.per_page + index + 1 }}
+                    {{ (anggota.current_page - 1) * anggota.per_page + index + 1 }}
                 </template>
                 <template #cell-aksi="{ row }">
                     <Button  variant="warning" size="small" :href="`/admin/resignations/${row.id}`">
@@ -180,8 +180,8 @@ onMounted(() => {
             </BaseTable>
 
             <Pagination
-                :links="members.links"
-                :total="members.total"
+                :links="anggota.links"
+                :total="anggota.total"
             />
         </div>
     </AdminLayout>

@@ -10,7 +10,7 @@ use App\Enums\UserStatusEnum;
 use App\Models\BerjangkaAccount;
 use App\Models\GlobalSetting;
 use App\Models\IbadahAccount;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Models\Pengguna;
@@ -32,13 +32,13 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
     it('PJ dapat mencatat transaksi penyetoran simpanan anggota dengan data yang valid', function () {
         $pjanggota = Pengguna::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/deposit', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
@@ -56,7 +56,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
     it('PJ tidak dapat mencatat transaksi penyetoran simpanan pokok lebih dari satu kali untuk anggota yang sama', function () {
         $pjanggota = Pengguna::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
             'status' => MemberStatusEnum::PAYMENT_PENDING->value
         ])->create();
@@ -64,7 +64,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
         // Simpanan pokok pertama
         $response1 = $this->actingAs($pjanggota)
             ->post('/admin/savings/deposit', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
@@ -74,14 +74,14 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
 
         $response1->assertSessionHasNoErrors();
 
-        $member->update([
+        $anggota->update([
             'status' => MemberStatusEnum::PAYMENT_PENDING->value
         ]);
 
         // Simpanan pokok kedua
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/deposit', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
@@ -97,7 +97,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
     it('PJ tidak dapat mencatat transaksi penyetoran simpanan pokok untuk selain anggota tanggung jawabnya', function () {
         $pjanggota1 = Pengguna::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
         $pjanggota1->syncRoles('Penanggung Jawab Anggota');
-        $member1 = Member::factory([
+        $member1 = Anggota::factory([
             'pj_anggota_id' => $pjanggota1->id,
             'status' => MemberStatusEnum::PAYMENT_PENDING->value
         ])->create();
@@ -107,7 +107,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
 
         $res = $this->actingAs($pjanggota2)
             ->post('/admin/savings/deposit', [
-                'member_id' => $member1->id,
+                'anggota_id' => $member1->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
@@ -123,14 +123,14 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
         $user = Pengguna::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
         $user->syncRoles('Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pengguna_id' => $user->id,
             'status' => 'Aktif',
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $sa = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_IBADAH->value,
             'balance' => 5000000,
         ]);
@@ -143,7 +143,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/deposit', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_account_id' => $sa->id,
                 'saving_category' => SavingTypeEnum::TABUNGAN_IBADAH->value,
                 'amount' => 100000,
@@ -162,14 +162,14 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
     it('PJ tidak dapat memproses penyetoran simpanan pokok untuk anggota yang berstatus aktif', function () {
         $pjanggota = Pengguna::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'status' => 'Aktif',
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/deposit', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
@@ -187,19 +187,19 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
     it('PJ dapat mencatat transaksi penarikan simpanan anggota dengan data yang valid', function () {
         $pjanggota = Pengguna::factory(['status' => UserStatusEnum::ACTIVE->value])->create();
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 500000,
         ]);
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
@@ -216,19 +216,19 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
     it('Nominal penarikan tidak boleh melebihi saldo tabungan', function () {
         $pjanggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => 'Tabungan Anggota',
             'balance' => 200000, // Saldo hanya 200rb
         ]);
 
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 500000,
                 'withdrawal_date' => now()->format('Y-m-d'),
@@ -244,13 +244,13 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
     it('Dana Tabungan Berjangka tidak dapat ditarik sebelum jatuh tempo.', function () {
         $pjanggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $waktuBuat = now();
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_BERJANGKA->value,
             'balance' => 1000000,
             'created_at' => $waktuBuat,
@@ -265,7 +265,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
 
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 500000,
                 'withdrawal_date' => now()->format('Y-m-d'),
@@ -283,20 +283,20 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
     it('Simpanan Pokok tidak dapat ditarik oleh Anggota Koperasi selama status keanggotaannya masih aktif.', function () {
         $pjanggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::SIMPANAN_POKOK->value,
             'balance' => 500000,
         ]);
 
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
@@ -311,20 +311,20 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
     it('Simpanan Wajib tidak dapat ditarik oleh Anggota Koperasi selama status keanggotaannya masih aktif.', function () {
         $pjanggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::SIMPANAN_WAJIB->value,
             'balance' => 500000,
         ]);
 
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
@@ -339,12 +339,12 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
     it('Dana Tabungan Ibadah tidak dapat dicairkan sebelum target nominal tercapai.', function () {
         $pjanggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_IBADAH->value,
             'balance' => 4000000,
         ]);
@@ -357,7 +357,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
 
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 1000000,
                 'withdrawal_date' => now()->format('Y-m-d'),
@@ -372,13 +372,13 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
     it('PJ tidak dapat mencatat transaksi penarikan simpanan pokok untuk selain anggota tanggung jawabnya', function () {
         $pjanggota1 = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota1->syncRoles('Penanggung Jawab Anggota');
-        $member1 = Member::factory([
+        $member1 = Anggota::factory([
             'pj_anggota_id' => $pjanggota1->id,
             'status' => MemberStatusEnum::PAYMENT_PENDING->value
         ])->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member1->id,
+            'anggota_id' => $member1->id,
             'saving_type' => SavingTypeEnum::SIMPANAN_POKOK->value,
             'balance' => 500000,
         ]);
@@ -388,7 +388,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
 
         $res = $this->actingAs($pjanggota2)
             ->post('/admin/savings/withdrawal', [
-                'member_id' => $member1->id,
+                'anggota_id' => $member1->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
@@ -405,13 +405,13 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
     it('Bukti transaksi berupa file PDF dihasilkan setelah transaksi setoran simpanan berhasil dicatat', function () {
         $pjanggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/deposit', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
@@ -438,19 +438,19 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
     it('Bukti transaksi berupa file PDF dihasilkan setelah transaksi penarikan simpanan berhasil dicatat', function () {
         $pjanggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 500000,
         ]);
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
@@ -477,13 +477,13 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
     it('Bukti transaksi tidak dihasilkan jika pencatatan transaksi setoran simpanan gagal karena data tidak valid', function () {
         $pjanggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/deposit', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => -500000, // Nominal tidak valid
                 'date' => now()->format('Y-m-d'),
@@ -500,17 +500,17 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
     it('Bukti transaksi tidak dihasilkan jika pencatatan transaksi penarikan simpanan gagal karena data tidak valid', function () {
         $pjanggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
-        $member = Member::factory()->create();
+        $anggota = Anggota::factory()->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 500000,
         ]);
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
-                'member_id' => $member->id,
+                'anggota_id' => $anggota->id,
                 'saving_account_id' => $savingAccount->id,
                 'amount' => -100000, // Nominal tidak valid
                 'withdrawal_date' => now()->format('Y-m-d'),
@@ -537,12 +537,12 @@ describe('Aplikasi harus menyediakan detail transaksi simpanan.', function () {
         $bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $bendahara->syncRoles('Bendahara');
 
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 500000,
         ]);
@@ -598,13 +598,13 @@ describe('Aplikasi harus menyediakan detail transaksi simpanan.', function () {
     it('PJ Anggota tidak dapat mengakses detail transaksi simpanan anggota lain yang bukan tanggung jawabnya', function () {
         $pjanggota1 = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $pjanggota1->syncRoles('Penanggung Jawab Anggota');
-        $member1 = Member::factory([
+        $member1 = Anggota::factory([
             'pj_anggota_id' => $pjanggota1->id,
             'status' => MemberStatusEnum::PAYMENT_PENDING->value
         ])->create();
 
         $savingAccount = SavingAccount::factory()->create([
-            'member_id' => $member1->id,
+            'anggota_id' => $member1->id,
             'saving_type' => SavingTypeEnum::SIMPANAN_POKOK->value,
             'balance' => 500000,
         ]);
@@ -663,12 +663,12 @@ describe('Aplikasi harus menyediakan daftar transaksi terbaru anggota koperasi.'
 
 describe('Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan saldo setiap produk simpanan berupa buku tabungan untuk anggota.', function () {
     it('Anggota dapat mengakses halaman riwayat transaksi simpanan dan pergerakan saldo tabungan pribadi', function () {
-        $member = Member::factory()->create();
-        $user = Pengguna::where('id', $member->pengguna_id)->first();
+        $anggota = Anggota::factory()->create();
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->syncRoles('Anggota');
 
         $sa = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 500000,
         ]);
@@ -690,12 +690,12 @@ describe('Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan s
     });
 
     it('Selain anggota, pengguna lain tidak dapat mengakses halaman riwayat transaksi simpanan dan pergerakan saldo tabungan pribadi', function () {
-        $member = Member::factory()->create();
-        $user = Pengguna::where('id', $member->pengguna_id)->first();
+        $anggota = Anggota::factory()->create();
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->syncRoles('Anggota');
 
         $sa = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 500000,
         ]);
@@ -718,12 +718,12 @@ describe('Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan s
 
 describe('Aplikasi harus menyediakan ekspor tabungan pribadi untuk anggota.', function () {
     it('Anggota dapat mengekspor tabungan pribadi dalam format PDF', function () {
-        $member = Member::factory()->create();
-        $user = Pengguna::where('id', $member->pengguna_id)->first();
+        $anggota = Anggota::factory()->create();
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->syncRoles('Anggota');
 
         $sa = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 500000,
         ]);
@@ -742,12 +742,12 @@ describe('Aplikasi harus menyediakan ekspor tabungan pribadi untuk anggota.', fu
     });
 
     it('Selain anggota, pengguna lain tidak dapat mengekspor tabungan pribadi anggota lain', function () {
-        $member = Member::factory()->create();
-        $user = Pengguna::where('id', $member->pengguna_id)->first();
+        $anggota = Anggota::factory()->create();
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->syncRoles('Anggota');
 
         $sa = SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 500000,
         ]);
@@ -772,18 +772,18 @@ describe('Aplikasi harus dapat menghitung poin simpanan anggota berdasarkan tota
     it('menghitung poin simpanan anggota berdasarkan total saldo bulan berjalan secara otomatis', function () {
         $user = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $user->syncRoles('Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pengguna_id' => $user->id,
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
         SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'balance' => 2000000,
         ]);
 
         SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'balance' => 3000000,
         ]);
 
@@ -803,7 +803,7 @@ describe('Aplikasi harus dapat menghitung poin simpanan anggota berdasarkan tota
     it('Tidak menghitung poin simpanan untuk anggota yang memiliki saldo simpanan kurang dari threshold', function () {
         $user = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $user->syncRoles('Anggota');
-        $member = Member::factory([
+        $anggota = Anggota::factory([
             'pengguna_id' => $user->id,
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
@@ -812,7 +812,7 @@ describe('Aplikasi harus dapat menghitung poin simpanan anggota berdasarkan tota
         $dummyBalance = ($threshold - 10000); // Saldo di bawah threshold
 
         SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'balance' => $dummyBalance,
         ]);
 
@@ -833,13 +833,13 @@ describe('Sistem mengirimkan notifikasi H-7 sebelum jatuh tempo pembayaran simpa
     it('Sistem mengirimkan notifikasi H-7 sebelum jatuh tempo', function () {
         $user = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $user->syncRoles('Anggota');
-        $member = Member::factory()->create([
+        $anggota = Anggota::factory()->create([
             'pengguna_id' => $user->id,
             'status' => MemberStatusEnum::ACTIVE->value,
         ]);
         
         SavingAccount::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
             'balance' => 0,
         ]);
@@ -850,7 +850,7 @@ describe('Sistem mengirimkan notifikasi H-7 sebelum jatuh tempo pembayaran simpa
         $this->artisan('notifications:send-reminders')->assertSuccessful();
 
         $this->assertDatabaseHas('notifications', [
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'notification_type' => NotificationTypeEnum::MANDATORY_SAVING->value,
             'reminder_type' => NotificationReminderTypeEnum::H_7->value,
             'status' => NotificationStatusEnum::SENT->value,

@@ -74,7 +74,7 @@ class PembayaranAngsuranService
     {
         return DB::transaction(function () use ($validatedData, $userId) {
             $data = [];
-            $installment = Installment::with('financing.member.user', 'financing.financingItem')
+            $installment = Installment::with('financing.anggota.user', 'financing.financingItem')
                 ->findOrFail($validatedData['installment_id']);
 
             $financing = $installment->financing;
@@ -107,9 +107,9 @@ class PembayaranAngsuranService
             $strukData = [
                 'no_transaksi' => $transCode,
                 'tanggal' => now(),
-                'no_anggota' => $financing->member->user->kode_pengguna,
-                'nama_anggota' => $financing->member->user->nama,
-                'no_telp' => $financing->member->user->no_telp,
+                'no_anggota' => $financing->anggota->user->kode_pengguna,
+                'nama_anggota' => $financing->anggota->user->nama,
+                'no_telp' => $financing->anggota->user->no_telp,
                 'financing_transaction_code' => $financing->financing_transaction_code,
                 'product_name' => $financing->financingItem->name ?? '-',
                 'total_paid_amount' => $calculatedData['total_paid_amount'],
@@ -167,7 +167,7 @@ class PembayaranAngsuranService
     public function getCreatePaymentData(Financing $financing): array
     {
         $financing->load([
-            'member.user',
+            'anggota.user',
             'financingItem.productType',
             'installment',
         ]);
@@ -204,8 +204,8 @@ class PembayaranAngsuranService
             'color'                   => '-',
             'qty'                     => $financing->financingItem?->qty,
             'user' => [
-                'nama'      => $financing->member?->user?->nama,
-                'kode_pengguna' => $financing->member?->user?->kode_pengguna,
+                'nama'      => $financing->anggota?->user?->nama,
+                'kode_pengguna' => $financing->anggota?->user?->kode_pengguna,
             ],
             'installment_per_month'   => $installment?->amount ?? 0,
             'remaining_balance'       => max($sisa, 0),
@@ -232,7 +232,7 @@ class PembayaranAngsuranService
     public function processPayment(array $validated): array
     {
         $financing = Financing::with([
-            'member.user',
+            'anggota.user',
             'financingItem.productType',
             'installment',
         ])->findOrFail($validated['financing_id']);
@@ -283,7 +283,7 @@ class PembayaranAngsuranService
                 ->orderBy('installment_no')
                 ->first();
 
-            $financing->load('member.user');
+            $financing->load('anggota.user');
 
         $hargaJual = $totalTagihan;
         return compact('financing', 'payment', 'installment', 'nextInstallment', 'hargaJual', 'sisa');
@@ -318,8 +318,8 @@ class PembayaranAngsuranService
                 'petugas'          => auth()->user()->nama,
                 'tanggal_angsuran' => Carbon::parse($payment->payment_date)->translatedFormat('d F Y'),
                 'nomor_pembiayaan' => $financing->financing_transaction_code,
-                'no_anggota'       => $financing->member?->user?->kode_pengguna,
-                'diterima_dari'    => $financing->member?->user?->nama,
+                'no_anggota'       => $financing->anggota?->user?->kode_pengguna,
+                'diterima_dari'    => $financing->anggota?->user?->nama,
                 'sejumlah_uang'    => $payment->nominal,
                 'items'            => [[
                     'no'         => 1,
@@ -343,12 +343,12 @@ class PembayaranAngsuranService
                 ->setPaper('a5', 'landscape')
                 ->setOptions(['isRemoteEnabled' => true]);
 
-            $fileName = 'receipts/' . $financing->member->id . '/receipt-' . time() . '.pdf';
+            $fileName = 'receipts/' . $financing->anggota->id . '/receipt-' . time() . '.pdf';
 
             Storage::disk('public')->put($fileName, $pdf->output());
 
             MemberDoc::create([
-                'member_id'      => $financing->member_id,
+                'anggota_id'      => $financing->anggota_id,
                 'doc_name'       => 'Kwitansi Pembayaran ' . $payment->installment_trans_code,
                 'doc_attachment' => $fileName,
             ]);

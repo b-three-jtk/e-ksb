@@ -5,7 +5,7 @@ use App\Enums\MemberStatusEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Financing;
 use App\Models\Installment;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\ProductType;
 use App\Models\SavingAccount;
 use App\Models\Supplier;
@@ -31,10 +31,10 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
     beforeEach(function () {
         $this->userMember = Pengguna::factory()->create(['nama' => 'Leon S Kennedy', 'status' => UserStatusEnum::ACTIVE->value]);
         $this->userMember->assignRole('Anggota');
-        $this->member = Member::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
+        $this->anggota = Anggota::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
 
         SavingAccount::factory()->create([
-            'member_id' => $this->member->id,
+            'anggota_id' => $this->anggota->id,
             'balance' => 10000000,
             'saving_type' => 'Tabungan Anggota',
             'created_at' => now()->subMonths(6),
@@ -67,8 +67,8 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $this->productType = ProductType::first();
 
         $this->payloadPengajuan = [
-            'member' => [
-                'kode_pengguna' => $this->member->user->kode_pengguna,
+            'anggota'=> [
+                'kode_pengguna' => $this->anggota->user->kode_pengguna,
                 'nama' => 'Dhira Ramadini',
                 'nik' => '1234567890123456',
                 'no_telp' => '08123456789',
@@ -102,7 +102,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         ];
 
         $this->actingAs($this->staffMurabahah)->post('/admin/financings/store', $payload)->assertSessionHasNoErrors()->assertStatus(302);
-        $financing = Financing::where('member_id', $this->member->id)->first();
+        $financing = Financing::where('anggota_id', $this->anggota->id)->first();
         Log::info('Financing ID: '.$financing->id);
 
         // ketua nge-acc pembiayaan
@@ -159,7 +159,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         ];
 
         $this->actingAs($this->staffMurabahah)->post('/admin/financings/store', $payload)->assertSessionHasNoErrors();
-        $financing = Financing::where('member_id', $this->member->id)->first();
+        $financing = Financing::where('anggota_id', $this->anggota->id)->first();
 
         // di-acc sama ketua
         $this->actingAs($this->ketuaMurabahah)->put("/admin/financings/validate/{$financing->id}", ['status' => 'Disetujui']);
@@ -229,7 +229,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         ];
 
         $this->actingAs($this->staffMurabahah)->post('/admin/financings/store', $payload)->assertSessionHasNoErrors();
-        $financing = Financing::where('member_id', $this->member->id)->first();
+        $financing = Financing::where('anggota_id', $this->anggota->id)->first();
 
         // acc pengajuannya
         $this->actingAs($this->ketuaMurabahah)->put("/admin/financings/validate/{$financing->id}", ['status' => 'Disetujui']);
@@ -279,7 +279,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                 'payment_method' => 'Non-Tunai',
             ])->assertSessionHasNoErrors();
 
-        // member mau lunasin sisa angsurannya lebih awal
+        // anggota mau lunasin sisa angsurannya lebih awal
         $this->actingAs($this->staffMurabahah)
             ->post('/admin/financings/repayment', [
                 'method' => 'Non-Tunai',
@@ -298,7 +298,7 @@ describe('IT02 Skenario Pengunduran Diri Anggota', function () {
     beforeEach(function () {
         $this->userMember = Pengguna::factory()->create(['nama' => 'Claire Redfield', 'status' => UserStatusEnum::ACTIVE->value]);
         $this->userMember->assignRole('Anggota');
-        $this->member = Member::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
+        $this->anggota = Anggota::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
     });
 
     it('Skenario Pengunduran Diri Anggota: Pengajuan -> Verifikasi', function () {
@@ -309,8 +309,8 @@ describe('IT02 Skenario Pengunduran Diri Anggota', function () {
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('user.userDashboard'));
 
-        $this->assertDatabaseHas('members', [
-            'id' => $this->member->id,
+        $this->assertDatabaseHas('anggota', [
+            'id' => $this->anggota->id,
             'status' => MemberStatusEnum::RESIGNED_REQUESTED->value,
         ]);
 
@@ -323,8 +323,8 @@ describe('IT02 Skenario Pengunduran Diri Anggota', function () {
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('admin.resignations.index'));
 
-        $this->assertDatabaseHas('members', [
-            'id' => $this->member->id,
+        $this->assertDatabaseHas('anggota', [
+            'id' => $this->anggota->id,
             'status' => MemberStatusEnum::RESIGNED->value,
         ]);
 

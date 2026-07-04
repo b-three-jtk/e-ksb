@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\MemberBankAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -16,7 +16,7 @@ class MemberBankAccountFactory extends Factory
             'account_number' => $this->faker->unique()->numerify('####################'),
             'bank_name' => $this->faker->randomElement(['BCA', 'Mandiri', 'BRI', 'BNI', 'Maybank', 'CIMB']),
             'account_name' => $this->faker->name(),
-            'member_id' => Member::factory(),
+            'anggota_id' => Anggota::factory(),
         ];
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\SavingTransaction;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,12 +18,12 @@ class SavingAccount extends Model
         'saving_account_code',
         'saving_type',
         'balance',
-        'member_id',
+        'anggota_id',
     ];
 
-    public function member()
+    public function anggota()
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Anggota::class);
     }
 
     public function transactions()

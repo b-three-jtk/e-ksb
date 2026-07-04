@@ -21,7 +21,7 @@ const breadcrumbItems = [
 
 const page = usePage()
 
-const members = computed(() => page.props.members || [])
+const anggota = computed(() => page.props.anggota || [])
 
 
 const selectedMember = ref(null)
@@ -88,8 +88,8 @@ const confirmationData = computed(() => ({
   accountNumber: currentFormData.value.accountNumber || '',
 }))
 
-function onMemberSelected(member) {
-  selectedMember.value = member
+function onMemberSelected(anggota) {
+  selectedMember.value = anggota
   selectedSaving.value = null
 }
 
@@ -120,7 +120,7 @@ function submitWithdrawal() {
   isSubmitting.value = true
 
   const formData = new FormData()
-  formData.append('member_id', selectedMember.value.id)
+  formData.append('anggota_id', selectedMember.value.id)
   formData.append('saving_account_id', selectedSaving.value.id)
   formData.append('amount', currentFormData.value.nominalRaw)
   formData.append('withdrawal_date', currentFormData.value.withdrawalDate)
@@ -164,7 +164,7 @@ function reset() {
     <div class="py-6 px-4 sm:px-6 lg:px-8">
       <div class="w-full px-4 sm:px-10 lg:px-10 space-y-6 font-body">
         <SelectMemberSection
-          :members="members"
+          :anggota="anggota"
           :selected="selectedMember"
           @selected="onMemberSelected"
           @reset="onMemberReset"

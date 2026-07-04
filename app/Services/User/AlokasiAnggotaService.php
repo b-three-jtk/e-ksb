@@ -4,7 +4,7 @@ namespace App\Services\User;
 
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +24,7 @@ class AlokasiAnggotaService
         $allocationStatus = (string) $request->input('allocation_status', '');
 
         $memberBaseQuery = Pengguna::query()
-            ->with(['member.penanggungJawab'])
+            ->with(['anggota.penanggungJawab'])
             ->whereHas('roles', fn ($roleQuery) => $roleQuery->where('name', UserRoleEnum::ANGGOTA->value))
             ->whereNotNull('tgl_bergabung')
             ->whereNotNull('kode_pengguna')
@@ -41,32 +41,32 @@ class AlokasiAnggotaService
         }
 
         if ($allocationStatus === 'allocated') {
-            $query->whereHas('member', fn ($memberQuery) => $memberQuery->whereNotNull('pj_anggota_id'));
+            $query->whereHas('anggota', fn ($memberQuery) => $memberQuery->whereNotNull('pj_anggota_id'));
         } elseif ($allocationStatus === 'unallocated') {
-            $query->whereHas('member', fn ($memberQuery) => $memberQuery->whereNull('pj_anggota_id'));
+            $query->whereHas('anggota', fn ($memberQuery) => $memberQuery->whereNull('pj_anggota_id'));
         }
 
-        $members = $query
+        $anggota = $query
             ->orderByDesc('tgl_bergabung')
             ->paginate($perPage)
             ->withQueryString();
 
-        $members->setCollection(
-            $members->getCollection()->map(function (Pengguna $user) {
-                $member = $user->member;
+        $anggota->setCollection(
+            $anggota->getCollection()->map(function (Pengguna $user) {
+                $anggota = $user->anggota;
 
                 return [
                     'id' => $user->id,
-                    'member_id' => $member?->id,
+                    'anggota_id' => $anggota?->id,
                     'kode_pengguna' => $user->kode_pengguna,
                     'nama' => $user->nama,
                     'avatar' => $user->foto_profile_url,
                     'no_telp' => $user->no_telp,
                     'tgl_bergabung' => optional($user->tgl_bergabung)->format('d M Y'),
                     'status' => $user->status,
-                    'pj_id' => $member?->pj_anggota_id,
-                    'pj_name' => $member?->penanggungJawab?->nama,
-                    'allocation_status' => $member?->pj_anggota_id ? 'Sudah Dialokasikan' : 'Belum Dialokasikan',
+                    'pj_id' => $anggota?->pj_anggota_id,
+                    'pj_name' => $anggota?->penanggungJawab?->nama,
+                    'allocation_status' => $anggota?->pj_anggota_id ? 'Sudah Dialokasikan' : 'Belum Dialokasikan',
                 ];
             })
         );
@@ -89,11 +89,11 @@ class AlokasiAnggotaService
 
         $totalMembers = (clone $memberBaseQuery)->count();
         $allocatedMembers = (clone $memberBaseQuery)
-            ->whereHas('member', fn ($memberQuery) => $memberQuery->whereNotNull('pj_anggota_id'))
+            ->whereHas('anggota', fn ($memberQuery) => $memberQuery->whereNotNull('pj_anggota_id'))
             ->count();
 
         return [
-            'members' => $members,
+            'anggota' => $anggota,
             'pjUsers' => $pjUsers,
             'filters' => [
                 'search' => $search,
@@ -109,7 +109,7 @@ class AlokasiAnggotaService
     }
 
     /**
-     * Allocate members to a specific PJ.
+     * Allocate anggota to a specific PJ.
      *
      * @param array{pj_anggota_id: mixed, member_ids: array} $validated
      * @return void
@@ -121,7 +121,7 @@ class AlokasiAnggotaService
                 ->whereHas('roles', fn ($roleQuery) => $roleQuery->where('name', UserRoleEnum::PJANGGOTA->value))
                 ->findOrFail($validated['pj_anggota_id']);
 
-            Member::query()
+            Anggota::query()
                 ->whereHas('user', fn ($userQuery) => $userQuery->where('status', UserStatusEnum::ACTIVE->value))
                 ->whereIn('id', $validated['member_ids'])
                 ->update([

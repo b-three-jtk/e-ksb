@@ -5,7 +5,7 @@ namespace App\Services\User;
 use App\Enums\MemberStatusEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Heir;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\MemberDoc;
 use App\Models\Pengguna;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 class PendaftaranAnggotaService
 {
     /**
-     * Register a new member with heir and optional documents.
+     * Register a new anggota with heir and optional documents.
      *
      * @param array<string, mixed> $validated
      * @param Request $request
@@ -30,13 +30,13 @@ class PendaftaranAnggotaService
 
         DB::transaction(function () use ($validated, $request, $memberNumber, $initialPassword) {
             $user = $this->createUser($validated, $memberNumber, $initialPassword);
-            $member = $this->createMember($validated, $user->id);
+            $anggota = $this->createMember($validated, $user->id);
 
             $user->assignRole('Anggota');
 
-            Log::info("User {$user->id} registered as member with user code {$memberNumber}");
-            $this->createMemberHeir($validated, $member->id);
-            $this->createMemberDocuments($request, $member->id);
+            Log::info("User {$user->id} registered as anggota with user code {$memberNumber}");
+            $this->createMemberHeir($validated, $anggota->id);
+            $this->createMemberDocuments($request, $anggota->id);
         });
 
         return [
@@ -90,29 +90,29 @@ class PendaftaranAnggotaService
     /**
      * @param array<string, mixed> $validated
      * @param string $userId
-     * @return Member
+     * @return Anggota
      */
-    private function createMember(array $validated, string $userId): Member
+    private function createMember(array $validated, string $userId): Anggota
     {
-        return Member::create([
+        return Anggota::create([
             'pengguna_id' => $userId,
-            'gender' => $validated['gender'],
-            'birth_place' => $validated['birth_place'],
-            'birth_date' => $validated['birth_date'],
-            'marital_status' => $validated['marital_status'],
-            'domicile_address' => $validated['domicile_address'],
-            'residential_address' => $validated['residential_address'] ?? null,
-            'last_education' => $validated['last_education'],
+            'jenis_kelamin' => $validated['jenis_kelamin'],
+            'tempat_lahir' => $validated['tempat_lahir'],
+            'tgl_lahir' => $validated['tgl_lahir'],
+            'status_pernikahan' => $validated['status_pernikahan'],
+            'alamat_domisili' => $validated['alamat_domisili'],
+            'alamat_ktp' => $validated['alamat_ktp'] ?? null,
+            'pendidikan_terakhir' => $validated['pendidikan_terakhir'],
             'status' => MemberStatusEnum::PAYMENT_PENDING->value,
         ]);
     }
 
     /**
      * @param array<string, mixed> $validated
-     * @param string $memberId
+     * @param string $anggotaId
      * @return void
      */
-    private function createMemberHeir(array $validated, string $memberId): void
+    private function createMemberHeir(array $validated, string $anggotaId): void
     {
         $heir = Heir::firstOrCreate(
             ['heir_nik' => $validated['heir_nik']],
@@ -122,24 +122,24 @@ class PendaftaranAnggotaService
             ]
         );
 
-        Member::find($memberId)->heirs()->syncWithoutDetaching([
+        Anggota::find($anggotaId)->heirs()->syncWithoutDetaching([
             $heir->heir_nik => ['relationship' => $validated['heir_relationship']]
         ]);
     }
 
     /**
      * @param Request $request
-     * @param string $memberId
+     * @param string $anggotaId
      * @return void
      */
-    private function createMemberDocuments(Request $request, string $memberId): void
+    private function createMemberDocuments(Request $request, string $anggotaId): void
     {
         if ($request->hasFile('ktp_photo')) {
             $ktpPath = $request->file('ktp_photo')->store('documents', 'public');
             MemberDoc::create([
                 'doc_name' => 'ktp',
                 'doc_attachment' => $ktpPath,
-                'member_id' => $memberId,
+                'anggota_id' => $anggotaId,
             ]);
         }
 
@@ -148,7 +148,7 @@ class PendaftaranAnggotaService
             MemberDoc::create([
                 'doc_name' => 'kartu_keluarga',
                 'doc_attachment' => $kkPath,
-                'member_id' => $memberId,
+                'anggota_id' => $anggotaId,
             ]);
         }
     }

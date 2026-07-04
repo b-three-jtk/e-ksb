@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\Financing;
 use App\Models\InstallmentPaymentTransaction;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\PointTransaction;
 use App\Models\SavingTransaction;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -101,14 +101,14 @@ class Pengguna extends Authenticatable
     }
 
     // Is-a
-    public function member()
+    public function anggota()
     {
-        return $this->hasOne(Member::class);
+        return $this->hasOne(Anggota::class);
     }
 
     public function allocatedMembers()
     {
-        return $this->hasMany(Member::class, 'pj_anggota_id');
+        return $this->hasMany(Anggota::class, 'pj_anggota_id');
     }
 
     // Verifies if the user has a specific role

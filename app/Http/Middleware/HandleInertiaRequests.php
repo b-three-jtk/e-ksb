@@ -50,11 +50,11 @@ class HandleInertiaRequests extends Middleware
         $unreadCount = 0;
         $pendingPopup = [];
 
-        if ($user && $user->member) {
+        if ($user && $user->anggota) {
             $service = app(NotifikasiService::class);
-            $notifications = $service->getNotificationDropdown($user->member->id);
-            $unreadCount = $service->getUnreadCount($user->member->id);
-            $pendingPopup = $service->getPendingPopupNotifications($user->member->id);
+            $notifications = $service->getNotificationDropdown($user->anggota->id);
+            $unreadCount = $service->getUnreadCount($user->anggota->id);
+            $pendingPopup = $service->getPendingPopupNotifications($user->anggota->id);
         }
 
         return array_merge(parent::share($request), [

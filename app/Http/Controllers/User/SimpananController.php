@@ -22,12 +22,12 @@ class SimpananController extends Controller
         $transactions = $query->paginate($perPage)->withQueryString();
         $transactions->setCollection($bukuBesarService->transformTransactions($transactions->getCollection(), true));
 
-        $member = auth()->user();
+        $anggota = auth()->user();
         $memberInfo = [
-            'nama' => $member->nama,
-            'no_anggota' => $member->kode_pengguna,
-            'status' => $member->status,
-            'tanggal_bergabung' => $member->tgl_bergabung->format('d F Y'),
+            'nama' => $anggota->nama,
+            'no_anggota' => $anggota->kode_pengguna,
+            'status' => $anggota->status,
+            'tanggal_bergabung' => $anggota->tgl_bergabung->format('d F Y'),
         ];
 
         [$savingSummary, $savingMeta] = $bukuBesarService->buildSavingSummaryAndMeta($userId);

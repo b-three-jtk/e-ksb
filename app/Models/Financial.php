@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Member;
+use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,7 +10,7 @@ class Financial extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'member_id',
+        'anggota_id',
         'gaji_pokok_amount',
         'penghasilan_usaha_amount',
         'penghasilan_pasangan_amount',
@@ -21,8 +21,8 @@ class Financial extends Model
         'jumlah_biaya_lainnya_amount',
     ];
 
-    public function member()
+    public function anggota()
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Anggota::class);
     }
 }

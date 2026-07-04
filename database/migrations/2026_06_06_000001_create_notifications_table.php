@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('member_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('anggota_id')->constrained('anggota')->cascadeOnDelete();
             $table->string('title', 255);
             $table->text('message');
             $table->enum('notification_type', array_column(NotificationTypeEnum::cases(), 'value'));
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->timestamp('alert_displayed_at')->nullable();
             $table->timestamps();
 
-            $table->index(['member_id', 'notification_type', 'notification_period', 'reminder_type']);
+            $table->index(['anggota_id', 'notification_type', 'notification_period', 'reminder_type']);
             $table->index(['reference_type', 'reference_id']);
         });
     }

@@ -17,13 +17,13 @@ class GlobalSettingSeeder extends Seeder
             'key' => 'saving_pokok_amount',
             'value' => '100000',
             'effective_date' => now(),
-            'description' => 'Maximum loan amount that can be applied for by members.',
+            'description' => 'Maximum loan amount that can be applied for by anggota.',
         ]);
         GlobalSetting::factory()->create([
             'key' => 'saving_wajib_amount',
             'value' => '100000',
             'effective_date' => now(),
-            'description' => 'Maximum loan amount that can be applied for by members.',
+            'description' => 'Maximum loan amount that can be applied for by anggota.',
         ]);
         GlobalSetting::factory()->create([
             'key' => 'saving_point_amount',
@@ -35,7 +35,7 @@ class GlobalSettingSeeder extends Seeder
             'key' => 'saving_point_reward',
             'value' => '1',
             'effective_date' => now(),
-            'description' => 'Saving point reward threshold, where members can redeem their points for rewards once they reach this amount.',
+            'description' => 'Saving point reward threshold, where anggota can redeem their points for rewards once they reach this amount.',
         ]);
         GlobalSetting::factory()->create([
             'key' => 'murabahah_margin_percentage',
@@ -53,7 +53,7 @@ class GlobalSettingSeeder extends Seeder
             'key' => 'murabaha_point_reward',
             'value' => '1',
             'effective_date' => now(),
-            'description' => 'Murabaha point reward threshold, where members can redeem their points for rewards once they reach this amount.',
+            'description' => 'Murabaha point reward threshold, where anggota can redeem their points for rewards once they reach this amount.',
         ]);
         GlobalSetting::factory()->create([
             'key' => 'tanggal_awal_periode',

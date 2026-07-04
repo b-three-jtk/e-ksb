@@ -29,38 +29,38 @@ class AnggotaController extends Controller
 
     public function index(Request $request)
     {
-        $user = auth()->user()->load('member');
+        $user = auth()->user()->load('anggota');
 
         return inertia('User/Dashboard', [
-            'summary' => $this->dasborService->getSummary($user->member->id, $user->id),
-            'tabungan'  => $this->dasborService->getTabungan($user->member->id),
+            'summary' => $this->dasborService->getSummary($user->anggota->id, $user->id),
+            'tabungan'  => $this->dasborService->getTabungan($user->anggota->id),
         ]);
     }
 
     public function createResign()
     {
-        $user = auth()->user()->load('member');
+        $user = auth()->user()->load('anggota');
 
-        $hasExistingResign = $user->member->status === MemberStatusEnum::RESIGNED_REQUESTED->value;
+        $hasExistingResign = $user->anggota->status === MemberStatusEnum::RESIGNED_REQUESTED->value;
 
-        $resignData = $this->pengunduranDiriService->getResignData($user->member->id);
+        $resignData = $this->pengunduranDiriService->getResignData($user->anggota->id);
 
         return inertia('User/Resign/Create', [
-            'member' => [
+            'anggota'=> [
                 ...$user->toArray(),
                 'total_saving'     => $resignData['total_saving'],
                 'total_obligation' => $resignData['total_obligation'],
             ],
             'has_existing_resign' => $hasExistingResign,
-            'member_status'       => $user->member->status,
+            'member_status'       => $user->anggota->status,
         ]);
     }
 
     public function storeResign(CreateResignRequest $request)
     {
-        $user = auth()->user()->load('member');
+        $user = auth()->user()->load('anggota');
 
-        $hasExistingResign = $user->member->status === MemberStatusEnum::RESIGNED_REQUESTED->value;
+        $hasExistingResign = $user->anggota->status === MemberStatusEnum::RESIGNED_REQUESTED->value;
 
         Log::info('User ' . $user->id . ' is trying to submit resignation with existing resign: ' . ($hasExistingResign ? 'yes' : 'no'));
 
@@ -70,13 +70,13 @@ class AnggotaController extends Controller
             ]);
         }
 
-        if ($user->member->status !== MemberStatusEnum::ACTIVE->value) {
+        if ($user->anggota->status !== MemberStatusEnum::ACTIVE->value) {
             return back()->withErrors([
                 'resign' => 'Status anggota tidak valid untuk pengajuan pengunduran diri.',
             ]);
         }
 
-        $totalObligation = $this->pengunduranDiriService->getTotalObligation($user->member->id);
+        $totalObligation = $this->pengunduranDiriService->getTotalObligation($user->anggota->id);
 
         if ($totalObligation > 0) {
             return back()->withErrors([
@@ -87,7 +87,7 @@ class AnggotaController extends Controller
         $data = $request->validated();
 
         try {
-            $this->pengunduranDiriService->submitResign($data['document'], $user->member->id, $user->member);
+            $this->pengunduranDiriService->submitResign($data['document'], $user->anggota->id, $user->anggota);
 
             return redirect()
                 ->route('user.userDashboard')
@@ -140,8 +140,8 @@ class AnggotaController extends Controller
                 Rule::unique('pengguna', 'email')->ignore($user->id, 'id'),
             ],
             'no_telp' => 'required|string|max:20',
-            'last_education' => 'nullable|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
-            'residential_address' => 'nullable|string|max:1000',
+            'pendidikan_terakhir' => 'nullable|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
+            'alamat_ktp' => 'nullable|string|max:1000',
         ]);
 
         $this->profilPenggunaService->update($user, $validated);

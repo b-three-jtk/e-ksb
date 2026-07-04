@@ -15,7 +15,7 @@ export default function useUserAllocation(props) {
     member_ids: [],
   })
 
-  const memberRows = computed(() => props.members?.data ?? [])
+  const memberRows = computed(() => props.anggota?.data ?? [])
   const selectedPj = computed(() => props.pjUsers.find((pj) => pj.id === selectedPjId.value) ?? null)
   const selectedCount = computed(() => selectedMemberIds.value.length)
   const totalAllocated = computed(() => selectedPj.value?.allocated_members_count ?? 0)
@@ -34,38 +34,38 @@ export default function useUserAllocation(props) {
     })
   })
 
-  const visibleMemberIds = computed(() => memberRows.value.map((member) => member.member_id))
+  const visibleMemberIds = computed(() => memberRows.value.map((anggota) => anggota.anggota_id))
   const allVisibleSelected = computed(() => {
     if (!memberRows.value.length) {
       return false
     }
 
-    return memberRows.value.every((member) => selectedMemberIds.value.includes(member.member_id))
+    return memberRows.value.every((anggota) => selectedMemberIds.value.includes(anggota.anggota_id))
   })
 
   watch(
-    () => props.members?.data,
+    () => props.anggota?.data,
     () => {
       selectedMemberIds.value = []
     },
     { immediate: true }
   )
 
-  const updateSelection = (memberId, checked) => {
+  const updateSelection = (anggotaId, checked) => {
     if (checked) {
-      if (!selectedMemberIds.value.includes(memberId)) {
-        selectedMemberIds.value = [...selectedMemberIds.value, memberId]
+      if (!selectedMemberIds.value.includes(anggotaId)) {
+        selectedMemberIds.value = [...selectedMemberIds.value, anggotaId]
       }
       return
     }
 
-    selectedMemberIds.value = selectedMemberIds.value.filter((id) => id !== memberId)
+    selectedMemberIds.value = selectedMemberIds.value.filter((id) => id !== anggotaId)
   }
 
   const toggleVisibleSelection = (checked) => {
     if (checked) {
       const nextIds = new Set(selectedMemberIds.value)
-      visibleMemberIds.value.forEach((memberId) => nextIds.add(memberId))
+      visibleMemberIds.value.forEach((anggotaId) => nextIds.add(anggotaId))
       selectedMemberIds.value = Array.from(nextIds)
       return
     }
@@ -77,8 +77,8 @@ export default function useUserAllocation(props) {
     selectedPjId.value = pjId
   }
 
-  const markBrokenMemberAvatar = (memberId) => {
-    brokenMemberAvatarIds.value = new Set([...brokenMemberAvatarIds.value, memberId])
+  const markBrokenMemberAvatar = (anggotaId) => {
+    brokenMemberAvatarIds.value = new Set([...brokenMemberAvatarIds.value, anggotaId])
   }
 
   const markBrokenPjAvatar = (pjId) => {

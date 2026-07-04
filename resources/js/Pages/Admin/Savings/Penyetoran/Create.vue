@@ -12,7 +12,7 @@ import Swal from 'sweetalert2'
 
 const props = defineProps({
     saving_types: { type: Array, required: true },
-    members: { type: Array, required: true },
+    anggota: { type: Array, required: true },
     accounts: { type: Array, required: true },
     pengurus: { type: Object, required: true },
     global_saving: { type: Object, required: true },
@@ -44,7 +44,7 @@ const selectedMember = ref(null)
 const memberSuggestions = computed(() => {
   const q = memberQuery.value.toLowerCase().trim()
   if (!q || q.length < 2) return []
-  return props.members
+  return props.anggota
     .filter(m =>
       m.name?.toLowerCase().includes(q) ||
       m.kode_pengguna?.toLowerCase().includes(q)
@@ -56,9 +56,9 @@ const showSuggestions = computed(() =>
   memberSuggestions.value.length > 0 && !selectedMember.value
 )
 
-function pilihAnggota(member) {
-  selectedMember.value = member
-  memberQuery.value    = member.name
+function pilihAnggota(anggota) {
+  selectedMember.value = anggota
+  memberQuery.value    = anggota.name
   jenisSimpanan.value  = ''
 }
 
@@ -324,7 +324,7 @@ function submitDeposit() {
     formData.append('saving_account_id', accountId)
   }
 
-  formData.append('member_id', selectedMember.value.id)
+  formData.append('anggota_id', selectedMember.value.id)
   formData.append('saving_category', jenisSimpanan.value)
   formData.append('amount', nominalRaw.value)
   formData.append('date', tanggalSetor.value)
@@ -355,7 +355,7 @@ function submitDeposit() {
       showDialog.value = false
       toast.success('Penyetoran berhasil diposting', { position: 'bottom-right' })
       resetForm()
-      router.reload({ only: ['members'] })
+      router.reload({ only: ['anggota'] })
       await nextTick()
       modalReceipt.value?.openModal()
     },
@@ -451,7 +451,7 @@ const akadType = computed(() => {
               </div>
             </div>
 
-            <!-- Selected member card -->
+            <!-- Selected anggota card -->
             <Transition name="fade">
               <div
                 v-if="selectedMember"

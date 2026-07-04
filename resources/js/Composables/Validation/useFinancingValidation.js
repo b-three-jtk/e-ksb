@@ -18,17 +18,17 @@ export function useFinancingValidation(form) {
     const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     const isValidPhone = (phone) => /^[0-9]{8,14}$/.test(phone)
     const isValidNik   = (nik)   => /^[0-9]{16}$/.test(nik)
-    const isValidDependents = (dependents) => /^[0-9]+$/.test(dependents)
+    const isValidDependents = (jml_tanggungan) => /^[0-9]+$/.test(jml_tanggungan)
 
     const validateStep1 = () => {
         const errs = {}
-        const m = form.member
+        const m = form.anggota
 
         if (!m.kode_pengguna)
             errs.kode_pengguna = 'Nomor anggota wajib dipilih.'
 
-        if (!m.name?.trim())
-            errs.name = 'Nama lengkap wajib diisi.'
+        if (!m.nama?.trim())
+            errs.nama = 'Nama lengkap wajib diisi.'
 
         if (!m.nik)
             errs.nik = 'NIK wajib diisi.'
@@ -42,13 +42,13 @@ export function useFinancingValidation(form) {
             errs.no_telp = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
         }
 
-        if (!m.gender)
-            errs.gender = 'Jenis kelamin wajib dipilih.'
+        if (!m.jenis_kelamin)
+            errs.jenis_kelamin = 'Jenis kelamin wajib dipilih.'
 
-        if (!isValidDependents(m.dependents))
-            errs.dependents = 'Jumlah tanggungan harus angka.'
+        if (!isValidDependents(m.jml_tanggungan))
+            errs.jml_tanggungan = 'Jumlah tanggungan harus angka.'
 
-        if (!form.member.heirs || form.member.heirs.length === 0)
+        if (!form.anggota.heirs || form.anggota.heirs.length === 0)
             errs.heirs = 'Minimal satu data ahli waris wajib ditambahkan.'
 
         if (form.financing.status !== 'Belum Ditinjau') {
@@ -63,7 +63,7 @@ export function useFinancingValidation(form) {
 
     const validateStep2 = () => {
         const errs = {}
-        const m = form.member
+        const m = form.anggota
         const isValidTenureYear = (tenure_year) => /^[0-9]+$/.test(tenure_year)
 
         if (!m.job_title?.trim())
@@ -266,8 +266,8 @@ export function useFinancingValidation(form) {
 
 function getAllKeysForStep(step) {
     const map = {
-        1: ['kode_pengguna', 'name', 'nik', 'email', 'no_telp', 'gender',
-            'residential_address', 'heirs', 'eligible_saving', 'no_obligation'],
+        1: ['kode_pengguna', 'name', 'nik', 'email', 'no_telp', 'jenis_kelamin',
+            'alamat_ktp', 'heirs', 'eligible_saving', 'no_obligation'],
         2: ['job_title', 'company_or_business_name', 'business_field',
             'tenure_year', 'workplace_contact', 'workplace_address',
             'income_slip_file', 'bank_book_file'],

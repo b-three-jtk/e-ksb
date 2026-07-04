@@ -5,7 +5,7 @@ namespace App\Services\User;
 use App\Enums\MemberStatusEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
@@ -24,11 +24,11 @@ class SimpananServices
 
     public function storeWithdrawal(array $validated, string $userId): array
     {
-        $member = Member::with('user')->findOrFail($validated['member_id']);
+        $anggota = Anggota::with('user')->findOrFail($validated['anggota_id']);
         $savingAccount = SavingAccount::with(['ibadah', 'berjangka'])->findOrFail($validated['saving_account_id']);
         $savingBalance = $savingAccount->balance;
 
-        if ((int) $savingAccount->member_id !== (int) $member->id) {
+        if ((int) $savingAccount->anggota_id !== (int) $anggota->id) {
             throw ValidationException::withMessages([
                 'saving_account_id' => 'Rekening simpanan tidak ditemukan untuk anggota ini'
             ]);
@@ -40,7 +40,7 @@ class SimpananServices
             ]);
         }
 
-        if ($member->status === MemberStatusEnum::ACTIVE->value && in_array($savingAccount->saving_type, [SavingTypeEnum::SIMPANAN_POKOK->value, SavingTypeEnum::SIMPANAN_WAJIB->value])) {
+        if ($anggota->status === MemberStatusEnum::ACTIVE->value && in_array($savingAccount->saving_type, [SavingTypeEnum::SIMPANAN_POKOK->value, SavingTypeEnum::SIMPANAN_WAJIB->value])) {
             throw ValidationException::withMessages([
                 'saving_account_id' => $savingAccount->saving_type . ' tidak dapat ditarik selama status keanggotaan masih aktif.'
             ]);
@@ -70,7 +70,7 @@ class SimpananServices
             }
         }
 
-        [$transaction, $saldoSebelum] = DB::transaction(function () use ($validated, $member, $savingAccount, $savingType, $userId) {
+        [$transaction, $saldoSebelum] = DB::transaction(function () use ($validated, $anggota, $savingAccount, $savingType, $userId) {
             $lockedSavingAccount = SavingAccount::query()
                 ->whereKey($savingAccount->id)
                 ->lockForUpdate()
@@ -102,7 +102,7 @@ class SimpananServices
             if ($validated['method'] === 'Non-Tunai') {
                 MemberBankAccount::updateOrCreate(
                     [
-                        'member_id' => $member->id,
+                        'anggota_id' => $anggota->id,
                         'account_number' => $validated['account_number'],
                     ],
                     [
@@ -128,8 +128,8 @@ class SimpananServices
             'no_transaksi' => $transaction->saving_transaction_code,
             'tanggal' => $transaction->transaction_date,
             'pengurus' => auth()->user()->nama ?? 'Pengurus',
-            'nama_anggota' => $member->user?->nama ?? '-',
-            'no_anggota' => $member->user?->kode_pengguna ?? '-',
+            'nama_anggota' => $anggota->user?->nama ?? '-',
+            'no_anggota' => $anggota->user?->kode_pengguna ?? '-',
             'jenis' => $savingType !== '' ? $savingType : '-',
             'metode' => $validated['method'],
             'nominal' => $validated['amount'],

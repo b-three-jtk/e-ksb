@@ -18,7 +18,7 @@ use App\Models\Financing;
 use App\Models\FinancingVerification;
 use App\Models\GlobalSetting;
 use App\Models\JournalEntry;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\ProductType;
 use App\Models\SavingAccount;
 use App\Models\Supplier;
@@ -66,10 +66,10 @@ class PembiayaanController extends Controller
                     'id' => $f->id,
                     'financing_transaction_code' => $f->financing_transaction_code,
                     'akad_date' => Carbon::parse($f->akad_date)->format('Y-m-d') ?? '',
-                    'user' => $f->member->user
-                        ? ($f->member->user->kode_pengguna . ' - ' . $f->member->user->nama)
+                    'user' => $f->anggota->user
+                        ? ($f->anggota->user->kode_pengguna . ' - ' . $f->anggota->user->nama)
                         : '-',
-                    'user_role' => $f->member->user?->getRoleNames()->first() ?? '-',
+                    'user_role' => $f->anggota->user?->getRoleNames()->first() ?? '-',
                     'tenor_left' => $f->installment ? max(0, $f->tenor - ($f->installment->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
                     'product_name' => $f->financingItem?->name,
                     'status' => $f->status,
@@ -132,7 +132,7 @@ class PembiayaanController extends Controller
         return inertia('Admin/Financing/Create', [
             'data' => $this->financingService->getDataOpsi(),
             'financing' => [
-                'member' => $this->financingService->formatMemberData($financing->member),
+                'anggota' => $this->financingService->formatMemberData($financing->anggota),
                 'financing' => [
                     'name' => $financing->financingItem->name,
                     'product_type_id' => $financing->financingItem->product_type_id,
@@ -167,9 +167,9 @@ class PembiayaanController extends Controller
                     ];
                 })->sortByDesc('verified_at')->values(),
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
-                    'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
-                    'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
+                    'income_slip' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
+                    'bank_book' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                     'purchase_receipt' => $this->getDocumentUrl($financing->financingItem->purchase_receipt),
                     'akad_document' => $this->getDocumentUrl($financing->signed_akad_document),
                     'akad_wakalah_document' => $this->getDocumentUrl($financing->wakalah?->signed_akad_document),
@@ -194,7 +194,7 @@ class PembiayaanController extends Controller
 
         return inertia('Admin/Financing/Validation', [
             'data' => [
-                'member' => $this->financingService->formatMemberData($financing->member),
+                'anggota' => $this->financingService->formatMemberData($financing->anggota),
                 'margin_percentage' => GlobalSetting::where('key', 'murabahah_margin_percentage')->where('effective_date', '<=', now())->latest()->first()?->value,
                 'financing' => [
                     'id' => $financing->id,
@@ -223,9 +223,9 @@ class PembiayaanController extends Controller
                     'collateral_location' => $financing->collateral?->collateral_location,
                 ],
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
-                    'income_slip' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
-                    'bank_book' => $this->getDocumentUrl($financing->member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
+                    'income_slip' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
+                    'bank_book' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                 ],
                 'supplier' => $financing->financingItem->supplier ? [
                     'supplier_name' => $financing->financingItem->supplier->supplier_name,
@@ -390,33 +390,33 @@ class PembiayaanController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $validated = $request->validated();
-                $user = Pengguna::with('member.savingAccounts')
-                    ->where('kode_pengguna', $validated['member']['kode_pengguna'])
+                $user = Pengguna::with('anggota.savingAccounts')
+                    ->where('kode_pengguna', $validated['anggota']['kode_pengguna'])
                     ->firstOrFail();
 
                 if ($user->status !== UserStatusEnum::ACTIVE->value) {
-                    throw ValidationException::withMessages(['member' => 'Pemohon harus dalam status aktif']);
+                    throw ValidationException::withMessages(['anggota'=> 'Pemohon harus dalam status aktif']);
                 }
 
-                $hasActiveFinancing = $user->member->financings?->whereIn('status', [FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, FinancingReqStatusEnum::TANGGUH->value])
+                $hasActiveFinancing = $user->anggota->financings?->whereIn('status', [FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, FinancingReqStatusEnum::TANGGUH->value])
                 ->isNotEmpty() ?? false;
 
                 if ($hasActiveFinancing) {
-                    throw ValidationException::withMessages(['member' => 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
+                    throw ValidationException::withMessages(['anggota'=> 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
                 }
 
-                $hasEligibleSaving = SavingAccount::where('member_id', $user->member->id)
+                $hasEligibleSaving = SavingAccount::where('anggota_id', $user->anggota->id)
                     ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
                     ->where('created_at', '<=', now()->subMonth())
                     ->exists();
 
                 if (!$hasEligibleSaving) {
-                    throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
+                    throw ValidationException::withMessages(['anggota'=> 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
                 $validated['financing']['status'] = 'Belum Ditinjau';
 
-                $this->financingService->syncMemberData($user, $validated['member'], $request);
+                $this->financingService->syncMemberData($user, $validated['anggota'], $request);
                 $this->financingService->syncFinancingData($user, $request, auth()->id());
             });
 
@@ -434,31 +434,31 @@ class PembiayaanController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $validated = $request->validated();
-                $user = Pengguna::with('member.savingAccounts')
-                    ->where('kode_pengguna', $validated['member']['kode_pengguna'])
+                $user = Pengguna::with('anggota.savingAccounts')
+                    ->where('kode_pengguna', $validated['anggota']['kode_pengguna'])
                     ->firstOrFail();
 
                 if ($user->status !== UserStatusEnum::ACTIVE->value) {
-                    throw ValidationException::withMessages(['member' => 'Pemohon harus dalam status aktif']);
+                    throw ValidationException::withMessages(['anggota'=> 'Pemohon harus dalam status aktif']);
                 }
 
-                $hasEligibleSaving = SavingAccount::where('member_id', $user->member->id)
+                $hasEligibleSaving = SavingAccount::where('anggota_id', $user->anggota->id)
                     ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
                     ->where('created_at', '<=', now()->subMonth())
                     ->exists();
 
                 if (!$hasEligibleSaving) {
-                    throw ValidationException::withMessages(['member' => 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
+                    throw ValidationException::withMessages(['anggota'=> 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
-                $hasActiveFinancing = $user->member->financings?->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+                $hasActiveFinancing = $user->anggota->financings?->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
                 ->isNotEmpty() ?? false;
 
                 if ($hasActiveFinancing) {
-                    throw ValidationException::withMessages(['member' => 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
+                    throw ValidationException::withMessages(['anggota'=> 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
                 }
 
-                $this->financingService->syncMemberData($user, $validated['member'], $request);
+                $this->financingService->syncMemberData($user, $validated['anggota'], $request);
                 $financing = $this->financingService->syncFinancingData($user, $request, auth()->id());
 
                 if (isset($validated['financing']['tenor']) && $validated['financing']['payment_method'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
@@ -681,11 +681,11 @@ class PembiayaanController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $validated = $request->validated();
-                $user = Pengguna::with('member.savingAccounts')
-                    ->where('kode_pengguna', $validated['member']['kode_pengguna'])
+                $user = Pengguna::with('anggota.savingAccounts')
+                    ->where('kode_pengguna', $validated['anggota']['kode_pengguna'])
                     ->firstOrFail();
 
-                $this->financingService->syncMemberData($user, $validated['member'], $request);
+                $this->financingService->syncMemberData($user, $validated['anggota'], $request);
                 $this->financingService->syncFinancingData($user, $request, auth()->id());
             });
 
@@ -702,7 +702,7 @@ class PembiayaanController extends Controller
     {
         $query = $request->input('q');
 
-        $members = Member::query()
+        $anggota = Anggota::query()
             ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'financings:id,status', 'savingAccounts:id,balance,created_at'])
             ->whereHas('user', function ($q) use ($query) {
                 $q->whereHas('roles', fn($roleQ) => $roleQ->where('name', 'Anggota'))
@@ -714,34 +714,34 @@ class PembiayaanController extends Controller
             })
             ->limit(5)
             ->get()
-            ->map(function ($member) {
-                $hasActiveFinancing = $member->financings?->where(
+            ->map(function ($anggota) {
+                $hasActiveFinancing = $anggota->financings?->where(
                     'status',
                         FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
                         FinancingReqStatusEnum::TANGGUH->value,
                 )->isNotEmpty() ?? false;
 
-                $member->is_have_no_obligation = !$hasActiveFinancing;
+                $anggota->is_have_no_obligation = !$hasActiveFinancing;
 
-                $hasEligibleSaving = SavingAccount::where('member_id', $member->id)
+                $hasEligibleSaving = SavingAccount::where('anggota_id', $anggota->id)
                     ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
                     ->where('created_at', '<=', now()->subMonth())
                     ->exists();
 
-                $member->heirs = $member->heirs->map(function ($heir) {
+                $anggota->heirs = $anggota->heirs->map(function ($heir) {
                     $heir->relationship = $heir->pivot->relationship;
                     return $heir;
                 });
 
-                $member->is_have_eligible_saving = $hasEligibleSaving;
-                $member->family_card = $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
-                $member->income_slip = $member->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
-                $member->bank_book = $member->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $member->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
+                $anggota->is_have_eligible_saving = $hasEligibleSaving;
+                $anggota->family_card = $anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
+                $anggota->income_slip = $anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $anggota->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
+                $anggota->bank_book = $anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
 
-                return $member;
+                return $anggota;
             });
 
-        return response()->json(['members' => $members->values()]);
+        return response()->json(['anggota' => $anggota->values()]);
     }
     public function searchSuppliers(Request $request)
     {
@@ -758,7 +758,7 @@ class PembiayaanController extends Controller
     public function showRepayment(string $id)
     {
         $financing = Financing::with([
-            'member.user',
+            'anggota.user',
             'installment.payment',
             'financingItem.productType',
             'financingItem.supplier',

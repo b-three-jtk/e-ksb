@@ -30,14 +30,14 @@ const form = useForm({
     nama: props.data.nama || '',
     email: props.data.email || '',
     no_telp: props.data.no_telp || '',
-    gender: props.data.member.gender || '',
-    birth_place: props.data.member.birth_place || '',
-    birth_date: props.data.member.birth_date || '',
-    last_education: props.data.member.last_education || '',
-    marital_status: props.data.member.marital_status || '',
-    domicile_address: props.data.member.domicile_address || '',
-    residential_address: props.data.member.residential_address || '',
-    dependents: props.data.member.dependents || [],
+    jenis_kelamin: props.data.anggota.jenis_kelamin || '',
+    tempat_lahir: props.data.anggota.tempat_lahir || '',
+    tgl_lahir: props.data.anggota.tgl_lahir || '',
+    pendidikan_terakhir: props.data.anggota.pendidikan_terakhir || '',
+    status_pernikahan: props.data.anggota.status_pernikahan || '',
+    alamat_domisili: props.data.anggota.alamat_domisili || '',
+    alamat_ktp: props.data.anggota.alamat_ktp || '',
+    jml_tanggungan: props.data.anggota.jml_tanggungan || [],
 
     kk: props.data.kk || '',
     ktp: props.data.ktp || '',
@@ -45,7 +45,7 @@ const form = useForm({
     kk_file: null,
     ktp_file: null,
 
-    heirs: (props.data.member.heirs || []).map(h => ({
+    heirs: (props.data.anggota.heirs || []).map(h => ({
         heir_nik: h.heir_nik,
         heir_name: h.heir_name,
         heir_contact: h.heir_contact,
@@ -217,27 +217,27 @@ const submitForm = () => {
                     <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="14"
                         v-model="form.no_telp" :errors="errors.no_telp" @input="onlyNumbers"
                         inputmode="numeric" />
-                    <BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required :selectables="[
+                    <BaseInputAdmin v-model="form.jenis_kelamin" label="Jenis Kelamin" type="radio" required :selectables="[
                         { value: 'Laki-laki', text: 'Laki-laki' },
                         { value: 'Perempuan', text: 'Perempuan' }
-                    ]" :error="errors.gender">
+                    ]" :error="errors.jenis_kelamin">
                     </BaseInputAdmin>
-                    <BaseInputAdmin label="Tempat Lahir" required v-model="form.birth_place" :error="errors.birth_place"
+                    <BaseInputAdmin label="Tempat Lahir" required v-model="form.tempat_lahir" :error="errors.tempat_lahir"
                         placeholder="Masukkan tempat lahir" @input="onlyAlpha" />
-                    <BaseInputAdmin label="Tanggal Lahir" required type="date" v-model="form.birth_date"
+                    <BaseInputAdmin label="Tanggal Lahir" required type="date" v-model="form.tgl_lahir"
                         :maxDate="maxBirthDate"
-                        :error="errors.birth_date" />
-                    <BaseInputAdmin v-model="form.residential_address" label="Alamat KTP" type="textarea"
-                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address"
+                        :error="errors.tgl_lahir" />
+                    <BaseInputAdmin v-model="form.alamat_ktp" label="Alamat KTP" type="textarea"
+                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.alamat_ktp"
                         @input="onlyAlphaNumericDash" />
-                    <BaseInputAdmin v-model="form.domicile_address" label="Alamat Domisili" type="textarea"
-                        placeholder="Masukkan alamat domisili" rows="4" :error="errors.domicile_address"
+                    <BaseInputAdmin v-model="form.alamat_domisili" label="Alamat Domisili" type="textarea"
+                        placeholder="Masukkan alamat domisili" rows="4" :error="errors.alamat_domisili"
                         @input="onlyAlphaNumericDash" />
-                    <BaseInputAdmin v-model="form.last_education" required label="Pendidikan Terakhir" type="select"
-                        :selectables="props.opsiPendidikan.map((item) => ({ value: item.value, text: item.text }))" :error="errors.last_education" />
-                    <BaseInputAdmin v-model="form.marital_status" required label="Status Perkawinan" type="select"
+                    <BaseInputAdmin v-model="form.pendidikan_terakhir" required label="Pendidikan Terakhir" type="select"
+                        :selectables="props.opsiPendidikan.map((item) => ({ value: item.value, text: item.text }))" :error="errors.pendidikan_terakhir" />
+                    <BaseInputAdmin v-model="form.status_pernikahan" required label="Status Perkawinan" type="select"
                         :selectables="props.opsiStatusPerkawinan" />
-                    <BaseInputAdmin v-model="form.dependents" label="Jumlah Tanggungan Keluarga" type="number"
+                    <BaseInputAdmin v-model="form.jml_tanggungan" label="Jumlah Tanggungan Keluarga" type="number"
                         @input="onlyNumbers" inputmode="numeric" min="0" />
                 </div>
 

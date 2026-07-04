@@ -22,7 +22,7 @@ const form = useForm({
 
 const props = defineProps({
     roles: { type: Array, required: true },
-    members: { type: Array, required: true },
+    anggota: { type: Array, required: true },
 })
 
 const breadcrumbItems = [
@@ -49,7 +49,7 @@ const searchMembers = () => {
     }
 
     const q = searchQuery.value.toLowerCase().trim()
-    searchResults.value = props.members.filter(m =>
+    searchResults.value = props.anggota.filter(m =>
         m.name?.toLowerCase().includes(q) ||
         m.nik?.toLowerCase().includes(q) ||
         m.email?.toLowerCase().includes(q) ||
@@ -57,13 +57,13 @@ const searchMembers = () => {
     ).slice(0, 6)
 }
 
-const selectMember = (member) => {
-    selectedMember.value = member
-    form.pengguna_id = member.id
-    form.name = member.name
-    form.nik = member.nik
-    form.email = member.email
-    form.no_telp = member.no_telp
+const selectMember = (anggota) => {
+    selectedMember.value = anggota
+    form.pengguna_id = anggota.id
+    form.name = anggota.name
+    form.nik = anggota.nik
+    form.email = anggota.email
+    form.no_telp = anggota.no_telp
     searchQuery.value = ''
     searchResults.value = []
 }
@@ -81,7 +81,7 @@ const submitForm = () => {
     Swal.fire({
         title: 'Konfirmasi',
         text: isEditingExistingMember.value
-            ? 'Apakah Anda yakin ingin mempromosikan member ini menjadi pengurus?'
+            ? 'Apakah Anda yakin ingin mempromosikan anggota ini menjadi pengurus?'
             : 'Apakah Anda yakin ingin menambahkan data admin ini?',
         icon: 'warning',
         showCancelButton: true,
@@ -92,7 +92,7 @@ const submitForm = () => {
         if (result.isConfirmed) {
             form.post('/admin/pengurus/store', {
                 onSuccess: () => {
-                    toast(isEditingExistingMember.value ? "Member berhasil dipromosikan!" : "Pengurus berhasil ditambahkan!", {
+                    toast(isEditingExistingMember.value ? "Anggota berhasil dipromosikan!" : "Pengurus berhasil ditambahkan!", {
                         "type": "success",
                         "position": "bottom-right",
                         "transition": "slide",
@@ -129,7 +129,7 @@ const submitForm = () => {
                             <input v-if="!selectedMember" v-model="searchQuery" @input="searchMembers" type="text"
                                 placeholder="Ketik nama, NIK, email, atau kode pengguna"
                                 class="w-full px-4 py-2 border font-body text-sm shadow-theme-xs focus:outline-hidden focus:ring-3 placeholder:text-gray-400 rounded-lg border-gray-300 focus:border-brand-300 focus:ring-brand-500/10" />
-                            <!-- Selected Member Info -->
+                            <!-- Selected Anggota Info -->
                             <div v-else class="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
                                 <div class="flex justify-between items-center">
                                     <p class="font-semibold font-body text-md text-green-900">{{ selectedMember.kode_pengguna }}</p>
@@ -142,19 +142,19 @@ const submitForm = () => {
                             <!-- Search Results Dropdown -->
                             <div v-if="searchResults.length > 0"
                                 class="absolute z-100 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg">
-                                <div v-for="member in searchResults" :key="member.id" @click="selectMember(member)"
+                                <div v-for="anggota in searchResults" :key="anggota.id" @click="selectMember(anggota)"
                                     class="px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-100">
-                                    <div class="font-semibold">{{ member.name }}</div>
-                                    <div class="text-sm text-gray-600">{{ member.kode_pengguna }} | NIK: {{ member.nik }}
+                                    <div class="font-semibold">{{ anggota.name }}</div>
+                                    <div class="text-sm text-gray-600">{{ anggota.kode_pengguna }} | NIK: {{ anggota.nik }}
                                     </div>
-                                    <div class="text-sm text-gray-600">{{ member.email }}</div>
+                                    <div class="text-sm text-gray-600">{{ anggota.email }}</div>
                                 </div>
                             </div>
 
                             <!-- No Results Message -->
                             <div v-else-if="searchQuery.length >= 2 && searchResults.length === 0"
                                 class="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg p-4">
-                                <p class="text-gray-500 text-sm">Tidak ada member aktif yang ditemukan</p>
+                                <p class="text-gray-500 text-sm">Tidak ada anggota aktif yang ditemukan</p>
                             </div>
                         </div>
 

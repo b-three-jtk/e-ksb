@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Models\Collateral;
 use App\Models\FinancingItem;
 use App\Models\Installment;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,7 +30,7 @@ class Financing extends Model
         'signed_akad_document',
         'predicted_cost_price',
 
-        'member_id',
+        'anggota_id',
         'updated_by',
     ];
 
@@ -51,9 +51,9 @@ class Financing extends Model
         });
     }
 
-    public function member()
+    public function anggota()
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Anggota::class);
     }
 
     public function updatedBy()

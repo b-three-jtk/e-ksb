@@ -18,6 +18,8 @@ class Anggota extends Model
 {
     use HasFactory;
 
+    protected $table = 'anggota';
+
     protected $fillable = [
         'pengguna_id',
         'pj_anggota_id',
@@ -30,7 +32,7 @@ class Anggota extends Model
         'status_pernikahan',
         'pendidikan_terakhir',
         'jml_tanggungan',
-        'resignation_date',
+        'tgl_pengunduran_diri',
     ];
 
     // Simpanan

@@ -26,11 +26,11 @@ const expenses = computed(() => [
 const tenor = ref(12)
 
 const totalIncome = computed(() => {
-    return incomes.value.reduce((total, item) => total + (Number(props.data.member[item.model]) || 0), 0)
+    return incomes.value.reduce((total, item) => total + (Number(props.data.anggota[item.model]) || 0), 0)
 })
 
 const totalExpense = computed(() => {
-    return expenses.value.reduce((total, item) => total + (Number(props.data.member[item.model]) || 0), 0)
+    return expenses.value.reduce((total, item) => total + (Number(props.data.anggota[item.model]) || 0), 0)
 })
 
 const totalPrice = computed(() => {

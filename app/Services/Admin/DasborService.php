@@ -79,24 +79,24 @@ class DasborService
     public function getTransaksiTerbaru($filter, $role)
     {
         $amount = $role === UserRoleEnum::DPS->value ? 5 : 6;
-        $transaksiSimpanan = SavingTransaction::with('savingAccount.member.user')
+        $transaksiSimpanan = SavingTransaction::with('savingAccount.anggota.user')
             ->latest()->take($amount)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
                 'no_transaksi' => $t->saving_transaction_code,
-                'anggota' => $t->savingAccount->member->user->nama,
+                'anggota' => $t->savingAccount->anggota->user->nama,
                 'jumlah' => $t->amount,
                 'produk' => $t->savingAccount->saving_type,
                 'akad' => $this->getAkadSimpanan($t->savingAccount->saving_type),
                 'tanggal' => $t->created_at->toDateString(),
             ]);
 
-        $transaksiPembiayaan = Financing::with('member.user', 'financingItem')
+        $transaksiPembiayaan = Financing::with('anggota.user', 'financingItem')
             ->latest()->take($amount)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
                 'no_transaksi' => $f->financing_transaction_code,
-                'anggota' => $f->member->user->nama,
+                'anggota' => $f->anggota->user->nama,
                 'jumlah' => $f->amount,
                 'produk' => 'Pembiayaan',
                 'akad' => 'Murabahah',
@@ -186,8 +186,8 @@ class DasborService
 
     public function getTotalSimpananAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, $tipe)
     {
-        $total = SavingTransaction::with('savingAccount.member')
-            ->whereHas('savingAccount.member', function ($q) {
+        $total = SavingTransaction::with('savingAccount.anggota')
+            ->whereHas('savingAccount.anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             })
             ->where('transaction_type', $tipe)
@@ -196,7 +196,7 @@ class DasborService
 
         $persen = $this->hitungPersen(
             $total,
-            SavingTransaction::whereHas('savingAccount.member', function ($q) {
+            SavingTransaction::whereHas('savingAccount.anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             })
                 ->where('transaction_type', $tipe)
@@ -264,7 +264,7 @@ class DasborService
         $savingNominal = GlobalSetting::where('key', 'saving_wajib_amount')->first()->value ?? 0;
 
         $query = Notification::with([
-            'member.user',
+            'anggota.user',
             'reference' => function (MorphTo $morphTo) {
                 $morphTo->morphWith([
                     SavingTransaction::class => ['savingAccount'],
@@ -272,7 +272,7 @@ class DasborService
                 ]);
             }
         ])
-            ->whereHas('member', function ($q) {
+            ->whereHas('anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             });
 
@@ -315,7 +315,7 @@ class DasborService
 
     public function getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)
     {
-        return Financing::with('member.user', 'financingItem')
+        return Financing::with('anggota.user', 'financingItem')
             ->whereBetween('requested_date', [$tanggalAwal, $tanggalAkhir])
             ->latest()
             ->take(5)
@@ -323,14 +323,14 @@ class DasborService
             ->map(fn($f) => [
                 'id' => $f->id,
                 'no_transaksi' => $f->financing_transaction_code,
-                'anggota' => $f->member->user->nama,
+                'anggota' => $f->anggota->user->nama,
                 'status' => $f->status,
             ]);
     }
 
     public function getPembayaranTerlambat($tanggalAkhir)
     {
-        $data = Installment::with('financing.member.user')
+        $data = Installment::with('financing.anggota.user')
             ->where('due_date', '<=', $tanggalAkhir)
             ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
             ->latest()
@@ -339,7 +339,7 @@ class DasborService
             ->map(fn($i) => [
                 'id' => $i->id,
                 'no_transaksi' => $i->financing->financing_transaction_code,
-                'anggota' => $i->financing->member->user->nama,
+                'anggota' => $i->financing->anggota->user->nama,
                 'jumlah' => $i->amount,
                 'hari_terlambat' => round(Carbon::parse($i->due_date)->diffInDays(Carbon::parse($tanggalAkhir))),
             ]);
@@ -349,8 +349,8 @@ class DasborService
 
     public function getTransaksiSimpananTerbaru($tanggalAkhir, $filter)
     {
-        $query = SavingTransaction::with(['savingAccount.member.user'])
-            ->whereHas('savingAccount.member', function ($q) {
+        $query = SavingTransaction::with(['savingAccount.anggota.user'])
+            ->whereHas('savingAccount.anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             })
             ->where('created_at', '<=', $tanggalAkhir);
@@ -367,7 +367,7 @@ class DasborService
             ->map(fn($t) => [
                 'id' => $t->id,
                 'no_transaksi' => $t->saving_transaction_code,
-                'anggota' => $t->savingAccount->member?->user?->nama ?? '-',
+                'anggota' => $t->savingAccount->anggota?->user?->nama ?? '-',
                 'jumlah' => $t->saving_amount,
                 'produk' => $t->savingAccount->saving_type,
             ])
@@ -378,8 +378,8 @@ class DasborService
 
     public function getTotalAngsuranBelumLunas()
     {
-        $total = Installment::with('financing.member')
-            ->whereHas('financing.member', function ($query) {
+        $total = Installment::with('financing.anggota')
+            ->whereHas('financing.anggota', function ($query) {
                 $query->where('pj_anggota_id', auth()->id());
             })
             ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
@@ -617,7 +617,7 @@ class DasborService
 
         return [
             'id' => $account->id,
-            'anggota' => $notif->member?->user?->nama ?? '-',
+            'anggota' => $notif->anggota?->user?->nama ?? '-',
             'nominal' => $savingNominal,
             'produk' => $account->saving_type,
             'jatuh_tempo' => Carbon::parse($ref->created_at)->addDays((int) $savingDueDate)->toDateString(),
@@ -637,7 +637,7 @@ class DasborService
 
         return [
             'id' => $ref->id,
-            'anggota' => $notif->member?->user?->nama ?? '-',
+            'anggota' => $notif->anggota?->user?->nama ?? '-',
             'nominal' => $ref->amount,
             'produk' => 'Pembiayaan',
             'jatuh_tempo' => Carbon::parse($ref->due_date)->toDateString(),

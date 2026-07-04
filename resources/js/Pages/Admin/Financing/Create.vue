@@ -33,18 +33,18 @@ const props = defineProps({
 const {
     form,
     searchQuery,
-    memberResults,
+    anggotaResults,
     isLoadingSearch,
-    isMemberSelected,
+    isAnggotaSelected,
     searchSupplierQuery,
     supplierResults,
     isLoadingSearchSupplier,
     isSupplierSelected,
-    selectMember,
+    selectAnggota,
     selectSupplier,
     addHeir,
     removeHeir,
-    resetMemberSelection,
+    resetAnggotaSelection,
     resetSupplierSelection,
     submit,
     saveDraft,
@@ -136,17 +136,17 @@ const handleSaveDraft = () => {
                     :form="form"
                     :search-query="searchQuery"
                     :is-loading-search="isLoadingSearch"
-                    :is-member-selected="isMemberSelected"
-                    :member-results="memberResults"
+                    :is-anggota-selected="isAnggotaSelected"
+                    :anggota-results="anggotaResults"
                     :data="props.data"
                     :only-letters="onlyLetters"
                     :only-numbers="onlyNumbers"
                     :errors="errors"
                     @update:search-query="searchQuery = $event"
-                    @selectMember="selectMember"
+                    @selectAnggota="selectAnggota"
                     @addHeir="addHeir"
                     @removeHeir="removeHeir"
-                    @resetMemberSelection="resetMemberSelection"
+                    @resetAnggotaSelection="resetAnggotaSelection"
                     @validate-field="(field) => validateField(field, 1)"
                 />
 

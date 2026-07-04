@@ -19,7 +19,7 @@ class ProfilPenggunaService
      */
     public function index(Pengguna $user): array
     {
-        $member = $user->member?->loadMissing(['heirs', 'memberDocs']);
+        $anggota = $user->anggota?->loadMissing(['heirs', 'memberDocs']);
         $pointTransactions = $user->pointTransactions()
             ->with('savingTransactions')
             ->orderBy('created_at')
@@ -54,7 +54,7 @@ class ProfilPenggunaService
         $latestPointTransaction = $pointTransactions->last();
 
         $photoUrl = $user->foto_profil ? asset('storage/' . $user->foto_profil) : null;
-        $heirs = $member?->heirs?->map(function ($heir) {
+        $heirs = $anggota?->heirs?->map(function ($heir) {
             return [
                 'heir_nik' => $heir->heir_nik,
                 'heir_name' => $heir->heir_name,
@@ -67,8 +67,8 @@ class ProfilPenggunaService
             return in_array($heir['relationship'] ?? '', ['Suami', 'Istri'], true);
         });
 
-        $ktpDocument = $member?->memberDocs?->firstWhere('doc_name', 'ktp');
-        $kkDocument = $member?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga');
+        $ktpDocument = $anggota?->memberDocs?->firstWhere('doc_name', 'ktp');
+        $kkDocument = $anggota?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga');
 
         return [
             'id' => $user->id,
@@ -80,19 +80,19 @@ class ProfilPenggunaService
             'foto_profil' => $user->foto_profil,
             'photo_url' => $photoUrl,
             'role_name' => $user->getRoleNames()->first() ?? 'Anggota',
-            'member' => [
-                'gender' => $member?->gender,
-                'birth_place' => $member?->birth_place,
-                'birth_date' => $member?->birth_date
-                    ? Carbon::parse($member->birth_date)->translatedFormat('d M Y')
+            'anggota'=> [
+                'jenis_kelamin' => $anggota?->jenis_kelamin,
+                'tempat_lahir' => $anggota?->tempat_lahir,
+                'tgl_lahir' => $anggota?->tgl_lahir
+                    ? Carbon::parse($anggota->tgl_lahir)->translatedFormat('d M Y')
                     : null,
-                'status' => $member?->status,
-                'domicile_address' => $member?->domicile_address,
-                'residential_address' => $member?->residential_address,
-                'marital_status' => $member?->marital_status,
-                'last_education' => $member?->last_education,
-                'dependents' => $member?->dependents,
-                'spouse_name' => $member?->spouse_name ?? $spouseHeir['heir_name'] ?? null,
+                'status' => $anggota?->status,
+                'alamat_domisili' => $anggota?->alamat_domisili,
+                'alamat_ktp' => $anggota?->alamat_ktp,
+                'status_pernikahan' => $anggota?->status_pernikahan,
+                'pendidikan_terakhir' => $anggota?->pendidikan_terakhir,
+                'jml_tanggungan' => $anggota?->jml_tanggungan,
+                'spouse_name' => $anggota?->spouse_name ?? $spouseHeir['heir_name'] ?? null,
                 'heirs' => $heirs,
                 'documents' => [
                     'ktp' => $ktpDocument?->doc_attachment ? asset('storage/' . $ktpDocument->doc_attachment) : null,
@@ -118,7 +118,7 @@ class ProfilPenggunaService
     }
 
     /**
-     * Update basic user and member profile details.
+     * Update basic user and anggota profile details.
      *
      * @param Pengguna $user
      * @param array $validated
@@ -132,10 +132,10 @@ class ProfilPenggunaService
             'no_telp' => $validated['no_telp'] ?? null,
         ]);
 
-        if ($user->member) {
-            $user->member->update([
-                'last_education' => $validated['last_education'] ?? null,
-                'residential_address' => $validated['residential_address'] ?? null,
+        if ($user->anggota) {
+            $user->anggota->update([
+                'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
+                'alamat_ktp' => $validated['alamat_ktp'] ?? null,
             ]);
         }
     }

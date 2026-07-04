@@ -18,9 +18,9 @@ class PembiayaanController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $member = $user->member;
+        $anggota = $user->anggota;
 
-        if (!$member) {
+        if (!$anggota) {
             return inertia('User/Financing/List', [
                 'financings' => [
                     'data' => [],
@@ -42,8 +42,8 @@ class PembiayaanController extends Controller
         $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
         $search = trim((string) $request->input('search', ''));
 
-        $financings = $this->pembiayaanService->getPersonalFinancings($member->id, $perPage, $search);
-        $activeFinancing = $this->pembiayaanService->getActiveFinancing($member->id);
+        $financings = $this->pembiayaanService->getPersonalFinancings($anggota->id, $perPage, $search);
+        $activeFinancing = $this->pembiayaanService->getActiveFinancing($anggota->id);
 
         return inertia('User/Financing/List', [
             'financings' => $financings,
@@ -61,10 +61,10 @@ class PembiayaanController extends Controller
     public function show(string $id)
     {
         $user = auth()->user();
-        $member = $user->member;
+        $anggota = $user->anggota;
         $financing = $this->pembiayaanService->getPembiayaanById($id);
 
-        if ($financing->member_id !== $member->id) {
+        if ($financing->anggota_id !== $anggota->id) {
             abort(403, 'Anggota tidak memiliki akses ke pembiayaan ini.');
         }
 

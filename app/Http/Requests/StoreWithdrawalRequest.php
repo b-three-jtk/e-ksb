@@ -21,7 +21,7 @@ class StoreWithdrawalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'member_id' => 'required|exists:members,id',
+            'anggota_id' => 'required|exists:anggota,id',
             'saving_account_id' => 'required|exists:saving_accounts,id',
             'amount' => 'required|numeric|min:1',
             'withdrawal_date' => 'required|date|before_or_equal:today',

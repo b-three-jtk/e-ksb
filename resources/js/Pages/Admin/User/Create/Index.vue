@@ -31,14 +31,14 @@ const props = defineProps({
 
 const requiredMemberFields = computed(() => [
 	'nama',
-	'gender',
+	'jenis_kelamin',
 	'nik',
-	'birth_place',
-	'birth_date',
-	'marital_status',
+	'tempat_lahir',
+	'tgl_lahir',
+	'status_pernikahan',
 	'no_telp',
-	'domicile_address',
-	'last_education',
+	'alamat_domisili',
+	'pendidikan_terakhir',
 	'heir_nik',
 	'heir_name',
 	'heir_relationship',
@@ -47,16 +47,16 @@ const requiredMemberFields = computed(() => [
 
 const form = useForm({
 	nama: '',
-	gender: '',
+	jenis_kelamin: '',
 	nik: '',
-	birth_place: '',
-	birth_date: '',
-	marital_status: '',
+	tempat_lahir: '',
+	tgl_lahir: '',
+	status_pernikahan: '',
 	no_telp: '',
 	email: '',
-	domicile_address: '',
-	last_education: '',
-	residential_address: '',
+	alamat_domisili: '',
+	pendidikan_terakhir: '',
+	alamat_ktp: '',
 	heir_nik: '',
 	heir_name: '',
 	heir_relationship: '',
@@ -173,7 +173,7 @@ const submitForm = () => {
 						:get-field-error="getFieldError"
 						:only-letters="onlyLetters"
 						:only-numbers="onlyNumbers"
-						:gender-options="genderOptions"
+						:jenis_kelamin-options="genderOptions"
 						:marital-status-options="props.maritalStatusOptions"
 						:education-options="props.educationOptions"
 					/>

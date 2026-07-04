@@ -15,9 +15,9 @@ return new class extends Migration
             $table->string('account_number', 20)->primary();
             $table->string('bank_name');
             $table->string('account_name');
-            $table->unsignedBigInteger('member_id');
+            $table->unsignedBigInteger('anggota_id');
 
-            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
+            $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('cascade');
             $table->timestamps();
         });
     }

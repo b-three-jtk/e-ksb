@@ -11,18 +11,18 @@ defineProps({
         <div class="card-layout">
             <h1 class="card-title">Identitas Pemohon</h1>
             <div class="grid grid-cols-2 gap-6 mt-8">
-                <Info label="Nomor Anggota KSB" :value="data.member.kode_pengguna" />
-                <Info label="Nama Lengkap" :value="data.member.name" />
-                <Info label="NIK" :value="data.member.nik" />
-                <Info label="Jenis Kelamin" :value="data.member.gender" />
-                <Info label="Tempat, Tanggal Lahir" :value="`${data.member.birth_place}, ${data.member.birth_date}`" />
-                <Info label="Alamat " :value="data.member.residential_address" />
-                <Info label="Alamat Domisili" :value="data.member.domicile_address" />
-                <Info label="Pendidikan Terakhir" :value="data.member.last_education" />
-                <Info label="Status Perkawinan" :value="data.member.marital_status" />
-                <Info label="Jumlah Tanggungan Keluarga" :value="data.member.dependents" />
-                <Info label="Nomor Telepon" :value="data.member.no_telp" />
-                <Info label="Email" :value="data.member.email" />
+                <Info label="Nomor Anggota KSB" :value="data.anggota.kode_pengguna" />
+                <Info label="Nama Lengkap" :value="data.anggota.name" />
+                <Info label="NIK" :value="data.anggota.nik" />
+                <Info label="Jenis Kelamin" :value="data.anggota.jenis_kelamin" />
+                <Info label="Tempat, Tanggal Lahir" :value="`${data.anggota.tempat_lahir}, ${data.anggota.tgl_lahir}`" />
+                <Info label="Alamat " :value="data.anggota.alamat_ktp" />
+                <Info label="Alamat Domisili" :value="data.anggota.alamat_domisili" />
+                <Info label="Pendidikan Terakhir" :value="data.anggota.pendidikan_terakhir" />
+                <Info label="Status Perkawinan" :value="data.anggota.status_pernikahan" />
+                <Info label="Jumlah Tanggungan Keluarga" :value="data.anggota.jml_tanggungan" />
+                <Info label="Nomor Telepon" :value="data.anggota.no_telp" />
+                <Info label="Email" :value="data.anggota.email" />
             </div>
         </div>
         <div class="card-layout">
@@ -36,8 +36,8 @@ defineProps({
                         <th class="py-4 text-left pl-6">Kontak</th>
                     </tr>
                 </thead>
-                <tbody v-if="data.member.heirs.length > 0">
-                    <tr v-for="(item, index) in data.member.heirs" :key="index"
+                <tbody v-if="data.anggota.heirs.length > 0">
+                    <tr v-for="(item, index) in data.anggota.heirs" :key="index"
                         class="bg-white border-b text-dark-text dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700">
                         <td class="py-2 text-left pl-6">{{ item.heir_name }}</td>
                         <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>

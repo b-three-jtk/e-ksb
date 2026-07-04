@@ -14,7 +14,7 @@ use App\Http\Requests\StoreDepositRequest;
 use App\Http\Requests\StoreWithdrawalRequest;
 use App\Models\BerjangkaAccount;
 use App\Models\IbadahAccount;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\MemberBankAccount;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
@@ -87,12 +87,12 @@ class SimpananController extends Controller
 
     public function show(string $id)
     {
-        $member = SavingTransaction::with('savingAccount.member.user')->findOrFail($id)->savingAccount->member;
-        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_anggota_id !== Auth::id()) {
+        $anggota = SavingTransaction::with('savingAccount.anggota.user')->findOrFail($id)->savingAccount->anggota;
+        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $anggota->pj_anggota_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki izin untuk melihat detail transaksi simpanan ini.');
         }
 
-        $data = SavingTransaction::with('savingAccount.member.user', 'memberBankAccount')->find($id);
+        $data = SavingTransaction::with('savingAccount.anggota.user', 'memberBankAccount')->find($id);
         $saving_transaction_receipt = $data->saving_transaction_receipt ? Storage::url($data->saving_transaction_receipt) : null;
 
         return inertia('Admin/Savings/Show', [
@@ -104,7 +104,7 @@ class SimpananController extends Controller
     public function createDeposit(Request $request)
     {
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
-            'members'      => $this->simpananService->getMembersForDeposit(),
+            'anggota'      => $this->simpananService->getMembersForDeposit(),
             'saving_types' => collect(SavingTypeEnum::cases())->map(fn($c) => $c->value),
             'pengurus'     => ['nama' => Auth::user()->nama ?? 'Pengurus'],
             'global_saving' => [
@@ -129,24 +129,24 @@ class SimpananController extends Controller
             );
         }
 
-        $member = Member::with('user')->findOrFail($data['member_id']);
+        $anggota = Anggota::with('user')->findOrFail($data['anggota_id']);
 
-        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_anggota_id !== Auth::id()) {
+        if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $anggota->pj_anggota_id !== Auth::id()) {
             abort(403, 'Anda tidak berhak melakukan transaksi untuk anggota ini.');
         }
 
-        $savingAccount = $this->simpananService->resolveOrCreateSavingAccount($data, $member);
+        $savingAccount = $this->simpananService->resolveOrCreateSavingAccount($data, $anggota);
 
-        Log::info('Saving account for member', [
-            'member_id'            => $member->id,
+        Log::info('Saving account for anggota', [
+            'anggota_id'            => $anggota->id,
             'saving_account_id'    => $savingAccount->id,
             'was_recently_created' => $savingAccount->wasRecentlyCreated,
         ]);
 
-        $this->simpananService->validateDepositRules($data, $savingAccount, $member);
+        $this->simpananService->validateDepositRules($data, $savingAccount, $anggota);
 
         $prevBalance = $savingAccount->balance;
-        $transaction = $this->simpananService->createDepositTransaction($data, $savingAccount, $member);
+        $transaction = $this->simpananService->createDepositTransaction($data, $savingAccount, $anggota);
 
         Log::info('Deposit transaction created', [
             'transaction_id'    => $transaction->id,
@@ -159,8 +159,8 @@ class SimpananController extends Controller
             'no_transaksi'  => $transaction->saving_transaction_code,
             'tanggal'       => $transaction->transaction_date,
             'pengurus'      => Auth::user()->nama,
-            'nama_anggota'  => $member->user->nama,
-            'no_anggota'    => $member->user->kode_pengguna,
+            'nama_anggota'  => $anggota->user->nama,
+            'no_anggota'    => $anggota->user->kode_pengguna,
             'jenis'         => $data['saving_category'],
             'metode'        => $transaction->saving_payment_method,
             'nominal'       => $transaction->saving_amount,
@@ -169,11 +169,11 @@ class SimpananController extends Controller
             'purpose'       => $data['purpose'] ?? null,
         ];
 
-        $this->simpananService->storeReceiptDepositPdf($transaction, $strukData, $member->id);
+        $this->simpananService->storeReceiptDepositPdf($transaction, $strukData, $anggota->id);
         $transaction->refresh();
 
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
-            'members'      => $this->simpananService->getMembersForDeposit(),
+            'anggota'      => $this->simpananService->getMembersForDeposit(),
             'saving_types' => collect(SavingTypeEnum::cases())->map(fn($c) => $c->value),
             'pengurus'     => ['nama' => Auth::user()->nama ?? 'Pengurus'],
             'global_saving' => [
@@ -187,18 +187,18 @@ class SimpananController extends Controller
 
     public function createWithdrawal()
     {
-        $members = $this->getMembersForSavingSelection(true);
+        $anggota = $this->getMembersForSavingSelection(true);
 
         return Inertia::render('Admin/Savings/Withdrawal/Create', [
-            'members' => $members,
+            'anggota' => $anggota,
         ]);
     }
 
     public function storeWithdrawal(StoreWithdrawalRequest $request)
     {
         try {
-            $member = Member::with('user')->findOrFail($request->member_id);
-            if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $member->pj_anggota_id !== Auth::id()) {
+            $anggota = Anggota::with('user')->findOrFail($request->anggota_id);
+            if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $anggota->pj_anggota_id !== Auth::id()) {
                 abort(403, 'Anda tidak berhak melakukan transaksi untuk anggota ini.');
             }
 
@@ -221,7 +221,7 @@ class SimpananController extends Controller
 
     private function getMembersForSavingSelection(bool $includeBankAccounts = false)
     {
-        $query = Member::query()
+        $query = Anggota::query()
             ->when($includeBankAccounts, function ($q) {
                 $q->with([
                     'user',
@@ -246,13 +246,13 @@ class SimpananController extends Controller
             $query->where('pj_anggota_id', Auth::id());
         }
 
-        return $query->get()->map(function ($member) use ($includeBankAccounts) {
+        return $query->get()->map(function ($anggota) use ($includeBankAccounts) {
             if ($includeBankAccounts) {
                 return [
-                    'id' => $member->id,
-                    'nama' => $member->user?->nama,
-                    'kode_pengguna' => $member->user?->kode_pengguna,
-                    'savingAccounts' => $member->savingAccounts->map(function ($acc) {
+                    'id' => $anggota->id,
+                    'nama' => $anggota->user?->nama,
+                    'kode_pengguna' => $anggota->user?->kode_pengguna,
+                    'savingAccounts' => $anggota->savingAccounts->map(function ($acc) {
                         return [
                             'id' => $acc->id,
                             'type' => $acc->saving_type ?? '-',
@@ -262,7 +262,7 @@ class SimpananController extends Controller
                             'opened_at' => optional($acc->created_at)->toDateString(),
                         ];
                     })->toArray(),
-                    'accounts' => $member->bankAccounts->map(function ($acc) {
+                    'accounts' => $anggota->bankAccounts->map(function ($acc) {
                         return [
                             'bank_name' => $acc->bank_name,
                             'account_name' => $acc->account_name,
@@ -273,11 +273,11 @@ class SimpananController extends Controller
             }
 
             return [
-                'id' => $member->id,
-                'kode_pengguna' => $member->user->kode_pengguna,
-                'nama' => $member->user->nama,
-                'status' => $member->status,
-                'savingAccounts' => $member->savingAccounts->map(fn($acc) => [
+                'id' => $anggota->id,
+                'kode_pengguna' => $anggota->user->kode_pengguna,
+                'nama' => $anggota->user->nama,
+                'status' => $anggota->status,
+                'savingAccounts' => $anggota->savingAccounts->map(fn($acc) => [
                     'type' => $acc->saving_type ?? null,
                     'purpose' => $acc->ibadah?->purpose ?? $acc->berjangka?->purpose ?? null,
                     'balance' => $acc->balance ?? 0,

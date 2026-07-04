@@ -218,7 +218,7 @@ const breadcrumbItems = [
                                     >
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
-                                        >{{ user.member.gender ?? "-" }}</span
+                                        >{{ user.anggota.jenis_kelamin ?? "-" }}</span
                                     >
                                 </li>
                                 <li class="flex flex-col gap-2">
@@ -230,7 +230,7 @@ const breadcrumbItems = [
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
                                             dateParser(
-                                                user.member.birth_date,
+                                                user.anggota.tgl_lahir,
                                             ) ?? "-"
                                         }}</span
                                     >
@@ -243,7 +243,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.member.last_education ?? "-"
+                                            user.anggota.pendidikan_terakhir ?? "-"
                                         }}</span
                                     >
                                 </li>
@@ -255,7 +255,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.member.marital_status ?? "-"
+                                            user.anggota.status_pernikahan ?? "-"
                                         }}</span
                                     >
                                 </li>
@@ -267,7 +267,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.member.dependents ?? "-"
+                                            user.anggota.jml_tanggungan ?? "-"
                                         }}</span
                                     >
                                 </li>
@@ -343,7 +343,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.member.residential_address ??
+                                            user.anggota.alamat_ktp ??
                                             "-"
                                         }}</span
                                     >
@@ -356,7 +356,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.member.domicile_address ?? "-"
+                                            user.anggota.alamat_domisili ?? "-"
                                         }}</span
                                     >
                                 </li>
@@ -375,7 +375,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.member.heirs.name ?? "-"
+                                            user.anggota.heirs.name ?? "-"
                                         }}</span
                                     >
                                 </li>
@@ -387,7 +387,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.member.heirs.relationship ??
+                                            user.anggota.heirs.relationship ??
                                             "-"
                                         }}</span
                                     >
@@ -400,7 +400,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.member.heirs.contact ?? "-"
+                                            user.anggota.heirs.contact ?? "-"
                                         }}</span
                                     >
                                 </li>
@@ -412,14 +412,14 @@ const breadcrumbItems = [
                     <h1 class="card-title">Akun</h1>
                     <div
                         v-if="
-                            user.member.saving_accounts?.length &&
-                            user.member.saving_accounts?.length
+                            user.anggota.saving_accounts?.length &&
+                            user.anggota.saving_accounts?.length
                         "
                         class="flex flex-col gap-4"
                     >
                         <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
                             <div
-                                v-for="account in user.member.saving_accounts"
+                                v-for="account in user.anggota.saving_accounts"
                                 class="card-layout flex flex-col gap-12"
                             >
                                 <h1 class="card-title">
@@ -514,7 +514,7 @@ const breadcrumbItems = [
                         </div>
                         <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
                             <div
-                                v-for="financing in user.member.financings"
+                                v-for="financing in user.anggota.financings"
                                 class="card-layout flex flex-col gap-8 px-0!"
                             >
                                 <div

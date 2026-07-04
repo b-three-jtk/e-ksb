@@ -16,7 +16,7 @@ class PengunduranDiriService
         $query = Pengguna::whereHas('roles', function ($q) {
                 $q->where('name', UserRoleEnum::ANGGOTA->value);
             })
-            ->whereHas('member', function ($q) {
+            ->whereHas('anggota', function ($q) {
                 $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
             })
             ->when($search, function ($q) use ($search) {
@@ -34,14 +34,14 @@ class PengunduranDiriService
 
     public function getAnggotaMengundurkanDiri($id)
     {
-        return Pengguna::with(['member' => function ($q) {
+        return Pengguna::with(['anggota' => function ($q) {
             $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
-        }, 'member.memberDocs'])->findOrFail($id);
+        }, 'anggota.memberDocs'])->findOrFail($id);
     }
 
     public function getTotalKewajiban(Pengguna $user)
     {
-        return Financing::with('installment.payment')->where('member_id', $user->member->id)
+        return Financing::with('installment.payment')->where('anggota_id', $user->anggota->id)
             ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->get()
             ->sum(function ($financing) {
@@ -65,9 +65,10 @@ class PengunduranDiriService
 
     public function updateStatusAnggota(Pengguna $user)
     {
-        $member = $user->member;
-        $member->status = MemberStatusEnum::RESIGNED->value;
-        $member->save();
+        $anggota = $user->anggota;
+        $anggota->status = MemberStatusEnum::RESIGNED->value;
+        $anggota->tgl_pengunduran_diri = now();
+        $anggota->save();
 
         $user->status = UserStatusEnum::INACTIVE->value;
         $user->save();

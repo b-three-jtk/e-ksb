@@ -22,7 +22,7 @@ class StoreDepositRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'member_id' => 'required|exists:members,id',
+            'anggota_id' => 'required|exists:anggota,id',
             'saving_account_id' => 'nullable|exists:saving_accounts,id',
             'saving_category' => 'required|in:'. implode(',', array_column(SavingTypeEnum::cases(), 'value')),
             'amount' => 'required|numeric|min:1',

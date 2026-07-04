@@ -58,7 +58,7 @@ const maxBirthDate = computed(() => {
 				:error="getFieldError('nama', errors.nama)"
 			/>
 
-			<BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required :selectables="genderOptions" :error="getFieldError('gender', errors.gender)" />
+			<BaseInputAdmin v-model="form.jenis_kelamin" label="Jenis Kelamin" type="radio" required :selectables="genderOptions" :error="getFieldError('jenis_kelamin', errors.jenis_kelamin)" />
 
 			<BaseInputAdmin
 				v-model="form.nik"
@@ -72,39 +72,39 @@ const maxBirthDate = computed(() => {
 			/>
 
 			<BaseInputAdmin
-				v-model="form.birth_place"
+				v-model="form.tempat_lahir"
 				label="Tempat Lahir"
 				type="text"
 				placeholder="Isi tempat lahir"
 				required
-				:error="getFieldError('birth_place', errors.birth_place)"
+				:error="getFieldError('tempat_lahir', errors.tempat_lahir)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.birth_date"
+				v-model="form.tgl_lahir"
 				label="Tanggal Lahir"
 				type="date"
 				required
 				:maxDate="maxBirthDate"
-				:error="getFieldError('birth_date', errors.birth_date)"
+				:error="getFieldError('tgl_lahir', errors.tgl_lahir)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.marital_status"
+				v-model="form.status_pernikahan"
 				label="Status Perkawinan"
 				type="select"
 				required
 				:selectables="maritalStatusOptions"
-				:error="getFieldError('marital_status', errors.marital_status)"
+				:error="getFieldError('status_pernikahan', errors.status_pernikahan)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.last_education"
+				v-model="form.pendidikan_terakhir"
 				label="Pendidikan Terakhir"
 				type="select"
 				required
 				:selectables="educationOptions"
-				:error="getFieldError('last_education', errors.last_education)"
+				:error="getFieldError('pendidikan_terakhir', errors.pendidikan_terakhir)"
 			/>
 		</div>
 	</section>

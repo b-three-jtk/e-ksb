@@ -33,10 +33,10 @@ class BukuBesarService
             $accountBalances[$savingAccountId] = $saldoSebelum;
 
             $linkedAccount = $transaction->memberBankAccount;
-            if (!$linkedAccount && $transaction->savingAccount?->member?->bankAccounts) {
-                $linkedAccount = $transaction->savingAccount->member->bankAccounts
+            if (!$linkedAccount && $transaction->savingAccount?->anggota?->bankAccounts) {
+                $linkedAccount = $transaction->savingAccount->anggota->bankAccounts
                     ->firstWhere('account_number', $transaction->account_number)
-                    ?? $transaction->savingAccount->member->bankAccounts->first();
+                    ?? $transaction->savingAccount->anggota->bankAccounts->first();
             }
 
             $receiptPath = (string) ($transaction->saving_transaction_receipt ?? '');
@@ -50,8 +50,8 @@ class BukuBesarService
                 'jenis_simpanan' => $transaction->savingAccount?->saving_type ?? 'N/A',
                 'metode' => $transaction->saving_payment_method ?? 'N/A',
                 'petugas' => $transaction->updatedBy?->nama ?? 'System',
-                'nama_anggota' => $transaction->savingAccount?->member?->user?->nama ?? '-',
-                'no_anggota' => $transaction->savingAccount?->member?->user?->kode_pengguna ?? '-',
+                'nama_anggota' => $transaction->savingAccount?->anggota?->user?->nama ?? '-',
+                'no_anggota' => $transaction->savingAccount?->anggota?->user?->kode_pengguna ?? '-',
                 'debit' => $isDeposit ? $amount : 0,
                 'kredit' => !$isDeposit ? $amount : 0,
                 'saldo' => $saldoSesudah,
@@ -81,8 +81,8 @@ class BukuBesarService
     public function buildTabunganTransactionQuery(int|string $userId, ?string $month, ?string $search): Builder
     {
         $query = SavingTransaction::query()
-            ->with(['savingAccount.member.bankAccounts', 'savingAccount', 'updatedBy', 'memberBankAccount'])
-            ->whereHas('savingAccount.member', function ($q) use ($userId) {
+            ->with(['savingAccount.anggota.bankAccounts', 'savingAccount', 'updatedBy', 'memberBankAccount'])
+            ->whereHas('savingAccount.anggota', function ($q) use ($userId) {
                 $q->where('pengguna_id', $userId);
             });
 
@@ -122,7 +122,7 @@ class BukuBesarService
     public function buildSavingSummaryAndMeta(int|string $userId): array
     {
         $savingAccounts = SavingAccount::query()
-            ->whereHas('member', function ($q) use ($userId) {
+            ->whereHas('anggota', function ($q) use ($userId) {
                 $q->where('pengguna_id', $userId);
             })
             ->get();
@@ -196,7 +196,7 @@ class BukuBesarService
 
         $transactions = $query->get();
         $rows = $this->transformTransactions($transactions, false);
-        $member = Auth::user();
+        $anggota = Auth::user();
 
         $totalDebit = $rows->sum('debit');
         $totalKredit = $rows->sum('kredit');
@@ -206,17 +206,17 @@ class BukuBesarService
         $endDate = $rows->max('tanggal_raw') ? Carbon::parse($rows->max('tanggal_raw')) : now();
 
         $memberInfo = [
-            'nama' => $member->nama,
-            'no_anggota' => $member->kode_pengguna,
-            'status' => $member->status,
-            'tanggal_bergabung' => optional($member->created_at)->format('d F Y'),
+            'nama' => $anggota->nama,
+            'no_anggota' => $anggota->kode_pengguna,
+            'status' => $anggota->status,
+            'tanggal_bergabung' => optional($anggota->created_at)->format('d F Y'),
         ];
 
-        $filename = 'Mutasi_Simpanan_' . $member->kode_pengguna . '_' . now()->format('Ymd_His') . '.pdf';
+        $filename = 'Mutasi_Simpanan_' . $anggota->kode_pengguna . '_' . now()->format('Ymd_His') . '.pdf';
 
         $pdf = Pdf::loadView('exports.tabungan_statement', [
             'transactions' => $rows,
-            'member' => $memberInfo,
+            'anggota'=> $memberInfo,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'totalDebit' => $totalDebit,

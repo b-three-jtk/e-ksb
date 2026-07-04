@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Member;
+use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,11 +15,11 @@ class MemberDoc extends Model
     protected $fillable = [
         'doc_name',
         'doc_attachment',
-        'member_id',
+        'anggota_id',
     ];
 
-    public function member(): BelongsTo
+    public function anggota(): BelongsTo
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Anggota::class);
     }
 }

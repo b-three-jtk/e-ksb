@@ -47,7 +47,7 @@ class PenggunaController extends Controller
             $memberCredentials = $pendaftaranAnggotaService->register($validated, $request);
         } catch (RuntimeException $e) {
             return back()->withErrors([
-                'member' => $e->getMessage(),
+                'anggota' => $e->getMessage(),
             ]);
         }
 
@@ -86,7 +86,7 @@ class PenggunaController extends Controller
     public function index(Request $request)
     {
         return Inertia::render('Admin/User/List', [
-            'members' => $this->anggotaService->getListAnggota($request),
+            'anggota' => $this->anggotaService->getListAnggota($request),
             'filters' => $request->only(['search', 'status', 'per_page', 'sort_by', 'sort_dir']),
             'summary' => $this->anggotaService->getSummary(),
             'statuses' => array_column(UserStatusEnum::cases(), 'value'),
@@ -107,12 +107,12 @@ class PenggunaController extends Controller
 
         $user = $this->anggotaService->getDetailAnggota($id);
 
-        if ($user->member) {
-            $ktpDoc = $user->member->memberDocs->where('doc_name', 'ktp')->first();
-            $kkDoc = $user->member->memberDocs->where('doc_name', 'kartu_keluarga')->first();
+        if ($user->anggota) {
+            $ktpDoc = $user->anggota->memberDocs->where('doc_name', 'ktp')->first();
+            $kkDoc = $user->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first();
 
-            if ($user->member->financings) {
-                $user->member->financings->each(function ($financing) use ($service) {
+            if ($user->anggota->financings) {
+                $user->anggota->financings->each(function ($financing) use ($service) {
                     $service->computeFinancingSummary($financing);
                     $nextInstallment = $financing->installment
                     ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
@@ -135,12 +135,12 @@ class PenggunaController extends Controller
     {
         $user = $this->anggotaService->getDetailAnggota($id);
 
-        $user->kk = $user->member?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga')?->doc_attachment
-            ? asset('storage/' . $user->member->memberDocs->firstWhere('doc_name', 'kartu_keluarga')->doc_attachment)
+        $user->kk = $user->anggota?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga')?->doc_attachment
+            ? asset('storage/' . $user->anggota->memberDocs->firstWhere('doc_name', 'kartu_keluarga')->doc_attachment)
             : null;
 
-        $user->ktp = $user->member?->memberDocs?->firstWhere('doc_name', 'ktp')?->doc_attachment
-            ? asset('storage/' . $user->member->memberDocs->firstWhere('doc_name', 'ktp')->doc_attachment)
+        $user->ktp = $user->anggota?->memberDocs?->firstWhere('doc_name', 'ktp')?->doc_attachment
+            ? asset('storage/' . $user->anggota->memberDocs->firstWhere('doc_name', 'ktp')->doc_attachment)
             : null;
 
         return inertia('Admin/User/Edit', [
@@ -164,7 +164,7 @@ class PenggunaController extends Controller
         } catch (Exception $e) {
             Log::info('error'. $e->getMessage());
             return back()->withErrors([
-                'member' => $e->getMessage(),
+                'anggota' => $e->getMessage(),
             ]);
         }
     }
@@ -197,7 +197,7 @@ class PenggunaController extends Controller
         $idCardUrl = $idCard?->attachment ? asset('storage/' . $idCard->attachment) : null;
 
         return Inertia::render('Admin/User/Verification/Show', [
-            'member' => [
+            'anggota' => [
                 'id' => $user->id,
                 'kode_pengguna' => $user->kode_pengguna,
                 'nama' => $user->nama,

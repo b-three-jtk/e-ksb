@@ -15,7 +15,7 @@ const props = defineProps({
 });
 
 const user = computed(() => props.user || {});
-const member = computed(() => user.value.member || {});
+const anggota = computed(() => user.value.anggota || {});
 const points = computed(
     () => user.value.points || { summary: {}, history: [] },
 );
@@ -24,7 +24,7 @@ const photoUrl = computed(
         user.value.photo_url ||
         (user.value.foto_profil ? `/storage/${user.value.foto_profil}` : null),
 );
-const documents = computed(() => member.value.documents || {});
+const documents = computed(() => anggota.value.documents || {});
 
 const isModalOpen = ref(false);
 const isPhotoPreviewOpen = ref(false);
@@ -66,16 +66,16 @@ const displayValue = (value) => value ?? "-";
 
 const identityFields = computed(() => [
     { label: "NIK", value: displayValue(user.value.nik) },
-    { label: "Jenis Kelamin", value: displayValue(member.value.gender) },
-    { label: "Tanggal Lahir", value: displayValue(member.value.birth_date) },
-    { label: "Tempat Lahir", value: displayValue(member.value.birth_place) },
+    { label: "Jenis Kelamin", value: displayValue(anggota.value.jenis_kelamin) },
+    { label: "Tanggal Lahir", value: displayValue(anggota.value.tgl_lahir) },
+    { label: "Tempat Lahir", value: displayValue(anggota.value.tempat_lahir) },
     {
         label: "Pendidikan Terakhir",
-        value: displayValue(member.value.last_education),
+        value: displayValue(anggota.value.pendidikan_terakhir),
     },
     {
         label: "Status Pernikahan",
-        value: displayValue(member.value.marital_status),
+        value: displayValue(anggota.value.status_pernikahan),
     },
 ]);
 
@@ -84,15 +84,15 @@ const contactFields = computed(() => [
     { label: "Email", value: displayValue(user.value.email) },
     {
         label: "Alamat Sesuai KTP",
-        value: displayValue(member.value.domicile_address),
+        value: displayValue(anggota.value.alamat_domisili),
     },
     {
         label: "Alamat Domisili",
-        value: displayValue(member.value.residential_address),
+        value: displayValue(anggota.value.alamat_ktp),
     },
 ]);
 
-const heirRows = computed(() => member.value.heirs || []);
+const heirRows = computed(() => anggota.value.heirs || []);
 
 const documentFields = computed(() => [
     { label: "KTP", title: "KTP", url: documents.value.ktp || null },

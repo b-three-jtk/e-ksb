@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('member_jobs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('member_id');
+            $table->unsignedBigInteger('anggota_id');
             $table->string('employment_status');
             $table->string('job_title')->nullable();
             $table->string('company_or_business_name')->nullable();
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('workplace_address')->nullable();
             $table->string('workplace_contact', 20)->nullable();
 
-            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
+            $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('cascade');
             $table->timestamps();
         });
     }

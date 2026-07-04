@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('saving_account_code', 20)->unique();
             $table->decimal('balance', 15, 2)->default(0);
             $table->enum('saving_type', array_column(SavingTypeEnum::cases(), 'value'));
-            $table->unsignedBigInteger('member_id')->nullable();
+            $table->unsignedBigInteger('anggota_id')->nullable();
 
-            $table->foreign('member_id')->references('id')->on('members')->onDelete('set null');
+            $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('set null');
             $table->timestamps();
         });
     }

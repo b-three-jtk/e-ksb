@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\SavingTransaction;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,12 +19,12 @@ class MemberBankAccount extends Model
         'account_number',
         'bank_name',
         'account_name',
-        'member_id',
+        'anggota_id',
     ];
 
-    public function member(): BelongsTo
+    public function anggota(): BelongsTo
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Anggota::class);
     }
 
     public function savingTransactions()

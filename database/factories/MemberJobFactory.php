@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\MemberJob;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -13,7 +13,7 @@ class MemberJobFactory extends Factory
     public function definition(): array
     {
         return [
-            'member_id' => Member::factory(),
+            'anggota_id' => Anggota::factory(),
             'employment_status' => $this->faker->randomElement(['Employed', 'Self-Employed', 'Unemployed', 'Student', 'Retired']),
             'job_title' => $this->faker->jobTitle(),
             'company_or_business_name' => $this->faker->company(),

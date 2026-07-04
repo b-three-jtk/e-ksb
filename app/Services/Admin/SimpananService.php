@@ -10,7 +10,7 @@ use App\Enums\UserStatusEnum;
 use App\Models\GlobalSetting;
 use App\Models\BerjangkaAccount;
 use App\Models\IbadahAccount;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\SavingAccount;
 use App\Models\SavingTransaction;
 use App\Services\PengaturanUmumService;
@@ -128,19 +128,19 @@ class SimpananService
         ];
 
         $query = SavingTransaction::with([
-            'savingAccount.member.user',
+            'savingAccount.anggota.user',
             'savingAccount',
         ]);
 
         if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value)) {
-            $query->whereHas('savingAccount.member', function ($q) {
+            $query->whereHas('savingAccount.anggota', function ($q) {
                 $q->where('pj_anggota_id', Auth::id());
             });
         }
 
         return $query
             ->when($search, function ($q) use ($search) {
-                $q->whereHas('savingAccount.member.user', function ($m) use ($search) {
+                $q->whereHas('savingAccount.anggota.user', function ($m) use ($search) {
                     $m->where('nama', 'like', "%{$search}%")
                         ->orWhere('nik', 'like', "%{$search}%")
                         ->orWhere('kode_pengguna', 'like', "%{$search}%");
@@ -185,9 +185,9 @@ class SimpananService
                 'id'           => $trx->id,
                 'no_transaksi' => $trx->saving_transaction_code,
                 'tanggal'      => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                'anggota'      => $trx->savingAccount->member->user->kode_pengguna
+                'anggota'      => $trx->savingAccount->anggota->user->kode_pengguna
                                 . ' - '
-                                . $trx->savingAccount->member->user->nama,
+                                . $trx->savingAccount->anggota->user->nama,
                 'nominal'      => $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
                                 ? -$trx->saving_amount
                                 : $trx->saving_amount,
@@ -253,7 +253,7 @@ class SimpananService
 
     public function getMembersForDeposit(): \Illuminate\Support\Collection
     {
-        $query = Member::whereIn('status', [
+        $query = Anggota::whereIn('status', [
             MemberStatusEnum::ACTIVE->value,
             MemberStatusEnum::PAYMENT_PENDING->value,
         ])
@@ -267,12 +267,12 @@ class SimpananService
             'savingAccounts.berjangka',
         ]);
 
-        return $query->get()->map(fn($member) => [
-            'id'            => $member->id,
-            'kode_pengguna'     => $member->user->kode_pengguna,
-            'nama'          => $member->user->nama,
-            'status'        => $member->status,
-            'savingAccounts' => $member->savingAccounts
+        return $query->get()->map(fn($anggota) => [
+            'id'            => $anggota->id,
+            'kode_pengguna'     => $anggota->user->kode_pengguna,
+            'nama'          => $anggota->user->nama,
+            'status'        => $anggota->status,
+            'savingAccounts' => $anggota->savingAccounts
                 ->filter(function ($acc) {
                     if ($acc->saving_type === 'Tabungan Ibadah')    return $acc->ibadah;
                     if ($acc->saving_type === 'Tabungan Berjangka') return $acc->berjangka;
@@ -301,11 +301,11 @@ class SimpananService
 
     // Store Deposit
 
-    public function resolveOrCreateSavingAccount(array $data, Member $member): SavingAccount
+    public function resolveOrCreateSavingAccount(array $data, Anggota $anggota): SavingAccount
     {
         if (filled($data['saving_account_id'] ?? null)) {
             return SavingAccount::where('id', $data['saving_account_id'])
-                ->where('member_id', $member->id)
+                ->where('anggota_id', $anggota->id)
                 ->firstOrFail();
         }
 
@@ -315,19 +315,19 @@ class SimpananService
             SavingTypeEnum::TABUNGAN_ANGGOTA->value,
         ])) {
             return SavingAccount::firstOrCreate(
-                ['member_id' => $member->id, 'saving_type' => $data['saving_category']],
+                ['anggota_id' => $anggota->id, 'saving_type' => $data['saving_category']],
                 ['saving_account_code' => $this->generateAccountCode($data['saving_category'])]
             );
         }
 
         return SavingAccount::create([
-            'member_id'           => $member->id,
+            'anggota_id'           => $anggota->id,
             'saving_type'         => $data['saving_category'],
             'saving_account_code' => $this->generateAccountCode($data['saving_category']),
         ]);
     }
 
-    public function validateDepositRules(array $data, SavingAccount $savingAccount, Member $member): void
+    public function validateDepositRules(array $data, SavingAccount $savingAccount, Anggota $anggota): void
     {
         $isNewAccount = empty($data['saving_account_id']);
         if ($isNewAccount && $data['saving_category'] === 'Tabungan Berjangka') {
@@ -362,7 +362,7 @@ class SimpananService
                 ]);
             }
 
-            if ($member->status !== MemberStatusEnum::PAYMENT_PENDING->value) {
+            if ($anggota->status !== MemberStatusEnum::PAYMENT_PENDING->value) {
                 throw ValidationException::withMessages([
                     'saving_category' => 'Simpanan Pokok hanya untuk anggota Menunggu Pembayaran.',
                 ]);
@@ -414,9 +414,9 @@ class SimpananService
         }
     }
 
-    public function createDepositTransaction(array $data, SavingAccount $savingAccount, Member $member): SavingTransaction
+    public function createDepositTransaction(array $data, SavingAccount $savingAccount, Anggota $anggota): SavingTransaction
     {
-        return DB::transaction(function () use ($data, $savingAccount, $member) {
+        return DB::transaction(function () use ($data, $savingAccount, $anggota) {
             $savingAccount->refresh();
             $newBalance = $savingAccount->balance + $data['amount'];
             $trx = SavingTransaction::create([
@@ -436,7 +436,7 @@ class SimpananService
             ]);
 
             if ($data['saving_category'] === 'Simpanan Pokok') {
-                $member->update(['status' => MemberStatusEnum::ACTIVE->value]);
+                $anggota->update(['status' => MemberStatusEnum::ACTIVE->value]);
             }
 
             return $trx;
@@ -446,7 +446,7 @@ class SimpananService
     public function storeReceiptDepositPdf(
         SavingTransaction $transaction,
         array $strukData,
-        int $memberId
+        int $anggotaId
     ): string
     {
         $pdf = Pdf::loadView('exports.deposit_receipt', [

@@ -15,15 +15,15 @@ return new class extends Migration
         Schema::create('member_heirs', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('member_id');
+            $table->unsignedBigInteger('anggota_id');
             $table->string('heir_nik', 16);
 
             $table->enum('relationship', array_column(HeirEnum::cases(), 'value'));
 
-            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
+            $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('cascade');
             $table->foreign('heir_nik')->references('heir_nik')->on('heirs')->onDelete('cascade');
 
-            $table->unique(['member_id', 'heir_nik']);
+            $table->unique(['anggota_id', 'heir_nik']);
 
             $table->timestamps();
         });

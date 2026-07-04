@@ -60,22 +60,22 @@ const normalizePhoneNumber = (value, onlyNumbers) => {
 			/>
 
 			<BaseInputAdmin
-				v-model="form.domicile_address"
+				v-model="form.alamat_domisili"
 				class="md:col-span-2"
 				label="Alamat Sesuai KTP"
 				type="text"
 				placeholder="Isi dengan huruf dan angka"
 				required
-				:error="getFieldError('domicile_address', errors.domicile_address)"
+				:error="getFieldError('alamat_domisili', errors.alamat_domisili)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.residential_address"
+				v-model="form.alamat_ktp"
 				class="md:col-span-2"
 				label="Alamat Domisili"
 				type="text"
 				placeholder="Isi dengan huruf dan angka"
-				:error="getFieldError('residential_address', errors.residential_address)"
+				:error="getFieldError('alamat_ktp', errors.alamat_ktp)"
 			/>
 		</div>
 	</section>

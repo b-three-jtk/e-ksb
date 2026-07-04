@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,12 +58,12 @@
             color: #667085;
         }
 
-        .member-info {
+        .anggota-info {
             margin-bottom: 12px;
             width: 50%;
         }
 
-        .member-card {
+        .anggota-card {
             display: flex;
             align-items: center;
             gap: 14px;
@@ -75,7 +76,7 @@
             box-sizing: border-box;
         }
 
-        .member-avatar {
+        .anggota-avatar {
             width: 34px;
             height: 34px;
             border-radius: 10px;
@@ -89,29 +90,29 @@
             font-weight: 700;
         }
 
-        .member-copy {
+        .anggota-copy {
             flex: 1;
         }
 
-        .member-name {
+        .anggota-name {
             font-size: 12.5px;
             font-weight: 700;
             color: #1d2939;
             margin-bottom: 2px;
         }
 
-        .member-meta {
+        .anggota-meta {
             font-size: 9px;
             color: #008e43;
             font-weight: 600;
         }
 
-        .member-meta .dot {
+        .anggota-meta .dot {
             color: #98a2b3;
             padding: 0 4px;
         }
 
-        .member-note {
+        .anggota-note {
             font-size: 8.5px;
             color: #667085;
             margin-top: 2px;
@@ -257,22 +258,24 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <div class="header-title">Koperasi Syariah Berkah</div>
             <div class="header-subtitle">Laporan Mutasi Simpanan Anggota</div>
-            <div class="header-address">Komplek Puri Cipageran Indah 2, RW 21, Desa Ngamprah, Kec. Tanimulya, Kabupaten Bandung Barat</div>
+            <div class="header-address">Komplek Puri Cipageran Indah 2, RW 21, Desa Ngamprah, Kec. Tanimulya, Kabupaten
+                Bandung Barat</div>
         </div>
 
-        <div class="member-info">
-            <div class="member-card">
-                <div class="member-copy">
-                    <div class="member-name">{{ $member['nama'] ?? '-' }}</div>
-                    <div class="member-meta">
-                        {{ $member['no_anggota'] ?? '-' }}
+        <div class="anggota-info">
+            <div class="anggota-card">
+                <div class="anggota-copy">
+                    <div class="anggota-name">{{ $anggota['nama'] ?? '-' }}</div>
+                    <div class="anggota-meta">
+                        {{ $anggota['no_anggota'] ?? '-' }}
                         <span class="dot">•</span>
-                        Anggota sejak {{ $member['sejak'] ?? ($member['tanggal_bergabung'] ?? '-') }}
+                        Anggota sejak {{ $anggota['sejak'] ?? ($anggota['tanggal_bergabung'] ?? '-') }}
                     </div>
                 </div>
             </div>
@@ -337,7 +340,8 @@
                 <div class="summary-divider"></div>
                 <div class="summary-row">
                     <span class="summary-label summary-total">Saldo Akhir</span>
-                    <span class="summary-value summary-total">Rp {{ number_format(max(0, $endingBalance), 0, ',', '.') }}</span>
+                    <span class="summary-value summary-total">Rp
+                        {{ number_format(max(0, $endingBalance), 0, ',', '.') }}</span>
                 </div>
             </div>
         @else
@@ -355,4 +359,5 @@
         </div>
     </div>
 </body>
+
 </html>

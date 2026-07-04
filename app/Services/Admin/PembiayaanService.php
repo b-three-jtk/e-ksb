@@ -18,7 +18,7 @@ use App\Models\GlobalSetting;
 use App\Models\Heir;
 use App\Models\Installment;
 use App\Models\JournalEntry;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\Supplier;
 use App\Models\Pengguna;
 use App\Models\Wakalah;
@@ -35,7 +35,7 @@ class PembiayaanService
     public function getSemuaPembiayaan($search, $tab, $verifier)
     {
         return Financing::with([
-            'member.user' => function ($query) {
+            'anggota.user' => function ($query) {
                 $query->select('id', 'nama', 'kode_pengguna');
             },
             'installment',
@@ -44,7 +44,7 @@ class PembiayaanService
             }
         ])
             ->when($search, function ($q) use ($search) {
-                $q->whereHas('member.user', function ($userQuery) use ($search) {
+                $q->whereHas('anggota.user', function ($userQuery) use ($search) {
                     $userQuery->where(function ($userSearchQuery) use ($search) {
                         $userSearchQuery->where('nama', 'like', "%{$search}%")
                             ->orWhere('kode_pengguna', 'like', "%{$search}%");
@@ -142,11 +142,11 @@ class PembiayaanService
                 FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
             ])
             ->with([
-                'member.user',
-                'member.financials',
-                'member.memberDocs',
-                'member.heirs',
-                'member.memberJobs',
+                'anggota.user',
+                'anggota.financials',
+                'anggota.memberDocs',
+                'anggota.heirs',
+                'anggota.memberJobs',
                 'financingItem.productType',
                 'financingItem.supplier',
                 'collateral',
@@ -166,11 +166,11 @@ class PembiayaanService
         return Financing::where('id', $id)
             ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
             ->with([
-                'member.user',
-                'member.financials',
-                'member.memberDocs',
-                'member.heirs',
-                'member.memberJobs',
+                'anggota.user',
+                'anggota.financials',
+                'anggota.memberDocs',
+                'anggota.heirs',
+                'anggota.memberJobs',
                 'financingItem.productType',
                 'financingItem.supplier',
                 'collateral',
@@ -188,15 +188,15 @@ class PembiayaanService
             'no_telp' => $memberData['no_telp'] ?? $user->no_telp,
         ]);
 
-        $user->member->update([
-            'gender'               => $memberData['gender'] ?? $user->member->gender,
-            'birth_place'          => $memberData['birth_place'] ?? $user->member->birth_place,
-            'birth_date'           => $memberData['birth_date'] ?? $user->member->birth_date,
-            'last_education'       => $memberData['last_education'] ?? $user->member->last_education,
-            'domicile_address'     => $memberData['domicile_address'] ?? $user->member->domicile_address,
-            'residential_address'  => $memberData['residential_address'] ?? $user->member->residential_address,
-            'marital_status'       => $memberData['marital_status'] ?? $user->member->marital_status,
-            'dependents'           => $memberData['dependents'] ?? $user->member->dependents,
+        $user->anggota->update([
+            'jenis_kelamin'               => $memberData['jenis_kelamin'] ?? $user->anggota->jenis_kelamin,
+            'tempat_lahir'          => $memberData['tempat_lahir'] ?? $user->anggota->tempat_lahir,
+            'tgl_lahir'           => $memberData['tgl_lahir'] ?? $user->anggota->tgl_lahir,
+            'pendidikan_terakhir'       => $memberData['pendidikan_terakhir'] ?? $user->anggota->pendidikan_terakhir,
+            'alamat_domisili'     => $memberData['alamat_domisili'] ?? $user->anggota->alamat_domisili,
+            'alamat_ktp'  => $memberData['alamat_ktp'] ?? $user->anggota->alamat_ktp,
+            'status_pernikahan'       => $memberData['status_pernikahan'] ?? $user->anggota->status_pernikahan,
+            'jml_tanggungan'           => $memberData['jml_tanggungan'] ?? $user->anggota->jml_tanggungan,
         ]);
 
         // Sync heirs
@@ -215,15 +215,15 @@ class PembiayaanService
                 $syncData[$heir->heir_nik] = ['relationship' => $heirInput['relationship']];
             }
 
-            $user->member->heirs()->sync($syncData);
+            $user->anggota->heirs()->sync($syncData);
         } else {
-            $user->member->heirs()->detach();
+            $user->anggota->heirs()->detach();
         }
 
         // Sync documents
         foreach (['slip_gaji' => 'income_slip_file', 'buku_tabungan' => 'bank_book_file'] as $docName => $fileField) {
             if ($request->hasFile($fileField)) {
-                $user->member->memberDocs()->updateOrCreate(
+                $user->anggota->memberDocs()->updateOrCreate(
                     ['doc_name' => $docName],
                     ['doc_attachment' => $request->file($fileField)->store('documents', 'public')]
                 );
@@ -231,9 +231,9 @@ class PembiayaanService
         }
 
         // Sync financials
-        $user->member->financials()->delete();
+        $user->anggota->financials()->delete();
         Financial::create([
-            'member_id'                    => $user->member->id,
+            'anggota_id'                    => $user->anggota->id,
             'gaji_pokok_amount'            => $memberData['gaji_pokok_amount'] ?? 0,
             'penghasilan_usaha_amount'     => $memberData['penghasilan_usaha_amount'] ?? 0,
             'penghasilan_pasangan_amount'  => $memberData['penghasilan_pasangan_amount'] ?? 0,
@@ -246,9 +246,9 @@ class PembiayaanService
         ]);
 
         // Sync job
-        $user->member->memberJobs()->delete();
+        $user->anggota->memberJobs()->delete();
         if (isset($memberData['job_title'])) {
-            $user->member->memberJobs()->create([
+            $user->anggota->memberJobs()->create([
                 'employment_status'        => $memberData['employment_status'] ?? null,
                 'job_title'                => $memberData['job_title'] ?? null,
                 'company_or_business_name' => $memberData['company_or_business_name'] ?? null,
@@ -268,7 +268,7 @@ class PembiayaanService
         $supplierData   = $request['supplier'] ?? null;
         $collateralData = $request['collateral'] ?? null;
 
-        $existingFinancing = Financing::where('member_id', $user->member->id)
+        $existingFinancing = Financing::where('anggota_id', $user->anggota->id)
             ->whereIn('status', [
                 FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                 FinancingReqStatusEnum::REJECTED->value,
@@ -301,7 +301,7 @@ class PembiayaanService
         } else {
             // Buat baru kalau memang belum ada sama sekali
             $financing = Financing::create([
-                'member_id'      => $user->member->id,
+                'anggota_id'      => $user->anggota->id,
                 'down_payment'   => $financingData['down_payment'] ?? 0,
                 'predicted_cost_price' => $financingData['predicted_cost_price'] ?? null,
                 'cost_price'     => $financingData['cost_price'] ?? null,
@@ -386,39 +386,39 @@ class PembiayaanService
         }
     }
 
-    public function formatMemberData(Member $member): array
+    public function formatMemberData(Anggota $anggota): array
     {
         return [
-            'id' => $member->id,
-            'kode_pengguna' => $member->user->kode_pengguna,
-            'nama' => $member->user->nama,
-            'email' => $member->user->email,
-            'nik' => $member->user->nik,
-            'no_telp' => $member->user->no_telp,
-            'gender' => $member->gender,
-            'birth_place' => $member->birth_place,
-            'birth_date' => $member->birth_date,
-            'marital_status' => $member->marital_status,
-            'last_education' => $member->last_education,
-            'dependents' => $member->dependents,
-            'domicile_address' => $member->domicile_address,
-            'residential_address' => $member->residential_address,
-            'employment_status' => $member->memberJobs?->employment_status,
-            'job_title' => $member->memberJobs?->job_title,
-            'company_or_business_name' => $member->memberJobs?->company_or_business_name,
-            'business_field' => $member->memberJobs?->business_field,
-            'tenure_year' => $member->memberJobs?->tenure_year,
-            'workplace_address' => $member->memberJobs?->workplace_address,
-            'workplace_contact' => $member->memberJobs?->workplace_contact,
-            'gaji_pokok_amount' => $member->financials?->gaji_pokok_amount ?? 0,
-            'penghasilan_usaha_amount' => $member->financials?->penghasilan_usaha_amount ?? 0,
-            'penghasilan_pasangan_amount' => $member->financials?->penghasilan_pasangan_amount ?? 0,
-            'penghasilan_lainnya_amount' => $member->financials?->penghasilan_lainnya_amount ?? 0,
-            'biaya_hidup_keluarga_amount' => $member->financials?->biaya_hidup_keluarga_amount ?? 0,
-            'biaya_pendidikan_amount' => $member->financials?->biaya_pendidikan_amount ?? 0,
-            'jumlah_cicilan_amount' => $member->financials?->jumlah_cicilan_amount ?? 0,
-            'jumlah_biaya_lainnya_amount' => $member->financials?->jumlah_biaya_lainnya_amount ?? 0,
-            'heirs' => $member->heirs->map(fn($h) => [
+            'id' => $anggota->id,
+            'kode_pengguna' => $anggota->user->kode_pengguna,
+            'nama' => $anggota->user->nama,
+            'email' => $anggota->user->email,
+            'nik' => $anggota->user->nik,
+            'no_telp' => $anggota->user->no_telp,
+            'jenis_kelamin' => $anggota->jenis_kelamin,
+            'tempat_lahir' => $anggota->tempat_lahir,
+            'tgl_lahir' => $anggota->tgl_lahir,
+            'status_pernikahan' => $anggota->status_pernikahan,
+            'pendidikan_terakhir' => $anggota->pendidikan_terakhir,
+            'jml_tanggungan' => $anggota->jml_tanggungan,
+            'alamat_domisili' => $anggota->alamat_domisili,
+            'alamat_ktp' => $anggota->alamat_ktp,
+            'employment_status' => $anggota->memberJobs?->employment_status,
+            'job_title' => $anggota->memberJobs?->job_title,
+            'company_or_business_name' => $anggota->memberJobs?->company_or_business_name,
+            'business_field' => $anggota->memberJobs?->business_field,
+            'tenure_year' => $anggota->memberJobs?->tenure_year,
+            'workplace_address' => $anggota->memberJobs?->workplace_address,
+            'workplace_contact' => $anggota->memberJobs?->workplace_contact,
+            'gaji_pokok_amount' => $anggota->financials?->gaji_pokok_amount ?? 0,
+            'penghasilan_usaha_amount' => $anggota->financials?->penghasilan_usaha_amount ?? 0,
+            'penghasilan_pasangan_amount' => $anggota->financials?->penghasilan_pasangan_amount ?? 0,
+            'penghasilan_lainnya_amount' => $anggota->financials?->penghasilan_lainnya_amount ?? 0,
+            'biaya_hidup_keluarga_amount' => $anggota->financials?->biaya_hidup_keluarga_amount ?? 0,
+            'biaya_pendidikan_amount' => $anggota->financials?->biaya_pendidikan_amount ?? 0,
+            'jumlah_cicilan_amount' => $anggota->financials?->jumlah_cicilan_amount ?? 0,
+            'jumlah_biaya_lainnya_amount' => $anggota->financials?->jumlah_biaya_lainnya_amount ?? 0,
+            'heirs' => $anggota->heirs->map(fn($h) => [
                 'heir_nik' => $h->heir_nik,
                 'heir_name' => $h->heir_name,
                 'relationship' => $h->pivot->relationship,

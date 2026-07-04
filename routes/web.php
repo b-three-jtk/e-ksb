@@ -122,7 +122,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/financings', [PembiayaanController::class, 'index'])->middleware('permission:view_murabahah')->name('financings.index');
     Route::get('/financings/show/{id}', [PembiayaanController::class, 'show'])->middleware('permission:view_murabahah')->name('financings.show');
     Route::get('/financings/create', [PembiayaanController::class, 'create'])->middleware('permission:create_murabahah')->name('financings.create');
-    Route::get('/members/search', [PembiayaanController::class, 'searchMembers'])->middleware('permission:create_murabahah')->name('members.search');
+    Route::get('/anggota/search', [PembiayaanController::class, 'searchMembers'])->middleware('permission:create_murabahah')->name('anggota.search');
     Route::get('/suppliers/search', [PembiayaanController::class, 'searchSuppliers'])->middleware('permission:create_murabahah')->name('suppliers.search');
     Route::post('/financings/draft', [PembiayaanController::class, 'saveDraft'])->middleware('permission:create_murabahah')->name('financings.draft');
     Route::post('/financings/finalize', [PembiayaanController::class, 'finalize'])->middleware('permission:create_murabahah')->name('financings.finalize');

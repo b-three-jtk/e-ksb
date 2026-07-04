@@ -7,10 +7,10 @@ import { useForm } from '@inertiajs/vue3'
 export function useFinancingForm(initialData = null) {
     // State
     const searchQuery = ref('')
-    const memberResults = ref([])
+    const anggotaResults = ref([])
     const isLoadingSearch = ref(false)
-    const selectedMember = ref(null)
-    const isMemberSelected = ref(false)
+    const selectedAnggota = ref(null)
+    const isAnggotaSelected = ref(false)
 
     const searchSupplierQuery = ref('')
     const supplierResults = ref([])
@@ -19,42 +19,42 @@ export function useFinancingForm(initialData = null) {
     const isSupplierSelected = ref(false)
 
     const form = useForm({
-        // Member data
-        member: {
-            kode_pengguna: initialData?.member?.kode_pengguna || '',
-            name: initialData?.member?.name || '',
-            nik: initialData?.member?.nik || '',
-            email: initialData?.member?.email || '',
-            no_telp: initialData?.member?.no_telp || '',
-            gender: initialData?.member?.gender || '',
-            birth_place: initialData?.member?.birth_place || '',
-            birth_date: initialData?.member?.birth_date || '',
-            last_education: initialData?.member?.last_education || '',
-            domicile_address: initialData?.member?.domicile_address || '',
-            residential_address: initialData?.member?.residential_address || '',
-            marital_status: initialData?.member?.marital_status || '',
-            dependents: initialData?.member?.dependents || 0,
+        // Anggota data
+        anggota: {
+            kode_pengguna: initialData?.anggota?.kode_pengguna || '',
+            name: initialData?.anggota?.nama || '',
+            nik: initialData?.anggota?.nik || '',
+            email: initialData?.anggota?.email || '',
+            no_telp: initialData?.anggota?.no_telp || '',
+            jenis_kelamin: initialData?.anggota?.jenis_kelamin || '',
+            tempat_lahir: initialData?.anggota?.tempat_lahir || '',
+            tgl_lahir: initialData?.anggota?.tgl_lahir || '',
+            pendidikan_terakhir: initialData?.anggota?.pendidikan_terakhir || '',
+            alamat_domisili: initialData?.anggota?.alamat_domisili || '',
+            alamat_ktp: initialData?.anggota?.alamat_ktp || '',
+            status_pernikahan: initialData?.anggota?.status_pernikahan || '',
+            jml_tanggungan: initialData?.anggota?.jml_tanggungan || 0,
 
-            employment_status: initialData?.member?.employment_status || '',
-            job_title: initialData?.member?.job_title || '',
-            company_or_business_name: initialData?.member?.company_or_business_name || '',
-            business_field: initialData?.member?.business_field || '',
-            tenure_year: initialData?.member?.tenure_year || 0,
-            workplace_address: initialData?.member?.workplace_address || '',
-            workplace_contact: initialData?.member?.workplace_contact || '',
+            employment_status: initialData?.anggota?.employment_status || '',
+            job_title: initialData?.anggota?.job_title || '',
+            company_or_business_name: initialData?.anggota?.company_or_business_name || '',
+            business_field: initialData?.anggota?.business_field || '',
+            tenure_year: initialData?.anggota?.tenure_year || 0,
+            workplace_address: initialData?.anggota?.workplace_address || '',
+            workplace_contact: initialData?.anggota?.workplace_contact || '',
 
-            gaji_pokok_amount: initialData?.member?.gaji_pokok_amount || '',
-            penghasilan_usaha_amount: initialData?.member?.penghasilan_usaha_amount || '',
-            penghasilan_pasangan_amount: initialData?.member?.penghasilan_pasangan_amount || '',
-            penghasilan_lainnya_amount: initialData?.member?.penghasilan_lainnya_amount || '',
-            biaya_hidup_keluarga_amount: initialData?.member?.biaya_hidup_keluarga_amount || '',
-            biaya_pendidikan_amount: initialData?.member?.biaya_pendidikan_amount || '',
-            jumlah_cicilan_amount: initialData?.member?.jumlah_cicilan_amount || '',
-            jumlah_biaya_lainnya_amount: initialData?.member?.jumlah_biaya_lainnya_amount || '',
+            gaji_pokok_amount: initialData?.anggota?.gaji_pokok_amount || '',
+            penghasilan_usaha_amount: initialData?.anggota?.penghasilan_usaha_amount || '',
+            penghasilan_pasangan_amount: initialData?.anggota?.penghasilan_pasangan_amount || '',
+            penghasilan_lainnya_amount: initialData?.anggota?.penghasilan_lainnya_amount || '',
+            biaya_hidup_keluarga_amount: initialData?.anggota?.biaya_hidup_keluarga_amount || '',
+            biaya_pendidikan_amount: initialData?.anggota?.biaya_pendidikan_amount || '',
+            jumlah_cicilan_amount: initialData?.anggota?.jumlah_cicilan_amount || '',
+            jumlah_biaya_lainnya_amount: initialData?.anggota?.jumlah_biaya_lainnya_amount || '',
 
-            is_have_eligible_saving: initialData?.member?.is_have_eligible_saving || null,
-            is_have_no_obligation: initialData?.member?.is_have_no_obligation || null,
-            heirs: initialData?.member?.heirs || [],
+            is_have_eligible_saving: initialData?.anggota?.is_have_eligible_saving || null,
+            is_have_no_obligation: initialData?.anggota?.is_have_no_obligation || null,
+            heirs: initialData?.anggota?.heirs || [],
         },
         // Financing data
         financing: {
@@ -114,7 +114,7 @@ export function useFinancingForm(initialData = null) {
     })
 
 
-    // Search members
+    // Search anggota
     let searchTimeout = null
 
     watch(() => searchQuery.value, (query) => {
@@ -124,7 +124,7 @@ export function useFinancingForm(initialData = null) {
         }
 
         if (!query || query.length < 2) {
-            memberResults.value = []
+            anggotaResults.value = []
             return
         }
 
@@ -132,88 +132,88 @@ export function useFinancingForm(initialData = null) {
         searchTimeout = setTimeout(async () => {
             isLoadingSearch.value = true
             try {
-                const response = await axios.get('/admin/members/search', {
+                const response = await axios.get('/admin/anggota/search', {
                     params: { q: query }
                 })
-                memberResults.value = response.data.members
+                anggotaResults.value = response.data.anggota
             } catch (error) {
-                console.error('Error searching members:', error)
-                memberResults.value = []
+                console.error('Error searching anggota:', error)
+                anggotaResults.value = []
             } finally {
                 isLoadingSearch.value = false
             }
         }, 500) // 500ms delay
     })
 
-    // Pilih member
-    const selectMember = (member) => {
-        selectedMember.value = member
-        searchQuery.value = member.name
+    // Pilih anggota
+    const selectAnggota = (anggota) => {
+        selectedAnggota.value = anggota
+        searchQuery.value = anggota.nama
 
-        console.log('member:',member);
+        console.log('anggota:',anggota);
 
-        // Update member form
-        form.member.kode_pengguna = member.user.kode_pengguna || ''
-        form.member.name = member.user.nama || ''
-        form.member.nik = member.user.nik || ''
-        form.member.email = member.user.email || ''
-        form.member.no_telp = member.user.no_telp || ''
-        form.member.gender = member.gender || ''
-        form.member.birth_place = member.birth_place || ''
-        form.member.birth_date = member.birth_date || ''
-        form.member.last_education = member.last_education || ''
-        form.member.domicile_address = member.domicile_address || ''
-        form.member.residential_address = member.residential_address || ''
-        form.member.marital_status = member.marital_status || ''
-        form.member.dependents = member.dependents || 0
+        // Update anggota form
+        form.anggota.kode_pengguna = anggota.user.kode_pengguna || ''
+        form.anggota.nama = anggota.user.nama || ''
+        form.anggota.nik = anggota.user.nik || ''
+        form.anggota.email = anggota.user.email || ''
+        form.anggota.no_telp = anggota.user.no_telp || ''
+        form.anggota.jenis_kelamin = anggota.jenis_kelamin || ''
+        form.anggota.tempat_lahir = anggota.tempat_lahir || ''
+        form.anggota.tgl_lahir = anggota.tgl_lahir || ''
+        form.anggota.pendidikan_terakhir = anggota.pendidikan_terakhir || ''
+        form.anggota.alamat_domisili = anggota.alamat_domisili || ''
+        form.anggota.alamat_ktp = anggota.alamat_ktp || ''
+        form.anggota.status_pernikahan = anggota.status_pernikahan || ''
+        form.anggota.jml_tanggungan = anggota.jml_tanggungan || 0
 
-        form.member.employment_status = member.member_jobs?.employment_status || ''
-        form.member.job_title = member.member_jobs?.job_title || ''
-        form.member.company_or_business_name = member.member_jobs?.company_or_business_name || ''
-        form.member.business_field = member.member_jobs?.business_field || ''
-        form.member.tenure_year = member.member_jobs?.tenure_year || 0
-        form.member.workplace_address = member.member_jobs?.workplace_address || ''
-        form.member.workplace_contact = member.member_jobs?.workplace_contact || ''
+        form.anggota.employment_status = anggota.member_jobs?.employment_status || ''
+        form.anggota.job_title = anggota.member_jobs?.job_title || ''
+        form.anggota.company_or_business_name = anggota.member_jobs?.company_or_business_name || ''
+        form.anggota.business_field = anggota.member_jobs?.business_field || ''
+        form.anggota.tenure_year = anggota.member_jobs?.tenure_year || 0
+        form.anggota.workplace_address = anggota.member_jobs?.workplace_address || ''
+        form.anggota.workplace_contact = anggota.member_jobs?.workplace_contact || ''
 
-        form.member.gaji_pokok_amount = member.financials?.gaji_pokok_amount || ''
-        form.member.penghasilan_usaha_amount = member.financials?.penghasilan_usaha_amount || ''
-        form.member.penghasilan_pasangan_amount = member.financials?.penghasilan_pasangan_amount || ''
-        form.member.penghasilan_lainnya_amount = member.financials?.penghasilan_lainnya_amount || ''
-        form.member.biaya_hidup_keluarga_amount = member.financials?.biaya_hidup_keluarga_amount || ''
-        form.member.biaya_pendidikan_amount = member.financials?.biaya_pendidikan_amount || ''
-        form.member.jumlah_cicilan_amount = member.financials?.jumlah_cicilan_amount || ''
-        form.member.jumlah_biaya_lainnya_amount = member.financials?.jumlah_biaya_lainnya_amount || ''
+        form.anggota.gaji_pokok_amount = anggota.financials?.gaji_pokok_amount || ''
+        form.anggota.penghasilan_usaha_amount = anggota.financials?.penghasilan_usaha_amount || ''
+        form.anggota.penghasilan_pasangan_amount = anggota.financials?.penghasilan_pasangan_amount || ''
+        form.anggota.penghasilan_lainnya_amount = anggota.financials?.penghasilan_lainnya_amount || ''
+        form.anggota.biaya_hidup_keluarga_amount = anggota.financials?.biaya_hidup_keluarga_amount || ''
+        form.anggota.biaya_pendidikan_amount = anggota.financials?.biaya_pendidikan_amount || ''
+        form.anggota.jumlah_cicilan_amount = anggota.financials?.jumlah_cicilan_amount || ''
+        form.anggota.jumlah_biaya_lainnya_amount = anggota.financials?.jumlah_biaya_lainnya_amount || ''
 
-        form.member.is_have_eligible_saving = member.is_have_eligible_saving || false
-        form.member.is_have_no_obligation = member.is_have_no_obligation || false
+        form.anggota.is_have_eligible_saving = anggota.is_have_eligible_saving || false
+        form.anggota.is_have_no_obligation = anggota.is_have_no_obligation || false
 
-        form.documents.family_card = member.family_card || null,
-        form.documents.income_slip = member.income_slip || null,
-        form.documents.bank_book = member.bank_book || null,
+        form.documents.family_card = anggota.family_card || null,
+        form.documents.income_slip = anggota.income_slip || null,
+        form.documents.bank_book = anggota.bank_book || null,
 
-        form.member.heirs = member.heirs || []
+        form.anggota.heirs = anggota.heirs || []
 
-        memberResults.value = []
-        isMemberSelected.value = true
+        anggotaResults.value = []
+        isAnggotaSelected.value = true
     }
 
-    const resetMemberSelection = () => {
-        selectedMember.value = null
+    const resetAnggotaSelection = () => {
+        selectedAnggota.value = null
         searchQuery.value = ''
-        form.member = {
+        form.anggota = {
             kode_pengguna: '',
-            name: '',
+            nama: '',
             nik: '',
             email: '',
             no_telp: '',
-            gender: '',
-            birth_place: '',
-            birth_date: '',
-            last_education: '',
-            domicile_address: '',
-            residential_address: '',
-            marital_status: '',
-            dependents: null,
+            jenis_kelamin: '',
+            tempat_lahir: '',
+            tgl_lahir: '',
+            pendidikan_terakhir: '',
+            alamat_domisili: '',
+            alamat_ktp: '',
+            status_pernikahan: '',
+            jml_tanggungan: null,
 
             employment_status: '',
             job_title: '',
@@ -265,7 +265,7 @@ export function useFinancingForm(initialData = null) {
             address: '',
             contact: '',
         }
-        isMemberSelected.value = false
+        isAnggotaSelected.value = false
     }
 
     // search supplier
@@ -332,7 +332,7 @@ export function useFinancingForm(initialData = null) {
             return
         }
 
-        form.member.heirs.push({
+        form.anggota.heirs.push({
             heir_nik: heirData.heir_nik,
             heir_name: heirData.heir_name,
             relationship: heirData.relationship,
@@ -341,7 +341,7 @@ export function useFinancingForm(initialData = null) {
     }
 
     const removeHeir = (index) => {
-        form.member.heirs.splice(index, 1)
+        form.anggota.heirs.splice(index, 1)
     }
 
     const submit = () => {
@@ -479,10 +479,10 @@ export function useFinancingForm(initialData = null) {
     }
 
     onMounted(() => {
-    if (initialData?.member) {
-            isMemberSelected.value = true
-            selectedMember.value = initialData.member
-            searchQuery.value = initialData.member.name
+    if (initialData?.anggota) {
+            isAnggotaSelected.value = true
+            selectedAnggota.value = initialData.anggota
+            searchQuery.value = initialData.anggota.name
         }
     })
 
@@ -490,10 +490,10 @@ export function useFinancingForm(initialData = null) {
         // State
         form,
         searchQuery,
-        memberResults,
+        anggotaResults,
         isLoadingSearch,
-        selectedMember,
-        isMemberSelected,
+        selectedAnggota,
+        isAnggotaSelected,
         searchSupplierQuery,
         supplierResults,
         isLoadingSearchSupplier,
@@ -501,8 +501,8 @@ export function useFinancingForm(initialData = null) {
         isSupplierSelected,
         // Methods
         resetSupplierSelection,
-        resetMemberSelection,
-        selectMember,
+        resetAnggotaSelection,
+        selectAnggota,
         selectSupplier,
         addHeir,
         removeHeir,

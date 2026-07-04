@@ -21,7 +21,7 @@ class StoreMemberAllocationRequest extends FormRequest
             'member_ids.*' => [
                 'required',
                 'integer',
-                Rule::exists('members', 'id')->where(function ($query) {
+                Rule::exists('anggota', 'id')->where(function ($query) {
                     $query->whereIn('pengguna_id', function ($userQuery) {
                         $userQuery->select('id')
                             ->from('pengguna')

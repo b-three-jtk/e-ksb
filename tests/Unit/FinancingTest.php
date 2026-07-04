@@ -4,7 +4,7 @@ use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MemberStatusEnum;
 use App\Models\Financing;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Services\Admin\DasborService;
 use App\Services\Admin\PembayaranAngsuranService;
 use Database\Seeders\AccountSeeder;
@@ -54,7 +54,7 @@ it('Menghitung detail pelunasan sebelum jatuh tempo', function () {
 
 it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function () {
     $targetDate = '2026-06-01';
-    $member = Member::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+    $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
 
     $statusActive = FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value;
     $statusScheduled = InstallmentPaymentScheduleStatusEnum::SCHEDULED->value;
@@ -62,7 +62,7 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
     // 1. DATA LANCAR
     // Skenario: Belum waktunya bayar (Due date: Juli 2026)
     $lancar = Financing::create([
-        'member_id' => $member->id,
+        'anggota_id' => $anggota->id,
         'status' => $statusActive,
         'akad_date' => '2026-01-01',
         'requested_date' => '2026-01-01',
@@ -79,7 +79,7 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
     // Skenario: Kontrak berjalan, nunggak 5 bulan (Due date: Januari 2026)
     // Syarat kode: tunggakan 4-6 bulan
     $kurangLancar = Financing::create([
-        'member_id' => $member->id,
+        'anggota_id' => $anggota->id,
         'status' => $statusActive,
         'akad_date' => '2025-10-01',
         'requested_date' => '2025-10-01',
@@ -96,7 +96,7 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
     // Skenario: Kontrak berjalan, nunggak 8 bulan (Due date: Oktober 2025)
     // Syarat kode: tunggakan 7-12 bulan
     $diragukan = Financing::create([
-        'member_id' => $member->id,
+        'anggota_id' => $anggota->id,
         'status' => $statusActive,
         'akad_date' => '2025-05-01',
         'requested_date' => '2025-05-01',
@@ -113,7 +113,7 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
     // Skenario: Kontrak sudah habis/tamat 5 bulan lalu, tapi masih ada tunggakan
     // Syarat kode: jatuh tempo pembiayaan terlewati > 2 bulan
     $macet = Financing::create([
-        'member_id' => $member->id,
+        'anggota_id' => $anggota->id,
         'status' => $statusActive,
         'akad_date' => '2025-01-01',
         'requested_date' => '2025-01-01',

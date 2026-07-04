@@ -11,7 +11,7 @@ class Notification extends Model
     use HasFactory;
 
     protected $fillable = [
-        'member_id',
+        'anggota_id',
         'title',
         'message',
         'notification_type',
@@ -35,9 +35,9 @@ class Notification extends Model
         'alert_displayed_at' => 'datetime',
     ];
 
-    public function member()
+    public function anggota()
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Anggota::class);
     }
 
     public function reference(): MorphTo
@@ -51,9 +51,9 @@ class Notification extends Model
         return $this->belongsTo(Installment::class, 'reference_id');
     }
 
-    public function scopeForMember($query, $memberId)
+    public function scopeForMember($query, $anggotaId)
     {
-        return $query->where('member_id', $memberId);
+        return $query->where('anggota_id', $anggotaId);
     }
 
     public function scopeUnread($query)

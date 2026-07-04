@@ -3,7 +3,7 @@
 use App\Enums\EducationEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Models\Financing;
-use App\Models\Member;
+use App\Models\Anggota;
 use App\Models\SavingAccount;
 use App\Models\Pengguna;
 use Database\Seeders\GlobalSettingSeeder;
@@ -56,7 +56,7 @@ describe('Aplikasi harus menyediakan pendaftaran pengurus baru dari anggota akti
             'status' => 'Aktif'
         ])->create();
         $anggota->assignRole('Anggota');
-        Member::factory()->create([
+        Anggota::factory()->create([
             'pengguna_id' => $anggota->id,
             'status' => 'Aktif',
         ]);
@@ -84,7 +84,7 @@ describe('Aplikasi harus menyediakan pendaftaran pengurus baru dari anggota akti
             'email' => 'asep@example.com',
             'status' => 'Aktif'
         ]);
-        $this->assertDatabaseHas('members', [
+        $this->assertDatabaseHas('anggota', [
             'pengguna_id' => $anggota->id,
             'status' => 'Aktif',
         ]);
@@ -306,14 +306,14 @@ describe('Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris
         $res = $this->actingAs($user)
             ->post('/admin/users/store', [
                 'nama' => 'Leon S Kennedy',
-                'gender' => 'Laki-laki',
-                'birth_place' => 'Bandung',
-                'birth_date' => '1990-01-01',
-                'marital_status' => 'Kawin',
+                'jenis_kelamin' => 'Laki-laki',
+                'tempat_lahir' => 'Bandung',
+                'tgl_lahir' => '1990-01-01',
+                'status_pernikahan' => 'Kawin',
                 'email' => 'leon@example.com',
                 'password' => 'password',
-                'domicile_address' => 'Jl. Ennerdale No. 123',
-                'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
+                'alamat_domisili' => 'Jl. Ennerdale No. 123',
+                'pendidikan_terakhir' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
                 'nik' => '1234567890123456',
                 'no_telp' => '081234567890',
                 'heir_nik' => '6543210987654321',
@@ -329,7 +329,7 @@ describe('Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris
             'email' => 'leon@example.com',
         ]);
 
-        $this->assertDatabaseHas('members', [
+        $this->assertDatabaseHas('anggota', [
             'pengguna_id' => Pengguna::where('nik', '1234567890123456')->first()->id,
             'status' => 'Menunggu Pembayaran'
         ]);
@@ -341,10 +341,10 @@ describe('Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris
 
         $res = $this->actingAs($user)
             ->post('/admin/users/store', [
-                'gender' => 'Laki-laki',
-                'birth_place' => 'Bandung',
-                'birth_date' => '1990-01-01',
-                'marital_status' => 'Kawin',
+                'jenis_kelamin' => 'Laki-laki',
+                'tempat_lahir' => 'Bandung',
+                'tgl_lahir' => '1990-01-01',
+                'status_pernikahan' => 'Kawin',
                 'heiger_nik' => '6543210987654321',
                 'heir_name' => 'Ada Wong',
                 'heir_relationship' => 'Istri',
@@ -353,17 +353,17 @@ describe('Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris
 
             $res->assertSessionHasErrors([
                 'nama' => 'The nama field is required.',
-                'domicile_address' => 'The domicile address field is required.',
-                'last_education' => 'The last education field is required.',
+                'alamat_domisili' => 'The alamat domisili field is required.',
+                'pendidikan_terakhir' => 'The pendidikan terakhir field is required.',
                 'nik' => 'The nik field is required.',
                 'no_telp' => 'The no telp field is required.',
             ]);
 
-            $this->assertDatabaseMissing('members', [
-                'gender' => 'Laki-laki',
-                'birth_place' => 'Bandung',
-                'birth_date' => '1990-01-01',
-                'marital_status' => 'Kawin'
+            $this->assertDatabaseMissing('anggota', [
+                'jenis_kelamin' => 'Laki-laki',
+                'tempat_lahir' => 'Bandung',
+                'tgl_lahir' => '1990-01-01',
+                'status_pernikahan' => 'Kawin'
                 ]
             );
     });
@@ -377,14 +377,14 @@ describe('Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris
         $res = $this->actingAs($anggota)
             ->post('/admin/users/store', [
                 'nama' => 'Leon S Kennedy',
-                'gender' => 'Laki-laki',
-                'birth_place' => 'Bandung',
-                'birth_date' => '1990-01-01',
-                'marital_status' => 'Kawin',
+                'jenis_kelamin' => 'Laki-laki',
+                'tempat_lahir' => 'Bandung',
+                'tgl_lahir' => '1990-01-01',
+                'status_pernikahan' => 'Kawin',
                 'email' => 'leon@example.com',
                 'password' => 'password',
-                'domicile_address' => 'Jl. Ennerdale No. 123',
-                'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
+                'alamat_domisili' => 'Jl. Ennerdale No. 123',
+                'pendidikan_terakhir' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
                 'nik' => '1234567890123456',
                 'no_telp' => '081234567890',
                 'heir_nik' => '6543210987654321',
@@ -493,12 +493,12 @@ describe('Aplikasi harus menyediakan pembaruan data anggota oleh sekretaris.', f
                 'nama' => 'Leon S Kennedy',
                 'nik' => '1234567890123456',
                 'no_telp' => '628934673463',
-                'gender' => 'Laki-laki',
-                'birth_place' => 'Bandung',
-                'birth_date' => '1990-01-01',
-                'marital_status' => 'Kawin',
-                'domicile_address' => 'Jl. Ennerdale No. 123',
-                'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
+                'jenis_kelamin' => 'Laki-laki',
+                'tempat_lahir' => 'Bandung',
+                'tgl_lahir' => '1990-01-01',
+                'status_pernikahan' => 'Kawin',
+                'alamat_domisili' => 'Jl. Ennerdale No. 123',
+                'pendidikan_terakhir' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
                 'heirs[0][heir_nik]' => '6543210987654321',
                 'heirs[0][heir_name]' => 'Ada Wong',
                 'heirs[0][relationship]' => 'Istri',
@@ -531,12 +531,12 @@ describe('Aplikasi harus menyediakan pembaruan data anggota oleh sekretaris.', f
                 'nama' => 'Leon S Kennedy',
                 'nik' => '1234567890123456',
                 'no_telp' => '628934673463',
-                'gender' => 'Laki-laki',
-                'birth_place' => 'Bandung',
-                'birth_date' => '1990-01-01',
-                'marital_status' => 'Kawin',
-                'domicile_address' => 'Jl. Ennerdale No. 123',
-                'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
+                'jenis_kelamin' => 'Laki-laki',
+                'tempat_lahir' => 'Bandung',
+                'tgl_lahir' => '1990-01-01',
+                'status_pernikahan' => 'Kawin',
+                'alamat_domisili' => 'Jl. Ennerdale No. 123',
+                'pendidikan_terakhir' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
                 'heirs[0][heir_nik]' => '6543210987654321',
                 'heirs[0][heir_name]' => 'Ada Wong',
                 'heirs[0][relationship]' => 'Istri',
@@ -610,8 +610,8 @@ describe('Aplikasi harus menyediakan pembaruan informasi profil bagi masing-masi
             ->put('/user/profile', [
                 'nama' => 'Leon S Kennedy',
                 'no_telp' => '081234567890',
-                'domicile_address' => 'Jl. Ennerdale No. 123',
-                'last_education' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
+                'alamat_domisili' => 'Jl. Ennerdale No. 123',
+                'pendidikan_terakhir' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
             ]);
 
         $res->assertStatus(403);
@@ -633,21 +633,22 @@ describe('Aplikasi harus menyediakan pengalokasian anggota ke penanggung jawab a
         $anggota = Pengguna::factory([
             'status' => 'Aktif'
         ])->create();
-        $member = Member::factory()->create([
+        $anggota->assignRole('Anggota');
+
+        $anggota = Anggota::factory()->create([
             'pengguna_id' => $anggota->id,
             'status' => 'Aktif',
         ]);
-        $anggota->assignRole('Anggota');
 
         $res = $this->actingAs($ketua)
             ->post('/admin/allocation', [
                 'pj_anggota_id' => $pj->id,
-                'member_ids' => [$member->id],
+                'member_ids' => [$anggota->id],
             ]);
 
         $res->assertStatus(302);
-        $this->assertDatabaseHas('members', [
-            'id' => $member->id,
+        $this->assertDatabaseHas('anggota', [
+            'id' => $anggota->id,
             'pj_anggota_id' => $pj->id,
         ]);
     });
@@ -661,16 +662,16 @@ describe('Aplikasi harus menyediakan pengalokasian anggota ke penanggung jawab a
         $anggota = Pengguna::factory([
             'status' => 'Aktif'
         ])->create();
-        $member = Member::factory()->create([
+        $anggota->assignRole('Anggota');
+        $anggota = Anggota::factory()->create([
             'pengguna_id' => $anggota->id,
             'status' => 'Aktif',
         ]);
-        $anggota->assignRole('Anggota');
 
         $res = $this->actingAs($bendahara)
             ->post('/admin/allocation', [
                 'pj_anggota_id' => $bendahara->id,
-                'member_ids' => [$member->id],
+                'member_ids' => [$anggota->id],
             ]);
 
         $res->assertStatus(403);
@@ -683,7 +684,7 @@ describe('Aplikasi harus menyediakan riwayat poin yang sudah diperoleh anggota',
             'status' => 'Aktif'
         ])->create();
         $user->assignRole('Anggota');
-        $anggota = Member::factory()->create([
+        $anggota = Anggota::factory()->create([
             'pengguna_id' => $user->id,
             'status' => 'Aktif',
         ]);
@@ -691,7 +692,7 @@ describe('Aplikasi harus menyediakan riwayat poin yang sudah diperoleh anggota',
         $res = $this->actingAs($user)->get('/user/profile');
 
         SavingAccount::factory()->create([
-            'member_id' => $anggota->id,
+            'anggota_id' => $anggota->id,
             'balance' => 1000000,
         ]);
 
@@ -823,7 +824,7 @@ describe('Aplikasi harus menyediakan dashboard operasional yang menyajikan ringk
     it('Anggota dapat melihat dashboard dengan data transaksi yang sesuai', function () {
         $user = Pengguna::factory()->create();
         $user->assignRole('Anggota');
-        Member::factory()->create([
+        Anggota::factory()->create([
             'pengguna_id' => $user->id,
         ]);
 
@@ -840,10 +841,10 @@ describe('Aplikasi harus menyediakan dashboard operasional yang menyajikan ringk
 
 describe('Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaan oleh anggota aktif.', function () {
     it('Anggota aktif dapat mengajukan pengunduran diri dengan melampirkan dokumen yang diperlukan', function () {
-        $member = Member::factory()->create([
+        $anggota = Anggota::factory()->create([
             'status' => 'Aktif',
         ]);
-        $user = Pengguna::where('id', $member->pengguna_id)->first();
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->assignRole('Anggota');
 
         $res = $this->actingAs($user)
@@ -854,7 +855,7 @@ describe('Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaan oleh
         Log::info('Resignation submission response: ' . $res->getContent());
 
         $res->assertStatus(302);
-        $this->assertDatabaseHas('members', [
+        $this->assertDatabaseHas('anggota', [
             'pengguna_id' => $user->id,
             'status' => 'Pengunduran Diri Diajukan',
         ]);
@@ -863,7 +864,7 @@ describe('Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaan oleh
     it('Anggota yang sudah mengajukan pengunduran diri tidak dapat mengajukan lagi', function () {
         $user = Pengguna::factory()->create();
         $user->assignRole('Anggota');
-        Member::factory()->create([
+        Anggota::factory()->create([
             'pengguna_id' => $user->id,
             'status' => 'Pengunduran Diri Diajukan',
         ]);
@@ -883,13 +884,13 @@ describe('Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaan oleh
             'status' => 'Aktif'
         ])->create();
         $user->assignRole('Anggota');
-        $member = Member::factory()->create([
+        $anggota = Anggota::factory()->create([
             'pengguna_id' => $user->id,
             'status' => 'Aktif',
         ]);
 
         Financing::factory()->create([
-            'member_id' => $member->id,
+            'anggota_id' => $anggota->id,
             'cost_price' => 1000000,
             'margin_amount' => 100000,
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
@@ -911,33 +912,33 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pengunduran diri angg
         $ketua = Pengguna::factory()->create();
         $ketua->assignRole('Ketua');
 
-        $member = Member::factory()->create([
+        $anggota = Anggota::factory()->create([
             'status' => 'Pengunduran Diri Diajukan',
         ]);
-        $user = Pengguna::where('id', $member->pengguna_id)->first();
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->assignRole('Anggota');
 
         $res = $this->actingAs($ketua)
             ->put('/admin/resignations/' . $user->id);
 
         $res->assertStatus(302);
-        $this->assertDatabaseHas('members', [
+        $this->assertDatabaseHas('anggota', [
             'pengguna_id' => $user->id,
             'status' => 'Mengundurkan Diri',
         ]);
     });
 
     it('Selain Ketua tidak dapat memproses permohonan pengunduran diri anggota', function () {
-        $anggota = Pengguna::factory()->create();
-        $anggota->assignRole('Anggota');
+        $sekretaris = Pengguna::factory()->create();
+        $sekretaris->assignRole('Sekretaris');
 
-        $member = Member::factory()->create([
+        $anggota = Anggota::factory()->create([
             'status' => 'Pengunduran Diri Diajukan',
         ]);
-        $user = Pengguna::where('id', $member->pengguna_id)->first();
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->assignRole('Anggota');
 
-        $res = $this->actingAs($anggota)
+        $res = $this->actingAs($sekretaris)
             ->put('/admin/resignations/' . $user->id);
 
         $res->assertStatus(403);

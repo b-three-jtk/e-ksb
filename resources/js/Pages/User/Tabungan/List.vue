@@ -244,7 +244,7 @@ const handleExport = () => {
                         <Table
                             :transactions="transactions.data"
                             :columns="columns"
-                            :member-info="memberInfo"
+                            :anggota-info="memberInfo"
                         />
 
                         <Pagination

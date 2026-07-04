@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Member;
+use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,7 +10,7 @@ class MemberJob extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'member_id',
+        'anggota_id',
         'employment_status',
         'job_title',
         'company_or_business_name',
@@ -20,8 +20,8 @@ class MemberJob extends Model
         'workplace_contact',
     ];
 
-    public function member()
+    public function anggota()
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Anggota::class);
     }
 }

@@ -34,7 +34,7 @@ ELSE
     points_earned := FLOOR(NEW.balance_after_transaction / 100000);
     activity_desc := 'Mendapatkan ' || points_earned || ' poin dari transaksi sebesar ' || NEW.saving_amount;
 
-    SELECT pengguna_id INTO v_pengguna_id FROM members WHERE id = (SELECT member_id FROM saving_accounts WHERE id = NEW.saving_account_id);
+    SELECT pengguna_id INTO v_pengguna_id FROM anggota WHERE id = (SELECT anggota_id FROM saving_accounts WHERE id = NEW.saving_account_id);
 
     INSERT INTO point_transactions (amount_earned, activity_description, pengguna_id, created_at, updated_at)
     VALUES (points_earned, activity_desc, v_pengguna_id, NOW(), NOW())

@@ -10,7 +10,7 @@ use App\Models\Anggota;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class MemberFactory extends Factory
+class AnggotaFactory extends Factory
 {
     protected $model = Anggota::class;
 

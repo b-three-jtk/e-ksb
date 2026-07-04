@@ -13,7 +13,7 @@ class CalculateMonthlySavingPoints extends Command
 {
     protected $signature = 'points:calculate-monthly-savings';
 
-    protected $description = 'Calculate and store monthly saving points for members';
+    protected $description = 'Calculate and store monthly saving points for anggota';
 
     public function handle(): int
     {
@@ -37,9 +37,9 @@ class CalculateMonthlySavingPoints extends Command
         }
 
         $users = Pengguna::query()
-            ->whereHas('member.savingAccounts')
+            ->whereHas('anggota.savingAccounts')
             ->with([
-                'member.savingAccounts',
+                'anggota.savingAccounts',
                 'pointTransactions' => function ($query) use ($periodDate) {
                     $query->whereDate('calculation_period', $periodDate);
                 },
@@ -55,7 +55,7 @@ class CalculateMonthlySavingPoints extends Command
                 continue;
             }
 
-            $totalSavings = (float) $user->member->savingAccounts->sum('balance');
+            $totalSavings = (float) $user->anggota->savingAccounts->sum('balance');
             $pointsEarned = (int) floor($totalSavings / $savingPointAmount) * (int) $savingPointReward;
 
             if ($pointsEarned <= 0) {
