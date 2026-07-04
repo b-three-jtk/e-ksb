@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\Financing;
 use App\Models\JenisBarang;
-use App\Models\Supplier;
+use App\Models\Pemasok;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,7 +20,7 @@ class FinancingItem extends Model
         'price_per_unit',
         'purchase_receipt',
         
-        'supplier_id',
+        'pemasok_id',
         'financing_id',
         'jenis_barang_id'
     ];
@@ -35,8 +35,8 @@ class FinancingItem extends Model
         return $this->belongsTo(JenisBarang::class);
     }
 
-    public function supplier()
+    public function pemasok()
     {
-        return $this->belongsTo(Supplier::class);
+        return $this->belongsTo(Pemasok::class);
     }
 }

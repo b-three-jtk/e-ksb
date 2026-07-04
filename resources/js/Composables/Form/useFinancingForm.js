@@ -12,11 +12,11 @@ export function useFinancingForm(initialData = null) {
     const selectedAnggota = ref(null)
     const isAnggotaSelected = ref(false)
 
-    const searchSupplierQuery = ref('')
-    const supplierResults = ref([])
-    const isLoadingSearchSupplier = ref(false)
-    const selectedSupplier = ref(null)
-    const isSupplierSelected = ref(false)
+    const searchPemasokQuery = ref('')
+    const pemasokResults = ref([])
+    const isLoadingSearchPemasok = ref(false)
+    const selectedPemasok = ref(null)
+    const isPemasokSelected = ref(false)
 
     const form = useForm({
         // Anggota data
@@ -75,7 +75,7 @@ export function useFinancingForm(initialData = null) {
             purchase_receipt: initialData?.financing?.purchase_receipt || null,
             tenor: initialData?.financing?.tenor || null,
             predicted_cost_price: initialData?.financing?.predicted_cost_price || null,
-            supplier_id: initialData?.financing?.supplier_id || null,
+            pemasok_id: initialData?.financing?.pemasok_id || null,
             tangguh_payment_date: initialData?.financing?.tangguh_payment_date || null,
         },
         collateral: {
@@ -93,11 +93,11 @@ export function useFinancingForm(initialData = null) {
             akad_document: initialData?.documents?.akad_document || null,
             akad_wakalah_document: initialData?.documents?.akad_wakalah_document || null
         },
-        // Supplier data
-        supplier: {
-            supplier_name: initialData?.supplier?.supplier_name || '',
-            address: initialData?.supplier?.address || '',
-            contact: initialData?.supplier?.contact || '',
+        // Pemasok data
+        pemasok: {
+            nama_pemasok: initialData?.pemasok?.nama_pemasok || '',
+            alamat_pemasok: initialData?.pemasok?.alamat_pemasok || '',
+            contact: initialData?.pemasok?.contact || '',
         },
         // Local state untuk temporary input
         monthly_installment: null,
@@ -252,7 +252,7 @@ export function useFinancingForm(initialData = null) {
             down_payment: null,
             notes: '',
             status: '',
-            supplier_id: null,
+            pemasok_id: null,
         }
         form.collateral = {
             collateral_type: '',
@@ -260,66 +260,66 @@ export function useFinancingForm(initialData = null) {
             estimated_market_value: null,
             collateral_location: '',
         }
-        form.supplier = {
-            supplier_name: '',
-            address: '',
+        form.pemasok = {
+            nama_pemasok: '',
+            alamat_pemasok: '',
             contact: '',
         }
         isAnggotaSelected.value = false
     }
 
-    // search supplier
-    let supplierSearchTimeout = null
-    watch(() => searchSupplierQuery.value, (query) => {
+    // search pemasok
+    let pemasokSearchTimeout = null
+    watch(() => searchPemasokQuery.value, (query) => {
         // 1. Bersihkan timer sebelumnya setiap kali user mengetik karakter baru
-        if (supplierSearchTimeout) {
-            clearTimeout(supplierSearchTimeout)
+        if (pemasokSearchTimeout) {
+            clearTimeout(pemasokSearchTimeout)
         }
 
         if (!query || query.length < 2) {
-            supplierResults.value = []
+            pemasokResults.value = []
             return
         }
 
         // 2. Buat timer baru
-        supplierSearchTimeout = setTimeout(async () => {
+        pemasokSearchTimeout = setTimeout(async () => {
             isLoadingSearch.value = true
             try {
-                const response = await axios.get('/admin/suppliers/search', {
+                const response = await axios.get('/admin/pemasok/search', {
                     params: { q: query }
                 })
-                supplierResults.value = response.data.suppliers
+                pemasokResults.value = response.data.pemasok
             } catch (error) {
-                console.error('Error searching suppliers:', error)
-                supplierResults.value = []
+                console.error('Error searching pemasok:', error)
+                pemasokResults.value = []
             } finally {
                 isLoadingSearch.value = false
             }
         }, 500) // 500ms delay
     })
 
-    // Pilih supplier
-    const selectSupplier = (supplier) => {
-        selectedSupplier.value = supplier
-        searchSupplierQuery.value = supplier.supplier_name
+    // Pilih pemasok
+    const selectPemasok = (pemasok) => {
+        selectedPemasok.value = pemasok
+        searchPemasokQuery.value = pemasok.nama_pemasok
 
-        form.supplier.supplier_name = supplier.supplier_name || ''
-        form.supplier.address = supplier.address || ''
-        form.supplier.contact = supplier.contact || ''
+        form.pemasok.nama_pemasok = pemasok.nama_pemasok || ''
+        form.pemasok.alamat_pemasok = pemasok.alamat_pemasok || ''
+        form.pemasok.contact = pemasok.contact || ''
 
-        supplierResults.value = []
-        isSupplierSelected.value = true
+        pemasokResults.value = []
+        isPemasokSelected.value = true
     }
 
-    const resetSupplierSelection = () => {
-        selectedSupplier.value = null
-        searchSupplierQuery.value = ''
-        form.supplier = {
-            supplier_name: '',
-            address: '',
+    const resetPemasokSelection = () => {
+        selectedPemasok.value = null
+        searchPemasokQuery.value = ''
+        form.pemasok = {
+            nama_pemasok: '',
+            alamat_pemasok: '',
             contact: '',
         }
-        isSupplierSelected.value = false
+        isPemasokSelected.value = false
     }
 
     // Heirs
@@ -494,16 +494,16 @@ export function useFinancingForm(initialData = null) {
         isLoadingSearch,
         selectedAnggota,
         isAnggotaSelected,
-        searchSupplierQuery,
-        supplierResults,
-        isLoadingSearchSupplier,
-        selectedSupplier,
-        isSupplierSelected,
+        searchPemasokQuery,
+        pemasokResults,
+        isLoadingSearchPemasok,
+        selectedPemasok,
+        isPemasokSelected,
         // Methods
-        resetSupplierSelection,
+        resetPemasokSelection,
         resetAnggotaSelection,
         selectAnggota,
-        selectSupplier,
+        selectPemasok,
         addHeir,
         removeHeir,
         submit,

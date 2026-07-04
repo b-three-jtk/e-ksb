@@ -36,16 +36,16 @@ const {
     anggotaResults,
     isLoadingSearch,
     isAnggotaSelected,
-    searchSupplierQuery,
-    supplierResults,
-    isLoadingSearchSupplier,
-    isSupplierSelected,
+    searchPemasokQuery,
+    pemasokResults,
+    isLoadingSearchPemasok,
+    isPemasokSelected,
     selectAnggota,
-    selectSupplier,
+    selectPemasok,
     addHeir,
     removeHeir,
     resetAnggotaSelection,
-    resetSupplierSelection,
+    resetPemasokSelection,
     submit,
     saveDraft,
     finalize,
@@ -170,14 +170,14 @@ const handleSaveDraft = () => {
                     v-if="activeStep === 4"
                     :form="form"
                     :data="props.data"
-                    :search-supplier-query="searchSupplierQuery"
-                    :is-loading-search-supplier="isLoadingSearchSupplier"
-                    :is-supplier-selected="isSupplierSelected"
-                    :supplier-results="supplierResults"
+                    :search-pemasok-query="searchPemasokQuery"
+                    :is-loading-search-pemasok="isLoadingSearchPemasok"
+                    :is-pemasok-selected="isPemasokSelected"
+                    :pemasok-results="pemasokResults"
                     :errors="errors"
-                    @update:search-supplier-query="searchSupplierQuery = $event"
-                    @selectSupplier="selectSupplier"
-                    @resetSupplierSelection="resetSupplierSelection"
+                    @update:search-pemasok-query="searchPemasokQuery = $event"
+                    @selectPemasok="selectPemasok"
+                    @resetPemasokSelection="resetPemasokSelection"
                     @validate-field="(field) => validateField(field, 4)"
                 />
 

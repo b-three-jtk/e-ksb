@@ -123,12 +123,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/financings/show/{id}', [PembiayaanController::class, 'show'])->middleware('permission:view_murabahah')->name('financings.show');
     Route::get('/financings/create', [PembiayaanController::class, 'create'])->middleware('permission:create_murabahah')->name('financings.create');
     Route::get('/anggota/search', [PembiayaanController::class, 'searchMembers'])->middleware('permission:create_murabahah')->name('anggota.search');
-    Route::get('/suppliers/search', [PembiayaanController::class, 'searchSuppliers'])->middleware('permission:create_murabahah')->name('suppliers.search');
+    Route::get('/pemasok/search', [PembiayaanController::class, 'searchPemasoks'])->middleware('permission:create_murabahah')->name('pemasok.search');
     Route::post('/financings/draft', [PembiayaanController::class, 'saveDraft'])->middleware('permission:create_murabahah')->name('financings.draft');
     Route::post('/financings/finalize', [PembiayaanController::class, 'finalize'])->middleware('permission:create_murabahah')->name('financings.finalize');
     Route::post('/financings/store', [PembiayaanController::class, 'store'])->middleware('permission:create_murabahah')->name('financings.store');
     Route::post('/product-types', [PembiayaanController::class, 'storeJenisBarang'])->middleware('permission:create_murabahah')->name('product-types.store');
-    Route::post('/suppliers', [PembiayaanController::class, 'storeSupplier'])->middleware('permission:create_murabahah')->name('suppliers.store');
+    Route::post('/pemasok', [PembiayaanController::class, 'storePemasok'])->middleware('permission:create_murabahah')->name('pemasok.store');
     Route::get('/financings/draft/{id}', [PembiayaanController::class, 'loadDraft'])->middleware('permission:create_murabahah')->name('financings.load-draft');
     Route::get('/financings/validation/{id}', [PembiayaanController::class, 'showValidation'])->middleware('permission:approve_murabahah')->name('financings.validation');
     Route::put('/financings/validate/{id}', [PembiayaanController::class, 'validate'])->middleware('permission:approve_murabahah')->name('financings.validation.submit');

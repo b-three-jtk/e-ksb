@@ -174,12 +174,12 @@ const openReceiptModal = (receiptPath) => {
                         <FinancingChart :total-price="Number(data.total_price)" :total-paid="Number(data.total_paid)"
                             :remaining-balance="Number(data.remaining_balance)" />
                     </div>
-                    <div v-if="data.supplier" class="card-layout h-fit flex flex-col gap-6">
+                    <div v-if="data.pemasok" class="card-layout h-fit flex flex-col gap-6">
                         <h1 class="card-title">Informasi Pemasok</h1>
                         <ul class="grid grid-cols-1 gap-6">
-                            <Info label="Nama Pemasok" :value="data.supplier?.supplier_name" />
-                            <Info label="Alamat Pemasok" :value="data.supplier?.supplier_address" />
-                            <Info label="Kontak Pemasok" :value="data.supplier?.supplier_contact" />
+                            <Info label="Nama Pemasok" :value="data.pemasok?.nama_pemasok" />
+                            <Info label="Alamat Pemasok" :value="data.pemasok?.pemasok_address" />
+                            <Info label="Kontak Pemasok" :value="data.pemasok?.pemasok_contact" />
                         </ul>
                     </div>
                     <div v-if="data.collateral" class="card-layout flex flex-col pb-12.5! gap-6">

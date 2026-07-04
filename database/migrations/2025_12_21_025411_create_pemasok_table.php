@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('suppliers', function (Blueprint $table) {
-            $table->string('contact')->nullable()->after('address');
+        Schema::create('pemasok', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_pemasok');
+            $table->string('kontak_pemasok')->nullable();
+            $table->string('alamat_pemasok')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('suppliers', function (Blueprint $table) {
-            $table->dropColumn('contact');
-        });
+        Schema::dropIfExists('pemasok');
     }
 };

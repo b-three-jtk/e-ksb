@@ -6,7 +6,7 @@ use App\Enums\ConditionEnum;
 use App\Models\Financing;
 use App\Models\FinancingItem;
 use App\Models\JenisBarang;
-use App\Models\Supplier;
+use App\Models\Pemasok;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FinancingItemFactory extends Factory
@@ -23,7 +23,7 @@ class FinancingItemFactory extends Factory
             'price_per_unit' => $this->faker->numberBetween(100000, 50000000),
             'purchase_receipt' => null,
             'jenis_barang_id' => JenisBarang::inRandomOrder()->first()?->id ?? JenisBarang::factory(),
-            'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
+            'pemasok_id' => Pemasok::inRandomOrder()->first()?->id ?? Pemasok::factory(),
             'financing_id' => Financing::factory(),
         ];
     }

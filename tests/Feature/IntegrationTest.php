@@ -8,7 +8,7 @@ use App\Models\Installment;
 use App\Models\Anggota;
 use App\Models\JenisBarang;
 use App\Models\AkunSimpanan;
-use App\Models\Supplier;
+use App\Models\Pemasok;
 use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\GlobalSettingSeeder;
@@ -46,10 +46,10 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $this->ketuaMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $this->ketuaMurabahah->assignRole('Ketua Murabahah');
 
-        $this->supplier = Supplier::create([
-            'supplier_name' => 'PT. Supplier Integrasi',
+        $this->pemasok = Pemasok::create([
+            'nama_pemasok' => 'PT. Pemasok Integrasi',
             'contact' => '081234567890',
-            'address' => 'Jl. Integrasi No. 1',
+            'alamat_pemasok' => 'Jl. Integrasi No. 1',
         ]);
 
         $danaAlokasi = \App\Models\Account::where('account_name', 'Dana Alokasi Pembiayaan Murabahah')->first();
@@ -124,14 +124,14 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                     'qty' => 1,
                     'condition' => 'Baru',
                     'akad_date' => now()->format('Y-m-d'),
-                    'supplier_id' => $this->supplier->id,
+                    'pemasok_id' => $this->pemasok->id,
                     'status' => FinancingReqStatusEnum::PAID->value,
                     'specification' => 'Laptop untuk menunjang pekerjaan',
                     'predicted_cost_price' => 10000000,
                 ],
-                'supplier' => [
-                    'supplier_name' => 'PT. Supplier Integrasi',
-                    'address' => 'Jl. Integrasi No. 1',
+                'pemasok' => [
+                    'nama_pemasok' => 'PT. Pemasok Integrasi',
+                    'alamat_pemasok' => 'Jl. Integrasi No. 1',
                     'contact' => '081234567890',
                 ],
                 'akad_document_file' => UploadedFile::fake()->create('akad.pdf'),
@@ -177,7 +177,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                     'qty' => 1,
                     'condition' => 'Baru',
                     'akad_date' => now()->format('Y-m-d'),
-                    'supplier_id' => $this->supplier->id,
+                    'pemasok_id' => $this->pemasok->id,
                     'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
                 ],
                 'akad_document_file' => UploadedFile::fake()->create('akad.pdf'),
@@ -247,15 +247,15 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                     'qty' => 1,
                     'condition' => 'Baru',
                     'akad_date' => now()->format('Y-m-d'),
-                    'supplier_id' => $this->supplier->id,
+                    'pemasok_id' => $this->pemasok->id,
                     'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
                     'specification' => 'Cicilan 12 bulan',
                     'predicted_cost_price' => 24000000,
                     'tenor' => 12,
                 ],
-                'supplier' => [
-                    'supplier_name' => 'PT. Supplier Integrasi',
-                    'address' => 'Jl. Integrasi No. 1',
+                'pemasok' => [
+                    'nama_pemasok' => 'PT. Pemasok Integrasi',
+                    'alamat_pemasok' => 'Jl. Integrasi No. 1',
                     'contact' => '081234567890',
                 ],
                 'akad_document_file' => UploadedFile::fake()->create('akad.pdf'),

@@ -80,7 +80,7 @@ class StoreFinancingDraftRequest extends FormRequest
             'financing.tenor' => 'nullable|integer',
             'financing.predicted_cost_price' => 'required|numeric|min:0',
             'financing.akad_wakalah_date' => 'nullable|date',
-            'financing.supplier_id' => 'nullable|exists:suppliers,id',
+            'financing.pemasok_id' => 'nullable|exists:pemasok,id',
             'financing.tangguh_payment_date' => 'nullable|date',
 
             // Collateral data
@@ -89,10 +89,10 @@ class StoreFinancingDraftRequest extends FormRequest
             'collateral.estimated_market_value' => 'nullable|numeric|min:0',
             'collateral.collateral_location' => 'nullable|string|max:500',
 
-            // Supplier data
-            'supplier.supplier_name' => 'nullable|string|max:255',
-            'supplier.address' => 'nullable|string|max:500',
-            'supplier.contact' => 'nullable|string|max:255',
+            // Pemasok data
+            'pemasok.nama_pemasok' => 'nullable|string|max:255',
+            'pemasok.alamat_pemasok' => 'nullable|string|max:500',
+            'pemasok.contact' => 'nullable|string|max:255',
 
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',

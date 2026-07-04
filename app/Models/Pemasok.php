@@ -6,14 +6,15 @@ use App\Models\FinancingItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Supplier extends Model
+class Pemasok extends Model
 {
     use HasFactory;
 
+    protected $table = 'pemasok';
     protected $fillable = [
-        'supplier_name',
-        'address',
-        'contact'
+        'nama_pemasok',
+        'alamat_pemasok',
+        'kontak_pemasok'
     ];
 
     public function financingItems()

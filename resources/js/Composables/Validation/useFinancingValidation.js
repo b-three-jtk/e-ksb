@@ -137,8 +137,8 @@ export function useFinancingValidation(form) {
     const validateStep4 = () => {
         const errs = {}
 
-        if (!form.financing.supplier_id)
-            errs.supplier_name = 'Supplier wajib diisi.'
+        if (!form.financing.pemasok_id)
+            errs.nama_pemasok = 'Pemasok wajib diisi.'
 
         if (!form.financing.cost_price)
             errs.cost_price = 'Harga pokok wajib diisi.'
@@ -272,7 +272,7 @@ function getAllKeysForStep(step) {
             'tenure_year', 'workplace_contact', 'workplace_address',
             'income_slip_file', 'bank_book_file'],
         3: ['financing_name', 'collateral_type'],
-        4: ['supplier_name', 'cost_price', 'purchase_receipt_file'],
+        4: ['nama_pemasok', 'cost_price', 'purchase_receipt_file'],
         5: ['status', 'akad_date', 'akad_document_file', 'payment_method'],
     }
     return map[step] ?? []

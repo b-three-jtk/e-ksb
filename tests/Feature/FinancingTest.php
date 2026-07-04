@@ -11,7 +11,7 @@ use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
-use App\Models\Supplier;
+use App\Models\Pemasok;
 use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\GlobalSettingSeeder;
@@ -286,10 +286,10 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
             'created_at' => now()->subMonths(6),
         ]);
 
-        $supplier = Supplier::create([
-            'supplier_name' => 'PT. Supplier Jaya',
+        $pemasok = Pemasok::create([
+            'nama_pemasok' => 'PT. Pemasok Jaya',
             'contact' => '081234567890',
-            'address' => 'Jl. Supplier No. 1',
+            'alamat_pemasok' => 'Jl. Pemasok No. 1',
         ]);
 
         $response = $this->actingAs($staffMurabahah)
@@ -322,13 +322,13 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
                     'akad_date' => '2024-01-01',
                     'akad_wakalah_date' => '2024-01-02',
                     'status' => 'Angsuran Berjalan',
-                    'supplier_id' => $supplier->id,
+                    'pemasok_id' => $pemasok->id,
                     'specification' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
-                'supplier' => [
-                    'supplier_name' => 'PT. Supplier Jaya',
+                'pemasok' => [
+                    'nama_pemasok' => 'PT. Pemasok Jaya',
                     'contact' => '081234567890',
-                    'address' => 'Jl. Supplier No. 1',
+                    'alamat_pemasok' => 'Jl. Pemasok No. 1',
                 ],
                 'collateral' => [
                     'collateral_type' => 'Motor',

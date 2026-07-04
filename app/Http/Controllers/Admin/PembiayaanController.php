@@ -21,7 +21,7 @@ use App\Models\JournalEntry;
 use App\Models\Anggota;
 use App\Models\JenisBarang;
 use App\Models\AkunSimpanan;
-use App\Models\Supplier;
+use App\Models\Pemasok;
 use App\Models\Pengguna;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PembayaranAngsuranService;
@@ -142,7 +142,7 @@ class PembiayaanController extends Controller
                     'price_per_unit' => $financing->financingItem->price_per_unit,
                     'cost_price' => $financing->cost_price,
                     'margin_amount' => $financing->margin_amount,
-                    'supplier_id' => $financing->financingItem->supplier_id,
+                    'pemasok_id' => $financing->financingItem->pemasok_id,
                     'down_payment' => $financing->down_payment,
                     'payment_method' => $financing->payment_method,
                     'akad_wakalah_date' => $financing->wakalah?->akad_date,
@@ -174,10 +174,10 @@ class PembiayaanController extends Controller
                     'akad_document' => $this->getDocumentUrl($financing->signed_akad_document),
                     'akad_wakalah_document' => $this->getDocumentUrl($financing->wakalah?->signed_akad_document),
                 ],
-                'supplier' => $financing->financingItem->supplier ? [
-                    'supplier_name' => $financing->financingItem->supplier->supplier_name,
-                    'address' => $financing->financingItem->supplier->address,
-                    'contact' => $financing->financingItem->supplier->contact,
+                'pemasok' => $financing->financingItem->pemasok ? [
+                    'nama_pemasok' => $financing->financingItem->pemasok->nama_pemasok,
+                    'alamat_pemasok' => $financing->financingItem->pemasok->alamat_pemasok,
+                    'contact' => $financing->financingItem->pemasok->contact,
                 ] : null,
             ],
         ]);
@@ -206,7 +206,7 @@ class PembiayaanController extends Controller
                     'specification' => $financing->financingItem->specification,
                     'cost_price' => $financing->cost_price,
                     'margin_amount' => $financing->margin_amount,
-                    'supplier_id' => $financing->financingItem->supplier_id,
+                    'pemasok_id' => $financing->financingItem->pemasok_id,
                     'down_payment' => $financing->down_payment,
                     'payment_method' => $financing->payment_method,
                     'akad_date' => $financing->akad_date,
@@ -227,10 +227,10 @@ class PembiayaanController extends Controller
                     'income_slip' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                 ],
-                'supplier' => $financing->financingItem->supplier ? [
-                    'supplier_name' => $financing->financingItem->supplier->supplier_name,
-                    'address' => $financing->financingItem->supplier->address,
-                    'contact' => $financing->financingItem->supplier->contact,
+                'pemasok' => $financing->financingItem->pemasok ? [
+                    'nama_pemasok' => $financing->financingItem->pemasok->nama_pemasok,
+                    'alamat_pemasok' => $financing->financingItem->pemasok->alamat_pemasok,
+                    'contact' => $financing->financingItem->pemasok->contact,
                 ] : null,
             ],
         ]);
@@ -743,16 +743,16 @@ class PembiayaanController extends Controller
 
         return response()->json(['anggota' => $anggota->values()]);
     }
-    public function searchSuppliers(Request $request)
+    public function searchPemasoks(Request $request)
     {
         $query = $request->input('q');
 
-        $suppliers = DB::table('suppliers')
-            ->where('supplier_name', 'ILIKE', "%{$query}%")
+        $pemasok = DB::table('pemasok')
+            ->where('nama_pemasok', 'ILIKE', "%{$query}%")
             ->limit(5)
             ->get();
 
-        return response()->json(['suppliers' => $suppliers]);
+        return response()->json(['pemasok' => $pemasok]);
     }
 
     public function showRepayment(string $id)
@@ -761,7 +761,7 @@ class PembiayaanController extends Controller
             'anggota.user',
             'installment.payment',
             'financingItem.jenisBarang',
-            'financingItem.supplier',
+            'financingItem.pemasok',
             'collateral'
         ])->where('status', '!=', FinancingReqStatusEnum::PAID->value)->findOrFail($id);
 
@@ -869,16 +869,16 @@ class PembiayaanController extends Controller
         return response()->json($jenisBarang);
     }
 
-    public function storeSupplier(Request $request)
+    public function storePemasok(Request $request)
     {
         $validatedData = $request->validate([
-            'supplier_name' => 'required|string|max:255|unique:suppliers,supplier_name',
-            'address' => 'required|string|max:255',
+            'nama_pemasok' => 'required|string|max:255|unique:pemasok,nama_pemasok',
+            'alamat_pemasok' => 'required|string|max:255',
             'contact' => 'required|string|max:255',
         ]);
 
-        $supplier = Supplier::create($validatedData);
+        $pemasok = Pemasok::create($validatedData);
 
-        return response()->json($supplier);
+        return response()->json($pemasok);
     }
 }

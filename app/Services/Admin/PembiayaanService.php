@@ -19,7 +19,7 @@ use App\Models\Heir;
 use App\Models\Installment;
 use App\Models\JournalEntry;
 use App\Models\Anggota;
-use App\Models\Supplier;
+use App\Models\Pemasok;
 use App\Models\Pengguna;
 use App\Models\Wakalah;
 use App\Services\PembiayaanService as SharedPembiayaanService;
@@ -127,7 +127,7 @@ class PembiayaanService
             'relationships' => array_column(HeirEnum::cases(), 'value'),
             'conditions' => array_column(ConditionEnum::cases(), 'value'),
             'jenisBarang' => DB::table('jenis_barang')->select('id', 'nama_jenis_barang')->get(),
-            'suppliers' => DB::table('suppliers')->select('id', 'supplier_name', 'address')->get(),
+            'pemasok' => DB::table('pemasok')->select('id', 'nama_pemasok', 'alamat_pemasok')->get(),
             'margin_percentage' => GlobalSetting::where('key', 'murabahah_margin_percentage')->where('effective_date', '<=', now())->latest()->first()?->value,
         ];
     }
@@ -148,7 +148,7 @@ class PembiayaanService
                 'anggota.heirs',
                 'anggota.memberJobs',
                 'financingItem.jenisBarang',
-                'financingItem.supplier',
+                'financingItem.pemasok',
                 'collateral',
                 'wakalah',
             'verification.verifier'
@@ -172,7 +172,7 @@ class PembiayaanService
                 'anggota.heirs',
                 'anggota.memberJobs',
                 'financingItem.jenisBarang',
-                'financingItem.supplier',
+                'financingItem.pemasok',
                 'collateral',
                 'wakalah',
             ])
@@ -265,7 +265,7 @@ class PembiayaanService
         if (!isset($request['financing']['name'])) return null;
 
         $financingData  = $request['financing'];
-        $supplierData   = $request['supplier'] ?? null;
+        $pemasokData   = $request['pemasok'] ?? null;
         $collateralData = $request['collateral'] ?? null;
 
         $existingFinancing = Financing::where('anggota_id', $user->anggota->id)
@@ -318,12 +318,12 @@ class PembiayaanService
             $financing->update(['requested_date' => now()]);
         }
 
-        $supplier = null;
-        if ($supplierData && isset($supplierData['supplier_name'])) {
-            $supplier = Supplier::updateOrCreate(
-                ['supplier_name' => $supplierData['supplier_name']],
-                ['address' => $supplierData['address'] ?? null,
-                'contact' => $supplierData['contact'] ?? null]
+        $pemasok = null;
+        if ($pemasokData && isset($pemasokData['nama_pemasok'])) {
+            $pemasok = Pemasok::updateOrCreate(
+                ['nama_pemasok' => $pemasokData['nama_pemasok']],
+                ['alamat_pemasok' => $pemasokData['alamat_pemasok'] ?? null,
+                'contact' => $pemasokData['contact'] ?? null]
             );
         }
 
@@ -336,7 +336,7 @@ class PembiayaanService
                 'condition'       => $financingData['condition'] ?? null,
                 'price_per_unit'  => $financingData['price_per_unit'] ?? null,
                 'jenis_barang_id' => $financingData['jenis_barang_id'] ?? null,
-                'supplier_id'     => $financingData['supplier_id'] ?? null,
+                'pemasok_id'     => $financingData['pemasok_id'] ?? null,
                 'purchase_receipt' => $request->hasFile('purchase_receipt_file') ? $request->file('purchase_receipt_file')->store('documents', 'public') : null,
             ]
         );

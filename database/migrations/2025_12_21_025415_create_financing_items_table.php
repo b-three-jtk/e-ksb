@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('purchase_receipt')->nullable();
 
             $table->foreignId('jenis_barang_id')->nullable()->references('id')->on('jenis_barang')->onDelete('set null');
-            $table->foreignId('supplier_id')->nullable()->references('id')->on('suppliers')->onDelete('set null');
+            $table->foreignId('pemasok_id')->nullable()->references('id')->on('pemasok')->onDelete('set null');
             $table->foreignUuid('financing_id')->references('id')->on('financings')->onDelete('cascade');
             $table->timestamps();
         });
