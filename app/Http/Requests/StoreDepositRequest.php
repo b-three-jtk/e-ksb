@@ -23,7 +23,7 @@ class StoreDepositRequest extends FormRequest
     {
         return [
             'anggota_id' => 'required|exists:anggota,id',
-            'saving_account_id' => 'nullable|exists:saving_accounts,id',
+            'akun_simpanan_id' => 'nullable|exists:akun_simpanan,id',
             'saving_category' => 'required|in:'. implode(',', array_column(SavingTypeEnum::cases(), 'value')),
             'amount' => 'required|numeric|min:1',
             'date' => 'required|date|before_or_equal:today',

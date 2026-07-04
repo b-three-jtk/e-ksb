@@ -62,7 +62,7 @@ const isFormValid = computed(() => {
   if (!form) return false
 
   const nominal = Number(form.nominalRaw || 0)
-  const maxWithdrawal = Number(selectedSaving.value?.balance || 0)
+  const maxWithdrawal = Number(selectedSaving.value?.saldo || 0)
 
   return (
     form.nominalRaw &&
@@ -81,7 +81,7 @@ const confirmationData = computed(() => ({
   savingType: selectedSaving.value?.type || '',
   method: currentFormData.value.method || 'Tunai',
   amount: currentFormData.value.nominalRaw || 0,
-  balance: selectedSaving.value?.balance || 0,
+  saldo: selectedSaving.value?.saldo || 0,
   date: currentFormData.value.withdrawalDate || getTodayYmd(),
   bankName: currentFormData.value.bankName || '',
   accountName: currentFormData.value.accountName || '',
@@ -121,7 +121,7 @@ function submitWithdrawal() {
 
   const formData = new FormData()
   formData.append('anggota_id', selectedMember.value.id)
-  formData.append('saving_account_id', selectedSaving.value.id)
+  formData.append('akun_simpanan_id', selectedSaving.value.id)
   formData.append('amount', currentFormData.value.nominalRaw)
   formData.append('withdrawal_date', currentFormData.value.withdrawalDate)
   formData.append('method', currentFormData.value.method)

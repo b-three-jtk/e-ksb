@@ -25,10 +25,10 @@ return new class extends Migration
             $table->string('saving_transaction_receipt')->nullable();
 
             $table->foreignUuid('updated_by')->nullable()->constrained('pengguna')->onDelete('set null');
-            $table->foreignUuid('saving_account_id')->nullable()->constrained('saving_accounts')->onDelete('set null');
+            $table->foreignUuid('akun_simpanan_id')->nullable()->constrained('akun_simpanan')->onDelete('set null');
             $table->string('account_number')->nullable();
             $table->foreign('account_number')->references('account_number')->on('member_bank_accounts')->onDelete('set null');
-            $table->foreignId('point_id')->nullable()->constrained('point_transactions')->onDelete('set null');
+            $table->foreignId('point_id')->nullable()->constrained('poin')->onDelete('set null');
             $table->timestamps();
 
             $table->index('saving_transaction_code');

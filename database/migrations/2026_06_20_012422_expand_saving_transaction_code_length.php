@@ -15,8 +15,8 @@ return new class extends Migration
             $table->string('saving_transaction_code', 20)->change();
         });
 
-        Schema::table('saving_accounts', function (Blueprint $table) {
-            $table->string('saving_account_code', 20)->change();
+        Schema::table('akun_simpanan', function (Blueprint $table) {
+            $table->string('kode_akun_simpanan', 20)->change();
         });
     }
 
@@ -29,8 +29,8 @@ return new class extends Migration
             $table->string('saving_transaction_code', 10)->change();
         });
 
-        Schema::table('saving_accounts', function (Blueprint $table) {
-            $table->string('saving_account_code', 10)->change();
+        Schema::table('akun_simpanan', function (Blueprint $table) {
+            $table->string('kode_akun_simpanan', 10)->change();
         });
     }
 };

@@ -11,7 +11,7 @@ use App\Models\BerjangkaAccount;
 use App\Models\GlobalSetting;
 use App\Models\IbadahAccount;
 use App\Models\Anggota;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use App\Models\SavingTransaction;
 use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
@@ -129,22 +129,22 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
-        $sa = SavingAccount::factory()->create([
+        $sa = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_IBADAH->value,
-            'balance' => 5000000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_IBADAH->value,
+            'saldo' => 5000000,
         ]);
 
         $ia = IbadahAccount::create([
             'target_amount' => 5000000,
             'purpose' => 'Tabungan untuk Haji 2026',
-            'saving_account_id' => $sa->id,
+            'akun_simpanan_id' => $sa->id,
         ]);
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/deposit', [
                 'anggota_id' => $anggota->id,
-                'saving_account_id' => $sa->id,
+                'akun_simpanan_id' => $sa->id,
                 'saving_category' => SavingTypeEnum::TABUNGAN_IBADAH->value,
                 'amount' => 100000,
                 'target_amount' => $ia->target_amount,
@@ -191,16 +191,16 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 500000,
         ]);
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
                 'anggota_id' => $anggota->id,
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
                 'method' => 'Tunai',
@@ -220,16 +220,16 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => 'Tabungan Anggota',
-            'balance' => 200000, // Saldo hanya 200rb
+            'jenis_simpanan' => 'Tabungan Anggota',
+            'saldo' => 200000, // Saldo hanya 200rb
         ]);
 
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
                 'anggota_id' => $anggota->id,
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'amount' => 500000,
                 'withdrawal_date' => now()->format('Y-m-d'),
                 'method' => 'Tunai',
@@ -249,16 +249,16 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
         ])->create();
 
         $waktuBuat = now();
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_BERJANGKA->value,
-            'balance' => 1000000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_BERJANGKA->value,
+            'saldo' => 1000000,
             'created_at' => $waktuBuat,
         ]);
 
         $tenorBulan = 6;
         BerjangkaAccount::create([
-            'saving_account_id' => $savingAccount->id,
+            'akun_simpanan_id' => $akunSimpanan->id,
             'tenor' => $tenorBulan,
             'purpose' => 'Tabungan Berjangka 6 bulan',
         ]);
@@ -266,7 +266,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
                 'anggota_id' => $anggota->id,
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'amount' => 500000,
                 'withdrawal_date' => now()->format('Y-m-d'),
                 'method' => 'Tunai',
@@ -276,7 +276,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
         $expectedMessage = 'Tabungan berjangka belum jatuh tempo. Pencairan dapat dilakukan mulai ' . $expectedMaturityDate->format('d/m/Y');
 
         $response->assertSessionHasErrors([
-            'saving_account_id' => $expectedMessage
+            'akun_simpanan_id' => $expectedMessage
         ]);
     });
 
@@ -288,23 +288,23 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::SIMPANAN_POKOK->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::SIMPANAN_POKOK->value,
+            'saldo' => 500000,
         ]);
 
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
                 'anggota_id' => $anggota->id,
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
                 'method' => 'Tunai',
             ]);
 
         $response->assertSessionHasErrors([
-            'saving_account_id' => 'Simpanan Pokok tidak dapat ditarik selama status keanggotaan masih aktif.'
+            'akun_simpanan_id' => 'Simpanan Pokok tidak dapat ditarik selama status keanggotaan masih aktif.'
         ]);
     });
 
@@ -316,23 +316,23 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::SIMPANAN_WAJIB->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::SIMPANAN_WAJIB->value,
+            'saldo' => 500000,
         ]);
 
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
                 'anggota_id' => $anggota->id,
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
                 'method' => 'Tunai',
             ]);
 
         $response->assertSessionHasErrors([
-            'saving_account_id' => 'Simpanan Wajib tidak dapat ditarik selama status keanggotaan masih aktif.'
+            'akun_simpanan_id' => 'Simpanan Wajib tidak dapat ditarik selama status keanggotaan masih aktif.'
         ]);
     });
 
@@ -343,29 +343,29 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_IBADAH->value,
-            'balance' => 4000000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_IBADAH->value,
+            'saldo' => 4000000,
         ]);
 
         IbadahAccount::create([
             'target_amount' => 5000000,
             'purpose' => 'Tabungan untuk Haji 2026',
-            'saving_account_id' => $savingAccount->id,
+            'akun_simpanan_id' => $akunSimpanan->id,
         ]);
 
         $response = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
                 'anggota_id' => $anggota->id,
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'amount' => 1000000,
                 'withdrawal_date' => now()->format('Y-m-d'),
                 'method' => 'Tunai',
             ]);
 
         $response->assertSessionHasErrors([
-            'saving_account_id' => 'Tabungan ibadah belum mencapai target minimal Rp 5.000.000'
+            'akun_simpanan_id' => 'Tabungan ibadah belum mencapai target minimal Rp 5.000.000'
         ]);
     });
 
@@ -377,10 +377,10 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
             'status' => MemberStatusEnum::PAYMENT_PENDING->value
         ])->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $member1->id,
-            'saving_type' => SavingTypeEnum::SIMPANAN_POKOK->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::SIMPANAN_POKOK->value,
+            'saldo' => 500000,
         ]);
 
         $pjanggota2 = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
@@ -389,7 +389,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
         $res = $this->actingAs($pjanggota2)
             ->post('/admin/savings/withdrawal', [
                 'anggota_id' => $member1->id,
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
                 'method' => 'Tunai',
@@ -442,16 +442,16 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 500000,
         ]);
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
                 'anggota_id' => $anggota->id,
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'amount' => 100000,
                 'withdrawal_date' => now()->format('Y-m-d'),
                 'method' => 'Tunai',
@@ -502,16 +502,16 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
         $pjanggota->syncRoles('Penanggung Jawab Anggota');
         $anggota = Anggota::factory()->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 500000,
         ]);
 
         $res = $this->actingAs($pjanggota)
             ->post('/admin/savings/withdrawal', [
                 'anggota_id' => $anggota->id,
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'amount' => -100000, // Nominal tidak valid
                 'withdrawal_date' => now()->format('Y-m-d'),
                 'method' => 'Tunai',
@@ -541,14 +541,14 @@ describe('Aplikasi harus menyediakan detail transaksi simpanan.', function () {
             'pj_anggota_id' => $pjanggota->id,
         ])->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 500000,
         ]);
 
         $transaction = SavingTransaction::factory()->create([
-            'saving_account_id' => $savingAccount->id,
+            'akun_simpanan_id' => $akunSimpanan->id,
             'saving_amount' => 500000,
             'saving_description' => 'Setoran tabungan anggota baru',
         ]);
@@ -603,14 +603,14 @@ describe('Aplikasi harus menyediakan detail transaksi simpanan.', function () {
             'status' => MemberStatusEnum::PAYMENT_PENDING->value
         ])->create();
 
-        $savingAccount = SavingAccount::factory()->create([
+        $akunSimpanan = AkunSimpanan::factory()->create([
             'anggota_id' => $member1->id,
-            'saving_type' => SavingTypeEnum::SIMPANAN_POKOK->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::SIMPANAN_POKOK->value,
+            'saldo' => 500000,
         ]);
 
         $transaction = SavingTransaction::factory()->create([
-            'saving_account_id' => $savingAccount->id,
+            'akun_simpanan_id' => $akunSimpanan->id,
             'saving_amount' => 500000,
             'saving_description' => 'Setoran pokok anggota baru',
         ]);
@@ -667,14 +667,14 @@ describe('Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan s
         $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->syncRoles('Anggota');
 
-        $sa = SavingAccount::factory()->create([
+        $sa = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 500000,
         ]);
 
         SavingTransaction::factory()->create([
-            'saving_account_id' => $sa->id,
+            'akun_simpanan_id' => $sa->id,
             'saving_amount' => 500000,
             'saving_description' => 'Setoran tabungan anggota baru',
         ]);
@@ -694,14 +694,14 @@ describe('Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan s
         $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->syncRoles('Anggota');
 
-        $sa = SavingAccount::factory()->create([
+        $sa = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 500000,
         ]);
 
         SavingTransaction::factory()->create([
-            'saving_account_id' => $sa->id,
+            'akun_simpanan_id' => $sa->id,
             'saving_amount' => 500000,
             'saving_description' => 'Setoran tabungan anggota baru',
         ]);
@@ -722,14 +722,14 @@ describe('Aplikasi harus menyediakan ekspor tabungan pribadi untuk anggota.', fu
         $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->syncRoles('Anggota');
 
-        $sa = SavingAccount::factory()->create([
+        $sa = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 500000,
         ]);
 
         SavingTransaction::factory()->create([
-            'saving_account_id' => $sa->id,
+            'akun_simpanan_id' => $sa->id,
             'saving_amount' => 500000,
             'saving_description' => 'Setoran tabungan anggota baru',
         ]);
@@ -746,14 +746,14 @@ describe('Aplikasi harus menyediakan ekspor tabungan pribadi untuk anggota.', fu
         $user = Pengguna::where('id', $anggota->pengguna_id)->first();
         $user->syncRoles('Anggota');
 
-        $sa = SavingAccount::factory()->create([
+        $sa = AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 500000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 500000,
         ]);
 
         SavingTransaction::factory()->create([
-            'saving_account_id' => $sa->id,
+            'akun_simpanan_id' => $sa->id,
             'saving_amount' => 500000,
             'saving_description' => 'Setoran tabungan anggota baru',
         ]);
@@ -777,14 +777,14 @@ describe('Aplikasi harus dapat menghitung poin simpanan anggota berdasarkan tota
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
-        SavingAccount::factory()->create([
+        AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'balance' => 2000000,
+            'saldo' => 2000000,
         ]);
 
-        SavingAccount::factory()->create([
+        AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'balance' => 3000000,
+            'saldo' => 3000000,
         ]);
 
         $this->travelTo(now()->endOfMonth());
@@ -792,9 +792,9 @@ describe('Aplikasi harus dapat menghitung poin simpanan anggota berdasarkan tota
         $this->artisan('points:calculate-monthly-savings')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('point_transactions', [
+        $this->assertDatabaseHas('poin', [
             'pengguna_id' => $user->id,
-            'amount_earned' => 50, // 1 poin per 100.000 saldo, total saldo 5.000.000 = 50 poin
+            'jml_perolehan' => 50, // 1 poin per 100.000 saldo, total saldo 5.000.000 = 50 poin
         ]);
 
         $this->travelBack();
@@ -811,9 +811,9 @@ describe('Aplikasi harus dapat menghitung poin simpanan anggota berdasarkan tota
         $threshold = GlobalSetting::where('key', 'saving_point_amount')->first()->value;
         $dummyBalance = ($threshold - 10000); // Saldo di bawah threshold
 
-        SavingAccount::factory()->create([
+        AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'balance' => $dummyBalance,
+            'saldo' => $dummyBalance,
         ]);
 
         $this->travelTo(now()->endOfMonth());
@@ -821,7 +821,7 @@ describe('Aplikasi harus dapat menghitung poin simpanan anggota berdasarkan tota
         $this->artisan('points:calculate-monthly-savings')
             ->assertSuccessful();
 
-        $this->assertDatabaseMissing('point_transactions', [
+        $this->assertDatabaseMissing('poin', [
             'pengguna_id' => $user->id,
         ]);
 
@@ -838,10 +838,10 @@ describe('Sistem mengirimkan notifikasi H-7 sebelum jatuh tempo pembayaran simpa
             'status' => MemberStatusEnum::ACTIVE->value,
         ]);
         
-        SavingAccount::factory()->create([
+        AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 0,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 0,
         ]);
 
         // Simulasikan waktu ke H-7 sebelum akhir bulan (jatuh tempo simpanan wajib)

@@ -22,7 +22,7 @@ class AccountFactory extends Factory
             'account_name' => $this->faker->word(),
             'account_category' => $this->faker->randomElement(['Asset', 'Liability', 'Equity', 'Revenue', 'Expense']),
             'status' => $this->faker->randomElement(['active', 'inactive']),
-            'balance' => $this->faker->randomFloat(2, 1000, 100000), // Random balance between 1,000
+            'saldo' => $this->faker->randomFloat(2, 1000, 100000), // Random balance between 1,000
         ];
     }
 }

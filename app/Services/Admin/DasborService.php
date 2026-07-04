@@ -79,15 +79,15 @@ class DasborService
     public function getTransaksiTerbaru($filter, $role)
     {
         $amount = $role === UserRoleEnum::DPS->value ? 5 : 6;
-        $transaksiSimpanan = SavingTransaction::with('savingAccount.anggota.user')
+        $transaksiSimpanan = SavingTransaction::with('akunSimpanan.anggota.user')
             ->latest()->take($amount)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
                 'no_transaksi' => $t->saving_transaction_code,
-                'anggota' => $t->savingAccount->anggota->user->nama,
+                'anggota' => $t->akunSimpanan->anggota->user->nama,
                 'jumlah' => $t->amount,
-                'produk' => $t->savingAccount->saving_type,
-                'akad' => $this->getAkadSimpanan($t->savingAccount->saving_type),
+                'produk' => $t->akunSimpanan->jenis_simpanan,
+                'akad' => $this->getAkadSimpanan($t->akunSimpanan->jenis_simpanan),
                 'tanggal' => $t->created_at->toDateString(),
             ]);
 
@@ -186,8 +186,8 @@ class DasborService
 
     public function getTotalSimpananAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, $tipe)
     {
-        $total = SavingTransaction::with('savingAccount.anggota')
-            ->whereHas('savingAccount.anggota', function ($q) {
+        $total = SavingTransaction::with('akunSimpanan.anggota')
+            ->whereHas('akunSimpanan.anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             })
             ->where('transaction_type', $tipe)
@@ -196,7 +196,7 @@ class DasborService
 
         $persen = $this->hitungPersen(
             $total,
-            SavingTransaction::whereHas('savingAccount.anggota', function ($q) {
+            SavingTransaction::whereHas('akunSimpanan.anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             })
                 ->where('transaction_type', $tipe)
@@ -267,7 +267,7 @@ class DasborService
             'anggota.user',
             'reference' => function (MorphTo $morphTo) {
                 $morphTo->morphWith([
-                    SavingTransaction::class => ['savingAccount'],
+                    SavingTransaction::class => ['akunSimpanan'],
                     Installment::class => ['financing'],
                 ]);
             }
@@ -349,15 +349,15 @@ class DasborService
 
     public function getTransaksiSimpananTerbaru($tanggalAkhir, $filter)
     {
-        $query = SavingTransaction::with(['savingAccount.anggota.user'])
-            ->whereHas('savingAccount.anggota', function ($q) {
+        $query = SavingTransaction::with(['akunSimpanan.anggota.user'])
+            ->whereHas('akunSimpanan.anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             })
             ->where('created_at', '<=', $tanggalAkhir);
 
         if ($filter !== 'all') {
-            $query->whereHas('savingAccount', function ($q) use ($filter) {
-                $q->where('saving_type', $filter);
+            $query->whereHas('akunSimpanan', function ($q) use ($filter) {
+                $q->where('jenis_simpanan', $filter);
             });
         }
 
@@ -367,9 +367,9 @@ class DasborService
             ->map(fn($t) => [
                 'id' => $t->id,
                 'no_transaksi' => $t->saving_transaction_code,
-                'anggota' => $t->savingAccount->anggota?->user?->nama ?? '-',
+                'anggota' => $t->akunSimpanan->anggota?->user?->nama ?? '-',
                 'jumlah' => $t->saving_amount,
-                'produk' => $t->savingAccount->saving_type,
+                'produk' => $t->akunSimpanan->jenis_simpanan,
             ])
             ->toArray();
 
@@ -609,9 +609,9 @@ class DasborService
      */
     private function mapJatuhTempoSimpanan($notif, $ref, $savingDueDate, $savingNominal): ?array
     {
-        $account = $ref->savingAccount;
+        $account = $ref->akunSimpanan;
 
-        if ($account?->saving_type !== SavingTypeEnum::SIMPANAN_WAJIB->value) {
+        if ($account?->jenis_simpanan !== SavingTypeEnum::SIMPANAN_WAJIB->value) {
             return null;
         }
 
@@ -619,7 +619,7 @@ class DasborService
             'id' => $account->id,
             'anggota' => $notif->anggota?->user?->nama ?? '-',
             'nominal' => $savingNominal,
-            'produk' => $account->saving_type,
+            'produk' => $account->jenis_simpanan,
             'jatuh_tempo' => Carbon::parse($ref->created_at)->addDays((int) $savingDueDate)->toDateString(),
             'status_notifikasi' => $notif->status ?? 'Belum Terkirim',
         ];

@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('point_transactions', function (Blueprint $table) {
+        Schema::create('poin', function (Blueprint $table) {
             $table->id();
-            $table->integer('amount_earned');
-            $table->text('activity_description');
+            $table->integer('jml_perolehan');
+            $table->text('deskripsi');
+            $table->date('periode_kalkulasi')->nullable();
+            $table->decimal('sisa_tabungan_snapshot', 15, 2)->default(0);
             $table->foreignUuid('pengguna_id')->nullable()->constrained('pengguna')->onDelete('set null');
             $table->timestamps();
         });
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('point_transactions');
+        Schema::dropIfExists('poin');
     }
 };

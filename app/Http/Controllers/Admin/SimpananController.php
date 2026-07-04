@@ -16,7 +16,7 @@ use App\Models\BerjangkaAccount;
 use App\Models\IbadahAccount;
 use App\Models\Anggota;
 use App\Models\MemberBankAccount;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use App\Models\SavingTransaction;
 use App\Models\Account;
 use App\Services\Admin\JurnalService;
@@ -87,12 +87,12 @@ class SimpananController extends Controller
 
     public function show(string $id)
     {
-        $anggota = SavingTransaction::with('savingAccount.anggota.user')->findOrFail($id)->savingAccount->anggota;
+        $anggota = SavingTransaction::with('akunSimpanan.anggota.user')->findOrFail($id)->akunSimpanan->anggota;
         if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $anggota->pj_anggota_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki izin untuk melihat detail transaksi simpanan ini.');
         }
 
-        $data = SavingTransaction::with('savingAccount.anggota.user', 'memberBankAccount')->find($id);
+        $data = SavingTransaction::with('akunSimpanan.anggota.user', 'memberBankAccount')->find($id);
         $saving_transaction_receipt = $data->saving_transaction_receipt ? Storage::url($data->saving_transaction_receipt) : null;
 
         return inertia('Admin/Savings/Show', [
@@ -105,7 +105,7 @@ class SimpananController extends Controller
     {
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
             'anggota'      => $this->simpananService->getMembersForDeposit(),
-            'saving_types' => collect(SavingTypeEnum::cases())->map(fn($c) => $c->value),
+            'jenis_simpanans' => collect(SavingTypeEnum::cases())->map(fn($c) => $c->value),
             'pengurus'     => ['nama' => Auth::user()->nama ?? 'Pengurus'],
             'global_saving' => [
                 'pokok' => $this->simpananService->getSettingValue('saving_pokok_amount'),
@@ -135,22 +135,22 @@ class SimpananController extends Controller
             abort(403, 'Anda tidak berhak melakukan transaksi untuk anggota ini.');
         }
 
-        $savingAccount = $this->simpananService->resolveOrCreateSavingAccount($data, $anggota);
+        $akunSimpanan = $this->simpananService->resolveOrCreateSavingAccount($data, $anggota);
 
         Log::info('Saving account for anggota', [
             'anggota_id'            => $anggota->id,
-            'saving_account_id'    => $savingAccount->id,
-            'was_recently_created' => $savingAccount->wasRecentlyCreated,
+            'akun_simpanan_id'    => $akunSimpanan->id,
+            'was_recently_created' => $akunSimpanan->wasRecentlyCreated,
         ]);
 
-        $this->simpananService->validateDepositRules($data, $savingAccount, $anggota);
+        $this->simpananService->validateDepositRules($data, $akunSimpanan, $anggota);
 
-        $prevBalance = $savingAccount->balance;
-        $transaction = $this->simpananService->createDepositTransaction($data, $savingAccount, $anggota);
+        $saldoSebelumnya = $akunSimpanan->saldo;
+        $transaction = $this->simpananService->createDepositTransaction($data, $akunSimpanan, $anggota);
 
         Log::info('Deposit transaction created', [
             'transaction_id'    => $transaction->id,
-            'saving_account_id' => $savingAccount->id,
+            'akun_simpanan_id' => $akunSimpanan->id,
             'amount'            => $transaction->saving_amount,
             'new_balance'       => $transaction->balance_after_transaction,
         ]);
@@ -164,8 +164,8 @@ class SimpananController extends Controller
             'jenis'         => $data['saving_category'],
             'metode'        => $transaction->saving_payment_method,
             'nominal'       => $transaction->saving_amount,
-            'saldo_sebelum' => $prevBalance,
-            'saldo_sesudah' => $prevBalance + $transaction->saving_amount,
+            'saldo_sebelum' => $saldoSebelumnya,
+            'saldo_sesudah' => $saldoSebelumnya + $transaction->saving_amount,
             'purpose'       => $data['purpose'] ?? null,
         ];
 
@@ -174,7 +174,7 @@ class SimpananController extends Controller
 
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
             'anggota'      => $this->simpananService->getMembersForDeposit(),
-            'saving_types' => collect(SavingTypeEnum::cases())->map(fn($c) => $c->value),
+            'jenis_simpanans' => collect(SavingTypeEnum::cases())->map(fn($c) => $c->value),
             'pengurus'     => ['nama' => Auth::user()->nama ?? 'Pengurus'],
             'global_saving' => [
                 'pokok' => $this->simpananService->getSettingValue('saving_pokok_amount'),
@@ -225,14 +225,14 @@ class SimpananController extends Controller
             ->when($includeBankAccounts, function ($q) {
                 $q->with([
                     'user',
-                    'savingAccounts.ibadah',
-                    'savingAccounts.berjangka',
+                    'akunSimpanan.ibadah',
+                    'akunSimpanan.berjangka',
                     'bankAccounts' => function ($subQuery) {
                         $subQuery->latest();
                     },
                 ]);
             }, function ($q) {
-                $q->with(['user:id,kode_pengguna,nama', 'savingAccounts.ibadah', 'savingAccounts.berjangka']);
+                $q->with(['user:id,kode_pengguna,nama', 'akunSimpanan.ibadah', 'akunSimpanan.berjangka']);
             })
             ->whereIn('status', [
                 MemberStatusEnum::ACTIVE->value,
@@ -252,11 +252,11 @@ class SimpananController extends Controller
                     'id' => $anggota->id,
                     'nama' => $anggota->user?->nama,
                     'kode_pengguna' => $anggota->user?->kode_pengguna,
-                    'savingAccounts' => $anggota->savingAccounts->map(function ($acc) {
+                    'akunSimpanan' => $anggota->akunSimpanan->map(function ($acc) {
                         return [
                             'id' => $acc->id,
-                            'type' => $acc->saving_type ?? '-',
-                            'balance' => $acc->balance ?? 0,
+                            'type' => $acc->jenis_simpanan ?? '-',
+                            'saldo' => $acc->saldo ?? 0,
                             'tenor_months' => $acc->berjangka?->tenor,
                             'target_amount' => $acc->ibadah?->target_amount,
                             'opened_at' => optional($acc->created_at)->toDateString(),
@@ -277,15 +277,15 @@ class SimpananController extends Controller
                 'kode_pengguna' => $anggota->user->kode_pengguna,
                 'nama' => $anggota->user->nama,
                 'status' => $anggota->status,
-                'savingAccounts' => $anggota->savingAccounts->map(fn($acc) => [
-                    'type' => $acc->saving_type ?? null,
+                'akunSimpanan' => $anggota->akunSimpanan->map(fn($acc) => [
+                    'type' => $acc->jenis_simpanan ?? null,
                     'purpose' => $acc->ibadah?->purpose ?? $acc->berjangka?->purpose ?? null,
-                    'balance' => $acc->balance ?? 0,
+                    'saldo' => $acc->saldo ?? 0,
                     'target_amount' => $acc->ibadah?->target_amount ?? null,
                     'matured_at' => $acc->berjangka?->tenor && $acc->created_at
                         ? $acc->created_at->copy()->addMonths($acc->berjangka->tenor)->format('d M Y')
                         : null,
-                    'is_frozen' => !is_null($acc->ibadah?->target_amount) && $acc->balance >= $acc->ibadah->target_amount,
+                    'is_frozen' => !is_null($acc->ibadah?->target_amount) && $acc->saldo >= $acc->ibadah->target_amount,
                     'is_matured' => $acc->berjangka?->tenor && $acc->created_at
                         ? now()->gte($acc->created_at->copy()->addMonths($acc->berjangka->tenor))
                         : false,

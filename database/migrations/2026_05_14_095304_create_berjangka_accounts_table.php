@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->integer('tenor');
             $table->string('purpose');
-            $table->uuid('saving_account_id');
+            $table->uuid('akun_simpanan_id');
 
-            $table->foreign('saving_account_id')->references('id')->on('saving_accounts')->onDelete('cascade');
+            $table->foreign('akun_simpanan_id')->references('id')->on('akun_simpanan')->onDelete('cascade');
 
             $table->timestamps();
         });

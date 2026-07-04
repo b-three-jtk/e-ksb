@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('no_ref_account')->primary();
             $table->string('account_name');
             $table->enum('account_category', array_column(AccountCategoryEnum::cases(), 'value'));
-            $table->decimal('balance', 15, 2)->default(0);
+            $table->decimal('saldo', 15, 2)->default(0);
             $table->enum('status', ['Aktif', 'Non-Aktif'])->default('Aktif');
             $table->timestamps();
         });

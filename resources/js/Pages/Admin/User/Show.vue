@@ -412,18 +412,18 @@ const breadcrumbItems = [
                     <h1 class="card-title">Akun</h1>
                     <div
                         v-if="
-                            user.anggota.saving_accounts?.length &&
-                            user.anggota.saving_accounts?.length
+                            user.anggota.akun_simpanan?.length &&
+                            user.anggota.akun_simpanan?.length
                         "
                         class="flex flex-col gap-4"
                     >
                         <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
                             <div
-                                v-for="account in user.anggota.saving_accounts"
+                                v-for="account in user.anggota.akun_simpanan"
                                 class="card-layout flex flex-col gap-12"
                             >
                                 <h1 class="card-title">
-                                    {{ account.saving_type }}
+                                    {{ account.jenis_simpanan }}
                                 </h1>
                                 <ul
                                     class="grid sm:grid-cols-2 grid-cols-1 gap-6"
@@ -437,7 +437,7 @@ const breadcrumbItems = [
                                             class="font-medium text-dark-text dark:text-white"
                                             >{{
                                                 parseCurrencyAmount(
-                                                    account.balance,
+                                                    account.saldo,
                                                 )
                                             }}</span
                                         >

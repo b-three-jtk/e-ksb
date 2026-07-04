@@ -22,7 +22,7 @@ class StoreWithdrawalRequest extends FormRequest
     {
         return [
             'anggota_id' => 'required|exists:anggota,id',
-            'saving_account_id' => 'required|exists:saving_accounts,id',
+            'akun_simpanan_id' => 'required|exists:akun_simpanan,id',
             'amount' => 'required|numeric|min:1',
             'withdrawal_date' => 'required|date|before_or_equal:today',
             'method' => 'required|in:Tunai,Non-Tunai',

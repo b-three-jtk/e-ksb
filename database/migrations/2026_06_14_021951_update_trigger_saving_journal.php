@@ -18,23 +18,23 @@ return new class extends Migration
                 v_saving_ref  VARCHAR;
                 v_debit_ref   VARCHAR;
                 v_credit_ref  VARCHAR;
-                v_saving_type VARCHAR;
+                v_jenis_simpanan VARCHAR;
             BEGIN
-                SELECT saving_type INTO v_saving_type
-                FROM saving_accounts
-                WHERE id = NEW.saving_account_id;
+                SELECT jenis_simpanan INTO v_jenis_simpanan
+                FROM akun_simpanan
+                WHERE id = NEW.akun_simpanan_id;
 
                 SELECT no_ref_account INTO v_kas_ref
                 FROM accounts WHERE account_name = 'Kas' LIMIT 1;
 
                 SELECT no_ref_account INTO v_saving_ref
-                FROM accounts WHERE account_name = v_saving_type LIMIT 1;
+                FROM accounts WHERE account_name = v_jenis_simpanan LIMIT 1;
 
                 IF v_kas_ref IS NULL THEN
                     RAISE EXCEPTION 'Akun Kas tidak ditemukan';
                 END IF;
                 IF v_saving_ref IS NULL THEN
-                    RAISE EXCEPTION 'Akun untuk saving_type ''%'' tidak ditemukan', v_saving_type;
+                    RAISE EXCEPTION 'Akun untuk jenis_simpanan ''%'' tidak ditemukan', v_jenis_simpanan;
                 END IF;
 
                 IF NEW.transaction_type = 'Penyetoran' THEN

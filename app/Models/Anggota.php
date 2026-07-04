@@ -9,7 +9,7 @@ use App\Models\MemberBankAccount;
 use App\Models\MemberDoc;
 use App\Models\MemberJob;
 use App\Models\Notification;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -36,9 +36,9 @@ class Anggota extends Model
     ];
 
     // Simpanan
-    public function savingAccounts()
+    public function akunSimpanan()
     {
-        return $this->hasMany(SavingAccount::class);
+        return $this->hasMany(AkunSimpanan::class);
     }
 
     // Detail Anggota

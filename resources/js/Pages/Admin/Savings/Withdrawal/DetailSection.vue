@@ -80,8 +80,8 @@ function validateNominal() {
     return
   }
 
-  if (form.value.nominalRaw && nominal > props.selectedSaving.balance) {
-    errors.value.nominal = `Nominal tidak boleh melebihi saldo (${formatRp(props.selectedSaving.balance)})`
+  if (form.value.nominalRaw && nominal > props.selectedSaving.saldo) {
+    errors.value.nominal = `Nominal tidak boleh melebihi saldo (${formatRp(props.selectedSaving.saldo)})`
   }
 }
 
@@ -232,9 +232,9 @@ watch(() => props.selectedSaving?.id, (newId, oldId) => {
   errors.value = {}
 
   if (props.selectedSaving?.isFullWithdrawal) {
-    const balance = String(props.selectedSaving.balance || 0)
-    form.value.nominalRaw = balance
-    form.value.nominalDisplay = formatRp(balance)
+    const saldo = String(props.selectedSaving.saldo || 0)
+    form.value.nominalRaw = saldo
+    form.value.nominalDisplay = formatRp(saldo)
   } else {
     form.value.nominalRaw = ''
     form.value.nominalDisplay = ''

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\SavingTypeEnum;
 use App\Models\Anggota;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use App\Models\SavingTransaction;
 use App\Models\Pengguna;
 use Carbon\Carbon;
@@ -50,17 +50,17 @@ class SavingProductSeeder extends Seeder
 
     private function seedSimpananPokok(Anggota $anggota, Pengguna $admin): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'SP-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::SIMPANAN_POKOK->value,
-            'balance' => 100000,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'SP-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::SIMPANAN_POKOK->value,
+            'saldo' => 100000,
             'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(12),
         ]);
 
         // Transaksi awal (setor simpanan pokok)
         SavingTransaction::create([
-            'saving_account_id' => $account->id,
+            'akun_simpanan_id' => $account->id,
             'saving_transaction_code' => 'SP' . str_pad($anggota->id, 8, '0', STR_PAD_LEFT),
             'transaction_type' => 'Penyetoran',
             'saving_amount' => 100000,
@@ -74,24 +74,24 @@ class SavingProductSeeder extends Seeder
 
     private function seedSimpananWajib(Anggota $anggota, Pengguna $admin): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'SW-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::SIMPANAN_WAJIB->value,
-            'balance' => 600000,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'SW-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::SIMPANAN_WAJIB->value,
+            'saldo' => 600000,
             'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(12),
         ]);
 
         // Transaksi bulanan selama 12 bulan
-        $balance = 0;
+        $saldo = 0;
         for ($i = 1; $i <= 12; $i++) {
-            $balance += 50000;
+            $saldo += 50000;
             SavingTransaction::create([
-                'saving_account_id' => $account->id,
+                'akun_simpanan_id' => $account->id,
                 'saving_transaction_code' => 'SW' . str_pad($anggota->id, 4, '0', STR_PAD_LEFT) . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'transaction_type' => 'Penyetoran',
                 'saving_amount' => 50000,
-                'balance_after_transaction' => $balance,
+                'balance_after_transaction' => $saldo,
                 'transaction_date' => now()->subMonths(13 - $i),
                 'saving_payment_method' => 'Tunai',
                 'saving_description' => 'Setoran Simpanan Wajib Bulan ke-' . $i,
@@ -102,16 +102,16 @@ class SavingProductSeeder extends Seeder
 
     private function seedTabunganAnggota(Anggota $anggota, Pengguna $admin, $amount): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'TA-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => $amount,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'TA-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => $amount,
             'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(8),
         ]);
 
         SavingTransaction::create([
-            'saving_account_id' => $account->id,
+            'akun_simpanan_id' => $account->id,
             'saving_transaction_code' => 'TA' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
             'transaction_type' => 'Penyetoran',
             'saving_amount' => $amount,
@@ -125,16 +125,16 @@ class SavingProductSeeder extends Seeder
 
     private function seedTabunganBerjangka(Anggota $anggota, Pengguna $admin, $amount): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'TB-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::TABUNGAN_BERJANGKA->value,
-            'balance' => $amount,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'TB-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_BERJANGKA->value,
+            'saldo' => $amount,
             'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(6),
         ]);
 
         SavingTransaction::create([
-            'saving_account_id' => $account->id,
+            'akun_simpanan_id' => $account->id,
             'saving_transaction_code' => 'TB' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
             'transaction_type' => 'Penyetoran',
             'saving_amount' => $amount,
@@ -148,16 +148,16 @@ class SavingProductSeeder extends Seeder
 
     private function seedTabunganIbadah(Anggota $anggota, Pengguna $admin, $amount): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'TI-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::TABUNGAN_IBADAH->value,
-            'balance' => $amount,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'TI-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_IBADAH->value,
+            'saldo' => $amount,
             'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(10),
         ]);
 
         SavingTransaction::create([
-            'saving_account_id' => $account->id,
+            'akun_simpanan_id' => $account->id,
             'saving_transaction_code' => 'TI' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
             'transaction_type' => 'Penyetoran',
             'saving_amount' => $amount,

@@ -18,7 +18,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Kas',
             'account_category' => AccountCategoryEnum::ASSET->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -26,7 +26,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Dana Alokasi Pembiayaan Murabahah',
             'account_category' => AccountCategoryEnum::ASSET->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -34,7 +34,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Pembiayaan Dalam Proses',
             'account_category' => AccountCategoryEnum::ASSET->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -42,7 +42,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Piutang Murabahah',
             'account_category' => AccountCategoryEnum::ASSET->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -50,7 +50,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Tabungan Anggota',
             'account_category' => AccountCategoryEnum::LIABILITY->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -58,7 +58,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Tabungan Berjangka',
             'account_category' => AccountCategoryEnum::LIABILITY->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -66,7 +66,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Tabungan Ibadah',
             'account_category' => AccountCategoryEnum::LIABILITY->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -74,7 +74,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Uang Muka Murabahah',
             'account_category' => AccountCategoryEnum::LIABILITY->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -82,7 +82,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Simpanan Pokok',
             'account_category' => AccountCategoryEnum::EQUITY->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -90,7 +90,7 @@ class AccountSeeder extends Seeder
             'account_name' => 'Simpanan Wajib',
             'account_category' => AccountCategoryEnum::EQUITY->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         Account::factory()->create([
@@ -98,12 +98,12 @@ class AccountSeeder extends Seeder
             'account_name' => 'Pendapatan Margin Murabahah',
             'account_category' => AccountCategoryEnum::REVENUE->value,
             'status' => 'Aktif',
-            'balance' => 0,
+            'saldo' => 0,
         ]);
 
         // mengisi dana alokasi pembiayaan murabahah dengan saldo awal
         $danaAlokasiPembiayaanMurabahah = Account::where('no_ref_account', '102')->first();
-        $danaAlokasiPembiayaanMurabahah->balance = 200000000; // saldo awal sebesar 200 juta
+        $danaAlokasiPembiayaanMurabahah->saldo = 200000000; // saldo awal sebesar 200 juta
         $danaAlokasiPembiayaanMurabahah->save();
     }
 }

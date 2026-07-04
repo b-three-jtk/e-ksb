@@ -7,7 +7,7 @@ use App\Models\Financing;
 use App\Models\Installment;
 use App\Models\Anggota;
 use App\Models\ProductType;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use App\Models\Supplier;
 use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
@@ -33,10 +33,10 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $this->userMember->assignRole('Anggota');
         $this->anggota = Anggota::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
 
-        SavingAccount::factory()->create([
+        AkunSimpanan::factory()->create([
             'anggota_id' => $this->anggota->id,
-            'balance' => 10000000,
-            'saving_type' => 'Tabungan Anggota',
+            'saldo' => 10000000,
+            'jenis_simpanan' => 'Tabungan Anggota',
             'created_at' => now()->subMonths(6),
         ]);
 

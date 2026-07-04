@@ -49,7 +49,7 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Kategori Simpanan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_account.saving_type
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_account.jenis_simpanan
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">

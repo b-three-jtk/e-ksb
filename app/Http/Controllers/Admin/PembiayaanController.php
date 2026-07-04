@@ -20,7 +20,7 @@ use App\Models\GlobalSetting;
 use App\Models\JournalEntry;
 use App\Models\Anggota;
 use App\Models\ProductType;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use App\Models\Supplier;
 use App\Models\Pengguna;
 use App\Services\Admin\JurnalService;
@@ -390,7 +390,7 @@ class PembiayaanController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $validated = $request->validated();
-                $user = Pengguna::with('anggota.savingAccounts')
+                $user = Pengguna::with('anggota.akunSimpanan')
                     ->where('kode_pengguna', $validated['anggota']['kode_pengguna'])
                     ->firstOrFail();
 
@@ -405,8 +405,8 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
                 }
 
-                $hasEligibleSaving = SavingAccount::where('anggota_id', $user->anggota->id)
-                    ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+                $hasEligibleSaving = AkunSimpanan::where('anggota_id', $user->anggota->id)
+                    ->where('jenis_simpanan', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
                     ->where('created_at', '<=', now()->subMonth())
                     ->exists();
 
@@ -434,7 +434,7 @@ class PembiayaanController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $validated = $request->validated();
-                $user = Pengguna::with('anggota.savingAccounts')
+                $user = Pengguna::with('anggota.akunSimpanan')
                     ->where('kode_pengguna', $validated['anggota']['kode_pengguna'])
                     ->firstOrFail();
 
@@ -442,8 +442,8 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon harus dalam status aktif']);
                 }
 
-                $hasEligibleSaving = SavingAccount::where('anggota_id', $user->anggota->id)
-                    ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+                $hasEligibleSaving = AkunSimpanan::where('anggota_id', $user->anggota->id)
+                    ->where('jenis_simpanan', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
                     ->where('created_at', '<=', now()->subMonth())
                     ->exists();
 
@@ -681,7 +681,7 @@ class PembiayaanController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $validated = $request->validated();
-                $user = Pengguna::with('anggota.savingAccounts')
+                $user = Pengguna::with('anggota.akunSimpanan')
                     ->where('kode_pengguna', $validated['anggota']['kode_pengguna'])
                     ->firstOrFail();
 
@@ -703,7 +703,7 @@ class PembiayaanController extends Controller
         $query = $request->input('q');
 
         $anggota = Anggota::query()
-            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'financings:id,status', 'savingAccounts:id,balance,created_at'])
+            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'financings:id,status', 'akunSimpanan:id,saldo,created_at'])
             ->whereHas('user', function ($q) use ($query) {
                 $q->whereHas('roles', fn($roleQ) => $roleQ->where('name', 'Anggota'))
                     ->where('status', UserStatusEnum::ACTIVE->value)
@@ -723,8 +723,8 @@ class PembiayaanController extends Controller
 
                 $anggota->is_have_no_obligation = !$hasActiveFinancing;
 
-                $hasEligibleSaving = SavingAccount::where('anggota_id', $anggota->id)
-                    ->where('saving_type', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+                $hasEligibleSaving = AkunSimpanan::where('anggota_id', $anggota->id)
+                    ->where('jenis_simpanan', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
                     ->where('created_at', '<=', now()->subMonth())
                     ->exists();
 

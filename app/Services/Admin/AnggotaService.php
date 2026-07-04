@@ -7,7 +7,7 @@ use App\Enums\UserStatusEnum;
 use App\Models\Financing;
 use App\Models\Heir;
 use App\Models\Pengguna;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +21,7 @@ class AnggotaService
         $sortBy  = in_array($request->sort_by, $allowedSorts) ? $request->sort_by : 'tgl_bergabung';
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
 
-        $query = Pengguna::with('anggota.savingAccounts')
+        $query = Pengguna::with('anggota.akunSimpanan')
             ->whereHas('anggota')
             ->whereNotNull('tgl_bergabung')
             ->whereNotNull('kode_pengguna');
@@ -58,9 +58,9 @@ class AnggotaService
                 'phone'         => $user->no_telp,
                 'status'        => $user->status,
                 'total_simpanan' => 'Rp ' . number_format(
-                    DB::table('saving_accounts')
+                    DB::table('akun_simpanan')
                         ->where('anggota_id', $user->anggota?->id)
-                        ->sum('balance') ?? 0,
+                        ->sum('saldo') ?? 0,
                     0, ',', '.'
                 ),
                 'avatar' => $user->foto_profil
@@ -102,8 +102,8 @@ class AnggotaService
         $user = Pengguna::with([
             'anggota.memberDocs',
             'roles',
-            'anggota.savingAccounts.transactions' => fn($q) => $q->orderBy('transaction_date', 'desc'),
-            'anggota.savingAccounts',
+            'anggota.akunSimpanan.transactions' => fn($q) => $q->orderBy('transaction_date', 'desc'),
+            'anggota.akunSimpanan',
             'anggota.heirs',
             'anggota.financings.installment.payment',
             'anggota.financings.financingItem',
@@ -182,7 +182,7 @@ class AnggotaService
 
     public function getMutasiSimpananAnggota($accountId)
     {
-        return SavingAccount::with([
+        return AkunSimpanan::with([
             'transactions' => fn($q) => $q->latest('transaction_date')
         ])->findOrFail($accountId);
     }

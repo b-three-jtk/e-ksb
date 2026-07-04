@@ -11,7 +11,7 @@ use App\Models\GlobalSetting;
 use App\Models\BerjangkaAccount;
 use App\Models\IbadahAccount;
 use App\Models\Anggota;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use App\Models\SavingTransaction;
 use App\Services\PengaturanUmumService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -80,7 +80,7 @@ class SimpananService
     {
         $prefix  = $this->getAccountPrefix($category);
         $yymm    = now()->format('ym');
-        $lastNo  = SavingAccount::where('saving_account_code', 'like', "{$prefix}{$yymm}%")
+        $lastNo  = AkunSimpanan::where('kode_akun_simpanan', 'like', "{$prefix}{$yymm}%")
             ->count();
         $seq     = str_pad((string)($lastNo + 1), 4, '0', STR_PAD_LEFT);
 
@@ -128,40 +128,40 @@ class SimpananService
         ];
 
         $query = SavingTransaction::with([
-            'savingAccount.anggota.user',
-            'savingAccount',
+            'akunSimpanan.anggota.user',
+            'akunSimpanan',
         ]);
 
         if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value)) {
-            $query->whereHas('savingAccount.anggota', function ($q) {
+            $query->whereHas('akunSimpanan.anggota', function ($q) {
                 $q->where('pj_anggota_id', Auth::id());
             });
         }
 
         return $query
             ->when($search, function ($q) use ($search) {
-                $q->whereHas('savingAccount.anggota.user', function ($m) use ($search) {
+                $q->whereHas('akunSimpanan.anggota.user', function ($m) use ($search) {
                     $m->where('nama', 'like', "%{$search}%")
                         ->orWhere('nik', 'like', "%{$search}%")
                         ->orWhere('kode_pengguna', 'like', "%{$search}%");
                 });
             })
             ->when(isset($typeMap[$tab]), function ($q) use ($typeMap, $tab) {
-                $q->whereHas('savingAccount', function ($sa) use ($typeMap, $tab) {
-                    $sa->where('saving_type', $typeMap[$tab]);
+                $q->whereHas('akunSimpanan', function ($sa) use ($typeMap, $tab) {
+                    $sa->where('jenis_simpanan', $typeMap[$tab]);
                 });
             })
             ->when($tab === 'simpanan', function ($q) {
-                $q->whereHas('savingAccount', function ($sa) {
-                    $sa->whereIn('saving_type', [
+                $q->whereHas('akunSimpanan', function ($sa) {
+                    $sa->whereIn('jenis_simpanan', [
                         SavingTypeEnum::SIMPANAN_POKOK->value,
                         SavingTypeEnum::SIMPANAN_WAJIB->value,
                     ]);
                 });
             })
             ->when($tab === 'tabungan', function ($q) {
-                $q->whereHas('savingAccount', function ($sa) {
-                    $sa->whereIn('saving_type', [
+                $q->whereHas('akunSimpanan', function ($sa) {
+                    $sa->whereIn('jenis_simpanan', [
                         SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                         SavingTypeEnum::TABUNGAN_BERJANGKA->value,
                         SavingTypeEnum::TABUNGAN_IBADAH->value,
@@ -185,13 +185,13 @@ class SimpananService
                 'id'           => $trx->id,
                 'no_transaksi' => $trx->saving_transaction_code,
                 'tanggal'      => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                'anggota'      => $trx->savingAccount->anggota->user->kode_pengguna
+                'anggota'      => $trx->akunSimpanan->anggota->user->kode_pengguna
                                 . ' - '
-                                . $trx->savingAccount->anggota->user->nama,
+                                . $trx->akunSimpanan->anggota->user->nama,
                 'nominal'      => $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
                                 ? -$trx->saving_amount
                                 : $trx->saving_amount,
-                'produk'       => $trx->savingAccount->saving_type,
+                'produk'       => $trx->akunSimpanan->jenis_simpanan,
                 'jenis'        => $trx->transaction_type,
             ]);
 
@@ -263,8 +263,8 @@ class SimpananService
         )
         ->with([
             'user:id,kode_pengguna,nama',
-            'savingAccounts.ibadah',
-            'savingAccounts.berjangka',
+            'akunSimpanan.ibadah',
+            'akunSimpanan.berjangka',
         ]);
 
         return $query->get()->map(fn($anggota) => [
@@ -272,23 +272,23 @@ class SimpananService
             'kode_pengguna'     => $anggota->user->kode_pengguna,
             'nama'          => $anggota->user->nama,
             'status'        => $anggota->status,
-            'savingAccounts' => $anggota->savingAccounts
+            'akunSimpanan' => $anggota->akunSimpanan
                 ->filter(function ($acc) {
-                    if ($acc->saving_type === 'Tabungan Ibadah')    return $acc->ibadah;
-                    if ($acc->saving_type === 'Tabungan Berjangka') return $acc->berjangka;
+                    if ($acc->jenis_simpanan === 'Tabungan Ibadah')    return $acc->ibadah;
+                    if ($acc->jenis_simpanan === 'Tabungan Berjangka') return $acc->berjangka;
                     return true;
                 })
                 ->map(fn($acc) => [
                     'id'            => $acc->id,
-                    'type'          => $acc->saving_type ?? null,
+                    'type'          => $acc->jenis_simpanan ?? null,
                     'purpose'       => $acc->berjangka?->purpose ?? $acc->ibadah?->purpose,
-                    'balance'       => $acc->balance ?? 0,
+                    'saldo'       => $acc->saldo ?? 0,
                     'target_amount' => $acc->ibadah?->target_amount,
                     'matured_at'    => $acc->berjangka
                         ? $acc->created_at->copy()->addMonths($acc->berjangka->tenor)->format('d M Y')
                         : null,
                     'is_frozen'     => $acc->ibadah
-                        ? $acc->balance >= $acc->ibadah->target_amount
+                        ? $acc->saldo >= $acc->ibadah->target_amount
                         : false,
                     'is_matured'    => $acc->berjangka
                         ? now()->gte($acc->created_at->copy()->addMonths($acc->berjangka->tenor))
@@ -301,10 +301,10 @@ class SimpananService
 
     // Store Deposit
 
-    public function resolveOrCreateSavingAccount(array $data, Anggota $anggota): SavingAccount
+    public function resolveOrCreateSavingAccount(array $data, Anggota $anggota): AkunSimpanan
     {
-        if (filled($data['saving_account_id'] ?? null)) {
-            return SavingAccount::where('id', $data['saving_account_id'])
+        if (filled($data['akun_simpanan_id'] ?? null)) {
+            return AkunSimpanan::where('id', $data['akun_simpanan_id'])
                 ->where('anggota_id', $anggota->id)
                 ->firstOrFail();
         }
@@ -314,22 +314,22 @@ class SimpananService
             SavingTypeEnum::SIMPANAN_WAJIB->value,
             SavingTypeEnum::TABUNGAN_ANGGOTA->value,
         ])) {
-            return SavingAccount::firstOrCreate(
-                ['anggota_id' => $anggota->id, 'saving_type' => $data['saving_category']],
-                ['saving_account_code' => $this->generateAccountCode($data['saving_category'])]
+            return AkunSimpanan::firstOrCreate(
+                ['anggota_id' => $anggota->id, 'jenis_simpanan' => $data['saving_category']],
+                ['kode_akun_simpanan' => $this->generateAccountCode($data['saving_category'])]
             );
         }
 
-        return SavingAccount::create([
+        return AkunSimpanan::create([
             'anggota_id'           => $anggota->id,
-            'saving_type'         => $data['saving_category'],
-            'saving_account_code' => $this->generateAccountCode($data['saving_category']),
+            'jenis_simpanan'         => $data['saving_category'],
+            'kode_akun_simpanan' => $this->generateAccountCode($data['saving_category']),
         ]);
     }
 
-    public function validateDepositRules(array $data, SavingAccount $savingAccount, Anggota $anggota): void
+    public function validateDepositRules(array $data, AkunSimpanan $akunSimpanan, Anggota $anggota): void
     {
-        $isNewAccount = empty($data['saving_account_id']);
+        $isNewAccount = empty($data['akun_simpanan_id']);
         if ($isNewAccount && $data['saving_category'] === 'Tabungan Berjangka') {
             if (empty($data['tenor_months'])) {
                 throw ValidationException::withMessages([
@@ -338,7 +338,7 @@ class SimpananService
             }
 
             BerjangkaAccount::create([
-                'saving_account_id' => $savingAccount->id,
+                'akun_simpanan_id' => $akunSimpanan->id,
                 'purpose'           => $data['purpose'] ?? null,
                 'tenor'             => $data['tenor_months'],
             ]);
@@ -353,7 +353,7 @@ class SimpananService
                 ]);
             }
 
-            if (SavingTransaction::where('saving_account_id', $savingAccount->id)
+            if (SavingTransaction::where('akun_simpanan_id', $akunSimpanan->id)
                 ->where('transaction_type', TransactionTypeEnum::DEPOSIT->value)
                 ->exists()
             ) {
@@ -380,7 +380,7 @@ class SimpananService
         }
 
         if ($data['saving_category'] === SavingTypeEnum::TABUNGAN_IBADAH->value) {
-            if ($savingAccount->wasRecentlyCreated) {
+            if ($akunSimpanan->wasRecentlyCreated) {
                 if (empty($data['target_amount'])) {
                     throw ValidationException::withMessages([
                         'target_amount' => 'Target tabungan wajib diisi.',
@@ -388,15 +388,15 @@ class SimpananService
                 }
 
                 IbadahAccount::create([
-                    'saving_account_id' => $savingAccount->id,
+                    'akun_simpanan_id' => $akunSimpanan->id,
                     'purpose'           => $data['purpose'],
                     'target_amount'     => $data['target_amount'],
                 ]);
             }
 
-            $ibadahAccount = $savingAccount->fresh()->ibadah;
+            $ibadahAccount = $akunSimpanan->fresh()->ibadah;
 
-            if ($ibadahAccount && $savingAccount->balance >= $ibadahAccount->target_amount) {
+            if ($ibadahAccount && $akunSimpanan->saldo >= $ibadahAccount->target_amount) {
                 throw ValidationException::withMessages([
                     'saving_category' => 'Tabungan Ibadah sudah mencapai target dan dibekukan.',
                 ]);
@@ -404,7 +404,7 @@ class SimpananService
         }
 
         if ($data['saving_category'] === SavingTypeEnum::TABUNGAN_BERJANGKA->value) {
-            $jatuhTempo = $savingAccount->created_at->copy()->addMonths($savingAccount->berjangka->tenor);
+            $jatuhTempo = $akunSimpanan->created_at->copy()->addMonths($akunSimpanan->berjangka->tenor);
 
             if (now()->gte($jatuhTempo)) {
                 throw ValidationException::withMessages([
@@ -414,11 +414,11 @@ class SimpananService
         }
     }
 
-    public function createDepositTransaction(array $data, SavingAccount $savingAccount, Anggota $anggota): SavingTransaction
+    public function createDepositTransaction(array $data, AkunSimpanan $akunSimpanan, Anggota $anggota): SavingTransaction
     {
-        return DB::transaction(function () use ($data, $savingAccount, $anggota) {
-            $savingAccount->refresh();
-            $newBalance = $savingAccount->balance + $data['amount'];
+        return DB::transaction(function () use ($data, $akunSimpanan, $anggota) {
+            $akunSimpanan->refresh();
+            $newBalance = $akunSimpanan->saldo + $data['amount'];
             $trx = SavingTransaction::create([
                 'saving_transaction_code' => $this->generateTransactionCode($data['saving_category']),
                 'saving_amount'              => $data['amount'],
@@ -428,11 +428,11 @@ class SimpananService
                 'saving_description'         => $data['notes'] ?? 'Penyetoran',
                 'transaction_date'           => $data['date'],
                 'updated_by'                 => Auth::id(),
-                'saving_account_id'          => $savingAccount->id,
+                'akun_simpanan_id'          => $akunSimpanan->id,
             ]);
 
-            $savingAccount->update([
-                'balance' => $savingAccount->balance + $data['amount']
+            $akunSimpanan->update([
+                'saldo' => $akunSimpanan->saldo + $data['amount']
             ]);
 
             if ($data['saving_category'] === 'Simpanan Pokok') {

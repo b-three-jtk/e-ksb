@@ -5,7 +5,7 @@ namespace App\Services\User;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Models\Installment;
-use App\Models\PointTransaction;
+use App\Models\Poin;
 use App\Models\SavingTransaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -14,9 +14,9 @@ class DasborService
 {
     public function getSummary(int $anggotaId, string $userId): array
     {
-        $totalSaving = DB::table('saving_accounts')
+        $totalSaving = DB::table('akun_simpanan')
             ->where('anggota_id', $anggotaId)
-            ->sum('balance');
+            ->sum('saldo');
 
         $totalInstallment = Installment::whereHas('financing', function ($q) use ($anggotaId) {
             $q->where('anggota_id', $anggotaId)
@@ -29,8 +29,8 @@ class DasborService
         ])
         ->sum('amount');
 
-        $totalPoints = PointTransaction::where('pengguna_id', $userId)
-            ->sum('amount_earned');
+        $totalPoints = Poin::where('pengguna_id', $userId)
+            ->sum('jml_perolehan');
 
         return [
             'total_saving'      => $totalSaving,
@@ -42,16 +42,16 @@ class DasborService
     public function getTabungan(int $anggotaId): \Illuminate\Support\Collection
     {
         return SavingTransaction::whereHas(
-            'savingAccount.anggota',
+            'akunSimpanan.anggota',
             fn($q) => $q->where('anggota_id', $anggotaId)
         )
-        ->with('savingAccount')
+        ->with('akunSimpanan')
         ->latest('transaction_date')
         ->limit(5)
         ->get()
         ->map(fn($trx) => [
             'date'    => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-            'product' => $trx->savingAccount->saving_type,
+            'product' => $trx->akunSimpanan->jenis_simpanan,
             'type'    => $trx->transaction_type,
             'amount'  => 'Rp ' . number_format($trx->saving_amount, 0, ',', '.'),
         ]);

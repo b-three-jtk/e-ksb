@@ -43,7 +43,7 @@ function formatDate(val) {
 
 function evaluateAvailability(acc) {
   const type = (acc.type || '').toLowerCase()
-  const balance = Number(acc.balance || 0)
+  const saldo = Number(acc.saldo || 0)
 
   if (!isWithdrawableType(acc.type)) {
     return {
@@ -52,7 +52,7 @@ function evaluateAvailability(acc) {
     }
   }
 
-  if (balance <= 0) {
+  if (saldo <= 0) {
     return {
       isAvailable: false,
       reason: 'Saldo belum tersedia',
@@ -74,7 +74,7 @@ function evaluateAvailability(acc) {
 
   if (type.includes('ibadah')) {
     const target = Number(acc.target_amount || 0)
-    if (target > 0 && balance < target) {
+    if (target > 0 && saldo < target) {
       return {
         isAvailable: false,
         reason: `Target belum tercapai (minimal ${formatRp(target)})`,
@@ -91,7 +91,7 @@ function evaluateAvailability(acc) {
 const savingsList = computed(() => {
   if (!props.selectedMember) return []
   
-  const accounts = props.selectedMember.savingAccounts || []
+  const accounts = props.selectedMember.akunSimpanan || []
   return accounts
     .map(acc => {
       const availability = evaluateAvailability(acc)
@@ -100,7 +100,7 @@ const savingsList = computed(() => {
       return {
         id: acc.id,
         type: acc.type,
-        balance: acc.balance,
+        saldo: acc.saldo,
         isAvailable: availability.isAvailable,
         reason: availability.reason,
         isFullWithdrawal,
@@ -157,7 +157,7 @@ function selectSaving(saving) {
           <div class="flex-1">
             <h3 class="font-semibold text-sm mb-1 text-gray-900 dark:text-gray-100">{{ saving.type }}</h3>
             <div class="text-lg font-bold mb-2 text-gray-900 dark:text-gray-100">
-              {{ formatRp(saving.balance) }}
+              {{ formatRp(saving.saldo) }}
             </div>
             <div v-if="saving.isAvailable" class="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-medium">
               Dapat Ditarik

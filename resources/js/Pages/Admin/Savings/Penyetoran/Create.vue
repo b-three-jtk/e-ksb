@@ -11,7 +11,7 @@ import Struk from '@/Components/Savings/Struk.vue'
 import Swal from 'sweetalert2'
 
 const props = defineProps({
-    saving_types: { type: Array, required: true },
+    jenis_simpanans: { type: Array, required: true },
     anggota: { type: Array, required: true },
     accounts: { type: Array, required: true },
     pengurus: { type: Object, required: true },
@@ -23,7 +23,7 @@ const props = defineProps({
 const filteredSavingTypes = computed(() => {
   if (!selectedMember.value) return []
 
-  let types = props.saving_types
+  let types = props.jenis_simpanans
 
   if (selectedMember.value.status === 'Menunggu Pembayaran') {
     return ['Simpanan Pokok']
@@ -137,7 +137,7 @@ watch(jenisSimpanan, () => {
 
 const existingAccounts = computed(() => {
   if (!selectedMember.value) return []
-  const accounts = selectedMember.value.savingAccounts ?? []
+  const accounts = selectedMember.value.akunSimpanan ?? []
   if (!['Tabungan Ibadah', 'Tabungan Berjangka'].includes(jenisSimpanan.value)) return []
   return accounts.filter(acc => acc.type === jenisSimpanan.value)
 })
@@ -197,11 +197,11 @@ const selectedAccount = computed(() => {
   if (!selectedMember.value) return null
   if (isMultiAccountType.value) {
     if (isCreatingNew.value || !selectedAccountId.value) return null
-    return (selectedMember.value.savingAccounts || []).find(
+    return (selectedMember.value.akunSimpanan || []).find(
       acc => acc.id === selectedAccountId.value
     )
   }
-  return (selectedMember.value.savingAccounts || []).find(
+  return (selectedMember.value.akunSimpanan || []).find(
     acc => acc.type === jenisSimpanan.value
   )
 })
@@ -290,7 +290,7 @@ const confirmationData = computed(() => ({
   tenorMonths: tenorMonths.value,
   targetAmount: targetAmount.value,
   officerName: props.pengurus?.name,
-  balance: selectedAccount.value ? Number(selectedAccount.value.balance) : 0,
+  saldo: selectedAccount.value ? Number(selectedAccount.value.saldo) : 0,
 }))
 
 const konfirmasiChecked = ref(false)
@@ -321,7 +321,7 @@ function submitDeposit() {
   const accountId = selectedAccount.value?.id
 
   if (accountId && accountId !== 'undefined') {
-    formData.append('saving_account_id', accountId)
+    formData.append('akun_simpanan_id', accountId)
   }
 
   formData.append('anggota_id', selectedMember.value.id)
@@ -586,7 +586,7 @@ const akadType = computed(() => {
                         <div class="flex-1 min-w-0">
                           <div class="font-medium text-sm text-gray-800 dark:text-gray-200">{{ acc.purpose }}</div>
                           <div class="text-xs text-gray-500 mt-0.5 flex gap-3">
-                            <span>Saldo: Rp {{ formatRp(acc.balance) }}</span>
+                            <span>Saldo: Rp {{ formatRp(acc.saldo) }}</span>
                             <span v-if="acc.target_amount">· Target: Rp {{ formatRp(acc.target_amount) }}</span>
                             <span v-if="acc.matured_at">· Jatuh Tempo: {{ acc.matured_at }}</span>
                           </div>

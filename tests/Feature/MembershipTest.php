@@ -4,7 +4,7 @@ use App\Enums\EducationEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Models\Financing;
 use App\Models\Anggota;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use App\Models\Pengguna;
 use Database\Seeders\GlobalSettingSeeder;
 use Database\Seeders\RoleSeeder;
@@ -691,9 +691,9 @@ describe('Aplikasi harus menyediakan riwayat poin yang sudah diperoleh anggota',
 
         $res = $this->actingAs($user)->get('/user/profile');
 
-        SavingAccount::factory()->create([
+        AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'balance' => 1000000,
+            'saldo' => 1000000,
         ]);
 
         $this->travelTo(now()->endOfMonth());
@@ -701,9 +701,9 @@ describe('Aplikasi harus menyediakan riwayat poin yang sudah diperoleh anggota',
         $this->artisan('points:calculate-monthly-savings')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('point_transactions', [
+        $this->assertDatabaseHas('poin', [
             'pengguna_id' => $user->id,
-            'amount_earned' => 10, // 1 poin per 100.000 saldo, total saldo 5.000.000 = 50 poin
+            'jml_perolehan' => 10, // 1 poin per 100.000 saldo, total saldo 5.000.000 = 50 poin
         ]);
 
         $this->travelBack();

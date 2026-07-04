@@ -15,7 +15,7 @@ class PengunduranDiriService
     public function getResignData(int $anggotaId): array
     {
         $totalSaving = SavingTransaction::whereHas(
-            'savingAccount',
+            'akunSimpanan',
             fn($q) => $q->where('anggota_id', $anggotaId)
         )
         ->sum(DB::raw("

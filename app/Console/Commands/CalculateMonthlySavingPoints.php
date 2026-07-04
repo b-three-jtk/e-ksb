@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\GlobalSetting;
-use App\Models\PointTransaction;
+use App\Models\Poin;
 use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -37,11 +37,11 @@ class CalculateMonthlySavingPoints extends Command
         }
 
         $users = Pengguna::query()
-            ->whereHas('anggota.savingAccounts')
+            ->whereHas('anggota.akunSimpanan')
             ->with([
-                'anggota.savingAccounts',
-                'pointTransactions' => function ($query) use ($periodDate) {
-                    $query->whereDate('calculation_period', $periodDate);
+                'anggota.akunSimpanan',
+                'poin' => function ($query) use ($periodDate) {
+                    $query->whereDate('periode_kalkulasi', $periodDate);
                 },
             ])
             ->get();
@@ -50,12 +50,12 @@ class CalculateMonthlySavingPoints extends Command
         $skipped = 0;
 
         foreach ($users as $user) {
-            if ($user->pointTransactions->isNotEmpty()) {
+            if ($user->poin->isNotEmpty()) {
                 $skipped++;
                 continue;
             }
 
-            $totalSavings = (float) $user->anggota->savingAccounts->sum('balance');
+            $totalSavings = (float) $user->anggota->akunSimpanan->sum('saldo');
             $pointsEarned = (int) floor($totalSavings / $savingPointAmount) * (int) $savingPointReward;
 
             if ($pointsEarned <= 0) {
@@ -64,16 +64,16 @@ class CalculateMonthlySavingPoints extends Command
             }
 
             DB::transaction(function () use ($user, $periodDate, $periodLabel, $totalSavings, $pointsEarned): void {
-                PointTransaction::create([
+                Poin::create([
                     'pengguna_id' => $user->id,
-                    'amount_earned' => $pointsEarned,
-                    'activity_description' => sprintf(
+                    'jml_perolehan' => $pointsEarned,
+                    'deskripsi' => sprintf(
                         'Perhitungan poin simpanan periode %s dengan total simpanan Rp %s',
                         $periodLabel,
                         number_format($totalSavings, 0, ',', '.')
                     ),
-                    'calculation_period' => $periodDate,
-                    'saving_balance_snapshot' => $totalSavings,
+                    'periode_kalkulasi' => $periodDate,
+                    'sisa_tabungan_snapshot' => $totalSavings,
                 ]);
             });
 

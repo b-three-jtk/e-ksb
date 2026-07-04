@@ -23,10 +23,10 @@ class SimpananExport implements FromCollection, WithEvents, ShouldAutoSize
             $rows->push([
                 $trx->saving_transaction_code,
                 Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                $trx->savingAccount->anggota->user->kode_pengguna
+                $trx->akunSimpanan->anggota->user->kode_pengguna
                     . ' - '
-                    . $trx->savingAccount->anggota->user->nama,
-                $trx->savingAccount->saving_type ?? '-',
+                    . $trx->akunSimpanan->anggota->user->nama,
+                $trx->akunSimpanan->jenis_simpanan ?? '-',
                 $trx->transaction_type,
                 $trx->transaction_type === 'Penarikan'
                     ? -$trx->saving_amount
@@ -79,14 +79,14 @@ class SimpananExport implements FromCollection, WithEvents, ShouldAutoSize
 
                     $sheet->setCellValue(
                         'C'.$row,
-                        $trx->savingAccount->anggota->user->kode_pengguna
+                        $trx->akunSimpanan->anggota->user->kode_pengguna
                         . ' - '
-                        . $trx->savingAccount->anggota->user->nama
+                        . $trx->akunSimpanan->anggota->user->nama
                     );
 
                     $sheet->setCellValue(
                         'D'.$row,
-                        $trx->savingAccount->saving_type ?? '-'
+                        $trx->akunSimpanan->jenis_simpanan ?? '-'
                     );
 
                     $sheet->setCellValue(

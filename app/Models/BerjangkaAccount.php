@@ -10,11 +10,11 @@ class BerjangkaAccount extends Model
     protected $fillable = [
         'tenor',
         'purpose',
-        'saving_account_id',
+        'akun_simpanan_id',
     ];
 
-    public function savingAccount()
+    public function akunSimpanan()
     {
-        return $this->belongsTo(SavingAccount::class);
+        return $this->belongsTo(AkunSimpanan::class);
     }
 }

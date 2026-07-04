@@ -24,7 +24,7 @@ const props = defineProps<{
     jenisAkunOptions: string[]
     accountSummary: {
         name: string;
-        balance: number
+        saldo: number
     }[]
     can: Record<string, boolean>
 }>()
@@ -384,7 +384,7 @@ const nomorAkunGuide = [
                     >
                         <CardInfo
                             :title="`Total ${item.name}`"
-                            :content="formatCurrency(item.balance)"
+                            :content="formatCurrency(item.saldo)"
                         />
                     </div>
                 </div>

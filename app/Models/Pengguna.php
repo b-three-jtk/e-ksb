@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Models\Financing;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Anggota;
-use App\Models\PointTransaction;
+use App\Models\Poin;
 use App\Models\SavingTransaction;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -90,9 +90,9 @@ class Pengguna extends Authenticatable
     }
 
     // universal relation
-    public function pointTransactions()
+    public function poin()
     {
-        return $this->hasMany(PointTransaction::class);
+        return $this->hasMany(Poin::class);
     }
 
     public function globalSettings()

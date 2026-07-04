@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Models\MemberBankAccount;
-use App\Models\PointTransaction;
-use App\Models\SavingAccount;
+use App\Models\Poin;
+use App\Models\AkunSimpanan;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,14 +28,14 @@ class SavingTransaction extends Model
         'saving_transaction_receipt',
 
         'updated_by',
-        'saving_account_id',
+        'akun_simpanan_id',
         'account_number',
         'point_id',
     ];
 
-    public function savingAccount()
+    public function akunSimpanan()
     {
-        return $this->belongsTo(SavingAccount::class);
+        return $this->belongsTo(AkunSimpanan::class);
     }
 
     public function updatedBy()
@@ -50,7 +50,7 @@ class SavingTransaction extends Model
 
     public function point()
     {
-        return $this->belongsTo(PointTransaction::class, 'point_id');
+        return $this->belongsTo(Poin::class, 'point_id');
     }
 
     public function notifications(): MorphMany

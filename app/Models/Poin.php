@@ -7,23 +7,25 @@ use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PointTransaction extends Model
+class Poin extends Model
 {
     use HasFactory;
 
+    protected $table = 'poin';
+
     protected $fillable = [
-        'amount_earned',
-        'activity_description',
-        'saving_balance_snapshot',
-        'calculation_period',
+        'jml_perolehan',
+        'deskripsi',
+        'sisa_tabungan_snapshot',
+        'periode_kalkulasi',
         'pengguna_id',
     ];
 
     protected function casts(): array
     {
         return [
-            'calculation_period' => 'date',
-            'saving_balance_snapshot' => 'decimal:2',
+            'periode_kalkulasi' => 'date',
+            'sisa_tabungan_snapshot' => 'decimal:2',
         ];
     }
 

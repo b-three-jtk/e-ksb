@@ -10,11 +10,11 @@ class IbadahAccount extends Model
     protected $fillable = [
         'target_amount',
         'purpose',
-        'saving_account_id',
+        'akun_simpanan_id',
     ];
 
-    public function savingAccount()
+    public function akunSimpanan()
     {
-        return $this->belongsTo(SavingAccount::class);
+        return $this->belongsTo(AkunSimpanan::class);
     }
 }

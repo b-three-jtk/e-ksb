@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\GlobalSetting;
 use App\Models\InstallmentPaymentTransaction;
-use App\Models\PointTransaction;
+use App\Models\Poin;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -78,10 +78,10 @@ public function handle(): int
                 continue;
             }
 
-            $hasPoint = PointTransaction::query()
+            $hasPoint = Poin::query()
                 ->where('pengguna_id', $data->pengguna_id)
-                ->whereDate('calculation_period', $endDate)
-                ->where('activity_description', 'LIKE', '%murabahah%')
+                ->whereDate('periode_kalkulasi', $endDate)
+                ->where('deskripsi', 'LIKE', '%murabahah%')
                 ->exists();
 
             if ($hasPoint) {
@@ -90,15 +90,15 @@ public function handle(): int
             }
 
             DB::transaction(function () use ($data, $endDate, $periodLabel, $totalMargin, $pointsEarned): void {
-                PointTransaction::create([
+                Poin::create([
                     'pengguna_id' => $data->pengguna_id,
-                    'amount_earned' => $pointsEarned,
-                    'activity_description' => sprintf(
+                    'jml_perolehan' => $pointsEarned,
+                    'deskripsi' => sprintf(
                         'Perhitungan poin murabahah periode %s dengan total margin Rp %s',
                         $periodLabel,
                         number_format($totalMargin, 0, ',', '.')
                     ),
-                    'calculation_period' => $endDate,
+                    'periode_kalkulasi' => $endDate,
                 ]);
             });
 

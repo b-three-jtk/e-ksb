@@ -12,11 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('saving_accounts', function (Blueprint $table) {
+        Schema::create('akun_simpanan', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('saving_account_code', 20)->unique();
-            $table->decimal('balance', 15, 2)->default(0);
-            $table->enum('saving_type', array_column(SavingTypeEnum::cases(), 'value'));
+            $table->string('kode_akun_simpanan', 20)->unique();
+            $table->decimal('saldo', 15, 2)->default(0);
+            $table->enum('jenis_simpanan', array_column(SavingTypeEnum::cases(), 'value'));
             $table->unsignedBigInteger('anggota_id')->nullable();
 
             $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('set null');
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('saving_accounts');
+        Schema::dropIfExists('akun_simpanan');
     }
 };

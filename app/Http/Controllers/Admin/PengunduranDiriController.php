@@ -43,7 +43,7 @@ class PengunduranDiriController extends Controller
 
         $resignationDoc = $data['user']->anggota->memberDocs?->first()?->doc_attachment ? asset('storage/' . $data['user']->anggota->memberDocs->first()->doc_attachment) : null;
 
-        $totalSavings = $data['user']->anggota->savingAccounts()->sum('balance');
+        $totalSavings = $data['user']->anggota->akunSimpanan()->sum('saldo');
         $totalObligation = $this->service->getTotalKewajiban($data['user']);
 
         return inertia('Admin/User/Resignation/Validation', [

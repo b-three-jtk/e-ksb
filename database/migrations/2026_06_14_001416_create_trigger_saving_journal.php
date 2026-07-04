@@ -21,12 +21,12 @@ return new class extends Migration
                 v_saving_ref  VARCHAR;
                 v_debit_ref   VARCHAR;
                 v_credit_ref  VARCHAR;
-                v_saving_type VARCHAR;
+                v_jenis_simpanan VARCHAR;
             BEGIN
-                -- Ambil saving_type dari saving_accounts
-                SELECT saving_type INTO v_saving_type
-                FROM saving_accounts
-                WHERE id = NEW.saving_account_id;
+                -- Ambil jenis_simpanan dari akun_simpanan
+                SELECT jenis_simpanan INTO v_jenis_simpanan
+                FROM akun_simpanan
+                WHERE id = NEW.akun_simpanan_id;
 
                 -- Kas → no_ref_account '101'
                 SELECT no_ref_account INTO v_kas_ref
@@ -34,12 +34,12 @@ return new class extends Migration
                 WHERE account_name = 'Kas'
                 LIMIT 1;
 
-                -- Simpanan → cocokkan dengan saving_type
+                -- Simpanan → cocokkan dengan jenis_simpanan
                 -- Nilai yang valid: 'Tabungan Anggota', 'Tabungan Berjangka',
                 --                   'Tabungan Ibadah', 'Simpanan Pokok', 'Simpanan Wajib'
                 SELECT no_ref_account INTO v_saving_ref
                 FROM accounts
-                WHERE account_name = v_saving_type
+                WHERE account_name = v_jenis_simpanan
                 LIMIT 1;
 
                 -- Guard: kalau akun tidak ditemukan, batalkan dan kasih pesan jelas
@@ -48,8 +48,8 @@ return new class extends Migration
                 END IF;
 
                 IF v_saving_ref IS NULL THEN
-                    RAISE EXCEPTION 'Akun untuk saving_type ''%'' tidak ditemukan di tabel accounts',
-                        v_saving_type;
+                    RAISE EXCEPTION 'Akun untuk jenis_simpanan ''%'' tidak ditemukan di tabel accounts',
+                        v_jenis_simpanan;
                 END IF;
 
                 -- Arah jurnal

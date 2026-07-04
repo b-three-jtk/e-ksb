@@ -8,16 +8,17 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SavingAccount extends Model
+class AkunSimpanan extends Model
 {
     use HasFactory;
     use HasUuids;
     protected $keyType = 'string';
+    protected $table = 'akun_simpanan';
     public $incrementing = false;
     protected $fillable = [
-        'saving_account_code',
-        'saving_type',
-        'balance',
+        'kode_akun_simpanan',
+        'jenis_simpanan',
+        'saldo',
         'anggota_id',
     ];
 

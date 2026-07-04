@@ -79,7 +79,7 @@ class AkunService
 
                 return [
                     'name'    => $item->value,
-                    'balance' => $totalBalance,
+                    'saldo' => $totalBalance,
                 ];
             })
             ->values();

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\PointTransaction;
+use App\Models\Poin;
 use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
@@ -20,38 +20,38 @@ class ProfilPenggunaService
     public function index(Pengguna $user): array
     {
         $anggota = $user->anggota?->loadMissing(['heirs', 'memberDocs']);
-        $pointTransactions = $user->pointTransactions()
+        $poin = $user->poin()
             ->with('savingTransactions')
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
 
-        $getSnapshotValue = function (PointTransaction $transaction): float {
-            return (float) ($transaction->saving_balance_snapshot
+        $getSnapshotValue = function (Poin $transaction): float {
+            return (float) ($transaction->sisa_tabungan_snapshot
                 ?? $transaction->savingTransactions?->balance_after_transaction
                 ?? 0);
         };
 
         $runningPointTotal = 0;
-        $pointHistory = $pointTransactions
-            ->map(function (PointTransaction $transaction) use (&$runningPointTotal, $getSnapshotValue) {
-                $runningPointTotal += (int) $transaction->amount_earned;
+        $pointHistory = $poin
+            ->map(function (Poin $transaction) use (&$runningPointTotal, $getSnapshotValue) {
+                $runningPointTotal += (int) $transaction->jml_perolehan;
 
                 return [
                     'id' => $transaction->id,
-                    'calculation_date' => $transaction->calculation_period
-                        ? Carbon::parse($transaction->calculation_period)->translatedFormat('d/m/Y')
+                    'calculation_date' => $transaction->periode_kalkulasi
+                        ? Carbon::parse($transaction->periode_kalkulasi)->translatedFormat('d/m/Y')
                         : Carbon::parse($transaction->created_at)->format('d/m/Y'),
                     'total_simpanan' => $getSnapshotValue($transaction),
-                    'points_earned' => (int) $transaction->amount_earned,
+                    'points_earned' => (int) $transaction->jml_perolehan,
                     'total_points' => $runningPointTotal,
-                    'activity_description' => $transaction->activity_description,
+                    'deskripsi' => $transaction->deskripsi,
                 ];
             })
             ->reverse()
             ->values();
 
-        $latestPointTransaction = $pointTransactions->last();
+        $latestPointTransaction = $poin->last();
 
         $photoUrl = $user->foto_profil ? asset('storage/' . $user->foto_profil) : null;
         $heirs = $anggota?->heirs?->map(function ($heir) {
@@ -101,10 +101,10 @@ class ProfilPenggunaService
             ],
             'points' => [
                 'summary' => [
-                    'total_points' => (int) $pointTransactions->sum('amount_earned'),
-                    'latest_points_earned' => (int) ($latestPointTransaction?->amount_earned ?? 0),
-                    'latest_calculated_at' => $latestPointTransaction?->calculation_period
-                        ? Carbon::parse($latestPointTransaction->calculation_period)->translatedFormat('d/m/Y')
+                    'total_points' => (int) $poin->sum('jml_perolehan'),
+                    'latest_points_earned' => (int) ($latestPointTransaction?->jml_perolehan ?? 0),
+                    'latest_calculated_at' => $latestPointTransaction?->periode_kalkulasi
+                        ? Carbon::parse($latestPointTransaction->periode_kalkulasi)->translatedFormat('d/m/Y')
                         : ($latestPointTransaction?->created_at
                             ? Carbon::parse($latestPointTransaction->created_at)->format('d/m/Y')
                             : null),

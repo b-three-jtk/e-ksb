@@ -6,8 +6,8 @@ use App\Enums\PaymentMethodsEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Models\MemberBankAccount;
-use App\Models\PointTransaction;
-use App\Models\SavingAccount;
+use App\Models\Poin;
+use App\Models\AkunSimpanan;
 use App\Models\SavingTransaction;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -28,9 +28,9 @@ class SavingTransactionFactory extends Factory
             'balance_after_transaction' => $this->faker->numberBetween(0, 100000000),
             'saving_transaction_receipt' => $this->faker->optional()->filePath(),
             'updated_by' => Pengguna::factory(),
-            'saving_account_id' => SavingAccount::factory(),
+            'akun_simpanan_id' => AkunSimpanan::factory(),
             'account_number' => MemberBankAccount::factory(),
-            'point_id' => PointTransaction::factory(),
+            'point_id' => Poin::factory(),
         ];
     }
 }

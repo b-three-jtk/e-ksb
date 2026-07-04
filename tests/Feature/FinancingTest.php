@@ -10,7 +10,7 @@ use App\Models\GlobalSetting;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Anggota;
-use App\Models\SavingAccount;
+use App\Models\AkunSimpanan;
 use App\Models\Supplier;
 use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
@@ -36,10 +36,10 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
         $staffMurabahah->syncRoles('Staf Murabahah');
         $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
 
-        SavingAccount::factory()->create([
+        AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 10000000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 10000000,
             'created_at' => now()->subMonths(6),
         ]);
 
@@ -149,10 +149,10 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
         ]);
 
-        SavingAccount::factory()->create([
+        AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 10000000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 10000000,
             'created_at' => now()->subMonths(6),
         ]);
 
@@ -279,10 +279,10 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
         $staffMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $staffMurabahah->syncRoles('Staf Murabahah');
 
-        SavingAccount::factory()->create([
+        AkunSimpanan::factory()->create([
             'anggota_id' => $anggota->id,
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => 10000000,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 10000000,
             'created_at' => now()->subMonths(6),
         ]);
 
@@ -868,9 +868,9 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
         $this->artisan('points:calculate-murabahah-points')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('point_transactions', [
+        $this->assertDatabaseHas('poin', [
             'pengguna_id' => $user->id,
-            'amount_earned' => 1,
+            'jml_perolehan' => 1,
         ]);
 
         $this->travelBack();
@@ -912,7 +912,7 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
         $this->artisan('points:calculate-murabahah-points')
             ->assertSuccessful();
 
-        $this->assertDatabaseMissing('point_transactions', [
+        $this->assertDatabaseMissing('poin', [
             'pengguna_id' => $user->id,
         ]);
 
