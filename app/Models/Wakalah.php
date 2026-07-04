@@ -10,16 +10,16 @@ class Wakalah extends Model
 
     protected $table = 'wakalah';
     protected $fillable = [
-        'akad_date',
-        'signed_akad_document',
+        'tgl_akad',
+        'dokumen_akad',
 
-        'financing_id',
+        'pembiayaan_id',
         'updated_by',
     ];
 
-    public function financing()
+    public function pembiayaan()
     {
-        return $this->belongsTo(Financing::class);
+        return $this->belongsTo(Pembiayaan::class);
     }
 
     public function updatedBy()

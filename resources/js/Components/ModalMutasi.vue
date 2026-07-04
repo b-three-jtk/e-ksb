@@ -7,7 +7,7 @@ const props = defineProps({
     title: String,
     modalId: { type: String, required: true },
     account: Object,
-    financing: Object,
+    pembiayaan: Object,
     transactions: Array,
     schedules: Array,
     loading: Boolean,

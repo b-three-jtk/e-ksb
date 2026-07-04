@@ -6,7 +6,7 @@ use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\GlobalSetting;
 use App\Models\Installment;
 use App\Models\JournalEntry;
@@ -91,11 +91,11 @@ class DasborService
                 'tanggal' => $t->created_at->toDateString(),
             ]);
 
-        $transaksiPembiayaan = Financing::with('anggota.user', 'financingItem')
+        $transaksiPembiayaan = Pembiayaan::with('anggota.user', 'financingItem')
             ->latest()->take($amount)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
-                'no_transaksi' => $f->financing_transaction_code,
+                'no_transaksi' => $f->kode_pembiayaan,
                 'anggota' => $f->anggota->user->nama,
                 'jumlah' => $f->amount,
                 'produk' => 'Pembiayaan',
@@ -268,7 +268,7 @@ class DasborService
             'reference' => function (MorphTo $morphTo) {
                 $morphTo->morphWith([
                     SavingTransaction::class => ['akunSimpanan'],
-                    Installment::class => ['financing'],
+                    Installment::class => ['pembiayaan'],
                 ]);
             }
         ])
@@ -315,14 +315,14 @@ class DasborService
 
     public function getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)
     {
-        return Financing::with('anggota.user', 'financingItem')
-            ->whereBetween('requested_date', [$tanggalAwal, $tanggalAkhir])
+        return Pembiayaan::with('anggota.user', 'financingItem')
+            ->whereBetween('tgl_permohonan', [$tanggalAwal, $tanggalAkhir])
             ->latest()
             ->take(5)
             ->get()
             ->map(fn($f) => [
                 'id' => $f->id,
-                'no_transaksi' => $f->financing_transaction_code,
+                'no_transaksi' => $f->kode_pembiayaan,
                 'anggota' => $f->anggota->user->nama,
                 'status' => $f->status,
             ]);
@@ -330,7 +330,7 @@ class DasborService
 
     public function getPembayaranTerlambat($tanggalAkhir)
     {
-        $data = Installment::with('financing.anggota.user')
+        $data = Installment::with('pembiayaan.anggota.user')
             ->where('due_date', '<=', $tanggalAkhir)
             ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
             ->latest()
@@ -338,8 +338,8 @@ class DasborService
             ->get()
             ->map(fn($i) => [
                 'id' => $i->id,
-                'no_transaksi' => $i->financing->financing_transaction_code,
-                'anggota' => $i->financing->anggota->user->nama,
+                'no_transaksi' => $i->pembiayaan->kode_pembiayaan,
+                'anggota' => $i->pembiayaan->anggota->user->nama,
                 'jumlah' => $i->amount,
                 'hari_terlambat' => round(Carbon::parse($i->due_date)->diffInDays(Carbon::parse($tanggalAkhir))),
             ]);
@@ -378,8 +378,8 @@ class DasborService
 
     public function getTotalAngsuranBelumLunas()
     {
-        $total = Installment::with('financing.anggota')
-            ->whereHas('financing.anggota', function ($query) {
+        $total = Installment::with('pembiayaan.anggota')
+            ->whereHas('pembiayaan.anggota', function ($query) {
                 $query->where('pj_anggota_id', auth()->id());
             })
             ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
@@ -410,7 +410,7 @@ class DasborService
         $targetDate = Carbon::parse($tanggalAkhir)->endOfDay();
 
         // Cari semua pembiayaan dengan status aktif dan ambil jadwal angsurannya yang belum lunas
-        $financings = Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+        $pembiayaan = Pembiayaan::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->with(['installment' => function ($query) {
                 $query->whereIn('status', [
                     InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
@@ -418,8 +418,8 @@ class DasborService
             }])
             ->get();
 
-        foreach ($financings as $financing) {
-            $kategori = $this->klasifikasikanKolektibilitasPembiayaan($financing, $targetDate);
+        foreach ($pembiayaan as $item) {
+            $kategori = $this->klasifikasikanKolektibilitasPembiayaan($item, $targetDate);
             $skeleton[$kategori]++;
         }
 
@@ -438,8 +438,8 @@ class DasborService
     public function getTotalPembiayaanAktif($tanggalAkhir, $tanggalAkhirSebelumnya)
     {
         return $this->getTotalDenganPersenPerubahan(
-            fn($tgl) => Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-                ->where('akad_date', '<=', $tgl)
+            fn($tgl) => Pembiayaan::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+                ->where('tgl_akad', '<=', $tgl)
                 ->count(),
             $tanggalAkhir,
             $tanggalAkhirSebelumnya
@@ -457,8 +457,8 @@ class DasborService
         ];
 
         return $this->getTotalDenganPersenPerubahan(
-            fn($tgl) => Financing::whereIn('status', $statusDihitung)
-                ->where('requested_date', '<=', $tgl)
+            fn($tgl) => Pembiayaan::whereIn('status', $statusDihitung)
+                ->where('tgl_permohonan', '<=', $tgl)
                 ->count(),
             $tanggalAkhir,
             $tanggalAkhirSebelumnya
@@ -650,9 +650,9 @@ class DasborService
      * (Lancar / Kurang Lancar / Diragukan / Macet) untuk satu pembiayaan,
      * berdasarkan jadwal angsuran tertua yang belum lunas dan tanggal jatuh tempo kontrak.
      */
-    private function klasifikasikanKolektibilitasPembiayaan(Financing $financing, Carbon $targetDate): string
+    private function klasifikasikanKolektibilitasPembiayaan(Pembiayaan $pembiayaan, Carbon $targetDate): string
     {
-        $oldestUnpaid = $financing->installment->sortBy('due_date')->first();
+        $oldestUnpaid = $pembiayaan->installment->sortBy('due_date')->first();
 
         // Jika tidak ada jadwal angsuran yang belum lunas, berarti pembiayaan ini 100% lancar
         if (!$oldestUnpaid) {
@@ -666,7 +666,7 @@ class DasborService
             return 'Lancar';
         }
 
-        $jatuhTempoPembiayaan = Carbon::parse($financing->akad_date)->addMonths($financing->tenor)->endOfDay();
+        $jatuhTempoPembiayaan = Carbon::parse($pembiayaan->tgl_akad)->addMonths($pembiayaan->tenor)->endOfDay();
 
         // KONDISI 2: Kontrak Akad Sudah Tamat / Jatuh Tempo Pembiayaan Terlewati
         if ($targetDate->greaterThan($jatuhTempoPembiayaan)) {

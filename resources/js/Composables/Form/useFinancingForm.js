@@ -56,27 +56,27 @@ export function useFinancingForm(initialData = null) {
             is_have_no_obligation: initialData?.anggota?.is_have_no_obligation || null,
             heirs: initialData?.anggota?.heirs || [],
         },
-        // Financing data
-        financing: {
-            name: initialData?.financing?.name || '',
-            jenis_barang_id: initialData?.financing?.jenis_barang_id || null,
-            brand: initialData?.financing?.brand || '',
-            condition: initialData?.financing?.condition || '',
-            qty: initialData?.financing?.qty || null,
-            specification: initialData?.financing?.specification || '',
-            price_per_unit: initialData?.financing?.price_per_unit || '',
-            cost_price: initialData?.financing?.cost_price || null,
-            margin_amount: initialData?.financing?.margin_amount || null,
-            akad_wakalah_date: initialData?.financing?.akad_wakalah_date || null,
-            payment_method: initialData?.financing?.payment_method || '',
-            akad_date: initialData?.financing?.akad_date || '',
-            down_payment: initialData?.financing?.down_payment || null,
-            status: initialData?.financing?.status || 'Menunggu Kelengkapan Dokumen',
-            purchase_receipt: initialData?.financing?.purchase_receipt || null,
-            tenor: initialData?.financing?.tenor || null,
-            predicted_cost_price: initialData?.financing?.predicted_cost_price || null,
-            pemasok_id: initialData?.financing?.pemasok_id || null,
-            tangguh_payment_date: initialData?.financing?.tangguh_payment_date || null,
+        // Pembiayaan data
+        pembiayaan: {
+            name: initialData?.pembiayaan?.name || '',
+            jenis_barang_id: initialData?.pembiayaan?.jenis_barang_id || null,
+            brand: initialData?.pembiayaan?.brand || '',
+            condition: initialData?.pembiayaan?.condition || '',
+            qty: initialData?.pembiayaan?.qty || null,
+            specification: initialData?.pembiayaan?.specification || '',
+            price_per_unit: initialData?.pembiayaan?.price_per_unit || '',
+            harga_perolehan: initialData?.pembiayaan?.harga_perolehan || null,
+            margin_keuntungan: initialData?.pembiayaan?.margin_keuntungan || null,
+            akad_wakalah_date: initialData?.pembiayaan?.akad_wakalah_date || null,
+            metode_pembayaran: initialData?.pembiayaan?.metode_pembayaran || '',
+            tgl_akad: initialData?.pembiayaan?.tgl_akad || '',
+            uang_muka: initialData?.pembiayaan?.uang_muka || null,
+            status: initialData?.pembiayaan?.status || 'Menunggu Kelengkapan Dokumen',
+            purchase_receipt: initialData?.pembiayaan?.purchase_receipt || null,
+            tenor: initialData?.pembiayaan?.tenor || null,
+            harga_perkiraan: initialData?.pembiayaan?.harga_perkiraan || null,
+            pemasok_id: initialData?.pembiayaan?.pemasok_id || null,
+            tangguh_payment_date: initialData?.pembiayaan?.tangguh_payment_date || null,
         },
         collateral: {
             collateral_type: initialData?.collateral?.collateral_type || '',
@@ -237,19 +237,19 @@ export function useFinancingForm(initialData = null) {
 
             heirs: [],
         }
-        form.financing = {
+        form.pembiayaan = {
             name: '',
             jenis_barang_id: null,
             brand: '',
             condition: '',
             qty: null,
             specification: '',
-            cost_price: null,
-            margin_amount: null,
+            harga_perolehan: null,
+            margin_keuntungan: null,
             is_wakalah: false,
-            payment_method: '',
-            akad_date: '',
-            down_payment: null,
+            metode_pembayaran: '',
+            tgl_akad: '',
+            uang_muka: null,
             notes: '',
             status: '',
             pemasok_id: null,
@@ -355,7 +355,7 @@ export function useFinancingForm(initialData = null) {
             confirmButtonColor: '#009141',
         }).then((result) => {
             if (result.isConfirmed) {
-                form.post('/admin/financings/store', {
+                form.post('/admin/pembiayaan/store', {
                     onSuccess: (page) => {
                         if (page.props.flash?.success) {
                             toast(page.props.flash.success, {
@@ -386,12 +386,12 @@ export function useFinancingForm(initialData = null) {
     }
 
     const finalize = () => {
-        if (form.financing.payment_method === 'Cicilan') {
-            form.financing.status = 'Angsuran Berjalan'
-        } else if (form.financing.payment_method === 'Tangguh') {
-            form.financing.status = 'Pembayaran Tangguh'
+        if (form.pembiayaan.metode_pembayaran === 'Cicilan') {
+            form.pembiayaan.status = 'Angsuran Berjalan'
+        } else if (form.pembiayaan.metode_pembayaran === 'Tangguh') {
+            form.pembiayaan.status = 'Pembayaran Tangguh'
         } else {
-            form.financing.status = 'Lunas'
+            form.pembiayaan.status = 'Lunas'
         }
 
         Swal.fire({
@@ -404,7 +404,7 @@ export function useFinancingForm(initialData = null) {
             confirmButtonColor: '#009141',
         }).then((result) => {
             if (result.isConfirmed) {
-                form.post('/admin/financings/finalize', {
+                form.post('/admin/pembiayaan/finalize', {
                     onSuccess: (page) => {
                         if (page.props.flash?.success) {
                             toast(page.props.flash.success, {
@@ -415,7 +415,7 @@ export function useFinancingForm(initialData = null) {
                     },
                     onError: (errors) => {
                         // Show all errors
-                        form.financing.status = 'Disetujui' // Revert status if error occurs
+                        form.pembiayaan.status = 'Disetujui' // Revert status if error occurs
                         const errorMessages = Object.values(errors).flat()
 
                         if (errorMessages.length > 0) {
@@ -432,7 +432,7 @@ export function useFinancingForm(initialData = null) {
                     }
                 })
             } else {
-                form.financing.status = 'Disetujui'
+                form.pembiayaan.status = 'Disetujui'
             }
         })
     }
@@ -448,7 +448,7 @@ export function useFinancingForm(initialData = null) {
             confirmButtonColor: '#009141',
         }).then((result) => {
             if (result.isConfirmed) {
-                form.post('/admin/financings/draft', {
+                form.post('/admin/pembiayaan/draft', {
                     onSuccess: (page) => {
                         if (page.props.flash?.success) {
                             toast(page.props.flash.success, {

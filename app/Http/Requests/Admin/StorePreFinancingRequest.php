@@ -62,15 +62,15 @@ class StorePreFinancingRequest extends FormRequest
             'anggota.jumlah_cicilan_amount' => 'nullable|numeric|min:0',
             'anggota.jumlah_biaya_lainnya_amount' => 'nullable|numeric|min:0',
 
-            // Financing data
-            'financing.name' => 'required|string|max:255',
-            'financing.jenis_barang_id' => 'required|exists:jenis_barang,id',
-            'financing.condition' => 'required|string|max:255',
-            'financing.qty' => 'required|integer|min:1',
-            'financing.specification' => 'required|string|max:1000',
-            'financing.status' => 'required|string|max:255',
-            'financing.predicted_cost_price' => 'required|numeric|min:0',
-            'financing.down_payment' => 'nullable|numeric|min:0',
+            // Pembiayaan data
+            'pembiayaan.name' => 'required|string|max:255',
+            'pembiayaan.jenis_barang_id' => 'required|exists:jenis_barang,id',
+            'pembiayaan.condition' => 'required|string|max:255',
+            'pembiayaan.qty' => 'required|integer|min:1',
+            'pembiayaan.specification' => 'required|string|max:1000',
+            'pembiayaan.status' => 'required|string|max:255',
+            'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
+            'pembiayaan.uang_muka' => 'nullable|numeric|min:0',
 
             // Collateral data
             'collateral.collateral_type' => 'required|string|max:255',

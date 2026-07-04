@@ -15,7 +15,7 @@ return new class extends Migration
             $table->decimal('principal_amount', 15, 2)
                   ->nullable()
                   ->after('nominal');
-            $table->decimal('margin_amount', 15, 2)
+            $table->decimal('margin_keuntungan', 15, 2)
                   ->nullable()
                   ->after('principal_amount');
         });
@@ -27,7 +27,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('installment_payment_transactions', function (Blueprint $table) {
-            $table->dropColumn(['principal_amount', 'margin_amount']);
+            $table->dropColumn(['principal_amount', 'margin_keuntungan']);
         });
     }
 };

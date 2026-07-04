@@ -4,7 +4,7 @@ namespace App\Services\User;
 
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\MemberStatusEnum;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\MemberDoc;
 use App\Models\SavingTransaction;
 use Illuminate\Support\Facades\DB;
@@ -35,13 +35,13 @@ class PengunduranDiriService
 
     public function getTotalObligation(int $anggotaId): float
     {
-        $costPriceSum = Financing::where('anggota_id', $anggotaId)
+        $costPriceSum = Pembiayaan::where('anggota_id', $anggotaId)
             ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->sum('cost_price');
+            ->sum('harga_perolehan');
 
-        $marginAmountSum = Financing::where('anggota_id', $anggotaId)
+        $marginAmountSum = Pembiayaan::where('anggota_id', $anggotaId)
             ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->sum('margin_amount');
+            ->sum('margin_keuntungan');
 
         return $costPriceSum + $marginAmountSum;
     }

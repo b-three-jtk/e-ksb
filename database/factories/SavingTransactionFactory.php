@@ -22,7 +22,7 @@ class SavingTransactionFactory extends Factory
             'saving_transaction_code' => $this->faker->unique()->numerify('ST#####'),
             'saving_amount' => $this->faker->numberBetween(50000, 5000000),
             'transaction_type' => $this->faker->randomElement(TransactionTypeEnum::cases())->value,
-            'saving_payment_method' => $this->faker->randomElement(PaymentMethodsEnum::cases())->value,
+            'saving_metode_pembayaran' => $this->faker->randomElement(PaymentMethodsEnum::cases())->value,
             'saving_description' => $this->faker->optional()->sentence(),
             'transaction_date' => $this->faker->dateTime(),
             'balance_after_transaction' => $this->faker->numberBetween(0, 100000000),

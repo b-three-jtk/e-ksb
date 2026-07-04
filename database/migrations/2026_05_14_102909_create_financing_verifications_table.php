@@ -14,15 +14,15 @@ return new class extends Migration
     {
         Schema::create('financing_verifications', function (Blueprint $table) {
             $table->id();
-            $table->uuid('financing_id');
+            $table->uuid('pembiayaan_id');
             $table->enum('final_verification_status', array_column(FinancingReqStatusEnum::cases(), 'value'));
             $table->text('notes')->nullable();
             $table->uuid('verified_by')->nullable();
             $table->dateTime('verified_at')->nullable();
 
-            $table->foreign('financing_id')->references('id')->on('financings')->onDelete('cascade');
+            $table->foreign('pembiayaan_id')->references('id')->on('pembiayaan')->onDelete('cascade');
             $table->foreign('verified_by')->references('id')->on('pengguna')->onDelete('set null');
-            $table->index('financing_id');
+            $table->index('pembiayaan_id');
             $table->timestamps();
         });
     }

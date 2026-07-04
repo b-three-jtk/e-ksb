@@ -42,7 +42,7 @@ class PengaturanUmumService
                 'description' => 'Nominal simpanan wajib anggota.',
             ],
         ],
-        'financing' => [
+        'pembiayaan' => [
             'murabahah_margin_percentage' => [
                 'label' => 'Persentase Margin',
                 'description' => 'Persentase margin pembiayaan murabahah.',
@@ -191,11 +191,11 @@ class PengaturanUmumService
                         'description' => self::SETTING_MAP['savings']['saving_wajib_amount']['description'],
                     ],
                 ], $userId),
-                'financing' => $this->saveSettingGroup([
+                'pembiayaan' => $this->saveSettingGroup([
                     'murabahah_margin_percentage' => [
                         'value' => $validated['murabahah_margin_percentage'],
                         'effective_date' => $validated['effective_date'],
-                        'description' => self::SETTING_MAP['financing']['murabahah_margin_percentage']['description'],
+                        'description' => self::SETTING_MAP['pembiayaan']['murabahah_margin_percentage']['description'],
                     ],
                 ], $userId),
             };

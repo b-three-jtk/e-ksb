@@ -14,11 +14,11 @@ class InstallmentPaymentTransaction extends Model
     public $incrementing = false;
     protected $fillable = [
         'installment_trans_code',
-        'payment_method',
+        'metode_pembayaran',
         'is_early_repayment',
         'nominal',
         'principal_amount',
-        'margin_amount',
+        'margin_keuntungan',
         'payment_date',
         'installment_payment_receipt',
 

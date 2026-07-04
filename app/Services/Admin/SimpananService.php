@@ -424,7 +424,7 @@ class SimpananService
                 'saving_amount'              => $data['amount'],
                 'balance_after_transaction'  => $newBalance,
                 'transaction_type'           => TransactionTypeEnum::DEPOSIT->value,
-                'saving_payment_method'      => $data['saving_payment_method'],
+                'saving_metode_pembayaran'      => $data['saving_metode_pembayaran'],
                 'saving_description'         => $data['notes'] ?? 'Penyetoran',
                 'transaction_date'           => $data['date'],
                 'updated_by'                 => Auth::id(),

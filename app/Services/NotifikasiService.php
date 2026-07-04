@@ -128,7 +128,7 @@ class NotifikasiService
     public function processInstallmentReminders(): void
     {
         $today = now()->startOfDay();
-        $installments = Installment::with('financing.anggota')
+        $installments = Installment::with('pembiayaan.anggota')
             ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
             ->whereBetween('due_date', [$today, $today->copy()->addDays(7)])
             ->get();
@@ -137,12 +137,12 @@ class NotifikasiService
             $dueDate = Carbon::parse($installment->due_date)->startOfDay();
             $daysLeft = $today->diffInDays($dueDate, false);
             $reminderType = $this->matchReminderType($daysLeft);
-            if (!$reminderType || !$installment->financing?->anggota) {
+            if (!$reminderType || !$installment->pembiayaan?->anggota) {
                 continue;
             }
 
             $period = $dueDate->format('Y-m');
-            $anggotaId = $installment->financing->anggota->id;
+            $anggotaId = $installment->pembiayaan->anggota->id;
 
             if ($this->findByDuplicateCriteria(
                 $anggotaId,

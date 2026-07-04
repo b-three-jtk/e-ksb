@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->integer('installment_no');
             $table->decimal('amount', 15, 2);
             $table->enum('status', array_column(InstallmentPaymentScheduleStatusEnum::cases(), 'value'))->default(InstallmentPaymentScheduleStatusEnum::PENDING->value);
-            $table->foreignUuid('financing_id')->nullable()->constrained('financings')->onDelete('set null');
+            $table->foreignUuid('pembiayaan_id')->nullable()->constrained('pembiayaan')->onDelete('set null');
             $table->timestamps();
         });
     }

@@ -16,7 +16,7 @@ class InstallmentPaymentTransactionFactory extends Factory
     {
         return [
             'installment_trans_code' => $this->faker->unique()->numerify('IPT-#########'),
-            'payment_method' => $this->faker->randomElement(PaymentMethodsEnum::cases())->value,
+            'metode_pembayaran' => $this->faker->randomElement(PaymentMethodsEnum::cases())->value,
             'is_early_repayment' => $this->faker->boolean(),
             'nominal' => $this->faker->numberBetween(100000, 10000000),
             'payment_date' => $this->faker->dateTime(),

@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('wakalah', function (Blueprint $table) {
             $table->id();
-            $table->date('akad_date');
-            $table->string('signed_akad_document')->nullable();
-            $table->uuid('financing_id');
+            $table->date('tgl_akad');
+            $table->string('dokumen_akad')->nullable();
+            $table->uuid('pembiayaan_id');
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
 
-            $table->foreign('financing_id')->references('id')->on('financings')->onDelete('cascade');
+            $table->foreign('pembiayaan_id')->references('id')->on('pembiayaan')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('pengguna')->onDelete('set null');
         });
     }

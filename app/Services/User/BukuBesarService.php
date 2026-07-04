@@ -48,7 +48,7 @@ class BukuBesarService
                 'produk' => $transaction->akunSimpanan?->jenis_simpanan ?? 'N/A',
                 'jenis' => $transaction->transaction_type,
                 'jenis_simpanan' => $transaction->akunSimpanan?->jenis_simpanan ?? 'N/A',
-                'metode' => $transaction->saving_payment_method ?? 'N/A',
+                'metode' => $transaction->saving_metode_pembayaran ?? 'N/A',
                 'petugas' => $transaction->updatedBy?->nama ?? 'System',
                 'nama_anggota' => $transaction->akunSimpanan?->anggota?->user?->nama ?? '-',
                 'no_anggota' => $transaction->akunSimpanan?->anggota?->user?->kode_pengguna ?? '-',
@@ -109,7 +109,7 @@ class BukuBesarService
             $searchLower = strtolower($search);
             $query->where(function ($q) use ($searchLower) {
                 $q->whereRaw('LOWER(transaction_type) LIKE ?', ['%' . $searchLower . '%'])
-                    ->orWhereRaw('LOWER(saving_payment_method) LIKE ?', ['%' . $searchLower . '%'])
+                    ->orWhereRaw('LOWER(saving_metode_pembayaran) LIKE ?', ['%' . $searchLower . '%'])
                     ->orWhereHas('akunSimpanan', function ($subQ) use ($searchLower) {
                         $subQ->whereRaw('LOWER(jenis_simpanan) LIKE ?', ['%' . $searchLower . '%']);
                     });

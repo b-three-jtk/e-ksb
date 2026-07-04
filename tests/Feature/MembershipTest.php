@@ -2,7 +2,7 @@
 
 use App\Enums\EducationEnum;
 use App\Enums\FinancingReqStatusEnum;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\Pengguna;
@@ -889,10 +889,10 @@ describe('Aplikasi harus menyediakan pengajuan pengunduran diri keanggotaan oleh
             'status' => 'Aktif',
         ]);
 
-        Financing::factory()->create([
+        Pembiayaan::factory()->create([
             'anggota_id' => $anggota->id,
-            'cost_price' => 1000000,
-            'margin_amount' => 100000,
+            'harga_perolehan' => 1000000,
+            'margin_keuntungan' => 100000,
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
         ]);
 

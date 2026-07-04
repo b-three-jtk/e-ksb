@@ -93,7 +93,7 @@ class SimpananServices
                 'balance_after_transaction' => $saldoSebelum - $validated['amount'],
                 'saving_amount' => $validated['amount'],
                 'transaction_type' => TransactionTypeEnum::WITHDRAWAL->value,
-                'saving_payment_method' => $validated['method'],
+                'saving_metode_pembayaran' => $validated['method'],
                 'transaction_date' => $validated['withdrawal_date'],
                 'saving_description' => $validated['notes'] ?? '',
                 'updated_by' => $userId,

@@ -11,33 +11,34 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Financing extends Model
+class Pembiayaan extends Model
 {
     use HasUuids, HasFactory;
 
     protected $keyType = 'string';
+    protected $table = 'pembiayaan';
     protected $fillable = [
-        'financing_transaction_code',
-        'down_payment',
-        'cost_price',
-        'margin_amount',
-        'requested_date',
-        'akad_date',
-        'paid_date',
+        'kode_pembiayaan',
+        'uang_muka',
+        'harga_perolehan',
+        'margin_keuntungan',
+        'tgl_permohonan',
+        'tgl_akad',
+        'tgl_lunas',
         'status',
-        'payment_method',
+        'metode_pembayaran',
         'tenor',
-        'signed_akad_document',
-        'predicted_cost_price',
+        'dokumen_akad',
+        'harga_perkiraan',
 
         'anggota_id',
         'updated_by',
     ];
 
     protected $casts = [
-        'akad_date' => 'datetime',
-        'requested_date' => 'date',
-        'paid_date' => 'date',
+        'tgl_akad' => 'datetime',
+        'tgl_permohonan' => 'date',
+        'tgl_lunas' => 'date',
     ];
 
     protected static function boot()
@@ -45,8 +46,8 @@ class Financing extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            if (!$model->financing_transaction_code) {
-                $model->financing_transaction_code = 'PM' . strtoupper(uniqid());
+            if (!$model->kode_pembiayaan) {
+                $model->kode_pembiayaan = 'PM' . strtoupper(uniqid());
             }
         });
     }

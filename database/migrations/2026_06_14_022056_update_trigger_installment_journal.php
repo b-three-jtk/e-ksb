@@ -19,7 +19,7 @@ return new class extends Migration
                 v_margin      NUMERIC(15,2);
             BEGIN
                 v_principal := COALESCE(NEW.principal_amount, 0);
-                v_margin    := COALESCE(NEW.margin_amount, 0);
+                v_margin    := COALESCE(NEW.margin_keuntungan, 0);
 
                 IF v_principal = 0 AND v_margin = 0 THEN
                     RETURN NEW;

@@ -42,7 +42,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
-                'saving_payment_method' => 'Tunai',
+                'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran tabungan anggota baru',
             ]);
 
@@ -68,7 +68,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
-                'saving_payment_method' => 'Tunai',
+                'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran pokok anggota baru',
             ]);
 
@@ -85,7 +85,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
-                'saving_payment_method' => 'Tunai',
+                'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran pokok anggota kedua',
             ]);
 
@@ -111,7 +111,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
-                'saving_payment_method' => 'Tunai',
+                'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran pokok anggota oleh PJ lain',
             ]);
 
@@ -149,7 +149,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'amount' => 100000,
                 'target_amount' => $ia->target_amount,
                 'date' => now()->format('Y-m-d'),
-                'saving_payment_method' => 'Tunai',
+                'saving_metode_pembayaran' => 'Tunai',
                 'purpose' => 'Tabungan untuk Haji 2026',
                 'notes' => 'Setoran tambahan tabungan ibadah',
             ]);
@@ -173,7 +173,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
-                'saving_payment_method' => 'Tunai',
+                'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran pokok anggota baru',
             ]);
 
@@ -415,7 +415,7 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
-                'saving_payment_method' => 'Tunai',
+                'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran tabungan anggota baru',
             ]);
 
@@ -487,7 +487,7 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => -500000, // Nominal tidak valid
                 'date' => now()->format('Y-m-d'),
-                'saving_payment_method' => 'Tunai',
+                'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran tabungan anggota baru',
             ]);
 

@@ -6,7 +6,7 @@ use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MemberStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\Pengguna;
 
 class PengunduranDiriService
@@ -41,22 +41,22 @@ class PengunduranDiriService
 
     public function getTotalKewajiban(Pengguna $user)
     {
-        return Financing::with('installment.payment')->where('anggota_id', $user->anggota->id)
+        return Pembiayaan::with('installment.payment')->where('anggota_id', $user->anggota->id)
             ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->get()
-            ->sum(function ($financing) {
-                $installment = $financing->installment;
+            ->sum(function ($accountpembiayaan) {
+                $installment = $accountpembiayaan->installment;
                 if (!$installment) return 0;
 
                 $paidInstallments = $installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
                 $remainingInstallments = $installment->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)->count();
 
                 // Asumsi margin flat, jadi margin per bulan tetap
-                $marginPerMonth = $financing->margin_amount / $financing->tenor;
-                $principalPerMonth = ($financing->cost_price - $financing->down_payment) / $financing->tenor;
+                $marginPerMonth = $accountpembiayaan->margin_keuntungan / $accountpembiayaan->tenor;
+                $principalPerMonth = ($accountpembiayaan->harga_perolehan - $accountpembiayaan->uang_muka) / $accountpembiayaan->tenor;
 
                 // Total kewajiban adalah sisa pokok + margin berjalan
-                $sisaPokok = max(0, ($financing->cost_price - $financing->down_payment) - ($principalPerMonth * $paidInstallments));
+                $sisaPokok = max(0, ($accountpembiayaan->harga_perolehan - $accountpembiayaan->uang_muka) - ($principalPerMonth * $paidInstallments));
                 $marginBerjalan = $marginPerMonth * ($paidInstallments + 1); // Margin diakui sampai bulan berikutnya
 
                 return $sisaPokok + $marginBerjalan;

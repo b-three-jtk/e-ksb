@@ -14,13 +14,13 @@ use App\Http\Requests\CreateRepaymentRequest;
 use App\Http\Requests\StoreFinancingDraftRequest;
 use App\Http\Requests\StoreFinancingRequest;
 use App\Models\Account;
-use App\Models\Financing;
+use App\Models\AkunSimpanan;
+use App\Models\Anggota;
+use App\Models\Pembiayaan;
 use App\Models\FinancingVerification;
 use App\Models\GlobalSetting;
-use App\Models\JournalEntry;
-use App\Models\Anggota;
 use App\Models\JenisBarang;
-use App\Models\AkunSimpanan;
+use App\Models\JournalEntry;
 use App\Models\Pemasok;
 use App\Models\Pengguna;
 use App\Services\Admin\JurnalService;
@@ -38,8 +38,8 @@ use Inertia\Inertia;
 class PembiayaanController extends Controller
 {
     public function __construct(
-        private PembiayaanService $financingService,
-        private SharedPembiayaanService $sharedFinancingService,
+        private PembiayaanService $pembiayaanService,
+        private SharedPembiayaanService $sharedPembiayaanService,
         protected PembayaranAngsuranService $pembayaranAngsuranService
     ){}
 
@@ -56,16 +56,16 @@ class PembiayaanController extends Controller
         $sortBy = $request->input('sort_by', 'created_at');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $query = $this->financingService->getSemuaPembiayaan($search, $tab, $user);
+        $query = $this->pembiayaanService->getSemuaPembiayaan($search, $tab, $user);
 
-        $financings = $query
+        $pembiayaan = $query
             ->paginate($perPage)
             ->withQueryString()
             ->through(function ($f) {
                 return [
                     'id' => $f->id,
-                    'financing_transaction_code' => $f->financing_transaction_code,
-                    'akad_date' => Carbon::parse($f->akad_date)->format('Y-m-d') ?? '',
+                    'kode_pembiayaan' => $f->kode_pembiayaan,
+                    'tgl_akad' => Carbon::parse($f->tgl_akad)->format('Y-m-d') ?? '',
                     'user' => $f->anggota->user
                         ? ($f->anggota->user->kode_pengguna . ' - ' . $f->anggota->user->nama)
                         : '-',
@@ -77,13 +77,13 @@ class PembiayaanController extends Controller
             });
 
         $summary = [
-            ['title' => 'Total Pengajuan Pembiayaan Murabahah','value' => $this->financingService->getTotalPermohonanPembiayaan()],
-            ['title' => 'Total Pembiayaan Berlangsung', 'value' => $this->financingService->getTotalPembiayaanBerlangsung()],
-            ['title' => 'Total Modal Belum Diputar', 'value' => $this->financingService->getModalBelumDiputar()],
+            ['title' => 'Total Pengajuan Pembiayaan Murabahah','value' => $this->pembiayaanService->getTotalPermohonanPembiayaan()],
+            ['title' => 'Total Pembiayaan Berlangsung', 'value' => $this->pembiayaanService->getTotalPembiayaanBerlangsung()],
+            ['title' => 'Total Modal Belum Diputar', 'value' => $this->pembiayaanService->getModalBelumDiputar()],
         ];
 
         return inertia('Admin/Financing/Index', [
-            'financings' => $financings,
+            'pembiayaan' => $pembiayaan,
             'summary' => $summary,
             'filters' => compact('search', 'perPage', 'tab', 'sortBy', 'sortDir'),
         ]);
@@ -91,12 +91,12 @@ class PembiayaanController extends Controller
 
     public function show(string $id)
     {
-        $financing = $this->sharedFinancingService->getPembiayaanById($id);
+        $pembiayaan = $this->sharedPembiayaanService->getPembiayaanById($id);
 
-        $this->financingService->computeFinancingSummary($financing);
-        $this->financingService->computeNextDueDate($financing);
+        $this->pembiayaanService->computepembiayaanummary($pembiayaan);
+        $this->pembiayaanService->computeNextDueDate($pembiayaan);
 
-        $financing->setRelation('installment', $financing->installment->map(function ($item) {
+        $pembiayaan->setRelation('installment', $pembiayaan->installment->map(function ($item) {
             return [
                 'installment_no'              => $item->installment_no,
                 'installment_trans_code'      => $item->payment?->installment_trans_code,
@@ -108,7 +108,7 @@ class PembiayaanController extends Controller
             ];
         }));
 
-        return inertia('Admin/Financing/Show', ['data' => $financing]);
+        return inertia('Admin/Financing/Show', ['data' => $pembiayaan]);
     }
 
     /**
@@ -117,48 +117,48 @@ class PembiayaanController extends Controller
     public function create()
     {
         return inertia('Admin/Financing/Create', [
-            'data' => $this->financingService->getDataOpsi(),
+            'data' => $this->pembiayaanService->getDataOpsi(),
         ]);
     }
 
     public function loadDraft(string $id)
     {
-        $financing = $this->financingService->getDraftPembiayaan($id);
+        $pembiayaan = $this->pembiayaanService->getDraftPembiayaan($id);
 
-        if (!$financing) {
+        if (!$pembiayaan) {
             throw ValidationException::withMessages(['Data pembiayaan tidak ditemukan atau tidak dalam status yang valid untuk dimuat sebagai draft']);
         }
 
         return inertia('Admin/Financing/Create', [
-            'data' => $this->financingService->getDataOpsi(),
-            'financing' => [
-                'anggota' => $this->financingService->formatMemberData($financing->anggota),
-                'financing' => [
-                    'name' => $financing->financingItem->name,
-                    'jenis_barang_id' => $financing->financingItem->jenis_barang_id,
-                    'condition' => $financing->financingItem->condition,
-                    'qty' => $financing->financingItem->qty,
-                    'specification' => $financing->financingItem->specification,
-                    'price_per_unit' => $financing->financingItem->price_per_unit,
-                    'cost_price' => $financing->cost_price,
-                    'margin_amount' => $financing->margin_amount,
-                    'pemasok_id' => $financing->financingItem->pemasok_id,
-                    'down_payment' => $financing->down_payment,
-                    'payment_method' => $financing->payment_method,
-                    'akad_wakalah_date' => $financing->wakalah?->akad_date,
-                    'akad_date' => $financing->akad_date,
-                    'status' => $financing->status,
-                    'tenor' => $financing->tenor,
-                    'predicted_cost_price' => $financing->predicted_cost_price,
-                    'tangguh_payment_date' => $financing->tangguh_payment_date,
+            'data' => $this->pembiayaanService->getDataOpsi(),
+            'pembiayaan' => [
+                'anggota' => $this->pembiayaanService->formatMemberData($pembiayaan->anggota),
+                'pembiayaan' => [
+                    'name' => $pembiayaan->financingItem->name,
+                    'jenis_barang_id' => $pembiayaan->financingItem->jenis_barang_id,
+                    'condition' => $pembiayaan->financingItem->condition,
+                    'qty' => $pembiayaan->financingItem->qty,
+                    'specification' => $pembiayaan->financingItem->specification,
+                    'price_per_unit' => $pembiayaan->financingItem->price_per_unit,
+                    'harga_perolehan' => $pembiayaan->harga_perolehan,
+                    'margin_keuntungan' => $pembiayaan->margin_keuntungan,
+                    'pemasok_id' => $pembiayaan->financingItem->pemasok_id,
+                    'uang_muka' => $pembiayaan->uang_muka,
+                    'metode_pembayaran' => $pembiayaan->metode_pembayaran,
+                    'akad_wakalah_date' => $pembiayaan->wakalah?->tgl_akad,
+                    'tgl_akad' => $pembiayaan->tgl_akad,
+                    'status' => $pembiayaan->status,
+                    'tenor' => $pembiayaan->tenor,
+                    'harga_perkiraan' => $pembiayaan->harga_perkiraan,
+                    'tangguh_payment_date' => $pembiayaan->tangguh_payment_date,
                 ],
                 'collateral' => [
-                    'collateral_type' => $financing->collateral?->collateral_type,
-                    'owner_name' => $financing->collateral?->owner_name,
-                    'estimated_market_value' => $financing->collateral?->estimated_market_value,
-                    'collateral_location' => $financing->collateral?->collateral_location,
+                    'collateral_type' => $pembiayaan->collateral?->collateral_type,
+                    'owner_name' => $pembiayaan->collateral?->owner_name,
+                    'estimated_market_value' => $pembiayaan->collateral?->estimated_market_value,
+                    'collateral_location' => $pembiayaan->collateral?->collateral_location,
                 ],
-                'verification' => $financing->verification->map(function ($item) {
+                'verification' => $pembiayaan->verification->map(function ($item) {
                     return [
                         'final_verification_status' => $item->final_verification_status,
                         'notes' => $item->notes,
@@ -167,17 +167,17 @@ class PembiayaanController extends Controller
                     ];
                 })->sortByDesc('verified_at')->values(),
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
-                    'income_slip' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
-                    'bank_book' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
-                    'purchase_receipt' => $this->getDocumentUrl($financing->financingItem->purchase_receipt),
-                    'akad_document' => $this->getDocumentUrl($financing->signed_akad_document),
-                    'akad_wakalah_document' => $this->getDocumentUrl($financing->wakalah?->signed_akad_document),
+                    'family_card' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
+                    'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
+                    'bank_book' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
+                    'purchase_receipt' => $this->getDocumentUrl($pembiayaan->financingItem->purchase_receipt),
+                    'akad_document' => $this->getDocumentUrl($pembiayaan->dokumen_akad),
+                    'akad_wakalah_document' => $this->getDocumentUrl($pembiayaan->wakalah?->dokumen_akad),
                 ],
-                'pemasok' => $financing->financingItem->pemasok ? [
-                    'nama_pemasok' => $financing->financingItem->pemasok->nama_pemasok,
-                    'alamat_pemasok' => $financing->financingItem->pemasok->alamat_pemasok,
-                    'contact' => $financing->financingItem->pemasok->contact,
+                'pemasok' => $pembiayaan->financingItem->pemasok ? [
+                    'nama_pemasok' => $pembiayaan->financingItem->pemasok->nama_pemasok,
+                    'alamat_pemasok' => $pembiayaan->financingItem->pemasok->alamat_pemasok,
+                    'contact' => $pembiayaan->financingItem->pemasok->contact,
                 ] : null,
             ],
         ]);
@@ -190,47 +190,47 @@ class PembiayaanController extends Controller
 
     public function showValidation(string $id)
     {
-        $financing = $this->financingService->getPembiayaanBelumDireview($id);
+        $pembiayaan = $this->pembiayaanService->getPembiayaanBelumDireview($id);
 
         return inertia('Admin/Financing/Validation', [
             'data' => [
-                'anggota' => $this->financingService->formatMemberData($financing->anggota),
+                'anggota' => $this->pembiayaanService->formatMemberData($pembiayaan->anggota),
                 'margin_percentage' => GlobalSetting::where('key', 'murabahah_margin_percentage')->where('effective_date', '<=', now())->latest()->first()?->value,
-                'financing' => [
-                    'id' => $financing->id,
-                    'financing_transaction_code' => $financing->financing_transaction_code,
-                    'name' => $financing->financingItem->name,
-                    'jenis_barang_id' => $financing->financingItem->jenis_barang_id,
-                    'condition' => $financing->financingItem->condition,
-                    'qty' => $financing->financingItem->qty,
-                    'specification' => $financing->financingItem->specification,
-                    'cost_price' => $financing->cost_price,
-                    'margin_amount' => $financing->margin_amount,
-                    'pemasok_id' => $financing->financingItem->pemasok_id,
-                    'down_payment' => $financing->down_payment,
-                    'payment_method' => $financing->payment_method,
-                    'akad_date' => $financing->akad_date,
-                    'status' => $financing->status,
-                    'jenis_barang' => $financing->financingItem->jenisBarang?->nama_jenis_barang,
-                    'tenor' => $financing->tenor,
-                    'predicted_cost_price' => $financing->predicted_cost_price,
-                    'tangguh_payment_date' => $financing->tangguh_payment_date,
+                'pembiayaan' => [
+                    'id' => $pembiayaan->id,
+                    'kode_pembiayaan' => $pembiayaan->kode_pembiayaan,
+                    'name' => $pembiayaan->financingItem->name,
+                    'jenis_barang_id' => $pembiayaan->financingItem->jenis_barang_id,
+                    'condition' => $pembiayaan->financingItem->condition,
+                    'qty' => $pembiayaan->financingItem->qty,
+                    'specification' => $pembiayaan->financingItem->specification,
+                    'harga_perolehan' => $pembiayaan->harga_perolehan,
+                    'margin_keuntungan' => $pembiayaan->margin_keuntungan,
+                    'pemasok_id' => $pembiayaan->financingItem->pemasok_id,
+                    'uang_muka' => $pembiayaan->uang_muka,
+                    'metode_pembayaran' => $pembiayaan->metode_pembayaran,
+                    'tgl_akad' => $pembiayaan->tgl_akad,
+                    'status' => $pembiayaan->status,
+                    'jenis_barang' => $pembiayaan->financingItem->jenisBarang?->nama_jenis_barang,
+                    'tenor' => $pembiayaan->tenor,
+                    'harga_perkiraan' => $pembiayaan->harga_perkiraan,
+                    'tangguh_payment_date' => $pembiayaan->tangguh_payment_date,
                 ],
                 'collateral' => [
-                    'collateral_type' => $financing->collateral?->collateral_type,
-                    'owner_name' => $financing->collateral?->owner_name,
-                    'estimated_market_value' => $financing->collateral?->estimated_market_value,
-                    'collateral_location' => $financing->collateral?->collateral_location,
+                    'collateral_type' => $pembiayaan->collateral?->collateral_type,
+                    'owner_name' => $pembiayaan->collateral?->owner_name,
+                    'estimated_market_value' => $pembiayaan->collateral?->estimated_market_value,
+                    'collateral_location' => $pembiayaan->collateral?->collateral_location,
                 ],
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
-                    'income_slip' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
-                    'bank_book' => $this->getDocumentUrl($financing->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
+                    'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
+                    'bank_book' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                 ],
-                'pemasok' => $financing->financingItem->pemasok ? [
-                    'nama_pemasok' => $financing->financingItem->pemasok->nama_pemasok,
-                    'alamat_pemasok' => $financing->financingItem->pemasok->alamat_pemasok,
-                    'contact' => $financing->financingItem->pemasok->contact,
+                'pemasok' => $pembiayaan->financingItem->pemasok ? [
+                    'nama_pemasok' => $pembiayaan->financingItem->pemasok->nama_pemasok,
+                    'alamat_pemasok' => $pembiayaan->financingItem->pemasok->alamat_pemasok,
+                    'contact' => $pembiayaan->financingItem->pemasok->contact,
                 ] : null,
             ],
         ]);
@@ -244,7 +244,7 @@ class PembiayaanController extends Controller
         ]);
 
         try {
-            $financing = $this->financingService->getPembiayaanBelumDireview($id);
+            $pembiayaan = $this->pembiayaanService->getPembiayaanBelumDireview($id);
 
                 if ($validated['status'] === FinancingReqStatusEnum::APPROVED->value) {
 
@@ -269,7 +269,7 @@ class PembiayaanController extends Controller
 
                     $saldoDanaAlokasi = $danaAlokasiMasuk - $danaAlokasiKeluar;
 
-                    if ($saldoDanaAlokasi < $financing->predicted_cost_price) {
+                    if ($saldoDanaAlokasi < $pembiayaan->harga_perkiraan) {
                         throw ValidationException::withMessages([
                             'status' =>
                                 'Dana alokasi pembiayaan tidak mencukupi. Silakan lakukan alokasi dana terlebih dahulu.'
@@ -277,12 +277,12 @@ class PembiayaanController extends Controller
                     }
                 }
 
-            $financing->update([
+            $pembiayaan->update([
                 'status' => $validated['status'],
             ]);
 
             FinancingVerification::create([
-                'financing_id' => $financing->id,
+                'pembiayaan_id' => $pembiayaan->id,
                 'verified_by' => auth()->id(),
                 'final_verification_status' => $validated['status'],
                 'notes' => $validated['notes'] ?? null,
@@ -306,12 +306,12 @@ class PembiayaanController extends Controller
                         [
                             'account' => $pembiayaanDalamProses->no_ref_account,
                             'position' => PositionEnum::DEBIT->value,
-                            'nominal' => $financing->predicted_cost_price,
+                            'nominal' => $pembiayaan->harga_perkiraan,
                         ],
                         [
                             'account' => $danaAlokasi->no_ref_account,
                             'position' => PositionEnum::CREDIT->value,
-                            'nominal' => $financing->predicted_cost_price,
+                            'nominal' => $pembiayaan->harga_perkiraan,
                         ],
                     ],
                     now()->toDateString(),
@@ -319,7 +319,7 @@ class PembiayaanController extends Controller
                 );
 
                 // Jurnal uang muka saat approval (semua payment method)
-                if ($financing->down_payment > 0) {
+                if ($pembiayaan->uang_muka > 0) {
                     $uangMukaMurabahah = Account::where(
                         'account_name',
                         'Uang Muka Murabahah'
@@ -336,12 +336,12 @@ class PembiayaanController extends Controller
                             [
                                 'account' => $kas->no_ref_account,
                                 'position' => PositionEnum::DEBIT->value,
-                                'nominal' => $financing->down_payment,
+                                'nominal' => $pembiayaan->uang_muka,
                             ],
                             [
                                 'account' => $uangMukaMurabahah->no_ref_account,
                                 'position' => PositionEnum::CREDIT->value,
-                                'nominal' => $financing->down_payment,
+                                'nominal' => $pembiayaan->uang_muka,
                             ],
                         ],
                         now()->toDateString(),
@@ -359,12 +359,12 @@ class PembiayaanController extends Controller
                             [
                                 'account' => $uangMukaMurabahah->no_ref_account,
                                 'position' => PositionEnum::DEBIT->value,
-                                'nominal' => $financing->down_payment,
+                                'nominal' => $pembiayaan->uang_muka,
                             ],
                             [
                                 'account' => $piutangMurabahah->no_ref_account,
                                 'position' => PositionEnum::CREDIT->value,
-                                'nominal' => $financing->down_payment,
+                                'nominal' => $pembiayaan->uang_muka,
                             ],
                         ],
                         now()->toDateString(),
@@ -373,11 +373,11 @@ class PembiayaanController extends Controller
                 }
             }
 
-            return redirect()->route('admin.financings.index')->with('success', 'Keputusan validasi berhasil disimpan');
+            return redirect()->route('admin.pembiayaan.index')->with('success', 'Keputusan validasi berhasil disimpan');
         } catch (ValidationException $e) {
             throw $e;
         } catch (Exception $e) {
-            Log::error('Error validating financing: ' . $e->getMessage());
+            Log::error('Error validating pembiayaan: ' . $e->getMessage());
 
             return back()->withErrors([
                 'error' => 'Gagal menyimpan keputusan validasi'
@@ -398,7 +398,7 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon harus dalam status aktif']);
                 }
 
-                $hasActiveFinancing = $user->anggota->financings?->whereIn('status', [FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, FinancingReqStatusEnum::TANGGUH->value])
+                $hasActiveFinancing = $user->anggota->pembiayaan?->whereIn('status', [FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, FinancingReqStatusEnum::TANGGUH->value])
                 ->isNotEmpty() ?? false;
 
                 if ($hasActiveFinancing) {
@@ -414,17 +414,17 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
-                $validated['financing']['status'] = 'Belum Ditinjau';
+                $validated['pembiayaan']['status'] = 'Belum Ditinjau';
 
-                $this->financingService->syncMemberData($user, $validated['anggota'], $request);
-                $this->financingService->syncFinancingData($user, $request, auth()->id());
+                $this->pembiayaanService->syncMemberData($user, $validated['anggota'], $request);
+                $this->pembiayaanService->syncFinancingData($user, $request, auth()->id());
             });
 
-            return redirect()->route('admin.financings.index')
+            return redirect()->route('admin.pembiayaan.index')
                 ->with('success', 'Permohonan pembiayaan berhasil dikirim');
 
         } catch (Exception $e) {
-            Log::error('Error storing financing: ' . $e->getMessage());
+            Log::error('Error storing pembiayaan: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return back()->withErrors(['error' => 'Gagal menyimpan permohonan: ' . $e->getMessage()]);
         }
     }
@@ -451,20 +451,20 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
-                $hasActiveFinancing = $user->anggota->financings?->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+                $hasActiveFinancing = $user->anggota->pembiayaan?->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
                 ->isNotEmpty() ?? false;
 
                 if ($hasActiveFinancing) {
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
                 }
 
-                $this->financingService->syncMemberData($user, $validated['anggota'], $request);
-                $financing = $this->financingService->syncFinancingData($user, $request, auth()->id());
+                $this->pembiayaanService->syncMemberData($user, $validated['anggota'], $request);
+                $pembiayaan = $this->pembiayaanService->syncFinancingData($user, $request, auth()->id());
 
-                if (isset($validated['financing']['tenor']) && $validated['financing']['payment_method'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
-                    $this->financingService->generateInstallments($financing);
-                } else if ($validated['financing']['payment_method'] === FinancingPaymentMethodEnum::TANGGUH->value) {
-                    $this->financingService->generateTangguhSchedule($financing, $validated['financing']['tangguh_payment_date']);
+                if (isset($validated['pembiayaan']['tenor']) && $validated['pembiayaan']['metode_pembayaran'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
+                    $this->pembiayaanService->generateInstallments($pembiayaan);
+                } else if ($validated['pembiayaan']['metode_pembayaran'] === FinancingPaymentMethodEnum::TANGGUH->value) {
+                    $this->pembiayaanService->generateTangguhSchedule($pembiayaan, $validated['pembiayaan']['tangguh_payment_date']);
                 }
 
                 $pembiayaanDalamProses = Account::where(
@@ -491,13 +491,13 @@ class PembiayaanController extends Controller
                     'Kas'
                 )->firstOrFail();
 
-                $costPrice = $financing->cost_price;
-                $margin = $financing->margin_amount;
+                $costPrice = $pembiayaan->harga_perolehan;
+                $margin = $pembiayaan->margin_keuntungan;
 
                 // Kalo pembayaran pembiayaannya cicilan
-                if ($financing->payment_method === FinancingPaymentMethodEnum::INSTALLMENT->value)
+                if ($pembiayaan->metode_pembayaran === FinancingPaymentMethodEnum::INSTALLMENT->value)
                 {
-                    $allocatedAmount = $financing->predicted_cost_price ?? 0;
+                    $allocatedAmount = $pembiayaan->harga_perkiraan ?? 0;
                     $piutang = $costPrice;
                     $selisih = $allocatedAmount - $piutang;
 
@@ -518,7 +518,7 @@ class PembiayaanController extends Controller
                                 [
                                     'account' => $pembiayaanDalamProses->no_ref_account,
                                     'position' => PositionEnum::CREDIT->value,
-                                    'nominal' => $financing->predicted_cost_price,
+                                    'nominal' => $pembiayaan->harga_perkiraan,
                                 ],
                             ],
                             now()->toDateString(),
@@ -544,15 +544,15 @@ class PembiayaanController extends Controller
                         );
                     } else {
                         throw ValidationException::withMessages([
-                            'cost_price' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
+                            'harga_perolehan' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
                         ]);
                     }
                 }
 
                 // Klo pembayaran Cash
-                if ($financing->payment_method === FinancingPaymentMethodEnum::CASH->value)
+                if ($pembiayaan->metode_pembayaran === FinancingPaymentMethodEnum::CASH->value)
                 {
-                    $allocatedAmount = $financing->predicted_cost_price ?? 0;
+                    $allocatedAmount = $pembiayaan->harga_perkiraan ?? 0;
                     $piutang = $costPrice;
                     $selisih = $allocatedAmount - $piutang;
 
@@ -609,15 +609,15 @@ class PembiayaanController extends Controller
                         );
                     } else {
                         throw ValidationException::withMessages([
-                            'cost_price' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
+                            'harga_perolehan' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
                         ]);
                     }
                 }
 
                 // Klo pembiayaan tangguh
-                if ($financing->payment_method === FinancingPaymentMethodEnum::TANGGUH->value)
+                if ($pembiayaan->metode_pembayaran === FinancingPaymentMethodEnum::TANGGUH->value)
                 {
-                    $allocatedAmount = $financing->predicted_cost_price ?? 0;
+                    $allocatedAmount = $pembiayaan->harga_perkiraan ?? 0;
                     $piutang = $costPrice;
                     $selisih = $allocatedAmount - $piutang;
 
@@ -662,16 +662,16 @@ class PembiayaanController extends Controller
                         );
                     } else {
                         throw ValidationException::withMessages([
-                            'cost_price' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
+                            'harga_perolehan' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
                         ]);
                     }
                 }
-                return $financing;
+                return $pembiayaan;
             });
-            return redirect()->route('admin.financings.index')
+            return redirect()->route('admin.pembiayaan.index')
                 ->with('success', 'Pembiayaan berhasil difinalisasi');
         } catch (Exception $e) {
-            Log::error('Error storing financing: ' . $e->getMessage());
+            Log::error('Error storing pembiayaan: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Gagal menyimpan permohonan: ' . $e->getMessage()]);
         }
     }
@@ -685,11 +685,11 @@ class PembiayaanController extends Controller
                     ->where('kode_pengguna', $validated['anggota']['kode_pengguna'])
                     ->firstOrFail();
 
-                $this->financingService->syncMemberData($user, $validated['anggota'], $request);
-                $this->financingService->syncFinancingData($user, $request, auth()->id());
+                $this->pembiayaanService->syncMemberData($user, $validated['anggota'], $request);
+                $this->pembiayaanService->syncFinancingData($user, $request, auth()->id());
             });
 
-            return redirect()->route('admin.financings.index')
+            return redirect()->route('admin.pembiayaan.index')
                 ->with('success', 'Draft berhasil disimpan');
 
         } catch (Exception $e) {
@@ -703,7 +703,7 @@ class PembiayaanController extends Controller
         $query = $request->input('q');
 
         $anggota = Anggota::query()
-            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'financings:id,status', 'akunSimpanan:id,saldo,created_at'])
+            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'pembiayaan:id,status', 'akunSimpanan:id,saldo,created_at'])
             ->whereHas('user', function ($q) use ($query) {
                 $q->whereHas('roles', fn($roleQ) => $roleQ->where('name', 'Anggota'))
                     ->where('status', UserStatusEnum::ACTIVE->value)
@@ -715,7 +715,7 @@ class PembiayaanController extends Controller
             ->limit(5)
             ->get()
             ->map(function ($anggota) {
-                $hasActiveFinancing = $anggota->financings?->where(
+                $hasActiveFinancing = $anggota->pembiayaan?->where(
                     'status',
                         FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
                         FinancingReqStatusEnum::TANGGUH->value,
@@ -757,7 +757,7 @@ class PembiayaanController extends Controller
 
     public function showRepayment(string $id)
     {
-        $financing = Financing::with([
+        $pembiayaan = Pembiayaan::with([
             'anggota.user',
             'installment.payment',
             'financingItem.jenisBarang',
@@ -765,11 +765,11 @@ class PembiayaanController extends Controller
             'collateral'
         ])->where('status', '!=', FinancingReqStatusEnum::PAID->value)->findOrFail($id);
 
-        $data = $this->pembayaranAngsuranService->calculateDetails($financing);
+        $data = $this->pembayaranAngsuranService->calculateDetails($pembiayaan);
 
         $data['pengurus'] = auth()->user()->nama;
 
-        $unpaidInstallment = $financing->installment
+        $unpaidInstallment = $pembiayaan->installment
             ->whereNotIn('status', [
                 InstallmentPaymentScheduleStatusEnum::PAID->value,
                 InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
@@ -801,10 +801,10 @@ class PembiayaanController extends Controller
         }
     }
 
-    public function createPayment(Financing $financing)
+    public function createPayment(Pembiayaan $pembiayaan)
     {
         return Inertia::render('Admin/Financing/Payment/Create', [
-            'financing' => $this->pembayaranAngsuranService->getCreatePaymentData($financing),
+            'pembiayaan' => $this->pembayaranAngsuranService->getCreatePaymentData($pembiayaan),
         ]);
     }
 
@@ -812,8 +812,8 @@ class PembiayaanController extends Controller
     {
         $validated = $request->validate([
             'installment_id' => 'required|exists:installments,id',
-            'financing_id'   => 'required|exists:financings,id',
-            'payment_method' => 'required|string',
+            'pembiayaan_id'   => 'required|exists:pembiayaan,id',
+            'metode_pembayaran' => 'required|string',
             'nominal'        => 'required|numeric|min:1',
             'payment_date'   => 'required|date',
         ]);
@@ -829,14 +829,14 @@ class PembiayaanController extends Controller
 
         $fileName = $this->pembayaranAngsuranService->generateAndStoreReceipt($paymentData);
 
-        return redirect("/admin/financings/show/{$paymentData['financing']->id}")
+        return redirect("/admin/pembiayaan/show/{$paymentData['pembiayaan']->id}")
             ->with([
                 'success' => 'Pembayaran berhasil diproses',
                 'pdf_url' => $fileName ? asset('storage/' . $fileName) : null,
             ]);
     }
 
-    public function reschedulePayment(Request $request, Financing $financing)
+    public function reschedulePayment(Request $request, Pembiayaan $pembiayaan)
     {
         $validated = $request->validate([
             'installment_id' => 'required|exists:installments,id',
@@ -845,12 +845,12 @@ class PembiayaanController extends Controller
 
         try {
             $this->pembayaranAngsuranService->rescheduleInstallments(
-                $financing,
+                $pembiayaan,
                 $validated['installment_id'],
                 $validated['due_date']
             );
 
-            return redirect("/admin/financings/show/{$financing->id}")
+            return redirect("/admin/pembiayaan/show/{pembiayaan->id}")
                 ->with('success', 'Jadwal pembayaran berhasil diperbarui');
 
         } catch (\Throwable $th) {

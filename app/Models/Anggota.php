@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\Financial;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\Heir;
 use App\Models\MemberBankAccount;
 use App\Models\MemberDoc;
@@ -80,9 +80,9 @@ class Anggota extends Model
     }
 
     // Murabahah
-    public function financings()
+    public function pembiayaan()
     {
-        return $this->hasMany(Financing::class);
+        return $this->hasMany(Pembiayaan::class);
     }
 
     public function notifications()

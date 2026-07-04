@@ -13,9 +13,9 @@ return new class extends Migration
     {
         $statuses = "'" . implode("', '", array_column(FinancingReqStatusEnum::cases(), 'value')) . "'";
 
-        DB::statement("ALTER TABLE financings DROP CONSTRAINT IF EXISTS financings_status_check");
+        DB::statement("ALTER TABLE pembiayaan DROP CONSTRAINT IF EXISTS pembiayaan_status_check");
 
-        DB::statement("ALTER TABLE financings ADD CONSTRAINT financings_status_check CHECK (status IN ($statuses))");
+        DB::statement("ALTER TABLE pembiayaan ADD CONSTRAINT pembiayaan_status_check CHECK (status IN ($statuses))");
     }
 
     /**
@@ -35,7 +35,7 @@ return new class extends Migration
 
         $oldStatuses = "'" . implode("', '", $oldStatusesArray) . "'";
 
-        DB::statement("ALTER TABLE financings DROP CONSTRAINT IF EXISTS financings_status_check");
-        DB::statement("ALTER TABLE financings ADD CONSTRAINT financings_status_check CHECK (status IN ($oldStatuses))");
+        DB::statement("ALTER TABLE pembiayaan DROP CONSTRAINT IF EXISTS pembiayaan_status_check");
+        DB::statement("ALTER TABLE pembiayaan ADD CONSTRAINT pembiayaan_status_check CHECK (status IN ($oldStatuses))");
     }
 };

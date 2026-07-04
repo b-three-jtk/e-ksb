@@ -117,14 +117,14 @@ const openMutasiModal = async (account) => {
     }
 };
 
-const openRiwayatModal = async (financing) => {
-    selectedFinancing.value = financing;
+const openRiwayatModal = async (pembiayaan) => {
+    selectedFinancing.value = pembiayaan;
     isLoadingRiwayat.value = true;
     riwayatModalRef.value?.openModal();
 
     try {
         const res = await axios.get(
-            `/admin/financings/${financing.id}/history`,
+            `/admin/pembiayaan/${pembiayaan.id}/history`,
         );
         riwayatData.value = res.data;
     } catch (error) {
@@ -514,7 +514,7 @@ const breadcrumbItems = [
                         </div>
                         <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
                             <div
-                                v-for="financing in user.anggota.financings"
+                                v-for="pembiayaan in user.anggota.pembiayaan"
                                 class="card-layout flex flex-col gap-8 px-0!"
                             >
                                 <div
@@ -523,11 +523,11 @@ const breadcrumbItems = [
                                     <h1
                                         class="font-semibold text-dark-text dark:text-white/90"
                                     >
-                                        {{ financing.financing_item?.name }}
+                                        {{ pembiayaan.financing_item?.name }}
                                         <span
                                             class="text-sm text-gray-400 dark:text-gray-300"
                                             >#{{
-                                                financing.financing_transaction_code
+                                                pembiayaan.kode_pembiayaan
                                             }}</span
                                         >
                                     </h1>
@@ -544,7 +544,7 @@ const breadcrumbItems = [
                                             class="font-medium text-dark-text dark:text-white"
                                             >{{
                                                 parseCurrencyAmount(
-                                                    financing.total_price,
+                                                    pembiayaan.total_price,
                                                 )
                                             }}</span
                                         >
@@ -559,7 +559,7 @@ const breadcrumbItems = [
                                         <span
                                             class="font-medium text-dark-text dark:text-white"
                                             >{{
-                                                dateParser(financing.updated_at)
+                                                dateParser(pembiayaan.updated_at)
                                             }}</span
                                         >
                                     </li>
@@ -576,7 +576,7 @@ const breadcrumbItems = [
                                             >
                                                 {{
                                                     parseCurrencyAmount(
-                                                        financing.remaining_balance,
+                                                        pembiayaan.remaining_balance,
                                                     )
                                                 }}
                                             </span>
@@ -587,11 +587,11 @@ const breadcrumbItems = [
                                                 :style="{
                                                     width:
                                                         Math.min(
-                                                            (financing.tenor ??
+                                                            (pembiayaan.tenor ??
                                                                 0) > 0
-                                                                ? ((financing.total_paid ??
+                                                                ? ((pembiayaan.total_paid ??
                                                                       0) /
-                                                                      (financing.total_price ??
+                                                                      (pembiayaan.total_price ??
                                                                           0)) *
                                                                       100
                                                                 : 0,
@@ -612,7 +612,7 @@ const breadcrumbItems = [
                                             class="font-medium text-dark-text dark:text-white"
                                             >{{
                                                 parseCurrencyAmount(
-                                                    financing.installment_per_month,
+                                                    pembiayaan.installment_per_month,
                                                 )
                                             }}</span
                                         >
@@ -628,7 +628,7 @@ const breadcrumbItems = [
                                             class="font-medium text-dark-text dark:text-white"
                                             >{{
                                                 dateParser(
-                                                    financing.next_due_date,
+                                                    pembiayaan.next_due_date,
                                                 )
                                             }}</span
                                         >
@@ -644,7 +644,7 @@ const breadcrumbItems = [
                                             class="font-medium text-dark-text dark:text-white"
                                         >
                                             {{
-                                                financing.tenor ?? 0
+                                                pembiayaan.tenor ?? 0
                                             }}
                                             bulan</span
                                         >
@@ -653,7 +653,7 @@ const breadcrumbItems = [
                                 <div class="flex gap-4 w-full px-8">
                                     <Button
                                         v-if="can['view_murabahah']"
-                                        :href="`/admin/financings/show/${financing.id}`"
+                                        :href="`/admin/pembiayaan/show/${pembiayaan.id}`"
                                         size="small"
                                         full
                                         variant="info"
@@ -665,7 +665,7 @@ const breadcrumbItems = [
                                         full
                                         size="small"
                                         variant="light"
-                                        @click="openRiwayatModal(financing)"
+                                        @click="openRiwayatModal(pembiayaan)"
                                     >
                                         <span
                                             class="icon-[tabler--history]"
@@ -704,7 +704,7 @@ const breadcrumbItems = [
             ref="riwayatModalRef"
             modal-id="modal-riwayat"
             title="Riwayat Pembiayaan"
-            :financing="selectedFinancing"
+            :pembiayaan="selectedFinancing"
             :schedules="riwayatData"
             :loading="isLoadingRiwayat"
             :key="selectedFinancing?.id"

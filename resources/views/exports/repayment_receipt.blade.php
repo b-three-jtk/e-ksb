@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -96,6 +97,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <table>
@@ -149,7 +151,7 @@
             <tr>
                 <td>No. Pembiayaan</td>
                 <td>:</td>
-                <td>{{ $financing_transaction_code }} - {{ $product_name }}</td>
+                <td>{{ $kode_pembiayaan }} - {{ $product_name }}</td>
             </tr>
         </table>
 
@@ -174,11 +176,12 @@
     </div>
 
     <script>
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                 // window.print();
             }
         });
     </script>
 </body>
+
 </html>

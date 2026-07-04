@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Anggota;
 use App\Models\Poin;
@@ -112,9 +112,9 @@ class Pengguna extends Authenticatable
     }
 
     // Verifies if the user has a specific role
-    public function financing()
+    public function pembiayaan()
     {
-        return $this->hasMany(Financing::class);
+        return $this->hasMany(Pembiayaan::class);
     }
 
     public function savingTransactions()

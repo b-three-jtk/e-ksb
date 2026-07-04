@@ -11,12 +11,12 @@ const props = defineProps({
 
 const emit = defineEmits(['validate-field'])
 
-const tenor = ref(props.form.financing.tenor || 12)
+const tenor = ref(props.form.pembiayaan.tenor || 12)
 
 const totalPrice = computed(() => {
-    const costPrice    = parseFloat(props.form.financing.cost_price) || 0
-    const marginAmount = parseFloat(props.form.financing.margin_amount) || 0
-    const downPayment  = parseFloat(props.form.financing.down_payment) || 0
+    const costPrice    = parseFloat(props.form.pembiayaan.harga_perolehan) || 0
+    const marginAmount = parseFloat(props.form.pembiayaan.margin_keuntungan) || 0
+    const downPayment  = parseFloat(props.form.pembiayaan.uang_muka) || 0
     return costPrice + marginAmount - downPayment
 })
 
@@ -46,20 +46,20 @@ const monthlyIncome = computed(() => {
 const remainingIncome = computed(() => monthlyIncome.value - monthlyInstallment.value)
 
 const firstDueDate = computed(() => {
-    const d = props.form.financing.akad_date ? new Date(props.form.financing.akad_date) : new Date()
+    const d = props.form.pembiayaan.tgl_akad ? new Date(props.form.pembiayaan.tgl_akad) : new Date()
     d.setMonth(d.getMonth() + 1)
     return d.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' })
 })
 
 const lastDueDate = computed(() => {
-    const d = props.form.financing.akad_date ? new Date(props.form.financing.akad_date) : new Date()
+    const d = props.form.pembiayaan.tgl_akad ? new Date(props.form.pembiayaan.tgl_akad) : new Date()
     d.setMonth(d.getMonth() + tenor.value)
     return d.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' })
 })
 
 // Sync tenor & simulasi ke form supaya bisa dikirim ke backend
 watch([tenor, monthlyInstallment, monthlyIncome], () => {
-    props.form.financing.tenor   = tenor.value
+    props.form.pembiayaan.tenor   = tenor.value
     props.form.monthly_installment = monthlyInstallment.value
     props.form.monthly_income    = monthlyIncome.value
 }, { immediate: true })
@@ -79,10 +79,10 @@ const onFieldChange = (field) => emit('validate-field', field)
         <section class="px-8 py-4">
             <h1 class="card-title text-lg!">Detail Objek Pembiayaan</h1>
             <div class="card-layout grid grid-cols-2 gap-4 mt-2">
-                <Info label="Nama Barang"        :value="form.financing.name" />
-                <Info label="Kualitas"           :value="form.financing.condition" />
-                <Info label="Kuantitas"          :value="form.financing.qty" />
-                <Info label="Detail Spesifikasi" :value="form.financing.specification" />
+                <Info label="Nama Barang"        :value="form.pembiayaan.name" />
+                <Info label="Kualitas"           :value="form.pembiayaan.condition" />
+                <Info label="Kuantitas"          :value="form.pembiayaan.qty" />
+                <Info label="Detail Spesifikasi" :value="form.pembiayaan.specification" />
             </div>
         </section>
 
@@ -100,15 +100,15 @@ const onFieldChange = (field) => emit('validate-field', field)
                     <tbody class="bg-white dark:bg-gray-800 text-dark-text dark:text-gray-200">
                         <tr class="border-b">
                             <td class="text-left pl-6 py-4">Harga Perolehan Barang</td>
-                            <td class="text-right pr-6 py-4">{{ parseCurrencyAmount(form.financing.cost_price) }}</td>
+                            <td class="text-right pr-6 py-4">{{ parseCurrencyAmount(form.pembiayaan.harga_perolehan) }}</td>
                         </tr>
                         <tr class="border-b">
                             <td class="text-left pl-6 py-4">Margin</td>
-                            <td class="text-right pr-6 py-4">{{ parseCurrencyAmount(form.financing.margin_amount) }}</td>
+                            <td class="text-right pr-6 py-4">{{ parseCurrencyAmount(form.pembiayaan.margin_keuntungan) }}</td>
                         </tr>
                         <tr class="border-b">
                             <td class="text-left pl-6 py-4">Uang Muka</td>
-                            <td class="text-right pr-6 py-4">{{ parseCurrencyAmount(form.financing.down_payment) }}</td>
+                            <td class="text-right pr-6 py-4">{{ parseCurrencyAmount(form.pembiayaan.uang_muka) }}</td>
                         </tr>
                         <tr class="border-b bg-light-bg dark:bg-gray-700 text-primary dark:text-secondary">
                             <td class="text-left pl-6 py-4 font-semibold">Total Harga Murabahah</td>
@@ -124,28 +124,28 @@ const onFieldChange = (field) => emit('validate-field', field)
             <div>
                 <BaseInputAdmin
                     required
-                    v-model="form.financing.payment_method"
+                    v-model="form.pembiayaan.metode_pembayaran"
                     label="Metode Pembayaran"
                     type="select"
                     :selectables="paymentMethods.map(v => ({ value: v, text: v }))"
-                    :error="errors?.payment_method"
-                    @change="onFieldChange('payment_method')"
+                    :error="errors?.metode_pembayaran"
+                    @change="onFieldChange('metode_pembayaran')"
                 />
             </div>
             <div>
                 <BaseInputAdmin
-                    v-model="form.financing.akad_date"
+                    v-model="form.pembiayaan.tgl_akad"
                     label="Tanggal Akad"
                     type="date"
-                    :error="errors?.akad_date"
-                    @change="onFieldChange('akad_date')"
+                    :error="errors?.tgl_akad"
+                    @change="onFieldChange('tgl_akad')"
                 />
             </div>
         </div>
 
-        <section v-if="form.financing.payment_method === 'Tangguh'" class="px-8 py-4">
+        <section v-if="form.pembiayaan.metode_pembayaran === 'Tangguh'" class="px-8 py-4">
             <BaseInputAdmin
-                v-model="form.financing.tangguh_payment_date"
+                v-model="form.pembiayaan.tangguh_payment_date"
                 label="Tanggal Pembayaran Tangguh"
                 type="date"
                 :error="errors?.tangguh_payment_date"
@@ -156,7 +156,7 @@ const onFieldChange = (field) => emit('validate-field', field)
         </section>
 
         <!-- Simulasi Cicilan (hanya jika Cicilan) -->
-        <section v-if="form.financing.payment_method === 'Cicilan'" class="px-8 py-4">
+        <section v-if="form.pembiayaan.metode_pembayaran === 'Cicilan'" class="px-8 py-4">
             <h1 class="card-title text-lg!">Simulasi Cicilan</h1>
             <div class="bg-white dark:bg-gray-800 border rounded-2xl p-6 mt-4">
                 <!-- Tenor Slider -->
@@ -207,7 +207,7 @@ const onFieldChange = (field) => emit('validate-field', field)
         </section>
 
         <!-- Skema Angsuran (hanya jika Cicilan) -->
-        <section v-if="form.financing.payment_method === 'Cicilan'" class="px-8 py-4">
+        <section v-if="form.pembiayaan.metode_pembayaran === 'Cicilan'" class="px-8 py-4">
             <h1 class="card-title text-lg!">Skema Angsuran</h1>
             <div class="border rounded-2xl overflow-hidden mt-2">
                 <table class="w-full text-sm text-left text-gray-500">

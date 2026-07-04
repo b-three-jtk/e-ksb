@@ -137,7 +137,7 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
             <TransactionTable :columns="kolomTabel" :rows="transaksi_terbaru">
                 <template #action="{ item }">
                     <Link
-                        :href="item.produk !== 'Pembiayaan' ? `/admin/savings/show/${item.id}` : `/admin/financings/show/${item.id}`">
+                        :href="item.produk !== 'Pembiayaan' ? `/admin/savings/show/${item.id}` : `/admin/pembiayaan/show/${item.id}`">
                         <EyeIcon
                             class="w-5 h-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
                     </Link>

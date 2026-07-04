@@ -23,18 +23,18 @@ const emit = defineEmits([
     'validate-field',
 ])
 
-// Hitung cost_price & margin otomatis dari price_per_unit × qty
-watch(() => props.form.financing.price_per_unit, () => {
-    const costPrice = (parseFloat(props.form.financing.price_per_unit) || 0)
-        * (parseFloat(props.form.financing.qty) || 0)
-    props.form.financing.cost_price = costPrice
-    props.form.financing.margin_amount = costPrice * (props.data.margin_percentage / 100)
+// Hitung harga_perolehan & margin otomatis dari price_per_unit × qty
+watch(() => props.form.pembiayaan.price_per_unit, () => {
+    const costPrice = (parseFloat(props.form.pembiayaan.price_per_unit) || 0)
+        * (parseFloat(props.form.pembiayaan.qty) || 0)
+    props.form.pembiayaan.harga_perolehan = costPrice
+    props.form.pembiayaan.margin_keuntungan = costPrice * (props.data.margin_percentage / 100)
 }, { immediate: true })
 
 const totalPrice = computed(() => {
-    const costPrice = parseFloat(props.form.financing.cost_price) || 0
-    const marginAmount = parseFloat(props.form.financing.margin_amount) || 0
-    const downPayment = parseFloat(props.form.financing.down_payment) || 0
+    const costPrice = parseFloat(props.form.pembiayaan.harga_perolehan) || 0
+    const marginAmount = parseFloat(props.form.pembiayaan.margin_keuntungan) || 0
+    const downPayment = parseFloat(props.form.pembiayaan.uang_muka) || 0
     return costPrice + marginAmount - downPayment
 })
 
@@ -58,13 +58,13 @@ const pemasokSelectables = computed(() => {
 const handlePemasokChange = (value) => {
     if (value === 'NEW') {
         showNewPemasokInput.value = true
-        props.form.financing.pemasok_id = null
+        props.form.pembiayaan.pemasok_id = null
         props.form.pemasok.nama_pemasok = ''
         props.form.pemasok.alamat_pemasok = ''
         props.form.pemasok.contact = ''
     } else {
         showNewPemasokInput.value = false
-        props.form.financing.pemasok_id = value
+        props.form.pembiayaan.pemasok_id = value
 
         const selectedPemasok = props.data.pemasok.find(s => String(s.id) === String(value))
         props.form.pemasok.nama_pemasok = selectedPemasok?.nama_pemasok || ''
@@ -85,7 +85,7 @@ const createNewPemasok = async () => {
 
         props.data.pemasok.push(response.data)
 
-        props.form.financing.pemasok_id = response.data.id
+        props.form.pembiayaan.pemasok_id = response.data.id
         props.form.pemasok.nama_pemasok = response.data.nama_pemasok || newPemasokName.value
         props.form.pemasok.alamat_pemasok = response.data.alamat_pemasok || newPemasokAddress.value
         props.form.pemasok.contact = response.data.contact || props.form.pemasok.contact
@@ -132,12 +132,12 @@ const onFieldChange = (field) => emit('validate-field', field)
                         <p>Max. 2 MB per file</p>
                     </div>
                 </div>
-                <BaseInputAdmin v-model.number="form.financing.price_per_unit" label="Harga Per Item" required isMoney
-                    placeholder="Masukkan harga per item" :error="errors?.cost_price"
-                    @input="onFieldChange('cost_price')" />
-                <Info label="Harga Perolehan Barang" :value="parseCurrencyAmount(form.financing.cost_price)" />
-                <Info label="Uang Muka" :value="parseCurrencyAmount(form.financing.down_payment)" />
-                <Info :label="`Margin (${data.margin_percentage}%)`" :value="parseCurrencyAmount(form.financing.margin_amount)" />
+                <BaseInputAdmin v-model.number="form.pembiayaan.price_per_unit" label="Harga Per Item" required isMoney
+                    placeholder="Masukkan harga per item" :error="errors?.harga_perolehan"
+                    @input="onFieldChange('harga_perolehan')" />
+                <Info label="Harga Perolehan Barang" :value="parseCurrencyAmount(form.pembiayaan.harga_perolehan)" />
+                <Info label="Uang Muka" :value="parseCurrencyAmount(form.pembiayaan.uang_muka)" />
+                <Info :label="`Margin (${data.margin_percentage}%)`" :value="parseCurrencyAmount(form.pembiayaan.margin_keuntungan)" />
             </div>
 
             <div class="bg-light-bg flex justify-between border px-8 py-4 mt-6 rounded-lg">
@@ -155,7 +155,7 @@ const onFieldChange = (field) => emit('validate-field', field)
             </div>
 
             <!-- Wakalah section -->
-            <div v-if="form.is_wakalah || form.financing.akad_wakalah_date" class="grid grid-cols-2 items-end gap-6 mt-4">
+            <div v-if="form.is_wakalah || form.pembiayaan.akad_wakalah_date" class="grid grid-cols-2 items-end gap-6 mt-4">
                 <a href="/docs/AkadWakalah.docx" target="_blank"
                     class="border border-gray-300 flex justify-between rounded-lg p-4">
                     <div class="text-sm text-primary hover:underline">
@@ -172,7 +172,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                             <p>Max. 2 MB per file</p>
                         </div>
                     </div>
-                    <BaseInputAdmin v-model="form.financing.akad_wakalah_date" required label="Tanggal Akad Wakalah"
+                    <BaseInputAdmin v-model="form.pembiayaan.akad_wakalah_date" required label="Tanggal Akad Wakalah"
                         errors="errors?.akad_wakalah_date"
                         type="date" />
                 </div>
@@ -185,7 +185,7 @@ const onFieldChange = (field) => emit('validate-field', field)
             <div class="grid grid-cols-2 gap-4 pt-4">
 
                 <!-- Pemasok search / input -->
-                <BaseInputAdmin v-model="form.financing.pemasok_id" label="Pemasok" type="select"
+                <BaseInputAdmin v-model="form.pembiayaan.pemasok_id" label="Pemasok" type="select"
                     :selectables="pemasokSelectables" @update:modelValue="handlePemasokChange" />
                 <BaseInputAdmin v-model="form.pemasok.contact" label="Kontak" type="text"
                     placeholder="Masukkan kontak pemasok" />

@@ -70,7 +70,7 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Metode Pembayaran</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_payment_method }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_metode_pembayaran }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Keterangan</span>

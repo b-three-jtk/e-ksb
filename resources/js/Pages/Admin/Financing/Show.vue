@@ -11,7 +11,7 @@ import FinancingChart from '@/Components/FinancingChart.vue'
 import EyeIcon from '@/Icons/EyeIcon.vue'
 import moneyParser from '@/Composables/moneyParser.js'
 import dateParser from '@/Composables/dateParser.js'
-import useFinancingStatus from '@/Composables/useFinancingStatus.js'
+import usepembiayaantatus from '@/Composables/usepembiayaantatus.js'
 import ModalDocument from '@/Components/ModalDocument.vue'
 import Documents from './Show/Documents.vue'
 
@@ -80,16 +80,16 @@ const openReceiptModal = (receiptPath) => {
             <div class="card-layout flex justify-between">
                 <div class="flex gap-2 items-center">
                     <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{
-                        data.financing_transaction_code }} <span class="my-auto ml-2"
-                            :class="useFinancingStatus(data.status)">{{ data.status }}</span>
+                        data.kode_pembiayaan }} <span class="my-auto ml-2"
+                            :class="usepembiayaantatus(data.status)">{{ data.status }}</span>
                     </h1>
                 </div>
                 <div class="flex items-center gap-4">
-                    <Button v-if="canPayBill && data.status === 'Angsuran Berjalan'" :href="`/admin/financings/repayment/${data.id}`" variant="secondary">
+                    <Button v-if="canPayBill && data.status === 'Angsuran Berjalan'" :href="`/admin/pembiayaan/repayment/${data.id}`" variant="secondary">
                         <span class="icon-[tabler--moneybag-move]" style="width:18px;height:18px;" />
                         Pelunasan Dipercepat
                     </Button>
-                    <Button v-if="canPayBill" :href="`/admin/financings/${data.id}/payments/create`" variant="info">
+                    <Button v-if="canPayBill" :href="`/admin/pembiayaan/${data.id}/payments/create`" variant="info">
                         <span class="icon-[tabler--credit-card-pay]" style="width:18px;height:18px;" />
                         Bayar Tagihan
                     </Button>
@@ -101,9 +101,9 @@ const openReceiptModal = (receiptPath) => {
                         <div class="card-layout">
                             <h2 class="card-title mb-4">Detail Transaksi</h2>
                             <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
-                                <Info label="Harga Pokok" :value="moneyParser(data.cost_price)" />
-                                <Info label="Margin" :value="moneyParser(data.margin_amount)" />
-                                <Info label="Uang Muka" :value="moneyParser(data.down_payment)" />
+                                <Info label="Harga Pokok" :value="moneyParser(data.harga_perolehan)" />
+                                <Info label="Margin" :value="moneyParser(data.margin_keuntungan)" />
+                                <Info label="Uang Muka" :value="moneyParser(data.uang_muka)" />
                                 <Info label="Total Pembiayaan" :value="moneyParser(data.total_price)" />
                                 <Info label="Total Dibayar" :value="moneyParser(data.total_paid)" />
                                 <Info label="Sisa Tagihan" :value="moneyParser(data.remaining_balance)" />
@@ -119,7 +119,7 @@ const openReceiptModal = (receiptPath) => {
                                 <Info label="Kategori Produk"
                                     :value="data.financing_item?.jenis_barang?.nama_jenis_barang" />
                                 <Info label="Nama Produk" :value="data.financing_item?.name" />
-                                <Info label="Tanggal Akad" :value="dateParser(data.akad_date)" />
+                                <Info label="Tanggal Akad" :value="dateParser(data.tgl_akad)" />
                                 <Info label="Jumlah/Kuantitas" :value="data.financing_item?.qty" />
                                 <Info label="Kondisi" :value="data.financing_item?.condition" />
                                 <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.specification" />

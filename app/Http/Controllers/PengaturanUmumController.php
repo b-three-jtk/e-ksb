@@ -44,7 +44,7 @@ class PengaturanUmumController extends Controller
                 'saving_wajib_amount' => ['required', 'numeric', 'min:1'],
                 'saving_wajib_effective_date' => ['required', 'date'],
             ],
-            'financing' => [
+            'pembiayaan' => [
                 'murabahah_margin_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
                 'effective_date' => ['required', 'date'],
             ],
@@ -59,7 +59,7 @@ class PengaturanUmumController extends Controller
             'general' => ['tanggal_awal_periode', 'tanggal_akhir_periode', 'status_tutup_buku'],
             'points' => ['saving_point_amount', 'saving_point_reward'],
             'savings' => ['saving_pokok_amount', 'saving_wajib_amount'],
-            'financing' => ['murabahah_margin_percentage'],
+            'pembiayaan' => ['murabahah_margin_percentage'],
             default => [],
         };
 

@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('collaterals', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('financing_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('pembiayaan_id')->constrained('pembiayaan')->onDelete('cascade');
             $table->string('collateral_type');
             $table->string('owner_name');
             $table->string('collateral_location')->nullable();

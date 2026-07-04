@@ -46,7 +46,7 @@ return new class extends Migration
 
                 -- Ambil breakdown dari kolom yang sudah diisi controller/service
                 v_principal := COALESCE(NEW.principal_amount, 0);
-                v_margin    := COALESCE(NEW.margin_amount, 0);
+                v_margin    := COALESCE(NEW.margin_keuntungan, 0);
 
                 -- Guard: nominal harus = pokok + margin
                 IF round(v_principal + v_margin, 2) != round(NEW.nominal, 2) THEN

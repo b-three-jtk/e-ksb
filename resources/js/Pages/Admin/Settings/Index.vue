@@ -34,7 +34,7 @@ const hasSavingsData = computed(() => {
 })
 
 const hasFinancingData = computed(() => {
-    const margin = props.settings?.financing?.murabahah_margin_percentage?.value
+    const margin = props.settings?.pembiayaan?.murabahah_margin_percentage?.value
     return margin !== null && margin !== undefined && margin !== ''
 })
 
@@ -75,7 +75,7 @@ const tabs = [
     { key: 'general', label: 'Umum' },
     { key: 'points', label: 'Poin' },
     { key: 'savings', label: 'Simpanan' },
-    { key: 'financing', label: 'Pembiayaan Murabahah' },
+    { key: 'pembiayaan', label: 'Pembiayaan Murabahah' },
 ]
 
 const activeTab = ref('general')
@@ -99,7 +99,7 @@ const forms = reactive({
         saving_wajib_amount: '',
         saving_wajib_effective_date: '',
     },
-    financing: {
+    pembiayaan: {
         murabahah_margin_percentage: '',
         effective_date: '',
     },
@@ -257,19 +257,19 @@ const summaryCards = computed(() => {
         ]
     }
 
-    const financing = getSetting('financing', 'murabahah_margin_percentage')
+    const pembiayaan = getSetting('pembiayaan', 'murabahah_margin_percentage')
 
     return [
         {
-            value: `${formatInteger(financing.value)} %`,
+            value: `${formatInteger(pembiayaan.value)} %`,
             label: 'Besaran Margin Pembiayaan',
         },
         {
-            value: formatDate(financing.effective_date),
+            value: formatDate(pembiayaan.effective_date),
             label: 'Berlaku Sejak',
         },
         {
-            value: formatDate(financing.updated_at),
+            value: formatDate(pembiayaan.updated_at),
             label: 'Terakhir Diperbarui',
         },
     ]
@@ -295,8 +295,8 @@ const syncForms = () => {
     forms.savings.saving_wajib_amount = props.settings?.savings?.saving_wajib_amount?.value ?? ''
     forms.savings.saving_wajib_effective_date = props.settings?.savings?.saving_wajib_amount?.effective_date ?? ''
 
-    forms.financing.murabahah_margin_percentage = props.settings?.financing?.murabahah_margin_percentage?.value ?? ''
-    forms.financing.effective_date = props.settings?.financing?.murabahah_margin_percentage?.effective_date ?? ''
+    forms.pembiayaan.murabahah_margin_percentage = props.settings?.pembiayaan?.murabahah_margin_percentage?.value ?? ''
+    forms.pembiayaan.effective_date = props.settings?.pembiayaan?.murabahah_margin_percentage?.effective_date ?? ''
 }
 
 const historyItems = computed(() => props.settingsHistory?.[activeTab.value] ?? [])
@@ -455,12 +455,12 @@ const isProcessing = (section) => processingSection.value === section
                         />
                     </div>
 
-                    <div v-else-if="activeTab === 'financing'" class="p-6 md:p-8">
+                    <div v-else-if="activeTab === 'pembiayaan'" class="p-6 md:p-8">
                         <FormPembiayaan
-                            :form="forms.financing"
-                            :is-processing="isProcessing('financing')"
+                            :form="forms.pembiayaan"
+                            :is-processing="isProcessing('pembiayaan')"
                             :readonly="readonlyFinancing"
-                            @submit="submitAlert('financing')"
+                            @submit="submitAlert('pembiayaan')"
                         />
                     </div>
                 </div>

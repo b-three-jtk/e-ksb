@@ -111,15 +111,15 @@ class PenggunaController extends Controller
             $ktpDoc = $user->anggota->memberDocs->where('doc_name', 'ktp')->first();
             $kkDoc = $user->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first();
 
-            if ($user->anggota->financings) {
-                $user->anggota->financings->each(function ($financing) use ($service) {
-                    $service->computeFinancingSummary($financing);
-                    $nextInstallment = $financing->installment
+            if ($user->anggota->pembiayaan) {
+                $user->anggota->pembiayaan->each(function ($pembiayaan) use ($service) {
+                    $service->computepembiayaanummary($pembiayaan);
+                    $nextInstallment = $pembiayaan->installment
                     ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
                     ->sortBy('due_date')
                     ->first();
 
-                $financing->setAttribute('next_due_date', $nextInstallment?->due_date);
+                pembiayaan->setAttribute('next_due_date', $nextInstallment?->due_date);
                 });
             }
         }
@@ -178,13 +178,13 @@ class PenggunaController extends Controller
 
     public function getRiwayat($financingId)
     {
-        $financing = $this->anggotaService->getRiwayatPembiayaanAnggota($financingId);
+        $pembiayaan = $this->anggotaService->getRiwayatPembiayaanAnggota($financingId);
 
-        if ($financing->installment->isEmpty()) {
+        if ($pembiayaan->installment->isEmpty()) {
             return response()->json([]);
         }
 
-        return response()->json($financing->installment);
+        return response()->json($pembiayaan->installment);
     }
 
     public function verificationDetail(Pengguna $user)

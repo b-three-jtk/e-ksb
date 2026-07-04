@@ -18,7 +18,7 @@ class DasborService
             ->where('anggota_id', $anggotaId)
             ->sum('saldo');
 
-        $totalInstallment = Installment::whereHas('financing', function ($q) use ($anggotaId) {
+        $totalInstallment = Installment::whereHas('pembiayaan', function ($q) use ($anggotaId) {
             $q->where('anggota_id', $anggotaId)
                 ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value);
         })

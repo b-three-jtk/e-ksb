@@ -23,7 +23,7 @@ return new class extends Migration
 
             $table->foreignId('jenis_barang_id')->nullable()->references('id')->on('jenis_barang')->onDelete('set null');
             $table->foreignId('pemasok_id')->nullable()->references('id')->on('pemasok')->onDelete('set null');
-            $table->foreignUuid('financing_id')->references('id')->on('financings')->onDelete('cascade');
+            $table->foreignUuid('pembiayaan_id')->references('id')->on('pembiayaan')->onDelete('cascade');
             $table->timestamps();
         });
     }

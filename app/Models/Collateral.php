@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,15 +12,15 @@ class Collateral extends Model
     use HasFactory, HasUuids;
     //
     protected $fillable = [
-        'financing_id',
+        'pembiayaan_id',
         'collateral_type',
         'owner_name',
         'collateral_location',
         'estimated_market_value',
     ];
 
-    public function financing()
+    public function pembiayaan()
     {
-        return $this->belongsTo(Financing::class);
+        return $this->belongsTo(Pembiayaan::class);
     }
 }

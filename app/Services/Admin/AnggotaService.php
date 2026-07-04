@@ -4,7 +4,7 @@ namespace App\Services\Admin;
 
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\Heir;
 use App\Models\Pengguna;
 use App\Models\AkunSimpanan;
@@ -105,8 +105,8 @@ class AnggotaService
             'anggota.akunSimpanan.transactions' => fn($q) => $q->orderBy('transaction_date', 'desc'),
             'anggota.akunSimpanan',
             'anggota.heirs',
-            'anggota.financings.installment.payment',
-            'anggota.financings.financingItem',
+            'anggota.pembiayaan.installment.payment',
+            'anggota.pembiayaan.financingItem',
         ])->findOrFail($id);
 
         $user->foto_profil = $user->foto_profil ? asset('storage/' . $user->foto_profil) : null;
@@ -189,7 +189,7 @@ class AnggotaService
 
     public function getRiwayatPembiayaanAnggota($financingId)
     {
-        return Financing::with([
+        return Pembiayaan::with([
             'installment' => fn($q) => $q->orderBy('installment_no', 'asc'),
             'installment.payment'
         ])->findOrFail($financingId);

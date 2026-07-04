@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class FinancingVerification extends Model
 {
     protected $fillable = [
-        'financing_id',
+        'pembiayaan_id',
         'final_verification_status',
         'notes',
         'verified_by',
@@ -18,9 +18,9 @@ class FinancingVerification extends Model
         'verified_at' => 'datetime',
     ];
 
-    public function financing()
+    public function pembiayaan()
     {
-        return $this->belongsTo(Financing::class);
+        return $this->belongsTo(Pembiayaan::class);
     }
 
     public function verifier()

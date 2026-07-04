@@ -6,7 +6,7 @@ use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PaymentMethodsEnum;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\FinancingItem;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
@@ -157,22 +157,22 @@ class MurabahaProductSeeder extends Seeder
 
         $akadDate = now()->subMonths($akadMonthsAgo)->startOfDay();
 
-        $financing = Financing::create([
-            'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
+        $pembiayaan = Pembiayaan::create([
+            'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
             'anggota_id' => $anggota->id,
-            'cost_price' => $item['price'],
-            'margin_amount' => $margin,
-            'down_payment' => $downPayment,
-            'akad_date' => $akadDate,
+            'harga_perolehan' => $item['price'],
+            'margin_keuntungan' => $margin,
+            'uang_muka' => $downPayment,
+            'tgl_akad' => $akadDate,
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-            'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
+            'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin?->id,
             'tenor' => $tenor,
         ]);
 
-        // Create Financing Item
+        // Create Pembiayaan Item
         FinancingItem::create([
-            'financing_id' => $financing->id,
+            'pembiayaan_id' => $pembiayaan->id,
             'name' => $item['name'],
             'specification' => $item['spec'],
             'qty' => 1,
@@ -190,7 +190,7 @@ class MurabahaProductSeeder extends Seeder
             'journal_group_id' => $akadJournal->id,
             'no_ref_account' => '103', // Pembiayaan Dalam Proses
             'position' => 'Debit',
-            'nominal' => $financing->cost_price,
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
             'transaction_date' => $akadDate,
         ]);
@@ -198,7 +198,7 @@ class MurabahaProductSeeder extends Seeder
             'journal_group_id' => $akadJournal->id,
             'no_ref_account' => '102', // Dana Alokasi Pembiayaan
             'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
             'transaction_date' => $akadDate,
         ]);
@@ -222,7 +222,7 @@ class MurabahaProductSeeder extends Seeder
             ]);
         }
 
-        $piutangPokok = $financing->cost_price - $downPayment;
+        $piutangPokok = $pembiayaan->harga_perolehan - $downPayment;
         JournalEntry::create([
             'journal_group_id' => $akadJournal->id,
             'no_ref_account' => '104', // Piutang Murabahah
@@ -245,16 +245,16 @@ class MurabahaProductSeeder extends Seeder
             'journal_group_id' => $akadJournal->id,
             'no_ref_account' => '103', // Pembiayaan Dalam Proses
             'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
             'transaction_date' => $akadDate,
         ]);
 
         // 2. Buat Installment sesuai skenario kolektibilitas
         for ($i = 1; $i <= $tenor; $i++) {
-            $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $tenor;
-            $monthlyMargin = $financing->margin_amount / $tenor;
-            $monthlyCostPrice = ($financing->cost_price - $financing->down_payment) / $tenor;
+            $monthlyPayment = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $tenor;
+            $monthlyMargin = $pembiayaan->margin_keuntungan / $tenor;
+            $monthlyCostPrice = ($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $tenor;
             $dueDate = $akadDate->copy()->addMonths($i);
 
             // Tentukan status pembayaran cicilan
@@ -267,7 +267,7 @@ class MurabahaProductSeeder extends Seeder
             }
 
             $installment = Installment::create([
-                'financing_id' => $financing->id,
+                'pembiayaan_id' => $pembiayaan->id,
                 'installment_no' => $i,
                 'due_date' => $dueDate,
                 'amount' => $monthlyPayment,
@@ -281,8 +281,8 @@ class MurabahaProductSeeder extends Seeder
                     'installment_id' => $installment->id,
                     'nominal' => $monthlyPayment,
                     'principal_amount' => $monthlyCostPrice,
-                    'margin_amount' => $monthlyMargin,
-                    'payment_method' => PaymentMethodsEnum::CASHLESS->value,
+                    'margin_keuntungan' => $monthlyMargin,
+                    'metode_pembayaran' => PaymentMethodsEnum::CASHLESS->value,
                     'is_early_repayment' => false,
                     'payment_date' => $dueDate,
                     'updated_by' => $admin?->id,
@@ -329,21 +329,21 @@ class MurabahaProductSeeder extends Seeder
         $margin = (int)($item['price'] * 0.1);
         $downPayment = (int)($item['price'] * 0.1);
 
-        $financing = Financing::create([
-            'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
+        $pembiayaan = Pembiayaan::create([
+            'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
             'anggota_id' => $anggota->id,
-            'cost_price' => $item['price'],
-            'margin_amount' => $margin,
-            'down_payment' => $downPayment,
-            'requested_date' => now(),
+            'harga_perolehan' => $item['price'],
+            'margin_keuntungan' => $margin,
+            'uang_muka' => $downPayment,
+            'tgl_permohonan' => now(),
             'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
-            'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
+            'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin?->id,
         ]);
 
-        // Create Financing Item
+        // Create Pembiayaan Item
         FinancingItem::create([
-            'financing_id' => $financing->id,
+            'pembiayaan_id' => $pembiayaan->id,
             'name' => $item['name'],
             'specification' => $item['spec'],
             'qty' => 1,
@@ -361,7 +361,7 @@ class MurabahaProductSeeder extends Seeder
             'journal_group_id' => $journal->id,
             'no_ref_account' => '103',
             'position' => 'Debit',
-            'nominal' => $financing->cost_price,
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
             'transaction_date' => now(),
         ]);
@@ -370,7 +370,7 @@ class MurabahaProductSeeder extends Seeder
             'journal_group_id' => $journal->id,
             'no_ref_account' => '102',
             'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
             'transaction_date' => now(),
         ]);
@@ -383,22 +383,22 @@ class MurabahaProductSeeder extends Seeder
         $downPayment = (int)($item['price'] * 0.1);
         $tenor = 10;
 
-        $financing = Financing::create([
-            'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
+        $pembiayaan = Pembiayaan::create([
+            'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
             'anggota_id' => $anggota->id,
-            'cost_price' => $item['price'],
-            'margin_amount' => $margin,
-            'down_payment' => $downPayment,
-            'akad_date' => now()->subMonths($tenor),
-            'paid_date' => now(),
+            'harga_perolehan' => $item['price'],
+            'margin_keuntungan' => $margin,
+            'uang_muka' => $downPayment,
+            'tgl_akad' => now()->subMonths($tenor),
+            'tgl_lunas' => now(),
             'status' => FinancingReqStatusEnum::PAID->value,
-            'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
+            'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin?->id,
         ]);
 
-        // Create Financing Item
+        // Create Pembiayaan Item
         FinancingItem::create([
-            'financing_id' => $financing->id,
+            'pembiayaan_id' => $pembiayaan->id,
             'name' => $item['name'],
             'specification' => $item['spec'],
             'qty' => 1,
@@ -407,7 +407,7 @@ class MurabahaProductSeeder extends Seeder
             'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
-        $akadDate = Carbon::parse($financing->akad_date);
+        $akadDate = Carbon::parse($pembiayaan->tgl_akad);
         $akadJournal = Journal::create([
             'tgl_transaksi' => $akadDate,
             'created_by' => $admin?->id,
@@ -417,7 +417,7 @@ class MurabahaProductSeeder extends Seeder
             'journal_group_id' => $akadJournal->id,
             'no_ref_account' => '103', // Pembiayaan Dalam Proses
             'position' => 'Debit',
-            'nominal' => $financing->cost_price,
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
             'transaction_date' => $akadDate,
         ]);
@@ -425,7 +425,7 @@ class MurabahaProductSeeder extends Seeder
             'journal_group_id' => $akadJournal->id,
             'no_ref_account' => '102', // Dana Alokasi Pembiayaan
             'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
             'transaction_date' => $akadDate,
         ]);
@@ -449,7 +449,7 @@ class MurabahaProductSeeder extends Seeder
             ]);
         }
 
-        $piutangPokok = $financing->cost_price - $downPayment;
+        $piutangPokok = $pembiayaan->harga_perolehan - $downPayment;
         JournalEntry::create([
             'journal_group_id' => $akadJournal->id,
             'no_ref_account' => '104', // Piutang Murabahah
@@ -472,21 +472,21 @@ class MurabahaProductSeeder extends Seeder
             'journal_group_id' => $akadJournal->id,
             'no_ref_account' => '103', // Pembiayaan Dalam Proses
             'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
             'transaction_date' => $akadDate,
         ]);
 
         for ($i = 1; $i <= $tenor; $i++) {
-            $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $tenor;
-            $monthlyMargin = $financing->margin_amount / $tenor;
-            $monthlyCostPrice = ($financing->cost_price - $financing->down_payment) / $tenor;
+            $monthlyPayment = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $tenor;
+            $monthlyMargin = $pembiayaan->margin_keuntungan / $tenor;
+            $monthlyCostPrice = ($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $tenor;
 
-            $akadDate = Carbon::parse($financing->akad_date);
+            $akadDate = Carbon::parse($pembiayaan->tgl_akad);
             $dueDate = $akadDate->copy()->addMonths($i);
 
             $installment = Installment::create([
-                'financing_id' => $financing->id,
+                'pembiayaan_id' => $pembiayaan->id,
                 'installment_no' => $i,
                 'due_date' => $dueDate,
                 'amount' => $monthlyPayment,
@@ -498,8 +498,8 @@ class MurabahaProductSeeder extends Seeder
                 'installment_id' => $installment->id,
                 'nominal' => $monthlyPayment,
                 'principal_amount' => $monthlyCostPrice,
-                'margin_amount' => $monthlyMargin,
-                'payment_method' => PaymentMethodsEnum::CASHLESS->value,
+                'margin_keuntungan' => $monthlyMargin,
+                'metode_pembayaran' => PaymentMethodsEnum::CASHLESS->value,
                 'is_early_repayment' => false,
                 'payment_date' => $dueDate,
                 'updated_by' => $admin?->id,

@@ -22,7 +22,7 @@ class SavingTransaction extends Model
         'saving_amount',
         'balance_after_transaction',
         'transaction_type',
-        'saving_payment_method',
+        'saving_metode_pembayaran',
         'saving_description',
         'transaction_date',
         'saving_transaction_receipt',

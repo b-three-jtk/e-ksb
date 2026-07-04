@@ -58,11 +58,11 @@ public function handle(): int
 
         $userMargins = InstallmentPaymentTransaction::query()
             ->join('installments', 'installment_payment_transactions.installment_id', '=', 'installments.id')
-            ->join('financings', 'installments.financing_id', '=', 'financings.id')
-            ->join('anggota', 'financings.anggota_id', '=', 'anggota.id')
+            ->join('pembiayaan', 'installments.pembiayaan_id', '=', 'pembiayaan.id')
+            ->join('anggota', 'pembiayaan.anggota_id', '=', 'anggota.id')
             ->whereDate('installment_payment_transactions.payment_date', '>=', $startDate)
             ->whereDate('installment_payment_transactions.payment_date', '<=', $endDate)
-            ->select('anggota.pengguna_id', DB::raw('SUM(installment_payment_transactions.margin_amount) as total_margin'))
+            ->select('anggota.pengguna_id', DB::raw('SUM(installment_payment_transactions.margin_keuntungan) as total_margin'))
             ->groupBy('anggota.pengguna_id')
             ->get();
 

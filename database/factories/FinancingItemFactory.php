@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\ConditionEnum;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\FinancingItem;
 use App\Models\JenisBarang;
 use App\Models\Pemasok;
@@ -24,7 +24,7 @@ class FinancingItemFactory extends Factory
             'purchase_receipt' => null,
             'jenis_barang_id' => JenisBarang::inRandomOrder()->first()?->id ?? JenisBarang::factory(),
             'pemasok_id' => Pemasok::inRandomOrder()->first()?->id ?? Pemasok::factory(),
-            'financing_id' => Financing::factory(),
+            'pembiayaan_id' => Pembiayaan::factory(),
         ];
     }
 }

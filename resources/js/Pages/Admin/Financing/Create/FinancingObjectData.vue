@@ -29,10 +29,10 @@ const jenisBarangelectables = computed(() => {
 const handleJenisBarangChange = (value) => {
     if (value === 'NEW') {
         showNewJenisBarangInput.value = true
-        props.form.financing.jenis_barang_id = null
+        props.form.pembiayaan.jenis_barang_id = null
     } else {
         showNewJenisBarangInput.value = false
-        props.form.financing.jenis_barang_id = value
+        props.form.pembiayaan.jenis_barang_id = value
     }
 }
 
@@ -44,7 +44,7 @@ const createNewJenisBarang = async () => {
             nama_jenis_barang: newJenisBarangName.value,
         })
         props.data.jenisBarang.push(response.data)
-        props.form.financing.jenis_barang_id = response.data.id
+        props.form.pembiayaan.jenis_barang_id = response.data.id
         newJenisBarangName.value = ''
         showNewJenisBarangInput.value = false
     } catch (error) {
@@ -85,18 +85,18 @@ const onFieldChange = (field) => emit('validate-field', field)
                 </div>
             </div>
 
-            <BaseInputAdmin v-model="form.financing.name" label="Nama Produk" placeholder="Masukkan nama produk"
+            <BaseInputAdmin v-model="form.pembiayaan.name" label="Nama Produk" placeholder="Masukkan nama produk"
                 required :error="errors?.financing_name" @input="onFieldChange('financing_name')" />
-            <BaseInputAdmin v-model="form.financing.jenis_barang_id" label="Kategori Produk" type="select"
+            <BaseInputAdmin v-model="form.pembiayaan.jenis_barang_id" label="Kategori Produk" type="select"
                 :selectables="jenisBarangelectables" @update:modelValue="handleJenisBarangChange" />
-            <BaseInputAdmin required v-model="form.financing.condition" label="Kondisi" type="select"
+            <BaseInputAdmin required v-model="form.pembiayaan.condition" label="Kondisi" type="select"
                 :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
-            <BaseInputAdmin required v-model="form.financing.qty" label="Jumlah" type="number" />
-            <BaseInputAdmin required v-model="form.financing.predicted_cost_price" label="Harga Perkiraan"
-                :error="errors?.predicted_cost_price" isMoney />
-            <BaseInputAdmin v-model.number="form.financing.down_payment" label="Uang Muka" isMoney
+            <BaseInputAdmin required v-model="form.pembiayaan.qty" label="Jumlah" type="number" />
+            <BaseInputAdmin required v-model="form.pembiayaan.harga_perkiraan" label="Harga Perkiraan"
+                :error="errors?.harga_perkiraan" isMoney />
+            <BaseInputAdmin v-model.number="form.pembiayaan.uang_muka" label="Uang Muka" isMoney
                     placeholder="Masukkan uang muka" />
-            <BaseInputAdmin v-model="form.financing.specification" label="Deskripsi" type="textarea" rows="4" required
+            <BaseInputAdmin v-model="form.pembiayaan.specification" label="Deskripsi" type="textarea" rows="4" required
                 :error="errors?.specification" placeholder="Masukkan deskripsi produk" />
         </div>
 
@@ -117,7 +117,7 @@ const onFieldChange = (field) => emit('validate-field', field)
         </div>
 
         <!-- Hasil verifikasi -->
-        <div v-if="form.financing.status !== 'Menunggu Kelengkapan Dokumen'" class="card-layout mx-4">
+        <div v-if="form.pembiayaan.status !== 'Menunggu Kelengkapan Dokumen'" class="card-layout mx-4">
             <h1 class="card-title">Hasil Verifikasi</h1>
             <div class="pt-4">
                 <template v-if="form.verification.length > 0">

@@ -21,13 +21,13 @@ const totalSteps = 5
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financings' },
+    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/pembiayaan' },
     { name: 'Permohonan Pembiayaan Murabahah' },
 ]
 
 const props = defineProps({
     data: Object,
-    financing: Object,
+    pembiayaan: Object,
 })
 
 const {
@@ -49,7 +49,7 @@ const {
     submit,
     saveDraft,
     finalize,
-} = useFinancingForm(props.financing)
+} = useFinancingForm(props.pembiayaan)
 
 const {
     errors,
@@ -68,14 +68,14 @@ const prevStep = () => {
 }
 
 const isStep3Valid = computed(() =>
-    form.financing.name && form.collateral.collateral_type && !form.processing
+    form.pembiayaan.name && form.collateral.collateral_type && !form.processing
 )
 
 const isFinalizationValid = computed(() =>
-    form.financing.status === 'Disetujui' &&
-    form.financing.akad_date &&
+    form.pembiayaan.status === 'Disetujui' &&
+    form.pembiayaan.tgl_akad &&
     (form.akad_document_file || form.documents?.akad_document) &&
-    form.financing.payment_method
+    form.pembiayaan.metode_pembayaran
 )
 
 const draftStatuses = [
@@ -85,7 +85,7 @@ const draftStatuses = [
 ]
 
 const showSubmitButton = computed(() => {
-    return activeStep.value === 3 && draftStatuses.includes(form.financing.status)
+    return activeStep.value === 3 && draftStatuses.includes(form.pembiayaan.status)
 })
 
 const showNextButton = computed(() => {
@@ -93,7 +93,7 @@ const showNextButton = computed(() => {
         return false
     }
 
-    if (activeStep.value === 3 && draftStatuses.includes(form.financing.status)) {
+    if (activeStep.value === 3 && draftStatuses.includes(form.pembiayaan.status)) {
         return false
     }
 

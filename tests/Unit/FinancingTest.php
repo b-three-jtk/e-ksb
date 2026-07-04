@@ -3,8 +3,8 @@
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MemberStatusEnum;
-use App\Models\Financing;
 use App\Models\Anggota;
+use App\Models\Pembiayaan;
 use App\Services\Admin\DasborService;
 use App\Services\Admin\PembayaranAngsuranService;
 use Database\Seeders\AccountSeeder;
@@ -22,13 +22,13 @@ beforeEach(function () {
 });
 
 it('Menghitung detail pelunasan sebelum jatuh tempo', function () {
-    $financing = new Financing();
-    $financing->tenor = 10;
-    $financing->cost_price = 12000;
-    $financing->down_payment = 2000;
-    $financing->margin_amount = 2000;
+    $pembiayaan = new Pembiayaan();
+    $pembiayaan->tenor = 10;
+    $pembiayaan->harga_perolehan = 12000;
+    $pembiayaan->uang_muka = 2000;
+    $pembiayaan->margin_keuntungan = 2000;
 
-    $financing->setRelation('installment', collect([
+    $pembiayaan->setRelation('installment', collect([
         (object) ['status' => InstallmentPaymentScheduleStatusEnum::PAID->value],
         (object) ['status' => InstallmentPaymentScheduleStatusEnum::PAID->value],
         (object) ['status' => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value],
@@ -36,7 +36,7 @@ it('Menghitung detail pelunasan sebelum jatuh tempo', function () {
 
     $service = new PembayaranAngsuranService();
 
-    $result = $service->calculateDetails($financing);
+    $result = $service->calculateDetails($pembiayaan);
 
     expect($result['total_paid_installments'])->toBe(2);
 
@@ -61,11 +61,11 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
 
     // 1. DATA LANCAR
     // Skenario: Belum waktunya bayar (Due date: Juli 2026)
-    $lancar = Financing::create([
+    $lancar = Pembiayaan::create([
         'anggota_id' => $anggota->id,
         'status' => $statusActive,
-        'akad_date' => '2026-01-01',
-        'requested_date' => '2026-01-01',
+        'tgl_akad' => '2026-01-01',
+        'tgl_permohonan' => '2026-01-01',
         'tenor' => 12,
     ]);
     $lancar->installment()->create([
@@ -78,11 +78,11 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
     // 2. DATA KURANG LANCAR
     // Skenario: Kontrak berjalan, nunggak 5 bulan (Due date: Januari 2026)
     // Syarat kode: tunggakan 4-6 bulan
-    $kurangLancar = Financing::create([
+    $kurangLancar = Pembiayaan::create([
         'anggota_id' => $anggota->id,
         'status' => $statusActive,
-        'akad_date' => '2025-10-01',
-        'requested_date' => '2025-10-01',
+        'tgl_akad' => '2025-10-01',
+        'tgl_permohonan' => '2025-10-01',
         'tenor' => 24, // Jatuh tempo akhir masih 2027
     ]);
     $kurangLancar->installment()->create([
@@ -95,11 +95,11 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
     // 3. DATA DIRAGUKAN
     // Skenario: Kontrak berjalan, nunggak 8 bulan (Due date: Oktober 2025)
     // Syarat kode: tunggakan 7-12 bulan
-    $diragukan = Financing::create([
+    $diragukan = Pembiayaan::create([
         'anggota_id' => $anggota->id,
         'status' => $statusActive,
-        'akad_date' => '2025-05-01',
-        'requested_date' => '2025-05-01',
+        'tgl_akad' => '2025-05-01',
+        'tgl_permohonan' => '2025-05-01',
         'tenor' => 24, // Jatuh tempo akhir masih 2027
     ]);
     $diragukan->installment()->create([
@@ -112,11 +112,11 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
     // 4. DATA MACET
     // Skenario: Kontrak sudah habis/tamat 5 bulan lalu, tapi masih ada tunggakan
     // Syarat kode: jatuh tempo pembiayaan terlewati > 2 bulan
-    $macet = Financing::create([
+    $macet = Pembiayaan::create([
         'anggota_id' => $anggota->id,
         'status' => $statusActive,
-        'akad_date' => '2025-01-01',
-        'requested_date' => '2025-01-01',
+        'tgl_akad' => '2025-01-01',
+        'tgl_permohonan' => '2025-01-01',
         'tenor' => 12, // Kontrak tamat pada Januari 2026
     ]);
     $macet->installment()->create([

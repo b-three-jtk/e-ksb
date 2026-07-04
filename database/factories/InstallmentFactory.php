@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\Installment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,7 +18,7 @@ class InstallmentFactory extends Factory
             'installment_no' => $this->faker->numberBetween(1, 36),
             'amount' => $this->faker->randomFloat(2, 100000, 1000000),
             'status' => $this->faker->randomElement(array_column(InstallmentPaymentScheduleStatusEnum::cases(), 'value')),
-            'financing_id' => Financing::factory(),
+            'pembiayaan_id' => Pembiayaan::factory(),
         ];
     }
 

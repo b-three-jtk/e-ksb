@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -18,16 +18,16 @@ class Installment extends Model
         'installment_no',
         'amount',
         'status',
-        'financing_id',
+        'pembiayaan_id',
     ];
 
     protected $casts = [
         'due_date' => 'datetime',
     ];
 
-    public function financing()
+    public function pembiayaan()
     {
-        return $this->belongsTo(Financing::class);
+        return $this->belongsTo(Pembiayaan::class);
     }
 
     public function payment()

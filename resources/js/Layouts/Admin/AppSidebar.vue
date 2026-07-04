@@ -107,7 +107,7 @@ const menuGroups = [
             {
                 icon: MoneyIcon,
                 name: "Pembiayaan Murabahah",
-                path: "/admin/financings",
+                path: "/admin/pembiayaan",
                 permission: "view_murabahah"
             }
         ],

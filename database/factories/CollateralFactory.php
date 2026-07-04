@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Collateral;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CollateralFactory extends Factory
@@ -13,7 +13,7 @@ class CollateralFactory extends Factory
     public function definition(): array
     {
         return [
-            'financing_id' => Financing::factory(),
+            'pembiayaan_id' => Pembiayaan::factory(),
             'collateral_type' => $this->faker->randomElement(['Gold', 'Vehicle', 'Property', 'Electronics', 'Jewelry']),
             'owner_name' => $this->faker->name(),
             'collateral_location' => $this->faker->address(),

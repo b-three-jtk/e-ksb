@@ -15,11 +15,11 @@ return new class extends Migration
     {
         Schema::create('saving_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('saving_transaction_code', 10)->unique();
+            $table->string('saving_transaction_code', 20)->unique();
             $table->decimal('saving_amount', 15, 2);
             $table->decimal('balance_after_transaction', 15, 2);
             $table->enum('transaction_type', array_column(TransactionTypeEnum::cases(), 'value'));
-            $table->enum('saving_payment_method', array_column(PaymentMethodsEnum::cases(), 'value'));
+            $table->enum('saving_metode_pembayaran', array_column(PaymentMethodsEnum::cases(), 'value'));
             $table->text('saving_description')->nullable();
             $table->datetime('transaction_date');
             $table->string('saving_transaction_receipt')->nullable();

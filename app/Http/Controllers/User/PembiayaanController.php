@@ -22,7 +22,7 @@ class PembiayaanController extends Controller
 
         if (!$anggota) {
             return inertia('User/Financing/List', [
-                'financings' => [
+                'pembiayaan' => [
                     'data' => [],
                     'current_page' => 1,
                     'per_page' => 10,
@@ -42,11 +42,11 @@ class PembiayaanController extends Controller
         $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
         $search = trim((string) $request->input('search', ''));
 
-        $financings = $this->pembiayaanService->getPersonalFinancings($anggota->id, $perPage, $search);
+        $pembiayaan = $this->pembiayaanService->getPersonalpembiayaan($anggota->id, $perPage, $search);
         $activeFinancing = $this->pembiayaanService->getActiveFinancing($anggota->id);
 
         return inertia('User/Financing/List', [
-            'financings' => $financings,
+            'pembiayaan' => $pembiayaan,
             'activeFinancing' => $activeFinancing,
             'filters' => [
                 'search' => $search,
@@ -62,16 +62,16 @@ class PembiayaanController extends Controller
     {
         $user = auth()->user();
         $anggota = $user->anggota;
-        $financing = $this->pembiayaanService->getPembiayaanById($id);
+        $pembiayaan = $this->pembiayaanService->getPembiayaanById($id);
 
-        if ($financing->anggota_id !== $anggota->id) {
+        if ($pembiayaan->anggota_id !== $anggota->id) {
             abort(403, 'Anggota tidak memiliki akses ke pembiayaan ini.');
         }
 
-        $this->pembiayaanService->computeFinancingSummary($financing);
-        $this->pembiayaanService->computeNextDueDate($financing);
+        $this->pembiayaanService->computepembiayaanummary($pembiayaan);
+        $this->pembiayaanService->computeNextDueDate($pembiayaan);
 
-        $financing->setRelation('installment', $financing->installment->map(function ($item) {
+        $pembiayaan->setRelation('installment', $pembiayaan->installment->map(function ($item) {
             return [
                 'installment_no'              => $item->installment_no,
                 'installment_trans_code'      => $item->payment?->installment_trans_code,
@@ -83,6 +83,6 @@ class PembiayaanController extends Controller
             ];
         }));
 
-        return inertia('User/Financing/Show', ['data' => $financing]);
+        return inertia('User/Financing/Show', ['data' => $pembiayaan]);
     }
 }

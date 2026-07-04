@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\JenisBarang;
 use App\Models\Pemasok;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,13 +21,13 @@ class FinancingItem extends Model
         'purchase_receipt',
         
         'pemasok_id',
-        'financing_id',
+        'pembiayaan_id',
         'jenis_barang_id'
     ];
 
-    public function financing()
+    public function pembiayaan()
     {
-        return $this->belongsTo(Financing::class);
+        return $this->belongsTo(Pembiayaan::class);
     }
 
     public function jenisBarang()

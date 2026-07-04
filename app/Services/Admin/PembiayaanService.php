@@ -12,7 +12,7 @@ use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
 use App\Models\Financial;
-use App\Models\Financing;
+use App\Models\Pembiayaan;
 use App\Models\FinancingItem;
 use App\Models\GlobalSetting;
 use App\Models\Heir;
@@ -34,7 +34,7 @@ class PembiayaanService
 
     public function getSemuaPembiayaan($search, $tab, $verifier)
     {
-        return Financing::with([
+        return Pembiayaan::with([
             'anggota.user' => function ($query) {
                 $query->select('id', 'nama', 'kode_pengguna');
             },
@@ -85,7 +85,7 @@ class PembiayaanService
 
     public function getTotalPermohonanPembiayaan()
     {
-        return Financing::whereIn('status', [
+        return Pembiayaan::whereIn('status', [
             FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
             FinancingReqStatusEnum::PENDING_REVIEW->value,
             FinancingReqStatusEnum::APPROVED->value,
@@ -134,7 +134,7 @@ class PembiayaanService
 
     public function getDraftPembiayaan($id)
     {
-        return Financing::where('id', $id)
+        return Pembiayaan::where('id', $id)
             ->whereIn('status', [
                 FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                 FinancingReqStatusEnum::APPROVED->value,
@@ -158,12 +158,12 @@ class PembiayaanService
 
     public function getTotalPembiayaanBerlangsung()
     {
-        return Financing::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->count();
+        return Pembiayaan::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)->count();
     }
 
     public function getPembiayaanBelumDireview($id)
     {
-        return Financing::where('id', $id)
+        return Pembiayaan::where('id', $id)
             ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
             ->with([
                 'anggota.user',
@@ -260,15 +260,15 @@ class PembiayaanService
         }
     }
 
-    public function syncFinancingData(Pengguna $user, Request $request, string $updatedBy): ?Financing
+    public function syncFinancingData(Pengguna $user, Request $request, string $updatedBy): ?Pembiayaan
     {
-        if (!isset($request['financing']['name'])) return null;
+        if (!isset($request['pembiayaan']['name'])) return null;
 
-        $financingData  = $request['financing'];
+        $financingData  = $request['pembiayaan'];
         $pemasokData   = $request['pemasok'] ?? null;
         $collateralData = $request['collateral'] ?? null;
 
-        $existingFinancing = Financing::where('anggota_id', $user->anggota->id)
+        $existingFinancing = Pembiayaan::where('anggota_id', $user->anggota->id)
             ->whereIn('status', [
                 FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                 FinancingReqStatusEnum::REJECTED->value,
@@ -281,41 +281,41 @@ class PembiayaanService
         if ($existingFinancing) {
             // Update yang sudah ada
             $existingFinancing->update([
-                'down_payment'   => $financingData['down_payment'] ?? 0,
-                'akad_date'      => $financingData['akad_date'] ?? null,
-                'cost_price'     => $financingData['cost_price'] ?? null,
-                'margin_amount'  => $financingData['margin_amount'] ?? null,
-                'payment_method' => $financingData['payment_method'] ?? null,
+                'uang_muka'   => $financingData['uang_muka'] ?? 0,
+                'tgl_akad'      => $financingData['tgl_akad'] ?? null,
+                'harga_perolehan'     => $financingData['harga_perolehan'] ?? null,
+                'margin_keuntungan'  => $financingData['margin_keuntungan'] ?? null,
+                'metode_pembayaran' => $financingData['metode_pembayaran'] ?? null,
                 'updated_by'     => $updatedBy,
-                'predicted_cost_price' => $financingData['predicted_cost_price'] ?? null,
+                'harga_perkiraan' => $financingData['harga_perkiraan'] ?? null,
                 'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-                'signed_akad_document' => $request->hasFile('akad_document_file') ? $request->file('akad_document_file')->store('documents', 'public') : $existingFinancing->signed_akad_document ?? null,
+                'dokumen_akad' => $request->hasFile('akad_document_file') ? $request->file('akad_document_file')->store('documents', 'public') : $existingFinancing->dokumen_akad ?? null,
             ]);
 
-            if (($financingData['payment_method'] ?? null) === FinancingPaymentMethodEnum::INSTALLMENT->value) {
+            if (($financingData['metode_pembayaran'] ?? null) === FinancingPaymentMethodEnum::INSTALLMENT->value) {
                 $existingFinancing->update([
                     'tenor' => $financingData['tenor'] ?? null,
                 ]);
             }
-            $financing = $existingFinancing;
+            $pembiayaan = $existingFinancing;
         } else {
             // Buat baru kalau memang belum ada sama sekali
-            $financing = Financing::create([
+            $pembiayaan = Pembiayaan::create([
                 'anggota_id'      => $user->anggota->id,
-                'down_payment'   => $financingData['down_payment'] ?? 0,
-                'predicted_cost_price' => $financingData['predicted_cost_price'] ?? null,
-                'cost_price'     => $financingData['cost_price'] ?? null,
-                'margin_amount'  => $financingData['margin_amount'] ?? null,
-                'akad_date'      => $financingData['akad_date'] ?? null,
-                'payment_method' => $financingData['payment_method'] ?? null,
+                'uang_muka'   => $financingData['uang_muka'] ?? 0,
+                'harga_perkiraan' => $financingData['harga_perkiraan'] ?? null,
+                'harga_perolehan'     => $financingData['harga_perolehan'] ?? null,
+                'margin_keuntungan'  => $financingData['margin_keuntungan'] ?? null,
+                'tgl_akad'      => $financingData['tgl_akad'] ?? null,
+                'metode_pembayaran' => $financingData['metode_pembayaran'] ?? null,
                 'tenor'          => $financingData['tenor'] ?? null,
                 'updated_by'     => $updatedBy,
                 'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
             ]);
         }
 
-        if ($financing->status === FinancingReqStatusEnum::PENDING_REVIEW->value) {
-            $financing->update(['requested_date' => now()]);
+        if ($pembiayaan->status === FinancingReqStatusEnum::PENDING_REVIEW->value) {
+            $pembiayaan->update(['tgl_permohonan' => now()]);
         }
 
         $pemasok = null;
@@ -328,7 +328,7 @@ class PembiayaanService
         }
 
         FinancingItem::updateOrCreate(
-            ['financing_id' => $financing->id],
+            ['pembiayaan_id' => $pembiayaan->id],
             [
                 'name'            => $financingData['name'] ?? null,
                 'specification'   => $financingData['specification'] ?? null,
@@ -343,21 +343,21 @@ class PembiayaanService
 
         if (isset($financingData['akad_wakalah_date'])) {
             $wakalah = Wakalah::updateOrCreate(
-                ['financing_id' => $financing->id],
+                ['pembiayaan_id' => $pembiayaan->id],
                 [
-                    'akad_date'       => $financingData['akad_wakalah_date'] ?? null,
+                    'tgl_akad'       => $financingData['akad_wakalah_date'] ?? null,
                 ]
             );
             if ($request->hasFile('akad_wakalah_file')) {
                 $wakalah->update([
-                    'signed_akad_document' => $request->file('akad_wakalah_file')->store('documents', 'public'),
+                    'dokumen_akad' => $request->file('akad_wakalah_file')->store('documents', 'public'),
                 ]);
             }
         }
 
         if ($collateralData && isset($collateralData['collateral_type'])) {
-            $financing->collateral()->updateOrCreate(
-                ['financing_id' => $financing->id],
+            $pembiayaan->collateral()->updateOrCreate(
+                ['pembiayaan_id' => $pembiayaan->id],
                 [
                     'collateral_type'        => $collateralData['collateral_type'],
                     'owner_name'             => $collateralData['owner_name'] ?? null,
@@ -367,20 +367,20 @@ class PembiayaanService
             );
         }
 
-        return $financing;
+        return $pembiayaan;
     }
 
-    public function generateInstallments(Financing $financing): void
+    public function generateInstallments(Pembiayaan $pembiayaan): void
     {
-        if (!$financing->tenor) return;
+        if (!$pembiayaan->tenor) return;
 
-        $installmentAmount = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $financing->tenor;
-        for ($i = 1; $i <= $financing->tenor; $i++) {
+        $installmentAmount = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $pembiayaan->tenor;
+        for ($i = 1; $i <= $pembiayaan->tenor; $i++) {
             Installment::create([
-                'financing_id'   => $financing->id,
+                'pembiayaan_id'   => $pembiayaan->id,
                 'installment_no' => $i,
                 'amount'         => round($installmentAmount, 2),
-                'due_date'       => $financing->akad_date->addMonths($i),
+                'due_date'       => $pembiayaan->tgl_akad->addMonths($i),
                 'status'         => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             ]);
         }
@@ -427,27 +427,27 @@ class PembiayaanService
         ];
     }
 
-    public function generateTangguhSchedule(Financing $financing, $tangguhPaymentDate): void
+    public function generateTangguhSchedule(Pembiayaan $pembiayaan, $tangguhPaymentDate): void
     {
         if (!$tangguhPaymentDate) return;
 
         Installment::create([
-            'financing_id'   => $financing->id,
+            'pembiayaan_id'   => $pembiayaan->id,
             'installment_no' => 1,
-            'amount'         => $financing->cost_price + $financing->margin_amount - $financing->down_payment,
+            'amount'         => $pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka,
             'due_date'       => $tangguhPaymentDate,
             'status'         => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
         ]);
     }
 
-    public function computeFinancingSummary(Financing $financing): void
+    public function computepembiayaanummary(Pembiayaan $pembiayaan): void
     {
-        $this->sharedPembiayaanService->computeFinancingSummary($financing);
+        $this->sharedPembiayaanService->computepembiayaanummary($pembiayaan);
     }
 
-    public function computeNextDueDate(Financing $financing): void
+    public function computeNextDueDate(Pembiayaan $pembiayaan): void
     {
-        $this->sharedPembiayaanService->computeNextDueDate($financing);
+        $this->sharedPembiayaanService->computeNextDueDate($pembiayaan);
     }
 
 }

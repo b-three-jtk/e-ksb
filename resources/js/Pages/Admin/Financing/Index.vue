@@ -9,7 +9,7 @@ import CardInfo from '@/Components/CardInfo.vue';
 import { usePage, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 import Button from '@/Components/Form/Button.vue';
-import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
+import usepembiayaantatus, { getStatusLabel } from '@/Composables/usepembiayaantatus'
 import ReviewIcon from '@/Icons/ReviewIcon.vue'
 import moneyParser from '@/Composables/moneyParser';
 
@@ -22,12 +22,12 @@ const can = computed(() => page.props.auth.can);
 const isLoading = ref(false);
 
 const props = defineProps({
-    financings: Object,
+    pembiayaan: Object,
     summary: Array,
     filters: Object,
 });
 
-const transactions = computed(() => page.props.financings ?? {
+const transactions = computed(() => page.props.pembiayaan ?? {
     data: [], current_page: 1, per_page: 10, total: 0, links: [],
 })
 
@@ -49,7 +49,7 @@ const filters = reactive({
 const applyFilters = () => {
     isLoading.value = true
     router.get(
-        '/admin/financings',
+        '/admin/pembiayaan',
         {
             search: filters.search || undefined,
             per_page: filters.per_page,
@@ -77,8 +77,8 @@ const tableTitle = computed(() => {
 
 const columns = computed(() => {
     const baseColumns = [
-        { key: 'financing_transaction_code', label: 'No. Transaksi', align: 'left' },
-        { key: 'akad_date', label: 'Tanggal Akad', align: 'left' },
+        { key: 'kode_pembiayaan', label: 'No. Transaksi', align: 'left' },
+        { key: 'tgl_akad', label: 'Tanggal Akad', align: 'left' },
         { key: 'user', label: 'Anggota', align: 'left' },
         { key: 'product_name', label: 'Nama Produk', align: 'left' },
         { key: 'status', label: 'Status', align: 'left' },
@@ -157,7 +157,7 @@ watch(() => filters.tab, applyFilters)
                             Lacak transaksi pembiayaan murabahah di sini
                         </p>
                     </div>
-                    <Button v-if="can['create_murabahah']" :href="`/admin/financings/create`" variant="secondary" size="small" class="mx-6">
+                    <Button v-if="can['create_murabahah']" :href="`/admin/pembiayaan/create`" variant="secondary" size="small" class="mx-6">
                         <Icon icon="mdi:plus" class="w-5 h-5 mr-1" />
                         Tambah Pembiayaan
                     </Button>
@@ -175,7 +175,7 @@ watch(() => filters.tab, applyFilters)
                     @sort="toggleSort">
 
                     <template #cell-status="{ row }">
-                        <span :class="useFinancingStatus(row.status)">
+                        <span :class="usepembiayaantatus(row.status)">
                             {{ getStatusLabel(row.status) }}
                         </span>
                     </template>
@@ -185,20 +185,20 @@ watch(() => filters.tab, applyFilters)
 
                             <Button
                                 v-if="can['edit_murabahah'] && (role === 'Staf Murabahah' && (row.status === 'Disetujui' || row.status === 'Ditolak' || row.status === 'Menunggu Kelengkapan Dokumen' || row.status === 'Disetujui dengan Catatan'))"
-                                :href="`/admin/financings/draft/${row.id}`" size="small" variant="info">
+                                :href="`/admin/pembiayaan/draft/${row.id}`" size="small" variant="info">
                                 <ReviewIcon width="18px" height="18px" />
                                 Lanjutkan
                             </Button>
                             <Button
                                 v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((row.status === 'Angsuran Berjalan') || (row.status === 'Belum Ditinjau') || (row.status === 'Lunas') || (row.status === 'Pembayaran Tangguh'))) || (role === 'Bendahara') || (role === 'Pengawas') || (role === 'Dewan Pengawas Syariah') || (role === 'Ketua Murabahah' && (row.status !== 'Belum Ditinjau')) || (role === 'Ketua' && (row.status !== 'Belum Ditinjau' || row.user_role !== 'Ketua Murabahah')))"
-                                :href="`/admin/financings/show/${row.id}`" size="small" variant="secondary">
+                                :href="`/admin/pembiayaan/show/${row.id}`" size="small" variant="secondary">
                                 <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                                 Lihat Detail
                             </Button>
 
                             <Button
                                 v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (row.status === 'Belum Ditinjau')) || (role === 'Ketua' && (row.status === 'Belum Ditinjau' && row.user_role === 'Ketua Murabahah'))"
-                                :href="`/admin/financings/validation/${row.id}`" size="small" variant="warning">
+                                :href="`/admin/pembiayaan/validation/${row.id}`" size="small" variant="warning">
                                 <ReviewIcon width="18px" height="18px" />
                                 Tinjau
                             </Button>

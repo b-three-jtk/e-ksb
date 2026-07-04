@@ -162,7 +162,7 @@ class SimpananController extends Controller
             'nama_anggota'  => $anggota->user->nama,
             'no_anggota'    => $anggota->user->kode_pengguna,
             'jenis'         => $data['saving_category'],
-            'metode'        => $transaction->saving_payment_method,
+            'metode'        => $transaction->saving_metode_pembayaran,
             'nominal'       => $transaction->saving_amount,
             'saldo_sebelum' => $saldoSebelumnya,
             'saldo_sesudah' => $saldoSebelumnya + $transaction->saving_amount,

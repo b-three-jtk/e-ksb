@@ -27,7 +27,7 @@ class StoreDepositRequest extends FormRequest
             'saving_category' => 'required|in:'. implode(',', array_column(SavingTypeEnum::cases(), 'value')),
             'amount' => 'required|numeric|min:1',
             'date' => 'required|date|before_or_equal:today',
-            'saving_payment_method' => 'required|in:Tunai,Non-Tunai',
+            'saving_metode_pembayaran' => 'required|in:Tunai,Non-Tunai',
             'notes' => 'nullable|string|max:255',
             'purpose' => [
                 'required_if:saving_category,Tabungan Ibadah,Tabungan Berjangka',

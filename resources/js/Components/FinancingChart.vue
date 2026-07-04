@@ -68,7 +68,7 @@ const options = computed(() => ({
 
 <template>
     <div class="flex items-center justify-center">
-        <div class="w-72 financing-chart">
+        <div class="w-72 pembiayaan-chart">
             <VueApexCharts type="donut" :series="series" :options="options" />
         </div>
     </div>
