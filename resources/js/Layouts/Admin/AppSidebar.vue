@@ -17,6 +17,7 @@ import PersonAlertIcon from "@/Icons/PersonAlertIcon.vue";
 import FinanceIcon from "@/Icons/FinanceIcon.vue";
 import AccountIcon from "@/Icons/AccountIcon.vue";
 import NotificationsIcon from "@/Icons/NotificationsIcon.vue";
+import ReviewIcon from "@/Icons/ReviewIcon.vue";
 
 const page = usePage()
 
@@ -119,6 +120,12 @@ const menuGroups = [
                 icon: SettingsIcon,
                 name: "Pengaturan Umum",
                 path: "/admin/settings",
+                permission: "view_pengaturan"
+            },
+            {
+                icon: ReviewIcon,
+                name: "Log Aktivitas",
+                path: "/admin/audit-logs",
                 permission: "view_pengaturan"
             }
         ],
