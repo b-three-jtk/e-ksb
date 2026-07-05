@@ -14,11 +14,11 @@ class CheckPenggunaTable extends Command
     protected $signature = 'app:check-pengguna-table';
 
     /**
-     * The console command description.
+     * The console command deskripsi.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $deskripsi = 'Command deskripsi';
 
     /**
      * Execute the console command.

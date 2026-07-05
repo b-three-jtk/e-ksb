@@ -7,7 +7,7 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Models\BerjangkaAccount;
 use App\Models\IbadahAccount;
 use App\Models\Anggota;
@@ -34,9 +34,9 @@ class SimpananService
 
     public function getSettingValue(string $key): float
     {
-        return (float) GlobalSetting::where('key', $key)
-            ->where('effective_date', '<=', now())
-            ->orderByDesc('effective_date')
+        return (float) PengaturanUmum::where('key', $key)
+            ->where('tgl_diberlakukan', '<=', now())
+            ->orderByDesc('tgl_diberlakukan')
             ->value('value') ?? 0;
     }
 

@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 class SendNotificationReminders extends Command
 {
     protected $signature = 'notifications:send-reminders';
-    protected $description = 'Generate and send mandatory saving and angsuran reminders daily.';
+    protected $deskripsi = 'Generate and send mandatory saving and angsuran reminders daily.';
 
     public function __construct(private NotifikasiService $notificationService)
     {

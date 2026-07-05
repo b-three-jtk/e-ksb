@@ -3,7 +3,7 @@
 use App\Models\Akun;
 use App\Models\Pengguna;
 use Database\Seeders\AkunSeeder;
-use Database\Seeders\GlobalSettingSeeder;
+use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -11,7 +11,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
     $this->seed(AkunSeeder::class);
-    $this->seed(GlobalSettingSeeder::class);
+    $this->seed(PengaturanUmumSeeder::class);
 });
 
 describe('Aplikasi harus menyediakan pengelolaan akun koperasi oleh bendahara.', function () {

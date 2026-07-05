@@ -6,7 +6,7 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Models\Angsuran;
 use App\Models\PembayaranAngsuran;
 use App\Models\Anggota;
@@ -14,7 +14,7 @@ use App\Models\AkunSimpanan;
 use App\Models\Pemasok;
 use App\Models\Pengguna;
 use Database\Seeders\AkunSeeder;
-use Database\Seeders\GlobalSettingSeeder;
+use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\JenisBarangSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +26,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
     $this->seed(AkunSeeder::class);
-    $this->seed(GlobalSettingSeeder::class);
+    $this->seed(PengaturanUmumSeeder::class);
     $this->seed(JenisBarangSeeder::class);
 });
 
@@ -840,11 +840,11 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
-        GlobalSetting::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
-        GlobalSetting::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
-        GlobalSetting::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
-        GlobalSetting::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
-        GlobalSetting::where('key', 'murabaha_point_reward')->update(['value' => '1']);
+        PengaturanUmum::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
+        PengaturanUmum::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
+        PengaturanUmum::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
+        PengaturanUmum::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
+        PengaturanUmum::where('key', 'murabaha_point_reward')->update(['value' => '1']);
 
         $pembiayaan = Pembiayaan::factory()->create([
             'anggota_id' => $anggota->id,
@@ -884,11 +884,11 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
-        GlobalSetting::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
-        GlobalSetting::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
-        GlobalSetting::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
-        GlobalSetting::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
-        GlobalSetting::where('key', 'murabaha_point_reward')->update(['value' => '1']);
+        PengaturanUmum::where('key', 'status_tutup_buku')->update(['value' => 'closed']);
+        PengaturanUmum::where('key', 'tanggal_awal_periode')->update(['value' => '2026-01-01']);
+        PengaturanUmum::where('key', 'tanggal_akhir_periode')->update(['value' => '2026-12-31']);
+        PengaturanUmum::where('key', 'murabaha_point_amount')->update(['value' => '100000']);
+        PengaturanUmum::where('key', 'murabaha_point_reward')->update(['value' => '1']);
 
         $pembiayaan = Pembiayaan::factory()->create([
             'anggota_id' => $anggota->id,

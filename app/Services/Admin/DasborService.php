@@ -7,7 +7,7 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Pembiayaan;
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Models\Angsuran;
 use App\Models\DetailJurnal;
 use App\Models\Notification;
@@ -263,8 +263,8 @@ class DasborService
 
     public function getJatuhTempoTerdekat($filter)
     {
-        $savingDueDate = GlobalSetting::where('key', 'due_date_simpanan')->first()->value ?? 30;
-        $savingNominal = GlobalSetting::where('key', 'saving_wajib_amount')->first()->value ?? 0;
+        $savingDueDate = PengaturanUmum::where('key', 'due_date_simpanan')->first()->value ?? 30;
+        $savingNominal = PengaturanUmum::where('key', 'saving_wajib_amount')->first()->value ?? 0;
 
         $query = Notification::with([
             'anggota.user',

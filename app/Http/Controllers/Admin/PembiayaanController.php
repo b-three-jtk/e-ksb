@@ -18,7 +18,7 @@ use App\Models\AkunSimpanan;
 use App\Models\Anggota;
 use App\Models\Pembiayaan;
 use App\Models\FinancingVerification;
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Models\JenisBarang;
 use App\Models\DetailJurnal;
 use App\Models\Pemasok;
@@ -195,7 +195,7 @@ class PembiayaanController extends Controller
         return inertia('Admin/Financing/Validation', [
             'data' => [
                 'anggota' => $this->pembiayaanService->formatMemberData($pembiayaan->anggota),
-                'margin_percentage' => GlobalSetting::where('key', 'murabahah_margin_percentage')->where('effective_date', '<=', now())->latest()->first()?->value,
+                'margin_percentage' => PengaturanUmum::where('key', 'murabahah_margin_percentage')->where('tgl_diberlakukan', '<=', now())->latest()->first()?->value,
                 'pembiayaan' => [
                     'id' => $pembiayaan->id,
                     'kode_pembiayaan' => $pembiayaan->kode_pembiayaan,

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Services\PengaturanUmumService;
 use Illuminate\Http\Request;
 
@@ -36,7 +36,7 @@ class PengaturanUmumController extends Controller
             'points' => [
                 'saving_point_amount' => ['required', 'numeric', 'min:1'],
                 'saving_point_reward' => ['required', 'numeric', 'min:1'],
-                'effective_date' => ['required', 'date'],
+                'tgl_diberlakukan' => ['required', 'date'],
             ],
             'savings' => [
                 'saving_pokok_amount' => ['required', 'numeric', 'min:1'],
@@ -46,7 +46,7 @@ class PengaturanUmumController extends Controller
             ],
             'pembiayaan' => [
                 'murabahah_margin_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
-                'effective_date' => ['required', 'date'],
+                'tgl_diberlakukan' => ['required', 'date'],
             ],
             default => [],
         };
@@ -63,7 +63,7 @@ class PengaturanUmumController extends Controller
             default => [],
         };
 
-        $hasData = GlobalSetting::whereIn('key', $keys)->exists();
+        $hasData = PengaturanUmum::whereIn('key', $keys)->exists();
 
         if ($hasData) {
             if (!$request->user()->can('edit_pengaturan')) {

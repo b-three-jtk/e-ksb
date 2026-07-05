@@ -6,7 +6,7 @@ use App\Models\Pembiayaan;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\Pengguna;
-use Database\Seeders\GlobalSettingSeeder;
+use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -17,7 +17,7 @@ use Spatie\Permission\Models\Role;
 uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
-    $this->seed(GlobalSettingSeeder::class);
+    $this->seed(PengaturanUmumSeeder::class);
 });
 
 describe('Aplikasi harus menyediakan pendaftaran pengurus baru dari anggota aktif maupun non-anggota oleh sekretaris.', function () {

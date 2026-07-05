@@ -50,12 +50,12 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
         <!-- GRAFIK PENDAPATAN & TRANSAKSI TERBARU - BARIS SATU -->
         <div class="grid grid-cols-2 col-span-7 gap-4">
             <div class="grid grid-cols-3 col-span-2 flex-col gap-4">
-                <CardInfo title="Rasio Kas" :content="props.stats.rasio_kas" :description="descriptions['Rasio Kas']" />
+                <CardInfo title="Rasio Kas" :content="props.stats.rasio_kas" :deskripsi="descriptions['Rasio Kas']" />
                 <CardInfo title="Total Kas" :content="parseCurrencyAmount(props.stats.total_kas)"
                     :percentage="props.stats.total_kas_persen" :filter="props.selectedFilter"
-                    :description="descriptions['Total Kas']" />
+                    :deskripsi="descriptions['Total Kas']" />
                 <CardInfo title="Rasio Financing-to-Deposit (FDR)" :content="props.stats.rasio_fdr"
-                    :description="descriptions['Rasio Financing-to-Deposit (FDR)']" />
+                    :deskripsi="descriptions['Rasio Financing-to-Deposit (FDR)']" />
             </div>
             <div class="grid grid-cols-2 col-span-1 flex-col gap-4">
                 <SkeletonChartCard v-if="!pertumbuhan_pendapatan" class="col-span-2" :bars="12" :legend="2" />

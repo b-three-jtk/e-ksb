@@ -95,9 +95,9 @@ class Pengguna extends Authenticatable
         return $this->hasMany(Poin::class);
     }
 
-    public function globalSettings()
+    public function pengaturanUmum()
     {
-        return $this->hasMany(GlobalSetting::class, 'updated_by');
+        return $this->hasMany(PengaturanUmum::class, 'updated_by');
     }
 
     // Is-a

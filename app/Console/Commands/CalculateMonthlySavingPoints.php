@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Models\Poin;
 use App\Models\Pengguna;
 use Carbon\Carbon;
@@ -13,7 +13,7 @@ class CalculateMonthlySavingPoints extends Command
 {
     protected $signature = 'points:calculate-monthly-savings';
 
-    protected $description = 'Calculate and store monthly saving points for anggota';
+    protected $deskripsi = 'Calculate and store monthly saving points for anggota';
 
     public function handle(): int
     {
@@ -87,10 +87,10 @@ class CalculateMonthlySavingPoints extends Command
 
     private function resolveActiveSettingValue(string $key, string $periodDate): ?float
     {
-        $setting = GlobalSetting::query()
+        $setting = PengaturanUmum::query()
             ->where('key', $key)
-            ->whereDate('effective_date', '<=', $periodDate)
-            ->orderByDesc('effective_date')
+            ->whereDate('tgl_diberlakukan', '<=', $periodDate)
+            ->orderByDesc('tgl_diberlakukan')
             ->orderByDesc('id')
             ->first();
 

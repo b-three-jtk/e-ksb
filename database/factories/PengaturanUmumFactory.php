@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<GlobalSetting>
+ * @extends Factory<PengaturanUmum>
  */
-class GlobalSettingFactory extends Factory
+class PengaturanUmumFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -21,8 +21,8 @@ class GlobalSettingFactory extends Factory
         return [
             'key' => $this->faker->unique()->word(),
             'value' => $this->faker->sentence(),
-            'effective_date' => $this->faker->date(),
-            'description' => $this->faker->paragraph(),
+            'tgl_diberlakukan' => $this->faker->date(),
+            'deskripsi' => $this->faker->paragraph(),
             'updated_by' => Pengguna::factory(),
         ];
     }

@@ -14,7 +14,7 @@ use App\Enums\PositionEnum;
 use App\Models\KeuanganAnggota;
 use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Models\AhliWaris;
 use App\Models\Angsuran;
 use App\Models\DetailJurnal;
@@ -128,7 +128,7 @@ class PembiayaanService
             'conditions' => array_column(ConditionEnum::cases(), 'value'),
             'jenisBarang' => DB::table('jenis_barang')->select('id', 'nama_jenis_barang')->get(),
             'pemasok' => DB::table('pemasok')->select('id', 'nama_pemasok', 'alamat_pemasok')->get(),
-            'margin_percentage' => GlobalSetting::where('key', 'murabahah_margin_percentage')->where('effective_date', '<=', now())->latest()->first()?->value,
+            'margin_percentage' => PengaturanUmum::where('key', 'murabahah_margin_percentage')->where('tgl_diberlakukan', '<=', now())->latest()->first()?->value,
         ];
     }
 

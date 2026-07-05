@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Models\PembayaranAngsuran;
 use App\Models\Poin;
 use Carbon\Carbon;
@@ -19,11 +19,11 @@ class CalculateMurabahahPoints extends Command
     protected $signature = 'points:calculate-murabahah-points';
 
     /**
-     * The console command description.
+     * The console command deskripsi.
      *
      * @var string
      */
-    protected $description = 'Calculate and store murabahah points for anggota';
+    protected $deskripsi = 'Calculate and store murabahah points for anggota';
 
     /**
      * Execute the console command.
@@ -115,10 +115,10 @@ public function handle(): int
      */
     private function resolveActiveSettingValue(string $key, string $periodDate): ?float
     {
-        $setting = GlobalSetting::query()
+        $setting = PengaturanUmum::query()
             ->where('key', $key)
-            ->whereDate('effective_date', '<=', $periodDate)
-            ->orderByDesc('effective_date')
+            ->whereDate('tgl_diberlakukan', '<=', $periodDate)
+            ->orderByDesc('tgl_diberlakukan')
             ->orderByDesc('id')
             ->first();
 
@@ -134,10 +134,10 @@ public function handle(): int
      */
     private function resolveStringSettingValue(string $key, string $periodDate): ?string
     {
-        $setting = GlobalSetting::query()
+        $setting = PengaturanUmum::query()
             ->where('key', $key)
-            ->whereDate('effective_date', '<=', $periodDate)
-            ->orderByDesc('effective_date')
+            ->whereDate('tgl_diberlakukan', '<=', $periodDate)
+            ->orderByDesc('tgl_diberlakukan')
             ->orderByDesc('id')
             ->first();
 

@@ -8,14 +8,14 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\BerjangkaAccount;
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Models\IbadahAccount;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\TransaksiSimpanan;
 use App\Models\Pengguna;
 use Database\Seeders\AkunSeeder;
-use Database\Seeders\GlobalSettingSeeder;
+use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
@@ -25,7 +25,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
     $this->seed(AkunSeeder::class);
-    $this->seed(GlobalSettingSeeder::class);
+    $this->seed(PengaturanUmumSeeder::class);
 });
 
 describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan anggota oleh penanggung jawab.', function () {
@@ -808,7 +808,7 @@ describe('Aplikasi harus dapat menghitung poin simpanan anggota berdasarkan tota
             'status' => MemberStatusEnum::ACTIVE->value,
         ])->create();
 
-        $threshold = GlobalSetting::where('key', 'saving_point_amount')->first()->value;
+        $threshold = PengaturanUmum::where('key', 'saving_point_amount')->first()->value;
         $dummyBalance = ($threshold - 10000); // Saldo di bawah threshold
 
         AkunSimpanan::factory()->create([

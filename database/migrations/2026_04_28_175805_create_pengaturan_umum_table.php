@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('global_settings', function (Blueprint $table) {
+        Schema::create('pengaturan_umum', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
             $table->text('value')->nullable();
-            $table->date('effective_date')->nullable();
-            $table->text('description')->nullable();
+            $table->date('tgl_diberlakukan')->nullable();
+            $table->text('deskripsi')->nullable();
             $table->foreignUuid('updated_by')->constrained('pengguna')->onDelete('restrict');
             $table->timestamps();
         });
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('global_settings');
+        Schema::dropIfExists('pengaturan_umum');
     }
 };

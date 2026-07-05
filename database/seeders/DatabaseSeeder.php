@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             AkunSeeder::class,
             SavingProductSeeder::class,
             MurabahaProductSeeder::class,
-            GlobalSettingSeeder::class,
+            PengaturanUmumSeeder::class,
         ]);
     }
 }

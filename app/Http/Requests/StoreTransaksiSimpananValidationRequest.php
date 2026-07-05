@@ -23,7 +23,7 @@ class StoreTransaksiSimpananValidationRequest extends FormRequest
     {
         return [
             'status' => 'required|in:accepted,rejected',
-            'description' => 'nullable|string', // this is rejection reason
+            'deskripsi' => 'nullable|string', // this is rejection reason
         ];
     }
 }

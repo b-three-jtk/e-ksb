@@ -6,19 +6,20 @@ use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class GlobalSetting extends Model
+class PengaturanUmum extends Model
 {
     use HasFactory;
+    protected $table = 'pengaturan_umum';
     protected $fillable = [
         'key',
         'value',
-        'effective_date',
-        'description',
+        'tgl_diberlakukan',
+        'deskripsi',
         'updated_by',
     ];
 
     protected $casts = [
-        'effective_date' => 'date',
+        'tgl_diberlakukan' => 'date',
     ];
 
     public function updatedBy()

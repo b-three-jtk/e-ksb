@@ -33,7 +33,7 @@ const emit = defineEmits(['submit'])
                     @update:model-value="form.saving_point_reward = $event" label="Poin yang Diperoleh" type="number"
                     min="1" step="1" required :disabled="readonly || isProcessing"
                     placeholder="Masukkan jumlah poin yang diberikan" />
-                <BaseInputAdmin v-model="form.effective_date" label="Tanggal Berlaku" type="date" required
+                <BaseInputAdmin v-model="form.tgl_diberlakukan" label="Tanggal Berlaku" type="date" required
                     :disabled="readonly || isProcessing" />
             </div>
 
