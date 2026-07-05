@@ -104,18 +104,34 @@ class PembayaranAngsuranService
                 $src = 'data:image/svg+xml;base64,' . base64_encode($data_logo);
             }
 
+            Carbon::setLocale('id');
+            $now = now();
+            $hari = $now->translatedFormat('l');
+            $tanggal = $now->format('d');
+            $bulan = $now->translatedFormat('F');
+            $tahun = $now->format('Y');
+
             $strukData = [
                 'no_transaksi' => $transCode,
-                'tanggal' => now(),
+                'hari' => $hari,
+                'tanggal' => $tanggal,
+                'bulan' => $bulan,
+                'tahun' => $tahun,
                 'no_anggota' => $financing->member->user->user_code,
                 'nama_anggota' => $financing->member->user->name,
-                'no_telp' => $financing->member->user->phone_number,
                 'financing_transaction_code' => $financing->financing_transaction_code,
                 'product_name' => $financing->financingItem->name ?? '-',
                 'total_paid_amount' => $calculatedData['total_paid_amount'],
                 'metode' => $validatedData['method'],
                 'repayment_total' => $calculatedData['repayment_total'],
-                'pengurus' => auth()->user()->name,
+                'tenor' => $financing->tenor,
+                'nama_pengurus' => auth()->user()->name,
+                'jabatan_pengurus' => auth()->user()->roles->first()->name ?? 'Pengurus',
+                'alamat' => $financing->member->domicile_address ?? $financing->member->residential_address ?? '-',
+                'harga_perolehan' => $financing->cost_price,
+                'margin_keuntungan' => $financing->margin_amount,
+                'no_telp' => $financing->member->user->phone_number,
+                'qimah_ismiyyah' => $financing->cost_price + $financing->margin_amount,
                 'qimah_haliyyah' => $calculatedData['qimah_haliyyah'],
                 'logo' => $src,
             ];
