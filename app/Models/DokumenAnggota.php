@@ -7,14 +7,16 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MemberDoc extends Model
+class DokumenAnggota extends Model
 {
     use HasUuids;
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table = 'dokumen_anggota';
+    
     protected $fillable = [
-        'doc_name',
-        'doc_attachment',
+        'nama_dokumen',
+        'lampiran_dokumen',
         'anggota_id',
     ];
 

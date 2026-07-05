@@ -19,7 +19,7 @@ class ProfilPenggunaService
      */
     public function index(Pengguna $user): array
     {
-        $anggota = $user->anggota?->loadMissing(['ahliWaris', 'memberDocs']);
+        $anggota = $user->anggota?->loadMissing(['ahliWaris', 'dokumenAnggota']);
         $poin = $user->poin()
             ->with('transaksiSimpanan')
             ->orderBy('created_at')
@@ -67,8 +67,8 @@ class ProfilPenggunaService
             return in_array($ahli_waris['hubungan'] ?? '', ['Suami', 'Istri'], true);
         });
 
-        $ktpDocument = $anggota?->memberDocs?->firstWhere('doc_name', 'ktp');
-        $kkDocument = $anggota?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga');
+        $ktpDocument = $anggota?->dokumenAnggota?->firstWhere('nama_dokumen', 'ktp');
+        $kkDocument = $anggota?->dokumenAnggota?->firstWhere('nama_dokumen', 'kartu_keluarga');
 
         return [
             'id' => $user->id,
@@ -95,8 +95,8 @@ class ProfilPenggunaService
                 'spouse_name' => $anggota?->spouse_name ?? $spouseAhliWaris['nama_ahli_waris'] ?? null,
                 'ahli_waris' => $ahli_waris,
                 'documents' => [
-                    'ktp' => $ktpDocument?->doc_attachment ? asset('storage/' . $ktpDocument->doc_attachment) : null,
-                    'kk' => $kkDocument?->doc_attachment ? asset('storage/' . $kkDocument->doc_attachment) : null,
+                    'ktp' => $ktpDocument?->lampiran_dokumen ? asset('storage/' . $ktpDocument->lampiran_dokumen) : null,
+                    'kk' => $kkDocument?->lampiran_dokumen ? asset('storage/' . $kkDocument->lampiran_dokumen) : null,
                 ],
             ],
             'points' => [

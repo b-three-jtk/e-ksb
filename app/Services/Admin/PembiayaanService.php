@@ -144,7 +144,7 @@ class PembiayaanService
             ->with([
                 'anggota.user',
                 'anggota.keuanganAnggota',
-                'anggota.memberDocs',
+                'anggota.dokumenAnggota',
                 'anggota.ahliWaris',
                 'anggota.memberJobs',
                 'objekPembiayaan.jenisBarang',
@@ -168,7 +168,7 @@ class PembiayaanService
             ->with([
                 'anggota.user',
                 'anggota.keuanganAnggota',
-                'anggota.memberDocs',
+                'anggota.dokumenAnggota',
                 'anggota.ahliWaris',
                 'anggota.memberJobs',
                 'objekPembiayaan.jenisBarang',
@@ -223,9 +223,9 @@ class PembiayaanService
         // Sync documents
         foreach (['slip_gaji' => 'income_slip_file', 'buku_tabungan' => 'bank_book_file'] as $docName => $fileField) {
             if ($request->hasFile($fileField)) {
-                $user->anggota->memberDocs()->updateOrCreate(
-                    ['doc_name' => $docName],
-                    ['doc_attachment' => $request->file($fileField)->store('documents', 'public')]
+                $user->anggota->dokumenAnggota()->updateOrCreate(
+                    ['nama_dokumen' => $docName],
+                    ['lampiran_dokumen' => $request->file($fileField)->store('documents', 'public')]
                 );
             }
         }

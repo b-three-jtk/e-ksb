@@ -6,7 +6,7 @@ use App\Enums\MemberStatusEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\AhliWaris;
 use App\Models\Anggota;
-use App\Models\MemberDoc;
+use App\Models\DokumenAnggota;
 use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +36,7 @@ class PendaftaranAnggotaService
 
             Log::info("User {$user->id} registered as anggota with user code {$memberNumber}");
             $this->createMemberAhliWaris($validated, $anggota->id);
-            $this->createMemberDocuments($request, $anggota->id);
+            $this->createDokumenAnggota($request, $anggota->id);
         });
 
         return [
@@ -132,22 +132,22 @@ class PendaftaranAnggotaService
      * @param string $anggotaId
      * @return void
      */
-    private function createMemberDocuments(Request $request, string $anggotaId): void
+    private function createDokumenAnggota(Request $request, string $anggotaId): void
     {
         if ($request->hasFile('ktp_photo')) {
             $ktpPath = $request->file('ktp_photo')->store('documents', 'public');
-            MemberDoc::create([
-                'doc_name' => 'ktp',
-                'doc_attachment' => $ktpPath,
+            DokumenAnggota::create([
+                'nama_dokumen' => 'ktp',
+                'lampiran_dokumen' => $ktpPath,
                 'anggota_id' => $anggotaId,
             ]);
         }
 
         if ($request->hasFile('kk_photo')) {
             $kkPath = $request->file('kk_photo')->store('documents', 'public');
-            MemberDoc::create([
-                'doc_name' => 'kartu_keluarga',
-                'doc_attachment' => $kkPath,
+            DokumenAnggota::create([
+                'nama_dokumen' => 'kartu_keluarga',
+                'lampiran_dokumen' => $kkPath,
                 'anggota_id' => $anggotaId,
             ]);
         }

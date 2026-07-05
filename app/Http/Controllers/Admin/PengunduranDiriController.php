@@ -41,7 +41,7 @@ class PengunduranDiriController extends Controller
         $data = [];
         $data['user'] = $this->service->getAnggotaMengundurkanDiri($id);
 
-        $resignationDoc = $data['user']->anggota->memberDocs?->first()?->doc_attachment ? asset('storage/' . $data['user']->anggota->memberDocs->first()->doc_attachment) : null;
+        $resignationDoc = $data['user']->anggota->dokumenAnggota?->first()?->lampiran_dokumen ? asset('storage/' . $data['user']->anggota->dokumenAnggota->first()->lampiran_dokumen) : null;
 
         $totalSavings = $data['user']->anggota->akunSimpanan()->sum('saldo');
         $totalObligation = $this->service->getTotalKewajiban($data['user']);

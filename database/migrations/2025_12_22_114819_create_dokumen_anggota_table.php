@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('member_docs', function (Blueprint $table) {
+        Schema::create('dokumen_anggota', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('doc_name');
-            $table->string('doc_attachment');
+            $table->string('nama_dokumen');
+            $table->string('lampiran_dokumen');
             $table->unsignedBigInteger('anggota_id');
 
             $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('cascade');

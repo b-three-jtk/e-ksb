@@ -6,7 +6,7 @@ use App\Models\KeuanganAnggota;
 use App\Models\Pembiayaan;
 use App\Models\AhliWaris;
 use App\Models\RekeningAnggota;
-use App\Models\MemberDoc;
+use App\Models\DokumenAnggota;
 use App\Models\MemberJob;
 use App\Models\Notification;
 use App\Models\AkunSimpanan;
@@ -69,9 +69,9 @@ class Anggota extends Model
                     ->withTimestamps();
     }
 
-    public function memberDocs()
+    public function dokumenAnggota()
     {
-        return $this->hasMany(MemberDoc::class);
+        return $this->hasMany(DokumenAnggota::class);
     }
 
     public function memberJobs()

@@ -167,9 +167,9 @@ class PembiayaanController extends Controller
                     ];
                 })->sortByDesc('verified_at')->values(),
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
-                    'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
-                    'bank_book' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()?->lampiran_dokumen),
+                    'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'slip_gaji')->first()?->lampiran_dokumen),
+                    'bank_book' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'buku_tabungan')->first()?->lampiran_dokumen),
                     'struk_pembelian' => $this->getDocumentUrl($pembiayaan->objekPembiayaan->struk_pembelian),
                     'akad_document' => $this->getDocumentUrl($pembiayaan->dokumen_akad),
                     'akad_wakalah_document' => $this->getDocumentUrl($pembiayaan->wakalah?->dokumen_akad),
@@ -223,9 +223,9 @@ class PembiayaanController extends Controller
                     'collateral_location' => $pembiayaan->collateral?->collateral_location,
                 ],
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
-                    'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
-                    'bank_book' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
+                    'family_card' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()?->lampiran_dokumen),
+                    'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'slip_gaji')->first()?->lampiran_dokumen),
+                    'bank_book' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'buku_tabungan')->first()?->lampiran_dokumen),
                 ],
                 'pemasok' => $pembiayaan->objekPembiayaan->pemasok ? [
                     'nama_pemasok' => $pembiayaan->objekPembiayaan->pemasok->nama_pemasok,
@@ -703,7 +703,7 @@ class PembiayaanController extends Controller
         $query = $request->input('q');
 
         $anggota = Anggota::query()
-            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'keuanganAnggota', 'ahliWaris', 'memberJobs', 'pembiayaan:id,status', 'akunSimpanan:id,saldo,created_at'])
+            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'dokumenAnggota', 'keuanganAnggota', 'ahliWaris', 'memberJobs', 'pembiayaan:id,status', 'akunSimpanan:id,saldo,created_at'])
             ->whereHas('user', function ($q) use ($query) {
                 $q->whereHas('roles', fn($roleQ) => $roleQ->where('nama_barang', 'Anggota'))
                     ->where('status', UserStatusEnum::ACTIVE->value)
@@ -734,9 +734,9 @@ class PembiayaanController extends Controller
                 });
 
                 $anggota->is_have_eligible_saving = $hasEligibleSaving;
-                $anggota->family_card = $anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment ? asset('storage/' . $anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()->doc_attachment) : null;
-                $anggota->income_slip = $anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment ? asset('storage/' . $anggota->memberDocs->where('doc_name', 'slip_gaji')->first()->doc_attachment) : null;
-                $anggota->bank_book = $anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment ? asset('storage/' . $anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()->doc_attachment) : null;
+                $anggota->family_card = $anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()?->lampiran_dokumen ? asset('storage/' . $anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()->lampiran_dokumen) : null;
+                $anggota->income_slip = $anggota->dokumenAnggota->where('nama_dokumen', 'slip_gaji')->first()?->lampiran_dokumen ? asset('storage/' . $anggota->dokumenAnggota->where('nama_dokumen', 'slip_gaji')->first()->lampiran_dokumen) : null;
+                $anggota->bank_book = $anggota->dokumenAnggota->where('nama_dokumen', 'buku_tabungan')->first()?->lampiran_dokumen ? asset('storage/' . $anggota->dokumenAnggota->where('nama_dokumen', 'buku_tabungan')->first()->lampiran_dokumen) : null;
 
                 return $anggota;
             });

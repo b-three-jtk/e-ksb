@@ -108,8 +108,8 @@ class PenggunaController extends Controller
         $user = $this->anggotaService->getDetailAnggota($id);
 
         if ($user->anggota) {
-            $ktpDoc = $user->anggota->memberDocs->where('doc_name', 'ktp')->first();
-            $kkDoc = $user->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first();
+            $ktpDoc = $user->anggota->dokumenAnggota->where('nama_dokumen', 'ktp')->first();
+            $kkDoc = $user->anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first();
 
             if ($user->anggota->pembiayaan) {
                 $user->anggota->pembiayaan->each(function ($pembiayaan) use ($service) {
@@ -126,8 +126,8 @@ class PenggunaController extends Controller
 
         return inertia('Admin/User/Show', [
             'user' => $user,
-            'ktp_photo' => $ktpDoc?->doc_attachment ? asset('storage/' . $ktpDoc->doc_attachment) : null,
-            'kk_photo' => $kkDoc?->doc_attachment ? asset('storage/' . $kkDoc->doc_attachment) : null,
+            'ktp_photo' => $ktpDoc?->lampiran_dokumen ? asset('storage/' . $ktpDoc->lampiran_dokumen) : null,
+            'kk_photo' => $kkDoc?->lampiran_dokumen ? asset('storage/' . $kkDoc->lampiran_dokumen) : null,
         ]);
     }
 
@@ -135,12 +135,12 @@ class PenggunaController extends Controller
     {
         $user = $this->anggotaService->getDetailAnggota($id);
 
-        $user->kk = $user->anggota?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga')?->doc_attachment
-            ? asset('storage/' . $user->anggota->memberDocs->firstWhere('doc_name', 'kartu_keluarga')->doc_attachment)
+        $user->kk = $user->anggota?->dokumenAnggota?->firstWhere('nama_dokumen', 'kartu_keluarga')?->lampiran_dokumen
+            ? asset('storage/' . $user->anggota->dokumenAnggota->firstWhere('nama_dokumen', 'kartu_keluarga')->lampiran_dokumen)
             : null;
 
-        $user->ktp = $user->anggota?->memberDocs?->firstWhere('doc_name', 'ktp')?->doc_attachment
-            ? asset('storage/' . $user->anggota->memberDocs->firstWhere('doc_name', 'ktp')->doc_attachment)
+        $user->ktp = $user->anggota?->dokumenAnggota?->firstWhere('nama_dokumen', 'ktp')?->lampiran_dokumen
+            ? asset('storage/' . $user->anggota->dokumenAnggota->firstWhere('nama_dokumen', 'ktp')->lampiran_dokumen)
             : null;
 
         return inertia('Admin/User/Edit', [

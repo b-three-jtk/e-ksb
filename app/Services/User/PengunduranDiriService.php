@@ -5,7 +5,7 @@ namespace App\Services\User;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\MemberStatusEnum;
 use App\Models\Pembiayaan;
-use App\Models\MemberDoc;
+use App\Models\DokumenAnggota;
 use App\Models\TransaksiSimpanan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -59,9 +59,9 @@ class PengunduranDiriService
 
         DB::beginTransaction();
         try {
-            MemberDoc::create([
-                'doc_name'       => 'Dokumen Pengunduran Diri',
-                'doc_attachment' => $path,
+            DokumenAnggota::create([
+                'nama_dokumen'       => 'Dokumen Pengunduran Diri',
+                'lampiran_dokumen' => $path,
                 'anggota_id'      => $anggotaId,
             ]);
 

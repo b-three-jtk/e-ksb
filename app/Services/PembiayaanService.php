@@ -120,7 +120,7 @@ class PembiayaanService
             'anggota.user',
             'anggota.ahliWaris',
             'anggota.keuanganAnggota',
-            'anggota.memberDocs',
+            'anggota.dokumenAnggota',
             'anggota.memberJobs',
             'objekPembiayaan.jenisBarang',
             'collateral',

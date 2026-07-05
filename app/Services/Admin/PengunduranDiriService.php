@@ -36,7 +36,7 @@ class PengunduranDiriService
     {
         return Pengguna::with(['anggota' => function ($q) {
             $q->where('status', MemberStatusEnum::RESIGNED_REQUESTED->value);
-        }, 'anggota.memberDocs'])->findOrFail($id);
+        }, 'anggota.dokumenAnggota'])->findOrFail($id);
     }
 
     public function getTotalKewajiban(Pengguna $user)

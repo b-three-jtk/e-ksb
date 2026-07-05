@@ -7,7 +7,7 @@ use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Models\Pembiayaan;
 use App\Models\Angsuran;
 use App\Models\PembayaranAngsuran;
-use App\Models\MemberDoc;
+use App\Models\DokumenAnggota;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -346,10 +346,10 @@ class PembayaranAngsuranService
 
             Storage::disk('public')->put($fileName, $pdf->output());
 
-            MemberDoc::create([
+            DokumenAnggota::create([
                 'anggota_id'      => $pembiayaan->anggota_id,
-                'doc_name'       => 'Kwitansi Pembayaran ' . $payment->kode_transaksi_pembayaran,
-                'doc_attachment' => $fileName,
+                'nama_dokumen'       => 'Kwitansi Pembayaran ' . $payment->kode_transaksi_pembayaran,
+                'lampiran_dokumen' => $fileName,
             ]);
 
             $payment->update(['struk_pembayaran' => $fileName]);

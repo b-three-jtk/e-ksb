@@ -164,7 +164,7 @@ class SimpananServices
                 'struk' => $strukData,
             ])->setPaper([0, 0, 226.77, 600], 'portrait');
             
-            $directory = 'member_docs/receipts/' . now()->format('Y-m');
+            $directory = 'dokumen_anggota/receipts/' . now()->format('Y-m');
             Storage::disk('public')->makeDirectory($directory);
             
             $filename = 'struk-withdrawal-' . $transaction->id . '.pdf';

@@ -100,7 +100,7 @@ class AnggotaService
     public function getDetailAnggota(string $id)
     {
         $user = Pengguna::with([
-            'anggota.memberDocs',
+            'anggota.dokumenAnggota',
             'roles',
             'anggota.akunSimpanan.transactions' => fn($q) => $q->orderBy('tgl_transaksi', 'desc'),
             'anggota.akunSimpanan',
@@ -161,16 +161,16 @@ class AnggotaService
                 }
 
                 if (isset($validated['ktp_file']) && $user->anggota) {
-                    $user->anggota->memberDocs()->updateOrCreate(
-                        ['doc_name' => 'ktp', 'anggota_id' => $user->anggota->id],
-                        ['doc_attachment' => $validated['ktp_file']->store('member_docs', 'public')]
+                    $user->anggota->dokumenAnggota()->updateOrCreate(
+                        ['nama_dokumen' => 'ktp', 'anggota_id' => $user->anggota->id],
+                        ['lampiran_dokumen' => $validated['ktp_file']->store('dokumen_anggota', 'public')]
                     );
                 }
 
                 if (isset($validated['kk_file']) && $user->anggota) {
-                    $user->anggota->memberDocs()->updateOrCreate(
-                        ['doc_name' => 'kartu_keluarga', 'anggota_id' => $user->anggota->id],
-                        ['doc_attachment' => $validated['kk_file']->store('member_docs', 'public')]
+                    $user->anggota->dokumenAnggota()->updateOrCreate(
+                        ['nama_dokumen' => 'kartu_keluarga', 'anggota_id' => $user->anggota->id],
+                        ['lampiran_dokumen' => $validated['kk_file']->store('dokumen_anggota', 'public')]
                     );
                 }
             });
