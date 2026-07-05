@@ -27,6 +27,7 @@ public function run(): void
             'notifikasi' => ['view'],
             'peran_akses' => ['view', 'create', 'edit'],
             'alokasi_pj' => ['view', 'edit'],
+            'log' => ['view'],
         ];
 
         foreach ($modules as $module => $actions) {

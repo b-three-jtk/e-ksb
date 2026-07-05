@@ -73,7 +73,7 @@ const closeModal = () => {
 const applyFilters = () => {
     isLoading.value = true
     router.get(
-        '/admin/audit-logs',
+        '/admin/logs',
         {
             search: filters.search || undefined,
             per_page: filters.per_page,
