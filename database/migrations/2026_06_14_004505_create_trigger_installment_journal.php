@@ -45,14 +45,14 @@ return new class extends Migration
                 END IF;
 
                 -- Ambil breakdown dari kolom yang sudah diisi controller/service
-                v_principal := COALESCE(NEW.principal_amount, 0);
-                v_margin    := COALESCE(NEW.margin_keuntungan, 0);
+                v_principal := COALESCE(NEW.pokok_dibayar, 0);
+                v_margin    := COALESCE(NEW.margin_dibayar, 0);
 
                 -- Guard: nominal harus = pokok + margin
-                IF round(v_principal + v_margin, 2) != round(NEW.nominal, 2) THEN
+                IF round(v_principal + v_margin, 2) != round(NEW.jumlah_angsuran_dibayar, 2) THEN
                     RAISE EXCEPTION 
                         'Nominal tidak balance: pokok(%) + margin(%) != nominal(%)',
-                        v_principal, v_margin, NEW.nominal;
+                        v_principal, v_margin, NEW.jumlah_angsuran_dibayar;
                 END IF;
 
                 v_group_id := gen_random_uuid();
@@ -64,8 +64,8 @@ return new class extends Migration
                     created_at, updated_at
                 ) VALUES (
                     v_group_id, v_kas_ref, 'Debit',
-                    NEW.nominal,
-                    NEW.payment_date::DATE,
+                    NEW.jumlah_angsuran_dibayar,
+                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by,
                     NOW(), NOW()
                 );
@@ -78,7 +78,7 @@ return new class extends Migration
                 ) VALUES (
                     v_group_id, v_piutang_ref, 'Credit',
                     v_principal,
-                    NEW.payment_date::DATE,
+                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by,
                     NOW(), NOW()
                 );
@@ -91,7 +91,7 @@ return new class extends Migration
                 ) VALUES (
                     v_group_id, v_margin_ref, 'Credit',
                     v_margin,
-                    NEW.payment_date::DATE,
+                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by,
                     NOW(), NOW()
                 );
@@ -103,7 +103,7 @@ return new class extends Migration
 
         DB::unprepared("
             CREATE TRIGGER trg_installment_journal
-            AFTER INSERT ON installment_payment_transactions
+            AFTER INSERT ON pembayaran_angsuran
             FOR EACH ROW
             EXECUTE FUNCTION fn_journal_installment();
         ");
@@ -114,7 +114,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::unprepared('DROP TRIGGER IF EXISTS trg_installment_journal ON installment_payment_transactions');
+        DB::unprepared('DROP TRIGGER IF EXISTS trg_installment_journal ON pembayaran_angsuran');
         DB::unprepared('DROP FUNCTION IF EXISTS fn_journal_installment');
     }
 };

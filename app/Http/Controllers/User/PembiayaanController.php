@@ -74,12 +74,12 @@ class PembiayaanController extends Controller
         $pembiayaan->setRelation('angsuran', $pembiayaan->angsuran->map(function ($item) {
             return [
                 'angsuran_ke'              => $item->angsuran_ke,
-                'installment_trans_code'      => $item->payment?->installment_trans_code,
+                'kode_transaksi_pembayaran'      => $item->payment?->kode_transaksi_pembayaran,
                 'tgl_jatuh_tempo'                    => $item->tgl_jatuh_tempo,
-                'payment_date'               => $item->payment?->payment_date,
-                'nominal_angsuran'                     => $item->payment?->nominal,
-                'is_early_repayment'         => $item->payment?->is_early_repayment ?? false,
-                'installment_payment_receipt' => $item->payment?->installment_payment_receipt ? asset('storage/' . $item->payment->installment_payment_receipt) : null,
+                'tgl_pembayaran'               => $item->payment?->tgl_pembayaran,
+                'nominal_angsuran'                     => $item->payment?->jumlah_angsuran_dibayar,
+                'is_pelunasan_lebih_cepat'         => $item->payment?->is_pelunasan_lebih_cepat ?? false,
+                'struk_pembayaran' => $item->payment?->struk_pembayaran ? asset('storage/' . $item->payment->struk_pembayaran) : null,
             ];
         }));
 

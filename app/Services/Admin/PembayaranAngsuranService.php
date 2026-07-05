@@ -6,7 +6,7 @@ use App\Models\Account;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Models\Pembiayaan;
 use App\Models\Angsuran;
-use App\Models\InstallmentPaymentTransaction;
+use App\Models\PembayaranAngsuran;
 use App\Models\MemberDoc;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -124,17 +124,17 @@ class PembayaranAngsuranService
 
             Storage::disk('public')->put($filePath, $pdf->output());
 
-            $transaction = InstallmentPaymentTransaction::create([
-                'installment_trans_code' => $transCode,
-                'nominal' => $calculatedData['repayment_total'],
-                'principal_amount' => $remainingPrincipal,
-                'margin_keuntungan' => $marginSettlement,
+            $transaction = PembayaranAngsuran::create([
+                'kode_transaksi_pembayaran' => $transCode,
+                'jumlah_angsuran_dibayar' => $calculatedData['repayment_total'],
+                'pokok_dibayar' => $remainingPrincipal,
+                'margin_dibayar' => $marginSettlement,
                 'metode_pembayaran' => $validatedData['method'],
-                'is_early_repayment' => true,
-                'payment_date' => now(),
+                'is_pelunasan_lebih_cepat' => true,
+                'tgl_pembayaran' => now(),
                 'angsuran_id' => $angsuran->id,
                 'updated_by' => $userId,
-                'installment_payment_receipt' => $filePath,
+                'struk_pembayaran' => $filePath,
             ]);
 
             $kas = Account::where(
@@ -157,7 +157,7 @@ class PembayaranAngsuranService
             ]);
 
             $data['pembiayaan_id'] = $angsuran->pembiayaan_id;
-            $data['installment_payment_receipt'] = $transaction->installment_payment_receipt ? asset('storage/' . $transaction->installment_payment_receipt) : null;
+            $data['struk_pembayaran'] = $transaction->struk_pembayaran ? asset('storage/' . $transaction->struk_pembayaran) : null;
 
             return $data;
         });
@@ -187,12 +187,12 @@ class PembayaranAngsuranService
             ->first();
 
         $hargaJual     = $pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan;
-        $totalTerbayar = InstallmentPaymentTransaction::whereHas('angsuran', fn($q) =>
+        $totalTerbayar = PembayaranAngsuran::whereHas('angsuran', fn($q) =>
             $q->where('pembiayaan_id', $pembiayaan->id)
-        )->sum('nominal');
+        )->sum('jumlah_angsuran_dibayar');
 
         $sisa         = $hargaJual - $totalTerbayar;
-        $paymentCount = InstallmentPaymentTransaction::where('angsuran_id', $angsuran?->id)->count();
+        $paymentCount = PembayaranAngsuran::where('angsuran_id', $angsuran?->id)->count();
 
         return [
             'id'                      => $pembiayaan->id,
@@ -221,7 +221,7 @@ class PembayaranAngsuranService
     {
         $prefix = 'TPA';
         $yymm   = now()->format('ym');
-        $lastNo = InstallmentPaymentTransaction::where('installment_trans_code', 'like', "{$prefix}{$yymm}%")
+        $lastNo = PembayaranAngsuran::where('kode_transaksi_pembayaran', 'like', "{$prefix}{$yymm}%")
             ->count();
         $seq    = str_pad((string)($lastNo + 1), 4, '0', STR_PAD_LEFT);
 
@@ -241,23 +241,23 @@ class PembayaranAngsuranService
             $marginPerMonth    = $pembiayaan->margin_keuntungan;
         } else {
             $marginPerMonth    = round($pembiayaan->margin_keuntungan / $pembiayaan->tenor, 2);
-            $principalPerMonth = round($validated['nominal'] - $marginPerMonth, 2);
+            $principalPerMonth = round($validated['jumlah_angsuran_dibayar'] - $marginPerMonth, 2);
         }
 
-        $payment = InstallmentPaymentTransaction::create([
-            'installment_trans_code' => $this->generateTransactionCode(),
+        $payment = PembayaranAngsuran::create([
+            'kode_transaksi_pembayaran' => $this->generateTransactionCode(),
             'metode_pembayaran'         => $validated['metode_pembayaran'],
-            'is_early_repayment'     => false,
-            'nominal'                => $validated['nominal'],
-            'principal_amount'       => $principalPerMonth,
-            'margin_keuntungan'          => $marginPerMonth,
-            'payment_date'           => $validated['payment_date'],
+            'is_pelunasan_lebih_cepat'     => false,
+            'jumlah_angsuran_dibayar'                => $validated['jumlah_angsuran_dibayar'],
+            'pokok_dibayar'       => $principalPerMonth,
+            'margin_dibayar'          => $marginPerMonth,
+            'tgl_pembayaran'           => $validated['tgl_pembayaran'],
             'angsuran_id'         => $validated['angsuran_id'],
             'updated_by'             => auth()->id(),
         ]);
 
             $angsuran = Angsuran::findOrFail($validated['angsuran_id']);
-            $paymentDate = Carbon::parse($validated['payment_date']);
+            $paymentDate = Carbon::parse($validated['tgl_pembayaran']);
             $dueDate     = $angsuran->tgl_jatuh_tempo;
 
             $status = $paymentDate->startOfDay()->gt($dueDate->copy()->startOfDay())
@@ -267,9 +267,9 @@ class PembayaranAngsuranService
             $angsuran->update(['status' => $status]);
 
         $totalTagihan  = ($pembiayaan->harga_perolehan - ($pembiayaan->uang_muka ?? 0)) + $pembiayaan->margin_keuntungan;
-        $totalTerbayar = InstallmentPaymentTransaction::whereHas('angsuran', fn($q) =>
+        $totalTerbayar = PembayaranAngsuran::whereHas('angsuran', fn($q) =>
             $q->where('pembiayaan_id', $pembiayaan->id)
-        )->sum('nominal');
+        )->sum('jumlah_angsuran_dibayar');
 
         $sisa = $totalTagihan - $totalTerbayar;
 
@@ -315,20 +315,20 @@ class PembayaranAngsuranService
                     'address' => 'Komplek Puri Cipageran Indah 2, RW 21, Desa Ngamprah, Kec. Tanimulya, Kabupaten Bandung Barat',
                 ],
                 'petugas'          => auth()->user()->nama,
-                'tanggal_angsuran' => Carbon::parse($payment->payment_date)->translatedFormat('d F Y'),
+                'tanggal_angsuran' => Carbon::parse($payment->tgl_pembayaran)->translatedFormat('d F Y'),
                 'nomor_pembiayaan' => $pembiayaan->kode_pembiayaan,
                 'no_anggota'       => $pembiayaan->anggota?->user?->kode_pengguna,
                 'diterima_dari'    => $pembiayaan->anggota?->user?->nama,
-                'sejumlah_uang'    => $payment->nominal,
+                'sejumlah_uang'    => $payment->jumlah_angsuran_dibayar,
                 'items'            => [[
                     'no'         => 1,
                     'keterangan' => 'Angsuran ke ' . $angsuran->angsuran_ke,
-                    'jumlah'     => $payment->nominal,
+                    'jumlah'     => $payment->jumlah_angsuran_dibayar,
                 ]],
                 'harga_perolehan' => $pembiayaan->harga_perolehan,
                 'margin'          => $pembiayaan->margin_keuntungan,
                 'harga_jual'      => $hargaJual,
-                'total_angsuran'  => $payment->nominal,
+                'total_angsuran'  => $payment->jumlah_angsuran_dibayar,
                 'sisa_hutang'     => max($sisa, 0),
                 'status'          => max($sisa, 0) <= 0 ? 'Lunas' : 'Belum Lunas',
                 'jatuh_tempo'     => $nextInstallment
@@ -348,11 +348,11 @@ class PembayaranAngsuranService
 
             MemberDoc::create([
                 'anggota_id'      => $pembiayaan->anggota_id,
-                'doc_name'       => 'Kwitansi Pembayaran ' . $payment->installment_trans_code,
+                'doc_name'       => 'Kwitansi Pembayaran ' . $payment->kode_transaksi_pembayaran,
                 'doc_attachment' => $fileName,
             ]);
 
-            $payment->update(['installment_payment_receipt' => $fileName]);
+            $payment->update(['struk_pembayaran' => $fileName]);
 
             return $fileName;
 

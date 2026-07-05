@@ -184,10 +184,10 @@ export function useFinancingValidation(form) {
             errs.metode_pembayaran = 'Metode pembayaran wajib dipilih.'
 
         if (form.pembiayaan.metode_pembayaran === 'Tangguh') {
-            if (!form.pembiayaan.tangguh_payment_date)
-                errs.tangguh_payment_date = 'Tanggal pembayaran tangguh wajib diisi.'
-            else if (new Date(form.pembiayaan.tangguh_payment_date) <= new Date(form.pembiayaan.tgl_akad))
-                errs.tangguh_payment_date = 'Tanggal pembayaran tangguh harus setelah tanggal akad.'
+            if (!form.pembiayaan.tangguh_tgl_pembayaran)
+                errs.tangguh_tgl_pembayaran = 'Tanggal pembayaran tangguh wajib diisi.'
+            else if (new Date(form.pembiayaan.tangguh_tgl_pembayaran) <= new Date(form.pembiayaan.tgl_akad))
+                errs.tangguh_tgl_pembayaran = 'Tanggal pembayaran tangguh harus setelah tanggal akad.'
         }
 
         return errs

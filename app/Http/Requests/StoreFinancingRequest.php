@@ -69,7 +69,7 @@ class StoreFinancingRequest extends FormRequest
             'pembiayaan.akad_wakalah_date' => 'nullable|date',
             'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
             'pembiayaan.pemasok_id' => 'required|exists:pemasok,id',
-            'pembiayaan.tangguh_payment_date' => 'nullable|date|after_or_equal:pembiayaan.tgl_akad',
+            'pembiayaan.tangguh_tgl_pembayaran' => 'nullable|date|after_or_equal:pembiayaan.tgl_akad',
 
             // Collateral data
             'collateral.collateral_type' => 'nullable|string|max:255',

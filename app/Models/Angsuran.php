@@ -33,7 +33,7 @@ class Angsuran extends Model
 
     public function payment()
     {
-        return $this->hasOne(InstallmentPaymentTransaction::class);
+        return $this->hasOne(PembayaranAngsuran::class);
     }
 
     public function notifications(): MorphMany

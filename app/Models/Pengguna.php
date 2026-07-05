@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\Pembiayaan;
-use App\Models\InstallmentPaymentTransaction;
+use App\Models\PembayaranAngsuran;
 use App\Models\Anggota;
 use App\Models\Poin;
 use App\Models\SavingTransaction;
@@ -124,6 +124,6 @@ class Pengguna extends Authenticatable
 
     public function installmentPayments()
     {
-        return $this->hasMany(InstallmentPaymentTransaction::class);
+        return $this->hasMany(PembayaranAngsuran::class);
     }
 }

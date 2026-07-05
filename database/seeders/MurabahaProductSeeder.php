@@ -9,7 +9,7 @@ use App\Enums\PaymentMethodsEnum;
 use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
 use App\Models\Angsuran;
-use App\Models\InstallmentPaymentTransaction;
+use App\Models\PembayaranAngsuran;
 use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\Anggota;
@@ -276,15 +276,15 @@ class MurabahaProductSeeder extends Seeder
 
             // Jika dibayar, buat history transaksinya
             if ($isPaid) {
-                InstallmentPaymentTransaction::create([
-                    'installment_trans_code' => $this->getUniqueTransCode(),
+                PembayaranAngsuran::create([
+                    'kode_transaksi_pembayaran' => $this->getUniqueTransCode(),
                     'angsuran_id' => $angsuran->id,
-                    'nominal' => $monthlyPayment,
-                    'principal_amount' => $monthlyCostPrice,
-                    'margin_keuntungan' => $monthlyMargin,
+                    'jumlah_angsuran_dibayar' => $monthlyPayment,
+                    'pokok_dibayar' => $monthlyCostPrice,
+                    'margin_dibayar' => $monthlyMargin,
                     'metode_pembayaran' => PaymentMethodsEnum::CASHLESS->value,
-                    'is_early_repayment' => false,
-                    'payment_date' => $dueDate,
+                    'is_pelunasan_lebih_cepat' => false,
+                    'tgl_pembayaran' => $dueDate,
                     'updated_by' => $admin?->id,
                 ]);
 
@@ -493,15 +493,15 @@ class MurabahaProductSeeder extends Seeder
                 'status' => $dueDate->isPast() ? InstallmentPaymentScheduleStatusEnum::PENDING->value : InstallmentPaymentScheduleStatusEnum::PAID->value,
             ]);
 
-            InstallmentPaymentTransaction::create([
-                'installment_trans_code' => $this->getUniqueTransCode(),
+            PembayaranAngsuran::create([
+                'kode_transaksi_pembayaran' => $this->getUniqueTransCode(),
                 'angsuran_id' => $angsuran->id,
-                'nominal' => $monthlyPayment,
-                'principal_amount' => $monthlyCostPrice,
-                'margin_keuntungan' => $monthlyMargin,
+                'jumlah_angsuran_dibayar' => $monthlyPayment,
+                'pokok_dibayar' => $monthlyCostPrice,
+                'margin_dibayar' => $monthlyMargin,
                 'metode_pembayaran' => PaymentMethodsEnum::CASHLESS->value,
-                'is_early_repayment' => false,
-                'payment_date' => $dueDate,
+                'is_pelunasan_lebih_cepat' => false,
+                'tgl_pembayaran' => $dueDate,
                 'updated_by' => $admin?->id,
             ]);
 

@@ -200,14 +200,14 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
                 'angsuran_id' => $angsuran->id,
                 'pembiayaan_id' => $pembiayaan->id,
-                'nominal' => 5500000,
-                'payment_date' => now()->format('Y-m-d'),
+                'jumlah_angsuran_dibayar' => 5500000,
+                'tgl_pembayaran' => now()->format('Y-m-d'),
                 'metode_pembayaran' => 'Non-Tunai',
             ])->assertSessionHasNoErrors()->assertStatus(302);
 
-        $this->assertDatabaseHas('installment_payment_transactions', [
+        $this->assertDatabaseHas('pembayaran_angsuran', [
             'angsuran_id' => $angsuran->id,
-            'nominal' => 5500000,
+            'jumlah_angsuran_dibayar' => 5500000,
         ]);
 
         // status pembiayaan harusnya lunas kalau angsuran udah beres semua
@@ -278,8 +278,8 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
                 'angsuran_id' => $installment1->id,
                 'pembiayaan_id' => $pembiayaan->id,
-                'nominal' => 2200000,
-                'payment_date' => now()->format('Y-m-d'),
+                'jumlah_angsuran_dibayar' => 2200000,
+                'tgl_pembayaran' => now()->format('Y-m-d'),
                 'metode_pembayaran' => 'Non-Tunai',
             ])->assertSessionHasNoErrors();
 

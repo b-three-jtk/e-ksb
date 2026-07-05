@@ -76,7 +76,7 @@ export function useFinancingForm(initialData = null) {
             tenor: initialData?.pembiayaan?.tenor || null,
             harga_perkiraan: initialData?.pembiayaan?.harga_perkiraan || null,
             pemasok_id: initialData?.pembiayaan?.pemasok_id || null,
-            tangguh_payment_date: initialData?.pembiayaan?.tangguh_payment_date || null,
+            tangguh_tgl_pembayaran: initialData?.pembiayaan?.tangguh_tgl_pembayaran || null,
         },
         collateral: {
             collateral_type: initialData?.collateral?.collateral_type || '',

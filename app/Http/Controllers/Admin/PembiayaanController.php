@@ -99,12 +99,12 @@ class PembiayaanController extends Controller
         $pembiayaan->setRelation('angsuran', $pembiayaan->angsuran->map(function ($item) {
             return [
                 'angsuran_ke'              => $item->angsuran_ke,
-                'installment_trans_code'      => $item->payment?->installment_trans_code,
+                'kode_transaksi_pembayaran'      => $item->payment?->kode_transaksi_pembayaran,
                 'tgl_jatuh_tempo'                    => $item->tgl_jatuh_tempo,
-                'payment_date'               => $item->payment?->payment_date,
+                'tgl_pembayaran'               => $item->payment?->tgl_pembayaran,
                 'nominal_angsuran'                     => $item->nominal_angsuran,
-                'is_early_repayment'         => $item->payment?->is_early_repayment ?? false,
-                'installment_payment_receipt' => $item->payment?->installment_payment_receipt ? asset('storage/' . $item->payment->installment_payment_receipt) : null,
+                'is_pelunasan_lebih_cepat'         => $item->payment?->is_pelunasan_lebih_cepat ?? false,
+                'struk_pembayaran' => $item->payment?->struk_pembayaran ? asset('storage/' . $item->payment->struk_pembayaran) : null,
             ];
         }));
 
@@ -150,7 +150,7 @@ class PembiayaanController extends Controller
                     'status' => $pembiayaan->status,
                     'tenor' => $pembiayaan->tenor,
                     'harga_perkiraan' => $pembiayaan->harga_perkiraan,
-                    'tangguh_payment_date' => $pembiayaan->tangguh_payment_date,
+                    'tangguh_tgl_pembayaran' => $pembiayaan->tangguh_tgl_pembayaran,
                 ],
                 'collateral' => [
                     'collateral_type' => $pembiayaan->collateral?->collateral_type,
@@ -214,7 +214,7 @@ class PembiayaanController extends Controller
                     'jenis_barang' => $pembiayaan->objekPembiayaan->jenisBarang?->nama_jenis_barang,
                     'tenor' => $pembiayaan->tenor,
                     'harga_perkiraan' => $pembiayaan->harga_perkiraan,
-                    'tangguh_payment_date' => $pembiayaan->tangguh_payment_date,
+                    'tangguh_tgl_pembayaran' => $pembiayaan->tangguh_tgl_pembayaran,
                 ],
                 'collateral' => [
                     'collateral_type' => $pembiayaan->collateral?->collateral_type,
@@ -464,7 +464,7 @@ class PembiayaanController extends Controller
                 if (isset($validated['pembiayaan']['tenor']) && $validated['pembiayaan']['metode_pembayaran'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
                     $this->pembiayaanService->generateInstallments($pembiayaan);
                 } else if ($validated['pembiayaan']['metode_pembayaran'] === FinancingPaymentMethodEnum::TANGGUH->value) {
-                    $this->pembiayaanService->generateTangguhSchedule($pembiayaan, $validated['pembiayaan']['tangguh_payment_date']);
+                    $this->pembiayaanService->generateTangguhSchedule($pembiayaan, $validated['pembiayaan']['tangguh_tgl_pembayaran']);
                 }
 
                 $pembiayaanDalamProses = Account::where(
@@ -814,8 +814,8 @@ class PembiayaanController extends Controller
             'angsuran_id' => 'required|exists:angsuran,id',
             'pembiayaan_id'   => 'required|exists:pembiayaan,id',
             'metode_pembayaran' => 'required|string',
-            'nominal'        => 'required|numeric|min:1',
-            'payment_date'   => 'required|date',
+            'jumlah_angsuran_dibayar'        => 'required|numeric|min:1',
+            'tgl_pembayaran'   => 'required|date',
         ]);
 
         DB::beginTransaction();

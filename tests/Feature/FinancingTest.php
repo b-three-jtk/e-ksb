@@ -8,7 +8,7 @@ use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
 use App\Models\GlobalSetting;
 use App\Models\Angsuran;
-use App\Models\InstallmentPaymentTransaction;
+use App\Models\PembayaranAngsuran;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\Pemasok;
@@ -591,16 +591,16 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
                 'angsuran_id' => $angsuran->id,
                 'pembiayaan_id' => $pembiayaan->id,
-                'nominal' => 1833333,
-                'payment_date' => now()->format('Y-m-d'),
+                'jumlah_angsuran_dibayar' => 1833333,
+                'tgl_pembayaran' => now()->format('Y-m-d'),
                 'metode_pembayaran' => 'Tunai',
             ]);
 
         $response->assertSessionHasNoErrors();
         $response->assertStatus(302);
-        $this->assertDatabaseHas('installment_payment_transactions', [
+        $this->assertDatabaseHas('pembayaran_angsuran', [
             'angsuran_id' => $angsuran->id,
-            'nominal' => 1833333,
+            'jumlah_angsuran_dibayar' => 1833333,
         ]);
     });
 
@@ -628,8 +628,8 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
                 'angsuran_id' => $angsuran->id,
                 'pembiayaan_id' => $pembiayaan->id,
-                'nominal' => 1833333,
-                'payment_date' => now()->format('Y-m-d'),
+                'jumlah_angsuran_dibayar' => 1833333,
+                'tgl_pembayaran' => now()->format('Y-m-d'),
                 'metode_pembayaran' => 'Tunai',
             ]);
 
@@ -855,12 +855,12 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'pembiayaan_id' => $pembiayaan->id,
         ]);
 
-        InstallmentPaymentTransaction::factory()->create([
+        PembayaranAngsuran::factory()->create([
             'angsuran_id' => $angsuran->id,
-            'margin_keuntungan' => 150000,
-            'principal_amount' => 0,
-            'nominal' => 150000,
-            'payment_date' => '2026-06-15',
+            'margin_dibayar' => 150000,
+            'pokok_dibayar' => 0,
+            'jumlah_angsuran_dibayar' => 150000,
+            'tgl_pembayaran' => '2026-06-15',
         ]);
 
         $this->travelTo(\Carbon\Carbon::parse('2026-12-31'));
@@ -899,12 +899,12 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'pembiayaan_id' => $pembiayaan->id,
         ]);
 
-        InstallmentPaymentTransaction::factory()->create([
+        PembayaranAngsuran::factory()->create([
             'angsuran_id' => $angsuran->id,
-            'margin_keuntungan' => 50000,
-            'principal_amount' => 0,
-            'nominal' => 50000,
-            'payment_date' => '2026-06-15',
+            'margin_dibayar' => 50000,
+            'pokok_dibayar' => 0,
+            'jumlah_angsuran_dibayar' => 50000,
+            'tgl_pembayaran' => '2026-06-15',
         ]);
 
         $this->travelTo(\Carbon\Carbon::parse('2026-12-31'));
@@ -950,8 +950,8 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
                 'angsuran_id' => $angsuran->id,
                 'pembiayaan_id' => $pembiayaan->id,
-                'nominal' => 1833333,
-                'payment_date' => now()->format('Y-m-d'),
+                'jumlah_angsuran_dibayar' => 1833333,
+                'tgl_pembayaran' => now()->format('Y-m-d'),
                 'metode_pembayaran' => 'Tunai',
             ]);
 

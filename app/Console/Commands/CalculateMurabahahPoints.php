@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\GlobalSetting;
-use App\Models\InstallmentPaymentTransaction;
+use App\Models\PembayaranAngsuran;
 use App\Models\Poin;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -56,13 +56,13 @@ public function handle(): int
 
         $periodLabel = Carbon::parse($startDate)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($endDate)->translatedFormat('d M Y');
 
-        $userMargins = InstallmentPaymentTransaction::query()
-            ->join('angsuran', 'installment_payment_transactions.angsuran_id', '=', 'angsuran.id')
+        $userMargins = PembayaranAngsuran::query()
+            ->join('angsuran', 'pembayaran_angsuran.angsuran_id', '=', 'angsuran.id')
             ->join('pembiayaan', 'angsuran.pembiayaan_id', '=', 'pembiayaan.id')
             ->join('anggota', 'pembiayaan.anggota_id', '=', 'anggota.id')
-            ->whereDate('installment_payment_transactions.payment_date', '>=', $startDate)
-            ->whereDate('installment_payment_transactions.payment_date', '<=', $endDate)
-            ->select('anggota.pengguna_id', DB::raw('SUM(installment_payment_transactions.margin_keuntungan) as total_margin'))
+            ->whereDate('pembayaran_angsuran.tgl_pembayaran', '>=', $startDate)
+            ->whereDate('pembayaran_angsuran.tgl_pembayaran', '<=', $endDate)
+            ->select('anggota.pengguna_id', DB::raw('SUM(pembayaran_angsuran.margin_dibayar) as total_margin'))
             ->groupBy('anggota.pengguna_id')
             ->get();
 

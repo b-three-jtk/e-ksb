@@ -18,17 +18,17 @@ return new class extends Migration
                 v_principal   NUMERIC(15,2);
                 v_margin      NUMERIC(15,2);
             BEGIN
-                v_principal := COALESCE(NEW.principal_amount, 0);
-                v_margin    := COALESCE(NEW.margin_keuntungan, 0);
+                v_principal := COALESCE(NEW.pokok_dibayar, 0);
+                v_margin    := COALESCE(NEW.margin_dibayar, 0);
 
                 IF v_principal = 0 AND v_margin = 0 THEN
                     RETURN NEW;
                 END IF;
 
-                IF round(v_principal + v_margin, 2) != round(NEW.nominal, 2) THEN
+                IF round(v_principal + v_margin, 2) != round(NEW.jumlah_angsuran_dibayar, 2) THEN
                     RAISE EXCEPTION
                         'Nominal tidak balance: pokok(%) + margin(%) != nominal(%)',
-                        v_principal, v_margin, NEW.nominal;
+                        v_principal, v_margin, NEW.jumlah_angsuran_dibayar;
                 END IF;
 
                 SELECT no_ref_account INTO v_kas_ref
@@ -54,7 +54,7 @@ return new class extends Migration
                 INSERT INTO journals (id, tgl_transaksi, created_by, created_at, updated_at)
                 VALUES (
                     gen_random_uuid(),
-                    NEW.payment_date::DATE,
+                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by,
                     NOW(), NOW()
                 )
@@ -68,8 +68,8 @@ return new class extends Migration
                     created_at, updated_at
                 ) VALUES (
                     v_journal_id, v_journal_id,
-                    v_kas_ref, 'Debit', NEW.nominal,
-                    NEW.payment_date::DATE,
+                    v_kas_ref, 'Debit', NEW.jumlah_angsuran_dibayar,
+                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 
@@ -82,7 +82,7 @@ return new class extends Migration
                 ) VALUES (
                     v_journal_id, v_journal_id,
                     v_piutang_ref, 'Credit', v_principal,
-                    NEW.payment_date::DATE,
+                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 
@@ -95,7 +95,7 @@ return new class extends Migration
                 ) VALUES (
                     v_journal_id, v_journal_id,
                     v_margin_ref, 'Credit', v_margin,
-                    NEW.payment_date::DATE,
+                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 

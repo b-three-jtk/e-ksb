@@ -84,13 +84,13 @@ class PembiayaanService
 
         if ($hasInstallments) {
             $pembiayaan->total_paid = $angsuran
-                ->sum(fn($i) => $i->payment?->nominal ?? 0);
+                ->sum(fn($i) => $i->payment?->jumlah_angsuran_dibayar ?? 0);
         } else {
             $pembiayaan->total_paid = 0;
         }
 
         $hasEarlyRepayment = $angsuran
-            ? $angsuran->contains(fn($i) => $i->payment?->is_early_repayment)
+            ? $angsuran->contains(fn($i) => $i->payment?->is_pelunasan_lebih_cepat)
             : false;
 
         $pembiayaan->remaining_balance = $hasEarlyRepayment ? 0 : max(0, $pembiayaan->total_price - $pembiayaan->total_paid);
