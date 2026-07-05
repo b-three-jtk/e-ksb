@@ -29,7 +29,8 @@ $adminRoles = [
     UserRoleEnum::DPS->value,
     UserRoleEnum::KETUAMURABAHAH->value,
     UserRoleEnum::STAFMURABAHAH->value,
-    UserRoleEnum::PJANGGOTA->value
+    UserRoleEnum::PJANGGOTA->value,
+    UserRoleEnum::ADMIN->value
 ];
 
 Route::get('/', function () {
@@ -154,8 +155,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/settings', [PengaturanUmumController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
     Route::post('/settings', [PengaturanUmumController::class, 'store'])->middleware('permission:create_pengaturan|edit_pengaturan')->name('settings.store');
 
-    // Audit Logs
-    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+    // Logs
+    Route::get('/logs', [AuditLogController::class, 'index'])->middleware('permission:view_log')->name('logs.index');
 
     // Personal
     Route::get('/dashboard', [DasborController::class, 'index'])->name('dashboard');

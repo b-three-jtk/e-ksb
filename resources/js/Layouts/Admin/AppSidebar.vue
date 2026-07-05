@@ -18,6 +18,7 @@ import FinanceIcon from "@/Icons/FinanceIcon.vue";
 import AccountIcon from "@/Icons/AccountIcon.vue";
 import NotificationsIcon from "@/Icons/NotificationsIcon.vue";
 import ReviewIcon from "@/Icons/ReviewIcon.vue";
+import HistoryIcon from "../../Icons/HistoryIcon.vue";
 
 const page = usePage()
 
@@ -123,10 +124,10 @@ const menuGroups = [
                 permission: "view_pengaturan"
             },
             {
-                icon: ReviewIcon,
+                icon: HistoryIcon,
                 name: "Log Aktivitas",
-                path: "/admin/audit-logs",
-                permission: "view_pengaturan"
+                path: "/admin/logs",
+                permission: "view_log"
             }
         ],
         permission: "view_pengaturan"
