@@ -103,18 +103,34 @@ class PembayaranAngsuranService
                 $src = 'data:image/svg+xml;base64,' . base64_encode($data_logo);
             }
 
+            Carbon::setLocale('id');
+            $now = now();
+            $hari = $now->translatedFormat('l');
+            $tanggal = $now->format('d');
+            $bulan = $now->translatedFormat('F');
+            $tahun = $now->format('Y');
+
             $strukData = [
                 'no_transaksi' => $transCode,
-                'tanggal' => now(),
-                'no_anggota' => $pembiayaan->anggota->user->kode_pengguna,
-                'nama_anggota' => $pembiayaan->anggota->user->nama,
-                'no_telp' => $pembiayaan->anggota->user->no_telp,
-                'kode_pembiayaan' => $pembiayaan->kode_pembiayaan,
+                'hari' => $hari,
+                'tanggal' => $tanggal,
+                'bulan' => $bulan,
+                'tahun' => $tahun,
+                'no_anggota' => $pembiayaan->member->user->kode_pengguna,
+                'nama_anggota' => $pembiayaan->member->user->name,
+                'financing_transaction_code' => $pembiayaan->kode_pembiayaan,
                 'product_name' => $pembiayaan->objekPembiayaan->nama_barang ?? '-',
                 'total_paid_amount' => $calculatedData['total_paid_amount'],
                 'metode' => $validatedData['method'],
                 'repayment_total' => $calculatedData['repayment_total'],
-                'pengurus' => auth()->user()->nama,
+                'tenor' => $pembiayaan->tenor,
+                'nama_pengurus' => auth()->user()->name,
+                'jabatan_pengurus' => auth()->user()->roles->first()->name ?? 'Pengurus',
+                'alamat' => $pembiayaan->anggota->alamat_domisili ?? $pembiayaan->anggota->alamat_ktp ?? '-',
+                'harga_perolehan' => $pembiayaan->harga_perolehan,
+                'margin_keuntungan' => $pembiayaan->margin_keuntungan,
+                'no_telp' => $pembiayaan->anggota->user->no_telp,
+                'qimah_ismiyyah' => $pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan,
                 'qimah_haliyyah' => $calculatedData['qimah_haliyyah'],
                 'logo' => $src,
             ];
