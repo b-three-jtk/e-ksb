@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 
-class ArusKasExport implements FromCollection, WithStyles, WithColumnWidths
+class JurnalUmumExport implements FromCollection, WithStyles, WithColumnWidths
 {
     public function __construct(
         protected $rows,
@@ -18,7 +18,7 @@ class ArusKasExport implements FromCollection, WithStyles, WithColumnWidths
     {
         return collect([
             ['Koperasi Syariah Berkah'],
-            ['Laporan Arus Kas'],
+            ['Jurnal Umum'],
             ["Periode : {$this->periode}"],
             [],
             ['Tanggal', 'Akun', 'Jenis Akun', 'Debit', 'Kredit'],
