@@ -12,15 +12,53 @@ import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify'
 import Button from '@/Components/Form/Button.vue'
+import CashflowReport from './CashflowReport.vue'
 
 const isLoading = ref(false)
 
 const props = defineProps({
     transactions: Object,
     summary: Array,
+    cashFlowReport: {
+        type: Object,
+        default: () => ({
+            operating: {
+                items: [],
+                net: 0,
+            },
+            investing: {
+                items: [],
+                net: 0,
+            },
+            financing: {
+                items: [],
+                net: 0,
+            },
+            opening_balance: 0,
+            net_cash: 0,
+            closing_balance: 0,
+        }),
+    },
     filters: Object,
     akunOptions: Array,
     can: Object,
+})
+
+const tabs = [
+    {
+        key: 'journal',
+        label: 'Jurnal Umum',
+    },
+    {
+        key: 'cashflow',
+        label: 'Laporan Arus Kas',
+    },
+]
+
+const sectionTitle = computed(() => {
+    return activeTab.value === 'journal'
+        ? 'Jurnal Umum'
+        : 'Laporan Arus Kas'
 })
 
 const columns = [
@@ -197,6 +235,7 @@ watch(
 
 // Modal Tambah Alokasi
 const showModal    = ref(false)
+const activeTab = ref("journal")
 const isSubmitting = ref(false)
 
 const formDefault = () => ({
@@ -354,8 +393,24 @@ const periodeOptions = [
             </div>
         </div>
 
+        <div class="flex gap-1 mb-[-1px]">
+            <button
+                v-for="tab in tabs"
+                :key="tab.key"
+                type="button"
+                @click="activeTab = tab.key"
+                class="font-head px-4 py-2 rounded-t-lg text-sm border transition shadow-sm
+                    dark:text-white dark:border-slate-700 dark:bg-slate-800"
+                :class="activeTab === tab.key
+                    ? 'bg-white text-brand-900 border-gray-200 shadow-sm'
+                    : 'bg-slate-100 text-slate-500 border-slate-100 dark:border-slate-700 dark:bg-slate-800'"
+            >
+                {{ tab.label }}
+            </button>
+        </div>
+
         <!-- Table Card -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow overflow-hidden">
+        <div v-if="activeTab === 'journal'" class="bg-white dark:bg-slate-800 rounded-xl shadow overflow-hidden">
             <!-- Header -->
             <div class="px-6 pt-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                 <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100 mb-0.5">
@@ -470,6 +525,11 @@ const periodeOptions = [
                 :total="transactions.total"
             />
         </div>
+
+        <CashflowReport
+            v-else
+            :report="cashFlowReport"
+        />
 
         <!--Modal Tambah Alokasi Kas-->
         <Teleport to="body">
