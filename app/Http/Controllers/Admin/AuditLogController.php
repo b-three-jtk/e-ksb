@@ -17,6 +17,7 @@ class AuditLogController extends Controller
         $search = $request->input('search');
         $event = $request->input('event');
         $type = $request->input('type');
+        $per_page = $request->input('per_page') ?? 10;
 
         $logs = AuditLog::with('user')
             ->when($search, function ($query, $search) {
@@ -31,7 +32,7 @@ class AuditLogController extends Controller
                 $query->where('auditable_type', 'like', "%{$type}%");
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(15)
+            ->paginate($per_page)
             ->withQueryString();
 
         return Inertia::render('Admin/AuditLog/Index', [
