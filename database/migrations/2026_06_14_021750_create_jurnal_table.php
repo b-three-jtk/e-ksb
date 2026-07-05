@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('journals', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+        Schema::create('jurnal', function (Blueprint $table) {
+            $table->uuid('id')->primary();
             $table->date('tgl_transaksi');
             $table->foreignUuid('created_by')
                   ->nullable()
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('journals');
+        Schema::dropIfExists('jurnal');
     }
 };

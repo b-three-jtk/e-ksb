@@ -9,14 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('journal_entries', function (Blueprint $table) {
-            // Tambah FK ke journals
+            // Tambah FK ke jurnal
             $table->uuid('journal_id')
                   ->nullable()
                   ->after('id');
 
             $table->foreign('journal_id')
                   ->references('id')
-                  ->on('journals')
+                  ->on('jurnal')
                   ->onDelete('cascade');
         });
     }

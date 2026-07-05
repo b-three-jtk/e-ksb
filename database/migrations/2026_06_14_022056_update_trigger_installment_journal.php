@@ -51,7 +51,7 @@ return new class extends Migration
                 END IF;
 
                 -- Buat header jurnal
-                INSERT INTO journals (id, tgl_transaksi, created_by, created_at, updated_at)
+                INSERT INTO jurnal (id, tgl_transaksi, created_by, created_at, updated_at)
                 VALUES (
                     gen_random_uuid(),
                     NEW.tgl_pembayaran::DATE,

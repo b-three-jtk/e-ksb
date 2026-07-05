@@ -3,7 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Enums\PositionEnum;
-use App\Models\Journal;
+use App\Models\Jurnal;
 use App\Models\JournalEntry;
 use Illuminate\Support\Facades\DB;
 
@@ -15,7 +15,7 @@ class JurnalService
 
         return DB::transaction(function () use ($entries, $date, $userId) {
 
-            $journal = Journal::create([
+            $journal = Jurnal::create([
                 'tgl_transaksi' => $date ?? now()->toDateString(),
                 'created_by'    => $userId,
             ]);

@@ -10,7 +10,7 @@ use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
 use App\Models\Angsuran;
 use App\Models\PembayaranAngsuran;
-use App\Models\Journal;
+use App\Models\Jurnal;
 use App\Models\JournalEntry;
 use App\Models\Anggota;
 use App\Models\JenisBarang;
@@ -181,7 +181,7 @@ class MurabahaProductSeeder extends Seeder
             'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
-        $akadJournal = Journal::create([
+        $akadJournal = Jurnal::create([
             'tgl_transaksi' => $akadDate,
             'created_by' => $admin?->id,
         ]);
@@ -288,7 +288,7 @@ class MurabahaProductSeeder extends Seeder
                     'updated_by' => $admin?->id,
                 ]);
 
-                $journal = Journal::create([
+                $journal = Jurnal::create([
                     'tgl_transaksi' => $dueDate,
                     'created_by' => $admin?->id,
                 ]);
@@ -352,7 +352,7 @@ class MurabahaProductSeeder extends Seeder
             'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
-        $journal = Journal::create([
+        $journal = Jurnal::create([
             'tgl_transaksi' => now(),
             'created_by' => $admin?->id,
         ]);
@@ -408,7 +408,7 @@ class MurabahaProductSeeder extends Seeder
         ]);
 
         $akadDate = Carbon::parse($pembiayaan->tgl_akad);
-        $akadJournal = Journal::create([
+        $akadJournal = Jurnal::create([
             'tgl_transaksi' => $akadDate,
             'created_by' => $admin?->id,
         ]);
@@ -505,7 +505,7 @@ class MurabahaProductSeeder extends Seeder
                 'updated_by' => $admin?->id,
             ]);
 
-            $journal = Journal::create([
+            $journal = Jurnal::create([
                 'tgl_transaksi' => $dueDate,
                 'created_by' => $admin?->id,
             ]);
