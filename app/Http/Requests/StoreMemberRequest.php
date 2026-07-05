@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\EducationEnum;
-use App\Enums\HeirEnum;
+use App\Enums\AhliWarisEnum;
 use App\Enums\MaritalStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -46,10 +46,10 @@ class StoreMemberRequest extends FormRequest
             'alamat_domisili' => 'required|string|max:500',
             'alamat_ktp' => 'nullable|string|max:500',
             'pendidikan_terakhir' => 'required|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
-            'heir_nik' => 'required|digits:16|unique:heirs,heir_nik',
-            'heir_name' => 'required|string|max:255',
-            'heir_relationship' => 'required|in:' . implode(',', array_column(HeirEnum::cases(), 'value')),
-            'heir_contact' => 'required|string|max:20',
+            'nik_ahli_waris' => 'required|digits:16|unique:ahli_waris,nik_ahli_waris',
+            'nama_ahli_waris' => 'required|string|max:255',
+            'heir_hubungan' => 'required|in:' . implode(',', array_column(AhliWarisEnum::cases(), 'value')),
+            'kontak_ahli_waris' => 'required|string|max:20',
             'ktp_photo' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
             'kk_photo' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
         ];

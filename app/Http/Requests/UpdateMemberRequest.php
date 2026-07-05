@@ -41,11 +41,11 @@ class UpdateMemberRequest extends FormRequest
             'ktp_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'kk_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
 
-            'heirs' => 'nullable|array',
-            'heirs.*.heir_nik' => 'required|string|max:16',
-            'heirs.*.heir_name' => 'required|string|max:255',
-            'heirs.*.relationship' => 'required|string',
-            'heirs.*.heir_contact' => 'required|string|max:20',
+            'ahli_waris' => 'nullable|array',
+            'ahli_waris.*.nik_ahli_waris' => 'required|string|max:16',
+            'ahli_waris.*.nama_ahli_waris' => 'required|string|max:255',
+            'ahli_waris.*.hubungan' => 'required|string',
+            'ahli_waris.*.kontak_ahli_waris' => 'required|string|max:20',
         ];
     }
 }

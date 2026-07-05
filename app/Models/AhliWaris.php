@@ -6,18 +6,19 @@ use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Heir extends Model
+class AhliWaris extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'heir_nik';
+    protected $table = 'ahli_waris';
+    protected $primaryKey = 'nik_ahli_waris';
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
-        'heir_nik',
-        'heir_name',
-        'heir_contact',
+        'nik_ahli_waris',
+        'nama_ahli_waris',
+        'kontak_ahli_waris',
     ];
 
     public function anggota()

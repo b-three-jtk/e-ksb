@@ -27,11 +27,11 @@ defineProps({
 		type: Array,
 		default: () => [],
 	},
-	maritalStatusOptions: {
+	statusPernikahanOptions: {
 		type: Array,
 		default: () => [],
 	},
-	educationOptions: {
+	pendidikanOptions: {
 		type: Array,
 		default: () => [],
 	},
@@ -94,7 +94,7 @@ const maxBirthDate = computed(() => {
 				label="Status Perkawinan"
 				type="select"
 				required
-				:selectables="maritalStatusOptions"
+				:selectables="statusPernikahanOptions"
 				:error="getFieldError('status_pernikahan', errors.status_pernikahan)"
 			/>
 
@@ -103,7 +103,7 @@ const maxBirthDate = computed(() => {
 				label="Pendidikan Terakhir"
 				type="select"
 				required
-				:selectables="educationOptions"
+				:selectables="pendidikanOptions"
 				:error="getFieldError('pendidikan_terakhir', errors.pendidikan_terakhir)"
 			/>
 		</div>

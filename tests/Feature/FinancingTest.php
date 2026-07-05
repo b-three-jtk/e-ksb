@@ -51,12 +51,12 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'nik' => $anggota->user->nik,
                     'no_telp' => $anggota->user->no_telp,
                     'employment_status' => 'Karyawan Swasta',
-                    'heirs' => [
+                    'ahli_waris' => [
                         [
-                            'heir_name' => 'Ahli Waris 1',
-                            'heir_nik' => '1234567890654321',
-                            'relationship' => 'Istri',
-                            'heir_contact' => '081234567890'
+                            'nama_ahli_waris' => 'Ahli Waris 1',
+                            'nik_ahli_waris' => '1234567890654321',
+                            'hubungan' => 'Istri',
+                            'kontak_ahli_waris' => '081234567890'
                         ]
                     ],
                 ],
@@ -103,12 +103,12 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'nik' => $anggota->user->nik,
                     'no_telp' => $anggota->user->no_telp,
                     'employment_status' => 'Karyawan Swasta',
-                    'heirs' => [
+                    'ahli_waris' => [
                         [
-                            'heir_name' => 'Ahli Waris 1',
-                            'heir_nik' => '1234567890654321',
-                            'relationship' => 'Istri',
-                            'heir_contact' => '081234567890'
+                            'nama_ahli_waris' => 'Ahli Waris 1',
+                            'nik_ahli_waris' => '1234567890654321',
+                            'hubungan' => 'Istri',
+                            'kontak_ahli_waris' => '081234567890'
                         ]
                     ],
                 ],
@@ -164,12 +164,12 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'nik' => $anggota->user->nik,
                     'no_telp' => $anggota->user->no_telp,
                     'employment_status' => 'Karyawan Swasta',
-                    'heirs' => [
+                    'ahli_waris' => [
                         [
-                            'heir_name' => 'Ahli Waris 1',
-                            'heir_nik' => '1234567890654321',
-                            'relationship' => 'Istri',
-                            'heir_contact' => '081234567890'
+                            'nama_ahli_waris' => 'Ahli Waris 1',
+                            'nik_ahli_waris' => '1234567890654321',
+                            'hubungan' => 'Istri',
+                            'kontak_ahli_waris' => '081234567890'
                         ]
                     ],
                 ],
@@ -211,12 +211,12 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'nik' => $anggota->user->nik,
                     'no_telp' => $anggota->user->no_telp,
                     'employment_status' => 'Karyawan Swasta',
-                    'heirs' => [
+                    'ahli_waris' => [
                         [
-                            'heir_name' => 'Ahli Waris 1',
-                            'heir_nik' => '1234567890654321',
-                            'relationship' => 'Istri',
-                            'heir_contact' => '081234567890'
+                            'nama_ahli_waris' => 'Ahli Waris 1',
+                            'nik_ahli_waris' => '1234567890654321',
+                            'hubungan' => 'Istri',
+                            'kontak_ahli_waris' => '081234567890'
                         ]
                     ],
                 ],
@@ -300,12 +300,12 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
                     'nik' => $user->nik,
                     'no_telp' => $user->no_telp,
                     'employment_status' => 'Karyawan Swasta',
-                    'heirs' => [
+                    'ahli_waris' => [
                         [
-                            'heir_name' => 'Ada Wong',
-                            'heir_nik' => '1234567890654321',
-                            'relationship' => 'Istri',
-                            'heir_contact' => '081234567890'
+                            'nama_ahli_waris' => 'Ada Wong',
+                            'nik_ahli_waris' => '1234567890654321',
+                            'hubungan' => 'Istri',
+                            'kontak_ahli_waris' => '081234567890'
                         ]
                     ],
                 ],

@@ -7,7 +7,7 @@ use App\Enums\FinancialCostEnum;
 use App\Enums\FinancialIncomeEnum;
 use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
-use App\Enums\HeirEnum;
+use App\Enums\AhliWarisEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
@@ -15,7 +15,7 @@ use App\Models\Financial;
 use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
 use App\Models\GlobalSetting;
-use App\Models\Heir;
+use App\Models\AhliWaris;
 use App\Models\Installment;
 use App\Models\JournalEntry;
 use App\Models\Anggota;
@@ -124,7 +124,7 @@ class PembiayaanService
             'marriageStatuses' => array_column(MaritalStatusEnum::cases(), 'value'),
             'incomes' => array_column(FinancialIncomeEnum::cases(), 'value'),
             'expenses' => array_column(FinancialCostEnum::cases(), 'value'),
-            'relationships' => array_column(HeirEnum::cases(), 'value'),
+            'hubungans' => array_column(AhliWarisEnum::cases(), 'value'),
             'conditions' => array_column(ConditionEnum::cases(), 'value'),
             'jenisBarang' => DB::table('jenis_barang')->select('id', 'nama_jenis_barang')->get(),
             'pemasok' => DB::table('pemasok')->select('id', 'nama_pemasok', 'alamat_pemasok')->get(),
@@ -145,7 +145,7 @@ class PembiayaanService
                 'anggota.user',
                 'anggota.financials',
                 'anggota.memberDocs',
-                'anggota.heirs',
+                'anggota.ahliWaris',
                 'anggota.memberJobs',
                 'objekPembiayaan.jenisBarang',
                 'objekPembiayaan.pemasok',
@@ -169,7 +169,7 @@ class PembiayaanService
                 'anggota.user',
                 'anggota.financials',
                 'anggota.memberDocs',
-                'anggota.heirs',
+                'anggota.ahliWaris',
                 'anggota.memberJobs',
                 'objekPembiayaan.jenisBarang',
                 'objekPembiayaan.pemasok',
@@ -199,25 +199,25 @@ class PembiayaanService
             'jml_tanggungan'           => $memberData['jml_tanggungan'] ?? $user->anggota->jml_tanggungan,
         ]);
 
-        // Sync heirs
-        if (!empty($memberData['heirs'])) {
+        // Sync ahli_waris
+        if (!empty($memberData['ahli_waris'])) {
             $syncData = [];
 
-            foreach ($memberData['heirs'] as $heirInput) {
-                $heir = Heir::firstOrCreate(
-                    ['heir_nik' => $heirInput['heir_nik']],
+            foreach ($memberData['ahli_waris'] as $heirInput) {
+                $ahli_waris = AhliWaris::firstOrCreate(
+                    ['nik_ahli_waris' => $heirInput['nik_ahli_waris']],
                     [
-                        'heir_name' => $heirInput['heir_name'],
-                        'heir_contact' => $heirInput['heir_contact'] ?? null,
+                        'nama_ahli_waris' => $heirInput['nama_ahli_waris'],
+                        'kontak_ahli_waris' => $heirInput['kontak_ahli_waris'] ?? null,
                     ]
                 );
 
-                $syncData[$heir->heir_nik] = ['relationship' => $heirInput['relationship']];
+                $syncData[$ahli_waris->nik_ahli_waris] = ['hubungan' => $heirInput['hubungan']];
             }
 
-            $user->anggota->heirs()->sync($syncData);
+            $user->anggota->ahliWaris()->sync($syncData);
         } else {
-            $user->anggota->heirs()->detach();
+            $user->anggota->ahliWaris()->detach();
         }
 
         // Sync documents
@@ -418,11 +418,11 @@ class PembiayaanService
             'biaya_pendidikan_amount' => $anggota->financials?->biaya_pendidikan_amount ?? 0,
             'jumlah_cicilan_amount' => $anggota->financials?->jumlah_cicilan_amount ?? 0,
             'jumlah_biaya_lainnya_amount' => $anggota->financials?->jumlah_biaya_lainnya_amount ?? 0,
-            'heirs' => $anggota->heirs->map(fn($h) => [
-                'heir_nik' => $h->heir_nik,
-                'heir_name' => $h->heir_name,
-                'relationship' => $h->pivot->relationship,
-                'heir_contact' => $h->heir_contact,
+            'ahli_waris' => $anggota->ahliWaris->map(fn($h) => [
+                'nik_ahli_waris' => $h->nik_ahli_waris,
+                'nama_ahli_waris' => $h->nama_ahli_waris,
+                'hubungan' => $h->pivot->hubungan,
+                'kontak_ahli_waris' => $h->kontak_ahli_waris,
             ])->values(),
         ];
     }

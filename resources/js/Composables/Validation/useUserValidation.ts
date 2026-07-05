@@ -11,7 +11,7 @@ export function useUserValidation(
     const errors = reactive({
         email: "",
         nik: "",
-        heir_nik: "",
+        nik_ahli_waris: "",
         name: "",
         role_id: "",
         no_telp: "",
@@ -49,16 +49,16 @@ export function useUserValidation(
     );
 
     watch(
-        () => form.heir_nik,
+        () => form.nik_ahli_waris,
         (v) => {
             if (!v) {
-                errors.heir_nik = "NIK ahli waris wajib diisi";
+                errors.nik_ahli_waris = "NIK ahli waris wajib diisi";
             } else if (!/^\d+$/.test(v)) {
-                errors.heir_nik = "NIK ahli waris hanya boleh berisi angka";
+                errors.nik_ahli_waris = "NIK ahli waris hanya boleh berisi angka";
             } else if (v.length !== 16) {
-                errors.heir_nik = "NIK ahli waris harus 16 digit";
+                errors.nik_ahli_waris = "NIK ahli waris harus 16 digit";
             } else {
-                errors.heir_nik = "";
+                errors.nik_ahli_waris = "";
             }
         },
     );

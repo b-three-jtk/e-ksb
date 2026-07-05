@@ -4,7 +4,7 @@ namespace App\Services\User;
 
 use App\Enums\MemberStatusEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Heir;
+use App\Models\AhliWaris;
 use App\Models\Anggota;
 use App\Models\MemberDoc;
 use App\Models\Pengguna;
@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 class PendaftaranAnggotaService
 {
     /**
-     * Register a new anggota with heir and optional documents.
+     * Register a new anggota with ahli_waris and optional documents.
      *
      * @param array<string, mixed> $validated
      * @param Request $request
@@ -35,7 +35,7 @@ class PendaftaranAnggotaService
             $user->assignRole('Anggota');
 
             Log::info("User {$user->id} registered as anggota with user code {$memberNumber}");
-            $this->createMemberHeir($validated, $anggota->id);
+            $this->createMemberAhliWaris($validated, $anggota->id);
             $this->createMemberDocuments($request, $anggota->id);
         });
 
@@ -112,18 +112,18 @@ class PendaftaranAnggotaService
      * @param string $anggotaId
      * @return void
      */
-    private function createMemberHeir(array $validated, string $anggotaId): void
+    private function createMemberAhliWaris(array $validated, string $anggotaId): void
     {
-        $heir = Heir::firstOrCreate(
-            ['heir_nik' => $validated['heir_nik']],
+        $ahli_waris = AhliWaris::firstOrCreate(
+            ['nik_ahli_waris' => $validated['nik_ahli_waris']],
             [
-                'heir_name' => $validated['heir_name'],
-                'heir_contact' => $validated['heir_contact'],
+                'nama_ahli_waris' => $validated['nama_ahli_waris'],
+                'kontak_ahli_waris' => $validated['kontak_ahli_waris'],
             ]
         );
 
-        Anggota::find($anggotaId)->heirs()->syncWithoutDetaching([
-            $heir->heir_nik => ['relationship' => $validated['heir_relationship']]
+        Anggota::find($anggotaId)->ahliWaris()->syncWithoutDetaching([
+            $ahli_waris->nik_ahli_waris => ['hubungan' => $validated['heir_hubungan']]
         ]);
     }
 

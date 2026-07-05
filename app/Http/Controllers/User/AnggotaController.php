@@ -119,11 +119,11 @@ class AnggotaController extends Controller
     public function profileEdit()
     {
         $user = auth()->user();
-        $educationOptions = array_column(EducationEnum::cases(), 'value');
+        $pendidikanOptions = array_column(EducationEnum::cases(), 'value');
 
         return Inertia::render('User/Profile/Edit', [
             'user' => $this->profilPenggunaService->index($user),
-            'educationOptions' => $educationOptions,
+            'pendidikanOptions' => $pendidikanOptions,
         ]);
     }
 

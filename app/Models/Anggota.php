@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\Financial;
 use App\Models\Pembiayaan;
-use App\Models\Heir;
+use App\Models\AhliWaris;
 use App\Models\MemberBankAccount;
 use App\Models\MemberDoc;
 use App\Models\MemberJob;
@@ -62,10 +62,10 @@ class Anggota extends Model
         return $this->hasMany(MemberBankAccount::class);
     }
 
-    public function heirs()
+    public function ahliWaris()
     {
-        return $this->belongsToMany(Heir::class, 'member_heirs', 'anggota_id', 'heir_nik')
-                    ->withPivot('relationship')
+        return $this->belongsToMany(AhliWaris::class, 'anggota_ahli_waris', 'anggota_id', 'nik_ahli_waris')
+                    ->withPivot('hubungan')
                     ->withTimestamps();
     }
 

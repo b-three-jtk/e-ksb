@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum HeirEnum: string
+enum AhliWarisEnum: string
 {
     case CHILD = 'Anak';
     case HUSBAND = 'Suami';

@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Enums\HeirEnum;
+use App\Enums\AhliWarisEnum;
 use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Heir>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AhliWaris>
  */
-class HeirFactory extends Factory
+class AhliWarisFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,10 +19,10 @@ class HeirFactory extends Factory
     public function definition(): array
     {
         return [
-            'heir_nik' => $this->faker->unique()->numerify('################'),
-            'heir_name' => $this->faker->name(),
-            'relationship' => $this->faker->randomElement(HeirEnum::cases())->value,
-            'heir_contact' => $this->faker->phoneNumber(),
+            'nik_ahli_waris' => $this->faker->unique()->numerify('################'),
+            'nama_ahli_waris' => $this->faker->name(),
+            'hubungan' => $this->faker->randomElement(AhliWarisEnum::cases())->value,
+            'kontak_ahli_waris' => $this->faker->phoneNumber(),
             'anggota_id' => Anggota::factory(),
         ];
     }

@@ -48,8 +48,8 @@ export function useFinancingValidation(form) {
         if (!isValidDependents(m.jml_tanggungan))
             errs.jml_tanggungan = 'Jumlah tanggungan harus angka.'
 
-        if (!form.anggota.heirs || form.anggota.heirs.length === 0)
-            errs.heirs = 'Minimal satu data ahli waris wajib ditambahkan.'
+        if (!form.anggota.ahli_waris || form.anggota.ahli_waris.length === 0)
+            errs.ahli_waris = 'Minimal satu data ahli waris wajib ditambahkan.'
 
         if (form.pembiayaan.status !== 'Belum Ditinjau') {
             if (m.is_have_eligible_saving === false)
@@ -267,7 +267,7 @@ export function useFinancingValidation(form) {
 function getAllKeysForStep(step) {
     const map = {
         1: ['kode_pengguna', 'name', 'nik', 'email', 'no_telp', 'jenis_kelamin',
-            'alamat_ktp', 'heirs', 'eligible_saving', 'no_obligation'],
+            'alamat_ktp', 'ahli_waris', 'eligible_saving', 'no_obligation'],
         2: ['job_title', 'company_or_business_name', 'business_field',
             'tenure_year', 'workplace_contact', 'workplace_address',
             'income_slip_file', 'bank_book_file'],

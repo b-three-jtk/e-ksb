@@ -36,13 +36,13 @@ defineProps({
                         <th class="py-4 text-left pl-6">Kontak</th>
                     </tr>
                 </thead>
-                <tbody v-if="data.anggota.heirs.length > 0">
-                    <tr v-for="(item, index) in data.anggota.heirs" :key="index"
+                <tbody v-if="data.anggota.ahli_waris.length > 0">
+                    <tr v-for="(item, index) in data.anggota.ahli_waris" :key="index"
                         class="bg-white border-b text-dark-text dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700">
-                        <td class="py-2 text-left pl-6">{{ item.heir_name }}</td>
-                        <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>
-                        <td class="py-2 text-left pl-6">{{ item.relationship }}</td>
-                        <td class="py-2 text-left pl-6">{{ item.heir_contact }}</td>
+                        <td class="py-2 text-left pl-6">{{ item.nama_ahli_waris }}</td>
+                        <td class="py-2 text-left pl-6">{{ item.nik_ahli_waris }}</td>
+                        <td class="py-2 text-left pl-6">{{ item.hubungan }}</td>
+                        <td class="py-2 text-left pl-6">{{ item.kontak_ahli_waris }}</td>
                     </tr>
                 </tbody>
                 <tbody v-else>

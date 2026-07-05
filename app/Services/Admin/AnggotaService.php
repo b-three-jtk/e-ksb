@@ -5,7 +5,7 @@ namespace App\Services\Admin;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Pembiayaan;
-use App\Models\Heir;
+use App\Models\AhliWaris;
 use App\Models\Pengguna;
 use App\Models\AkunSimpanan;
 use Exception;
@@ -104,7 +104,7 @@ class AnggotaService
             'roles',
             'anggota.akunSimpanan.transactions' => fn($q) => $q->orderBy('transaction_date', 'desc'),
             'anggota.akunSimpanan',
-            'anggota.heirs',
+            'anggota.ahliWaris',
             'anggota.pembiayaan.installment.payment',
             'anggota.pembiayaan.objekPembiayaan',
         ])->findOrFail($id);
@@ -140,24 +140,24 @@ class AnggotaService
                     ]);
                 }
 
-                if (!empty($validated['heirs']) && $user->anggota) {
+                if (!empty($validated['ahli_waris']) && $user->anggota) {
                     $syncData = [];
 
-                    foreach ($validated['heirs'] as $heirInput) {
-                        $heir = Heir::firstOrCreate(
-                            ['heir_nik' => $heirInput['heir_nik']],
+                    foreach ($validated['ahli_waris'] as $heirInput) {
+                        $ahli_waris = AhliWaris::firstOrCreate(
+                            ['nik_ahli_waris' => $heirInput['nik_ahli_waris']],
                             [
-                                'heir_name' => $heirInput['heir_name'],
-                                'heir_contact' => $heirInput['heir_contact'] ?? null,
+                                'nama_ahli_waris' => $heirInput['nama_ahli_waris'],
+                                'kontak_ahli_waris' => $heirInput['kontak_ahli_waris'] ?? null,
                             ]
                         );
 
-                        $syncData[$heir->heir_nik] = ['relationship' => $heirInput['relationship']];
+                        $syncData[$ahli_waris->nik_ahli_waris] = ['hubungan' => $heirInput['hubungan']];
                     }
 
-                    $user->anggota->heirs()->sync($syncData);
+                    $user->anggota->ahliWaris()->sync($syncData);
                 } elseif ($user->anggota) {
-                    $user->anggota->heirs()->detach();
+                    $user->anggota->ahliWaris()->detach();
                 }
 
                 if (isset($validated['ktp_file']) && $user->anggota) {

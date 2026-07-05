@@ -22,7 +22,7 @@ const props = defineProps({
 		type: Function,
 		required: true,
 	},
-	heirRelationshipOptions: {
+	hubunganOptions: {
 		type: Array,
 		default: () => [],
 	},
@@ -49,43 +49,43 @@ const normalizePhoneNumber = (value, onlyNumbers) => {
 
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<BaseInputAdmin
-				v-model="form.heir_nik"
+				v-model="form.nik_ahli_waris"
 				label="NIK Ahli Waris"
 				type="text"
 				placeholder="Isi dengan angka"
 				required
                 max="16"
-				@input="form.heir_nik = onlyNumbers(form.heir_nik)"
-				:error="getFieldError('heir_nik', errors.heir_nik)"
+				@input="form.nik_ahli_waris = onlyNumbers(form.nik_ahli_waris)"
+				:error="getFieldError('nik_ahli_waris', errors.nik_ahli_waris)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.heir_name"
+				v-model="form.nama_ahli_waris"
 				label="Nama Ahli Waris"
 				type="text"
 				placeholder="Isi dengan huruf"
 				required
-				@input="form.heir_name = onlyLetters(form.heir_name)"
-				:error="getFieldError('heir_name', errors.heir_name)"
+				@input="form.nama_ahli_waris = onlyLetters(form.nama_ahli_waris)"
+				:error="getFieldError('nama_ahli_waris', errors.nama_ahli_waris)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.heir_relationship"
+				v-model="form.heir_hubungan"
 				label="Hubungan Keluarga"
 				type="select"
 				required
-				:selectables="heirRelationshipOptions"
-				:error="getFieldError('heir_relationship', errors.heir_relationship)"
+				:selectables="hubunganOptions"
+				:error="getFieldError('heir_hubungan', errors.heir_hubungan)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.heir_contact"
+				v-model="form.kontak_ahli_waris"
 				label="Nomor Telepon Ahli Waris"
 				type="text"
 				placeholder="Contoh: 81234567890"
 				required
-				@input="form.heir_contact = normalizePhoneNumber(form.heir_contact, props.onlyNumbers)"
-				:error="getFieldError('heir_contact', errors.heir_contact)"
+				@input="form.kontak_ahli_waris = normalizePhoneNumber(form.kontak_ahli_waris, props.onlyNumbers)"
+				:error="getFieldError('kontak_ahli_waris', errors.kontak_ahli_waris)"
 			/>
 		</div>
 	</section>

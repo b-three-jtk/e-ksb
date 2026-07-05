@@ -316,12 +316,13 @@ describe('Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris
                 'pendidikan_terakhir' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
                 'nik' => '1234567890123456',
                 'no_telp' => '081234567890',
-                'heir_nik' => '6543210987654321',
-                'heir_name' => 'Ada Wong',
-                'heir_relationship' => 'Istri',
-                'heir_contact' => '081234567891',
+                'nik_ahli_waris' => '6543210987654321',
+                'nama_ahli_waris' => 'Ada Wong',
+                'heir_hubungan' => 'Istri',
+                'kontak_ahli_waris' => '081234567891',
             ]);
 
+        $res->assertSessionHasNoErrors();
         $res->assertStatus(302);
 
         $this->assertDatabaseHas('pengguna', [
@@ -346,9 +347,9 @@ describe('Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris
                 'tgl_lahir' => '1990-01-01',
                 'status_pernikahan' => 'Kawin',
                 'heiger_nik' => '6543210987654321',
-                'heir_name' => 'Ada Wong',
-                'heir_relationship' => 'Istri',
-                'heir_contact' => '081234567891',
+                'nama_ahli_waris' => 'Ada Wong',
+                'heir_hubungan' => 'Istri',
+                'kontak_ahli_waris' => '081234567891',
             ]);
 
             $res->assertSessionHasErrors([
@@ -387,10 +388,10 @@ describe('Aplikasi harus menyediakan registrasi anggota baru KSB oleh sekretaris
                 'pendidikan_terakhir' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
                 'nik' => '1234567890123456',
                 'no_telp' => '081234567890',
-                'heir_nik' => '6543210987654321',
-                'heir_name' => 'Ada Wong',
-                'heir_relationship' => 'Istri',
-                'heir_contact' => '081234567891',
+                'nik_ahli_waris' => '6543210987654321',
+                'nama_ahli_waris' => 'Ada Wong',
+                'heir_hubungan' => 'Istri',
+                'kontak_ahli_waris' => '081234567891',
             ]);
 
         $res->assertStatus(403);
@@ -499,10 +500,10 @@ describe('Aplikasi harus menyediakan pembaruan data anggota oleh sekretaris.', f
                 'status_pernikahan' => 'Kawin',
                 'alamat_domisili' => 'Jl. Ennerdale No. 123',
                 'pendidikan_terakhir' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
-                'heirs[0][heir_nik]' => '6543210987654321',
-                'heirs[0][heir_name]' => 'Ada Wong',
-                'heirs[0][relationship]' => 'Istri',
-                'heirs[0][heir_contact]' => '081234567891',
+                'ahli_waris[0][nik_ahli_waris]' => '6543210987654321',
+                'ahli_waris[0][nama_ahli_waris]' => 'Ada Wong',
+                'ahli_waris[0][hubungan]' => 'Istri',
+                'ahli_waris[0][kontak_ahli_waris]' => '081234567891',
             ]);
 
         $responseSekretaris->assertStatus(302);
@@ -537,10 +538,10 @@ describe('Aplikasi harus menyediakan pembaruan data anggota oleh sekretaris.', f
                 'status_pernikahan' => 'Kawin',
                 'alamat_domisili' => 'Jl. Ennerdale No. 123',
                 'pendidikan_terakhir' => EducationEnum::DIPLOMA_IV_BACHELOR->value,
-                'heirs[0][heir_nik]' => '6543210987654321',
-                'heirs[0][heir_name]' => 'Ada Wong',
-                'heirs[0][relationship]' => 'Istri',
-                'heirs[0][heir_contact]' => '081234567891',
+                'ahli_waris[0][nik_ahli_waris]' => '6543210987654321',
+                'ahli_waris[0][nama_ahli_waris]' => 'Ada Wong',
+                'ahli_waris[0][hubungan]' => 'Istri',
+                'ahli_waris[0][kontak_ahli_waris]' => '081234567891',
             ]);
 
         $responseAnggota->assertStatus(403);

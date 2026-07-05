@@ -19,7 +19,7 @@ class ProfilPenggunaService
      */
     public function index(Pengguna $user): array
     {
-        $anggota = $user->anggota?->loadMissing(['heirs', 'memberDocs']);
+        $anggota = $user->anggota?->loadMissing(['ahliWaris', 'memberDocs']);
         $poin = $user->poin()
             ->with('savingTransactions')
             ->orderBy('created_at')
@@ -54,17 +54,17 @@ class ProfilPenggunaService
         $latestPointTransaction = $poin->last();
 
         $photoUrl = $user->foto_profil ? asset('storage/' . $user->foto_profil) : null;
-        $heirs = $anggota?->heirs?->map(function ($heir) {
+        $ahli_waris = $anggota?->ahliWaris?->map(function ($ahli_waris) {
             return [
-                'heir_nik' => $heir->heir_nik,
-                'heir_name' => $heir->heir_name,
-                'relationship' => $heir->relationship,
-                'heir_contact' => $heir->heir_contact,
+                'nik_ahli_waris' => $ahli_waris->nik_ahli_waris,
+                'nama_ahli_waris' => $ahli_waris->nama_ahli_waris,
+                'hubungan' => $ahli_waris->hubungan,
+                'kontak_ahli_waris' => $ahli_waris->kontak_ahli_waris,
             ];
         })->values() ?? collect();
 
-        $spouseHeir = $heirs->first(function ($heir) {
-            return in_array($heir['relationship'] ?? '', ['Suami', 'Istri'], true);
+        $spouseAhliWaris = $ahli_waris->first(function ($ahli_waris) {
+            return in_array($ahli_waris['hubungan'] ?? '', ['Suami', 'Istri'], true);
         });
 
         $ktpDocument = $anggota?->memberDocs?->firstWhere('doc_name', 'ktp');
@@ -92,8 +92,8 @@ class ProfilPenggunaService
                 'status_pernikahan' => $anggota?->status_pernikahan,
                 'pendidikan_terakhir' => $anggota?->pendidikan_terakhir,
                 'jml_tanggungan' => $anggota?->jml_tanggungan,
-                'spouse_name' => $anggota?->spouse_name ?? $spouseHeir['heir_name'] ?? null,
-                'heirs' => $heirs,
+                'spouse_name' => $anggota?->spouse_name ?? $spouseAhliWaris['nama_ahli_waris'] ?? null,
+                'ahli_waris' => $ahli_waris,
                 'documents' => [
                     'ktp' => $ktpDocument?->doc_attachment ? asset('storage/' . $ktpDocument->doc_attachment) : null,
                     'kk' => $kkDocument?->doc_attachment ? asset('storage/' . $kkDocument->doc_attachment) : null,

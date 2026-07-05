@@ -92,7 +92,7 @@ const contactFields = computed(() => [
     },
 ]);
 
-const heirRows = computed(() => anggota.value.heirs || []);
+const heirRows = computed(() => anggota.value.ahli_waris || []);
 
 const documentFields = computed(() => [
     { label: "KTP", title: "KTP", url: documents.value.ktp || null },
@@ -272,8 +272,8 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                             <h1 class="card-title">Ahli Waris</h1>
                             <div v-if="heirRows.length" class="grid gap-4">
                                 <div
-                                    v-for="heir in heirRows"
-                                    :key="heir.heir_nik"
+                                    v-for="ahli_waris in heirRows"
+                                    :key="ahli_waris.nik_ahli_waris"
                                     class="grid md:grid-cols-2 gap-4 items-start rounded-2xl border border-stroke p-4 bg-white"
                                 >
                                     <div>
@@ -283,7 +283,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                         <div
                                             class="font-medium text-dark-text text-lg"
                                         >
-                                            {{ heir.heir_name }}
+                                            {{ ahli_waris.nama_ahli_waris }}
                                         </div>
 
                                         <span
@@ -291,7 +291,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                             >Kontak Ahli Waris</span
                                         >
                                         <div class="font-medium text-dark-text">
-                                            {{ heir.heir_contact || "-" }}
+                                            {{ ahli_waris.kontak_ahli_waris || "-" }}
                                         </div>
                                     </div>
 
@@ -302,7 +302,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                         <div
                                             class="font-medium text-dark-text text-lg"
                                         >
-                                            {{ heir.relationship }}
+                                            {{ ahli_waris.hubungan }}
                                         </div>
                                     </div>
                                 </div>

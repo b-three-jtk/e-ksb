@@ -54,7 +54,7 @@ export function useFinancingForm(initialData = null) {
 
             is_have_eligible_saving: initialData?.anggota?.is_have_eligible_saving || null,
             is_have_no_obligation: initialData?.anggota?.is_have_no_obligation || null,
-            heirs: initialData?.anggota?.heirs || [],
+            ahli_waris: initialData?.anggota?.ahli_waris || [],
         },
         // Pembiayaan data
         pembiayaan: {
@@ -191,7 +191,7 @@ export function useFinancingForm(initialData = null) {
         form.documents.income_slip = anggota.income_slip || null,
         form.documents.bank_book = anggota.bank_book || null,
 
-        form.anggota.heirs = anggota.heirs || []
+        form.anggota.ahli_waris = anggota.ahli_waris || []
 
         anggotaResults.value = []
         isAnggotaSelected.value = true
@@ -235,7 +235,7 @@ export function useFinancingForm(initialData = null) {
             is_have_eligible_saving: null,
             is_have_no_obligation: null,
 
-            heirs: [],
+            ahli_waris: [],
         }
         form.pembiayaan = {
             name: '',
@@ -322,9 +322,9 @@ export function useFinancingForm(initialData = null) {
         isPemasokSelected.value = false
     }
 
-    // Heirs
-    const addHeir = (heirData) => {
-        if (!heirData.heir_nik || !heirData.heir_name || !heirData.relationship || !heirData.heir_contact) {
+    // AhliWariss
+    const addAhliWaris = (heirData) => {
+        if (!heirData.nik_ahli_waris || !heirData.nama_ahli_waris || !heirData.hubungan || !heirData.kontak_ahli_waris) {
             toast('Lengkapi semua field untuk menambahkan ahli waris!', {
                 type: 'error',
                 position: 'bottom-right',
@@ -332,16 +332,16 @@ export function useFinancingForm(initialData = null) {
             return
         }
 
-        form.anggota.heirs.push({
-            heir_nik: heirData.heir_nik,
-            heir_name: heirData.heir_name,
-            relationship: heirData.relationship,
-            heir_contact: heirData.heir_contact,
+        form.anggota.ahli_waris.push({
+            nik_ahli_waris: heirData.nik_ahli_waris,
+            nama_ahli_waris: heirData.nama_ahli_waris,
+            hubungan: heirData.hubungan,
+            kontak_ahli_waris: heirData.kontak_ahli_waris,
         })
     }
 
-    const removeHeir = (index) => {
-        form.anggota.heirs.splice(index, 1)
+    const removeAhliWaris = (index) => {
+        form.anggota.ahli_waris.splice(index, 1)
     }
 
     const submit = () => {
@@ -504,8 +504,8 @@ export function useFinancingForm(initialData = null) {
         resetAnggotaSelection,
         selectAnggota,
         selectPemasok,
-        addHeir,
-        removeHeir,
+        addAhliWaris,
+        removeAhliWaris,
         submit,
         saveDraft,
         finalize

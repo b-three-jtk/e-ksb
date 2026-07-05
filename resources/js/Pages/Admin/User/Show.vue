@@ -375,7 +375,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.anggota.heirs.name ?? "-"
+                                            user.anggota.ahli_waris.name ?? "-"
                                         }}</span
                                     >
                                 </li>
@@ -387,7 +387,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.anggota.heirs.relationship ??
+                                            user.anggota.ahli_waris.hubungan ??
                                             "-"
                                         }}</span
                                     >
@@ -400,7 +400,7 @@ const breadcrumbItems = [
                                     <span
                                         class="font-medium text-dark-text dark:text-white"
                                         >{{
-                                            user.anggota.heirs.contact ?? "-"
+                                            user.anggota.ahli_waris.contact ?? "-"
                                         }}</span
                                     >
                                 </li>

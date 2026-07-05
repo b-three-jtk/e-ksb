@@ -12,18 +12,18 @@ import { useImageUploadPreview } from '@/Composables/useImageUploadPreview'
 import PersonalIdentitySection from './PersonalIdentitySection.vue'
 import SupportingDocument from './SupportingDocument.vue'
 import ContactSection from './ContactSection.vue'
-import HeirSection from './HeirSection.vue'
+import AhliWarisSection from './AhliWarisSection.vue'
 
 const props = defineProps({
-	educationOptions: {
+	pendidikanOptions: {
 		type: Array,
 		default: () => [],
 	},
-	maritalStatusOptions: {
+	statusPernikahanOptions: {
 		type: Array,
 		default: () => [],
 	},
-	heirRelationshipOptions: {
+	hubunganOptions: {
 		type: Array,
 		default: () => [],
 	},
@@ -39,10 +39,10 @@ const requiredMemberFields = computed(() => [
 	'no_telp',
 	'alamat_domisili',
 	'pendidikan_terakhir',
-	'heir_nik',
-	'heir_name',
-	'heir_relationship',
-	'heir_contact',
+	'nik_ahli_waris',
+	'nama_ahli_waris',
+	'heir_hubungan',
+	'kontak_ahli_waris',
 ])
 
 const form = useForm({
@@ -57,10 +57,10 @@ const form = useForm({
 	alamat_domisili: '',
 	pendidikan_terakhir: '',
 	alamat_ktp: '',
-	heir_nik: '',
-	heir_name: '',
-	heir_relationship: '',
-	heir_contact: '',
+	nik_ahli_waris: '',
+	nama_ahli_waris: '',
+	heir_hubungan: '',
+	kontak_ahli_waris: '',
 	ktp_photo: null,
 	kk_photo: null,
 })
@@ -174,8 +174,8 @@ const submitForm = () => {
 						:only-letters="onlyLetters"
 						:only-numbers="onlyNumbers"
 						:jenis_kelamin-options="genderOptions"
-						:marital-status-options="props.maritalStatusOptions"
-						:education-options="props.educationOptions"
+						:marital-status-options="props.statusPernikahanOptions"
+						:education-options="props.pendidikanOptions"
 					/>
 
 					<SupportingDocument
@@ -195,13 +195,13 @@ const submitForm = () => {
 						:only-numbers="onlyNumbers"
 					/>
 
-					<HeirSection
+					<AhliWarisSection
 						:form="form"
 						:errors="errors"
 						:get-field-error="getFieldError"
 						:only-letters="onlyLetters"
 						:only-numbers="onlyNumbers"
-						:heir-relationship-options="props.heirRelationshipOptions"
+						:ahli_waris-hubungan-options="props.hubunganOptions"
 					/>
 				</div>
 

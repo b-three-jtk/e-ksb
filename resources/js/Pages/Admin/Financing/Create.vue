@@ -42,8 +42,8 @@ const {
     isPemasokSelected,
     selectAnggota,
     selectPemasok,
-    addHeir,
-    removeHeir,
+    addAhliWaris,
+    removeAhliWaris,
     resetAnggotaSelection,
     resetPemasokSelection,
     submit,
@@ -144,8 +144,8 @@ const handleSaveDraft = () => {
                     :errors="errors"
                     @update:search-query="searchQuery = $event"
                     @selectAnggota="selectAnggota"
-                    @addHeir="addHeir"
-                    @removeHeir="removeHeir"
+                    @addAhliWaris="addAhliWaris"
+                    @removeAhliWaris="removeAhliWaris"
                     @resetAnggotaSelection="resetAnggotaSelection"
                     @validate-field="(field) => validateField(field, 1)"
                 />

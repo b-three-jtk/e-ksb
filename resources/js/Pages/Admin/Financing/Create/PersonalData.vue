@@ -21,24 +21,24 @@ const props = defineProps({
 const emit = defineEmits([
     'update:searchQuery',
     'selectAnggota',
-    'addHeir',
-    'removeHeir',
+    'addAhliWaris',
+    'removeAhliWaris',
     'resetAnggotaSelection',
     'validate-field',
 ])
 
 const heirInput = ref({
-    heir_nik: '',
-    heir_name: '',
-    relationship: '',
-    heir_contact: '',
+    nik_ahli_waris: '',
+    nama_ahli_waris: '',
+    hubungan: '',
+    kontak_ahli_waris: '',
 })
 
-const sanitizeHeirNik = (event) => {
-    heirInput.value.heir_nik = event.target.value.replace(/[^0-9]/g, '')
+const sanitizeAhliWarisNik = (event) => {
+    heirInput.value.nik_ahli_waris = event.target.value.replace(/[^0-9]/g, '')
 }
-const sanitizeHeirName = (event) => {
-    heirInput.value.heir_name = event.target.value.replace(/[^a-zA-Z\s]/g, '')
+const sanitizeAhliWarisName = (event) => {
+    heirInput.value.nama_ahli_waris = event.target.value.replace(/[^a-zA-Z\s]/g, '')
 }
 
 const onFieldChange = (field) => emit('validate-field', field)
@@ -218,7 +218,7 @@ const onFieldChange = (field) => emit('validate-field', field)
             />
         </div>
 
-        <!-- Heirs section -->
+        <!-- AhliWariss section -->
         <div class="flex flex-col gap-4 w-full p-4 border-b border-gray-200">
             <div class="flex gap-4 w-full items-end">
                 <BaseInputAdmin
@@ -226,34 +226,34 @@ const onFieldChange = (field) => emit('validate-field', field)
                     required
                     max="16"
                     placeholder="NIK Ahli Waris"
-                    v-model="heirInput.heir_nik"
+                    v-model="heirInput.nik_ahli_waris"
                     inputmode="numeric"
-                    @input="sanitizeHeirNik"
+                    @input="sanitizeAhliWarisNik"
                 />
                 <BaseInputAdmin
-                    v-model="heirInput.heir_name"
+                    v-model="heirInput.nama_ahli_waris"
                     placeholder="Nama Ahli Waris"
-                    @input="sanitizeHeirName"
+                    @input="sanitizeAhliWarisName"
                 />
                 <BaseInputAdmin
-                    v-model="heirInput.relationship"
+                    v-model="heirInput.hubungan"
                     type="select"
-                    :selectables="data.relationships.map(unit => ({ value: unit, text: unit }))"
+                    :selectables="data.hubungans.map(unit => ({ value: unit, text: unit }))"
                     placeholder="Hubungan"
                 />
                 <BaseInputAdmin
-                    v-model="heirInput.heir_contact"
+                    v-model="heirInput.kontak_ahli_waris"
                     max="20"
                     placeholder="Nomor Kontak"
                     inputmode="numeric"
-                    @input="heirInput.heir_contact = normalizePhoneNumber(heirInput.heir_contact, props.onlyNumbers)"
+                    @input="heirInput.kontak_ahli_waris = normalizePhoneNumber(heirInput.kontak_ahli_waris, props.onlyNumbers)"
                 />
-                <Button variant="primary" @click="$emit('addHeir', heirInput); onFieldChange('heirs')">
+                <Button variant="primary" @click="$emit('addAhliWaris', heirInput); onFieldChange('ahli_waris')">
                     Tambah
                 </Button>
             </div>
 
-            <p v-if="errors?.heirs" class="text-xs text-red-500 -mt-2">{{ errors.heirs }}</p>
+            <p v-if="errors?.ahli_waris" class="text-xs text-red-500 -mt-2">{{ errors.ahli_waris }}</p>
 
             <table class="w-full text-sm text-left text-gray-500">
                 <thead class="text-gray-400 border-y">
@@ -265,15 +265,15 @@ const onFieldChange = (field) => emit('validate-field', field)
                         <th class="py-4 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody v-if="form.anggota.heirs.length > 0">
-                    <tr v-for="(item, index) in form.anggota.heirs" :key="index"
+                <tbody v-if="form.anggota.ahli_waris.length > 0">
+                    <tr v-for="(item, index) in form.anggota.ahli_waris" :key="index"
                         class="bg-transparent border-b text-dark-text dark:text-gray-300">
-                        <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>
-                        <td class="py-2 text-right pr-6">{{ item.heir_name }}</td>
-                        <td class="py-2 text-right pr-6">{{ item.relationship }}</td>
-                        <td class="py-2 text-right pr-6">{{ item.heir_contact }}</td>
+                        <td class="py-2 text-left pl-6">{{ item.nik_ahli_waris }}</td>
+                        <td class="py-2 text-right pr-6">{{ item.nama_ahli_waris }}</td>
+                        <td class="py-2 text-right pr-6">{{ item.hubungan }}</td>
+                        <td class="py-2 text-right pr-6">{{ item.kontak_ahli_waris }}</td>
                         <td class="py-2 text-center flex justify-center">
-                            <Button size="small" variant="light" @click="$emit('removeHeir', index)">-</Button>
+                            <Button size="small" variant="light" @click="$emit('removeAhliWaris', index)">-</Button>
                         </td>
                     </tr>
                 </tbody>

@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class MemberHeir extends Pivot
+class AnggotaAhliWaris extends Pivot
 {
-    protected $table = 'member_heirs';
+    protected $table = 'anggota_ahli_waris';
     protected $fillable = [
-        'relationship'
+        'hubungan'
     ];
 }

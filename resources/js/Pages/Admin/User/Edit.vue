@@ -45,11 +45,11 @@ const form = useForm({
     kk_file: null,
     ktp_file: null,
 
-    heirs: (props.data.anggota.heirs || []).map(h => ({
-        heir_nik: h.heir_nik,
-        heir_name: h.heir_name,
-        heir_contact: h.heir_contact,
-        relationship: h.pivot ? h.pivot.relationship : h.relationship
+    ahli_waris: (props.data.anggota.ahli_waris || []).map(h => ({
+        nik_ahli_waris: h.nik_ahli_waris,
+        nama_ahli_waris: h.nama_ahli_waris,
+        kontak_ahli_waris: h.kontak_ahli_waris,
+        hubungan: h.pivot ? h.pivot.hubungan : h.hubungan
     })),
 });
 
@@ -118,50 +118,50 @@ const onlyAlphaNumericDash = (event) => {
 }
 
 const heirInput = ref({
-    heir_nik: '',
-    heir_name: '',
-    relationship: '',
-    heir_contact: '',
+    nik_ahli_waris: '',
+    nama_ahli_waris: '',
+    hubungan: '',
+    kontak_ahli_waris: '',
 })
 
-const addHeir = (heirData) => {
-    if (!heirData.heir_nik || !heirData.heir_name || !heirData.relationship || !heirData.heir_contact) {
+const addAhliWaris = (heirData) => {
+    if (!heirData.nik_ahli_waris || !heirData.nama_ahli_waris || !heirData.hubungan || !heirData.kontak_ahli_waris) {
         toast.error('Lengkapi semua field untuk menambahkan ahli waris!', { position: 'bottom-right' });
         return
     }
 
-    if (heirData.heir_nik.length !== 16) {
+    if (heirData.nik_ahli_waris.length !== 16) {
         toast.error('NIK Ahli Waris harus terdiri dari 16 digit.', { position: 'bottom-right' });
         return;
     }
 
-    if (form.heirs.some(h => h.heir_nik === heirData.heir_nik)) {
+    if (form.ahli_waris.some(h => h.nik_ahli_waris === heirData.nik_ahli_waris)) {
         toast.error('Ahli waris dengan NIK ini sudah ditambahkan.', { position: 'bottom-right' });
         return;
     }
 
-    if (!/^\d+$/.test(heirData.heir_contact)) {
+    if (!/^\d+$/.test(heirData.kontak_ahli_waris)) {
         toast.error('Kontak Ahli Waris harus terdiri dari angka.', { position: 'bottom-right' });
         return;
     }
 
-    form.heirs.push({
-        heir_nik: heirData.heir_nik,
-        heir_name: heirData.heir_name,
-        relationship: heirData.relationship,
-        heir_contact: heirData.heir_contact,
+    form.ahli_waris.push({
+        nik_ahli_waris: heirData.nik_ahli_waris,
+        nama_ahli_waris: heirData.nama_ahli_waris,
+        hubungan: heirData.hubungan,
+        kontak_ahli_waris: heirData.kontak_ahli_waris,
     })
 
     heirInput.value = {
-        heir_nik: '',
-        heir_name: '',
-        relationship: '',
-        heir_contact: '',
+        nik_ahli_waris: '',
+        nama_ahli_waris: '',
+        hubungan: '',
+        kontak_ahli_waris: '',
     }
 }
 
-const removeHeir = (index) => {
-    form.heirs.splice(index, 1)
+const removeAhliWaris = (index) => {
+    form.ahli_waris.splice(index, 1)
 }
 
 const submitForm = () => {
@@ -244,15 +244,15 @@ const submitForm = () => {
                 <div class="flex flex-col gap-4 w-3/4 py-4 col-span-2">
                     <div class="flex gap-4 w-full items-end">
                         <BaseInputAdmin label="Data Ahli Waris" max="16" pattern="[0-9]{16}"
-                            placeholder="Masukkan NIK Ahli Waris" v-model="heirInput.heir_nik" @input="onlyNumbers"
+                            placeholder="Masukkan NIK Ahli Waris" v-model="heirInput.nik_ahli_waris" @input="onlyNumbers"
                             inputmode="numeric" />
-                        <BaseInputAdmin v-model="heirInput.heir_name" placeholder="Nama Ahli Waris"
+                        <BaseInputAdmin v-model="heirInput.nama_ahli_waris" placeholder="Nama Ahli Waris"
                             @input="onlyAlpha" />
-                        <BaseInputAdmin v-model="heirInput.relationship" type="select"
+                        <BaseInputAdmin v-model="heirInput.hubungan" type="select"
                             :selectables="props.opsiHubunganKeluarga" placeholder="Hubungan dengan anggota" />
-                        <BaseInputAdmin v-model="heirInput.heir_contact" max="20" placeholder="Nomor Kontak"
+                        <BaseInputAdmin v-model="heirInput.kontak_ahli_waris" max="20" placeholder="Nomor Kontak"
                             @input="onlyNumbers" inputmode="numeric" />
-                        <Button variant="primary" @click="addHeir(heirInput)">
+                        <Button variant="primary" @click="addAhliWaris(heirInput)">
                             Tambah
                         </Button>
                     </div>
@@ -267,15 +267,15 @@ const submitForm = () => {
                                 <th class="py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody v-if="form.heirs.length > 0">
-                            <tr v-for="(item, index) in form.heirs" :key="index"
+                        <tbody v-if="form.ahli_waris.length > 0">
+                            <tr v-for="(item, index) in form.ahli_waris" :key="index"
                                 class="bg-white border-b text-dark-text dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
-                                <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>
-                                <td class="py-2 text-right pr-6">{{ item.heir_name }}</td>
-                                <td class="py-2 text-right pr-6">{{ item.relationship }}</td>
-                                <td class="py-2 text-right pr-6">{{ item.heir_contact }}</td>
+                                <td class="py-2 text-left pl-6">{{ item.nik_ahli_waris }}</td>
+                                <td class="py-2 text-right pr-6">{{ item.nama_ahli_waris }}</td>
+                                <td class="py-2 text-right pr-6">{{ item.hubungan }}</td>
+                                <td class="py-2 text-right pr-6">{{ item.kontak_ahli_waris }}</td>
                                 <td class="py-2 text-center flex justify-center">
-                                    <Button size="small" variant="light" @click="removeHeir(index)">
+                                    <Button size="small" variant="light" @click="removeAhliWaris(index)">
                                         -
                                     </Button>
                                 </td>

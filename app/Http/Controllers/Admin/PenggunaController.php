@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\EducationEnum;
-use App\Enums\HeirEnum;
+use App\Enums\AhliWarisEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\UserStatusEnum;
@@ -33,9 +33,9 @@ class PenggunaController extends Controller
     public function create()
     {
         return Inertia::render('Admin/User/Create/Index', [
-            'educationOptions' => $this->enumOptions(EducationEnum::cases()),
-            'maritalStatusOptions' => $this->enumOptions(MaritalStatusEnum::cases()),
-            'heirRelationshipOptions' => $this->enumOptions(HeirEnum::cases()),
+            'pendidikanOptions' => $this->enumOptions(EducationEnum::cases()),
+            'statusPernikahanOptions' => $this->enumOptions(MaritalStatusEnum::cases()),
+            'hubunganOptions' => $this->enumOptions(AhliWarisEnum::cases()),
         ]);
     }
 
@@ -147,7 +147,7 @@ class PenggunaController extends Controller
             'data' => $user,
             'opsiPendidikan' => $this->enumOptions(EducationEnum::cases()),
             'opsiStatusPerkawinan' => $this->enumOptions(MaritalStatusEnum::cases()),
-            'opsiHubunganKeluarga' => $this->enumOptions(HeirEnum::cases()),
+            'opsiHubunganKeluarga' => $this->enumOptions(AhliWarisEnum::cases()),
         ]);
     }
 

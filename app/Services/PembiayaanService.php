@@ -118,7 +118,7 @@ class PembiayaanService
     {
         return Pembiayaan::with([
             'anggota.user',
-            'anggota.heirs',
+            'anggota.ahliWaris',
             'anggota.financials',
             'anggota.memberDocs',
             'anggota.memberJobs',

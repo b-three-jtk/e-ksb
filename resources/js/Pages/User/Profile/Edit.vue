@@ -15,7 +15,7 @@ const props = defineProps({
         type: Object,
         required: true,
     },
-    educationOptions: {
+    pendidikanOptions: {
         type: Array,
         default: () => [],
     },
@@ -106,7 +106,7 @@ const documentState = computed(() => [
     },
 ]);
 
-const heirFields = computed(() => anggota.value.heirs || []);
+const heirFields = computed(() => anggota.value.ahli_waris || []);
 
 const handleChangePicture = () => {
     fileInput.value.click();
@@ -460,7 +460,7 @@ const submit = () => {
                                             :error="form.errors.pendidikan_terakhir"
                                         >
                                             <option
-                                                v-for="education in props.educationOptions"
+                                                v-for="education in props.pendidikanOptions"
                                                 :key="education"
                                                 :value="education"
                                             >
@@ -592,25 +592,25 @@ const submit = () => {
                                     class="grid gap-6"
                                 >
                                     <div
-                                        v-for="heir in heirFields"
-                                        :key="heir.heir_nik"
+                                        v-for="ahli_waris in heirFields"
+                                        :key="ahli_waris.nik_ahli_waris"
                                         class="grid xl:grid-cols-2 grid-cols-1 gap-4 rounded-2xl border border-stroke p-4 bg-white"
                                     >
                                         <BaseInput
                                             label="Nama Ahli Waris"
-                                            :model-value="heir.heir_name || ''"
+                                            :model-value="ahli_waris.nama_ahli_waris || ''"
                                             disabled
                                         />
                                         <BaseInput
                                             label="NIK"
-                                            :model-value="heir.heir_nik || ''"
+                                            :model-value="ahli_waris.nik_ahli_waris || ''"
                                             disabled
                                             locked
                                         />
                                         <BaseInput
                                             label="Hubungan Keluarga"
                                             :model-value="
-                                                heir.relationship || ''
+                                                ahli_waris.hubungan || ''
                                             "
                                             disabled
                                             locked
@@ -618,7 +618,7 @@ const submit = () => {
                                         <BaseInput
                                             label="Kontak Ahli Waris"
                                             :model-value="
-                                                heir.heir_contact || ''
+                                                ahli_waris.kontak_ahli_waris || ''
                                             "
                                             disabled
                                             locked

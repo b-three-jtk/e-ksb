@@ -703,7 +703,7 @@ class PembiayaanController extends Controller
         $query = $request->input('q');
 
         $anggota = Anggota::query()
-            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'pembiayaan:id,status', 'akunSimpanan:id,saldo,created_at'])
+            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'financials', 'ahliWaris', 'memberJobs', 'pembiayaan:id,status', 'akunSimpanan:id,saldo,created_at'])
             ->whereHas('user', function ($q) use ($query) {
                 $q->whereHas('roles', fn($roleQ) => $roleQ->where('nama_barang', 'Anggota'))
                     ->where('status', UserStatusEnum::ACTIVE->value)
@@ -728,9 +728,9 @@ class PembiayaanController extends Controller
                     ->where('created_at', '<=', now()->subMonth())
                     ->exists();
 
-                $anggota->heirs = $anggota->heirs->map(function ($heir) {
-                    $heir->relationship = $heir->pivot->relationship;
-                    return $heir;
+                $anggota->ahliWaris = $anggota->ahliWaris->map(function ($ahli_waris) {
+                    $ahli_waris->hubungan = $ahli_waris->pivot->hubungan;
+                    return $ahli_waris;
                 });
 
                 $anggota->is_have_eligible_saving = $hasEligibleSaving;

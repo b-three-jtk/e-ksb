@@ -74,7 +74,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                 'nik' => '1234567890123456',
                 'no_telp' => '08123456789',
                 'employment_status' => 'Karyawan Swasta',
-                'heirs' => [['heir_name' => 'Ahli Waris', 'heir_nik' => '1234567890654321', 'relationship' => 'Anak', 'heir_contact' => '081234567890']],
+                'ahli_waris' => [['nama_ahli_waris' => 'Ahli Waris', 'nik_ahli_waris' => '1234567890654321', 'hubungan' => 'Anak', 'kontak_ahli_waris' => '081234567890']],
             ],
             'collateral' => [
                 'collateral_type' => 'Logam Mulia',
