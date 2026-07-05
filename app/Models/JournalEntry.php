@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Account;
+use App\Models\Akun;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +12,7 @@ class JournalEntry extends Model
     use HasFactory;
     protected $fillable = [
         'journal_group_id',
-        'no_ref_account',
+        'no_ref_akun',
         'position',
         'nominal',
         'updated_by',
@@ -23,12 +23,12 @@ class JournalEntry extends Model
         'tgl_transaksi' => 'date',
     ];
 
-    public function account()
+    public function akun()
     {
         return $this->belongsTo(
-            Account::class,
-            'no_ref_account',
-            'no_ref_account'
+            Akun::class,
+            'no_ref_akun',
+            'no_ref_akun'
         );
     }
 

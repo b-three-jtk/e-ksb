@@ -13,7 +13,7 @@ use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\Pemasok;
 use App\Models\Pengguna;
-use Database\Seeders\AccountSeeder;
+use Database\Seeders\AkunSeeder;
 use Database\Seeders\GlobalSettingSeeder;
 use Database\Seeders\JenisBarangSeeder;
 use Database\Seeders\RoleSeeder;
@@ -25,7 +25,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
-    $this->seed(AccountSeeder::class);
+    $this->seed(AkunSeeder::class);
     $this->seed(GlobalSettingSeeder::class);
     $this->seed(JenisBarangSeeder::class);
 });

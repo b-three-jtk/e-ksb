@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum AccountCategoryEnum: string
+enum AkunCategoryEnum: string
 {
     case ASSET = 'Aset';
     case LIABILITY = 'Liabilitas';

@@ -7,7 +7,7 @@ use App\Models\Anggota;
 use App\Models\Pembiayaan;
 use App\Services\Admin\DasborService;
 use App\Services\Admin\PembayaranAngsuranService;
-use Database\Seeders\AccountSeeder;
+use Database\Seeders\AkunSeeder;
 use Database\Seeders\GlobalSettingSeeder;
 use Database\Seeders\JenisBarangSeeder;
 use Database\Seeders\RoleSeeder;
@@ -16,7 +16,7 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
-    $this->seed(AccountSeeder::class);
+    $this->seed(AkunSeeder::class);
     $this->seed(GlobalSettingSeeder::class);
     $this->seed(JenisBarangSeeder::class);
 });

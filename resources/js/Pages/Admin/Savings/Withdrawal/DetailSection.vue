@@ -37,8 +37,8 @@ const defaultBankOptions = [
 ]
 
 const savedAccounts = computed(() => {
-  const accounts = props.selectedMember?.accounts
-  return Array.isArray(accounts) ? accounts : []
+  const akun = props.selectedMember?.akun
+  return Array.isArray(akun) ? akun : []
 })
 
 const hasSavedAccounts = computed(() => savedAccounts.value.length > 0)

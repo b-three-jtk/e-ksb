@@ -91,8 +91,8 @@ function evaluateAvailability(acc) {
 const savingsList = computed(() => {
   if (!props.selectedMember) return []
   
-  const accounts = props.selectedMember.akunSimpanan || []
-  return accounts
+  const akun = props.selectedMember.akunSimpanan || []
+  return akun
     .map(acc => {
       const availability = evaluateAvailability(acc)
       const typeLower = (acc.type || '').toLowerCase()

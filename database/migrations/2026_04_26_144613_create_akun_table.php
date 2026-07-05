@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\AccountCategoryEnum;
+use App\Enums\AkunCategoryEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,10 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('accounts', function (Blueprint $table) {
-            $table->string('no_ref_account')->primary();
-            $table->string('account_name');
-            $table->enum('account_category', array_column(AccountCategoryEnum::cases(), 'value'));
+        Schema::create('akun', function (Blueprint $table) {
+            $table->string('no_ref_akun')->primary();
+            $table->string('nama_akun');
+            $table->enum('kategori_akun', array_column(AkunCategoryEnum::cases(), 'value'));
             $table->decimal('saldo', 15, 2)->default(0);
             $table->enum('status', ['Aktif', 'Non-Aktif'])->default('Aktif');
             $table->timestamps();
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('accounts');
+        Schema::dropIfExists('akun');
     }
 };

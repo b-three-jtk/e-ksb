@@ -2,10 +2,10 @@
 
 namespace App\Services\Admin;
 
-use App\Models\Account;
+use App\Models\Akun;
 use App\Models\JournalEntry;
 use App\Enums\PositionEnum;
-use App\Enums\AccountCategoryEnum;
+use App\Enums\AkunCategoryEnum;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -14,18 +14,18 @@ class AruskasService
     public function buildBaseQuery(array $filters)
     {
         $query = JournalEntry::query()
-            ->join('accounts', 'journal_entries.no_ref_account', '=', 'accounts.no_ref_account')
+            ->join('akun', 'journal_entries.no_ref_akun', '=', 'akun.no_ref_akun')
             ->select([
                 'journal_entries.*',
-                'accounts.account_name',
-                'accounts.account_category',
+                'akun.nama_akun',
+                'akun.kategori_akun',
             ]);
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
-                $q->where('accounts.account_name', 'like', '%' . $filters['search'] . '%')
+                $q->where('akun.nama_akun', 'like', '%' . $filters['search'] . '%')
                     ->orWhere('journal_entries.journal_group_id', 'like', '%' . $filters['search'] . '%')
-                    ->orWhere('journal_entries.no_ref_account', 'like', '%' . $filters['search'] . '%');
+                    ->orWhere('journal_entries.no_ref_akun', 'like', '%' . $filters['search'] . '%');
             });
         }
 
@@ -104,8 +104,8 @@ class AruskasService
                     'no'         => $currentNumber,
                     'no_jurnal'  => $item->journal_group_id,
                     'tanggal'    => Carbon::parse($item->tgl_transaksi)->format('d/m/Y'),
-                    'akun'       => $item->no_ref_account . ' - ' . $item->account_name,
-                    'jenis_akun' => $item->account_category,
+                    'akun'       => $item->no_ref_akun . ' - ' . $item->nama_akun,
+                    'jenis_akun' => $item->kategori_akun,
                     'debit'      => $item->position === PositionEnum::DEBIT->value  ? $item->nominal : null,
                     'kredit'     => $item->position === PositionEnum::CREDIT->value ? $item->nominal : null,
                 ];
@@ -117,13 +117,13 @@ class AruskasService
 
     public function getKasSummary(): array
     {
-        $kasAccount = Account::where('account_name', 'Kas')->firstOrFail();
+        $kasAkun = Akun::where('nama_akun', 'Kas')->firstOrFail();
 
-        $totalKasMasuk = JournalEntry::where('no_ref_account', $kasAccount->no_ref_account)
+        $totalKasMasuk = JournalEntry::where('no_ref_akun', $kasAkun->no_ref_akun)
             ->where('position', PositionEnum::DEBIT->value)
             ->sum('nominal');
 
-        $totalKasKeluar = JournalEntry::where('no_ref_account', $kasAccount->no_ref_account)
+        $totalKasKeluar = JournalEntry::where('no_ref_akun', $kasAkun->no_ref_akun)
             ->where('position', PositionEnum::CREDIT->value)
             ->sum('nominal');
 
@@ -168,8 +168,8 @@ class AruskasService
             ->get()
             ->map(fn ($trx) => [
                 Carbon::parse($trx->tgl_transaksi)->format('d/m/Y'),
-                $trx->no_ref_account . ' - ' . $trx->account_name,
-                $trx->account_category,
+                $trx->no_ref_akun . ' - ' . $trx->nama_akun,
+                $trx->kategori_akun,
                 $trx->position === PositionEnum::DEBIT->value
                     ? number_format($trx->nominal, 0, ',', '.')
                     : '',

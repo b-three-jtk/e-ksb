@@ -13,7 +13,7 @@ import Swal from 'sweetalert2'
 const props = defineProps({
     jenis_simpanans: { type: Array, required: true },
     anggota: { type: Array, required: true },
-    accounts: { type: Array, required: true },
+    akun: { type: Array, required: true },
     pengurus: { type: Object, required: true },
     global_saving: { type: Object, required: true },
     struk: Object,
@@ -137,9 +137,9 @@ watch(jenisSimpanan, () => {
 
 const existingAccounts = computed(() => {
   if (!selectedMember.value) return []
-  const accounts = selectedMember.value.akunSimpanan ?? []
+  const akun = selectedMember.value.akunSimpanan ?? []
   if (!['Tabungan Ibadah', 'Tabungan Berjangka'].includes(jenisSimpanan.value)) return []
-  return accounts.filter(acc => acc.type === jenisSimpanan.value)
+  return akun.filter(acc => acc.type === jenisSimpanan.value)
 })
 
 const isMultiAccountType = computed(() =>
@@ -562,7 +562,7 @@ const akadType = computed(() => {
                     </label>
 
                     <div class="space-y-2">
-                      <!-- Existing accounts -->
+                      <!-- Existing akun -->
                       <div
                         v-for="acc in existingAccounts"
                         :key="acc.purpose"

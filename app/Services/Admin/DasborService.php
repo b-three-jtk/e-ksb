@@ -117,7 +117,7 @@ class DasborService
         [$data, $format] = $this->buildSkeletonPeriode($tanggalAkhir, $filter);
         [$rangeAwal, $rangeAkhir] = $this->getRangeUntukFilterPeriode($tanggalAkhir, $filter);
 
-        $pendapatan = JournalEntry::where('no_ref_account', '401')
+        $pendapatan = JournalEntry::where('no_ref_akun', '401')
             ->whereBetween('tgl_transaksi', [$rangeAwal, $rangeAkhir])
             ->get()
             ->groupBy(fn($entry) => Carbon::parse($entry->tgl_transaksi)->format($format))
@@ -226,10 +226,10 @@ class DasborService
         $res = collect();
 
         if ($filter === 'jenis') {
-            $data = JournalEntry::whereIn('no_ref_account', ['201', '202', '203', '301', '302'])
+            $data = JournalEntry::whereIn('no_ref_akun', ['201', '202', '203', '301', '302'])
                 ->where('tgl_transaksi', '<=', $tanggalAkhir)
                 ->get()
-                ->groupBy(fn($entry) => match ($entry->no_ref_account) {
+                ->groupBy(fn($entry) => match ($entry->no_ref_akun) {
                     '201' => 'Tabungan Anggota',
                     '202' => 'Tabungan Berjangka',
                     '203' => 'Tabungan Ibadah',
@@ -241,10 +241,10 @@ class DasborService
 
             $res = collect($skeletonJenis)->replace($data)->sortDesc();
         } else if ($filter === 'akad') {
-            $data = JournalEntry::whereIn('no_ref_account', ['201', '202', '203', '301', '302'])
+            $data = JournalEntry::whereIn('no_ref_akun', ['201', '202', '203', '301', '302'])
                 ->where('tgl_transaksi', '<=', $tanggalAkhir)
                 ->get()
-                ->groupBy(fn($entry) => match ($entry->no_ref_account) {
+                ->groupBy(fn($entry) => match ($entry->no_ref_akun) {
                     '202', '203' => 'Mudharabah Mutlaqah',
                     '201' => 'Wadiah Yad Dhamanah',
                     '301', '302' => 'Musyarakah',
@@ -564,19 +564,19 @@ class DasborService
      * Mode "satu posisi saja": kirim null pada salah satu posisi (debit/credit)
      * untuk hanya men-sum nominal pada posisi yang tidak null tersebut.
      *
-     * @param  string|array  $noRefAccount  satu kode akun atau array kode akun
+     * @param  string|array  $noRefAkun  satu kode akun atau array kode akun
      */
     private function getSaldoAkun(
-        string|array $noRefAccount,
+        string|array $noRefAkun,
         $tanggalAkhir,
         ?string $posisiDebit = 'Debit',
         ?string $posisiCredit = 'Credit'
     ): float {
         $query = JournalEntry::where('tgl_transaksi', '<=', $tanggalAkhir);
 
-        is_array($noRefAccount)
-            ? $query->whereIn('no_ref_account', $noRefAccount)
-            : $query->where('no_ref_account', $noRefAccount);
+        is_array($noRefAkun)
+            ? $query->whereIn('no_ref_akun', $noRefAkun)
+            : $query->where('no_ref_akun', $noRefAkun);
 
         // Mode "satu posisi saja": kalau salah satu posisi null, sum langsung tanpa pengurangan
         if ($posisiDebit === null || $posisiCredit === null) {

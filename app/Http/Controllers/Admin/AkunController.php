@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\Admin\AkunService;
 use Inertia\Inertia;
-use App\Enums\AccountCategoryEnum;
+use App\Enums\AkunCategoryEnum;
 use App\Enums\UserRoleEnum;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Auth;
@@ -28,16 +28,16 @@ class AkunController extends Controller
             'sort_dir'  => $request->sort_dir ?? 'asc',
         ];
 
-        return Inertia::render('Admin/Accounts/List', [
-            'accounts' => $this->akunService->getAccountList($filters),
+        return Inertia::render('Admin/Akuns/List', [
+            'akun' => $this->akunService->getAkunList($filters),
 
             'filters' => $filters,
 
-            'jenisAkunOptions' => collect(AccountCategoryEnum::cases())
+            'jenisAkunOptions' => collect(AkunCategoryEnum::cases())
                 ->map(fn ($item) => $item->value)
                 ->values(),
 
-            'accountSummary' => $this->akunService->getAccountSummary(),
+            'accountSummary' => $this->akunService->getAkunSummary(),
 
             'can' => [
                 'tambah_akun' => Auth::user()->hasRole(UserRoleEnum::BENDAHARA->value),
@@ -50,9 +50,9 @@ class AkunController extends Controller
     {
         $validated = $request->validate(
             [
-                'nomor_akun' => ['required', 'regex:/^[0-9]+$/', 'unique:accounts,no_ref_account'],
+                'nomor_akun' => ['required', 'regex:/^[0-9]+$/', 'unique:akun,no_ref_akun'],
                 'nama_akun'  => ['required', 'string', 'max:255'],
-                'jenis_akun' => ['required', new Enum(AccountCategoryEnum::class)],
+                'jenis_akun' => ['required', new Enum(AkunCategoryEnum::class)],
             ],
             [
                 'nomor_akun.required' => 'Nomor akun wajib diisi.',
@@ -65,9 +65,9 @@ class AkunController extends Controller
             ]
         );
 
-        $this->akunService->createAccount($validated);
+        $this->akunService->createAkun($validated);
 
-        return redirect()->route('admin.accounts.index')->with('success', 'Akun berhasil ditambahkan.');
+        return redirect()->route('admin.akun.index')->with('success', 'Akun berhasil ditambahkan.');
     }
 
     public function updateStatus(Request $request, $id)

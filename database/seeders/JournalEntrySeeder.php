@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Account;
+use App\Models\Akun;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,12 +13,12 @@ class JournalEntrySeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed journal entries for all accounts
-        $accounts = Account::all();
+        // Seed journal entries for all akun
+        $akun = Akun::all();
 
-        foreach ($accounts as $account) {
-            // Create a journal entry for each account
-            $account->journalEntries()->create([
+        foreach ($akun as $akun) {
+            // Create a journal entry for each akun
+            $akun->journalEntries()->create([
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

@@ -14,7 +14,7 @@ use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\TransaksiSimpanan;
 use App\Models\Pengguna;
-use Database\Seeders\AccountSeeder;
+use Database\Seeders\AkunSeeder;
 use Database\Seeders\GlobalSettingSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,7 +24,7 @@ use Inertia\Testing\AssertableInertia;
 uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
-    $this->seed(AccountSeeder::class);
+    $this->seed(AkunSeeder::class);
     $this->seed(GlobalSettingSeeder::class);
 });
 

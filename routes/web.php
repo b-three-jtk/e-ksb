@@ -92,7 +92,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/allocation', [PenggunaController::class, 'allocation'])->middleware('permission:edit_anggota')->name('allocation');
     Route::post('/allocation', [PenggunaController::class, 'storeAllocation'])->middleware('permission:edit_anggota')->name('allocation.store');
     Route::put('/users/{id}/disable', [PenggunaController::class, 'updateStatusToInactive'])->middleware('permission:edit_anggota')->name('users.disable');
-    Route::get('/accounts/{id}/mutasi', [PenggunaController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
+    Route::get('/akun/{id}/mutasi', [PenggunaController::class, 'getMutasi'])->middleware('permission:view_anggota')->name('users.mutasi');
     Route::get('/pembiayaan/{id}/history', [PenggunaController::class, 'getRiwayat'])->middleware('permission:view_anggota')->name('users.financing_history');
 
     // Pengelolaan Pengurus
@@ -141,9 +141,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/pembiayaan/{pembiayaan}/payments/reschedule', [PembiayaanController::class, 'reschedulePayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.payments.reschedule');
 
     // Pengelolaan Akun
-    Route::get('/accounts', [AkunController::class, 'index'])->middleware('permission:view_kas')->name('accounts.index');
-    Route::post('/accounts/create', [AkunController::class, 'store'])->middleware('permission:create_kas')->name('accounts.create');
-    Route::patch('/accounts/{id}/status', [AkunController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('accounts.update-status');
+    Route::get('/akun', [AkunController::class, 'index'])->middleware('permission:view_kas')->name('akun.index');
+    Route::post('/akun/create', [AkunController::class, 'store'])->middleware('permission:create_kas')->name('akun.create');
+    Route::patch('/akun/{id}/status', [AkunController::class, 'updateStatus'])->middleware('permission:edit_kas')->name('akun.update-status');
 
     // Pengelolaan Kas
     Route::get('/kas', [AruskasController::class, 'index'])->middleware('permission:view_kas')->name('kas.index');

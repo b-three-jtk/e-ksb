@@ -24,7 +24,7 @@ class JurnalService
                 JournalEntry::create([
                     'journal_id'       => $journal->id,
                     'journal_group_id' => $journal->id,
-                    'no_ref_account'   => $entry['account'],
+                    'no_ref_akun'   => $entry['akun'],
                     'position'         => $entry['position'],
                     'nominal'          => $entry['nominal'],
                     'tgl_transaksi' => $date ?? now()->toDateString(),

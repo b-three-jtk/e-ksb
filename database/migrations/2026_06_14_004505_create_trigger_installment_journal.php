@@ -23,15 +23,15 @@ return new class extends Migration
                 v_principal     NUMERIC(15,2);
                 v_margin        NUMERIC(15,2);
             BEGIN
-                -- Ambil no_ref_account yang dibutuhkan
-                SELECT no_ref_account INTO v_kas_ref
-                FROM accounts WHERE account_name = 'Kas' LIMIT 1;
+                -- Ambil no_ref_akun yang dibutuhkan
+                SELECT no_ref_akun INTO v_kas_ref
+                FROM akun WHERE nama_akun = 'Kas' LIMIT 1;
 
-                SELECT no_ref_account INTO v_piutang_ref
-                FROM accounts WHERE account_name = 'Piutang Murabahah' LIMIT 1;
+                SELECT no_ref_akun INTO v_piutang_ref
+                FROM akun WHERE nama_akun = 'Piutang Murabahah' LIMIT 1;
 
-                SELECT no_ref_account INTO v_margin_ref
-                FROM accounts WHERE account_name = 'Pendapatan Margin Murabahah' LIMIT 1;
+                SELECT no_ref_akun INTO v_margin_ref
+                FROM akun WHERE nama_akun = 'Pendapatan Margin Murabahah' LIMIT 1;
 
                 -- Guard: pastikan semua akun ada
                 IF v_kas_ref IS NULL THEN
@@ -59,7 +59,7 @@ return new class extends Migration
 
                 -- Dr Kas (total nominal)
                 INSERT INTO journal_entries (
-                    journal_group_id, no_ref_account, position,
+                    journal_group_id, no_ref_akun, position,
                     nominal, tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
@@ -72,7 +72,7 @@ return new class extends Migration
 
                 -- Cr Piutang Murabahah (pokok)
                 INSERT INTO journal_entries (
-                    journal_group_id, no_ref_account, position,
+                    journal_group_id, no_ref_akun, position,
                     nominal, tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
@@ -85,7 +85,7 @@ return new class extends Migration
 
                 -- Cr Pendapatan Margin Murabahah (margin)
                 INSERT INTO journal_entries (
-                    journal_group_id, no_ref_account, position,
+                    journal_group_id, no_ref_akun, position,
                     nominal, tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (

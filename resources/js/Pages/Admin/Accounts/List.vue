@@ -13,7 +13,7 @@ import CardInfo from '../../../Components/CardInfo.vue'
 import Button from '../../../Components/Form/Button.vue'
 
 const props = defineProps<{
-    accounts: {
+    akun: {
         data: any[]
         current_page: number
         per_page: number
@@ -119,7 +119,7 @@ const submitForm = async () => {
 
     isSubmitting.value = true
     router.post(
-        '/admin/accounts/create',
+        '/admin/akun/create',
         {
             nomor_akun: form.nomor_akun,
             nama_akun: form.nama_akun,
@@ -200,7 +200,7 @@ const updateStatus = async () => {
     if (!result.isConfirmed) return
 
     router.patch(
-        `/admin/accounts/${statusForm.id}/status`,
+        `/admin/akun/${statusForm.id}/status`,
         {
             status: statusForm.status,
         },
@@ -251,7 +251,7 @@ const filters = reactive({
 
 const applyFilters = () => {
     router.get(
-        '/admin/accounts',
+        '/admin/akun',
         {
             search: filters.search || undefined,
             jenis_akun: filters.jenis_akun || undefined,
@@ -420,15 +420,15 @@ const nomorAkunGuide = [
             <!-- Table -->
             <BaseTable
                 :columns="columns"
-                :data="accounts.data"
-                :pagination="accounts"
+                :data="akun.data"
+                :pagination="akun"
                 :sort-by="filters.sort_by"
                 :sort-dir="filters.sort_dir"
                 @sort="toggleSort"
             >
 
                 <template #cell-no="{ index }">
-                    {{ (accounts.current_page - 1) * accounts.per_page + index + 1 }}
+                    {{ (akun.current_page - 1) * akun.per_page + index + 1 }}
                 </template>
 
                 <!-- Nomor Akun centered -->
@@ -481,7 +481,7 @@ const nomorAkunGuide = [
             </BaseTable>
 
             <!-- Pagination -->
-            <Pagination :links="accounts.links" :total="accounts.total" />
+            <Pagination :links="akun.links" :total="akun.total" />
         </div>
 
         <!--Modal Tambah Akun-->

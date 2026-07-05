@@ -18,7 +18,7 @@ use App\Models\Anggota;
 use App\Models\RekeningAnggota;
 use App\Models\AkunSimpanan;
 use App\Models\TransaksiSimpanan;
-use App\Models\Account;
+use App\Models\Akun;
 use App\Services\Admin\JurnalService;
 use App\Services\User\SimpananServices;
 use App\Services\PengaturanUmumService;
@@ -262,7 +262,7 @@ class SimpananController extends Controller
                             'opened_at' => optional($acc->created_at)->toDateString(),
                         ];
                     })->toArray(),
-                    'accounts' => $anggota->bankAccounts->map(function ($acc) {
+                    'akun' => $anggota->bankAccounts->map(function ($acc) {
                         return [
                             'nama_bank' => $acc->nama_bank,
                             'atas_nama' => $acc->atas_nama,

@@ -10,7 +10,7 @@ use App\Models\JenisBarang;
 use App\Models\AkunSimpanan;
 use App\Models\Pemasok;
 use App\Models\Pengguna;
-use Database\Seeders\AccountSeeder;
+use Database\Seeders\AkunSeeder;
 use Database\Seeders\GlobalSettingSeeder;
 use Database\Seeders\JenisBarangSeeder;
 use Database\Seeders\RoleSeeder;
@@ -22,7 +22,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
-    $this->seed(AccountSeeder::class);
+    $this->seed(AkunSeeder::class);
     $this->seed(GlobalSettingSeeder::class);
     $this->seed(JenisBarangSeeder::class);
 });
@@ -53,10 +53,10 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             'alamat_pemasok' => 'Jl. Integrasi No. 1',
         ]);
 
-        $danaAlokasi = \App\Models\Account::where('account_name', 'Dana Alokasi Pembiayaan Murabahah')->first();
+        $danaAlokasi = \App\Models\Akun::where('nama_akun', 'Dana Alokasi Pembiayaan Murabahah')->first();
         if ($danaAlokasi) {
             \App\Models\JournalEntry::create([
-                'no_ref_account' => $danaAlokasi->no_ref_account,
+                'no_ref_akun' => $danaAlokasi->no_ref_akun,
                 'position' => 'Debit',
                 'nominal' => 100000000,
                 'tgl_transaksi' => now()->format('Y-m-d'),

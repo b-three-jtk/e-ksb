@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\PositionEnum;
-use App\Models\Account;
+use App\Models\Akun;
 use App\Models\JournalEntry;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -15,7 +15,7 @@ class JournalEntryFactory extends Factory
     public function definition(): array
     {
         return [
-            'no_ref_account' => Account::factory(),
+            'no_ref_akun' => Akun::factory(),
             'position' => $this->faker->randomElement(PositionEnum::cases())->value,
             'nominal' => $this->faker->numberBetween(10000, 100000000),
             'updated_by' => Pengguna::factory(),

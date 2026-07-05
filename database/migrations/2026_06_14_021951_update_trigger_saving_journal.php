@@ -24,11 +24,11 @@ return new class extends Migration
                 FROM akun_simpanan
                 WHERE id = NEW.akun_simpanan_id;
 
-                SELECT no_ref_account INTO v_kas_ref
-                FROM accounts WHERE account_name = 'Kas' LIMIT 1;
+                SELECT no_ref_akun INTO v_kas_ref
+                FROM akun WHERE nama_akun = 'Kas' LIMIT 1;
 
-                SELECT no_ref_account INTO v_saving_ref
-                FROM accounts WHERE account_name = v_jenis_simpanan LIMIT 1;
+                SELECT no_ref_akun INTO v_saving_ref
+                FROM akun WHERE nama_akun = v_jenis_simpanan LIMIT 1;
 
                 IF v_kas_ref IS NULL THEN
                     RAISE EXCEPTION 'Akun Kas tidak ditemukan';
@@ -60,7 +60,7 @@ return new class extends Migration
                 -- Debit
                 INSERT INTO journal_entries (
                     journal_id, journal_group_id,
-                    no_ref_account, position, nominal,
+                    no_ref_akun, position, nominal,
                     tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
@@ -74,7 +74,7 @@ return new class extends Migration
                 -- Credit
                 INSERT INTO journal_entries (
                     journal_id, journal_group_id,
-                    no_ref_account, position, nominal,
+                    no_ref_akun, position, nominal,
                     tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (

@@ -13,7 +13,7 @@ use App\Http\Requests\Admin\StorePreFinancingRequest;
 use App\Http\Requests\CreateRepaymentRequest;
 use App\Http\Requests\StoreFinancingDraftRequest;
 use App\Http\Requests\StoreFinancingRequest;
-use App\Models\Account;
+use App\Models\Akun;
 use App\Models\AkunSimpanan;
 use App\Models\Anggota;
 use App\Models\Pembiayaan;
@@ -248,21 +248,21 @@ class PembiayaanController extends Controller
 
                 if ($validated['status'] === FinancingReqStatusEnum::APPROVED->value) {
 
-                    $danaAlokasi = Account::where(
-                        'account_name',
+                    $danaAlokasi = Akun::where(
+                        'nama_akun',
                         'Dana Alokasi Pembiayaan Murabahah'
                     )->firstOrFail();
 
                     $danaAlokasiMasuk = JournalEntry::where(
-                        'no_ref_account',
-                        $danaAlokasi->no_ref_account
+                        'no_ref_akun',
+                        $danaAlokasi->no_ref_akun
                     )
                     ->where('position', PositionEnum::DEBIT->value)
                     ->sum('nominal');
 
                     $danaAlokasiKeluar = JournalEntry::where(
-                        'no_ref_account',
-                        $danaAlokasi->no_ref_account
+                        'no_ref_akun',
+                        $danaAlokasi->no_ref_akun
                     )
                     ->where('position', PositionEnum::CREDIT->value)
                     ->sum('nominal');
@@ -291,25 +291,25 @@ class PembiayaanController extends Controller
 
             if ($validated['status'] === FinancingReqStatusEnum::APPROVED->value) {
 
-                $pembiayaanDalamProses = Account::where(
-                    'account_name',
+                $pembiayaanDalamProses = Akun::where(
+                    'nama_akun',
                     'Pembiayaan Dalam Proses'
                 )->firstOrFail();
 
-                $danaAlokasi = Account::where(
-                    'account_name',
+                $danaAlokasi = Akun::where(
+                    'nama_akun',
                     'Dana Alokasi Pembiayaan Murabahah'
                 )->firstOrFail();
 
                 app(JurnalService::class)->create(
                     [
                         [
-                            'account' => $pembiayaanDalamProses->no_ref_account,
+                            'akun' => $pembiayaanDalamProses->no_ref_akun,
                             'position' => PositionEnum::DEBIT->value,
                             'nominal' => $pembiayaan->harga_perkiraan,
                         ],
                         [
-                            'account' => $danaAlokasi->no_ref_account,
+                            'akun' => $danaAlokasi->no_ref_akun,
                             'position' => PositionEnum::CREDIT->value,
                             'nominal' => $pembiayaan->harga_perkiraan,
                         ],
@@ -320,13 +320,13 @@ class PembiayaanController extends Controller
 
                 // Jurnal uang muka saat approval (semua payment method)
                 if ($pembiayaan->uang_muka > 0) {
-                    $uangMukaMurabahah = Account::where(
-                        'account_name',
+                    $uangMukaMurabahah = Akun::where(
+                        'nama_akun',
                         'Uang Muka Murabahah'
                     )->firstOrFail();
 
-                    $kas = Account::where(
-                        'account_name',
+                    $kas = Akun::where(
+                        'nama_akun',
                         'Kas'
                     )->firstOrFail();
 
@@ -334,12 +334,12 @@ class PembiayaanController extends Controller
                     app(JurnalService::class)->create(
                         [
                             [
-                                'account' => $kas->no_ref_account,
+                                'akun' => $kas->no_ref_akun,
                                 'position' => PositionEnum::DEBIT->value,
                                 'nominal' => $pembiayaan->uang_muka,
                             ],
                             [
-                                'account' => $uangMukaMurabahah->no_ref_account,
+                                'akun' => $uangMukaMurabahah->no_ref_akun,
                                 'position' => PositionEnum::CREDIT->value,
                                 'nominal' => $pembiayaan->uang_muka,
                             ],
@@ -349,20 +349,20 @@ class PembiayaanController extends Controller
                     );
 
                     // Offset uang muka ke piutang murabahah
-                    $piutangMurabahah = Account::where(
-                        'account_name',
+                    $piutangMurabahah = Akun::where(
+                        'nama_akun',
                         'Piutang Murabahah'
                     )->firstOrFail();
 
                     app(JurnalService::class)->create(
                         [
                             [
-                                'account' => $uangMukaMurabahah->no_ref_account,
+                                'akun' => $uangMukaMurabahah->no_ref_akun,
                                 'position' => PositionEnum::DEBIT->value,
                                 'nominal' => $pembiayaan->uang_muka,
                             ],
                             [
-                                'account' => $piutangMurabahah->no_ref_account,
+                                'akun' => $piutangMurabahah->no_ref_akun,
                                 'position' => PositionEnum::CREDIT->value,
                                 'nominal' => $pembiayaan->uang_muka,
                             ],
@@ -467,27 +467,27 @@ class PembiayaanController extends Controller
                     $this->pembiayaanService->generateTangguhSchedule($pembiayaan, $validated['pembiayaan']['tangguh_tgl_pembayaran']);
                 }
 
-                $pembiayaanDalamProses = Account::where(
-                    'account_name',
+                $pembiayaanDalamProses = Akun::where(
+                    'nama_akun',
                     'Pembiayaan Dalam Proses'
                 )->firstOrFail();
 
-                $piutangMurabahah = Account::where(
-                    'account_name',
+                $piutangMurabahah = Akun::where(
+                    'nama_akun',
                     'Piutang Murabahah'
                 )->firstOrFail();
 
-                $pendapatanMargin = Account::where(
-                    'account_name',
+                $pendapatanMargin = Akun::where(
+                    'nama_akun',
                     'Pendapatan Margin Murabahah'
                 )->firstOrFail();
-                $danaAlokasi = Account::where(
-                    'account_name',
+                $danaAlokasi = Akun::where(
+                    'nama_akun',
                     'Dana Alokasi Pembiayaan Murabahah'
                 )->firstOrFail();
 
-                $kas = Account::where(
-                    'account_name',
+                $kas = Akun::where(
+                    'nama_akun',
                     'Kas'
                 )->firstOrFail();
 
@@ -506,17 +506,17 @@ class PembiayaanController extends Controller
                         app(JurnalService::class)->create(
                             [
                                 [
-                                    'account' => $danaAlokasi->no_ref_account,
+                                    'akun' => $danaAlokasi->no_ref_akun,
                                     'position' => PositionEnum::DEBIT->value,
                                     'nominal' => $selisih,
                                 ],
                                 [
-                                    'account' => $piutangMurabahah->no_ref_account,
+                                    'akun' => $piutangMurabahah->no_ref_akun,
                                     'position' => PositionEnum::DEBIT->value,
                                     'nominal' => $piutang,
                                 ],
                                 [
-                                    'account' => $pembiayaanDalamProses->no_ref_account,
+                                    'akun' => $pembiayaanDalamProses->no_ref_akun,
                                     'position' => PositionEnum::CREDIT->value,
                                     'nominal' => $pembiayaan->harga_perkiraan,
                                 ],
@@ -529,12 +529,12 @@ class PembiayaanController extends Controller
                         app(JurnalService::class)->create(
                             [
                                 [
-                                    'account' => $piutangMurabahah->no_ref_account,
+                                    'akun' => $piutangMurabahah->no_ref_akun,
                                     'position' => PositionEnum::DEBIT->value,
                                     'nominal' => $piutang,
                                 ],
                                 [
-                                    'account' => $pembiayaanDalamProses->no_ref_account,
+                                    'akun' => $pembiayaanDalamProses->no_ref_akun,
                                     'position' => PositionEnum::CREDIT->value,
                                     'nominal' => $allocatedAmount,
                                 ],
@@ -561,22 +561,22 @@ class PembiayaanController extends Controller
                         app(JurnalService::class)->create(
                         [
                             [
-                                'account' => $danaAlokasi->no_ref_account,
+                                'akun' => $danaAlokasi->no_ref_akun,
                                 'position' => PositionEnum::DEBIT->value,
                                 'nominal' => $selisih,
                             ],
                             [
-                                'account' => $kas->no_ref_account,
+                                'akun' => $kas->no_ref_akun,
                                 'position' => PositionEnum::DEBIT->value,
                                 'nominal' => $piutang + $margin,
                             ],
                             [
-                                'account' => $pembiayaanDalamProses->no_ref_account,
+                                'akun' => $pembiayaanDalamProses->no_ref_akun,
                                 'position' => PositionEnum::CREDIT->value,
                                 'nominal' => $allocatedAmount,
                             ],
                             [
-                                'account' => $pendapatanMargin->no_ref_account,
+                                'akun' => $pendapatanMargin->no_ref_akun,
                                 'position' => PositionEnum::CREDIT->value,
                                 'nominal' => $margin,
                             ],
@@ -589,17 +589,17 @@ class PembiayaanController extends Controller
                         app(JurnalService::class)->create(
                         [
                             [
-                                'account' => $kas->no_ref_account,
+                                'akun' => $kas->no_ref_akun,
                                 'position' => PositionEnum::DEBIT->value,
                                 'nominal' => $piutang + $margin,
                             ],
                             [
-                                'account' => $pembiayaanDalamProses->no_ref_account,
+                                'akun' => $pembiayaanDalamProses->no_ref_akun,
                                 'position' => PositionEnum::CREDIT->value,
                                 'nominal' => $allocatedAmount,
                             ],
                             [
-                                'account' => $pendapatanMargin->no_ref_account,
+                                'akun' => $pendapatanMargin->no_ref_akun,
                                 'position' => PositionEnum::CREDIT->value,
                                 'nominal' => $margin,
                             ],
@@ -625,17 +625,17 @@ class PembiayaanController extends Controller
                         app(JurnalService::class)->create(
                             [
                                 [
-                                    'account' => $danaAlokasi->no_ref_account,
+                                    'akun' => $danaAlokasi->no_ref_akun,
                                     'position' => PositionEnum::DEBIT->value,
                                     'nominal' => $selisih,
                                 ],
                                 [
-                                    'account' => $piutangMurabahah->no_ref_account,
+                                    'akun' => $piutangMurabahah->no_ref_akun,
                                     'position' => PositionEnum::DEBIT->value,
                                     'nominal' => $piutang,
                                 ],
                                 [
-                                    'account' => $pembiayaanDalamProses->no_ref_account,
+                                    'akun' => $pembiayaanDalamProses->no_ref_akun,
                                     'position' => PositionEnum::CREDIT->value,
                                     'nominal' => $allocatedAmount,
                                 ],
@@ -647,12 +647,12 @@ class PembiayaanController extends Controller
                         app(JurnalService::class)->create(
                             [
                                 [
-                                    'account' => $piutangMurabahah->no_ref_account,
+                                    'akun' => $piutangMurabahah->no_ref_akun,
                                     'position' => PositionEnum::DEBIT->value,
                                     'nominal' => $piutang,
                                 ],
                                 [
-                                    'account' => $pembiayaanDalamProses->no_ref_account,
+                                    'akun' => $pembiayaanDalamProses->no_ref_akun,
                                     'position' => PositionEnum::CREDIT->value,
                                     'nominal' => $allocatedAmount,
                                 ],

@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::create('journal_entries', function (Blueprint $table) {
             $table->id();
-            $table->string('no_ref_account');
+            $table->string('no_ref_akun');
             $table->enum('position', ['Debit', 'Credit']);
             $table->decimal('nominal', 15, 2);
             $table->date('tgl_transaksi');
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
 
-            $table->foreign('no_ref_account')->references('no_ref_account')->on('accounts')->onDelete('restrict');
+            $table->foreign('no_ref_akun')->references('no_ref_akun')->on('akun')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('pengguna')->onDelete('set null');
-            $table->index('no_ref_account');
+            $table->index('no_ref_akun');
         });
     }
 

@@ -78,7 +78,7 @@ const menuGroups = [
             {
                 icon: AccountIcon,
                 name: "Pengelolaan Akun",
-                path: "/admin/accounts",
+                path: "/admin/akun",
                 permission: "view_kas"
             },
             {

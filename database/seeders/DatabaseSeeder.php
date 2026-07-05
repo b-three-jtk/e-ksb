@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\JournalEntry;
-use Database\Seeders\AccountSeeder;
+use Database\Seeders\AkunSeeder;
 use Database\Seeders\PenggunaSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             PenggunaSeeder::class,
             JenisBarangSeeder::class,
-            AccountSeeder::class,
+            AkunSeeder::class,
             SavingProductSeeder::class,
             MurabahaProductSeeder::class,
             GlobalSettingSeeder::class,

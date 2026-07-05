@@ -97,18 +97,18 @@ class PembiayaanService
     public function getModalBelumDiputar()
     {
         $modalCredit = JournalEntry::whereHas(
-            'account',
+            'akun',
             function ($q) {
-                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
+                $q->where('nama_akun', 'Dana Alokasi Pembiayaan Murabahah');
             }
         )
         ->where('position', PositionEnum::CREDIT->value)
         ->sum('nominal');
 
         $modalDebit = JournalEntry::whereHas(
-            'account',
+            'akun',
             function ($q) {
-                $q->where('account_name', 'Dana Alokasi Pembiayaan Murabahah');
+                $q->where('nama_akun', 'Dana Alokasi Pembiayaan Murabahah');
             }
         )
         ->where('position', PositionEnum::DEBIT->value)

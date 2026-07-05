@@ -108,7 +108,7 @@ const openMutasiModal = async (account) => {
     mutasiModalRef.value?.openModal();
 
     try {
-        const res = await axios.get(`/admin/accounts/${account.id}/mutasi`);
+        const res = await axios.get(`/admin/akun/${account.id}/mutasi`);
         mutasiData.value = res.data;
     } catch (error) {
         console.error("Error fetching mutasi:", error);

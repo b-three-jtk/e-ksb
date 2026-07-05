@@ -28,27 +28,27 @@ return new class extends Migration
                 FROM akun_simpanan
                 WHERE id = NEW.akun_simpanan_id;
 
-                -- Kas → no_ref_account '101'
-                SELECT no_ref_account INTO v_kas_ref
-                FROM accounts
-                WHERE account_name = 'Kas'
+                -- Kas → no_ref_akun '101'
+                SELECT no_ref_akun INTO v_kas_ref
+                FROM akun
+                WHERE nama_akun = 'Kas'
                 LIMIT 1;
 
                 -- Simpanan → cocokkan dengan jenis_simpanan
                 -- Nilai yang valid: 'Tabungan Anggota', 'Tabungan Berjangka',
                 --                   'Tabungan Ibadah', 'Simpanan Pokok', 'Simpanan Wajib'
-                SELECT no_ref_account INTO v_saving_ref
-                FROM accounts
-                WHERE account_name = v_jenis_simpanan
+                SELECT no_ref_akun INTO v_saving_ref
+                FROM akun
+                WHERE nama_akun = v_jenis_simpanan
                 LIMIT 1;
 
                 -- Guard: kalau akun tidak ditemukan, batalkan dan kasih pesan jelas
                 IF v_kas_ref IS NULL THEN
-                    RAISE EXCEPTION 'Akun Kas tidak ditemukan di tabel accounts';
+                    RAISE EXCEPTION 'Akun Kas tidak ditemukan di tabel akun';
                 END IF;
 
                 IF v_saving_ref IS NULL THEN
-                    RAISE EXCEPTION 'Akun untuk jenis_simpanan ''%'' tidak ditemukan di tabel accounts',
+                    RAISE EXCEPTION 'Akun untuk jenis_simpanan ''%'' tidak ditemukan di tabel akun',
                         v_jenis_simpanan;
                 END IF;
 
@@ -70,7 +70,7 @@ return new class extends Migration
                 -- Baris DEBIT
                 INSERT INTO journal_entries (
                     journal_group_id,
-                    no_ref_account,
+                    no_ref_akun,
                     position,
                     nominal,
                     tgl_transaksi,
@@ -91,7 +91,7 @@ return new class extends Migration
                 -- Baris CREDIT
                 INSERT INTO journal_entries (
                     journal_group_id,
-                    no_ref_account,
+                    no_ref_akun,
                     position,
                     nominal,
                     tgl_transaksi,

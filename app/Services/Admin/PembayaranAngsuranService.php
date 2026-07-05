@@ -2,7 +2,7 @@
 namespace App\Services\Admin;
 
 use App\Enums\FinancingReqStatusEnum;
-use App\Models\Account;
+use App\Models\Akun;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Models\Pembiayaan;
 use App\Models\Angsuran;
@@ -137,18 +137,18 @@ class PembayaranAngsuranService
                 'struk_pembayaran' => $filePath,
             ]);
 
-            $kas = Account::where(
-                'account_name',
+            $kas = Akun::where(
+                'nama_akun',
                 'Kas'
             )->firstOrFail();
 
-            $piutangMurabahah = Account::where(
-                'account_name',
+            $piutangMurabahah = Akun::where(
+                'nama_akun',
                 'Piutang Murabahah'
             )->firstOrFail();
 
-            $pendapatanMargin = Account::where(
-                'account_name',
+            $pendapatanMargin = Akun::where(
+                'nama_akun',
                 'Pendapatan Margin Murabahah'
             )->firstOrFail();
 
