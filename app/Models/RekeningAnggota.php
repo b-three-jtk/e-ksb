@@ -8,17 +8,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MemberBankAccount extends Model
+class RekeningAnggota extends Model
 {
     use HasFactory;
-    protected $primaryKey = 'account_number';
+    protected $primaryKey = 'no_rekening';
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table = 'rekening_anggota';
 
     protected $fillable = [
-        'account_number',
-        'bank_name',
-        'account_name',
+        'no_rekening',
+        'nama_bank',
+        'atas_nama',
         'anggota_id',
     ];
 

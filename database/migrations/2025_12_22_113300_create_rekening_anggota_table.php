@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('member_bank_accounts', function (Blueprint $table) {
-            $table->string('account_number', 20)->primary();
-            $table->string('bank_name');
-            $table->string('account_name');
+        Schema::create('rekening_anggota', function (Blueprint $table) {
+            $table->string('no_rekening', 20)->primary();
+            $table->string('nama_bank');
+            $table->string('atas_nama');
             $table->unsignedBigInteger('anggota_id');
 
             $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('cascade');

@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <title>Kuitansi Penyetoran</title>
     <style>
-        @page { size: 80mm auto; margin: 4mm; }
+        @page {
+            size: 80mm auto;
+            margin: 4mm;
+        }
 
         body {
             margin: 0;
@@ -20,7 +24,9 @@
             padding: 10px;
         }
 
-        .center { text-align: center; }
+        .center {
+            text-align: center;
+        }
 
         .title {
             font-weight: 700;
@@ -115,6 +121,7 @@
         }
     </style>
 </head>
+
 <body>
     @php
         $trxDate = \Carbon\Carbon::parse($struk['tanggal'] ?? now())->locale('id');
@@ -125,7 +132,8 @@
     <div class="receipt">
         <div class="center">
             <div class="title">Koperasi Syariah Berkah</div>
-            <div class="subtitle">Komplek Puri Cipageran Indah 2, RW 21, Desa Ngamprah, Kec. Tanimulya, Kabupaten Bandung Barat</div>
+            <div class="subtitle">Komplek Puri Cipageran Indah 2, RW 21, Desa Ngamprah, Kec. Tanimulya, Kabupaten
+                Bandung Barat</div>
         </div>
 
         <hr>
@@ -136,24 +144,74 @@
 
         <hr>
 
-        <table class="row"><tr><td>No. Transaksi</td><td><strong>{{ $struk['no_transaksi'] ?? '-' }}</strong></td></tr></table>
-        <table class="row"><tr><td>Tanggal</td><td>{{ $tanggalFormatted }}</td></tr></table>
-        <table class="row"><tr><td>Kasir / Pengurus</td><td>{{ $struk['pengurus'] ?? '-' }}</td></tr></table>
+        <table class="row">
+            <tr>
+                <td>No. Transaksi</td>
+                <td><strong>{{ $struk['no_transaksi'] ?? '-' }}</strong></td>
+            </tr>
+        </table>
+        <table class="row">
+            <tr>
+                <td>Tanggal</td>
+                <td>{{ $tanggalFormatted }}</td>
+            </tr>
+        </table>
+        <table class="row">
+            <tr>
+                <td>Kasir / Pengurus</td>
+                <td>{{ $struk['pengurus'] ?? '-' }}</td>
+            </tr>
+        </table>
 
         <hr>
 
-        <table class="row"><tr><td>Nama Anggota</td><td>{{ $struk['nama_anggota'] ?? '-' }}</td></tr></table>
-        <table class="row"><tr><td>No. Anggota</td><td>{{ $struk['no_anggota'] ?? '-' }}</td></tr></table>
+        <table class="row">
+            <tr>
+                <td>Nama Anggota</td>
+                <td>{{ $struk['nama_anggota'] ?? '-' }}</td>
+            </tr>
+        </table>
+        <table class="row">
+            <tr>
+                <td>No. Anggota</td>
+                <td>{{ $struk['no_anggota'] ?? '-' }}</td>
+            </tr>
+        </table>
 
         <hr>
 
-        <table class="rowb"><tr><td>Jenis Simpanan</td><td>{{ $struk['jenis'] ?? '-' }}</td></tr></table>
-        <table class="row"><tr><td>Metode</td><td>{{ $struk['metode'] ?? '-' }}</td></tr></table>
+        <table class="rowb">
+            <tr>
+                <td>Jenis Simpanan</td>
+                <td>{{ $struk['jenis'] ?? '-' }}</td>
+            </tr>
+        </table>
+        <table class="row">
+            <tr>
+                <td>Metode</td>
+                <td>{{ $struk['metode'] ?? '-' }}</td>
+            </tr>
+        </table>
 
         @if(($struk['metode'] ?? '') === 'Non-Tunai')
-            <table class="row"><tr><td>Bank</td><td>{{ $struk['bank_name'] ?? '-' }}</td></tr></table>
-            <table class="row"><tr><td>Atas Nama</td><td>{{ $struk['account_name'] ?? '-' }}</td></tr></table>
-            <table class="row"><tr><td>No. Rekening</td><td>{{ $struk['account_number'] ?? '-' }}</td></tr></table>
+            <table class="row">
+                <tr>
+                    <td>Bank</td>
+                    <td>{{ $struk['nama_bank'] ?? '-' }}</td>
+                </tr>
+            </table>
+            <table class="row">
+                <tr>
+                    <td>Atas Nama</td>
+                    <td>{{ $struk['atas_nama'] ?? '-' }}</td>
+                </tr>
+            </table>
+            <table class="row">
+                <tr>
+                    <td>No. Rekening</td>
+                    <td>{{ $struk['no_rekening'] ?? '-' }}</td>
+                </tr>
+            </table>
         @endif
 
         <hr>
@@ -167,11 +225,27 @@
 
         <hr>
 
-        <div style="font-weight:700; font-size:11px; margin-bottom:4px;">SALDO {{ strtoupper($struk['jenis'] ?? '-') }}</div>
+        <div style="font-weight:700; font-size:11px; margin-bottom:4px;">SALDO {{ strtoupper($struk['jenis'] ?? '-') }}
+        </div>
         <div class="box">
-            <table class="row muted"><tr><td>Saldo sebelum</td><td>Rp {{ number_format((float) ($struk['saldo_sebelum'] ?? 0), 0, ',', '.') }}</td></tr></table>
-            <table class="row"><tr><td>+ Setoran ini</td><td class="plus">+ Rp {{ number_format((float) ($struk['nominal'] ?? 0), 0, ',', '.') }}</td></tr></table>
-            <table class="row saldo-now"><tr><td>Saldo sekarang</td><td>Rp {{ number_format((float) ($struk['saldo_sesudah'] ?? 0), 0, ',', '.') }}</td></tr></table>
+            <table class="row muted">
+                <tr>
+                    <td>Saldo sebelum</td>
+                    <td>Rp {{ number_format((float) ($struk['saldo_sebelum'] ?? 0), 0, ',', '.') }}</td>
+                </tr>
+            </table>
+            <table class="row">
+                <tr>
+                    <td>+ Setoran ini</td>
+                    <td class="plus">+ Rp {{ number_format((float) ($struk['nominal'] ?? 0), 0, ',', '.') }}</td>
+                </tr>
+            </table>
+            <table class="row saldo-now">
+                <tr>
+                    <td>Saldo sekarang</td>
+                    <td>Rp {{ number_format((float) ($struk['saldo_sesudah'] ?? 0), 0, ',', '.') }}</td>
+                </tr>
+            </table>
         </div>
 
         <hr>
@@ -183,4 +257,5 @@
         </div>
     </div>
 </body>
+
 </html>

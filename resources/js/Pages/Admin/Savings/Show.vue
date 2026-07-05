@@ -107,17 +107,17 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Rekening</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.member_bank_account?.account_number }}</span>
+                                        data.member_bank_account?.no_rekening }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pemilik Rekening</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.member_bank_account?.account_name }}</span>
+                                        data.member_bank_account?.atas_nama }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Bank</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.member_bank_account?.bank_name }}</span>
+                                        data.member_bank_account?.nama_bank }}</span>
                                 </li>
                             </ul>
                         </div>

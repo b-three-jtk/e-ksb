@@ -102,9 +102,9 @@ function cetak() {
 
   const withdrawalBankRows = !isDeposit.value && props.transaksi.metode === 'Non-Tunai'
     ? `
-      <div class="row"><span>Bank</span><span>${escapeHtml(props.transaksi.bank_name)}</span></div>
-      <div class="row"><span>Atas Nama</span><span>${escapeHtml(props.transaksi.account_name)}</span></div>
-      <div class="row"><span>No. Rekening</span><span>${escapeHtml(props.transaksi.account_number)}</span></div>
+      <div class="row"><span>Bank</span><span>${escapeHtml(props.transaksi.nama_bank)}</span></div>
+      <div class="row"><span>Atas Nama</span><span>${escapeHtml(props.transaksi.atas_nama)}</span></div>
+      <div class="row"><span>No. Rekening</span><span>${escapeHtml(props.transaksi.no_rekening)}</span></div>
     `
     : ''
 
@@ -271,15 +271,15 @@ defineExpose({ cetak })
       <div v-if="!isDeposit && transaksi.metode === 'Non-Tunai'">
         <div class="flex justify-between text-xs">
           <span>Bank</span>
-          <span>{{ transaksi.bank_name }}</span>
+          <span>{{ transaksi.nama_bank }}</span>
         </div>
         <div class="flex justify-between text-xs">
           <span>Atas Nama</span>
-          <span>{{ transaksi.account_name }}</span>
+          <span>{{ transaksi.atas_nama }}</span>
         </div>
         <div class="flex justify-between text-xs">
           <span>No. Rekening</span>
-          <span>{{ transaksi.account_number }}</span>
+          <span>{{ transaksi.no_rekening }}</span>
         </div>
       </div>
 

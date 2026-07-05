@@ -6,7 +6,7 @@ use App\Enums\MemberStatusEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Models\Anggota;
-use App\Models\MemberBankAccount;
+use App\Models\RekeningAnggota;
 use App\Models\AkunSimpanan;
 use App\Models\SavingTransaction;
 use App\Services\Admin\JurnalService;
@@ -100,19 +100,19 @@ class SimpananServices
             ]);
 
             if ($validated['method'] === 'Non-Tunai') {
-                MemberBankAccount::updateOrCreate(
+                RekeningAnggota::updateOrCreate(
                     [
                         'anggota_id' => $anggota->id,
-                        'account_number' => $validated['account_number'],
+                        'no_rekening' => $validated['no_rekening'],
                     ],
                     [
-                        'bank_name' => $validated['bank_name'],
-                        'account_name' => $validated['account_name'],
+                        'nama_bank' => $validated['nama_bank'],
+                        'atas_nama' => $validated['atas_nama'],
                     ]
                 );
 
                 $transaction->update([
-                    'account_number' => $validated['account_number'],
+                    'no_rekening' => $validated['no_rekening'],
                 ]);
             }
 
@@ -135,9 +135,9 @@ class SimpananServices
             'nominal' => $validated['amount'],
             'saldo_sebelum' => $saldoSebelum,
             'saldo_sesudah' => $saldoSebelum - $validated['amount'],
-            'bank_name' => $validated['bank_name'] ?? '',
-            'account_name' => $validated['account_name'] ?? '',
-            'account_number' => $validated['account_number'] ?? '',
+            'nama_bank' => $validated['nama_bank'] ?? '',
+            'atas_nama' => $validated['atas_nama'] ?? '',
+            'no_rekening' => $validated['no_rekening'] ?? '',
         ];
 
         try {

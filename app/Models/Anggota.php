@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Models\KeuanganAnggota;
 use App\Models\Pembiayaan;
 use App\Models\AhliWaris;
-use App\Models\MemberBankAccount;
+use App\Models\RekeningAnggota;
 use App\Models\MemberDoc;
 use App\Models\MemberJob;
 use App\Models\Notification;
@@ -59,7 +59,7 @@ class Anggota extends Model
 
     public function bankAccounts()
     {
-        return $this->hasMany(MemberBankAccount::class);
+        return $this->hasMany(RekeningAnggota::class);
     }
 
     public function ahliWaris()

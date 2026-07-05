@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Enums\PaymentMethodsEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
-use App\Models\MemberBankAccount;
+use App\Models\RekeningAnggota;
 use App\Models\Poin;
 use App\Models\AkunSimpanan;
 use App\Models\SavingTransaction;
@@ -29,7 +29,7 @@ class SavingTransactionFactory extends Factory
             'saving_transaction_receipt' => $this->faker->optional()->filePath(),
             'updated_by' => Pengguna::factory(),
             'akun_simpanan_id' => AkunSimpanan::factory(),
-            'account_number' => MemberBankAccount::factory(),
+            'no_rekening' => RekeningAnggota::factory(),
             'point_id' => Poin::factory(),
         ];
     }

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\MemberBankAccount;
+use App\Models\RekeningAnggota;
 use App\Models\Poin;
 use App\Models\AkunSimpanan;
 use App\Models\Pengguna;
@@ -29,7 +29,7 @@ class SavingTransaction extends Model
 
         'updated_by',
         'akun_simpanan_id',
-        'account_number',
+        'no_rekening',
         'point_id',
     ];
 
@@ -43,9 +43,9 @@ class SavingTransaction extends Model
         return $this->belongsTo(Pengguna::class, 'updated_by');
     }
 
-    public function memberBankAccount()
+    public function rekeningAnggota()
     {
-        return $this->belongsTo(MemberBankAccount::class, 'account_number', 'account_number');
+        return $this->belongsTo(RekeningAnggota::class, 'no_rekening', 'no_rekening');
     }
 
     public function point()

@@ -45,7 +45,7 @@ const hasSavedAccounts = computed(() => savedAccounts.value.length > 0)
 
 const bankOptions = computed(() => {
   const savedBanks = savedAccounts.value
-    .map((acc) => String(acc?.bank_name || '').trim())
+    .map((acc) => String(acc?.nama_bank || '').trim())
     .filter(Boolean)
 
   return [...new Set([...savedBanks, ...defaultBankOptions])]
@@ -118,18 +118,18 @@ function applySavedBankInfo() {
   if (!latest) return
 
   if (!form.value.bankName) {
-    form.value.bankName = latest.bank_name || ''
+    form.value.bankName = latest.nama_bank || ''
   }
 
   if (!form.value.accountName) {
-    form.value.accountName = latest.account_name || ''
+    form.value.accountName = latest.atas_nama || ''
   }
 
   if (!form.value.accountNumber) {
-    form.value.accountNumber = latest.account_number || ''
+    form.value.accountNumber = latest.no_rekening || ''
   }
 
-  selectedSavedAccountNumber.value = latest.account_number || ''
+  selectedSavedAccountNumber.value = latest.no_rekening || ''
 }
 
 function applySavedBankInfoByBank(bankName) {
@@ -139,14 +139,14 @@ function applySavedBankInfoByBank(bankName) {
   if (!selectedBank) return
 
   const matched = savedAccounts.value.find(
-    (acc) => String(acc?.bank_name || '').trim().toLowerCase() === selectedBank
+    (acc) => String(acc?.nama_bank || '').trim().toLowerCase() === selectedBank
   )
 
   if (!matched) return
 
-  form.value.accountName = matched.account_name || ''
-  form.value.accountNumber = matched.account_number || ''
-  selectedSavedAccountNumber.value = matched.account_number || ''
+  form.value.accountName = matched.atas_nama || ''
+  form.value.accountNumber = matched.no_rekening || ''
+  selectedSavedAccountNumber.value = matched.no_rekening || ''
 }
 
 function applySavedBankInfoByAccountNumber(accountNumber) {
@@ -156,14 +156,14 @@ function applySavedBankInfoByAccountNumber(accountNumber) {
   if (!selectedNumber) return
 
   const matched = savedAccounts.value.find(
-    (acc) => String(acc?.account_number || '').trim() === selectedNumber
+    (acc) => String(acc?.no_rekening || '').trim() === selectedNumber
   )
 
   if (!matched) return
 
-  form.value.bankName = matched.bank_name || ''
-  form.value.accountName = matched.account_name || ''
-  form.value.accountNumber = matched.account_number || ''
+  form.value.bankName = matched.nama_bank || ''
+  form.value.accountName = matched.atas_nama || ''
+  form.value.accountNumber = matched.no_rekening || ''
 }
 
 function onAccountNumberInput(e) {
@@ -391,10 +391,10 @@ defineExpose({
             <option value="">Pilih rekening (opsional)</option>
             <option
               v-for="account in savedAccounts"
-              :key="account.account_number"
-              :value="account.account_number"
+              :key="account.no_rekening"
+              :value="account.no_rekening"
             >
-              {{ account.bank_name }} - {{ account.account_number }} ({{ account.account_name }})
+              {{ account.nama_bank }} - {{ account.no_rekening }} ({{ account.atas_nama }})
             </option>
           </select>
         </div>

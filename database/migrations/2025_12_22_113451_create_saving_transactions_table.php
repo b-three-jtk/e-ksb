@@ -26,8 +26,8 @@ return new class extends Migration
 
             $table->foreignUuid('updated_by')->nullable()->constrained('pengguna')->onDelete('set null');
             $table->foreignUuid('akun_simpanan_id')->nullable()->constrained('akun_simpanan')->onDelete('set null');
-            $table->string('account_number')->nullable();
-            $table->foreign('account_number')->references('account_number')->on('member_bank_accounts')->onDelete('set null');
+            $table->string('no_rekening')->nullable();
+            $table->foreign('no_rekening')->references('no_rekening')->on('rekening_anggota')->onDelete('set null');
             $table->foreignId('point_id')->nullable()->constrained('poin')->onDelete('set null');
             $table->timestamps();
 

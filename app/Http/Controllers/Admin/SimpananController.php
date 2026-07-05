@@ -15,7 +15,7 @@ use App\Http\Requests\StoreWithdrawalRequest;
 use App\Models\BerjangkaAccount;
 use App\Models\IbadahAccount;
 use App\Models\Anggota;
-use App\Models\MemberBankAccount;
+use App\Models\RekeningAnggota;
 use App\Models\AkunSimpanan;
 use App\Models\SavingTransaction;
 use App\Models\Account;
@@ -92,7 +92,7 @@ class SimpananController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk melihat detail transaksi simpanan ini.');
         }
 
-        $data = SavingTransaction::with('akunSimpanan.anggota.user', 'memberBankAccount')->find($id);
+        $data = SavingTransaction::with('akunSimpanan.anggota.user', 'rekeningAnggota')->find($id);
         $saving_transaction_receipt = $data->saving_transaction_receipt ? Storage::url($data->saving_transaction_receipt) : null;
 
         return inertia('Admin/Savings/Show', [
@@ -264,9 +264,9 @@ class SimpananController extends Controller
                     })->toArray(),
                     'accounts' => $anggota->bankAccounts->map(function ($acc) {
                         return [
-                            'bank_name' => $acc->bank_name,
-                            'account_name' => $acc->account_name,
-                            'account_number' => $acc->account_number,
+                            'nama_bank' => $acc->nama_bank,
+                            'atas_nama' => $acc->atas_nama,
+                            'no_rekening' => $acc->no_rekening,
                         ];
                     })->toArray(),
                 ];

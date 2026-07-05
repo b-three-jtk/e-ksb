@@ -32,10 +32,10 @@ class BukuBesarService
             $saldoSebelum = $saldoSesudah - $transactionEffect;
             $accountBalances[$akunSimpananId] = $saldoSebelum;
 
-            $linkedAccount = $transaction->memberBankAccount;
+            $linkedAccount = $transaction->rekeningAnggota;
             if (!$linkedAccount && $transaction->akunSimpanan?->anggota?->bankAccounts) {
                 $linkedAccount = $transaction->akunSimpanan->anggota->bankAccounts
-                    ->firstWhere('account_number', $transaction->account_number)
+                    ->firstWhere('no_rekening', $transaction->no_rekening)
                     ?? $transaction->akunSimpanan->anggota->bankAccounts->first();
             }
 
@@ -59,9 +59,9 @@ class BukuBesarService
                 'saldo_sesudah' => $saldoSesudah,
                 'nominal_transaksi' => $amount,
                 'status' => null,
-                'bank_name' => $linkedAccount?->bank_name ?? '',
-                'account_name' => $linkedAccount?->account_name ?? '',
-                'account_number' => $linkedAccount?->account_number ?? ($transaction->account_number ?? ''),
+                'nama_bank' => $linkedAccount?->nama_bank ?? '',
+                'atas_nama' => $linkedAccount?->atas_nama ?? '',
+                'no_rekening' => $linkedAccount?->no_rekening ?? ($transaction->no_rekening ?? ''),
                 'tenor' => $transaction->akunSimpanan?->saving_tenor,
                 'target' => $transaction->akunSimpanan?->target_amount,
                 'struk_nama' => $receiptPath !== '' ? basename($receiptPath) : null,
@@ -81,7 +81,7 @@ class BukuBesarService
     public function buildTabunganTransactionQuery(int|string $userId, ?string $month, ?string $search): Builder
     {
         $query = SavingTransaction::query()
-            ->with(['akunSimpanan.anggota.bankAccounts', 'akunSimpanan', 'updatedBy', 'memberBankAccount'])
+            ->with(['akunSimpanan.anggota.bankAccounts', 'akunSimpanan', 'updatedBy', 'rekeningAnggota'])
             ->whereHas('akunSimpanan.anggota', function ($q) use ($userId) {
                 $q->where('pengguna_id', $userId);
             });

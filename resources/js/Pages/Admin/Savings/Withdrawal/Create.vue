@@ -128,9 +128,9 @@ function submitWithdrawal() {
   formData.append('notes', currentFormData.value.notes || '')
 
   if (currentFormData.value.method === 'Non-Tunai') {
-    formData.append('bank_name', currentFormData.value.bankName)
-    formData.append('account_name', currentFormData.value.accountName)
-    formData.append('account_number', currentFormData.value.accountNumber)
+    formData.append('nama_bank', currentFormData.value.bankName)
+    formData.append('atas_nama', currentFormData.value.accountName)
+    formData.append('no_rekening', currentFormData.value.accountNumber)
   }
 
   router.post('/admin/savings/withdrawal', formData, {
