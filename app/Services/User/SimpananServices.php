@@ -62,7 +62,7 @@ class SimpananServices
         }
 
         if (str_contains($typeLower, 'ibadah')) {
-            $targetAmount = (float) ($akunSimpanan->ibadah?->target_amount ?? 0);
+            $targetAmount = (float) ($akunSimpanan->ibadah?->target_tabungan ?? 0);
             if ($targetAmount > 0 && (float) $savingBalance < $targetAmount) {
                 throw ValidationException::withMessages([
                     'akun_simpanan_id' => 'Tabungan ibadah belum mencapai target minimal Rp ' . number_format($targetAmount, 0, ',', '.'),

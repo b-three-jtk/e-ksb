@@ -12,8 +12,8 @@ use App\Exports\SimpananExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDepositRequest;
 use App\Http\Requests\StoreWithdrawalRequest;
-use App\Models\BerjangkaAccount;
-use App\Models\IbadahAccount;
+use App\Models\AkunBerjangka;
+use App\Models\AkunIbadah;
 use App\Models\Anggota;
 use App\Models\RekeningAnggota;
 use App\Models\AkunSimpanan;
@@ -166,7 +166,7 @@ class SimpananController extends Controller
             'nominal'       => $transaction->nominal_simpanan,
             'saldo_sebelum' => $saldoSebelumnya,
             'saldo_sesudah' => $saldoSebelumnya + $transaction->nominal_simpanan,
-            'purpose'       => $data['purpose'] ?? null,
+            'tujuan'       => $data['tujuan'] ?? null,
         ];
 
         $this->simpananService->storeReceiptDepositPdf($transaction, $strukData, $anggota->id);
@@ -258,7 +258,7 @@ class SimpananController extends Controller
                             'type' => $acc->jenis_simpanan ?? '-',
                             'saldo' => $acc->saldo ?? 0,
                             'tenor_months' => $acc->berjangka?->tenor,
-                            'target_amount' => $acc->ibadah?->target_amount,
+                            'target_tabungan' => $acc->ibadah?->target_tabungan,
                             'opened_at' => optional($acc->created_at)->toDateString(),
                         ];
                     })->toArray(),
@@ -279,13 +279,13 @@ class SimpananController extends Controller
                 'status' => $anggota->status,
                 'akunSimpanan' => $anggota->akunSimpanan->map(fn($acc) => [
                     'type' => $acc->jenis_simpanan ?? null,
-                    'purpose' => $acc->ibadah?->purpose ?? $acc->berjangka?->purpose ?? null,
+                    'tujuan' => $acc->ibadah?->tujuan ?? $acc->berjangka?->tujuan ?? null,
                     'saldo' => $acc->saldo ?? 0,
-                    'target_amount' => $acc->ibadah?->target_amount ?? null,
+                    'target_tabungan' => $acc->ibadah?->target_tabungan ?? null,
                     'matured_at' => $acc->berjangka?->tenor && $acc->created_at
                         ? $acc->created_at->copy()->addMonths($acc->berjangka->tenor)->format('d M Y')
                         : null,
-                    'is_frozen' => !is_null($acc->ibadah?->target_amount) && $acc->saldo >= $acc->ibadah->target_amount,
+                    'is_frozen' => !is_null($acc->ibadah?->target_tabungan) && $acc->saldo >= $acc->ibadah->target_tabungan,
                     'is_matured' => $acc->berjangka?->tenor && $acc->created_at
                         ? now()->gte($acc->created_at->copy()->addMonths($acc->berjangka->tenor))
                         : false,

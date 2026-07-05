@@ -8,8 +8,8 @@ use App\Enums\TransactionTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\PengaturanUmum;
-use App\Models\BerjangkaAccount;
-use App\Models\IbadahAccount;
+use App\Models\AkunBerjangka;
+use App\Models\AkunIbadah;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\TransaksiSimpanan;
@@ -281,14 +281,14 @@ class SimpananService
                 ->map(fn($acc) => [
                     'id'            => $acc->id,
                     'type'          => $acc->jenis_simpanan ?? null,
-                    'purpose'       => $acc->berjangka?->purpose ?? $acc->ibadah?->purpose,
+                    'tujuan'       => $acc->berjangka?->tujuan ?? $acc->ibadah?->tujuan,
                     'saldo'       => $acc->saldo ?? 0,
-                    'target_amount' => $acc->ibadah?->target_amount,
+                    'target_tabungan' => $acc->ibadah?->target_tabungan,
                     'matured_at'    => $acc->berjangka
                         ? $acc->created_at->copy()->addMonths($acc->berjangka->tenor)->format('d M Y')
                         : null,
                     'is_frozen'     => $acc->ibadah
-                        ? $acc->saldo >= $acc->ibadah->target_amount
+                        ? $acc->saldo >= $acc->ibadah->target_tabungan
                         : false,
                     'is_matured'    => $acc->berjangka
                         ? now()->gte($acc->created_at->copy()->addMonths($acc->berjangka->tenor))
@@ -337,9 +337,9 @@ class SimpananService
                 ]);
             }
 
-            BerjangkaAccount::create([
+            AkunBerjangka::create([
                 'akun_simpanan_id' => $akunSimpanan->id,
-                'purpose'           => $data['purpose'] ?? null,
+                'tujuan'           => $data['tujuan'] ?? null,
                 'tenor'             => $data['tenor_months'],
             ]);
         }
@@ -381,22 +381,22 @@ class SimpananService
 
         if ($data['saving_category'] === SavingTypeEnum::TABUNGAN_IBADAH->value) {
             if ($akunSimpanan->wasRecentlyCreated) {
-                if (empty($data['target_amount'])) {
+                if (empty($data['target_tabungan'])) {
                     throw ValidationException::withMessages([
-                        'target_amount' => 'Target tabungan wajib diisi.',
+                        'target_tabungan' => 'Target tabungan wajib diisi.',
                     ]);
                 }
 
-                IbadahAccount::create([
+                AkunIbadah::create([
                     'akun_simpanan_id' => $akunSimpanan->id,
-                    'purpose'           => $data['purpose'],
-                    'target_amount'     => $data['target_amount'],
+                    'tujuan'           => $data['tujuan'],
+                    'target_tabungan'     => $data['target_tabungan'],
                 ]);
             }
 
             $ibadahAccount = $akunSimpanan->fresh()->ibadah;
 
-            if ($ibadahAccount && $akunSimpanan->saldo >= $ibadahAccount->target_amount) {
+            if ($ibadahAccount && $akunSimpanan->saldo >= $ibadahAccount->target_tabungan) {
                 throw ValidationException::withMessages([
                     'saving_category' => 'Tabungan Ibadah sudah mencapai target dan dibekukan.',
                 ]);

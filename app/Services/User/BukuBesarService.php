@@ -63,7 +63,7 @@ class BukuBesarService
                 'atas_nama' => $linkedAccount?->atas_nama ?? '',
                 'no_rekening' => $linkedAccount?->no_rekening ?? ($transaction->no_rekening ?? ''),
                 'tenor' => $transaction->akunSimpanan?->saving_tenor,
-                'target' => $transaction->akunSimpanan?->target_amount,
+                'target' => $transaction->akunSimpanan?->target_tabungan,
                 'struk_nama' => $receiptPath !== '' ? basename($receiptPath) : null,
                 'struk_attachment' => $receiptPath !== ''
                     ? asset('storage/' . ltrim($receiptPath, '/'))
@@ -177,7 +177,7 @@ class BukuBesarService
             }
 
             if ($typeKey === 'tabungan_ibadah') {
-                $targetAmount = (float) ($account->target_amount ?? 0);
+                $targetAmount = (float) ($account->target_tabungan ?? 0);
                 $currentMinimumTarget = $savingMeta['tabungan_ibadah']['minimum_target'];
 
                 if ($targetAmount > 0 && (!$currentMinimumTarget || $targetAmount < $currentMinimumTarget)) {

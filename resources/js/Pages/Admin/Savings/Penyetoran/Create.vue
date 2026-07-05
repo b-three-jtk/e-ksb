@@ -77,7 +77,7 @@ watch(memberQuery, val => {
 const jenisSimpanan  = ref('')
 const selectedAccountId = ref('')
 const isCreatingNew   = ref(false)
-const purposeInput    = ref('')
+const tujuanInput    = ref('')
 const nominalRaw     = ref('')
 const nominalDisplay = ref('')
 const tanggalSetor   = ref(today())
@@ -121,7 +121,7 @@ watch(jenisSimpanan, () => {
 watch(jenisSimpanan, () => {
   selectedAccountId.value = '' 
   isCreatingNew.value   = false
-  purposeInput.value    = ''
+  tujuanInput.value    = ''
   tenorMonths.value     = ''
   targetAmount.value    = ''
   targetDisplay.value   = ''
@@ -223,9 +223,9 @@ const errorsForm = computed(() => {
 
   if (isMultiAccountType.value) {
     if (!isCreatingNew.value && !selectedAccountId.value)
-      e.purpose = 'Pilih tujuan tabungan atau buat baru'
+      e.tujuan = 'Pilih tujuan tabungan atau buat baru'
     if (isCreatingNew.value) {
-      if (!purposeInput.value) e.purposeInput = 'Tujuan tabungan wajib diisi'
+      if (!tujuanInput.value) e.tujuanInput = 'Tujuan tabungan wajib diisi'
       if (jenisSimpanan.value === 'Tabungan Berjangka' && !tenorMonths.value)
         e.tenor = 'Jatuh tempo wajib diisi'
       if (jenisSimpanan.value === 'Tabungan Ibadah' && !targetAmount.value)
@@ -257,7 +257,7 @@ function resetForm() {
   jenisSimpanan.value   = ''
   selectedAccountId.value = '' 
   isCreatingNew.value   = false
-  purposeInput.value    = ''
+  tujuanInput.value    = ''
   nominalRaw.value      = ''
   nominalDisplay.value  = ''
   tanggalSetor.value    = today()
@@ -333,14 +333,14 @@ function submitDeposit() {
 
   if (isMultiAccountType.value) {
     formData.append(
-      'purpose',
-      isCreatingNew.value ? purposeInput.value : selectedAccount.value?.purpose
+      'tujuan',
+      isCreatingNew.value ? tujuanInput.value : selectedAccount.value?.tujuan
     )
   }
 
   if (isNewAccount.value) {
     formData.append('tenor_months', tenorMonths.value)
-    formData.append('target_amount', targetAmount.value)
+    formData.append('target_tabungan', targetAmount.value)
   }
 
   router.post('/admin/savings/deposit', formData, {
@@ -565,7 +565,7 @@ const akadType = computed(() => {
                       <!-- Existing akun -->
                       <div
                         v-for="acc in existingAccounts"
-                        :key="acc.purpose"
+                        :key="acc.tujuan"
                         @click="!acc.is_frozen && !acc.is_matured && selectAccount(acc)"
                         class="p-3 border rounded-lg"
                         :class="[
@@ -584,10 +584,10 @@ const akadType = computed(() => {
                           class="mt-0.5 text-secondary"
                         />
                         <div class="flex-1 min-w-0">
-                          <div class="font-medium text-sm text-gray-800 dark:text-gray-200">{{ acc.purpose }}</div>
+                          <div class="font-medium text-sm text-gray-800 dark:text-gray-200">{{ acc.tujuan }}</div>
                           <div class="text-xs text-gray-500 mt-0.5 flex gap-3">
                             <span>Saldo: Rp {{ formatRp(acc.saldo) }}</span>
-                            <span v-if="acc.target_amount">· Target: Rp {{ formatRp(acc.target_amount) }}</span>
+                            <span v-if="acc.target_tabungan">· Target: Rp {{ formatRp(acc.target_tabungan) }}</span>
                             <span v-if="acc.matured_at">· Jatuh Tempo: {{ acc.matured_at }}</span>
                           </div>
                           <!-- Badge frozen / matured -->
@@ -625,8 +625,8 @@ const akadType = computed(() => {
                       </label>
                     </div>
 
-                    <p v-if="errorsForm.purpose" class="mt-1 text-xs text-red-500 flex items-center gap-1">
-                      <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.purpose }}
+                    <p v-if="errorsForm.tujuan" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                      <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.tujuan }}
                     </p>
                   </div>
 
@@ -640,17 +640,17 @@ const akadType = computed(() => {
                           Tujuan Tabungan <span class="text-red-500">*</span>
                         </label>
                         <input
-                          v-model="purposeInput"
+                          v-model="tujuanInput"
                           type="text"
                           placeholder="Contoh: Haji 2027, Umroh bersama keluarga..."
                           class="w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700
                                 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors"
-                          :class="errorsForm.purposeInput
+                          :class="errorsForm.tujuanInput
                             ? 'border-red-400 focus:ring-red-400'
                             : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
                         />
-                        <p v-if="errorsForm.purposeInput" class="mt-1 text-xs text-red-500 flex items-center gap-1">
-                          <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.purposeInput }}
+                        <p v-if="errorsForm.tujuanInput" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                          <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.tujuanInput }}
                         </p>
                       </div>
 

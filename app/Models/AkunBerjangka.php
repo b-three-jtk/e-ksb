@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BerjangkaAccount extends Model
+class AkunBerjangka extends Model
 {
     //
+    protected $table = "akun_berjangka";
     protected $fillable = [
         'tenor',
-        'purpose',
+        'tujuan',
         'akun_simpanan_id',
     ];
 

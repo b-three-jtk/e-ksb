@@ -73,7 +73,7 @@ function evaluateAvailability(acc) {
   }
 
   if (type.includes('ibadah')) {
-    const target = Number(acc.target_amount || 0)
+    const target = Number(acc.target_tabungan || 0)
     if (target > 0 && saldo < target) {
       return {
         isAvailable: false,

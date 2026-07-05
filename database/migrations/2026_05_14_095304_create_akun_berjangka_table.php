@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('berjangka_accounts', function (Blueprint $table) {
+        Schema::create('akun_berjangka', function (Blueprint $table) {
             $table->id();
             $table->integer('tenor');
-            $table->string('purpose');
+            $table->string('tujuan');
             $table->uuid('akun_simpanan_id');
 
             $table->foreign('akun_simpanan_id')->references('id')->on('akun_simpanan')->onDelete('cascade');
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('berjangka_accounts');
+        Schema::dropIfExists('akun_berjangka');
     }
 };

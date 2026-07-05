@@ -29,13 +29,13 @@ class StoreDepositRequest extends FormRequest
             'date' => 'required|date|before_or_equal:today',
             'metode_pembayaran_simpanan' => 'required|in:Tunai,Non-Tunai',
             'notes' => 'nullable|string|max:255',
-            'purpose' => [
+            'tujuan' => [
                 'required_if:saving_category,Tabungan Ibadah,Tabungan Berjangka',
                 'string',
                 'max:255',
             ],
             'tenor_months' => 'nullable|integer|min:1|max:360',
-            'target_amount' => 'nullable|numeric|min:1',
+            'target_tabungan' => 'nullable|numeric|min:1',
         ];
     }
 }

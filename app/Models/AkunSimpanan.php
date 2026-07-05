@@ -34,11 +34,11 @@ class AkunSimpanan extends Model
 
     public function ibadah()
     {
-        return $this->hasOne(IbadahAccount::class);
+        return $this->hasOne(AkunIbadah::class);
     }
 
     public function berjangka()
     {
-        return $this->hasOne(BerjangkaAccount::class);
+        return $this->hasOne(AkunBerjangka::class);
     }
 }

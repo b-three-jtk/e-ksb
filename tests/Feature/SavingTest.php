@@ -7,9 +7,9 @@ use App\Enums\NotificationTypeEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\BerjangkaAccount;
+use App\Models\AkunBerjangka;
 use App\Models\PengaturanUmum;
-use App\Models\IbadahAccount;
+use App\Models\AkunIbadah;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\TransaksiSimpanan;
@@ -135,9 +135,9 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
             'saldo' => 5000000,
         ]);
 
-        $ia = IbadahAccount::create([
-            'target_amount' => 5000000,
-            'purpose' => 'Tabungan untuk Haji 2026',
+        $ia = AkunIbadah::create([
+            'target_tabungan' => 5000000,
+            'tujuan' => 'Tabungan untuk Haji 2026',
             'akun_simpanan_id' => $sa->id,
         ]);
 
@@ -147,10 +147,10 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'akun_simpanan_id' => $sa->id,
                 'saving_category' => SavingTypeEnum::TABUNGAN_IBADAH->value,
                 'amount' => 100000,
-                'target_amount' => $ia->target_amount,
+                'target_tabungan' => $ia->target_tabungan,
                 'date' => now()->format('Y-m-d'),
                 'metode_pembayaran_simpanan' => 'Tunai',
-                'purpose' => 'Tabungan untuk Haji 2026',
+                'tujuan' => 'Tabungan untuk Haji 2026',
                 'notes' => 'Setoran tambahan tabungan ibadah',
             ]);
 
@@ -257,10 +257,10 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
         ]);
 
         $tenorBulan = 6;
-        BerjangkaAccount::create([
+        AkunBerjangka::create([
             'akun_simpanan_id' => $akunSimpanan->id,
             'tenor' => $tenorBulan,
-            'purpose' => 'Tabungan Berjangka 6 bulan',
+            'tujuan' => 'Tabungan Berjangka 6 bulan',
         ]);
 
         $response = $this->actingAs($pjanggota)
@@ -349,9 +349,9 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
             'saldo' => 4000000,
         ]);
 
-        IbadahAccount::create([
-            'target_amount' => 5000000,
-            'purpose' => 'Tabungan untuk Haji 2026',
+        AkunIbadah::create([
+            'target_tabungan' => 5000000,
+            'tujuan' => 'Tabungan untuk Haji 2026',
             'akun_simpanan_id' => $akunSimpanan->id,
         ]);
 
