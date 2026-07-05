@@ -13,25 +13,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('saving_transactions', function (Blueprint $table) {
+        Schema::create('transaksi_simpanan', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('saving_transaction_code', 20)->unique();
-            $table->decimal('saving_amount', 15, 2);
-            $table->decimal('balance_after_transaction', 15, 2);
-            $table->enum('transaction_type', array_column(TransactionTypeEnum::cases(), 'value'));
-            $table->enum('saving_metode_pembayaran', array_column(PaymentMethodsEnum::cases(), 'value'));
-            $table->text('saving_description')->nullable();
-            $table->datetime('transaction_date');
-            $table->string('saving_transaction_receipt')->nullable();
+            $table->string('kode_transaksi_simpanan', 20)->unique();
+            $table->decimal('nominal_simpanan', 15, 2);
+            $table->decimal('saldo_setelah_transaksi', 15, 2);
+            $table->enum('tipe_transaksi', array_column(TransactionTypeEnum::cases(), 'value'));
+            $table->enum('metode_pembayaran_simpanan', array_column(PaymentMethodsEnum::cases(), 'value'));
+            $table->text('deskripsi_simpanan')->nullable();
+            $table->datetime('tgl_transaksi');
+            $table->string('struk_simpanan')->nullable();
 
             $table->foreignUuid('updated_by')->nullable()->constrained('pengguna')->onDelete('set null');
             $table->foreignUuid('akun_simpanan_id')->nullable()->constrained('akun_simpanan')->onDelete('set null');
             $table->string('no_rekening')->nullable();
             $table->foreign('no_rekening')->references('no_rekening')->on('rekening_anggota')->onDelete('set null');
-            $table->foreignId('point_id')->nullable()->constrained('poin')->onDelete('set null');
+            $table->foreignId('poin_id')->nullable()->constrained('poin')->onDelete('set null');
             $table->timestamps();
 
-            $table->index('saving_transaction_code');
+            $table->index('kode_transaksi_simpanan');
         });
     }
 
@@ -40,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('saving_transactions');
+        Schema::dropIfExists('transaksi_simpanan');
     }
 };

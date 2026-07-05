@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\Anggota;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,7 +29,7 @@ class AkunSimpanan extends Model
 
     public function transactions()
     {
-        return $this->hasMany(SavingTransaction::class);
+        return $this->hasMany(TransaksiSimpanan::class);
     }
 
     public function ibadah()

@@ -3,7 +3,7 @@
 namespace App\Services\User;
 
 use App\Models\AkunSimpanan;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,9 +18,9 @@ class BukuBesarService
         $accountBalances = [];
 
         return $transactions->map(function ($transaction) use (&$accountBalances, $includeId) {
-            $isDeposit = in_array(strtolower((string) $transaction->transaction_type), ['penyetoran', 'deposit'], true);
-            $amount = (float) ($transaction->saving_amount ?? 0);
-            $transactionDate = $transaction->transaction_date ? Carbon::parse($transaction->transaction_date) : null;
+            $isDeposit = in_array(strtolower((string) $transaction->tipe_transaksi), ['penyetoran', 'deposit'], true);
+            $amount = (float) ($transaction->nominal_simpanan ?? 0);
+            $transactionDate = $transaction->tgl_transaksi ? Carbon::parse($transaction->tgl_transaksi) : null;
 
             $akunSimpananId = (string) ($transaction->akun_simpanan_id ?? '');
             if (!array_key_exists($akunSimpananId, $accountBalances)) {
@@ -39,16 +39,16 @@ class BukuBesarService
                     ?? $transaction->akunSimpanan->anggota->bankAccounts->first();
             }
 
-            $receiptPath = (string) ($transaction->saving_transaction_receipt ?? '');
+            $receiptPath = (string) ($transaction->struk_simpanan ?? '');
 
             $result = [
-                'no_transaksi' => $transaction->saving_transaction_code,
+                'no_transaksi' => $transaction->kode_transaksi_simpanan,
                 'tanggal_raw' => $transactionDate?->toISOString(),
                 'tanggal' => $transactionDate?->format('d/m/Y') ?? '-',
                 'produk' => $transaction->akunSimpanan?->jenis_simpanan ?? 'N/A',
-                'jenis' => $transaction->transaction_type,
+                'jenis' => $transaction->tipe_transaksi,
                 'jenis_simpanan' => $transaction->akunSimpanan?->jenis_simpanan ?? 'N/A',
-                'metode' => $transaction->saving_metode_pembayaran ?? 'N/A',
+                'metode' => $transaction->metode_pembayaran_simpanan ?? 'N/A',
                 'petugas' => $transaction->updatedBy?->nama ?? 'System',
                 'nama_anggota' => $transaction->akunSimpanan?->anggota?->user?->nama ?? '-',
                 'no_anggota' => $transaction->akunSimpanan?->anggota?->user?->kode_pengguna ?? '-',
@@ -80,7 +80,7 @@ class BukuBesarService
 
     public function buildTabunganTransactionQuery(int|string $userId, ?string $month, ?string $search): Builder
     {
-        $query = SavingTransaction::query()
+        $query = TransaksiSimpanan::query()
             ->with(['akunSimpanan.anggota.bankAccounts', 'akunSimpanan', 'updatedBy', 'rekeningAnggota'])
             ->whereHas('akunSimpanan.anggota', function ($q) use ($userId) {
                 $q->where('pengguna_id', $userId);
@@ -100,16 +100,16 @@ class BukuBesarService
             }
 
             if ($parsedYear && $parsedMonth) {
-                $query->whereYear('transaction_date', $parsedYear)
-                    ->whereMonth('transaction_date', $parsedMonth);
+                $query->whereYear('tgl_transaksi', $parsedYear)
+                    ->whereMonth('tgl_transaksi', $parsedMonth);
             }
         }
 
         if ($search) {
             $searchLower = strtolower($search);
             $query->where(function ($q) use ($searchLower) {
-                $q->whereRaw('LOWER(transaction_type) LIKE ?', ['%' . $searchLower . '%'])
-                    ->orWhereRaw('LOWER(saving_metode_pembayaran) LIKE ?', ['%' . $searchLower . '%'])
+                $q->whereRaw('LOWER(tipe_transaksi) LIKE ?', ['%' . $searchLower . '%'])
+                    ->orWhereRaw('LOWER(metode_pembayaran_simpanan) LIKE ?', ['%' . $searchLower . '%'])
                     ->orWhereHas('akunSimpanan', function ($subQ) use ($searchLower) {
                         $subQ->whereRaw('LOWER(jenis_simpanan) LIKE ?', ['%' . $searchLower . '%']);
                     });
@@ -192,7 +192,7 @@ class BukuBesarService
     public function exportTabunganPdf(int|string $userId, ?string $month, ?string $search): array
     {
         $query = $this->buildTabunganTransactionQuery($userId, $month, $search);
-        $query->orderBy('transaction_date', 'asc');
+        $query->orderBy('tgl_transaksi', 'asc');
 
         $transactions = $query->get();
         $rows = $this->transformTransactions($transactions, false);

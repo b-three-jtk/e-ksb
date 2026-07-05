@@ -19,7 +19,7 @@ class JournalEntryFactory extends Factory
             'position' => $this->faker->randomElement(PositionEnum::cases())->value,
             'nominal' => $this->faker->numberBetween(10000, 100000000),
             'updated_by' => Pengguna::factory(),
-            'transaction_date' => $this->faker->dateTime(),
+            'tgl_transaksi' => $this->faker->dateTime(),
         ];
     }
 }

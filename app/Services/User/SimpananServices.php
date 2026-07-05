@@ -8,7 +8,7 @@ use App\Enums\TransactionTypeEnum;
 use App\Models\Anggota;
 use App\Models\RekeningAnggota;
 use App\Models\AkunSimpanan;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use App\Services\Admin\JurnalService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -87,15 +87,15 @@ class SimpananServices
                 throw new \RuntimeException('Saldo tidak cukup untuk penarikan.');
             }
 
-            $transaction = SavingTransaction::create([
-                'saving_transaction_code' => $this->generateWithdrawalTransactionCode($savingType),
+            $transaction = TransaksiSimpanan::create([
+                'kode_transaksi_simpanan' => $this->generateWithdrawalTransactionCode($savingType),
                 'akun_simpanan_id' => $lockedSavingAccount->id,
-                'balance_after_transaction' => $saldoSebelum - $validated['amount'],
-                'saving_amount' => $validated['amount'],
-                'transaction_type' => TransactionTypeEnum::WITHDRAWAL->value,
-                'saving_metode_pembayaran' => $validated['method'],
-                'transaction_date' => $validated['withdrawal_date'],
-                'saving_description' => $validated['notes'] ?? '',
+                'saldo_setelah_transaksi' => $saldoSebelum - $validated['amount'],
+                'nominal_simpanan' => $validated['amount'],
+                'tipe_transaksi' => TransactionTypeEnum::WITHDRAWAL->value,
+                'metode_pembayaran_simpanan' => $validated['method'],
+                'tgl_transaksi' => $validated['withdrawal_date'],
+                'deskripsi_simpanan' => $validated['notes'] ?? '',
                 'updated_by' => $userId,
             ]);
 
@@ -125,8 +125,8 @@ class SimpananServices
 
         $strukData = [
             'transaction_id' => $transaction->id,
-            'no_transaksi' => $transaction->saving_transaction_code,
-            'tanggal' => $transaction->transaction_date,
+            'no_transaksi' => $transaction->kode_transaksi_simpanan,
+            'tanggal' => $transaction->tgl_transaksi,
             'pengurus' => auth()->user()->nama ?? 'Pengurus',
             'nama_anggota' => $anggota->user?->nama ?? '-',
             'no_anggota' => $anggota->user?->kode_pengguna ?? '-',
@@ -144,7 +144,7 @@ class SimpananServices
             $receiptPath = $this->storeReceiptWithdrawalPdf($transaction, $strukData);
             if ($receiptPath) {
                 $transaction->update([
-                    'saving_transaction_receipt' => $receiptPath,
+                    'struk_simpanan' => $receiptPath,
                 ]);
             }
         } catch (\Throwable $receiptException) {
@@ -157,7 +157,7 @@ class SimpananServices
         ];
     }
 
-    private function storeReceiptWithdrawalPdf(SavingTransaction $transaction, array $strukData): ?string
+    private function storeReceiptWithdrawalPdf(TransaksiSimpanan $transaction, array $strukData): ?string
     {
         try {
             $pdf = Pdf::loadView('exports.withdrawal_receipt', [
@@ -201,15 +201,15 @@ class SimpananServices
         $categoryPrefix = $this->getTrxPrefix($savingType);
         $prefix = $categoryPrefix . $yymm;
 
-        $latestTransaction = SavingTransaction::where('transaction_type', TransactionTypeEnum::WITHDRAWAL->value)
-            ->where('saving_transaction_code', 'like', $prefix . '%')
+        $latestTransaction = TransaksiSimpanan::where('tipe_transaksi', TransactionTypeEnum::WITHDRAWAL->value)
+            ->where('kode_transaksi_simpanan', 'like', $prefix . '%')
             ->lockForUpdate()
-            ->orderByDesc('saving_transaction_code')
+            ->orderByDesc('kode_transaksi_simpanan')
             ->first();
 
         $lastNumber = 0;
         if ($latestTransaction) {
-            preg_match('/(\d{4})$/', (string) $latestTransaction->saving_transaction_code, $matches);
+            preg_match('/(\d{4})$/', (string) $latestTransaction->kode_transaksi_simpanan, $matches);
             $lastNumber = (int) ($matches[1] ?? 0);
         }
 

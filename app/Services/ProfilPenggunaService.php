@@ -21,14 +21,14 @@ class ProfilPenggunaService
     {
         $anggota = $user->anggota?->loadMissing(['ahliWaris', 'memberDocs']);
         $poin = $user->poin()
-            ->with('savingTransactions')
+            ->with('transaksiSimpanan')
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
 
         $getSnapshotValue = function (Poin $transaction): float {
             return (float) ($transaction->sisa_tabungan_snapshot
-                ?? $transaction->savingTransactions?->balance_after_transaction
+                ?? $transaction->transaksiSimpanan?->saldo_setelah_transaksi
                 ?? 0);
         };
 

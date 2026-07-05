@@ -53,11 +53,11 @@ return new class extends Migration
                 END IF;
 
                 -- Arah jurnal
-                IF NEW.transaction_type = 'Penyetoran' THEN
+                IF NEW.tipe_transaksi = 'Penyetoran' THEN
                     v_debit_ref  := v_kas_ref;
                     v_credit_ref := v_saving_ref;
 
-                ELSIF NEW.transaction_type = 'Penarikan' THEN
+                ELSIF NEW.tipe_transaksi = 'Penarikan' THEN
                     v_debit_ref  := v_saving_ref;
                     v_credit_ref := v_kas_ref;
 
@@ -73,7 +73,7 @@ return new class extends Migration
                     no_ref_account,
                     position,
                     nominal,
-                    transaction_date,
+                    tgl_transaksi,
                     updated_by,
                     created_at,
                     updated_at
@@ -81,8 +81,8 @@ return new class extends Migration
                     v_group_id,
                     v_debit_ref,
                     'Debit',
-                    NEW.saving_amount,
-                    NEW.transaction_date::DATE,
+                    NEW.nominal_simpanan,
+                    NEW.tgl_transaksi::DATE,
                     NEW.updated_by,
                     NOW(),
                     NOW()
@@ -94,7 +94,7 @@ return new class extends Migration
                     no_ref_account,
                     position,
                     nominal,
-                    transaction_date,
+                    tgl_transaksi,
                     updated_by,
                     created_at,
                     updated_at
@@ -102,8 +102,8 @@ return new class extends Migration
                     v_group_id,
                     v_credit_ref,
                     'Credit',
-                    NEW.saving_amount,
-                    NEW.transaction_date::DATE,
+                    NEW.nominal_simpanan,
+                    NEW.tgl_transaksi::DATE,
                     NEW.updated_by,
                     NOW(),
                     NOW()
@@ -116,7 +116,7 @@ return new class extends Migration
 
         DB::unprepared("
             CREATE TRIGGER trg_saving_journal
-            AFTER INSERT ON saving_transactions
+            AFTER INSERT ON transaksi_simpanan
             FOR EACH ROW
             EXECUTE FUNCTION fn_journal_saving();
         ");
@@ -127,7 +127,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::unprepared('DROP TRIGGER IF EXISTS trg_saving_journal ON saving_transactions');
+        DB::unprepared('DROP TRIGGER IF EXISTS trg_saving_journal ON transaksi_simpanan');
         DB::unprepared('DROP FUNCTION IF EXISTS fn_journal_saving');
     }
 };

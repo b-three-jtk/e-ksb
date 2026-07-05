@@ -27,7 +27,7 @@ class JurnalService
                     'no_ref_account'   => $entry['account'],
                     'position'         => $entry['position'],
                     'nominal'          => $entry['nominal'],
-                    'transaction_date' => $date ?? now()->toDateString(),
+                    'tgl_transaksi' => $date ?? now()->toDateString(),
                     'updated_by'       => $userId,
                 ]);
             }

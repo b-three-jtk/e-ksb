@@ -12,7 +12,7 @@ use App\Models\GlobalSetting;
 use App\Models\IbadahAccount;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use App\Models\Pengguna;
 use Database\Seeders\AccountSeeder;
 use Database\Seeders\GlobalSettingSeeder;
@@ -42,14 +42,14 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
-                'saving_metode_pembayaran' => 'Tunai',
+                'metode_pembayaran_simpanan' => 'Tunai',
                 'notes' => 'Setoran tabungan anggota baru',
             ]);
 
         $res->assertStatus(200);
-        $this->assertDatabaseHas('saving_transactions', [
-            'saving_amount' => 500000,
-            'saving_description' => 'Setoran tabungan anggota baru',
+        $this->assertDatabaseHas('transaksi_simpanan', [
+            'nominal_simpanan' => 500000,
+            'deskripsi_simpanan' => 'Setoran tabungan anggota baru',
         ]);
     });
 
@@ -68,7 +68,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 100000,
                 'date' => now()->format('Y-m-d'),
-                'saving_metode_pembayaran' => 'Tunai',
+                'metode_pembayaran_simpanan' => 'Tunai',
                 'notes' => 'Setoran pokok anggota baru',
             ]);
 
@@ -85,7 +85,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 100000,
                 'date' => now()->format('Y-m-d'),
-                'saving_metode_pembayaran' => 'Tunai',
+                'metode_pembayaran_simpanan' => 'Tunai',
                 'notes' => 'Setoran pokok anggota kedua',
             ]);
 
@@ -111,7 +111,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
-                'saving_metode_pembayaran' => 'Tunai',
+                'metode_pembayaran_simpanan' => 'Tunai',
                 'notes' => 'Setoran pokok anggota oleh PJ lain',
             ]);
 
@@ -149,7 +149,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'amount' => 100000,
                 'target_amount' => $ia->target_amount,
                 'date' => now()->format('Y-m-d'),
-                'saving_metode_pembayaran' => 'Tunai',
+                'metode_pembayaran_simpanan' => 'Tunai',
                 'purpose' => 'Tabungan untuk Haji 2026',
                 'notes' => 'Setoran tambahan tabungan ibadah',
             ]);
@@ -173,7 +173,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
                 'amount' => 100000,
                 'date' => now()->format('Y-m-d'),
-                'saving_metode_pembayaran' => 'Tunai',
+                'metode_pembayaran_simpanan' => 'Tunai',
                 'notes' => 'Setoran pokok anggota baru',
             ]);
 
@@ -207,9 +207,9 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penarikan simpanan ang
             ]);
 
         $res->assertStatus(302);
-        $this->assertDatabaseHas('saving_transactions', [
-            'saving_amount' => 100000,
-            'transaction_type' => TransactionTypeEnum::WITHDRAWAL->value,
+        $this->assertDatabaseHas('transaksi_simpanan', [
+            'nominal_simpanan' => 100000,
+            'tipe_transaksi' => TransactionTypeEnum::WITHDRAWAL->value,
         ]);
     });
 
@@ -415,24 +415,24 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
-                'saving_metode_pembayaran' => 'Tunai',
+                'metode_pembayaran_simpanan' => 'Tunai',
                 'notes' => 'Setoran tabungan anggota baru',
             ]);
 
         $res->assertStatus(200);
-        $this->assertDatabaseHas('saving_transactions', [
-            'saving_amount' => 500000,
-            'saving_description' => 'Setoran tabungan anggota baru',
+        $this->assertDatabaseHas('transaksi_simpanan', [
+            'nominal_simpanan' => 500000,
+            'deskripsi_simpanan' => 'Setoran tabungan anggota baru',
         ]);
 
-        $transaction = SavingTransaction::where('saving_amount', 500000)
-            ->where('saving_description', 'Setoran tabungan anggota baru')
+        $transaction = TransaksiSimpanan::where('nominal_simpanan', 500000)
+            ->where('deskripsi_simpanan', 'Setoran tabungan anggota baru')
             ->first();
 
         $this->assertNotNull($transaction);
-        $this->assertNotNull($transaction->saving_transaction_receipt);
-        $this->assertStringContainsString('struk-deposit-', $transaction->saving_transaction_receipt);
-        $this->assertStringEndsWith('.pdf', $transaction->saving_transaction_receipt);
+        $this->assertNotNull($transaction->struk_simpanan);
+        $this->assertStringContainsString('struk-deposit-', $transaction->struk_simpanan);
+        $this->assertStringEndsWith('.pdf', $transaction->struk_simpanan);
     });
 
     it('Bukti transaksi berupa file PDF dihasilkan setelah transaksi penarikan simpanan berhasil dicatat', function () {
@@ -458,19 +458,19 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
             ]);
 
         $res->assertStatus(302);
-        $this->assertDatabaseHas('saving_transactions', [
-            'saving_amount' => 100000,
-            'transaction_type' => TransactionTypeEnum::WITHDRAWAL->value,
+        $this->assertDatabaseHas('transaksi_simpanan', [
+            'nominal_simpanan' => 100000,
+            'tipe_transaksi' => TransactionTypeEnum::WITHDRAWAL->value,
         ]);
 
-        $transaction = SavingTransaction::where('saving_amount', 100000)
-            ->where('transaction_type', TransactionTypeEnum::WITHDRAWAL->value)
+        $transaction = TransaksiSimpanan::where('nominal_simpanan', 100000)
+            ->where('tipe_transaksi', TransactionTypeEnum::WITHDRAWAL->value)
             ->first();
 
         $this->assertNotNull($transaction);
-        $this->assertNotNull($transaction->saving_transaction_receipt);
-        $this->assertStringContainsString('struk-withdrawal-', $transaction->saving_transaction_receipt);
-        $this->assertStringEndsWith('.pdf', $transaction->saving_transaction_receipt);
+        $this->assertNotNull($transaction->struk_simpanan);
+        $this->assertStringContainsString('struk-withdrawal-', $transaction->struk_simpanan);
+        $this->assertStringEndsWith('.pdf', $transaction->struk_simpanan);
     });
 
     // negatif
@@ -487,13 +487,13 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
                 'saving_category' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
                 'amount' => -500000, // Nominal tidak valid
                 'date' => now()->format('Y-m-d'),
-                'saving_metode_pembayaran' => 'Tunai',
+                'metode_pembayaran_simpanan' => 'Tunai',
                 'notes' => 'Setoran tabungan anggota baru',
             ]);
 
         $res->assertSessionHasErrors('amount');
-        $this->assertDatabaseMissing('saving_transactions', [
-            'saving_description' => 'Setoran tabungan anggota baru',
+        $this->assertDatabaseMissing('transaksi_simpanan', [
+            'deskripsi_simpanan' => 'Setoran tabungan anggota baru',
         ]);
     });
 
@@ -518,8 +518,8 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
             ]);
 
         $res->assertSessionHasErrors('amount');
-        $this->assertDatabaseMissing('saving_transactions', [
-            'transaction_type' => TransactionTypeEnum::WITHDRAWAL->value,
+        $this->assertDatabaseMissing('transaksi_simpanan', [
+            'tipe_transaksi' => TransactionTypeEnum::WITHDRAWAL->value,
         ]);
     });
 });
@@ -547,10 +547,10 @@ describe('Aplikasi harus menyediakan detail transaksi simpanan.', function () {
             'saldo' => 500000,
         ]);
 
-        $transaction = SavingTransaction::factory()->create([
+        $transaction = TransaksiSimpanan::factory()->create([
             'akun_simpanan_id' => $akunSimpanan->id,
-            'saving_amount' => 500000,
-            'saving_description' => 'Setoran tabungan anggota baru',
+            'nominal_simpanan' => 500000,
+            'deskripsi_simpanan' => 'Setoran tabungan anggota baru',
         ]);
 
         $res = $this->actingAs($pjanggota)
@@ -609,10 +609,10 @@ describe('Aplikasi harus menyediakan detail transaksi simpanan.', function () {
             'saldo' => 500000,
         ]);
 
-        $transaction = SavingTransaction::factory()->create([
+        $transaction = TransaksiSimpanan::factory()->create([
             'akun_simpanan_id' => $akunSimpanan->id,
-            'saving_amount' => 500000,
-            'saving_description' => 'Setoran pokok anggota baru',
+            'nominal_simpanan' => 500000,
+            'deskripsi_simpanan' => 'Setoran pokok anggota baru',
         ]);
 
         $pjanggota2 = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
@@ -673,10 +673,10 @@ describe('Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan s
             'saldo' => 500000,
         ]);
 
-        SavingTransaction::factory()->create([
+        TransaksiSimpanan::factory()->create([
             'akun_simpanan_id' => $sa->id,
-            'saving_amount' => 500000,
-            'saving_description' => 'Setoran tabungan anggota baru',
+            'nominal_simpanan' => 500000,
+            'deskripsi_simpanan' => 'Setoran tabungan anggota baru',
         ]);
 
         $res = $this->actingAs($user)
@@ -700,10 +700,10 @@ describe('Aplikasi harus menyediakan riwayat transaksi simpanan dan pergerakan s
             'saldo' => 500000,
         ]);
 
-        SavingTransaction::factory()->create([
+        TransaksiSimpanan::factory()->create([
             'akun_simpanan_id' => $sa->id,
-            'saving_amount' => 500000,
-            'saving_description' => 'Setoran tabungan anggota baru',
+            'nominal_simpanan' => 500000,
+            'deskripsi_simpanan' => 'Setoran tabungan anggota baru',
         ]);
 
         $otherUser = Pengguna::factory()->create();
@@ -728,10 +728,10 @@ describe('Aplikasi harus menyediakan ekspor tabungan pribadi untuk anggota.', fu
             'saldo' => 500000,
         ]);
 
-        SavingTransaction::factory()->create([
+        TransaksiSimpanan::factory()->create([
             'akun_simpanan_id' => $sa->id,
-            'saving_amount' => 500000,
-            'saving_description' => 'Setoran tabungan anggota baru',
+            'nominal_simpanan' => 500000,
+            'deskripsi_simpanan' => 'Setoran tabungan anggota baru',
         ]);
 
         $res = $this->actingAs($user)
@@ -752,10 +752,10 @@ describe('Aplikasi harus menyediakan ekspor tabungan pribadi untuk anggota.', fu
             'saldo' => 500000,
         ]);
 
-        SavingTransaction::factory()->create([
+        TransaksiSimpanan::factory()->create([
             'akun_simpanan_id' => $sa->id,
-            'saving_amount' => 500000,
-            'saving_description' => 'Setoran tabungan anggota baru',
+            'nominal_simpanan' => 500000,
+            'deskripsi_simpanan' => 'Setoran tabungan anggota baru',
         ]);
 
         $otherUser = Pengguna::factory()->create();

@@ -64,7 +64,7 @@ return new class extends Migration
                 INSERT INTO journal_entries (
                     journal_id, journal_group_id,
                     no_ref_account, position, nominal,
-                    transaction_date, updated_by,
+                    tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
                     v_journal_id, v_journal_id,
@@ -77,7 +77,7 @@ return new class extends Migration
                 INSERT INTO journal_entries (
                     journal_id, journal_group_id,
                     no_ref_account, position, nominal,
-                    transaction_date, updated_by,
+                    tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
                     v_journal_id, v_journal_id,
@@ -90,7 +90,7 @@ return new class extends Migration
                 INSERT INTO journal_entries (
                     journal_id, journal_group_id,
                     no_ref_account, position, nominal,
-                    transaction_date, updated_by,
+                    tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
                     v_journal_id, v_journal_id,

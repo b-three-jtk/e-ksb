@@ -67,7 +67,7 @@ const filters = reactive({
     search:   page.props.filters?.search ?? '',
     per_page: page.props.filters?.per_page ?? 10,
     tab:      page.props.filters?.tab ?? 'semua',
-    sort_by:  page.props.filters?.sort_by ?? 'transaction_date',
+    sort_by:  page.props.filters?.sort_by ?? 'tgl_transaksi',
     sort_dir: page.props.filters?.sort_dir ?? 'desc',
 })
 

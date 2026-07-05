@@ -464,7 +464,7 @@ const breadcrumbItems = [
                                         <span
                                             :class="
                                                 account.transactions[0]
-                                                    ?.transaction_type ==
+                                                    ?.tipe_transaksi ==
                                                 'Penyetoran'
                                                     ? 'text-green-500'
                                                     : 'text-red-500'
@@ -472,7 +472,7 @@ const breadcrumbItems = [
                                             class="font-medium text-dark-text dark:text-white"
                                             >{{
                                                 account.transactions[0]
-                                                    ?.transaction_type ==
+                                                    ?.tipe_transaksi ==
                                                 "Penyetoran"
                                                     ? "+"
                                                     : "-"
@@ -480,7 +480,7 @@ const breadcrumbItems = [
                                             {{
                                                 parseCurrencyAmount(
                                                     account.transactions[0]
-                                                        ?.saving_amount,
+                                                        ?.nominal_simpanan,
                                                 ) ?? "-"
                                             }}</span
                                         >
@@ -495,7 +495,7 @@ const breadcrumbItems = [
                                             >{{
                                                 dateParser(
                                                     account.transactions[0]
-                                                        ?.transaction_date,
+                                                        ?.tgl_transaksi,
                                                 ) ?? "-"
                                             }}</span
                                         >

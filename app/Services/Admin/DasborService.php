@@ -11,7 +11,7 @@ use App\Models\GlobalSetting;
 use App\Models\Angsuran;
 use App\Models\JournalEntry;
 use App\Models\Notification;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use App\Models\Pengguna;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -79,11 +79,11 @@ class DasborService
     public function getTransaksiTerbaru($filter, $role)
     {
         $amount = $role === UserRoleEnum::DPS->value ? 5 : 6;
-        $transaksiSimpanan = SavingTransaction::with('akunSimpanan.anggota.user')
+        $transaksiSimpanan = TransaksiSimpanan::with('akunSimpanan.anggota.user')
             ->latest()->take($amount)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
-                'no_transaksi' => $t->saving_transaction_code,
+                'no_transaksi' => $t->kode_transaksi_simpanan,
                 'anggota' => $t->akunSimpanan->anggota->user->nama,
                 'jumlah' => $t->amount,
                 'produk' => $t->akunSimpanan->jenis_simpanan,
@@ -118,9 +118,9 @@ class DasborService
         [$rangeAwal, $rangeAkhir] = $this->getRangeUntukFilterPeriode($tanggalAkhir, $filter);
 
         $pendapatan = JournalEntry::where('no_ref_account', '401')
-            ->whereBetween('transaction_date', [$rangeAwal, $rangeAkhir])
+            ->whereBetween('tgl_transaksi', [$rangeAwal, $rangeAkhir])
             ->get()
-            ->groupBy(fn($entry) => Carbon::parse($entry->transaction_date)->format($format))
+            ->groupBy(fn($entry) => Carbon::parse($entry->tgl_transaksi)->format($format))
             ->map(fn($group) => $group->sum('nominal'));
 
         $result = $data->replace($pendapatan);
@@ -186,22 +186,22 @@ class DasborService
 
     public function getTotalSimpananAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, $tipe)
     {
-        $total = SavingTransaction::with('akunSimpanan.anggota')
+        $total = TransaksiSimpanan::with('akunSimpanan.anggota')
             ->whereHas('akunSimpanan.anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             })
-            ->where('transaction_type', $tipe)
+            ->where('tipe_transaksi', $tipe)
             ->where('created_at', '<=', $tanggalAkhir)
-            ->sum('saving_amount');
+            ->sum('nominal_simpanan');
 
         $persen = $this->hitungPersen(
             $total,
-            SavingTransaction::whereHas('akunSimpanan.anggota', function ($q) {
+            TransaksiSimpanan::whereHas('akunSimpanan.anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             })
-                ->where('transaction_type', $tipe)
+                ->where('tipe_transaksi', $tipe)
                 ->where('created_at', '<=', $tanggalAkhirSebelumnya)
-                ->sum('saving_amount')
+                ->sum('nominal_simpanan')
         );
 
         return [$total, $persen];
@@ -227,7 +227,7 @@ class DasborService
 
         if ($filter === 'jenis') {
             $data = JournalEntry::whereIn('no_ref_account', ['201', '202', '203', '301', '302'])
-                ->where('transaction_date', '<=', $tanggalAkhir)
+                ->where('tgl_transaksi', '<=', $tanggalAkhir)
                 ->get()
                 ->groupBy(fn($entry) => match ($entry->no_ref_account) {
                     '201' => 'Tabungan Anggota',
@@ -242,7 +242,7 @@ class DasborService
             $res = collect($skeletonJenis)->replace($data)->sortDesc();
         } else if ($filter === 'akad') {
             $data = JournalEntry::whereIn('no_ref_account', ['201', '202', '203', '301', '302'])
-                ->where('transaction_date', '<=', $tanggalAkhir)
+                ->where('tgl_transaksi', '<=', $tanggalAkhir)
                 ->get()
                 ->groupBy(fn($entry) => match ($entry->no_ref_account) {
                     '202', '203' => 'Mudharabah Mutlaqah',
@@ -267,7 +267,7 @@ class DasborService
             'anggota.user',
             'reference' => function (MorphTo $morphTo) {
                 $morphTo->morphWith([
-                    SavingTransaction::class => ['akunSimpanan'],
+                    TransaksiSimpanan::class => ['akunSimpanan'],
                     Angsuran::class => ['pembiayaan'],
                 ]);
             }
@@ -277,12 +277,12 @@ class DasborService
             });
 
         if ($filter === 'simpanan') {
-            $query->where('reference_type', SavingTransaction::class);
+            $query->where('reference_type', TransaksiSimpanan::class);
         } elseif ($filter === 'pembiayaan') {
             $query->where('reference_type', Angsuran::class);
         } else {
             $query->whereIn('reference_type', [
-                SavingTransaction::class,
+                TransaksiSimpanan::class,
                 Angsuran::class
             ]);
         }
@@ -293,7 +293,7 @@ class DasborService
 
                 if (!$ref) return null;
 
-                if ($notif->reference_type === SavingTransaction::class) {
+                if ($notif->reference_type === TransaksiSimpanan::class) {
                     return $this->mapJatuhTempoSimpanan($notif, $ref, $savingDueDate, $savingNominal);
                 }
 
@@ -349,7 +349,7 @@ class DasborService
 
     public function getTransaksiSimpananTerbaru($tanggalAkhir, $filter)
     {
-        $query = SavingTransaction::with(['akunSimpanan.anggota.user'])
+        $query = TransaksiSimpanan::with(['akunSimpanan.anggota.user'])
             ->whereHas('akunSimpanan.anggota', function ($q) {
                 $q->where('pj_anggota_id', auth()->id());
             })
@@ -366,9 +366,9 @@ class DasborService
             ->get()
             ->map(fn($t) => [
                 'id' => $t->id,
-                'no_transaksi' => $t->saving_transaction_code,
+                'no_transaksi' => $t->kode_transaksi_simpanan,
                 'anggota' => $t->akunSimpanan->anggota?->user?->nama ?? '-',
-                'jumlah' => $t->saving_amount,
+                'jumlah' => $t->nominal_simpanan,
                 'produk' => $t->akunSimpanan->jenis_simpanan,
             ])
             ->toArray();
@@ -572,7 +572,7 @@ class DasborService
         ?string $posisiDebit = 'Debit',
         ?string $posisiCredit = 'Credit'
     ): float {
-        $query = JournalEntry::where('transaction_date', '<=', $tanggalAkhir);
+        $query = JournalEntry::where('tgl_transaksi', '<=', $tanggalAkhir);
 
         is_array($noRefAccount)
             ? $query->whereIn('no_ref_account', $noRefAccount)
@@ -604,7 +604,7 @@ class DasborService
     }
 
     /**
-     * Helper untuk getJatuhTempoTerdekat: mapping notifikasi bertipe SavingTransaction.
+     * Helper untuk getJatuhTempoTerdekat: mapping notifikasi bertipe TransaksiSimpanan.
      * Mengembalikan null jika bukan Simpanan Wajib (di luar scope notifikasi jatuh tempo simpanan).
      */
     private function mapJatuhTempoSimpanan($notif, $ref, $savingDueDate, $savingNominal): ?array

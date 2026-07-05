@@ -44,7 +44,7 @@
                 <tr>
                     <td>{{ $i + 1 }}</td>
                     <td>TRX-{{ str_pad($trx->id, 6, '0', STR_PAD_LEFT) }}</td>
-                    <td>{{ $trx->transaction_date->format('d/m/Y') }}</td>
+                    <td>{{ $trx->tgl_transaksi->format('d/m/Y') }}</td>
                     <td>{{ $trx->akunSimpanan->user->name }}</td>
                     <td>{{ $trx->akunSimpanan->type }}</td>
                     <td>{{ $trx->type }}</td>

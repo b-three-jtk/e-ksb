@@ -17,7 +17,7 @@ use App\Models\IbadahAccount;
 use App\Models\Anggota;
 use App\Models\RekeningAnggota;
 use App\Models\AkunSimpanan;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use App\Models\Account;
 use App\Services\Admin\JurnalService;
 use App\Services\User\SimpananServices;
@@ -59,7 +59,7 @@ class SimpananController extends Controller
 
         $transactions = $this->simpananService
             ->buildBaseQuery($request)
-            ->orderBy('transaction_date', 'desc')
+            ->orderBy('tgl_transaksi', 'desc')
             ->get();
 
         return Excel::download(
@@ -74,7 +74,7 @@ class SimpananController extends Controller
         $title = $this->simpananService->getExportTitle($tab);
 
         $transactions = $this->simpananService->buildBaseQuery($request)
-            ->orderBy('transaction_date', 'desc')
+            ->orderBy('tgl_transaksi', 'desc')
             ->get();
 
         $pdf = Pdf::loadView('exports.saving', [
@@ -87,17 +87,17 @@ class SimpananController extends Controller
 
     public function show(string $id)
     {
-        $anggota = SavingTransaction::with('akunSimpanan.anggota.user')->findOrFail($id)->akunSimpanan->anggota;
+        $anggota = TransaksiSimpanan::with('akunSimpanan.anggota.user')->findOrFail($id)->akunSimpanan->anggota;
         if (Auth::user()->hasRole(UserRoleEnum::PJANGGOTA->value) && $anggota->pj_anggota_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki izin untuk melihat detail transaksi simpanan ini.');
         }
 
-        $data = SavingTransaction::with('akunSimpanan.anggota.user', 'rekeningAnggota')->find($id);
-        $saving_transaction_receipt = $data->saving_transaction_receipt ? Storage::url($data->saving_transaction_receipt) : null;
+        $data = TransaksiSimpanan::with('akunSimpanan.anggota.user', 'rekeningAnggota')->find($id);
+        $struk_simpanan = $data->struk_simpanan ? Storage::url($data->struk_simpanan) : null;
 
         return inertia('Admin/Savings/Show', [
             'data' => $data,
-            'saving_transaction_receipt' => $saving_transaction_receipt,
+            'struk_simpanan' => $struk_simpanan,
         ]);
     }
 
@@ -151,21 +151,21 @@ class SimpananController extends Controller
         Log::info('Deposit transaction created', [
             'transaction_id'    => $transaction->id,
             'akun_simpanan_id' => $akunSimpanan->id,
-            'amount'            => $transaction->saving_amount,
-            'new_balance'       => $transaction->balance_after_transaction,
+            'amount'            => $transaction->nominal_simpanan,
+            'new_balance'       => $transaction->saldo_setelah_transaksi,
         ]);
 
         $strukData = [
-            'no_transaksi'  => $transaction->saving_transaction_code,
-            'tanggal'       => $transaction->transaction_date,
+            'no_transaksi'  => $transaction->kode_transaksi_simpanan,
+            'tanggal'       => $transaction->tgl_transaksi,
             'pengurus'      => Auth::user()->nama,
             'nama_anggota'  => $anggota->user->nama,
             'no_anggota'    => $anggota->user->kode_pengguna,
             'jenis'         => $data['saving_category'],
-            'metode'        => $transaction->saving_metode_pembayaran,
-            'nominal'       => $transaction->saving_amount,
+            'metode'        => $transaction->metode_pembayaran_simpanan,
+            'nominal'       => $transaction->nominal_simpanan,
             'saldo_sebelum' => $saldoSebelumnya,
-            'saldo_sesudah' => $saldoSebelumnya + $transaction->saving_amount,
+            'saldo_sesudah' => $saldoSebelumnya + $transaction->nominal_simpanan,
             'purpose'       => $data['purpose'] ?? null,
         ];
 
@@ -181,7 +181,7 @@ class SimpananController extends Controller
                 'wajib' => $this->simpananService->getSettingValue('saving_wajib_amount'),
             ],
             'struk' => $strukData,
-            'receipt' => Storage::url($transaction->saving_transaction_receipt),
+            'receipt' => Storage::url($transaction->struk_simpanan),
         ]);
     }
 

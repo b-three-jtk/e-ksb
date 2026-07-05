@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('no_ref_account');
             $table->enum('position', ['Debit', 'Credit']);
             $table->decimal('nominal', 15, 2);
-            $table->date('transaction_date');
+            $table->date('tgl_transaksi');
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
 

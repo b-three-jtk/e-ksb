@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\Anggota;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,8 +28,8 @@ class RekeningAnggota extends Model
         return $this->belongsTo(Anggota::class);
     }
 
-    public function savingTransactions()
+    public function transaksiSimpanan()
     {
-        return $this->hasMany(SavingTransaction::class);
+        return $this->hasMany(TransaksiSimpanan::class);
     }
 }

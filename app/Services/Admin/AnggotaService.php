@@ -102,7 +102,7 @@ class AnggotaService
         $user = Pengguna::with([
             'anggota.memberDocs',
             'roles',
-            'anggota.akunSimpanan.transactions' => fn($q) => $q->orderBy('transaction_date', 'desc'),
+            'anggota.akunSimpanan.transactions' => fn($q) => $q->orderBy('tgl_transaksi', 'desc'),
             'anggota.akunSimpanan',
             'anggota.ahliWaris',
             'anggota.pembiayaan.angsuran.payment',
@@ -183,7 +183,7 @@ class AnggotaService
     public function getMutasiSimpananAnggota($accountId)
     {
         return AkunSimpanan::with([
-            'transactions' => fn($q) => $q->latest('transaction_date')
+            'transactions' => fn($q) => $q->latest('tgl_transaksi')
         ])->findOrFail($accountId);
     }
 

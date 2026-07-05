@@ -11,26 +11,27 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class SavingTransaction extends Model
+class TransaksiSimpanan extends Model
 {
     use HasFactory, HasUuids;
 
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $table = 'transaksi_simpanan';
     protected $fillable = [
-        'saving_transaction_code',
-        'saving_amount',
-        'balance_after_transaction',
-        'transaction_type',
-        'saving_metode_pembayaran',
-        'saving_description',
-        'transaction_date',
-        'saving_transaction_receipt',
+        'kode_transaksi_simpanan',
+        'nominal_simpanan',
+        'saldo_setelah_transaksi',
+        'tipe_transaksi',
+        'metode_pembayaran_simpanan',
+        'deskripsi_simpanan',
+        'tgl_transaksi',
+        'struk_simpanan',
 
         'updated_by',
         'akun_simpanan_id',
         'no_rekening',
-        'point_id',
+        'poin_id',
     ];
 
     public function akunSimpanan()
@@ -50,7 +51,7 @@ class SavingTransaction extends Model
 
     public function point()
     {
-        return $this->belongsTo(Poin::class, 'point_id');
+        return $this->belongsTo(Poin::class, 'poin_id');
     }
 
     public function notifications(): MorphMany

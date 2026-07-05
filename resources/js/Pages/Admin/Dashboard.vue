@@ -36,7 +36,7 @@ const selectedFilter = ref('month');
 const selectedTransactionFilter = ref('all');
 const selectedSavingsFilter = ref('jenis');
 const selectedNearestDueFilter = ref('all');
-const selectedSavingTransactionFilter = ref('all');
+const selectedTransaksiSimpananFilter = ref('all');
 const isDarkMode = ref(false);
 
 console.log(props);
@@ -64,7 +64,7 @@ const filterDataMap = {
     selectedTransactionFilter:    ['transaksi_terbaru'],
     selectedSavingsFilter:        ['peta_simpanan'],
     selectedNearestDueFilter:     ['jatuh_tempo_terdekat'],
-    selectedSavingTransactionFilter: ['transaksi_simpanan_terbaru'],
+    selectedTransaksiSimpananFilter: ['transaksi_simpanan_terbaru'],
 };
 
 const applyFilter = (changedKey) => {
@@ -73,7 +73,7 @@ const applyFilter = (changedKey) => {
         transaction_filter:       selectedTransactionFilter.value,
         savings_filter:           selectedSavingsFilter.value,
         nearest_filter:           selectedNearestDueFilter.value,
-        saving_transaction_filter: selectedSavingTransactionFilter.value,
+        saving_transaction_filter: selectedTransaksiSimpananFilter.value,
     }, {
         preserveState:  true,
         preserveScroll: true,
@@ -87,7 +87,7 @@ watch(selectedFilter,               () => applyFilter('selectedFilter'));
 watch(selectedTransactionFilter,    () => applyFilter('selectedTransactionFilter'));
 watch(selectedSavingsFilter,        () => applyFilter('selectedSavingsFilter'));
 watch(selectedNearestDueFilter,     () => applyFilter('selectedNearestDueFilter'));
-watch(selectedSavingTransactionFilter, () => applyFilter('selectedSavingTransactionFilter'));
+watch(selectedTransaksiSimpananFilter, () => applyFilter('selectedTransaksiSimpananFilter'));
 </script>
 
 <template>
@@ -158,8 +158,8 @@ watch(selectedSavingTransactionFilter, () => applyFilter('selectedSavingTransact
             <PJAnggota v-if="role === 'Penanggung Jawab Anggota'"
                 @update:selected-nearest-due-filter="selectedNearestDueFilter = $event"
                 :selected-nearest-due-filter="selectedNearestDueFilter"
-                @update:selected-saving-transaction-filter="selectedSavingTransactionFilter = $event"
-                :selected-saving-transaction-filter="selectedSavingTransactionFilter"
+                @update:selected-saving-transaction-filter="selectedTransaksiSimpananFilter = $event"
+                :selected-saving-transaction-filter="selectedTransaksiSimpananFilter"
                 :stats="props.stats"
                 :jatuh_tempo_terdekat="props.jatuh_tempo_terdekat"
                 :transaksi_simpanan_terbaru="props.transaksi_simpanan_terbaru"

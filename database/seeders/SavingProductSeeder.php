@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Enums\SavingTypeEnum;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -59,15 +59,15 @@ class SavingProductSeeder extends Seeder
         ]);
 
         // Transaksi awal (setor simpanan pokok)
-        SavingTransaction::create([
+        TransaksiSimpanan::create([
             'akun_simpanan_id' => $account->id,
-            'saving_transaction_code' => 'SP' . str_pad($anggota->id, 8, '0', STR_PAD_LEFT),
-            'transaction_type' => 'Penyetoran',
-            'saving_amount' => 100000,
-            'balance_after_transaction' => 100000,
-            'transaction_date' => now()->subMonths(12),
-            'saving_metode_pembayaran' => 'Tunai',
-            'saving_description' => 'Setor Awal Simpanan Pokok',
+            'kode_transaksi_simpanan' => 'SP' . str_pad($anggota->id, 8, '0', STR_PAD_LEFT),
+            'tipe_transaksi' => 'Penyetoran',
+            'nominal_simpanan' => 100000,
+            'saldo_setelah_transaksi' => 100000,
+            'tgl_transaksi' => now()->subMonths(12),
+            'metode_pembayaran_simpanan' => 'Tunai',
+            'deskripsi_simpanan' => 'Setor Awal Simpanan Pokok',
             'updated_by' => $admin->id,
         ]);
     }
@@ -86,15 +86,15 @@ class SavingProductSeeder extends Seeder
         $saldo = 0;
         for ($i = 1; $i <= 12; $i++) {
             $saldo += 50000;
-            SavingTransaction::create([
+            TransaksiSimpanan::create([
                 'akun_simpanan_id' => $account->id,
-                'saving_transaction_code' => 'SW' . str_pad($anggota->id, 4, '0', STR_PAD_LEFT) . str_pad($i, 4, '0', STR_PAD_LEFT),
-                'transaction_type' => 'Penyetoran',
-                'saving_amount' => 50000,
-                'balance_after_transaction' => $saldo,
-                'transaction_date' => now()->subMonths(13 - $i),
-                'saving_metode_pembayaran' => 'Tunai',
-                'saving_description' => 'Setoran Simpanan Wajib Bulan ke-' . $i,
+                'kode_transaksi_simpanan' => 'SW' . str_pad($anggota->id, 4, '0', STR_PAD_LEFT) . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'tipe_transaksi' => 'Penyetoran',
+                'nominal_simpanan' => 50000,
+                'saldo_setelah_transaksi' => $saldo,
+                'tgl_transaksi' => now()->subMonths(13 - $i),
+                'metode_pembayaran_simpanan' => 'Tunai',
+                'deskripsi_simpanan' => 'Setoran Simpanan Wajib Bulan ke-' . $i,
                 'updated_by' => $admin->id,
             ]);
         }
@@ -110,15 +110,15 @@ class SavingProductSeeder extends Seeder
             'created_at' => now()->subMonths(8),
         ]);
 
-        SavingTransaction::create([
+        TransaksiSimpanan::create([
             'akun_simpanan_id' => $account->id,
-            'saving_transaction_code' => 'TA' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
-            'transaction_type' => 'Penyetoran',
-            'saving_amount' => $amount,
-            'saving_metode_pembayaran' => 'Tunai',
-            'balance_after_transaction' => $amount,
-            'transaction_date' => now()->subMonths(8),
-            'saving_description' => 'Setor Awal Tabungan Anggota',
+            'kode_transaksi_simpanan' => 'TA' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
+            'tipe_transaksi' => 'Penyetoran',
+            'nominal_simpanan' => $amount,
+            'metode_pembayaran_simpanan' => 'Tunai',
+            'saldo_setelah_transaksi' => $amount,
+            'tgl_transaksi' => now()->subMonths(8),
+            'deskripsi_simpanan' => 'Setor Awal Tabungan Anggota',
             'updated_by' => $admin->id,
         ]);
     }
@@ -133,15 +133,15 @@ class SavingProductSeeder extends Seeder
             'created_at' => now()->subMonths(6),
         ]);
 
-        SavingTransaction::create([
+        TransaksiSimpanan::create([
             'akun_simpanan_id' => $account->id,
-            'saving_transaction_code' => 'TB' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
-            'transaction_type' => 'Penyetoran',
-            'saving_amount' => $amount,
-            'balance_after_transaction' => $amount,
-            'saving_metode_pembayaran' => 'Tunai',
-            'transaction_date' => now()->subMonths(6),
-            'saving_description' => 'Setor Tabungan Berjangka',
+            'kode_transaksi_simpanan' => 'TB' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
+            'tipe_transaksi' => 'Penyetoran',
+            'nominal_simpanan' => $amount,
+            'saldo_setelah_transaksi' => $amount,
+            'metode_pembayaran_simpanan' => 'Tunai',
+            'tgl_transaksi' => now()->subMonths(6),
+            'deskripsi_simpanan' => 'Setor Tabungan Berjangka',
             'updated_by' => $admin->id,
         ]);
     }
@@ -156,15 +156,15 @@ class SavingProductSeeder extends Seeder
             'created_at' => now()->subMonths(10),
         ]);
 
-        SavingTransaction::create([
+        TransaksiSimpanan::create([
             'akun_simpanan_id' => $account->id,
-            'saving_transaction_code' => 'TI' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
-            'transaction_type' => 'Penyetoran',
-            'saving_amount' => $amount,
-            'balance_after_transaction' => $amount,
-            'transaction_date' => now()->subMonths(10),
-            'saving_metode_pembayaran' => 'Tunai',
-            'saving_description' => 'Setor Awal Tabungan Ibadah',
+            'kode_transaksi_simpanan' => 'TI' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
+            'tipe_transaksi' => 'Penyetoran',
+            'nominal_simpanan' => $amount,
+            'saldo_setelah_transaksi' => $amount,
+            'tgl_transaksi' => now()->subMonths(10),
+            'metode_pembayaran_simpanan' => 'Tunai',
+            'deskripsi_simpanan' => 'Setor Awal Tabungan Ibadah',
             'updated_by' => $admin->id,
         ]);
     }

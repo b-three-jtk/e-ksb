@@ -6,7 +6,7 @@ use App\Models\Pembiayaan;
 use App\Models\PembayaranAngsuran;
 use App\Models\Anggota;
 use App\Models\Poin;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -117,9 +117,9 @@ class Pengguna extends Authenticatable
         return $this->hasMany(Pembiayaan::class);
     }
 
-    public function savingTransactions()
+    public function transaksiSimpanan()
     {
-        return $this->hasMany(SavingTransaction::class);
+        return $this->hasMany(TransaksiSimpanan::class);
     }
 
     public function installmentPayments()

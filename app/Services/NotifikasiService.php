@@ -88,10 +88,10 @@ class NotifikasiService
         $currentPeriod = now()->format('Y-m');
         $anggota = Anggota::whereHas('akunSimpanan')
             ->whereDoesntHave('akunSimpanan.transactions', function ($query) {
-                $query->where('saving_transaction_code', 'ILIKE', 'SW%')
-                    ->where('transaction_type', 'Penyetoran')
-                    ->whereMonth('transaction_date', now()->month)
-                    ->whereYear('transaction_date', now()->year);
+                $query->where('kode_transaksi_simpanan', 'ILIKE', 'SW%')
+                    ->where('tipe_transaksi', 'Penyetoran')
+                    ->whereMonth('tgl_transaksi', now()->month)
+                    ->whereYear('tgl_transaksi', now()->year);
             })
             ->get();
 

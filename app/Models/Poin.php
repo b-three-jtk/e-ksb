@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,8 +34,8 @@ class Poin extends Model
         return $this->belongsTo(Pengguna::class);
     }
 
-    public function savingTransactions()
+    public function transaksiSimpanan()
     {
-        return $this->hasOne(SavingTransaction::class, 'point_id');
+        return $this->hasOne(TransaksiSimpanan::class, 'poin_id');
     }
 }

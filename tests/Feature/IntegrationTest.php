@@ -59,7 +59,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                 'no_ref_account' => $danaAlokasi->no_ref_account,
                 'position' => 'Debit',
                 'nominal' => 100000000,
-                'transaction_date' => now()->format('Y-m-d'),
+                'tgl_transaksi' => now()->format('Y-m-d'),
                 'updated_by' => $this->staffMurabahah->id,
                 'journal_group_id' => \Illuminate\Support\Str::uuid()->toString(),
             ]);

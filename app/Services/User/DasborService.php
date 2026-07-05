@@ -6,7 +6,7 @@ use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Models\Angsuran;
 use App\Models\Poin;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -41,19 +41,19 @@ class DasborService
 
     public function getTabungan(int $anggotaId): \Illuminate\Support\Collection
     {
-        return SavingTransaction::whereHas(
+        return TransaksiSimpanan::whereHas(
             'akunSimpanan.anggota',
             fn($q) => $q->where('anggota_id', $anggotaId)
         )
         ->with('akunSimpanan')
-        ->latest('transaction_date')
+        ->latest('tgl_transaksi')
         ->limit(5)
         ->get()
         ->map(fn($trx) => [
-            'date'    => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
+            'date'    => Carbon::parse($trx->tgl_transaksi)->format('d/m/Y'),
             'product' => $trx->akunSimpanan->jenis_simpanan,
-            'type'    => $trx->transaction_type,
-            'amount'  => 'Rp ' . number_format($trx->saving_amount, 0, ',', '.'),
+            'type'    => $trx->tipe_transaksi,
+            'amount'  => 'Rp ' . number_format($trx->nominal_simpanan, 0, ',', '.'),
         ]);
     }
 }

@@ -6,7 +6,7 @@ use App\Enums\FinancingReqStatusEnum;
 use App\Enums\MemberStatusEnum;
 use App\Models\Pembiayaan;
 use App\Models\MemberDoc;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,14 +14,14 @@ class PengunduranDiriService
 {
     public function getResignData(int $anggotaId): array
     {
-        $totalSaving = SavingTransaction::whereHas(
+        $totalSaving = TransaksiSimpanan::whereHas(
             'akunSimpanan',
             fn($q) => $q->where('anggota_id', $anggotaId)
         )
         ->sum(DB::raw("
             CASE
-                WHEN transaction_type = 'Penyetoran' THEN saving_amount
-                WHEN transaction_type = 'Penarikan' THEN -saving_amount
+                WHEN tipe_transaksi = 'Penyetoran' THEN nominal_simpanan
+                WHEN tipe_transaksi = 'Penarikan' THEN -nominal_simpanan
             END
         "));
 

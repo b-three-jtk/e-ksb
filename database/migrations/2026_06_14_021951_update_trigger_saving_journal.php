@@ -37,10 +37,10 @@ return new class extends Migration
                     RAISE EXCEPTION 'Akun untuk jenis_simpanan ''%'' tidak ditemukan', v_jenis_simpanan;
                 END IF;
 
-                IF NEW.transaction_type = 'Penyetoran' THEN
+                IF NEW.tipe_transaksi = 'Penyetoran' THEN
                     v_debit_ref  := v_kas_ref;
                     v_credit_ref := v_saving_ref;
-                ELSIF NEW.transaction_type = 'Penarikan' THEN
+                ELSIF NEW.tipe_transaksi = 'Penarikan' THEN
                     v_debit_ref  := v_saving_ref;
                     v_credit_ref := v_kas_ref;
                 ELSE
@@ -51,7 +51,7 @@ return new class extends Migration
                 INSERT INTO journals (id, tgl_transaksi, created_by, created_at, updated_at)
                 VALUES (
                     gen_random_uuid(),
-                    NEW.transaction_date::DATE,
+                    NEW.tgl_transaksi::DATE,
                     NEW.updated_by,
                     NOW(), NOW()
                 )
@@ -61,13 +61,13 @@ return new class extends Migration
                 INSERT INTO journal_entries (
                     journal_id, journal_group_id,
                     no_ref_account, position, nominal,
-                    transaction_date, updated_by,
+                    tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
                     v_journal_id, v_journal_id,
                     v_debit_ref, 'Debit',
-                    NEW.saving_amount,
-                    NEW.transaction_date::DATE,
+                    NEW.nominal_simpanan,
+                    NEW.tgl_transaksi::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 
@@ -75,13 +75,13 @@ return new class extends Migration
                 INSERT INTO journal_entries (
                     journal_id, journal_group_id,
                     no_ref_account, position, nominal,
-                    transaction_date, updated_by,
+                    tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
                     v_journal_id, v_journal_id,
                     v_credit_ref, 'Credit',
-                    NEW.saving_amount,
-                    NEW.transaction_date::DATE,
+                    NEW.nominal_simpanan,
+                    NEW.tgl_transaksi::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 

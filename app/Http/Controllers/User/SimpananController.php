@@ -17,7 +17,7 @@ class SimpananController extends Controller
         $perPage = (int) $request->input('per_page', 10);
 
         $query = $bukuBesarService->buildTabunganTransactionQuery($userId, $month, $search);
-        $query->orderBy('transaction_date', 'desc');
+        $query->orderBy('tgl_transaksi', 'desc');
 
         $transactions = $query->paginate($perPage)->withQueryString();
         $transactions->setCollection($bukuBesarService->transformTransactions($transactions->getCollection(), true));

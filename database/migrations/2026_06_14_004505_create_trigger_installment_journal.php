@@ -60,7 +60,7 @@ return new class extends Migration
                 -- Dr Kas (total nominal)
                 INSERT INTO journal_entries (
                     journal_group_id, no_ref_account, position,
-                    nominal, transaction_date, updated_by,
+                    nominal, tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
                     v_group_id, v_kas_ref, 'Debit',
@@ -73,7 +73,7 @@ return new class extends Migration
                 -- Cr Piutang Murabahah (pokok)
                 INSERT INTO journal_entries (
                     journal_group_id, no_ref_account, position,
-                    nominal, transaction_date, updated_by,
+                    nominal, tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
                     v_group_id, v_piutang_ref, 'Credit',
@@ -86,7 +86,7 @@ return new class extends Migration
                 -- Cr Pendapatan Margin Murabahah (margin)
                 INSERT INTO journal_entries (
                     journal_group_id, no_ref_account, position,
-                    nominal, transaction_date, updated_by,
+                    nominal, tgl_transaksi, updated_by,
                     created_at, updated_at
                 ) VALUES (
                     v_group_id, v_margin_ref, 'Credit',

@@ -16,11 +16,11 @@ class JournalEntry extends Model
         'position',
         'nominal',
         'updated_by',
-        'transaction_date',
+        'tgl_transaksi',
     ];
 
     protected $casts = [
-        'transaction_date' => 'date',
+        'tgl_transaksi' => 'date',
     ];
 
     public function account()

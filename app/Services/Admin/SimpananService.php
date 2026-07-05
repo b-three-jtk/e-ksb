@@ -12,7 +12,7 @@ use App\Models\BerjangkaAccount;
 use App\Models\IbadahAccount;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
-use App\Models\SavingTransaction;
+use App\Models\TransaksiSimpanan;
 use App\Services\PengaturanUmumService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -91,7 +91,7 @@ class SimpananService
     {
         $prefix  = $this->getTrxCodePrefix($category);
         $yymm    = now()->format('ym'); // e.g. 2506
-        $lastNo  = SavingTransaction::where('saving_transaction_code', 'like', "{$prefix}{$yymm}%")
+        $lastNo  = TransaksiSimpanan::where('kode_transaksi_simpanan', 'like', "{$prefix}{$yymm}%")
             ->count();
         $seq     = str_pad((string)($lastNo + 1), 4, '0', STR_PAD_LEFT);
 
@@ -127,7 +127,7 @@ class SimpananService
             'tabungan_ibadah'    => SavingTypeEnum::TABUNGAN_IBADAH->value,
         ];
 
-        $query = SavingTransaction::with([
+        $query = TransaksiSimpanan::with([
             'akunSimpanan.anggota.user',
             'akunSimpanan',
         ]);
@@ -174,7 +174,7 @@ class SimpananService
     {
         $perPage  = $request->input('per_page', 10);
         $tab      = $request->input('tab', 'semua');
-        $sortBy   = in_array($request->input('sort_by'), ['transaction_date']) ? $request->input('sort_by') : 'transaction_date';
+        $sortBy   = in_array($request->input('sort_by'), ['tgl_transaksi']) ? $request->input('sort_by') : 'tgl_transaksi';
         $sortDir  = $request->input('sort_dir', 'desc');
 
         $transactions = $this->buildBaseQuery($request)
@@ -183,21 +183,21 @@ class SimpananService
             ->withQueryString()
             ->through(fn($trx) => [
                 'id'           => $trx->id,
-                'no_transaksi' => $trx->saving_transaction_code,
-                'tanggal'      => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
+                'no_transaksi' => $trx->kode_transaksi_simpanan,
+                'tanggal'      => Carbon::parse($trx->tgl_transaksi)->format('d/m/Y'),
                 'anggota'      => $trx->akunSimpanan->anggota->user->kode_pengguna
                                 . ' - '
                                 . $trx->akunSimpanan->anggota->user->nama,
-                'nominal'      => $trx->transaction_type === TransactionTypeEnum::WITHDRAWAL->value
-                                ? -$trx->saving_amount
-                                : $trx->saving_amount,
+                'nominal'      => $trx->tipe_transaksi === TransactionTypeEnum::WITHDRAWAL->value
+                                ? -$trx->nominal_simpanan
+                                : $trx->nominal_simpanan,
                 'produk'       => $trx->akunSimpanan->jenis_simpanan,
-                'jenis'        => $trx->transaction_type,
+                'jenis'        => $trx->tipe_transaksi,
             ]);
 
         $summaryBase     = $this->buildBaseQuery($request);
-        $totalMasuk      = (clone $summaryBase)->where('transaction_type', 'Penyetoran')->sum('saving_amount');
-        $totalKeluar     = (clone $summaryBase)->where('transaction_type', 'Penarikan')->sum('saving_amount');
+        $totalMasuk      = (clone $summaryBase)->where('tipe_transaksi', 'Penyetoran')->sum('nominal_simpanan');
+        $totalKeluar     = (clone $summaryBase)->where('tipe_transaksi', 'Penarikan')->sum('nominal_simpanan');
         $totalPerputaran = $totalMasuk + $totalKeluar;
 
         $tabLabels = [
@@ -353,8 +353,8 @@ class SimpananService
                 ]);
             }
 
-            if (SavingTransaction::where('akun_simpanan_id', $akunSimpanan->id)
-                ->where('transaction_type', TransactionTypeEnum::DEPOSIT->value)
+            if (TransaksiSimpanan::where('akun_simpanan_id', $akunSimpanan->id)
+                ->where('tipe_transaksi', TransactionTypeEnum::DEPOSIT->value)
                 ->exists()
             ) {
                 throw ValidationException::withMessages([
@@ -414,19 +414,19 @@ class SimpananService
         }
     }
 
-    public function createDepositTransaction(array $data, AkunSimpanan $akunSimpanan, Anggota $anggota): SavingTransaction
+    public function createDepositTransaction(array $data, AkunSimpanan $akunSimpanan, Anggota $anggota): TransaksiSimpanan
     {
         return DB::transaction(function () use ($data, $akunSimpanan, $anggota) {
             $akunSimpanan->refresh();
             $newBalance = $akunSimpanan->saldo + $data['amount'];
-            $trx = SavingTransaction::create([
-                'saving_transaction_code' => $this->generateTransactionCode($data['saving_category']),
-                'saving_amount'              => $data['amount'],
-                'balance_after_transaction'  => $newBalance,
-                'transaction_type'           => TransactionTypeEnum::DEPOSIT->value,
-                'saving_metode_pembayaran'      => $data['saving_metode_pembayaran'],
-                'saving_description'         => $data['notes'] ?? 'Penyetoran',
-                'transaction_date'           => $data['date'],
+            $trx = TransaksiSimpanan::create([
+                'kode_transaksi_simpanan' => $this->generateTransactionCode($data['saving_category']),
+                'nominal_simpanan'              => $data['amount'],
+                'saldo_setelah_transaksi'  => $newBalance,
+                'tipe_transaksi'           => TransactionTypeEnum::DEPOSIT->value,
+                'metode_pembayaran_simpanan'      => $data['metode_pembayaran_simpanan'],
+                'deskripsi_simpanan'         => $data['notes'] ?? 'Penyetoran',
+                'tgl_transaksi'           => $data['date'],
                 'updated_by'                 => Auth::id(),
                 'akun_simpanan_id'          => $akunSimpanan->id,
             ]);
@@ -444,7 +444,7 @@ class SimpananService
     }
 
     public function storeReceiptDepositPdf(
-        SavingTransaction $transaction,
+        TransaksiSimpanan $transaction,
         array $strukData,
         int $anggotaId
     ): string
@@ -469,10 +469,10 @@ class SimpananService
         }
 
         $transaction->update([
-            'saving_transaction_receipt' => $path,
+            'struk_simpanan' => $path,
         ]);
         Log::info('Receipt after update', [
-            'receipt' => $transaction->fresh()->saving_transaction_receipt,
+            'receipt' => $transaction->fresh()->struk_simpanan,
         ]);
 
         return $path;

@@ -32,20 +32,20 @@ class AruskasService
         if (!empty($filters['periode'])) {
             switch ($filters['periode']) {
                 case '1_minggu':
-                    $query->whereDate('journal_entries.transaction_date', '>=', now()->subWeek());
+                    $query->whereDate('journal_entries.tgl_transaksi', '>=', now()->subWeek());
                     break;
                 case '1_bulan':
-                    $query->whereDate('journal_entries.transaction_date', '>=', now()->subMonth());
+                    $query->whereDate('journal_entries.tgl_transaksi', '>=', now()->subMonth());
                     break;
                 case '3_bulan':
-                    $query->whereDate('journal_entries.transaction_date', '>=', now()->subMonths(3));
+                    $query->whereDate('journal_entries.tgl_transaksi', '>=', now()->subMonths(3));
                     break;
                 case '1_tahun':
-                    $query->whereDate('journal_entries.transaction_date', '>=', now()->subYear());
+                    $query->whereDate('journal_entries.tgl_transaksi', '>=', now()->subYear());
                     break;
                 case 'custom':
                     if (!empty($filters['date_from']) && !empty($filters['date_to'])) {
-                        $query->whereBetween('journal_entries.transaction_date', [
+                        $query->whereBetween('journal_entries.tgl_transaksi', [
                             $filters['date_from'],
                             $filters['date_to'],
                         ]);
@@ -60,11 +60,11 @@ class AruskasService
     public function getTransactions(array $filters): array
     {
         $sortMap = [
-            'tanggal'   => 'journal_entries.transaction_date',
+            'tanggal'   => 'journal_entries.tgl_transaksi',
             'no_jurnal' => 'journal_entries.journal_group_id',
         ];
 
-        $sortBy  = $sortMap[$filters['sort_by'] ?? 'tanggal'] ?? 'journal_entries.transaction_date';
+        $sortBy  = $sortMap[$filters['sort_by'] ?? 'tanggal'] ?? 'journal_entries.tgl_transaksi';
         $sortDir = $filters['sort_dir'] ?? 'desc';
 
         $query = $this->buildBaseQuery($filters);
@@ -103,7 +103,7 @@ class AruskasService
                     'id'         => $item->id,
                     'no'         => $currentNumber,
                     'no_jurnal'  => $item->journal_group_id,
-                    'tanggal'    => Carbon::parse($item->transaction_date)->format('d/m/Y'),
+                    'tanggal'    => Carbon::parse($item->tgl_transaksi)->format('d/m/Y'),
                     'akun'       => $item->no_ref_account . ' - ' . $item->account_name,
                     'jenis_akun' => $item->account_category,
                     'debit'      => $item->position === PositionEnum::DEBIT->value  ? $item->nominal : null,
@@ -151,12 +151,12 @@ class AruskasService
     public function buildCsvRows(array $filters): \Illuminate\Support\Collection
     {
         $sortMap = [
-            'tanggal'   => 'journal_entries.transaction_date',
+            'tanggal'   => 'journal_entries.tgl_transaksi',
             'no_jurnal' => 'journal_entries.journal_group_id',
         ];
 
         $sortBy  = $sortMap[$filters['sort_by'] ?? 'tanggal']
-            ?? 'journal_entries.transaction_date';
+            ?? 'journal_entries.tgl_transaksi';
 
         $sortDir = $filters['sort_dir'] ?? 'desc';
 
@@ -167,7 +167,7 @@ class AruskasService
             ->orderBy('journal_entries.id')
             ->get()
             ->map(fn ($trx) => [
-                Carbon::parse($trx->transaction_date)->format('d/m/Y'),
+                Carbon::parse($trx->tgl_transaksi)->format('d/m/Y'),
                 $trx->no_ref_account . ' - ' . $trx->account_name,
                 $trx->account_category,
                 $trx->position === PositionEnum::DEBIT->value

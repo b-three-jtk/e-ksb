@@ -66,16 +66,16 @@ defineExpose({ openModal, closeModal })
                     class="flex justify-between items-center py-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
                     <div class="flex flex-col gap-1">
                         <span class="font-medium text-dark-text dark:text-white">
-                            {{ transaction.saving_description }}
+                            {{ transaction.deskripsi_simpanan }}
                         </span>
                         <span class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ dateParser(transaction.transaction_date) }}
+                            {{ dateParser(transaction.tgl_transaksi) }}
                         </span>
                     </div>
-                    <span :class="transaction.transaction_type === 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
+                    <span :class="transaction.tipe_transaksi === 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
                         class="font-semibold">
-                        {{ transaction.transaction_type === 'Penyetoran' ? '+' : '-' }}
-                        {{ parseCurrencyAmount(transaction.saving_amount) }}
+                        {{ transaction.tipe_transaksi === 'Penyetoran' ? '+' : '-' }}
+                        {{ parseCurrencyAmount(transaction.nominal_simpanan) }}
                     </span>
                 </li>
             </ul>
