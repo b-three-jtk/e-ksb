@@ -20,14 +20,12 @@ const props = defineProps({
 const page = usePage()
 
 const hasPointsData = computed(() => {
-    const amt = props.settings?.points?.saving_point_amount?.value
-    const rwd = props.settings?.points?.saving_point_reward?.value
-    const mb_amt = props.settings?.points?.murabaha_point_amount?.value
-    const mb_rwd = props.settings?.points?.murabaha_point_reward?.value
-    return amt !== null && amt !== undefined && amt !== '' &&
-           rwd !== null && rwd !== undefined && rwd !== '' &&
-           mb_amt !== null && mb_amt !== undefined && mb_amt !== '' &&
-           mb_rwd !== null && mb_rwd !== undefined && mb_rwd !== ''
+    const hasAny = (val) => val !== null && val !== undefined && val !== ''
+    
+    return hasAny(props.settings?.points?.saving_point_amount?.value) ||
+           hasAny(props.settings?.points?.saving_point_reward?.value) ||
+           hasAny(props.settings?.points?.murabaha_point_amount?.value) ||
+           hasAny(props.settings?.points?.murabaha_point_reward?.value)
 })
 
 const hasSavingsData = computed(() => {
