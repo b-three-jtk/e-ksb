@@ -28,7 +28,7 @@ class AkunController extends Controller
             'sort_dir'  => $request->sort_dir ?? 'asc',
         ];
 
-        return Inertia::render('Admin/Akuns/List', [
+        return Inertia::render('Admin/Accounts/List', [
             'akun' => $this->akunService->getAkunList($filters),
 
             'filters' => $filters,

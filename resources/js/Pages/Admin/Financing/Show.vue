@@ -11,7 +11,7 @@ import FinancingChart from '@/Components/FinancingChart.vue'
 import EyeIcon from '@/Icons/EyeIcon.vue'
 import moneyParser from '@/Composables/moneyParser.js'
 import dateParser from '@/Composables/dateParser.js'
-import usepembiayaantatus from '@/Composables/usepembiayaantatus.js'
+import useFinancingStatus from '@/Composables/useFinancingStatus.js'
 import ModalDocument from '@/Components/ModalDocument.vue'
 import Documents from './Show/Documents.vue'
 
@@ -22,7 +22,7 @@ const page = usePage()
 
 const can = computed(() => page.props.auth.can)
 
-const installments = computed(() => props.data?.installment ?? {
+const installments = computed(() => props.data?.angsuran ?? {
     data: [], current_page: 1, per_page: 10, total: 0, links: [],
 })
 
@@ -34,13 +34,13 @@ const canPayBill = computed(() =>
 )
 
 const INSTALLMENT_COLUMNS = [
-    { key: 'installment_no', label: 'Pembayaran Ke' },
-    { key: 'installment_trans_code', label: 'No. Transaksi' },
-    { key: 'due_date', label: 'Tanggal Jatuh Tempo' },
-    { key: 'payment_date', label: 'Tanggal Pembayaran' },
-    { key: 'amount', label: 'Nominal' },
-    { key: 'is_early_repayment', label: 'Keterangan' },
-    { key: 'installment_payment_receipt', label: 'Aksi' },
+    { key: 'angsuran_ke', label: 'Pembayaran Ke' },
+    { key: 'kode_transaksi_pembayaran', label: 'No. Transaksi' },
+    { key: 'tgl_jatuh_tempo', label: 'Tanggal Jatuh Tempo' },
+    { key: 'tgl_pembayaran', label: 'Tanggal Pembayaran' },
+    { key: 'nominal_angsuran', label: 'Nominal' },
+    { key: 'is_pelunasan_lebih_cepat', label: 'Keterangan' },
+    { key: 'struk_pembayaran', label: 'Aksi' },
 ]
 
 const BREADCRUMBS = [
@@ -81,7 +81,7 @@ const openReceiptModal = (receiptPath) => {
                 <div class="flex gap-2 items-center">
                     <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{
                         data.kode_pembiayaan }} <span class="my-auto ml-2"
-                            :class="usepembiayaantatus(data.status)">{{ data.status }}</span>
+                            :class="useFinancingStatus(data.status)">{{ data.status }}</span>
                     </h1>
                 </div>
                 <div class="flex items-center gap-4">
@@ -118,7 +118,7 @@ const openReceiptModal = (receiptPath) => {
                             <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <Info label="Kategori Produk"
                                     :value="data.objek_pembiayaan?.jenis_barang?.nama_jenis_barang" />
-                                <Info label="Nama Produk" :value="data.objek_pembiayaan?.name" />
+                                <Info label="Nama Produk" :value="data.objek_pembiayaan?.nama_barang" />
                                 <Info label="Tanggal Akad" :value="dateParser(data.tgl_akad)" />
                                 <Info label="Jumlah/Kuantitas" :value="data.objek_pembiayaan?.kuantitas" />
                                 <Info label="Kondisi" :value="data.objek_pembiayaan?.kondisi_produk" />
@@ -130,28 +130,28 @@ const openReceiptModal = (receiptPath) => {
                             <div class="card-layout p-0!">
                                 <BaseTable :columns="INSTALLMENT_COLUMNS" :data="installments">
 
-                                    <template #cell-installment_trans_code="{ row }">
-                                        {{ row.installment_trans_code ?? '-' }}
+                                    <template #cell-kode_transaksi_pembayaran="{ row }">
+                                        {{ row.kode_transaksi_pembayaran ?? '-' }}
                                     </template>
-                                    <template #cell-due_date="{ row }">
-                                        {{ dateParser(row.due_date) }}
+                                    <template #cell-tgl_jatuh_tempo="{ row }">
+                                        {{ dateParser(row.tgl_jatuh_tempo) }}
                                     </template>
-                                    <template #cell-payment_date="{ row }">
-                                        {{ dateParser(row.payment_date) }}
+                                    <template #cell-tgl_pembayaran="{ row }">
+                                        {{ dateParser(row.tgl_pembayaran) }}
                                     </template>
-                                    <template #cell-amount="{ row }">
-                                        {{ moneyParser(row.amount) }}
+                                    <template #cell-nominal_angsuran="{ row }">
+                                        {{ moneyParser(row.nominal_angsuran) }}
                                     </template>
-                                    <template #cell-is_early_repayment="{ row }">
-                                        <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="row.is_early_repayment
+                                    <template #cell-is_pelunasan_lebih_cepat="{ row }">
+                                        <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="row.is_pelunasan_lebih_cepat
                                             ? 'text-blue-600 bg-blue-50'
                                             : 'text-green-600 bg-green-50'">
-                                            {{ row.is_early_repayment ? 'Pelunasan Dipercepat' : 'Reguler' }}
+                                            {{ row.is_pelunasan_lebih_cepat ? 'Pelunasan Dipercepat' : 'Reguler' }}
                                         </span>
                                     </template>
-                                    <template #cell-installment_payment_receipt="{ row }">
-                                        <Button v-if="row.installment_payment_receipt" size="small" variant="primary"
-                                            @click="openReceiptModal(row.installment_payment_receipt)">
+                                    <template #cell-struk_pembayaran="{ row }">
+                                        <Button v-if="row.struk_pembayaran" size="small" variant="primary"
+                                            @click="openReceiptModal(row.struk_pembayaran)">
                                             <EyeIcon width="18px" height="18px" />
                                             Lihat Bukti
                                         </Button>

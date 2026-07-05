@@ -23,7 +23,7 @@ class NotificationFactory extends Factory
             'title' => $this->faker->sentence(5),
             'message' => $this->faker->paragraph(),
             'notification_type' => $type,
-            'reference_type' => $type === NotificationTypeEnum::INSTALLMENT->value ? 'angsuran' : null,
+            'jenis_referensi' => $type === NotificationTypeEnum::INSTALLMENT->value ? 'angsuran' : null,
             'reference_id' => null,
             'notification_period' => now()->format('Y-m'),
             'reminder_type' => $reminder,

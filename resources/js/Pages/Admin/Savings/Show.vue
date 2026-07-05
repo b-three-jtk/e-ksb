@@ -49,7 +49,7 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Kategori Simpanan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_account.jenis_simpanan
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.akun_simpanan.jenis_simpanan
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
@@ -87,17 +87,17 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Anggota</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.anggota.user.kode_pengguna }}</span>
+                                        data.akun_simpanan.anggota.user.kode_pengguna }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Anggota</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.anggota.user.nama }}</span>
+                                        data.akun_simpanan.anggota.user.nama }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Status Keanggotaan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.anggota.user.status }}</span>
+                                        data.akun_simpanan.anggota.user.status }}</span>
                                 </li>
                             </ul>
                         </div>

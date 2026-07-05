@@ -62,8 +62,8 @@ class BukuBesarService
                 'nama_bank' => $linkedAccount?->nama_bank ?? '',
                 'atas_nama' => $linkedAccount?->atas_nama ?? '',
                 'no_rekening' => $linkedAccount?->no_rekening ?? ($transaction->no_rekening ?? ''),
-                'tenor' => $transaction->akunSimpanan?->saving_tenor,
-                'target' => $transaction->akunSimpanan?->target_tabungan,
+                'tenor' => $transaction->akunSimpanan?->berjangka?->tenor,
+                'target' => $transaction->akunSimpanan?->ibadah?->target_tabungan,
                 'struk_nama' => $receiptPath !== '' ? basename($receiptPath) : null,
                 'struk_attachment' => $receiptPath !== ''
                     ? asset('storage/' . ltrim($receiptPath, '/'))
@@ -162,7 +162,7 @@ class BukuBesarService
             $savingSummary[$typeKey] += $currentBalance;
 
             if ($typeKey === 'tabungan_berjangka') {
-                $tenorMonths = (int) ($account->saving_tenor ?? 0);
+                $tenorMonths = (int) ($account->berjangka?->tenor ?? 0);
 
                 if ($tenorMonths > 0 && $account->created_at) {
                     $maturityDate = Carbon::parse($account->created_at)
@@ -177,7 +177,7 @@ class BukuBesarService
             }
 
             if ($typeKey === 'tabungan_ibadah') {
-                $targetAmount = (float) ($account->target_tabungan ?? 0);
+                $targetAmount = (float) ($account->ibadah?->target_tabungan ?? 0);
                 $currentMinimumTarget = $savingMeta['tabungan_ibadah']['minimum_target'];
 
                 if ($targetAmount > 0 && (!$currentMinimumTarget || $targetAmount < $currentMinimumTarget)) {

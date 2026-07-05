@@ -145,13 +145,13 @@ const onFieldChange = (field) => emit('validate-field', field)
 
         <section v-if="form.pembiayaan.metode_pembayaran === 'Tangguh'" class="px-8 py-4">
             <BaseInputAdmin
-                v-model="form.pembiayaan.tangguh_payment_date"
+                v-model="form.pembiayaan.tangguh_tgl_pembayaran"
                 label="Tanggal Pembayaran Tangguh"
                 type="date"
-                :error="errors?.tangguh_payment_date"
+                :error="errors?.tangguh_tgl_pembayaran"
                 required
                 hint="Tanggal pembayaran tangguh harus setelah tanggal akad"
-                @change="onFieldChange('tangguh_payment_date')"
+                @change="onFieldChange('tangguh_tgl_pembayaran')"
             />
         </section>
 

@@ -523,7 +523,7 @@ const breadcrumbItems = [
                                     <h1
                                         class="font-semibold text-dark-text dark:text-white/90"
                                     >
-                                        {{ pembiayaan.objek_pembiayaan?.name }}
+                                        {{ pembiayaan.objek_pembiayaan?.nama_barang }}
                                         <span
                                             class="text-sm text-gray-400 dark:text-gray-300"
                                             >#{{

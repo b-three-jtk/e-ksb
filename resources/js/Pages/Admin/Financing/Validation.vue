@@ -10,7 +10,7 @@ import moneyParser from '@/Composables/moneyParser'
 
 import Stepper from './Validation/Stepper.vue'
 import Documents from './Validation/Documents.vue'
-import usepembiayaantatus, { getStatusLabel } from '@/Composables/usepembiayaantatus'
+import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
 import Info from '@/Components/Form/Info.vue'
 import PersonalData from './Validation/PersonalData.vue'
 import FinancialData from './Validation/FinancialData.vue'
@@ -119,7 +119,7 @@ const submit = () => {
                     <h1 class="font-semibold text-white">{{ data.pembiayaan.name }}</h1>
                     <div class="flex items-center gap-4">
                         <p class="text-white">No. Transaksi : #{{ data.pembiayaan.kode_pembiayaan }}</p>
-                        <span :class="usepembiayaantatus(data.pembiayaan.status)">
+                        <span :class="useFinancingStatus(data.pembiayaan.status)">
                             {{ getStatusLabel(data.pembiayaan.status) }}
                         </span>
                     </div>

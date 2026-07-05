@@ -11,29 +11,31 @@ import FinancingChart from '@/Components/FinancingChart.vue'
 import EyeIcon from '@/Icons/EyeIcon.vue'
 import moneyParser from '@/Composables/moneyParser.js'
 import dateParser from '@/Composables/dateParser.js'
-import usepembiayaantatus from '@/Composables/usepembiayaantatus.js'
+import useFinancingStatus from '@/Composables/useFinancingStatus.js'
 import ModalDocument from '@/Components/ModalDocument.vue'
-import Documents from '../../Admin/Pembiayaan/Show/Documents.vue'
+import Documents from '../../Admin/Financing/Show/Documents.vue'
 
 const props = defineProps({
     data: { type: Object, required: true },
 })
+
+console.log(props.data)
 const page = usePage()
 
 const can = computed(() => page.props.auth.can)
 
-const installments = computed(() => props.data?.installment ?? {
+const installments = computed(() => props.data?.angsuran ?? {
     data: [], current_page: 1, per_page: 10, total: 0, links: [],
 })
 
-const hasInstallmentHistory = computed(() => props.data?.installment?.data?.length > 0)
+const hasInstallmentHistory = computed(() => props.data?.angsuran?.data?.length > 0)
 
 const INSTALLMENT_COLUMNS = [
-    { key: 'installment_no', label: 'Pembayaran Ke' },
-    { key: 'installment_trans_code', label: 'No. Transaksi' },
-    { key: 'due_date', label: 'Tanggal Jatuh Tempo' },
-    { key: 'payment_date', label: 'Tanggal Pembayaran' },
-    { key: 'amount', label: 'Nominal' },
+    { key: 'angsuran_ke', label: 'Pembayaran Ke' },
+    { key: 'kode_transaksi_pembayaran', label: 'No. Transaksi' },
+    { key: 'tgl_jatuh_tempo', label: 'Tanggal Jatuh Tempo' },
+    { key: 'tgl_pembayaran', label: 'Tanggal Pembayaran' },
+    { key: 'nominal_angsuran', label: 'Nominal' },
     { key: 'is_early_repayment', label: 'Keterangan' },
     { key: 'installment_payment_receipt', label: 'Aksi' },
 ]
@@ -63,7 +65,7 @@ const openReceiptModal = (receiptPath) => {
                     <div class="flex gap-2 items-center">
                         <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{
                             data.kode_pembiayaan }} <span class="my-auto ml-2"
-                                :class="usepembiayaantatus(data.status)">{{ data.status }}</span>
+                                :class="useFinancingStatus(data.status)">{{ data.status }}</span>
                         </h1>
                     </div>
                 </div>
@@ -102,17 +104,17 @@ const openReceiptModal = (receiptPath) => {
                                 <div class="card-layout p-0!">
                                     <BaseTable :columns="INSTALLMENT_COLUMNS" :data="installments">
 
-                                        <template #cell-installment_trans_code="{ row }">
-                                            {{ row.installment_trans_code ?? '-' }}
+                                        <template #cell-kode_transaksi_pembayaran="{ row }">
+                                            {{ row.kode_transaksi_pembayaran ?? '-' }}
                                         </template>
                                         <template #cell-due_date="{ row }">
                                             {{ dateParser(row.due_date) }}
                                         </template>
-                                        <template #cell-payment_date="{ row }">
-                                            {{ dateParser(row.payment_date) }}
+                                        <template #cell-tgl_pembayaran="{ row }">
+                                            {{ dateParser(row.tgl_pembayaran) }}
                                         </template>
-                                        <template #cell-amount="{ row }">
-                                            {{ moneyParser(row.amount) }}
+                                        <template #cell-nominal_angsuran="{ row }">
+                                            {{ moneyParser(row.nominal_angsuran) }}
                                         </template>
                                         <template #cell-is_early_repayment="{ row }">
                                             <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="row.is_early_repayment
@@ -152,8 +154,8 @@ const openReceiptModal = (receiptPath) => {
                             <h1 class="card-title">Informasi Pemasok</h1>
                             <ul class="grid grid-cols-1 gap-6">
                                 <Info label="Nama Pemasok" :value="data.pemasok?.nama_pemasok" />
-                                <Info label="Alamat Pemasok" :value="data.pemasok?.pemasok_address" />
-                                <Info label="Kontak Pemasok" :value="data.pemasok?.pemasok_contact" />
+                                <Info label="Alamat Pemasok" :value="data.pemasok?.alamat_pemasok" />
+                                <Info label="Kontak Pemasok" :value="data.pemasok?.kontak_pemasok" />
                             </ul>
                         </div>
                         <div v-if="data.collateral" class="card-layout flex flex-col pb-12.5! gap-6">

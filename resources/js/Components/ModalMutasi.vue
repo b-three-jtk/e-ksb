@@ -86,15 +86,15 @@ defineExpose({ openModal, closeModal })
                     class="flex justify-between items-center py-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
                     <div class="flex flex-col gap-1 flex-1">
                         <span class="font-medium text-dark-text dark:text-white">
-                            Angsuran #{{ schedule.installment_no }}
+                            Angsuran #{{ schedule.angsuran_ke }}
                         </span>
                         <span class="text-sm text-gray-500 dark:text-gray-400">
-                            Jatuh Tempo: {{ dateParser(schedule.due_date) }}
+                            Jatuh Tempo: {{ dateParser(schedule.tgl_jatuh_tempo) }}
                         </span>
                     </div>
                     <div class="flex flex-col gap-1 items-end">
                         <span class="font-semibold text-dark-text dark:text-white">
-                            {{ parseCurrencyAmount(schedule.amount) }}
+                            {{ parseCurrencyAmount(schedule.nominal_angsuran) }}
                         </span>
                         <span :class="schedule.status === 'Dibayar' ? 'text-green-500' : schedule.status === 'Terlambat' ? 'text-red-500' : 'text-yellow-500'"
                             class="text-xs font-medium">

@@ -12,7 +12,7 @@ import { useImageUploadPreview } from '@/Composables/useImageUploadPreview'
 import PersonalIdentitySection from './PersonalIdentitySection.vue'
 import SupportingDocument from './SupportingDocument.vue'
 import ContactSection from './ContactSection.vue'
-import AhliWarisSection from './AhliWarisSection.vue'
+import HeirSection from './HeirSection.vue'
 
 const props = defineProps({
 	pendidikanOptions: {
@@ -195,7 +195,7 @@ const submitForm = () => {
 						:only-numbers="onlyNumbers"
 					/>
 
-					<AhliWarisSection
+					<HeirSection
 						:form="form"
 						:errors="errors"
 						:get-field-error="getFieldError"

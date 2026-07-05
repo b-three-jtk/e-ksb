@@ -9,7 +9,7 @@ import CardInfo from '@/Components/CardInfo.vue';
 import { usePage, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 import Button from '@/Components/Form/Button.vue';
-import usepembiayaantatus, { getStatusLabel } from '@/Composables/usepembiayaantatus'
+import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
 import ReviewIcon from '@/Icons/ReviewIcon.vue'
 import moneyParser from '@/Composables/moneyParser';
 
@@ -175,7 +175,7 @@ watch(() => filters.tab, applyFilters)
                     @sort="toggleSort">
 
                     <template #cell-status="{ row }">
-                        <span :class="usepembiayaantatus(row.status)">
+                        <span :class="useFinancingStatus(row.status)">
                             {{ getStatusLabel(row.status) }}
                         </span>
                     </template>

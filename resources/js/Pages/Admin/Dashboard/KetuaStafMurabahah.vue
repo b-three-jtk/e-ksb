@@ -13,7 +13,7 @@ import SkeletonStatCard from '@/Components/Dashboard/Loading/SkeletonStatCard.vu
 import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
 import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue';
 import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
-import usepembiayaantatus, { getStatusLabel } from '@/Composables/usepembiayaantatus'
+import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
 import { Link } from '@inertiajs/vue3';
 import parseCurrencyAmount from '@/Composables/moneyParser.js'
 
@@ -128,7 +128,7 @@ const emit = defineEmits(['update:selectedFilter']);
                 </div>
                 <TransactionTable :columns="kolomTabelPermohonanMurabahah" :rows="permohonan_murabahah">
                     <template #status="{ item }">
-                        <span :class="usepembiayaantatus(item.status)">
+                        <span :class="useFinancingStatus(item.status)">
                             {{ getStatusLabel(item.status) }}
                         </span>
                     </template>

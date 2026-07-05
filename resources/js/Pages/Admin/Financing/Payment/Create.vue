@@ -207,7 +207,7 @@ async function handleSubmit() {
             nominal:
                 selectedFinancing.value.installment_per_month,
 
-            payment_date:
+            tgl_pembayaran:
                 tanggalPembayaran.value,
         },
         {

@@ -27,7 +27,7 @@ const STATUS_MAP = {
     }
 }
 
-export default function usepembiayaantatus(status) {
+export default function useFinancingStatus(status) {
     return STATUS_MAP[status]?.class || `${baseClass} text-gray-600 bg-gray-100`
 }
 

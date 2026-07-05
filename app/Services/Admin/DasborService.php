@@ -280,11 +280,11 @@ class DasborService
             });
 
         if ($filter === 'simpanan') {
-            $query->where('reference_type', TransaksiSimpanan::class);
+            $query->where('jenis_referensi', TransaksiSimpanan::class);
         } elseif ($filter === 'pembiayaan') {
-            $query->where('reference_type', Angsuran::class);
+            $query->where('jenis_referensi', Angsuran::class);
         } else {
-            $query->whereIn('reference_type', [
+            $query->whereIn('jenis_referensi', [
                 TransaksiSimpanan::class,
                 Angsuran::class
             ]);
@@ -296,11 +296,11 @@ class DasborService
 
                 if (!$ref) return null;
 
-                if ($notif->reference_type === TransaksiSimpanan::class) {
+                if ($notif->jenis_referensi === TransaksiSimpanan::class) {
                     return $this->mapJatuhTempoSimpanan($notif, $ref, $savingDueDate, $savingNominal);
                 }
 
-                if ($notif->reference_type === Angsuran::class) {
+                if ($notif->jenis_referensi === Angsuran::class) {
                     return $this->mapJatuhTempoInstallment($notif, $ref);
                 }
 
