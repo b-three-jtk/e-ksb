@@ -8,9 +8,63 @@ use App\Enums\PositionEnum;
 use App\Enums\AkunCategoryEnum;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class AruskasService
 {
+
+    private const CASH_ACCOUNT = '101';
+
+    private const CASH_FLOW_MAPPING = [
+        '201' => [
+            'activity' => 'financing',
+            'in' => 'Penerimaan Tabungan Anggota',
+            'out' => 'Penarikan Tabungan Anggota',
+        ],
+
+        '202' => [
+            'activity' => 'financing',
+            'in' => 'Penerimaan Tabungan Berjangka',
+            'out' => 'Pencairan Tabungan Berjangka',
+        ],
+
+        '203' => [
+            'activity' => 'financing',
+            'in' => 'Penerimaan Tabungan Ibadah',
+            'out' => 'Pencairan Tabungan Ibadah',
+        ],
+
+        '301' => [
+            'activity' => 'financing',
+            'in' => 'Penerimaan Simpanan Pokok',
+            'out' => 'Penarikan Simpanan Pokok',
+        ],
+
+        '302' => [
+            'activity' => 'financing',
+            'in' => 'Penerimaan Simpanan Wajib',
+            'out' => 'Penarikan Simpanan Wajib',
+        ],
+
+        '102' => [
+            'activity' => 'operating',
+            'in' => null,
+            'out' => 'Penyaluran Dana Pembiayaan Murabahah',
+        ],
+
+        '104' => [
+            'activity' => 'operating',
+            'in' => 'Penerimaan Angsuran Murabahah',
+            'out' => null,
+        ],
+
+        '204' => [
+            'activity' => 'operating',
+            'in' => 'Penerimaan Uang Muka Murabahah',
+            'out' => null,
+        ],
+    ];
+
     public function buildBaseQuery(array $filters)
     {
         $query = DetailJurnal::query()
@@ -179,5 +233,216 @@ class AruskasService
                     ? number_format($trx->nominal, 0, ',', '.')
                     : '',
             ]);
+    }
+    
+    public function getCashFlowReport(array $filters): array
+    {
+        $journals = $this->buildBaseQuery($filters)
+            ->get()
+            ->groupBy('journal_group_id');
+
+        $operating = [];
+        $investing = [];
+        $financing = [];
+
+        foreach ($journals as $entries) {
+
+            $result = $this->classifyJournal($entries);
+
+            if (!$result) {
+                continue;
+            }
+
+            switch ($result['activity']) {
+
+                case 'operating':
+                    if (!isset($operating[$result['description']])) {
+                        $operating[$result['description']] = 0;
+                    }
+
+                    $operating[$result['description']] +=
+                        $result['cash_in']
+                            ? $result['amount']
+                            : -$result['amount'];
+                break;
+
+                case 'investing':
+                    if (!isset($investing[$result['description']])) {
+                        $investing[$result['description']] = 0;
+                    }
+
+                    $investing[$result['description']] +=
+                        $result['cash_in']
+                            ? $result['amount']
+                            : -$result['amount'];
+                break;
+
+                case 'financing':
+                    if (!isset($financing[$result['description']])) {
+                        $financing[$result['description']] = 0;
+                    }
+
+                    $financing[$result['description']] +=
+                        $result['amount']
+                        * ($result['cash_in'] ? 1 : -1);
+                break;
+            }
+        }
+
+        $operatingItems = collect($operating)
+            ->map(fn($amount, $desc) => [
+                'description' => $desc,
+                'amount' => $amount,
+            ])
+            ->values();
+
+        $investingItems = collect($investing)
+            ->map(fn($amount, $desc) => [
+                'description' => $desc,
+                'amount' => $amount,
+            ])
+            ->values();
+
+        $financingItems = collect($financing)
+            ->map(fn($amount, $desc) => [
+                'description' => $desc,
+                'amount' => $amount,
+            ])
+            ->values();
+
+        $openingBalance = $this->calculateOpeningBalance($filters);
+
+        $operatingNet = $operatingItems->sum('amount');
+        $investingNet = $investingItems->sum('amount');
+        $financingNet = $financingItems->sum('amount');
+
+        $netCash = $operatingNet + $investingNet + $financingNet;
+
+        return [
+
+            'opening_balance' => $openingBalance,
+
+            'operating' => [
+                'items' => $operatingItems,
+                'net' => $operatingNet,
+            ],
+
+            'investing' => [
+                'items' => $investingItems,
+                'net' => $investingNet,
+            ],
+
+            'financing' => [
+                'items' => $financingItems,
+                'net' => $financingNet,
+            ],
+
+            'net_cash' => $netCash,
+
+            'closing_balance' => $openingBalance + $netCash,
+        ];
+    }
+
+    private function classifyJournal($entries): ?array
+    {
+        $cashEntry = $entries->firstWhere(
+            'no_ref_account',
+            self::CASH_ACCOUNT
+        );
+
+        if (!$cashEntry) {
+            return null;
+        }
+
+        $accountCodes = $entries
+            ->pluck('no_ref_account')
+            ->toArray();
+
+        $cashIn = $cashEntry->position === PositionEnum::DEBIT->value;
+
+        if (
+            in_array('104', $accountCodes)
+            && in_array('401', $accountCodes)
+        ) {
+            return [
+                'activity' => 'operating',
+                'description' => 'Penerimaan Angsuran Murabahah',
+                'cash_in' => true,
+                'amount' => $cashEntry->nominal,
+            ];
+        }
+
+        /**
+         * Uang Muka
+         */
+        if (in_array('204', $accountCodes)) {
+
+            return [
+                'activity' => 'operating',
+                'description' => 'Penerimaan Uang Muka Murabahah',
+                'cash_in' => true,
+                'amount' => $cashEntry->nominal,
+            ];
+        }
+
+        /**
+         * Dana Alokasi
+         */
+        if (in_array('102', $accountCodes)) {
+
+            return [
+                'activity' => 'operating',
+                'description' => 'Penyaluran Dana Pembiayaan Murabahah',
+                'cash_in' => false,
+                'amount' => $cashEntry->nominal,
+            ];
+        }
+
+        foreach (self::CASH_FLOW_MAPPING as $account => $mapping) {
+
+            if (!in_array($account, $accountCodes)) {
+                continue;
+            }
+
+            return [
+                'activity' => $mapping['activity'],
+                'description' => $cashIn
+                    ? $mapping['in']
+                    : $mapping['out'],
+                'cash_in' => $cashIn,
+                'amount' => $cashEntry->nominal,
+            ];
+        }
+
+        return null;
+    }
+
+    private function calculateOpeningBalance(array $filters): float
+    {
+        $query = JournalEntry::query()
+            ->where('no_ref_account', self::CASH_ACCOUNT);
+
+        if (
+            ($filters['periode'] ?? null) === 'custom'
+            && !empty($filters['date_from'])
+        ) {
+            $query->whereDate(
+                'transaction_date',
+                '<',
+                $filters['date_from']
+            );
+        } else {
+            return 0;
+        }
+
+        $debit = (clone $query)
+            ->where('position', PositionEnum::DEBIT->value)
+            ->sum('nominal');
+
+        $credit = (clone $query)
+            ->where('position', PositionEnum::CREDIT->value)
+            ->sum('nominal');
+
+        return $debit - $credit;
     }
 }
