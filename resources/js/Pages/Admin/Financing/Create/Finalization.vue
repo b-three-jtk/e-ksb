@@ -25,16 +25,16 @@ const monthlyInstallment = computed(() =>
 )
 
 const incomes = [
-    { model: 'gaji_pokok_amount' },
-    { model: 'penghasilan_usaha_amount' },
-    { model: 'penghasilan_pasangan_amount' },
-    { model: 'penghasilan_lainnya_amount' },
+    { model: 'jml_gaji_pokok' },
+    { model: 'jml_penghasilan_usaha' },
+    { model: 'jml_penghasilan_pasangan' },
+    { model: 'jml_penghasilan_lainnya' },
 ]
 const expenseKeys = [
-    'biaya_hidup_keluarga_amount',
-    'biaya_pendidikan_amount',
-    'jumlah_cicilan_amount',
-    'jumlah_biaya_lainnya_amount',
+    'jml_biaya_hidup_keluarga',
+    'jml_biaya_pendidikan',
+    'jml_cicilan',
+    'jml_biaya_lainnya',
 ]
 
 const monthlyIncome = computed(() => {

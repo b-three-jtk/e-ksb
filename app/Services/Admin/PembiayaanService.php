@@ -3,15 +3,15 @@ namespace App\Services\Admin;
 
 use App\Enums\ConditionEnum;
 use App\Enums\EducationEnum;
-use App\Enums\FinancialCostEnum;
-use App\Enums\FinancialIncomeEnum;
+use App\Enums\KeuanganAnggotaCostEnum;
+use App\Enums\KeuanganAnggotaIncomeEnum;
 use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\AhliWarisEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
-use App\Models\Financial;
+use App\Models\KeuanganAnggota;
 use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
 use App\Models\GlobalSetting;
@@ -122,8 +122,8 @@ class PembiayaanService
         return [
             'educations' => array_column(EducationEnum::cases(), 'value'),
             'marriageStatuses' => array_column(MaritalStatusEnum::cases(), 'value'),
-            'incomes' => array_column(FinancialIncomeEnum::cases(), 'value'),
-            'expenses' => array_column(FinancialCostEnum::cases(), 'value'),
+            'incomes' => array_column(KeuanganAnggotaIncomeEnum::cases(), 'value'),
+            'expenses' => array_column(KeuanganAnggotaCostEnum::cases(), 'value'),
             'hubungans' => array_column(AhliWarisEnum::cases(), 'value'),
             'conditions' => array_column(ConditionEnum::cases(), 'value'),
             'jenisBarang' => DB::table('jenis_barang')->select('id', 'nama_jenis_barang')->get(),
@@ -143,7 +143,7 @@ class PembiayaanService
             ])
             ->with([
                 'anggota.user',
-                'anggota.financials',
+                'anggota.keuanganAnggota',
                 'anggota.memberDocs',
                 'anggota.ahliWaris',
                 'anggota.memberJobs',
@@ -167,7 +167,7 @@ class PembiayaanService
             ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
             ->with([
                 'anggota.user',
-                'anggota.financials',
+                'anggota.keuanganAnggota',
                 'anggota.memberDocs',
                 'anggota.ahliWaris',
                 'anggota.memberJobs',
@@ -230,19 +230,19 @@ class PembiayaanService
             }
         }
 
-        // Sync financials
-        $user->anggota->financials()->delete();
-        Financial::create([
+        // Sync keuanganAnggota
+        $user->anggota->keuanganAnggota()->delete();
+        KeuanganAnggota::create([
             'anggota_id'                    => $user->anggota->id,
-            'gaji_pokok_amount'            => $memberData['gaji_pokok_amount'] ?? 0,
-            'penghasilan_usaha_amount'     => $memberData['penghasilan_usaha_amount'] ?? 0,
-            'penghasilan_pasangan_amount'  => $memberData['penghasilan_pasangan_amount'] ?? 0,
-            'penghasilan_lainnya_amount'   => $memberData['penghasilan_lainnya_amount'] ?? 0,
-            'biaya_hidup_keluarga_amount'  => $memberData['biaya_hidup_keluarga_amount'] ?? 0,
-            'biaya_pendidikan_amount'      => $memberData['biaya_pendidikan_amount'] ?? 0,
-            'jumlah_cicilan_amount'        => $memberData['jumlah_cicilan_amount'] ?? 0,
+            'jml_gaji_pokok'            => $memberData['jml_gaji_pokok'] ?? 0,
+            'jml_penghasilan_usaha'     => $memberData['jml_penghasilan_usaha'] ?? 0,
+            'jml_penghasilan_pasangan'  => $memberData['jml_penghasilan_pasangan'] ?? 0,
+            'jml_penghasilan_lainnya'   => $memberData['jml_penghasilan_lainnya'] ?? 0,
+            'jml_biaya_hidup_keluarga'  => $memberData['jml_biaya_hidup_keluarga'] ?? 0,
+            'jml_biaya_pendidikan'      => $memberData['jml_biaya_pendidikan'] ?? 0,
+            'jml_cicilan'        => $memberData['jml_cicilan'] ?? 0,
             'jumlah_tanggungan_amount'     => $memberData['jumlah_tanggungan_amount'] ?? 0,
-            'jumlah_biaya_lainnya_amount'  => $memberData['jumlah_biaya_lainnya_amount'] ?? 0,
+            'jml_biaya_lainnya'  => $memberData['jml_biaya_lainnya'] ?? 0,
         ]);
 
         // Sync job
@@ -410,14 +410,14 @@ class PembiayaanService
             'tenure_year' => $anggota->memberJobs?->tenure_year,
             'workplace_address' => $anggota->memberJobs?->workplace_address,
             'workplace_contact' => $anggota->memberJobs?->workplace_contact,
-            'gaji_pokok_amount' => $anggota->financials?->gaji_pokok_amount ?? 0,
-            'penghasilan_usaha_amount' => $anggota->financials?->penghasilan_usaha_amount ?? 0,
-            'penghasilan_pasangan_amount' => $anggota->financials?->penghasilan_pasangan_amount ?? 0,
-            'penghasilan_lainnya_amount' => $anggota->financials?->penghasilan_lainnya_amount ?? 0,
-            'biaya_hidup_keluarga_amount' => $anggota->financials?->biaya_hidup_keluarga_amount ?? 0,
-            'biaya_pendidikan_amount' => $anggota->financials?->biaya_pendidikan_amount ?? 0,
-            'jumlah_cicilan_amount' => $anggota->financials?->jumlah_cicilan_amount ?? 0,
-            'jumlah_biaya_lainnya_amount' => $anggota->financials?->jumlah_biaya_lainnya_amount ?? 0,
+            'jml_gaji_pokok' => $anggota->keuanganAnggota?->jml_gaji_pokok ?? 0,
+            'jml_penghasilan_usaha' => $anggota->keuanganAnggota?->jml_penghasilan_usaha ?? 0,
+            'jml_penghasilan_pasangan' => $anggota->keuanganAnggota?->jml_penghasilan_pasangan ?? 0,
+            'jml_penghasilan_lainnya' => $anggota->keuanganAnggota?->jml_penghasilan_lainnya ?? 0,
+            'jml_biaya_hidup_keluarga' => $anggota->keuanganAnggota?->jml_biaya_hidup_keluarga ?? 0,
+            'jml_biaya_pendidikan' => $anggota->keuanganAnggota?->jml_biaya_pendidikan ?? 0,
+            'jml_cicilan' => $anggota->keuanganAnggota?->jml_cicilan ?? 0,
+            'jml_biaya_lainnya' => $anggota->keuanganAnggota?->jml_biaya_lainnya ?? 0,
             'ahli_waris' => $anggota->ahliWaris->map(fn($h) => [
                 'nik_ahli_waris' => $h->nik_ahli_waris,
                 'nama_ahli_waris' => $h->nama_ahli_waris,

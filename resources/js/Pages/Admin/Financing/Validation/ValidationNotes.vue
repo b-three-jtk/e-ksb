@@ -10,17 +10,17 @@ const props = defineProps({
 })
 
 const incomes = computed(() => [
-    { label: 'Gaji Pokok & Tunjangan', model: 'gaji_pokok_amount' },
-    { label: 'Penghasilan Usaha', model: 'penghasilan_usaha_amount' },
-    { label: 'Penghasilan Pasangan', model: 'penghasilan_pasangan_amount' },
-    { label: 'Penghasilan Lainnya', model: 'penghasilan_lainnya_amount' },
+    { label: 'Gaji Pokok & Tunjangan', model: 'jml_gaji_pokok' },
+    { label: 'Penghasilan Usaha', model: 'jml_penghasilan_usaha' },
+    { label: 'Penghasilan Pasangan', model: 'jml_penghasilan_pasangan' },
+    { label: 'Penghasilan Lainnya', model: 'jml_penghasilan_lainnya' },
 ])
 
 const expenses = computed(() => [
-    { label: 'Biaya Hidup Keluarga', model: 'biaya_hidup_keluarga_amount' },
-    { label: 'Biaya Pendidikan', model: 'biaya_pendidikan_amount' },
-    { label: 'Jumlah Cicilan Lainnya', model: 'jumlah_cicilan_amount' },
-    { label: 'Jumlah Biaya Lainnya', model: 'jumlah_biaya_lainnya_amount' },
+    { label: 'Biaya Hidup Keluarga', model: 'jml_biaya_hidup_keluarga' },
+    { label: 'Biaya Pendidikan', model: 'jml_biaya_pendidikan' },
+    { label: 'Jumlah Cicilan Lainnya', model: 'jml_cicilan' },
+    { label: 'Jumlah Biaya Lainnya', model: 'jml_biaya_lainnya' },
 ])
 
 const tenor = ref(12)

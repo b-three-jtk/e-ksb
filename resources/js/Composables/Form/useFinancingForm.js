@@ -43,14 +43,14 @@ export function useFinancingForm(initialData = null) {
             workplace_address: initialData?.anggota?.workplace_address || '',
             workplace_contact: initialData?.anggota?.workplace_contact || '',
 
-            gaji_pokok_amount: initialData?.anggota?.gaji_pokok_amount || '',
-            penghasilan_usaha_amount: initialData?.anggota?.penghasilan_usaha_amount || '',
-            penghasilan_pasangan_amount: initialData?.anggota?.penghasilan_pasangan_amount || '',
-            penghasilan_lainnya_amount: initialData?.anggota?.penghasilan_lainnya_amount || '',
-            biaya_hidup_keluarga_amount: initialData?.anggota?.biaya_hidup_keluarga_amount || '',
-            biaya_pendidikan_amount: initialData?.anggota?.biaya_pendidikan_amount || '',
-            jumlah_cicilan_amount: initialData?.anggota?.jumlah_cicilan_amount || '',
-            jumlah_biaya_lainnya_amount: initialData?.anggota?.jumlah_biaya_lainnya_amount || '',
+            jml_gaji_pokok: initialData?.anggota?.jml_gaji_pokok || '',
+            jml_penghasilan_usaha: initialData?.anggota?.jml_penghasilan_usaha || '',
+            jml_penghasilan_pasangan: initialData?.anggota?.jml_penghasilan_pasangan || '',
+            jml_penghasilan_lainnya: initialData?.anggota?.jml_penghasilan_lainnya || '',
+            jml_biaya_hidup_keluarga: initialData?.anggota?.jml_biaya_hidup_keluarga || '',
+            jml_biaya_pendidikan: initialData?.anggota?.jml_biaya_pendidikan || '',
+            jml_cicilan: initialData?.anggota?.jml_cicilan || '',
+            jml_biaya_lainnya: initialData?.anggota?.jml_biaya_lainnya || '',
 
             is_have_eligible_saving: initialData?.anggota?.is_have_eligible_saving || null,
             is_have_no_obligation: initialData?.anggota?.is_have_no_obligation || null,
@@ -175,14 +175,14 @@ export function useFinancingForm(initialData = null) {
         form.anggota.workplace_address = anggota.member_jobs?.workplace_address || ''
         form.anggota.workplace_contact = anggota.member_jobs?.workplace_contact || ''
 
-        form.anggota.gaji_pokok_amount = anggota.financials?.gaji_pokok_amount || ''
-        form.anggota.penghasilan_usaha_amount = anggota.financials?.penghasilan_usaha_amount || ''
-        form.anggota.penghasilan_pasangan_amount = anggota.financials?.penghasilan_pasangan_amount || ''
-        form.anggota.penghasilan_lainnya_amount = anggota.financials?.penghasilan_lainnya_amount || ''
-        form.anggota.biaya_hidup_keluarga_amount = anggota.financials?.biaya_hidup_keluarga_amount || ''
-        form.anggota.biaya_pendidikan_amount = anggota.financials?.biaya_pendidikan_amount || ''
-        form.anggota.jumlah_cicilan_amount = anggota.financials?.jumlah_cicilan_amount || ''
-        form.anggota.jumlah_biaya_lainnya_amount = anggota.financials?.jumlah_biaya_lainnya_amount || ''
+        form.anggota.jml_gaji_pokok = anggota.keuangan_anggota?.jml_gaji_pokok || ''
+        form.anggota.jml_penghasilan_usaha = anggota.keuangan_anggota?.jml_penghasilan_usaha || ''
+        form.anggota.jml_penghasilan_pasangan = anggota.keuangan_anggota?.jml_penghasilan_pasangan || ''
+        form.anggota.jml_penghasilan_lainnya = anggota.keuangan_anggota?.jml_penghasilan_lainnya || ''
+        form.anggota.jml_biaya_hidup_keluarga = anggota.keuangan_anggota?.jml_biaya_hidup_keluarga || ''
+        form.anggota.jml_biaya_pendidikan = anggota.keuangan_anggota?.jml_biaya_pendidikan || ''
+        form.anggota.jml_cicilan = anggota.keuangan_anggota?.jml_cicilan || ''
+        form.anggota.jml_biaya_lainnya = anggota.keuangan_anggota?.jml_biaya_lainnya || ''
 
         form.anggota.is_have_eligible_saving = anggota.is_have_eligible_saving || false
         form.anggota.is_have_no_obligation = anggota.is_have_no_obligation || false
@@ -223,14 +223,14 @@ export function useFinancingForm(initialData = null) {
             workplace_address: '',
             workplace_contact: '',
 
-            gaji_pokok_amount: '',
-            penghasilan_usaha_amount: '',
-            penghasilan_pasangan_amount: '',
-            penghasilan_lainnya_amount: '',
-            biaya_hidup_keluarga_amount: '',
-            biaya_pendidikan_amount: '',
-            jumlah_cicilan_amount: '',
-            jumlah_biaya_lainnya_amount: '',
+            jml_gaji_pokok: '',
+            jml_penghasilan_usaha: '',
+            jml_penghasilan_pasangan: '',
+            jml_penghasilan_lainnya: '',
+            jml_biaya_hidup_keluarga: '',
+            jml_biaya_pendidikan: '',
+            jml_cicilan: '',
+            jml_biaya_lainnya: '',
 
             is_have_eligible_saving: null,
             is_have_no_obligation: null,

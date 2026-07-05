@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum FinancialCategoryEnum: string
+enum KeuanganAnggotaCategoryEnum: string
 {
     case INCOME = 'Pemasukan';
     case EXPENSE = 'Pengeluaran';

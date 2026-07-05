@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum FinancialCostEnum: string
+enum KeuanganAnggotaCostEnum: string
 {
     case FAMILY_LIVING_COST     = 'Biaya Hidup Keluarga';
     case EDUCATION_COST         = 'Biaya Pendidikan';

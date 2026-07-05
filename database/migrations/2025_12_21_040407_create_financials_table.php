@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('financials', function (Blueprint $table) {
+        Schema::create('keuangan_anggota', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('anggota_id');
-            $table->decimal('gaji_pokok_amount', 15, 2);
-            $table->decimal('penghasilan_usaha_amount', 15, 2);
-            $table->decimal('penghasilan_pasangan_amount', 15, 2);
-            $table->decimal('penghasilan_lainnya_amount', 15, 2);
-            $table->decimal('biaya_hidup_keluarga_amount', 15, 2);
-            $table->decimal('biaya_pendidikan_amount', 15, 2);
-            $table->decimal('jumlah_cicilan_amount', 15, 2);
-            $table->decimal('jumlah_biaya_lainnya_amount', 15, 2);
+            $table->decimal('jml_gaji_pokok', 15, 2);
+            $table->decimal('jml_penghasilan_usaha', 15, 2);
+            $table->decimal('jml_penghasilan_pasangan', 15, 2);
+            $table->decimal('jml_penghasilan_lainnya', 15, 2);
+            $table->decimal('jml_biaya_hidup_keluarga', 15, 2);
+            $table->decimal('jml_biaya_pendidikan', 15, 2);
+            $table->decimal('jml_cicilan', 15, 2);
+            $table->decimal('jml_biaya_lainnya', 15, 2);
 
             $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('cascade');
             $table->unique('anggota_id');
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('financials');
+        Schema::dropIfExists('keuangan_anggota');
     }
 };

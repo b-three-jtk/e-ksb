@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Financial;
+use App\Models\KeuanganAnggota;
 use App\Models\Pembiayaan;
 use App\Models\AhliWaris;
 use App\Models\MemberBankAccount;
@@ -52,9 +52,9 @@ class Anggota extends Model
         return $this->belongsTo(Pengguna::class, 'pj_anggota_id');
     }
 
-    public function financials()
+    public function keuanganAnggota()
     {
-        return $this->hasOne(Financial::class);
+        return $this->hasOne(KeuanganAnggota::class);
     }
 
     public function bankAccounts()
