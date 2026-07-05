@@ -4,19 +4,19 @@ namespace Database\Factories;
 
 use App\Enums\PositionEnum;
 use App\Models\Akun;
-use App\Models\JournalEntry;
+use App\Models\DetailJurnal;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class JournalEntryFactory extends Factory
+class DetailJurnalFactory extends Factory
 {
-    protected $model = JournalEntry::class;
+    protected $model = DetailJurnal::class;
 
     public function definition(): array
     {
         return [
             'no_ref_akun' => Akun::factory(),
-            'position' => $this->faker->randomElement(PositionEnum::cases())->value,
+            'posisi_akun' => $this->faker->randomElement(PositionEnum::cases())->value,
             'nominal' => $this->faker->numberBetween(10000, 100000000),
             'updated_by' => Pengguna::factory(),
             'tgl_transaksi' => $this->faker->dateTime(),

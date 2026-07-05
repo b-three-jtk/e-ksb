@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('journal_entries', function (Blueprint $table) {
+        Schema::create('detail_jurnal', function (Blueprint $table) {
             $table->id();
             $table->string('no_ref_akun');
-            $table->enum('position', ['Debit', 'Credit']);
+            $table->enum('posisi_akun', ['Debit', 'Credit']);
             $table->decimal('nominal', 15, 2);
-            $table->date('tgl_transaksi');
             $table->uuid('updated_by')->nullable();
+            $table->uuid('jurnal_id')->index();
             $table->timestamps();
 
+            $table->foreign('jurnal_id')->references('id')->on('jurnal')->onDelete('cascade');
             $table->foreign('no_ref_akun')->references('no_ref_akun')->on('akun')->onDelete('restrict');
             $table->foreign('updated_by')->references('id')->on('pengguna')->onDelete('set null');
             $table->index('no_ref_akun');
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('journal_entries');
+        Schema::dropIfExists('detail_jurnal');
     }
 };

@@ -20,7 +20,7 @@ use App\Models\Pembiayaan;
 use App\Models\FinancingVerification;
 use App\Models\GlobalSetting;
 use App\Models\JenisBarang;
-use App\Models\JournalEntry;
+use App\Models\DetailJurnal;
 use App\Models\Pemasok;
 use App\Models\Pengguna;
 use App\Services\Admin\JurnalService;
@@ -253,18 +253,18 @@ class PembiayaanController extends Controller
                         'Dana Alokasi Pembiayaan Murabahah'
                     )->firstOrFail();
 
-                    $danaAlokasiMasuk = JournalEntry::where(
+                    $danaAlokasiMasuk = DetailJurnal::where(
                         'no_ref_akun',
                         $danaAlokasi->no_ref_akun
                     )
-                    ->where('position', PositionEnum::DEBIT->value)
+                    ->where('posisi_akun', PositionEnum::DEBIT->value)
                     ->sum('nominal');
 
-                    $danaAlokasiKeluar = JournalEntry::where(
+                    $danaAlokasiKeluar = DetailJurnal::where(
                         'no_ref_akun',
                         $danaAlokasi->no_ref_akun
                     )
-                    ->where('position', PositionEnum::CREDIT->value)
+                    ->where('posisi_akun', PositionEnum::CREDIT->value)
                     ->sum('nominal');
 
                     $saldoDanaAlokasi = $danaAlokasiMasuk - $danaAlokasiKeluar;
@@ -305,12 +305,12 @@ class PembiayaanController extends Controller
                     [
                         [
                             'akun' => $pembiayaanDalamProses->no_ref_akun,
-                            'position' => PositionEnum::DEBIT->value,
+                            'posisi_akun' => PositionEnum::DEBIT->value,
                             'nominal' => $pembiayaan->harga_perkiraan,
                         ],
                         [
                             'akun' => $danaAlokasi->no_ref_akun,
-                            'position' => PositionEnum::CREDIT->value,
+                            'posisi_akun' => PositionEnum::CREDIT->value,
                             'nominal' => $pembiayaan->harga_perkiraan,
                         ],
                     ],
@@ -335,12 +335,12 @@ class PembiayaanController extends Controller
                         [
                             [
                                 'akun' => $kas->no_ref_akun,
-                                'position' => PositionEnum::DEBIT->value,
+                                'posisi_akun' => PositionEnum::DEBIT->value,
                                 'nominal' => $pembiayaan->uang_muka,
                             ],
                             [
                                 'akun' => $uangMukaMurabahah->no_ref_akun,
-                                'position' => PositionEnum::CREDIT->value,
+                                'posisi_akun' => PositionEnum::CREDIT->value,
                                 'nominal' => $pembiayaan->uang_muka,
                             ],
                         ],
@@ -358,12 +358,12 @@ class PembiayaanController extends Controller
                         [
                             [
                                 'akun' => $uangMukaMurabahah->no_ref_akun,
-                                'position' => PositionEnum::DEBIT->value,
+                                'posisi_akun' => PositionEnum::DEBIT->value,
                                 'nominal' => $pembiayaan->uang_muka,
                             ],
                             [
                                 'akun' => $piutangMurabahah->no_ref_akun,
-                                'position' => PositionEnum::CREDIT->value,
+                                'posisi_akun' => PositionEnum::CREDIT->value,
                                 'nominal' => $pembiayaan->uang_muka,
                             ],
                         ],
@@ -507,17 +507,17 @@ class PembiayaanController extends Controller
                             [
                                 [
                                     'akun' => $danaAlokasi->no_ref_akun,
-                                    'position' => PositionEnum::DEBIT->value,
+                                    'posisi_akun' => PositionEnum::DEBIT->value,
                                     'nominal' => $selisih,
                                 ],
                                 [
                                     'akun' => $piutangMurabahah->no_ref_akun,
-                                    'position' => PositionEnum::DEBIT->value,
+                                    'posisi_akun' => PositionEnum::DEBIT->value,
                                     'nominal' => $piutang,
                                 ],
                                 [
                                     'akun' => $pembiayaanDalamProses->no_ref_akun,
-                                    'position' => PositionEnum::CREDIT->value,
+                                    'posisi_akun' => PositionEnum::CREDIT->value,
                                     'nominal' => $pembiayaan->harga_perkiraan,
                                 ],
                             ],
@@ -530,12 +530,12 @@ class PembiayaanController extends Controller
                             [
                                 [
                                     'akun' => $piutangMurabahah->no_ref_akun,
-                                    'position' => PositionEnum::DEBIT->value,
+                                    'posisi_akun' => PositionEnum::DEBIT->value,
                                     'nominal' => $piutang,
                                 ],
                                 [
                                     'akun' => $pembiayaanDalamProses->no_ref_akun,
-                                    'position' => PositionEnum::CREDIT->value,
+                                    'posisi_akun' => PositionEnum::CREDIT->value,
                                     'nominal' => $allocatedAmount,
                                 ],
                             ],
@@ -562,22 +562,22 @@ class PembiayaanController extends Controller
                         [
                             [
                                 'akun' => $danaAlokasi->no_ref_akun,
-                                'position' => PositionEnum::DEBIT->value,
+                                'posisi_akun' => PositionEnum::DEBIT->value,
                                 'nominal' => $selisih,
                             ],
                             [
                                 'akun' => $kas->no_ref_akun,
-                                'position' => PositionEnum::DEBIT->value,
+                                'posisi_akun' => PositionEnum::DEBIT->value,
                                 'nominal' => $piutang + $margin,
                             ],
                             [
                                 'akun' => $pembiayaanDalamProses->no_ref_akun,
-                                'position' => PositionEnum::CREDIT->value,
+                                'posisi_akun' => PositionEnum::CREDIT->value,
                                 'nominal' => $allocatedAmount,
                             ],
                             [
                                 'akun' => $pendapatanMargin->no_ref_akun,
-                                'position' => PositionEnum::CREDIT->value,
+                                'posisi_akun' => PositionEnum::CREDIT->value,
                                 'nominal' => $margin,
                             ],
                         ],
@@ -590,17 +590,17 @@ class PembiayaanController extends Controller
                         [
                             [
                                 'akun' => $kas->no_ref_akun,
-                                'position' => PositionEnum::DEBIT->value,
+                                'posisi_akun' => PositionEnum::DEBIT->value,
                                 'nominal' => $piutang + $margin,
                             ],
                             [
                                 'akun' => $pembiayaanDalamProses->no_ref_akun,
-                                'position' => PositionEnum::CREDIT->value,
+                                'posisi_akun' => PositionEnum::CREDIT->value,
                                 'nominal' => $allocatedAmount,
                             ],
                             [
                                 'akun' => $pendapatanMargin->no_ref_akun,
-                                'position' => PositionEnum::CREDIT->value,
+                                'posisi_akun' => PositionEnum::CREDIT->value,
                                 'nominal' => $margin,
                             ],
                         ],
@@ -626,17 +626,17 @@ class PembiayaanController extends Controller
                             [
                                 [
                                     'akun' => $danaAlokasi->no_ref_akun,
-                                    'position' => PositionEnum::DEBIT->value,
+                                    'posisi_akun' => PositionEnum::DEBIT->value,
                                     'nominal' => $selisih,
                                 ],
                                 [
                                     'akun' => $piutangMurabahah->no_ref_akun,
-                                    'position' => PositionEnum::DEBIT->value,
+                                    'posisi_akun' => PositionEnum::DEBIT->value,
                                     'nominal' => $piutang,
                                 ],
                                 [
                                     'akun' => $pembiayaanDalamProses->no_ref_akun,
-                                    'position' => PositionEnum::CREDIT->value,
+                                    'posisi_akun' => PositionEnum::CREDIT->value,
                                     'nominal' => $allocatedAmount,
                                 ],
                             ],
@@ -648,12 +648,12 @@ class PembiayaanController extends Controller
                             [
                                 [
                                     'akun' => $piutangMurabahah->no_ref_akun,
-                                    'position' => PositionEnum::DEBIT->value,
+                                    'posisi_akun' => PositionEnum::DEBIT->value,
                                     'nominal' => $piutang,
                                 ],
                                 [
                                     'akun' => $pembiayaanDalamProses->no_ref_akun,
-                                    'position' => PositionEnum::CREDIT->value,
+                                    'posisi_akun' => PositionEnum::CREDIT->value,
                                     'nominal' => $allocatedAmount,
                                 ],
                             ],

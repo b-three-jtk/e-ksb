@@ -19,8 +19,8 @@ class Jurnal extends Model
         'created_by',
     ];
 
-    public function entries()
+    public function detailJurnal()
     {
-        return $this->hasMany(JournalEntry::class, 'journal_id');
+        return $this->hasMany(DetailJurnal::class, 'jurnal_id');
     }
 }

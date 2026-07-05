@@ -65,8 +65,8 @@ class AruskasController extends Controller
 
         app(JurnalService::class)->create(
             [
-                ['akun' => $debitAkun->no_ref_akun,  'position' => PositionEnum::DEBIT->value,  'nominal' => $validated['nominal']],
-                ['akun' => $creditAkun->no_ref_akun, 'position' => PositionEnum::CREDIT->value, 'nominal' => $validated['nominal']],
+                ['akun' => $debitAkun->no_ref_akun,  'posisi_akun' => PositionEnum::DEBIT->value,  'nominal' => $validated['nominal']],
+                ['akun' => $creditAkun->no_ref_akun, 'posisi_akun' => PositionEnum::CREDIT->value, 'nominal' => $validated['nominal']],
             ],
             now()->toDateString(),
             auth()->id()

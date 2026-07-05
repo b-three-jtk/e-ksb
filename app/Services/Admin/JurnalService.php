@@ -4,7 +4,7 @@ namespace App\Services\Admin;
 
 use App\Enums\PositionEnum;
 use App\Models\Jurnal;
-use App\Models\JournalEntry;
+use App\Models\DetailJurnal;
 use Illuminate\Support\Facades\DB;
 
 class JurnalService
@@ -21,13 +21,11 @@ class JurnalService
             ]);
 
             foreach ($entries as $entry) {
-                JournalEntry::create([
-                    'journal_id'       => $journal->id,
-                    'journal_group_id' => $journal->id,
+                DetailJurnal::create([
+                    'jurnal_id' => $journal->id,
                     'no_ref_akun'   => $entry['akun'],
-                    'position'         => $entry['position'],
+                    'posisi_akun'         => $entry['posisi_akun'],
                     'nominal'          => $entry['nominal'],
-                    'tgl_transaksi' => $date ?? now()->toDateString(),
                     'updated_by'       => $userId,
                 ]);
             }
@@ -43,11 +41,11 @@ class JurnalService
         }
 
         $debit = collect($entries)
-            ->where('position', PositionEnum::DEBIT->value)
+            ->where('posisi_akun', PositionEnum::DEBIT->value)
             ->sum('nominal');
 
         $credit = collect($entries)
-            ->where('position', PositionEnum::CREDIT->value)
+            ->where('posisi_akun', PositionEnum::CREDIT->value)
             ->sum('nominal');
 
         if (round($debit, 2) !== round($credit, 2)) {

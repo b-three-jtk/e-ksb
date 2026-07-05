@@ -9,7 +9,7 @@ use App\Enums\UserStatusEnum;
 use App\Models\Pembiayaan;
 use App\Models\GlobalSetting;
 use App\Models\Angsuran;
-use App\Models\JournalEntry;
+use App\Models\DetailJurnal;
 use App\Models\Notification;
 use App\Models\TransaksiSimpanan;
 use App\Models\Pengguna;
@@ -117,8 +117,9 @@ class DasborService
         [$data, $format] = $this->buildSkeletonPeriode($tanggalAkhir, $filter);
         [$rangeAwal, $rangeAkhir] = $this->getRangeUntukFilterPeriode($tanggalAkhir, $filter);
 
-        $pendapatan = JournalEntry::where('no_ref_akun', '401')
-            ->whereBetween('tgl_transaksi', [$rangeAwal, $rangeAkhir])
+        $pendapatan = DetailJurnal::where('detail_jurnal.no_ref_akun', '401')
+            ->join('jurnal', 'detail_jurnal.jurnal_id', '=', 'jurnal.id')
+            ->whereBetween('jurnal.tgl_transaksi', [$rangeAwal, $rangeAkhir])
             ->get()
             ->groupBy(fn($entry) => Carbon::parse($entry->tgl_transaksi)->format($format))
             ->map(fn($group) => $group->sum('nominal'));
@@ -226,8 +227,9 @@ class DasborService
         $res = collect();
 
         if ($filter === 'jenis') {
-            $data = JournalEntry::whereIn('no_ref_akun', ['201', '202', '203', '301', '302'])
-                ->where('tgl_transaksi', '<=', $tanggalAkhir)
+            $data = DetailJurnal::join('jurnal', 'detail_jurnal.jurnal_id', '=', 'jurnal.id')
+                ->whereIn('detail_jurnal.no_ref_akun', ['201', '202', '203', '301', '302'])
+                ->where('jurnal.tgl_transaksi', '<=', $tanggalAkhir)
                 ->get()
                 ->groupBy(fn($entry) => match ($entry->no_ref_akun) {
                     '201' => 'Tabungan Anggota',
@@ -241,8 +243,9 @@ class DasborService
 
             $res = collect($skeletonJenis)->replace($data)->sortDesc();
         } else if ($filter === 'akad') {
-            $data = JournalEntry::whereIn('no_ref_akun', ['201', '202', '203', '301', '302'])
-                ->where('tgl_transaksi', '<=', $tanggalAkhir)
+            $data = DetailJurnal::join('jurnal', 'detail_jurnal.jurnal_id', '=', 'jurnal.id')
+                ->whereIn('detail_jurnal.no_ref_akun', ['201', '202', '203', '301', '302'])
+                ->where('jurnal.tgl_transaksi', '<=', $tanggalAkhir)
                 ->get()
                 ->groupBy(fn($entry) => match ($entry->no_ref_akun) {
                     '202', '203' => 'Mudharabah Mutlaqah',
@@ -572,7 +575,8 @@ class DasborService
         ?string $posisiDebit = 'Debit',
         ?string $posisiCredit = 'Credit'
     ): float {
-        $query = JournalEntry::where('tgl_transaksi', '<=', $tanggalAkhir);
+        $query = DetailJurnal::join('jurnal', 'detail_jurnal.jurnal_id', '=', 'jurnal.id')
+            ->where('jurnal.tgl_transaksi', '<=', $tanggalAkhir);
 
         is_array($noRefAkun)
             ? $query->whereIn('no_ref_akun', $noRefAkun)
@@ -582,11 +586,11 @@ class DasborService
         if ($posisiDebit === null || $posisiCredit === null) {
             $posisi = $posisiDebit ?? $posisiCredit;
 
-            return (float) $query->where('position', $posisi)->sum('nominal');
+            return (float) $query->where('posisi_akun', $posisi)->sum('nominal');
         }
 
         return (float) ($query->selectRaw(
-            'SUM(CASE WHEN position = ? THEN nominal ELSE 0 END) - SUM(CASE WHEN position = ? THEN nominal ELSE 0 END) as total',
+            'SUM(CASE WHEN posisi_akun = ? THEN nominal ELSE 0 END) - SUM(CASE WHEN posisi_akun = ? THEN nominal ELSE 0 END) as total',
             [$posisiDebit, $posisiCredit]
         )->value('total') ?? 0);
     }
@@ -597,8 +601,8 @@ class DasborService
      */
     private function hitungSaldoCreditMinusDebit(Collection $group): float
     {
-        $totalCredit = $group->where('position', 'Credit')->sum('nominal');
-        $totalDebit = $group->where('position', 'Debit')->sum('nominal');
+        $totalCredit = $group->where('posisi_akun', 'Credit')->sum('nominal');
+        $totalDebit = $group->where('posisi_akun', 'Debit')->sum('nominal');
 
         return $totalCredit - $totalDebit;
     }

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\JournalEntry;
+use App\Models\DetailJurnal;
 use Database\Seeders\AkunSeeder;
 use Database\Seeders\PenggunaSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;

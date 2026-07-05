@@ -17,7 +17,7 @@ use App\Models\ObjekPembiayaan;
 use App\Models\GlobalSetting;
 use App\Models\AhliWaris;
 use App\Models\Angsuran;
-use App\Models\JournalEntry;
+use App\Models\DetailJurnal;
 use App\Models\Anggota;
 use App\Models\Pemasok;
 use App\Models\Pengguna;
@@ -96,22 +96,22 @@ class PembiayaanService
 
     public function getModalBelumDiputar()
     {
-        $modalCredit = JournalEntry::whereHas(
+        $modalCredit = DetailJurnal::whereHas(
             'akun',
             function ($q) {
                 $q->where('nama_akun', 'Dana Alokasi Pembiayaan Murabahah');
             }
         )
-        ->where('position', PositionEnum::CREDIT->value)
+        ->where('posisi_akun', PositionEnum::CREDIT->value)
         ->sum('nominal');
 
-        $modalDebit = JournalEntry::whereHas(
+        $modalDebit = DetailJurnal::whereHas(
             'akun',
             function ($q) {
                 $q->where('nama_akun', 'Dana Alokasi Pembiayaan Murabahah');
             }
         )
-        ->where('position', PositionEnum::DEBIT->value)
+        ->where('posisi_akun', PositionEnum::DEBIT->value)
         ->sum('nominal');
 
         return $modalDebit - $modalCredit;

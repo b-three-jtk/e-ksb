@@ -58,30 +58,28 @@ return new class extends Migration
                 RETURNING id INTO v_journal_id;
 
                 -- Debit
-                INSERT INTO journal_entries (
-                    journal_id, journal_group_id,
-                    no_ref_akun, position, nominal,
-                    tgl_transaksi, updated_by,
+                INSERT INTO detail_jurnal (
+                    jurnal_id,
+                    no_ref_akun, posisi_akun, nominal,
+                    updated_by,
                     created_at, updated_at
                 ) VALUES (
-                    v_journal_id, v_journal_id,
+                    v_journal_id,
                     v_debit_ref, 'Debit',
                     NEW.nominal_simpanan,
-                    NEW.tgl_transaksi::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 
                 -- Credit
-                INSERT INTO journal_entries (
-                    journal_id, journal_group_id,
-                    no_ref_akun, position, nominal,
-                    tgl_transaksi, updated_by,
+                INSERT INTO detail_jurnal (
+                    jurnal_id,
+                    no_ref_akun, posisi_akun, nominal,
+                    updated_by,
                     created_at, updated_at
                 ) VALUES (
-                    v_journal_id, v_journal_id,
+                    v_journal_id,
                     v_credit_ref, 'Credit',
                     NEW.nominal_simpanan,
-                    NEW.tgl_transaksi::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 

@@ -128,14 +128,14 @@ describe('Aplikasi harus menyediakan pencatatan alokasi kas koperasi untuk setia
             'akun_kredit' => $akunKredit->no_ref_akun,
         ]);
         $response->assertStatus(302);
-        $this->assertDatabaseHas('journal_entries', [
+        $this->assertDatabaseHas('detail_jurnal', [
             'no_ref_akun' => $akunDebit->no_ref_akun,
-            'position' => 'Debit',
+            'posisi_akun' => 'Debit',
             'nominal' => 100000.00,
         ]);
-        $this->assertDatabaseHas('journal_entries', [
+        $this->assertDatabaseHas('detail_jurnal', [
             'no_ref_akun' => $akunKredit->no_ref_akun,
-            'position' => 'Credit',
+            'posisi_akun' => 'Credit',
             'nominal' => 100000.00,
         ]);
     });
@@ -164,14 +164,14 @@ describe('Aplikasi harus menyediakan pencatatan alokasi kas koperasi untuk setia
             'akun_kredit' => $akunKredit->no_ref_akun,
         ]);
         $response->assertStatus(403);
-        $this->assertDatabaseMissing('journal_entries', [
+        $this->assertDatabaseMissing('detail_jurnal', [
             'no_ref_akun' => $akunDebit->no_ref_akun,
-            'position' => 'Debit',
+            'posisi_akun' => 'Debit',
             'nominal' => 100000.00,
         ]);
-        $this->assertDatabaseMissing('journal_entries', [
+        $this->assertDatabaseMissing('detail_jurnal', [
             'no_ref_akun' => $akunKredit->no_ref_akun,
-            'position' => 'Credit',
+            'posisi_akun' => 'Credit',
             'nominal' => 100000.00,
         ]);
     });

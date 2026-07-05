@@ -55,13 +55,16 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
 
         $danaAlokasi = \App\Models\Akun::where('nama_akun', 'Dana Alokasi Pembiayaan Murabahah')->first();
         if ($danaAlokasi) {
-            \App\Models\JournalEntry::create([
-                'no_ref_akun' => $danaAlokasi->no_ref_akun,
-                'position' => 'Debit',
-                'nominal' => 100000000,
+            $jurnal = \App\Models\Jurnal::create([
                 'tgl_transaksi' => now()->format('Y-m-d'),
+                'created_by' => $this->staffMurabahah->id,
+            ]);
+            \App\Models\DetailJurnal::create([
+                'no_ref_akun' => $danaAlokasi->no_ref_akun,
+                'posisi_akun' => 'Debit',
+                'nominal' => 100000000,
                 'updated_by' => $this->staffMurabahah->id,
-                'journal_group_id' => \Illuminate\Support\Str::uuid()->toString(),
+                'jurnal_id' => $jurnal->id,
             ]);
         }
 

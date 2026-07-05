@@ -7,21 +7,19 @@ use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class JournalEntry extends Model
+class DetailJurnal extends Model
 {
     use HasFactory;
+    protected $table = 'detail_jurnal';
     protected $fillable = [
-        'journal_group_id',
+        'jurnal_id',
         'no_ref_akun',
-        'position',
+        'posisi_akun',
         'nominal',
         'updated_by',
-        'tgl_transaksi',
     ];
 
-    protected $casts = [
-        'tgl_transaksi' => 'date',
-    ];
+    protected $casts = [];
 
     public function akun()
     {

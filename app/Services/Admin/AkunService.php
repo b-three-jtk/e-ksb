@@ -3,7 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Models\Akun;
-use App\Models\JournalEntry;
+use App\Models\DetailJurnal;
 use App\Enums\AkunCategoryEnum;
 use App\Enums\PositionEnum;
 
@@ -11,12 +11,12 @@ class AkunService
 {
     public function calculateBalance(string $noRefAkun, string $category): float
     {
-        $debit = JournalEntry::where('no_ref_akun', $noRefAkun)
-            ->where('position', PositionEnum::DEBIT->value)
+        $debit = DetailJurnal::where('no_ref_akun', $noRefAkun)
+            ->where('posisi_akun', PositionEnum::DEBIT->value)
             ->sum('nominal');
 
-        $kredit = JournalEntry::where('no_ref_akun', $noRefAkun)
-            ->where('position', PositionEnum::CREDIT->value)
+        $kredit = DetailJurnal::where('no_ref_akun', $noRefAkun)
+            ->where('posisi_akun', PositionEnum::CREDIT->value)
             ->sum('nominal');
 
         return in_array($category, ['Aset', 'Beban'])

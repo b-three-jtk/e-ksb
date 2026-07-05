@@ -61,41 +61,38 @@ return new class extends Migration
                 RETURNING id INTO v_journal_id;
 
                 -- Dr Kas
-                INSERT INTO journal_entries (
-                    journal_id, journal_group_id,
-                    no_ref_akun, position, nominal,
-                    tgl_transaksi, updated_by,
+                INSERT INTO detail_jurnal (
+                    jurnal_id, 
+                    no_ref_akun, posisi_akun, nominal,
+                    updated_by,
                     created_at, updated_at
                 ) VALUES (
-                    v_journal_id, v_journal_id,
+                    v_journal_id,
                     v_kas_ref, 'Debit', NEW.jumlah_angsuran_dibayar,
-                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 
                 -- Cr Piutang
-                INSERT INTO journal_entries (
-                    journal_id, journal_group_id,
-                    no_ref_akun, position, nominal,
-                    tgl_transaksi, updated_by,
+                INSERT INTO detail_jurnal (
+                    jurnal_id, 
+                    no_ref_akun, posisi_akun, nominal,
+                    updated_by,
                     created_at, updated_at
                 ) VALUES (
-                    v_journal_id, v_journal_id,
+                    v_journal_id,
                     v_piutang_ref, 'Credit', v_principal,
-                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 
                 -- Cr Margin
-                INSERT INTO journal_entries (
-                    journal_id, journal_group_id,
-                    no_ref_akun, position, nominal,
-                    tgl_transaksi, updated_by,
+                INSERT INTO detail_jurnal (
+                    jurnal_id,
+                    no_ref_akun, posisi_akun, nominal,
+                    updated_by,
                     created_at, updated_at
                 ) VALUES (
-                    v_journal_id, v_journal_id,
+                    v_journal_id,
                     v_margin_ref, 'Credit', v_margin,
-                    NEW.tgl_pembayaran::DATE,
                     NEW.updated_by, NOW(), NOW()
                 );
 

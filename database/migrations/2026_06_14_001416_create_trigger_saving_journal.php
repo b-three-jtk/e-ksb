@@ -68,12 +68,11 @@ return new class extends Migration
                 v_group_id := gen_random_uuid();
 
                 -- Baris DEBIT
-                INSERT INTO journal_entries (
-                    journal_group_id,
+                INSERT INTO detail_jurnal (
+                    jurnal_id,
                     no_ref_akun,
-                    position,
+                    posisi_akun,
                     nominal,
-                    tgl_transaksi,
                     updated_by,
                     created_at,
                     updated_at
@@ -82,19 +81,17 @@ return new class extends Migration
                     v_debit_ref,
                     'Debit',
                     NEW.nominal_simpanan,
-                    NEW.tgl_transaksi::DATE,
                     NEW.updated_by,
                     NOW(),
                     NOW()
                 );
 
                 -- Baris CREDIT
-                INSERT INTO journal_entries (
-                    journal_group_id,
+                INSERT INTO detail_jurnal (
+                    jurnal_id,
                     no_ref_akun,
-                    position,
+                    posisi_akun,
                     nominal,
-                    tgl_transaksi,
                     updated_by,
                     created_at,
                     updated_at
@@ -103,7 +100,6 @@ return new class extends Migration
                     v_credit_ref,
                     'Credit',
                     NEW.nominal_simpanan,
-                    NEW.tgl_transaksi::DATE,
                     NEW.updated_by,
                     NOW(),
                     NOW()

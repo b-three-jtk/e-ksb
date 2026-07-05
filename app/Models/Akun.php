@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\JournalEntry;
+use App\Models\DetailJurnal;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,8 +21,8 @@ class Akun extends Model
         'saldo',
     ];
 
-    public function journalEntries()
+    public function detailJurnal()
     {
-        return $this->hasMany(JournalEntry::class, 'account_code', 'no_ref_akun');
+        return $this->hasMany(DetailJurnal::class, 'account_code', 'no_ref_akun');
     }
 }

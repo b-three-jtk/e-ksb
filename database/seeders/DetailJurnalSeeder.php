@@ -6,7 +6,7 @@ use App\Models\Akun;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class JournalEntrySeeder extends Seeder
+class DetailJurnalSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,9 +16,9 @@ class JournalEntrySeeder extends Seeder
         // Seed journal entries for all akun
         $akun = Akun::all();
 
-        foreach ($akun as $akun) {
+        foreach ($akun as $a) {
             // Create a journal entry for each akun
-            $akun->journalEntries()->create([
+            $a->detailJurnal()->create([
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
