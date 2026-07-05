@@ -7,7 +7,7 @@ use App\Models\Pembiayaan;
 use App\Models\AhliWaris;
 use App\Models\RekeningAnggota;
 use App\Models\DokumenAnggota;
-use App\Models\MemberJob;
+use App\Models\PekerjaanAnggota;
 use App\Models\Notification;
 use App\Models\AkunSimpanan;
 use App\Models\Pengguna;
@@ -74,9 +74,9 @@ class Anggota extends Model
         return $this->hasMany(DokumenAnggota::class);
     }
 
-    public function memberJobs()
+    public function pekerjaanAnggota()
     {
-        return $this->hasOne(MemberJob::class);
+        return $this->hasOne(PekerjaanAnggota::class);
     }
 
     // Murabahah

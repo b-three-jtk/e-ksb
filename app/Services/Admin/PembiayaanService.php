@@ -146,7 +146,7 @@ class PembiayaanService
                 'anggota.keuanganAnggota',
                 'anggota.dokumenAnggota',
                 'anggota.ahliWaris',
-                'anggota.memberJobs',
+                'anggota.pekerjaanAnggota',
                 'objekPembiayaan.jenisBarang',
                 'objekPembiayaan.pemasok',
                 'collateral',
@@ -170,7 +170,7 @@ class PembiayaanService
                 'anggota.keuanganAnggota',
                 'anggota.dokumenAnggota',
                 'anggota.ahliWaris',
-                'anggota.memberJobs',
+                'anggota.pekerjaanAnggota',
                 'objekPembiayaan.jenisBarang',
                 'objekPembiayaan.pemasok',
                 'collateral',
@@ -246,16 +246,16 @@ class PembiayaanService
         ]);
 
         // Sync job
-        $user->anggota->memberJobs()->delete();
-        if (isset($memberData['job_title'])) {
-            $user->anggota->memberJobs()->create([
-                'employment_status'        => $memberData['employment_status'] ?? null,
-                'job_title'                => $memberData['job_title'] ?? null,
-                'company_or_business_name' => $memberData['company_or_business_name'] ?? null,
-                'business_field'           => $memberData['business_field'] ?? null,
-                'tenure_year'              => $memberData['tenure_year'] ?? null,
-                'workplace_address'        => $memberData['workplace_address'] ?? null,
-                'workplace_contact'        => $memberData['workplace_contact'] ?? null,
+        $user->anggota->pekerjaanAnggota()->delete();
+        if (isset($memberData['jabatan_pekerjaan'])) {
+            $user->anggota->pekerjaanAnggota()->create([
+                'status_pekerjaan'        => $memberData['status_pekerjaan'] ?? null,
+                'jabatan_pekerjaan'                => $memberData['jabatan_pekerjaan'] ?? null,
+                'nama_perusahaan' => $memberData['nama_perusahaan'] ?? null,
+                'bidang_usaha'           => $memberData['bidang_usaha'] ?? null,
+                'lama_bekerja'              => $memberData['lama_bekerja'] ?? null,
+                'alamat_tempat_bekerja'        => $memberData['alamat_tempat_bekerja'] ?? null,
+                'no_telp_kantor'        => $memberData['no_telp_kantor'] ?? null,
             ]);
         }
     }
@@ -403,13 +403,13 @@ class PembiayaanService
             'jml_tanggungan' => $anggota->jml_tanggungan,
             'alamat_domisili' => $anggota->alamat_domisili,
             'alamat_ktp' => $anggota->alamat_ktp,
-            'employment_status' => $anggota->memberJobs?->employment_status,
-            'job_title' => $anggota->memberJobs?->job_title,
-            'company_or_business_name' => $anggota->memberJobs?->company_or_business_name,
-            'business_field' => $anggota->memberJobs?->business_field,
-            'tenure_year' => $anggota->memberJobs?->tenure_year,
-            'workplace_address' => $anggota->memberJobs?->workplace_address,
-            'workplace_contact' => $anggota->memberJobs?->workplace_contact,
+            'status_pekerjaan' => $anggota->pekerjaanAnggota?->status_pekerjaan,
+            'jabatan_pekerjaan' => $anggota->pekerjaanAnggota?->jabatan_pekerjaan,
+            'nama_perusahaan' => $anggota->pekerjaanAnggota?->nama_perusahaan,
+            'bidang_usaha' => $anggota->pekerjaanAnggota?->bidang_usaha,
+            'lama_bekerja' => $anggota->pekerjaanAnggota?->lama_bekerja,
+            'alamat_tempat_bekerja' => $anggota->pekerjaanAnggota?->alamat_tempat_bekerja,
+            'no_telp_kantor' => $anggota->pekerjaanAnggota?->no_telp_kantor,
             'jml_gaji_pokok' => $anggota->keuanganAnggota?->jml_gaji_pokok ?? 0,
             'jml_penghasilan_usaha' => $anggota->keuanganAnggota?->jml_penghasilan_usaha ?? 0,
             'jml_penghasilan_pasangan' => $anggota->keuanganAnggota?->jml_penghasilan_pasangan ?? 0,

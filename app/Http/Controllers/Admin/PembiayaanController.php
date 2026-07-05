@@ -703,7 +703,7 @@ class PembiayaanController extends Controller
         $query = $request->input('q');
 
         $anggota = Anggota::query()
-            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'dokumenAnggota', 'keuanganAnggota', 'ahliWaris', 'memberJobs', 'pembiayaan:id,status', 'akunSimpanan:id,saldo,created_at'])
+            ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'dokumenAnggota', 'keuanganAnggota', 'ahliWaris', 'pekerjaanAnggota', 'pembiayaan:id,status', 'akunSimpanan:id,saldo,created_at'])
             ->whereHas('user', function ($q) use ($query) {
                 $q->whereHas('roles', fn($roleQ) => $roleQ->where('nama_barang', 'Anggota'))
                     ->where('status', UserStatusEnum::ACTIVE->value)

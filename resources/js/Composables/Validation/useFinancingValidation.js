@@ -64,29 +64,29 @@ export function useFinancingValidation(form) {
     const validateStep2 = () => {
         const errs = {}
         const m = form.anggota
-        const isValidTenureYear = (tenure_year) => /^[0-9]+$/.test(tenure_year)
+        const isValidTenureYear = (lama_bekerja) => /^[0-9]+$/.test(lama_bekerja)
 
-        if (!m.job_title?.trim())
-            errs.job_title = 'Jabatan wajib diisi.'
+        if (!m.jabatan_pekerjaan?.trim())
+            errs.jabatan_pekerjaan = 'Jabatan wajib diisi.'
 
-        if (!m.company_or_business_name?.trim())
-            errs.company_or_business_name = 'Nama perusahaan/bisnis wajib diisi.'
+        if (!m.nama_perusahaan?.trim())
+            errs.nama_perusahaan = 'Nama perusahaan/bisnis wajib diisi.'
 
-        if (!m.business_field?.trim())
-            errs.business_field = 'Bidang pekerjaan wajib diisi.'
+        if (!m.bidang_usaha?.trim())
+            errs.bidang_usaha = 'Bidang pekerjaan wajib diisi.'
 
-        if (!m.tenure_year && m.tenure_year !== 0)
-            errs.tenure_year = 'Lama bekerja wajib diisi.'
-        else if (!isValidTenureYear(m.tenure_year))
-            errs.tenure_year = 'Lama bekerja harus berupa angka.'
+        if (!m.lama_bekerja && m.lama_bekerja !== 0)
+            errs.lama_bekerja = 'Lama bekerja wajib diisi.'
+        else if (!isValidTenureYear(m.lama_bekerja))
+            errs.lama_bekerja = 'Lama bekerja harus berupa angka.'
 
-        if (!m.workplace_contact?.trim())
-            errs.workplace_contact = 'Kontak perusahaan wajib diisi.'
-        else if (!isValidPhone(m.workplace_contact))
-            errs.workplace_contact = 'Kontak perusahaan harus 8-13 digit angka.'
+        if (!m.no_telp_kantor?.trim())
+            errs.no_telp_kantor = 'Kontak perusahaan wajib diisi.'
+        else if (!isValidPhone(m.no_telp_kantor))
+            errs.no_telp_kantor = 'Kontak perusahaan harus 8-13 digit angka.'
 
-        if (!m.workplace_address?.trim())
-            errs.workplace_address = 'Alamat perusahaan wajib diisi.'
+        if (!m.alamat_tempat_bekerja?.trim())
+            errs.alamat_tempat_bekerja = 'Alamat perusahaan wajib diisi.'
 
         if (!form.income_slip_file && !form.documents?.income_slip)
             errs.income_slip_file = 'Slip gaji wajib diunggah.'
@@ -268,8 +268,8 @@ function getAllKeysForStep(step) {
     const map = {
         1: ['kode_pengguna', 'name', 'nik', 'email', 'no_telp', 'jenis_kelamin',
             'alamat_ktp', 'ahli_waris', 'eligible_saving', 'no_obligation'],
-        2: ['job_title', 'company_or_business_name', 'business_field',
-            'tenure_year', 'workplace_contact', 'workplace_address',
+        2: ['jabatan_pekerjaan', 'nama_perusahaan', 'bidang_usaha',
+            'lama_bekerja', 'no_telp_kantor', 'alamat_tempat_bekerja',
             'income_slip_file', 'bank_book_file'],
         3: ['financing_name', 'collateral_type'],
         4: ['nama_pemasok', 'harga_perolehan', 'purchase_receipt_file'],

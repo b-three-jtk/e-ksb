@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('member_jobs', function (Blueprint $table) {
+        Schema::create('pekerjaan_anggota', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('anggota_id');
-            $table->string('employment_status');
-            $table->string('job_title')->nullable();
-            $table->string('company_or_business_name')->nullable();
-            $table->string('business_field')->nullable();
-            $table->integer('tenure_year')->nullable();
-            $table->text('workplace_address')->nullable();
-            $table->string('workplace_contact', 20)->nullable();
+            $table->string('status_pekerjaan');
+            $table->string('jabatan_pekerjaan')->nullable();
+            $table->string('nama_perusahaan')->nullable();
+            $table->string('bidang_usaha')->nullable();
+            $table->integer('lama_bekerja')->nullable();
+            $table->text('alamat_tempat_bekerja')->nullable();
+            $table->string('no_telp_kantor', 20)->nullable();
 
             $table->foreign('anggota_id')->references('id')->on('anggota')->onDelete('cascade');
             $table->timestamps();

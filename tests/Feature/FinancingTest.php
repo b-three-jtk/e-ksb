@@ -50,7 +50,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'nama' => $anggota->user->nama,
                     'nik' => $anggota->user->nik,
                     'no_telp' => $anggota->user->no_telp,
-                    'employment_status' => 'Karyawan Swasta',
+                    'status_pekerjaan' => 'Karyawan Swasta',
                     'ahli_waris' => [
                         [
                             'nama_ahli_waris' => 'Ahli Waris 1',
@@ -102,7 +102,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'nama' => $anggota->user->nama,
                     'nik' => $anggota->user->nik,
                     'no_telp' => $anggota->user->no_telp,
-                    'employment_status' => 'Karyawan Swasta',
+                    'status_pekerjaan' => 'Karyawan Swasta',
                     'ahli_waris' => [
                         [
                             'nama_ahli_waris' => 'Ahli Waris 1',
@@ -163,7 +163,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'nama' => $anggota->user->nama,
                     'nik' => $anggota->user->nik,
                     'no_telp' => $anggota->user->no_telp,
-                    'employment_status' => 'Karyawan Swasta',
+                    'status_pekerjaan' => 'Karyawan Swasta',
                     'ahli_waris' => [
                         [
                             'nama_ahli_waris' => 'Ahli Waris 1',
@@ -210,7 +210,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'nama' => $anggota->user->nama,
                     'nik' => $anggota->user->nik,
                     'no_telp' => $anggota->user->no_telp,
-                    'employment_status' => 'Karyawan Swasta',
+                    'status_pekerjaan' => 'Karyawan Swasta',
                     'ahli_waris' => [
                         [
                             'nama_ahli_waris' => 'Ahli Waris 1',
@@ -299,7 +299,7 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
                     'nama' => $user->nama,
                     'nik' => $user->nik,
                     'no_telp' => $user->no_telp,
-                    'employment_status' => 'Karyawan Swasta',
+                    'status_pekerjaan' => 'Karyawan Swasta',
                     'ahli_waris' => [
                         [
                             'nama_ahli_waris' => 'Ada Wong',

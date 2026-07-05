@@ -121,7 +121,7 @@ class PembiayaanService
             'anggota.ahliWaris',
             'anggota.keuanganAnggota',
             'anggota.dokumenAnggota',
-            'anggota.memberJobs',
+            'anggota.pekerjaanAnggota',
             'objekPembiayaan.jenisBarang',
             'collateral',
             'angsuran' => function ($q) {

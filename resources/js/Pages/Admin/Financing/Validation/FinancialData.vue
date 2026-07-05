@@ -38,13 +38,13 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
         <div>
             <h1 class="card-title">Informasi Pekerjaan</h1>
             <div class="grid grid-cols-2 gap-6 mt-8">
-                <Info label="Status Pekerjaan" :value="data.anggota.employment_status" />
-                <Info label="Jabatan" :value="data.anggota.job_title" />
-                <Info label="Nama Perusahaan atau Bisnis" :value="data.anggota.company_or_business_name" />
-                <Info label="Bidang Pekerjaan" :value="data.anggota.business_field" />
-                <Info label="Lama Bekerja (Tahun)" :value="data.anggota.tenure_year" />
-                <Info label="Kontak Perusahaan" :value="data.anggota.workplace_contact" />
-                <Info label="Alamat Perusahaan" :value="data.anggota.workplace_address" />
+                <Info label="Status Pekerjaan" :value="data.anggota.status_pekerjaan" />
+                <Info label="Jabatan" :value="data.anggota.jabatan_pekerjaan" />
+                <Info label="Nama Perusahaan atau Bisnis" :value="data.anggota.nama_perusahaan" />
+                <Info label="Bidang Pekerjaan" :value="data.anggota.bidang_usaha" />
+                <Info label="Lama Bekerja (Tahun)" :value="data.anggota.lama_bekerja" />
+                <Info label="Kontak Perusahaan" :value="data.anggota.no_telp_kantor" />
+                <Info label="Alamat Perusahaan" :value="data.anggota.alamat_tempat_bekerja" />
             </div>
         </div>
         <div class="card-layout">

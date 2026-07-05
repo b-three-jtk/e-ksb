@@ -6,18 +6,19 @@ use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MemberJob extends Model
+class PekerjaanAnggota extends Model
 {
     use HasFactory;
+    protected $table = 'pekerjaan_anggota';
     protected $fillable = [
         'anggota_id',
-        'employment_status',
-        'job_title',
-        'company_or_business_name',
-        'business_field',
-        'tenure_year',
-        'workplace_address',
-        'workplace_contact',
+        'status_pekerjaan',
+        'jabatan_pekerjaan',
+        'nama_perusahaan',
+        'bidang_usaha',
+        'lama_bekerja',
+        'alamat_tempat_bekerja',
+        'no_telp_kantor',
     ];
 
     public function anggota()

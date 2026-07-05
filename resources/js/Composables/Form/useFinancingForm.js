@@ -35,13 +35,13 @@ export function useFinancingForm(initialData = null) {
             status_pernikahan: initialData?.anggota?.status_pernikahan || '',
             jml_tanggungan: initialData?.anggota?.jml_tanggungan || 0,
 
-            employment_status: initialData?.anggota?.employment_status || '',
-            job_title: initialData?.anggota?.job_title || '',
-            company_or_business_name: initialData?.anggota?.company_or_business_name || '',
-            business_field: initialData?.anggota?.business_field || '',
-            tenure_year: initialData?.anggota?.tenure_year || 0,
-            workplace_address: initialData?.anggota?.workplace_address || '',
-            workplace_contact: initialData?.anggota?.workplace_contact || '',
+            status_pekerjaan: initialData?.anggota?.status_pekerjaan || '',
+            jabatan_pekerjaan: initialData?.anggota?.jabatan_pekerjaan || '',
+            nama_perusahaan: initialData?.anggota?.nama_perusahaan || '',
+            bidang_usaha: initialData?.anggota?.bidang_usaha || '',
+            lama_bekerja: initialData?.anggota?.lama_bekerja || 0,
+            alamat_tempat_bekerja: initialData?.anggota?.alamat_tempat_bekerja || '',
+            no_telp_kantor: initialData?.anggota?.no_telp_kantor || '',
 
             jml_gaji_pokok: initialData?.anggota?.jml_gaji_pokok || '',
             jml_penghasilan_usaha: initialData?.anggota?.jml_penghasilan_usaha || '',
@@ -167,13 +167,13 @@ export function useFinancingForm(initialData = null) {
         form.anggota.status_pernikahan = anggota.status_pernikahan || ''
         form.anggota.jml_tanggungan = anggota.jml_tanggungan || 0
 
-        form.anggota.employment_status = anggota.member_jobs?.employment_status || ''
-        form.anggota.job_title = anggota.member_jobs?.job_title || ''
-        form.anggota.company_or_business_name = anggota.member_jobs?.company_or_business_name || ''
-        form.anggota.business_field = anggota.member_jobs?.business_field || ''
-        form.anggota.tenure_year = anggota.member_jobs?.tenure_year || 0
-        form.anggota.workplace_address = anggota.member_jobs?.workplace_address || ''
-        form.anggota.workplace_contact = anggota.member_jobs?.workplace_contact || ''
+        form.anggota.status_pekerjaan = anggota.pekerjaan_anggota?.status_pekerjaan || ''
+        form.anggota.jabatan_pekerjaan = anggota.pekerjaan_anggota?.jabatan_pekerjaan || ''
+        form.anggota.nama_perusahaan = anggota.pekerjaan_anggota?.nama_perusahaan || ''
+        form.anggota.bidang_usaha = anggota.pekerjaan_anggota?.bidang_usaha || ''
+        form.anggota.lama_bekerja = anggota.pekerjaan_anggota?.lama_bekerja || 0
+        form.anggota.alamat_tempat_bekerja = anggota.pekerjaan_anggota?.alamat_tempat_bekerja || ''
+        form.anggota.no_telp_kantor = anggota.pekerjaan_anggota?.no_telp_kantor || ''
 
         form.anggota.jml_gaji_pokok = anggota.keuangan_anggota?.jml_gaji_pokok || ''
         form.anggota.jml_penghasilan_usaha = anggota.keuangan_anggota?.jml_penghasilan_usaha || ''
@@ -215,13 +215,13 @@ export function useFinancingForm(initialData = null) {
             status_pernikahan: '',
             jml_tanggungan: null,
 
-            employment_status: '',
-            job_title: '',
-            company_or_business_name: '',
-            business_field: '',
-            tenure_year: null,
-            workplace_address: '',
-            workplace_contact: '',
+            status_pekerjaan: '',
+            jabatan_pekerjaan: '',
+            nama_perusahaan: '',
+            bidang_usaha: '',
+            lama_bekerja: null,
+            alamat_tempat_bekerja: '',
+            no_telp_kantor: '',
 
             jml_gaji_pokok: '',
             jml_penghasilan_usaha: '',

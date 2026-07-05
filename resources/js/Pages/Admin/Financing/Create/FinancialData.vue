@@ -48,57 +48,57 @@ const onFieldChange = (field) => emit('validate-field', field)
             <!-- Data Pekerjaan -->
             <div class="border-b border-gray-200 grid grid-cols-2 gap-4 p-4">
                 <BaseInputAdmin
-                    v-model="form.anggota.employment_status"
+                    v-model="form.anggota.status_pekerjaan"
                     required
                     label="Status Pekerjaan"
                     placeholder="Masukkan status pekerjaan, contoh: Karyawan Swasta"
-                    @input="onFieldChange('employment_status')"
+                    @input="onFieldChange('status_pekerjaan')"
                 />
                 <BaseInputAdmin
-                    v-model="form.anggota.job_title"
+                    v-model="form.anggota.jabatan_pekerjaan"
                     label="Jabatan"
                     placeholder="Masukkan jabatan"
-                    :error="errors?.job_title"
-                    @input="onFieldChange('job_title')"
+                    :error="errors?.jabatan_pekerjaan"
+                    @input="onFieldChange('jabatan_pekerjaan')"
                 />
                 <BaseInputAdmin
-                    v-model="form.anggota.company_or_business_name"
+                    v-model="form.anggota.nama_perusahaan"
                     label="Nama Perusahaan atau Bisnis"
                     placeholder="Masukkan nama perusahaan atau bisnis"
-                    :error="errors?.company_or_business_name"
-                    @input="onFieldChange('company_or_business_name')"
+                    :error="errors?.nama_perusahaan"
+                    @input="onFieldChange('nama_perusahaan')"
                 />
                 <BaseInputAdmin
-                    v-model="form.anggota.business_field"
+                    v-model="form.anggota.bidang_usaha"
                     label="Bidang Pekerjaan"
                     placeholder="Masukkan bidang pekerjaan"
-                    :error="errors?.business_field"
-                    @input="onFieldChange('business_field')"
+                    :error="errors?.bidang_usaha"
+                    @input="onFieldChange('bidang_usaha')"
                 />
                 <BaseInputAdmin
-                    v-model="form.anggota.tenure_year"
+                    v-model="form.anggota.lama_bekerja"
                     label="Lama Bekerja (Tahun)"
                     type="number"
                     placeholder="Masukkan lama bekerja"
-                    :error="errors?.tenure_year"
-                    @input="onFieldChange('tenure_year')"
+                    :error="errors?.lama_bekerja"
+                    @input="onFieldChange('lama_bekerja')"
                 />
                 <BaseInputAdmin
-                    v-model="form.anggota.workplace_contact"
+                    v-model="form.anggota.no_telp_kantor"
                     max="13"
                     label="Kontak Perusahaan"
                     placeholder="Masukkan kontak perusahaan"
-                    :error="errors?.workplace_contact"
-                    @input="onFieldChange('workplace_contact')"
+                    :error="errors?.no_telp_kantor"
+                    @input="onFieldChange('no_telp_kantor')"
                 />
                 <BaseInputAdmin
                     rows="3"
-                    v-model="form.anggota.workplace_address"
+                    v-model="form.anggota.alamat_tempat_bekerja"
                     label="Alamat Perusahaan"
                     type="textarea"
                     placeholder="Masukkan alamat perusahaan"
-                    :error="errors?.workplace_address"
-                    @input="onFieldChange('workplace_address')"
+                    :error="errors?.alamat_tempat_bekerja"
+                    @input="onFieldChange('alamat_tempat_bekerja')"
                 />
             </div>
 
