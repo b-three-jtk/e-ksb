@@ -20,10 +20,12 @@ const props = defineProps({
 const page = usePage()
 
 const hasPointsData = computed(() => {
-    const amt = props.settings?.points?.saving_point_amount?.value
-    const rwd = props.settings?.points?.saving_point_reward?.value
-    return amt !== null && amt !== undefined && amt !== '' &&
-           rwd !== null && rwd !== undefined && rwd !== ''
+    const hasAny = (val) => val !== null && val !== undefined && val !== ''
+    
+    return hasAny(props.settings?.points?.saving_point_amount?.value) ||
+           hasAny(props.settings?.points?.saving_point_reward?.value) ||
+           hasAny(props.settings?.points?.murabaha_point_amount?.value) ||
+           hasAny(props.settings?.points?.murabaha_point_reward?.value)
 })
 
 const hasSavingsData = computed(() => {
@@ -92,6 +94,9 @@ const forms = reactive({
         saving_point_amount: '',
         saving_point_reward: '',
         effective_date: '',
+        murabaha_point_amount: '',
+        murabaha_point_reward: '',
+        murabaha_effective_date: '',
     },
     savings: {
         saving_pokok_amount: '',
@@ -152,11 +157,11 @@ const formatHistoryValue = (value, key) => {
         return `${formatInteger(value)} %`
     }
 
-    if (['saving_point_amount', 'saving_pokok_amount', 'saving_wajib_amount'].includes(key)) {
+    if (['saving_point_amount', 'saving_pokok_amount', 'saving_wajib_amount', 'murabaha_point_amount'].includes(key)) {
         return formatMoney(value)
     }
 
-    if (key === 'saving_point_reward') {
+    if (key === 'saving_point_reward' || key === 'murabaha_point_reward') {
         return formatInteger(value)
     }
 
@@ -209,6 +214,8 @@ const summaryCards = computed(() => {
     if (activeTab.value === 'points') {
         const pointsAmount = getSetting('points', 'saving_point_amount')
         const pointReward = getSetting('points', 'saving_point_reward')
+        const mbPointsAmount = getSetting('points', 'murabaha_point_amount')
+        const mbPointReward = getSetting('points', 'murabaha_point_reward')
 
         return [
             {
@@ -217,15 +224,15 @@ const summaryCards = computed(() => {
             },
             {
                 value: formatInteger(pointReward.value),
-                label: 'Poin Diperoleh',
+                label: 'Poin Simpanan Diperoleh',
             },
             {
-                value: formatDate(pointsAmount.effective_date || pointReward.effective_date),
-                label: 'Berlaku Sejak',
+                value: formatMoney(mbPointsAmount.value),
+                label: 'Jumlah Margin Murabahah',
             },
             {
-                value: formatDate(pointsAmount.updated_at || pointReward.updated_at),
-                label: 'Terakhir Diperbarui',
+                value: formatInteger(mbPointReward.value),
+                label: 'Poin Murabahah Diperoleh',
             },
         ]
     }
@@ -288,6 +295,11 @@ const syncForms = () => {
     forms.points.saving_point_reward = props.settings?.points?.saving_point_reward?.value ?? ''
     forms.points.effective_date = props.settings?.points?.saving_point_amount?.effective_date
         ?? props.settings?.points?.saving_point_reward?.effective_date
+        ?? ''
+    forms.points.murabaha_point_amount = props.settings?.points?.murabaha_point_amount?.value ?? ''
+    forms.points.murabaha_point_reward = props.settings?.points?.murabaha_point_reward?.value ?? ''
+    forms.points.murabaha_effective_date = props.settings?.points?.murabaha_point_amount?.effective_date
+        ?? props.settings?.points?.murabaha_point_reward?.effective_date
         ?? ''
 
     forms.savings.saving_pokok_amount = props.settings?.savings?.saving_pokok_amount?.value ?? ''
