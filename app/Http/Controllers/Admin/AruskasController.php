@@ -12,7 +12,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use App\Exports\ArusKasExport;
+use App\Exports\JurnalUmumExport;
+use App\Exports\LaporanArusKasExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AruskasController extends Controller
@@ -33,6 +34,7 @@ class AruskasController extends Controller
         return Inertia::render('Admin/CashFlow/List', [
             'transactions' => $transactions,
             'summary'      => $this->aruskasService->getKasSummary(),
+            'cashFlowReport'=>$this->aruskasService->getCashFlowReport($filters),
             'filters'      => $filters,
             'akunOptions'  => Account::select(
                                 'no_ref_account as nomor_akun',
@@ -104,8 +106,49 @@ class AruskasController extends Controller
         };
 
         return Excel::download(
-            new ArusKasExport($rows, $periode),
-            'arus_kas_'.now()->format('Ymd_His').'.xlsx'
+            new JurnalUmumExport($rows, $periode),
+            'jurnal_umum_'.now()->format('Ymd_His').'.xlsx'
+        );
+    }
+
+    public function exportCashflow(Request $request)
+    {
+        $filters = $request->only([
+            'search',
+            'periode',
+            'date_from',
+            'date_to',
+            'sort_by',
+            'sort_dir',
+        ]);
+
+        $report = $this->aruskasService->getCashFlowReport($filters);
+
+        $periode = match ($filters['periode'] ?? '') {
+
+            '1_minggu' => '1 Minggu Terakhir',
+
+            '1_bulan' => '1 Bulan Terakhir',
+
+            '3_bulan' => '3 Bulan Terakhir',
+
+            '1_tahun' => '1 Tahun Terakhir',
+
+            'custom' => (
+                !empty($filters['date_from']) &&
+                !empty($filters['date_to'])
+                    ? Carbon::parse($filters['date_from'])->translatedFormat('d F Y')
+                    .' s.d. '.
+                    Carbon::parse($filters['date_to'])->translatedFormat('d F Y')
+                    : 'Periode Kustom'
+            ),
+
+            default => 'Berakhir '.now()->translatedFormat('d F Y'),
+        };
+
+        return Excel::download(
+            new LaporanArusKasExport($report, $periode),
+            'laporan_arus_kas_'.now()->format('Ymd_His').'.xlsx'
         );
     }
 }
