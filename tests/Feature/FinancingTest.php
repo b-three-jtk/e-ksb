@@ -70,11 +70,11 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'status' => 'Belum Ditinjau',
                     'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
-                'collateral' => [
-                    'collateral_type' => 'Motor',
-                    'owner_name' => 'Pemohon',
-                    'estimated_market_value' => 30000000,
-                    'collateral_location' => 'Bandung',
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
                 ],
                 'income_slip_file' => UploadedFile::fake()->create('income_slip.jpg'),
                 'bank_book_file' => UploadedFile::fake()->create('bank_book.jpg'),
@@ -85,7 +85,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
             'harga_perkiraan' => 50000000,
         ]);
         $this->assertDatabaseHas('objek_pembiayaan', ['nama_barang' => 'Motor Honda']);
-        $this->assertDatabaseHas('collaterals', ['collateral_type' => 'Motor']);
+        $this->assertDatabaseHas('jaminan', ['jenis_jaminan' => 'Motor']);
     });
 
     it('Pemohon yang tidak berstatus aktif tidak dapat mengajukan pembiayaan', function () {
@@ -122,11 +122,11 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'status' => 'Belum Ditinjau',
                     'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
-                'collateral' => [
-                    'collateral_type' => 'Motor',
-                    'owner_name' => 'Pemohon',
-                    'estimated_market_value' => 30000000,
-                    'collateral_location' => 'Bandung',
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
                 ],
                 'income_slip_file' => UploadedFile::fake()->create('income_slip.jpg'),
                 'bank_book_file' => UploadedFile::fake()->create('bank_book.jpg'),
@@ -183,11 +183,11 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'status' => 'Belum Ditinjau',
                     'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
-                'collateral' => [
-                    'collateral_type' => 'Motor',
-                    'owner_name' => 'Pemohon',
-                    'estimated_market_value' => 30000000,
-                    'collateral_location' => 'Bandung',
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
                 ],
                 'income_slip_file' => UploadedFile::fake()->create('income_slip.jpg'),
                 'bank_book_file' => UploadedFile::fake()->create('bank_book.jpg'),
@@ -230,11 +230,11 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'status' => 'Belum Ditinjau',
                     'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
-                'collateral' => [
-                    'collateral_type' => 'Motor',
-                    'owner_name' => 'Pemohon',
-                    'estimated_market_value' => 30000000,
-                    'collateral_location' => 'Bandung',
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
                 ],
                 'income_slip_file' => UploadedFile::fake()->create('income_slip.jpg'),
                 'bank_book_file' => UploadedFile::fake()->create('bank_book.jpg'),
@@ -259,11 +259,11 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     'kuantitas' => 1,
                     'kondisi_produk' => 'Baru',
                 ],
-                'collateral' => [
-                    'collateral_type' => 'Motor',
-                    'owner_name' => 'John Doe',
-                    'estimated_market_value' => 30000000,
-                    'collateral_location' => 'Bandung',
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'John Doe',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
                 ],
             ]);
 
@@ -330,11 +330,11 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
                     'contact' => '081234567890',
                     'alamat_pemasok' => 'Jl. Pemasok No. 1',
                 ],
-                'collateral' => [
-                    'collateral_type' => 'Motor',
-                    'owner_name' => 'Pemohon',
-                    'estimated_market_value' => 30000000,
-                    'collateral_location' => 'Bandung',
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
                 ],
                 'akad_document_file' => UploadedFile::fake()->create('akad.pdf'),
                 'akad_wakalah_file' => UploadedFile::fake()->create('akad_wakalah.pdf'),
@@ -350,7 +350,7 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
             'status' => 'Angsuran Berjalan',
         ]);
         $this->assertDatabaseHas('objek_pembiayaan', ['nama_barang' => 'Motor Honda']);
-        $this->assertDatabaseHas('collaterals', ['collateral_type' => 'Motor']);
+        $this->assertDatabaseHas('jaminan', ['jenis_jaminan' => 'Motor']);
     });
 });
 

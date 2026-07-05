@@ -76,11 +76,11 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                 'status_pekerjaan' => 'Karyawan Swasta',
                 'ahli_waris' => [['nama_ahli_waris' => 'Ahli Waris', 'nik_ahli_waris' => '1234567890654321', 'hubungan' => 'Anak', 'kontak_ahli_waris' => '081234567890']],
             ],
-            'collateral' => [
-                'collateral_type' => 'Logam Mulia',
-                'owner_name' => 'Dhira Ramadini',
-                'estimated_market_value' => 15000000,
-                'collateral_location' => 'Bandung',
+            'jaminan' => [
+                'jenis_jaminan' => 'Logam Mulia',
+                'nama_pemilik' => 'Dhira Ramadini',
+                'nilai_perkiraan_pasar' => 15000000,
+                'lokasi_kondisi_jaminan' => 'Bandung',
             ],
             'income_slip_file' => UploadedFile::fake()->create('income.jpg'),
             'bank_book_file' => UploadedFile::fake()->create('bank.jpg'),

@@ -84,11 +84,11 @@ watch([
         <div class="card-layout">
             <h1 class="card-title">Data Jaminan</h1>
             <div class="grid grid-cols-2 gap-6 mt-8">
-                <Info label="Jenis Jaminan" :value="data.collateral.collateral_type" />
+                <Info label="Jenis Jaminan" :value="data.collateral.jenis_jaminan" />
                 <Info label="Nilai Estimasi Jaminan (Rp)"
-                    :value="moneyParser(data.collateral.estimated_market_value)" />
-                <Info label="Atas Nama" :value="data.collateral.owner_name" />
-                <Info label="Lokasi / Kondisi Jaminan" :value="data.collateral.collateral_location" />
+                    :value="moneyParser(data.collateral.nilai_perkiraan_pasar)" />
+                <Info label="Atas Nama" :value="data.collateral.nama_pemilik" />
+                <Info label="Lokasi / Kondisi Jaminan" :value="data.collateral.lokasi_kondisi_jaminan" />
             </div>
         </div>
         <section class="card-layout">

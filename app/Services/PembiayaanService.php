@@ -123,7 +123,7 @@ class PembiayaanService
             'anggota.dokumenAnggota',
             'anggota.pekerjaanAnggota',
             'objekPembiayaan.jenisBarang',
-            'collateral',
+            'jaminan',
             'angsuran' => function ($q) {
                 $q->orderBy('angsuran_ke');
             },

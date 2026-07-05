@@ -72,11 +72,11 @@ class StorePreFinancingRequest extends FormRequest
             'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
             'pembiayaan.uang_muka' => 'nullable|numeric|min:0',
 
-            // Collateral data
-            'collateral.collateral_type' => 'required|string|max:255',
-            'collateral.owner_name' => 'required|string|max:255',
-            'collateral.estimated_market_value' => 'nullable|numeric|min:0',
-            'collateral.collateral_location' => 'nullable|string|max:500',
+            // Jaminan data
+            'jaminan.jenis_jaminan' => 'required|string|max:255',
+            'jaminan.nama_pemilik' => 'required|string|max:255',
+            'jaminan.nilai_perkiraan_pasar' => 'nullable|numeric|min:0',
+            'jaminan.lokasi_kondisi_jaminan' => 'nullable|string|max:500',
 
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',

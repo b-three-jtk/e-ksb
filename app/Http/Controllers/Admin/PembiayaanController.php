@@ -152,11 +152,11 @@ class PembiayaanController extends Controller
                     'harga_perkiraan' => $pembiayaan->harga_perkiraan,
                     'tangguh_tgl_pembayaran' => $pembiayaan->tangguh_tgl_pembayaran,
                 ],
-                'collateral' => [
-                    'collateral_type' => $pembiayaan->collateral?->collateral_type,
-                    'owner_name' => $pembiayaan->collateral?->owner_name,
-                    'estimated_market_value' => $pembiayaan->collateral?->estimated_market_value,
-                    'collateral_location' => $pembiayaan->collateral?->collateral_location,
+                'jaminan' => [
+                    'jenis_jaminan' => $pembiayaan->jaminan?->jenis_jaminan,
+                    'nama_pemilik' => $pembiayaan->jaminan?->nama_pemilik,
+                    'nilai_perkiraan_pasar' => $pembiayaan->jaminan?->nilai_perkiraan_pasar,
+                    'lokasi_kondisi_jaminan' => $pembiayaan->jaminan?->lokasi_kondisi_jaminan,
                 ],
                 'verification' => $pembiayaan->verification->map(function ($item) {
                     return [
@@ -216,11 +216,11 @@ class PembiayaanController extends Controller
                     'harga_perkiraan' => $pembiayaan->harga_perkiraan,
                     'tangguh_tgl_pembayaran' => $pembiayaan->tangguh_tgl_pembayaran,
                 ],
-                'collateral' => [
-                    'collateral_type' => $pembiayaan->collateral?->collateral_type,
-                    'owner_name' => $pembiayaan->collateral?->owner_name,
-                    'estimated_market_value' => $pembiayaan->collateral?->estimated_market_value,
-                    'collateral_location' => $pembiayaan->collateral?->collateral_location,
+                'jaminan' => [
+                    'jenis_jaminan' => $pembiayaan->jaminan?->jenis_jaminan,
+                    'nama_pemilik' => $pembiayaan->jaminan?->nama_pemilik,
+                    'nilai_perkiraan_pasar' => $pembiayaan->jaminan?->nilai_perkiraan_pasar,
+                    'lokasi_kondisi_jaminan' => $pembiayaan->jaminan?->lokasi_kondisi_jaminan,
                 ],
                 'documents' => [
                     'family_card' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()?->lampiran_dokumen),
@@ -762,7 +762,7 @@ class PembiayaanController extends Controller
             'angsuran.payment',
             'objekPembiayaan.jenisBarang',
             'objekPembiayaan.pemasok',
-            'collateral'
+            'jaminan'
         ])->where('status', '!=', FinancingReqStatusEnum::PAID->value)->findOrFail($id);
 
         $data = $this->pembayaranAngsuranService->calculateDetails($pembiayaan);

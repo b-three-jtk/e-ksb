@@ -79,10 +79,10 @@ export function useFinancingForm(initialData = null) {
             tangguh_tgl_pembayaran: initialData?.pembiayaan?.tangguh_tgl_pembayaran || null,
         },
         collateral: {
-            collateral_type: initialData?.collateral?.collateral_type || '',
-            owner_name: initialData?.collateral?.owner_name || '',
-            estimated_market_value: initialData?.collateral?.estimated_market_value || 0,
-            collateral_location: initialData?.collateral?.collateral_location || '',
+            jenis_jaminan: initialData?.collateral?.jenis_jaminan || '',
+            nama_pemilik: initialData?.collateral?.nama_pemilik || '',
+            nilai_perkiraan_pasar: initialData?.collateral?.nilai_perkiraan_pasar || 0,
+            lokasi_kondisi_jaminan: initialData?.collateral?.lokasi_kondisi_jaminan || '',
         },
         verification: initialData?.verification || [],
         documents: {
@@ -255,10 +255,10 @@ export function useFinancingForm(initialData = null) {
             pemasok_id: null,
         }
         form.collateral = {
-            collateral_type: '',
-            owner_name: '',
-            estimated_market_value: null,
-            collateral_location: '',
+            jenis_jaminan: '',
+            nama_pemilik: '',
+            nilai_perkiraan_pasar: null,
+            lokasi_kondisi_jaminan: '',
         }
         form.pemasok = {
             nama_pemasok: '',

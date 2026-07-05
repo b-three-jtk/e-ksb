@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Collateral;
+use App\Models\Jaminan;
 use App\Models\ObjekPembiayaan;
 use App\Models\Angsuran;
 use App\Models\Anggota;
@@ -75,9 +75,9 @@ class Pembiayaan extends Model
     }
 
     // Rahn atau Jaminan
-    public function collateral()
+    public function jaminan()
     {
-        return $this->hasOne(Collateral::class);
+        return $this->hasOne(Jaminan::class);
     }
 
     // Wakalah

@@ -159,11 +159,11 @@ const openReceiptModal = (receiptPath) => {
                         <div v-if="data.collateral" class="card-layout flex flex-col pb-12.5! gap-6">
                             <h1 class="card-title">Informasi Jaminan</h1>
                             <ul class="grid grid-cols-1 gap-6">
-                                <Info label="Tipe Jaminan" :value="data.collateral.collateral_type" />
-                                <Info label="Nama Pemilik" :value="data.collateral.owner_name" />
-                                <Info label="Lokasi Jaminan" :value="data.collateral.collateral_location" />
+                                <Info label="Tipe Jaminan" :value="data.collateral.jenis_jaminan" />
+                                <Info label="Nama Pemilik" :value="data.collateral.nama_pemilik" />
+                                <Info label="Lokasi Jaminan" :value="data.collateral.lokasi_kondisi_jaminan" />
                                 <Info label="Nilai Pasar Estimasi"
-                                    :value="moneyParser(data.collateral.estimated_market_value)" />
+                                    :value="moneyParser(data.collateral.nilai_perkiraan_pasar)" />
                             </ul>
                         </div>
                         <Documents :data="data" />

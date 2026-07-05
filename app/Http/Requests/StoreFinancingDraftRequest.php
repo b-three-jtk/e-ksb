@@ -83,11 +83,11 @@ class StoreFinancingDraftRequest extends FormRequest
             'pembiayaan.pemasok_id' => 'nullable|exists:pemasok,id',
             'pembiayaan.tangguh_tgl_pembayaran' => 'nullable|date',
 
-            // Collateral data
-            'collateral.collateral_type' => 'nullable|string|max:255',
-            'collateral.owner_name' => 'nullable|string|max:255',
-            'collateral.estimated_market_value' => 'nullable|numeric|min:0',
-            'collateral.collateral_location' => 'nullable|string|max:500',
+            // Jaminan data
+            'jaminan.jenis_jaminan' => 'nullable|string|max:255',
+            'jaminan.nama_pemilik' => 'nullable|string|max:255',
+            'jaminan.nilai_perkiraan_pasar' => 'nullable|numeric|min:0',
+            'jaminan.lokasi_kondisi_jaminan' => 'nullable|string|max:500',
 
             // Pemasok data
             'pemasok.nama_pemasok' => 'nullable|string|max:255',

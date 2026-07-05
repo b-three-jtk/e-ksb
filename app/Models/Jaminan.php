@@ -7,16 +7,17 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Collateral extends Model
+class Jaminan extends Model
 {
     use HasFactory, HasUuids;
     //
+    protected $table = 'jaminan';
     protected $fillable = [
         'pembiayaan_id',
-        'collateral_type',
-        'owner_name',
-        'collateral_location',
-        'estimated_market_value',
+        'jenis_jaminan',
+        'nama_pemilik',
+        'lokasi_kondisi_jaminan',
+        'nilai_perkiraan_pasar',
     ];
 
     public function pembiayaan()

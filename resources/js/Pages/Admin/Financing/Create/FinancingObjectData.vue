@@ -105,14 +105,14 @@ const onFieldChange = (field) => emit('validate-field', field)
             <h1 class="card-title">Jaminan (Rahn)</h1>
         </div>
         <div class="grid grid-cols-2 gap-4 p-4">
-            <BaseInputAdmin v-model="form.collateral.collateral_type" label="Jenis Agunan"
-                placeholder="Masukkan jenis agunan" required :error="errors?.collateral_type"
-                @input="onFieldChange('collateral_type')" />
-            <BaseInputAdmin v-model="form.collateral.owner_name" required label="Atas Nama"
+            <BaseInputAdmin v-model="form.collateral.jenis_jaminan" label="Jenis Agunan"
+                placeholder="Masukkan jenis agunan" required :error="errors?.jenis_jaminan"
+                @input="onFieldChange('jenis_jaminan')" />
+            <BaseInputAdmin v-model="form.collateral.nama_pemilik" required label="Atas Nama"
                 placeholder="Masukkan nama pemilik" />
-            <BaseInputAdmin v-model="form.collateral.estimated_market_value" label="Nilai Perkiraan Pasar" isMoney
+            <BaseInputAdmin v-model="form.collateral.nilai_perkiraan_pasar" label="Nilai Perkiraan Pasar" isMoney
                 placeholder="Masukkan nilai perkiraan pasar" />
-            <BaseInputAdmin v-model="form.collateral.collateral_location" label="Lokasi/Kondisi Agunan" type="textarea"
+            <BaseInputAdmin v-model="form.collateral.lokasi_kondisi_jaminan" label="Lokasi/Kondisi Agunan" type="textarea"
                 rows="4" placeholder="Masukkan lokasi atau kondisi agunan" />
         </div>
 

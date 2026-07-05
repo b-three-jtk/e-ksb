@@ -68,7 +68,7 @@ const prevStep = () => {
 }
 
 const isStep3Valid = computed(() =>
-    form.pembiayaan.name && form.collateral.collateral_type && !form.processing
+    form.pembiayaan.name && form.collateral.jenis_jaminan && !form.processing
 )
 
 const isFinalizationValid = computed(() =>

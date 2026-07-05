@@ -128,8 +128,8 @@ export function useFinancingValidation(form) {
         if (!form.pembiayaan.harga_perkiraan)
             errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
 
-        if (!form.collateral.collateral_type)
-            errs.collateral_type = 'Jenis jaminan wajib dipilih.'
+        if (!form.collateral.jenis_jaminan)
+            errs.jenis_jaminan = 'Jenis jaminan wajib dipilih.'
 
         return errs
     }
@@ -271,7 +271,7 @@ function getAllKeysForStep(step) {
         2: ['jabatan_pekerjaan', 'nama_perusahaan', 'bidang_usaha',
             'lama_bekerja', 'no_telp_kantor', 'alamat_tempat_bekerja',
             'income_slip_file', 'bank_book_file'],
-        3: ['financing_name', 'collateral_type'],
+        3: ['financing_name', 'jenis_jaminan'],
         4: ['nama_pemasok', 'harga_perolehan', 'purchase_receipt_file'],
         5: ['status', 'tgl_akad', 'akad_document_file', 'metode_pembayaran'],
     }

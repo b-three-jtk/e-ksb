@@ -149,7 +149,7 @@ class PembiayaanService
                 'anggota.pekerjaanAnggota',
                 'objekPembiayaan.jenisBarang',
                 'objekPembiayaan.pemasok',
-                'collateral',
+                'jaminan',
                 'wakalah',
             'verification.verifier'
             ])
@@ -173,7 +173,7 @@ class PembiayaanService
                 'anggota.pekerjaanAnggota',
                 'objekPembiayaan.jenisBarang',
                 'objekPembiayaan.pemasok',
-                'collateral',
+                'jaminan',
                 'wakalah',
             ])
             ->first();
@@ -266,7 +266,7 @@ class PembiayaanService
 
         $financingData  = $request['pembiayaan'];
         $pemasokData   = $request['pemasok'] ?? null;
-        $collateralData = $request['collateral'] ?? null;
+        $jaminanData = $request['jaminan'] ?? null;
 
         $existingFinancing = Pembiayaan::where('anggota_id', $user->anggota->id)
             ->whereIn('status', [
@@ -355,14 +355,14 @@ class PembiayaanService
             }
         }
 
-        if ($collateralData && isset($collateralData['collateral_type'])) {
-            $pembiayaan->collateral()->updateOrCreate(
+        if ($jaminanData && isset($jaminanData['jenis_jaminan'])) {
+            $pembiayaan->jaminan()->updateOrCreate(
                 ['pembiayaan_id' => $pembiayaan->id],
                 [
-                    'collateral_type'        => $collateralData['collateral_type'],
-                    'owner_name'             => $collateralData['owner_name'] ?? null,
-                    'estimated_market_value' => $collateralData['estimated_market_value'] ?? null,
-                    'collateral_location'    => $collateralData['collateral_location'] ?? null,
+                    'jenis_jaminan'        => $jaminanData['jenis_jaminan'],
+                    'nama_pemilik'             => $jaminanData['nama_pemilik'] ?? null,
+                    'nilai_perkiraan_pasar' => $jaminanData['nilai_perkiraan_pasar'] ?? null,
+                    'lokasi_kondisi_jaminan'    => $jaminanData['lokasi_kondisi_jaminan'] ?? null,
                 ]
             );
         }

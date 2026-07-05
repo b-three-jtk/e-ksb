@@ -10,13 +10,13 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('collaterals', function (Blueprint $table) {
+        Schema::create('jaminan', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('pembiayaan_id')->constrained('pembiayaan')->onDelete('cascade');
-            $table->string('collateral_type');
-            $table->string('owner_name');
-            $table->string('collateral_location')->nullable();
-            $table->decimal('estimated_market_value', 15, 2)->nullable();
+            $table->string('jenis_jaminan');
+            $table->string('nama_pemilik');
+            $table->string('lokasi_kondisi_jaminan')->nullable();
+            $table->decimal('nilai_perkiraan_pasar', 15, 2)->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('collaterals');
+        Schema::dropIfExists('jaminan');
     }
 };
