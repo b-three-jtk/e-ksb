@@ -125,7 +125,7 @@ function submitWithdrawal() {
   formData.append('amount', currentFormData.value.nominalRaw)
   formData.append('withdrawal_date', currentFormData.value.withdrawalDate)
   formData.append('method', currentFormData.value.method)
-  formData.append('notes', currentFormData.value.notes || '')
+  formData.append('catatan', currentFormData.value.catatan || '')
 
   if (currentFormData.value.method === 'Non-Tunai') {
     formData.append('nama_bank', currentFormData.value.bankName)

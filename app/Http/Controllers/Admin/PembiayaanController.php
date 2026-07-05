@@ -17,7 +17,7 @@ use App\Models\Akun;
 use App\Models\AkunSimpanan;
 use App\Models\Anggota;
 use App\Models\Pembiayaan;
-use App\Models\FinancingVerification;
+use App\Models\VerifikasiPembiayaan;
 use App\Models\PengaturanUmum;
 use App\Models\JenisBarang;
 use App\Models\DetailJurnal;
@@ -160,12 +160,12 @@ class PembiayaanController extends Controller
                 ],
                 'verification' => $pembiayaan->verification->map(function ($item) {
                     return [
-                        'final_verification_status' => $item->final_verification_status,
-                        'notes' => $item->notes,
-                        'verified_by_name' => $item->verifier?->nama,
-                        'verified_at' => $item->verified_at?->format('Y-m-d H:i:s'),
+                        'keputusan_akhir' => $item->keputusan_akhir,
+                        'catatan' => $item->catatan,
+                        'diverifikasi_oleh_name' => $item->verifikator?->nama,
+                        'diverifikasi_pada' => $item->diverifikasi_pada?->format('Y-m-d H:i:s'),
                     ];
-                })->sortByDesc('verified_at')->values(),
+                })->sortByDesc('diverifikasi_pada')->values(),
                 'documents' => [
                     'family_card' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()?->lampiran_dokumen),
                     'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'slip_gaji')->first()?->lampiran_dokumen),
@@ -240,7 +240,7 @@ class PembiayaanController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required',
-            'notes' => 'nullable|string',
+            'catatan' => 'nullable|string',
         ]);
 
         try {
@@ -281,12 +281,12 @@ class PembiayaanController extends Controller
                 'status' => $validated['status'],
             ]);
 
-            FinancingVerification::create([
+            VerifikasiPembiayaan::create([
                 'pembiayaan_id' => $pembiayaan->id,
-                'verified_by' => auth()->id(),
-                'final_verification_status' => $validated['status'],
-                'notes' => $validated['notes'] ?? null,
-                'verified_at' => now(),
+                'diverifikasi_oleh' => auth()->id(),
+                'keputusan_akhir' => $validated['status'],
+                'catatan' => $validated['catatan'] ?? null,
+                'diverifikasi_pada' => now(),
             ]);
 
             if ($validated['status'] === FinancingReqStatusEnum::APPROVED->value) {

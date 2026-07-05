@@ -59,7 +59,7 @@ class Pengguna extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            'email_diverifikasi_pada' => 'datetime',
             'password' => 'hashed',
             'tgl_bergabung' => 'date',
         ];

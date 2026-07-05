@@ -43,7 +43,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
                 'metode_pembayaran_simpanan' => 'Tunai',
-                'notes' => 'Setoran tabungan anggota baru',
+                'catatan' => 'Setoran tabungan anggota baru',
             ]);
 
         $res->assertStatus(200);
@@ -69,7 +69,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'amount' => 100000,
                 'date' => now()->format('Y-m-d'),
                 'metode_pembayaran_simpanan' => 'Tunai',
-                'notes' => 'Setoran pokok anggota baru',
+                'catatan' => 'Setoran pokok anggota baru',
             ]);
 
         $response1->assertSessionHasNoErrors();
@@ -86,7 +86,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'amount' => 100000,
                 'date' => now()->format('Y-m-d'),
                 'metode_pembayaran_simpanan' => 'Tunai',
-                'notes' => 'Setoran pokok anggota kedua',
+                'catatan' => 'Setoran pokok anggota kedua',
             ]);
 
         $res->assertSessionHasErrors([
@@ -112,7 +112,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
                 'metode_pembayaran_simpanan' => 'Tunai',
-                'notes' => 'Setoran pokok anggota oleh PJ lain',
+                'catatan' => 'Setoran pokok anggota oleh PJ lain',
             ]);
 
             $res->assertStatus(403);
@@ -151,7 +151,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'date' => now()->format('Y-m-d'),
                 'metode_pembayaran_simpanan' => 'Tunai',
                 'tujuan' => 'Tabungan untuk Haji 2026',
-                'notes' => 'Setoran tambahan tabungan ibadah',
+                'catatan' => 'Setoran tambahan tabungan ibadah',
             ]);
 
         $res->assertSessionHasErrors([
@@ -174,7 +174,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
                 'amount' => 100000,
                 'date' => now()->format('Y-m-d'),
                 'metode_pembayaran_simpanan' => 'Tunai',
-                'notes' => 'Setoran pokok anggota baru',
+                'catatan' => 'Setoran pokok anggota baru',
             ]);
 
         $res->assertSessionHasErrors([
@@ -416,7 +416,7 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
                 'amount' => 500000,
                 'date' => now()->format('Y-m-d'),
                 'metode_pembayaran_simpanan' => 'Tunai',
-                'notes' => 'Setoran tabungan anggota baru',
+                'catatan' => 'Setoran tabungan anggota baru',
             ]);
 
         $res->assertStatus(200);
@@ -488,7 +488,7 @@ describe('Aplikasi harus menghasilkan bukti transaksi untuk setiap transaksi set
                 'amount' => -500000, // Nominal tidak valid
                 'date' => now()->format('Y-m-d'),
                 'metode_pembayaran_simpanan' => 'Tunai',
-                'notes' => 'Setoran tabungan anggota baru',
+                'catatan' => 'Setoran tabungan anggota baru',
             ]);
 
         $res->assertSessionHasErrors('amount');

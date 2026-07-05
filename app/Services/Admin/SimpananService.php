@@ -425,7 +425,7 @@ class SimpananService
                 'saldo_setelah_transaksi'  => $newBalance,
                 'tipe_transaksi'           => TransactionTypeEnum::DEPOSIT->value,
                 'metode_pembayaran_simpanan'      => $data['metode_pembayaran_simpanan'],
-                'deskripsi_simpanan'         => $data['notes'] ?? 'Penyetoran',
+                'deskripsi_simpanan'         => $data['catatan'] ?? 'Penyetoran',
                 'tgl_transaksi'           => $data['date'],
                 'updated_by'                 => Auth::id(),
                 'akun_simpanan_id'          => $akunSimpanan->id,

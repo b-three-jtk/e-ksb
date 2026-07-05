@@ -20,7 +20,7 @@ const activeStep = ref(1)
 const totalSteps = 3
 
 const form = useForm({
-    notes: '',
+    catatan: '',
     collateral_document_status: '',
     suitability_status: '',
     income_feasibility_status: '',
@@ -77,7 +77,7 @@ const submit = () => {
         if (result.isConfirmed) {
             const submitForm = useForm({
                 status: form.final_decision_status,
-                notes: form.notes,
+                catatan: form.catatan,
             })
 
             submitForm.put(`/admin/pembiayaan/validate/${props.data.pembiayaan.id}`, {

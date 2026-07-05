@@ -250,7 +250,7 @@ export function useFinancingForm(initialData = null) {
             metode_pembayaran: '',
             tgl_akad: '',
             uang_muka: null,
-            notes: '',
+            catatan: '',
             status: '',
             pemasok_id: null,
         }

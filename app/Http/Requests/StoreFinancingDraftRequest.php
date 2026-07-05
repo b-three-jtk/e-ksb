@@ -75,7 +75,7 @@ class StoreFinancingDraftRequest extends FormRequest
             'pembiayaan.metode_pembayaran' => 'nullable|string|max:255',
             'pembiayaan.tgl_akad' => 'nullable|date',
             'pembiayaan.uang_muka' => 'nullable|numeric|min:0',
-            'pembiayaan.notes' => 'nullable|string|max:1000',
+            'pembiayaan.catatan' => 'nullable|string|max:1000',
             'pembiayaan.status' => 'nullable|string|max:255',
             'pembiayaan.tenor' => 'nullable|integer',
             'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',

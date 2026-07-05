@@ -125,21 +125,21 @@ const onFieldChange = (field) => emit('validate-field', field)
                         class="bg-gray-50 dark:bg-gray-700 border border-gray-200 rounded-lg p-4 mb-4">
                         <div class="flex items-center gap-3 mb-2">
                             <span :class="{
-                                'text-green-500': verification.final_verification_status === 'Disetujui',
-                                'text-red-500': verification.final_verification_status === 'Ditolak',
-                                'text-yellow-500': verification.final_verification_status === 'Disetujui dengan Catatan',
+                                'text-green-500': verification.keputusan_akhir === 'Disetujui',
+                                'text-red-500': verification.keputusan_akhir === 'Ditolak',
+                                'text-yellow-500': verification.keputusan_akhir === 'Disetujui dengan Catatan',
                             }" class="icon-[tabler--circle-check] w-5 h-5"></span>
                             <div>
                                 <p class="text-sm font-medium text-gray-900 dark:text-gray-200 capitalize">
-                                    {{ verification.final_verification_status.replace(/_/g, ' ') }}
+                                    {{ verification.keputusan_akhir.replace(/_/g, ' ') }}
                                 </p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ new Date(verification.verified_at).toLocaleString() }} oleh {{
-                                    verification.verified_by_name }}
+                                    {{ new Date(verification.diverifikasi_pada).toLocaleString() }} oleh {{
+                                    verification.diverifikasi_oleh_name }}
                                 </p>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-700">{{ verification.notes }}</p>
+                        <p class="text-sm text-gray-700">{{ verification.catatan }}</p>
                     </div>
                 </template>
                 <p v-else class="text-sm text-gray-500">Belum ada hasil verifikasi.</p>

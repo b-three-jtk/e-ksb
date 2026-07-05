@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->string('no_telp', 20)->unique();
             $table->date('tgl_bergabung')->nullable();
 
-            $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('email_diverifikasi_pada')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

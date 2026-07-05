@@ -88,6 +88,6 @@ class Pembiayaan extends Model
 
     public function verification()
     {
-        return $this->hasMany(FinancingVerification::class);
+        return $this->hasMany(VerifikasiPembiayaan::class);
     }
 }

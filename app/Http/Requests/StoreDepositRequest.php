@@ -28,7 +28,7 @@ class StoreDepositRequest extends FormRequest
             'amount' => 'required|numeric|min:1',
             'date' => 'required|date|before_or_equal:today',
             'metode_pembayaran_simpanan' => 'required|in:Tunai,Non-Tunai',
-            'notes' => 'nullable|string|max:255',
+            'catatan' => 'nullable|string|max:255',
             'tujuan' => [
                 'required_if:saving_category,Tabungan Ibadah,Tabungan Berjangka',
                 'string',

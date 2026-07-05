@@ -369,9 +369,9 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pembiayaan murabahah 
             ]);
 
         $response->assertStatus(302);
-        $this->assertDatabaseHas('financing_verifications', [
+        $this->assertDatabaseHas('verifikasi_pembiayaan', [
             'pembiayaan_id' => $pembiayaan->id,
-            'final_verification_status' => 'Disetujui',
+            'keputusan_akhir' => 'Disetujui',
         ]);
     });
 
@@ -386,13 +386,13 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pembiayaan murabahah 
         $this->actingAs($ketuaMurabahah)
             ->put("/admin/pembiayaan/validate/{$pembiayaan->id}", [
                 'status' => FinancingReqStatusEnum::REJECTED->value,
-                'notes' => 'Penghasilan bersih tidak mencukupi untuk bayar angsuran.',
+                'catatan' => 'Penghasilan bersih tidak mencukupi untuk bayar angsuran.',
             ]);
 
-        $this->assertDatabaseHas('financing_verifications', [
+        $this->assertDatabaseHas('verifikasi_pembiayaan', [
             'pembiayaan_id' => $pembiayaan->id,
-            'final_verification_status' => FinancingReqStatusEnum::REJECTED->value,
-            'notes' => 'Penghasilan bersih tidak mencukupi untuk bayar angsuran.',
+            'keputusan_akhir' => FinancingReqStatusEnum::REJECTED->value,
+            'catatan' => 'Penghasilan bersih tidak mencukupi untuk bayar angsuran.',
         ]);
     });
 
@@ -415,9 +415,9 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pembiayaan murabahah 
             ]);
 
         $response->assertStatus(302);
-        $this->assertDatabaseHas('financing_verifications', [
+        $this->assertDatabaseHas('verifikasi_pembiayaan', [
             'pembiayaan_id' => $pembiayaan->id,
-            'final_verification_status' => 'Disetujui',
+            'keputusan_akhir' => 'Disetujui',
         ]);
     });
 });

@@ -227,7 +227,7 @@ watch([
                 </p>
             </div>
 
-            <BaseInputAdmin v-if="form.final_decision_status !== 'Disetujui'" v-model="form.notes" label="Catatan Pemeriksaan" type="textarea"
+            <BaseInputAdmin v-if="form.final_decision_status !== 'Disetujui'" v-model="form.catatan" label="Catatan Pemeriksaan" type="textarea"
                 placeholder="Masukkan catatan pemeriksaan" rows="4" />
         </div>
     </div>

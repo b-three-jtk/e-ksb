@@ -329,7 +329,7 @@ function submitDeposit() {
   formData.append('amount', nominalRaw.value)
   formData.append('date', tanggalSetor.value)
   formData.append('metode_pembayaran_simpanan', depositMethod.value)
-  formData.append('notes', catatan.value)
+  formData.append('catatan', catatan.value)
 
   if (isMultiAccountType.value) {
     formData.append(

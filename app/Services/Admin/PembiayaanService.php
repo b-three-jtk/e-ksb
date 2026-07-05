@@ -32,7 +32,7 @@ class PembiayaanService
     {
     }
 
-    public function getSemuaPembiayaan($search, $tab, $verifier)
+    public function getSemuaPembiayaan($search, $tab, $verifikator)
     {
         return Pembiayaan::with([
             'anggota.user' => function ($query) {
@@ -51,13 +51,13 @@ class PembiayaanService
                     });
                 });
             })
-            ->when($tab === 'request', function ($q) use ($verifier) {
-                if (in_array($verifier->getRoleNames()->first(), ['Ketua Murabahah'])) {
+            ->when($tab === 'request', function ($q) use ($verifikator) {
+                if (in_array($verifikator->getRoleNames()->first(), ['Ketua Murabahah'])) {
                     $q->where(
                         'status',
                         FinancingReqStatusEnum::PENDING_REVIEW->value,
                     );
-                } else if (in_array($verifier->getRoleNames()->first(), ['Staf Murabahah'])) {
+                } else if (in_array($verifikator->getRoleNames()->first(), ['Staf Murabahah'])) {
                     $q->whereIn('status', [
                         FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                     ]);
@@ -151,7 +151,7 @@ class PembiayaanService
                 'objekPembiayaan.pemasok',
                 'jaminan',
                 'wakalah',
-            'verification.verifier'
+            'verification.verifikator'
             ])
             ->first();
     }

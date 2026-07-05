@@ -12,16 +12,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('financing_verifications', function (Blueprint $table) {
+        Schema::create('verifikasi_pembiayaan', function (Blueprint $table) {
             $table->id();
             $table->uuid('pembiayaan_id');
-            $table->enum('final_verification_status', array_column(FinancingReqStatusEnum::cases(), 'value'));
-            $table->text('notes')->nullable();
-            $table->uuid('verified_by')->nullable();
-            $table->dateTime('verified_at')->nullable();
+            $table->enum('keputusan_akhir', array_column(FinancingReqStatusEnum::cases(), 'value'));
+            $table->text('catatan')->nullable();
+            $table->uuid('diverifikasi_oleh')->nullable();
+            $table->dateTime('diverifikasi_pada')->nullable();
 
             $table->foreign('pembiayaan_id')->references('id')->on('pembiayaan')->onDelete('cascade');
-            $table->foreign('verified_by')->references('id')->on('pengguna')->onDelete('set null');
+            $table->foreign('diverifikasi_oleh')->references('id')->on('pengguna')->onDelete('set null');
             $table->index('pembiayaan_id');
             $table->timestamps();
         });
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('financing_verifications');
+        Schema::dropIfExists('verifikasi_pembiayaan');
     }
 };

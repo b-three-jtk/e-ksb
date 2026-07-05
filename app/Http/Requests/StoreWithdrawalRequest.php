@@ -29,7 +29,7 @@ class StoreWithdrawalRequest extends FormRequest
             'nama_bank' => 'required_if:method,Non-Tunai|nullable|string',
             'atas_nama' => 'required_if:method,Non-Tunai|nullable|string',
             'no_rekening' => 'required_if:method,Non-Tunai|nullable|string',
-            'notes' => 'nullable|string|max:1000',
+            'catatan' => 'nullable|string|max:1000',
         ];
     }
 }

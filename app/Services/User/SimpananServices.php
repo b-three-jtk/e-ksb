@@ -95,7 +95,7 @@ class SimpananServices
                 'tipe_transaksi' => TransactionTypeEnum::WITHDRAWAL->value,
                 'metode_pembayaran_simpanan' => $validated['method'],
                 'tgl_transaksi' => $validated['withdrawal_date'],
-                'deskripsi_simpanan' => $validated['notes'] ?? '',
+                'deskripsi_simpanan' => $validated['catatan'] ?? '',
                 'updated_by' => $userId,
             ]);
 
