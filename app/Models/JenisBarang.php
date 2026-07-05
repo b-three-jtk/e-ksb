@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\FinancingItem;
+use App\Models\ObjekPembiayaan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,8 +15,8 @@ class JenisBarang extends Model
         'nama_jenis_barang',
     ];
 
-    public function financingItems()
+    public function objekPembiayaan()
     {
-        return $this->hasMany(FinancingItem::class);
+        return $this->hasMany(ObjekPembiayaan::class);
     }
 }

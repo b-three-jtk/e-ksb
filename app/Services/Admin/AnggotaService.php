@@ -106,7 +106,7 @@ class AnggotaService
             'anggota.akunSimpanan',
             'anggota.heirs',
             'anggota.pembiayaan.installment.payment',
-            'anggota.pembiayaan.financingItem',
+            'anggota.pembiayaan.objekPembiayaan',
         ])->findOrFail($id);
 
         $user->foto_profil = $user->foto_profil ? asset('storage/' . $user->foto_profil) : null;

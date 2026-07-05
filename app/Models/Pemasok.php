@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\FinancingItem;
+use App\Models\ObjekPembiayaan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,8 +17,8 @@ class Pemasok extends Model
         'kontak_pemasok'
     ];
 
-    public function financingItems()
+    public function objekPembiayaan()
     {
-        return $this->hasMany(FinancingItem::class);
+        return $this->hasMany(ObjekPembiayaan::class);
     }
 }

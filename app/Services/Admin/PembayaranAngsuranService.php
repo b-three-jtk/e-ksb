@@ -73,7 +73,7 @@ class PembayaranAngsuranService
     {
         return DB::transaction(function () use ($validatedData, $userId) {
             $data = [];
-            $installment = Installment::with('pembiayaan.anggota.user', 'pembiayaan.financingItem')
+            $installment = Installment::with('pembiayaan.anggota.user', 'pembiayaan.objekPembiayaan')
                 ->findOrFail($validatedData['installment_id']);
 
             $pembiayaan = $installment->pembiayaan;
@@ -110,7 +110,7 @@ class PembayaranAngsuranService
                 'nama_anggota' => $pembiayaan->anggota->user->nama,
                 'no_telp' => $pembiayaan->anggota->user->no_telp,
                 'kode_pembiayaan' => $pembiayaan->kode_pembiayaan,
-                'product_name' => $pembiayaan->financingItem->name ?? '-',
+                'product_name' => $pembiayaan->objekPembiayaan->nama_barang ?? '-',
                 'total_paid_amount' => $calculatedData['total_paid_amount'],
                 'metode' => $validatedData['method'],
                 'repayment_total' => $calculatedData['repayment_total'],
@@ -167,7 +167,7 @@ class PembayaranAngsuranService
     {
         $pembiayaan->load([
             'anggota.user',
-            'financingItem.jenisBarang',
+            'objekPembiayaan.jenisBarang',
             'installment',
         ]);
 
@@ -197,11 +197,11 @@ class PembayaranAngsuranService
         return [
             'id'                      => $pembiayaan->id,
             'transaction_code'        => $pembiayaan->kode_pembiayaan,
-            'product_name'            => $pembiayaan->financingItem?->name,
-            'jenis_barang'            => $pembiayaan->financingItem?->jenisBarang?->nama_jenis_barang,
-            'product_specification'   => $pembiayaan->financingItem?->specification,
+            'product_name'            => $pembiayaan->objekPembiayaan?->nama_barang,
+            'jenis_barang'            => $pembiayaan->objekPembiayaan?->jenisBarang?->nama_jenis_barang,
+            'product_spesifikasi_barang'   => $pembiayaan->objekPembiayaan?->spesifikasi_barang,
             'color'                   => '-',
-            'qty'                     => $pembiayaan->financingItem?->qty,
+            'kuantitas'                     => $pembiayaan->objekPembiayaan?->kuantitas,
             'user' => [
                 'nama'      => $pembiayaan->anggota?->user?->nama,
                 'kode_pengguna' => $pembiayaan->anggota?->user?->kode_pengguna,
@@ -232,7 +232,7 @@ class PembayaranAngsuranService
     {
         $pembiayaan = Pembiayaan::with([
             'anggota.user',
-            'financingItem.jenisBarang',
+            'objekPembiayaan.jenisBarang',
             'installment',
         ])->findOrFail($validated['pembiayaan_id']);
 

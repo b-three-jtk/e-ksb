@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\Collateral;
-use App\Models\FinancingItem;
+use App\Models\ObjekPembiayaan;
 use App\Models\Installment;
 use App\Models\Anggota;
 use App\Models\Pengguna;
@@ -69,9 +69,9 @@ class Pembiayaan extends Model
     }
 
     // Objek Pembiayaan
-    public function financingItem()
+    public function objekPembiayaan()
     {
-        return $this->hasOne(FinancingItem::class);
+        return $this->hasOne(ObjekPembiayaan::class);
     }
 
     // Rahn atau Jaminan

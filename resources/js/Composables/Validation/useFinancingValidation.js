@@ -111,19 +111,19 @@ export function useFinancingValidation(form) {
         if (!form.pembiayaan.name?.trim())
             errs.name = 'Nama objek pembiayaan wajib diisi.'
 
-        if (!form.pembiayaan.condition)
-            errs.condition = 'Kondisi objek pembiayaan wajib diisi.'
+        if (!form.pembiayaan.kondisi_produk)
+            errs.kondisi_produk = 'Kondisi objek pembiayaan wajib diisi.'
 
-        if (isNaN(form.pembiayaan.qty) || form.pembiayaan.qty <= 0)
-            errs.qty = 'Jumlah objek pembiayaan harus berupa angka positif.'
-        else if (!form.pembiayaan.qty)
-            errs.qty = 'Jumlah objek pembiayaan wajib diisi.'
+        if (isNaN(form.pembiayaan.kuantitas) || form.pembiayaan.kuantitas <= 0)
+            errs.kuantitas = 'Jumlah objek pembiayaan harus berupa angka positif.'
+        else if (!form.pembiayaan.kuantitas)
+            errs.kuantitas = 'Jumlah objek pembiayaan wajib diisi.'
 
         if (!form.pembiayaan.harga_perkiraan)
             errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
 
-        if (!form.pembiayaan.specification?.trim())
-            errs.specification = 'Spesifikasi objek pembiayaan wajib diisi.'
+        if (!form.pembiayaan.spesifikasi_barang?.trim())
+            errs.spesifikasi_barang = 'Spesifikasi objek pembiayaan wajib diisi.'
 
         if (!form.pembiayaan.harga_perkiraan)
             errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
@@ -143,10 +143,10 @@ export function useFinancingValidation(form) {
         if (!form.pembiayaan.harga_perolehan)
             errs.harga_perolehan = 'Harga pokok wajib diisi.'
 
-        if (!form.pembiayaan.price_per_unit)
-            errs.price_per_unit = 'Harga per unit wajib diisi.'
+        if (!form.pembiayaan.harga_beli_per_unit)
+            errs.harga_beli_per_unit = 'Harga per unit wajib diisi.'
 
-        if (!form.purchase_receipt_file && !form.documents?.purchase_receipt)
+        if (!form.purchase_receipt_file && !form.documents?.struk_pembelian)
             errs.purchase_receipt_file = 'Nota pembelian wajib diunggah.'
         else if (form.purchase_receipt_file && !['image/jpeg', 'image/png'].includes(form.purchase_receipt_file.type))
             errs.purchase_receipt_file = 'Format nota pembelian harus JPG, JPEG, atau PNG.'

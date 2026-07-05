@@ -97,11 +97,11 @@ const submitForm = () => {
                             <Info label="Nomor Transaksi" :value="props.data?.pembiayaan?.kode_pembiayaan" />
                         </li>
                         <li>
-                            <Info label="Objek Pembiayaan" :value="props.data?.pembiayaan?.financing_item.name" />
+                            <Info label="Objek Pembiayaan" :value="props.data?.pembiayaan?.objek_pembiayaan.nama_barang" />
                         </li>
                         <li>
                             <Info label="Kategori Objek Pembiayaan"
-                                :value="props.data?.pembiayaan?.financing_item.jenis_barang.nama_jenis_barang" />
+                                :value="props.data?.pembiayaan?.objek_pembiayaan.jenis_barang.nama_jenis_barang" />
                         </li>
                         <li>
                             <Info label="Informasi Cicilan"

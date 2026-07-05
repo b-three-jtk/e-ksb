@@ -80,9 +80,9 @@ const onFieldChange = (field) => emit('validate-field', field)
             <h1 class="card-title text-lg!">Detail Objek Pembiayaan</h1>
             <div class="card-layout grid grid-cols-2 gap-4 mt-2">
                 <Info label="Nama Barang"        :value="form.pembiayaan.name" />
-                <Info label="Kualitas"           :value="form.pembiayaan.condition" />
-                <Info label="Kuantitas"          :value="form.pembiayaan.qty" />
-                <Info label="Detail Spesifikasi" :value="form.pembiayaan.specification" />
+                <Info label="Kualitas"           :value="form.pembiayaan.kondisi_produk" />
+                <Info label="Kuantitas"          :value="form.pembiayaan.kuantitas" />
+                <Info label="Detail Spesifikasi" :value="form.pembiayaan.spesifikasi_barang" />
             </div>
         </section>
 

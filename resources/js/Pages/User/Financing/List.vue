@@ -19,7 +19,7 @@ type LoanInfo = {
 	next_due_date?: string
 }
 
-type FinancingItem = {
+type ObjekPembiayaan = {
 	id: string
 	transaction_code?: string
 	tgl_akad?: string
@@ -31,7 +31,7 @@ type FinancingItem = {
 }
 
 type FinancingPagination = {
-	data: FinancingItem[]
+	data: ObjekPembiayaan[]
 	current_page: number
 	per_page: number
 	total: number
@@ -41,7 +41,7 @@ type FinancingPagination = {
 
 const props = withDefaults(defineProps<{
 	pembiayaan?: FinancingPagination
-	activeFinancing?: FinancingItem | null
+	activeFinancing?: ObjekPembiayaan | null
 	filters?: {
 		search?: string
 		per_page?: number

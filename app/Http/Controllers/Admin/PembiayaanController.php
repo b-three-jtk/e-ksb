@@ -71,7 +71,7 @@ class PembiayaanController extends Controller
                         : '-',
                     'user_role' => $f->anggota->user?->getRoleNames()->first() ?? '-',
                     'tenor_left' => $f->installment ? max(0, $f->tenor - ($f->installment->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
-                    'product_name' => $f->financingItem?->name,
+                    'product_name' => $f->objekPembiayaan?->nama_barang,
                     'status' => $f->status,
                 ];
             });
@@ -134,15 +134,15 @@ class PembiayaanController extends Controller
             'pembiayaan' => [
                 'anggota' => $this->pembiayaanService->formatMemberData($pembiayaan->anggota),
                 'pembiayaan' => [
-                    'name' => $pembiayaan->financingItem->name,
-                    'jenis_barang_id' => $pembiayaan->financingItem->jenis_barang_id,
-                    'condition' => $pembiayaan->financingItem->condition,
-                    'qty' => $pembiayaan->financingItem->qty,
-                    'specification' => $pembiayaan->financingItem->specification,
-                    'price_per_unit' => $pembiayaan->financingItem->price_per_unit,
+                    'nama_barang' => $pembiayaan->objekPembiayaan->nama_barang,
+                    'jenis_barang_id' => $pembiayaan->objekPembiayaan->jenis_barang_id,
+                    'kondisi_produk' => $pembiayaan->objekPembiayaan->kondisi_produk,
+                    'kuantitas' => $pembiayaan->objekPembiayaan->kuantitas,
+                    'spesifikasi_barang' => $pembiayaan->objekPembiayaan->spesifikasi_barang,
+                    'harga_beli_per_unit' => $pembiayaan->objekPembiayaan->harga_beli_per_unit,
                     'harga_perolehan' => $pembiayaan->harga_perolehan,
                     'margin_keuntungan' => $pembiayaan->margin_keuntungan,
-                    'pemasok_id' => $pembiayaan->financingItem->pemasok_id,
+                    'pemasok_id' => $pembiayaan->objekPembiayaan->pemasok_id,
                     'uang_muka' => $pembiayaan->uang_muka,
                     'metode_pembayaran' => $pembiayaan->metode_pembayaran,
                     'akad_wakalah_date' => $pembiayaan->wakalah?->tgl_akad,
@@ -170,14 +170,14 @@ class PembiayaanController extends Controller
                     'family_card' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'kartu_keluarga')->first()?->doc_attachment),
                     'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
-                    'purchase_receipt' => $this->getDocumentUrl($pembiayaan->financingItem->purchase_receipt),
+                    'struk_pembelian' => $this->getDocumentUrl($pembiayaan->objekPembiayaan->struk_pembelian),
                     'akad_document' => $this->getDocumentUrl($pembiayaan->dokumen_akad),
                     'akad_wakalah_document' => $this->getDocumentUrl($pembiayaan->wakalah?->dokumen_akad),
                 ],
-                'pemasok' => $pembiayaan->financingItem->pemasok ? [
-                    'nama_pemasok' => $pembiayaan->financingItem->pemasok->nama_pemasok,
-                    'alamat_pemasok' => $pembiayaan->financingItem->pemasok->alamat_pemasok,
-                    'contact' => $pembiayaan->financingItem->pemasok->contact,
+                'pemasok' => $pembiayaan->objekPembiayaan->pemasok ? [
+                    'nama_pemasok' => $pembiayaan->objekPembiayaan->pemasok->nama_pemasok,
+                    'alamat_pemasok' => $pembiayaan->objekPembiayaan->pemasok->alamat_pemasok,
+                    'contact' => $pembiayaan->objekPembiayaan->pemasok->contact,
                 ] : null,
             ],
         ]);
@@ -199,19 +199,19 @@ class PembiayaanController extends Controller
                 'pembiayaan' => [
                     'id' => $pembiayaan->id,
                     'kode_pembiayaan' => $pembiayaan->kode_pembiayaan,
-                    'name' => $pembiayaan->financingItem->name,
-                    'jenis_barang_id' => $pembiayaan->financingItem->jenis_barang_id,
-                    'condition' => $pembiayaan->financingItem->condition,
-                    'qty' => $pembiayaan->financingItem->qty,
-                    'specification' => $pembiayaan->financingItem->specification,
+                    'nama_barang' => $pembiayaan->objekPembiayaan->nama_barang,
+                    'jenis_barang_id' => $pembiayaan->objekPembiayaan->jenis_barang_id,
+                    'kondisi_produk' => $pembiayaan->objekPembiayaan->kondisi_produk,
+                    'kuantitas' => $pembiayaan->objekPembiayaan->kuantitas,
+                    'spesifikasi_barang' => $pembiayaan->objekPembiayaan->spesifikasi_barang,
                     'harga_perolehan' => $pembiayaan->harga_perolehan,
                     'margin_keuntungan' => $pembiayaan->margin_keuntungan,
-                    'pemasok_id' => $pembiayaan->financingItem->pemasok_id,
+                    'pemasok_id' => $pembiayaan->objekPembiayaan->pemasok_id,
                     'uang_muka' => $pembiayaan->uang_muka,
                     'metode_pembayaran' => $pembiayaan->metode_pembayaran,
                     'tgl_akad' => $pembiayaan->tgl_akad,
                     'status' => $pembiayaan->status,
-                    'jenis_barang' => $pembiayaan->financingItem->jenisBarang?->nama_jenis_barang,
+                    'jenis_barang' => $pembiayaan->objekPembiayaan->jenisBarang?->nama_jenis_barang,
                     'tenor' => $pembiayaan->tenor,
                     'harga_perkiraan' => $pembiayaan->harga_perkiraan,
                     'tangguh_payment_date' => $pembiayaan->tangguh_payment_date,
@@ -227,10 +227,10 @@ class PembiayaanController extends Controller
                     'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'slip_gaji')->first()?->doc_attachment),
                     'bank_book' => $this->getDocumentUrl($pembiayaan->anggota->memberDocs->where('doc_name', 'buku_tabungan')->first()?->doc_attachment),
                 ],
-                'pemasok' => $pembiayaan->financingItem->pemasok ? [
-                    'nama_pemasok' => $pembiayaan->financingItem->pemasok->nama_pemasok,
-                    'alamat_pemasok' => $pembiayaan->financingItem->pemasok->alamat_pemasok,
-                    'contact' => $pembiayaan->financingItem->pemasok->contact,
+                'pemasok' => $pembiayaan->objekPembiayaan->pemasok ? [
+                    'nama_pemasok' => $pembiayaan->objekPembiayaan->pemasok->nama_pemasok,
+                    'alamat_pemasok' => $pembiayaan->objekPembiayaan->pemasok->alamat_pemasok,
+                    'contact' => $pembiayaan->objekPembiayaan->pemasok->contact,
                 ] : null,
             ],
         ]);
@@ -705,7 +705,7 @@ class PembiayaanController extends Controller
         $anggota = Anggota::query()
             ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'memberDocs', 'financials', 'heirs', 'memberJobs', 'pembiayaan:id,status', 'akunSimpanan:id,saldo,created_at'])
             ->whereHas('user', function ($q) use ($query) {
-                $q->whereHas('roles', fn($roleQ) => $roleQ->where('name', 'Anggota'))
+                $q->whereHas('roles', fn($roleQ) => $roleQ->where('nama_barang', 'Anggota'))
                     ->where('status', UserStatusEnum::ACTIVE->value)
                     ->where(function ($searchQ) use ($query) {
                         $searchQ->where('nama', 'ILIKE', "%{$query}%")
@@ -760,8 +760,8 @@ class PembiayaanController extends Controller
         $pembiayaan = Pembiayaan::with([
             'anggota.user',
             'installment.payment',
-            'financingItem.jenisBarang',
-            'financingItem.pemasok',
+            'objekPembiayaan.jenisBarang',
+            'objekPembiayaan.pemasok',
             'collateral'
         ])->where('status', '!=', FinancingReqStatusEnum::PAID->value)->findOrFail($id);
 

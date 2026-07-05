@@ -56,7 +56,7 @@ class PendaftaranAnggotaService
         $last = Pengguna::query()
             ->where('kode_pengguna', 'like', $prefix . '%')
             ->orderBy('kode_pengguna', 'desc')
-            ->lockForUpdate() // ← cegah race condition
+            ->lockForUpdate() // ← cegah race kondisi_produk
             ->value('kode_pengguna');
 
         $lastSequence = $last ? (int) substr($last, -3) : 0;

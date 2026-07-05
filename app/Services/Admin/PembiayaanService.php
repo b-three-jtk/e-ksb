@@ -13,7 +13,7 @@ use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
 use App\Models\Financial;
 use App\Models\Pembiayaan;
-use App\Models\FinancingItem;
+use App\Models\ObjekPembiayaan;
 use App\Models\GlobalSetting;
 use App\Models\Heir;
 use App\Models\Installment;
@@ -39,7 +39,7 @@ class PembiayaanService
                 $query->select('id', 'nama', 'kode_pengguna');
             },
             'installment',
-            'financingItem.jenisBarang' => function ($query) {
+            'objekPembiayaan.jenisBarang' => function ($query) {
                 $query->select('jenis_barang.id', 'jenis_barang.nama_jenis_barang');
             }
         ])
@@ -147,8 +147,8 @@ class PembiayaanService
                 'anggota.memberDocs',
                 'anggota.heirs',
                 'anggota.memberJobs',
-                'financingItem.jenisBarang',
-                'financingItem.pemasok',
+                'objekPembiayaan.jenisBarang',
+                'objekPembiayaan.pemasok',
                 'collateral',
                 'wakalah',
             'verification.verifier'
@@ -171,8 +171,8 @@ class PembiayaanService
                 'anggota.memberDocs',
                 'anggota.heirs',
                 'anggota.memberJobs',
-                'financingItem.jenisBarang',
-                'financingItem.pemasok',
+                'objekPembiayaan.jenisBarang',
+                'objekPembiayaan.pemasok',
                 'collateral',
                 'wakalah',
             ])
@@ -262,7 +262,7 @@ class PembiayaanService
 
     public function syncFinancingData(Pengguna $user, Request $request, string $updatedBy): ?Pembiayaan
     {
-        if (!isset($request['pembiayaan']['name'])) return null;
+        if (!isset($request['pembiayaan']['nama_barang'])) return null;
 
         $financingData  = $request['pembiayaan'];
         $pemasokData   = $request['pemasok'] ?? null;
@@ -327,17 +327,17 @@ class PembiayaanService
             );
         }
 
-        FinancingItem::updateOrCreate(
+        ObjekPembiayaan::updateOrCreate(
             ['pembiayaan_id' => $pembiayaan->id],
             [
-                'name'            => $financingData['name'] ?? null,
-                'specification'   => $financingData['specification'] ?? null,
-                'qty'             => $financingData['qty'] ?? null,
-                'condition'       => $financingData['condition'] ?? null,
-                'price_per_unit'  => $financingData['price_per_unit'] ?? null,
+                'nama_barang'            => $financingData['nama_barang'] ?? null,
+                'spesifikasi_barang'   => $financingData['spesifikasi_barang'] ?? null,
+                'kuantitas'             => $financingData['kuantitas'] ?? null,
+                'kondisi_produk'       => $financingData['kondisi_produk'] ?? null,
+                'harga_beli_per_unit'  => $financingData['harga_beli_per_unit'] ?? null,
                 'jenis_barang_id' => $financingData['jenis_barang_id'] ?? null,
                 'pemasok_id'     => $financingData['pemasok_id'] ?? null,
-                'purchase_receipt' => $request->hasFile('purchase_receipt_file') ? $request->file('purchase_receipt_file')->store('documents', 'public') : null,
+                'struk_pembelian' => $request->hasFile('purchase_receipt_file') ? $request->file('purchase_receipt_file')->store('documents', 'public') : null,
             ]
         );
 

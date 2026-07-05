@@ -8,17 +8,19 @@ use App\Models\Pemasok;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FinancingItem extends Model
+class ObjekPembiayaan extends Model
 {
     use HasFactory;
     //
+
+    protected $table = 'objek_pembiayaan';
     protected $fillable = [
-        'name',
-        'specification',
-        'qty',
-        'condition',
-        'price_per_unit',
-        'purchase_receipt',
+        'nama_barang',
+        'spesifikasi_barang',
+        'kuantitas',
+        'kondisi_produk',
+        'harga_beli_per_unit',
+        'struk_pembelian',
         
         'pemasok_id',
         'pembiayaan_id',

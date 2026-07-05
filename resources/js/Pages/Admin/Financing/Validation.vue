@@ -125,10 +125,10 @@ const submit = () => {
                     </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 grid grid-cols-3 gap-6 p-6 rounded-2xl">
-                    <Info label="Spesifikasi Produk" :value="data.pembiayaan.specification" />
+                    <Info label="Spesifikasi Produk" :value="data.pembiayaan.spesifikasi_barang" />
                     <Info label="Kategori Produk" :value="data.pembiayaan.jenis_barang" />
-                    <Info label="Kondisi" :value="data.pembiayaan.condition" />
-                    <Info label="Kuantitas" :value="data.pembiayaan.qty" />
+                    <Info label="Kondisi" :value="data.pembiayaan.kondisi_produk" />
+                    <Info label="Kuantitas" :value="data.pembiayaan.kuantitas" />
                     <Info label="Harga Perkiraan" :value="moneyParser(data.pembiayaan.harga_perkiraan)" />
                     <Info label="Uang Muka" :value="moneyParser(data.pembiayaan.uang_muka)" />
                 </div>

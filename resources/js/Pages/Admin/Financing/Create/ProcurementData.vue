@@ -23,10 +23,10 @@ const emit = defineEmits([
     'validate-field',
 ])
 
-// Hitung harga_perolehan & margin otomatis dari price_per_unit × qty
-watch(() => props.form.pembiayaan.price_per_unit, () => {
-    const costPrice = (parseFloat(props.form.pembiayaan.price_per_unit) || 0)
-        * (parseFloat(props.form.pembiayaan.qty) || 0)
+// Hitung harga_perolehan & margin otomatis dari harga_beli_per_unit × kuantitas
+watch(() => props.form.pembiayaan.harga_beli_per_unit, () => {
+    const costPrice = (parseFloat(props.form.pembiayaan.harga_beli_per_unit) || 0)
+        * (parseFloat(props.form.pembiayaan.kuantitas) || 0)
     props.form.pembiayaan.harga_perolehan = costPrice
     props.form.pembiayaan.margin_keuntungan = costPrice * (props.data.margin_percentage / 100)
 }, { immediate: true })
@@ -132,7 +132,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                         <p>Max. 2 MB per file</p>
                     </div>
                 </div>
-                <BaseInputAdmin v-model.number="form.pembiayaan.price_per_unit" label="Harga Per Item" required isMoney
+                <BaseInputAdmin v-model.number="form.pembiayaan.harga_beli_per_unit" label="Harga Per Item" required isMoney
                     placeholder="Masukkan harga per item" :error="errors?.harga_perolehan"
                     @input="onFieldChange('harga_perolehan')" />
                 <Info label="Harga Perolehan Barang" :value="parseCurrencyAmount(form.pembiayaan.harga_perolehan)" />

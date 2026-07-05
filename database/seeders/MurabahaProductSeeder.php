@@ -7,7 +7,7 @@ use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PaymentMethodsEnum;
 use App\Models\Pembiayaan;
-use App\Models\FinancingItem;
+use App\Models\ObjekPembiayaan;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Journal;
@@ -52,11 +52,11 @@ class MurabahaProductSeeder extends Seeder
         ];
 
         $items = [
-            ['name' => 'Kipas Angin Miyako', 'spec' => 'Kipas Angin', 'price' => 300000, 'type' => 'Elektronik'],
-            ['name' => 'Smartphone Samsung Galaxy A05', 'spec' => 'Samsung Galaxy A05', 'price' => 1500000, 'type' => 'Elektronik'],
-            ['name' => 'Motor Honda Vario 160', 'spec' => 'Motor Honda Vario 160cc Tahun 2024', 'price' => 50000000, 'type' => 'Kendaraan Roda Dua'],
-            ['name' => 'Laptop ASUS VivoBook', 'spec' => 'Laptop ASUS VivoBook 15, Intel i5, RAM 8GB', 'price' => 30000000, 'type' => 'Elektronik'],
-            ['name' => 'Mesin Jahit Singer', 'spec' => 'Mesin Jahit Singer Portable, Semi Otomatis', 'price' => 2000000, 'type' => 'Peralatan Usaha'],
+            ['nama_barang' => 'Kipas Angin Miyako', 'spec' => 'Kipas Angin', 'price' => 300000, 'type' => 'Elektronik'],
+            ['nama_barang' => 'Smartphone Samsung Galaxy A05', 'spec' => 'Samsung Galaxy A05', 'price' => 1500000, 'type' => 'Elektronik'],
+            ['nama_barang' => 'Motor Honda Vario 160', 'spec' => 'Motor Honda Vario 160cc Tahun 2024', 'price' => 50000000, 'type' => 'Kendaraan Roda Dua'],
+            ['nama_barang' => 'Laptop ASUS VivoBook', 'spec' => 'Laptop ASUS VivoBook 15, Intel i5, RAM 8GB', 'price' => 30000000, 'type' => 'Elektronik'],
+            ['nama_barang' => 'Mesin Jahit Singer', 'spec' => 'Mesin Jahit Singer Portable, Semi Otomatis', 'price' => 2000000, 'type' => 'Peralatan Usaha'],
         ];
 
         // Generate 50 pembiayaan yang bervariasi agar grafiknya penuh
@@ -171,13 +171,13 @@ class MurabahaProductSeeder extends Seeder
         ]);
 
         // Create Pembiayaan Item
-        FinancingItem::create([
+        ObjekPembiayaan::create([
             'pembiayaan_id' => $pembiayaan->id,
-            'name' => $item['name'],
-            'specification' => $item['spec'],
-            'qty' => 1,
-            'condition' => 'Baru',
-            'price_per_unit' => $item['price'],
+            'nama_barang' => $item['nama_barang'],
+            'spesifikasi_barang' => $item['spec'],
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
+            'harga_beli_per_unit' => $item['price'],
             'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
@@ -342,13 +342,13 @@ class MurabahaProductSeeder extends Seeder
         ]);
 
         // Create Pembiayaan Item
-        FinancingItem::create([
+        ObjekPembiayaan::create([
             'pembiayaan_id' => $pembiayaan->id,
-            'name' => $item['name'],
-            'specification' => $item['spec'],
-            'qty' => 1,
-            'condition' => 'Baru',
-            'price_per_unit' => $item['price'],
+            'nama_barang' => $item['nama_barang'],
+            'spesifikasi_barang' => $item['spec'],
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
+            'harga_beli_per_unit' => $item['price'],
             'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
@@ -397,13 +397,13 @@ class MurabahaProductSeeder extends Seeder
         ]);
 
         // Create Pembiayaan Item
-        FinancingItem::create([
+        ObjekPembiayaan::create([
             'pembiayaan_id' => $pembiayaan->id,
-            'name' => $item['name'],
-            'specification' => $item['spec'],
-            'qty' => 1,
-            'condition' => 'Baru',
-            'price_per_unit' => $item['price'],
+            'nama_barang' => $item['nama_barang'],
+            'spesifikasi_barang' => $item['spec'],
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
+            'harga_beli_per_unit' => $item['price'],
             'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 

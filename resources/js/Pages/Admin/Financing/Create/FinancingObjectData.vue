@@ -89,15 +89,15 @@ const onFieldChange = (field) => emit('validate-field', field)
                 required :error="errors?.financing_name" @input="onFieldChange('financing_name')" />
             <BaseInputAdmin v-model="form.pembiayaan.jenis_barang_id" label="Kategori Produk" type="select"
                 :selectables="jenisBarangelectables" @update:modelValue="handleJenisBarangChange" />
-            <BaseInputAdmin required v-model="form.pembiayaan.condition" label="Kondisi" type="select"
+            <BaseInputAdmin required v-model="form.pembiayaan.kondisi_produk" label="Kondisi" type="select"
                 :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
-            <BaseInputAdmin required v-model="form.pembiayaan.qty" label="Jumlah" type="number" />
+            <BaseInputAdmin required v-model="form.pembiayaan.kuantitas" label="Jumlah" type="number" />
             <BaseInputAdmin required v-model="form.pembiayaan.harga_perkiraan" label="Harga Perkiraan"
                 :error="errors?.harga_perkiraan" isMoney />
             <BaseInputAdmin v-model.number="form.pembiayaan.uang_muka" label="Uang Muka" isMoney
                     placeholder="Masukkan uang muka" />
-            <BaseInputAdmin v-model="form.pembiayaan.specification" label="Deskripsi" type="textarea" rows="4" required
-                :error="errors?.specification" placeholder="Masukkan deskripsi produk" />
+            <BaseInputAdmin v-model="form.pembiayaan.spesifikasi_barang" label="Deskripsi" type="textarea" rows="4" required
+                :error="errors?.spesifikasi_barang" placeholder="Masukkan deskripsi produk" />
         </div>
 
         <!-- Jaminan -->

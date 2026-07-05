@@ -63,11 +63,11 @@ class StorePreFinancingRequest extends FormRequest
             'anggota.jumlah_biaya_lainnya_amount' => 'nullable|numeric|min:0',
 
             // Pembiayaan data
-            'pembiayaan.name' => 'required|string|max:255',
+            'pembiayaan.nama_barang' => 'required|string|max:255',
             'pembiayaan.jenis_barang_id' => 'required|exists:jenis_barang,id',
-            'pembiayaan.condition' => 'required|string|max:255',
-            'pembiayaan.qty' => 'required|integer|min:1',
-            'pembiayaan.specification' => 'required|string|max:1000',
+            'pembiayaan.kondisi_produk' => 'required|string|max:255',
+            'pembiayaan.kuantitas' => 'required|integer|min:1',
+            'pembiayaan.spesifikasi_barang' => 'required|string|max:1000',
             'pembiayaan.status' => 'required|string|max:255',
             'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
             'pembiayaan.uang_muka' => 'nullable|numeric|min:0',

@@ -10,7 +10,7 @@ class PembiayaanService
     public function getPersonalpembiayaan(string $anggotaId, int $perPage = 10, string $search = '')
     {
         return Pembiayaan::query()
-            ->with(['financingItem.jenisBarang'])
+            ->with(['objekPembiayaan.jenisBarang'])
             ->where('anggota_id', $anggotaId)
             ->whereIn('status', ['Lunas', 'Angsuran Berjalan', 'Pembayaran Tangguh'])
             ->when($search !== '', function ($q) use ($search) {
@@ -29,7 +29,7 @@ class PembiayaanService
     public function getActiveFinancing(string $anggotaId): ?array
     {
         $activeFinancingModel = Pembiayaan::query()
-            ->with(['financingItem.jenisBarang'])
+            ->with(['objekPembiayaan.jenisBarang'])
             ->where('anggota_id', $anggotaId)
             ->where('status', 'Angsuran Berjalan')
             ->orderByDesc('tgl_akad')
@@ -43,8 +43,8 @@ class PembiayaanService
     {
         $productName = null;
 
-        if ($pembiayaan->financingItem) {
-            $productName = $pembiayaan->financingItem->name;
+        if ($pembiayaan->objekPembiayaan) {
+            $productName = $pembiayaan->objekPembiayaan->nama_barang;
         }
 
         return [
@@ -73,7 +73,7 @@ class PembiayaanService
 
         $dokumenPendukung = [
             'akad_document'    => getDocumentUrl($pembiayaan->dokumen_akad),
-            'purchase_receipt' => getDocumentUrl($pembiayaan->purchase_receipt),
+            'struk_pembelian' => getDocumentUrl($pembiayaan->struk_pembelian),
         ];
 
         if ($pembiayaan->wakalah) {
@@ -122,7 +122,7 @@ class PembiayaanService
             'anggota.financials',
             'anggota.memberDocs',
             'anggota.memberJobs',
-            'financingItem.jenisBarang',
+            'objekPembiayaan.jenisBarang',
             'collateral',
             'installment' => function ($q) {
                 $q->orderBy('installment_no');

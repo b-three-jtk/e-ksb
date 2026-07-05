@@ -119,7 +119,7 @@ class PenggunaController extends Controller
                     ->sortBy('due_date')
                     ->first();
 
-                pembiayaan->setAttribute('next_due_date', $nextInstallment?->due_date);
+                $pembiayaan->setAttribute('next_due_date', $nextInstallment?->due_date);
                 });
             }
         }

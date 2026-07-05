@@ -92,15 +92,15 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         // staf ngajuin pembiayaan cash
         $payload = $this->payloadPengajuan;
         $payload['pembiayaan'] = [
-            'name' => 'Laptop ASUS',
+            'nama_barang' => 'Laptop ASUS',
             'jenis_barang_id' => $this->jenisBarang->id,
             'harga_perkiraan' => 10000000,
-            'qty' => 1,
-            'condition' => 'Baru',
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
             'tgl_akad' => now()->format('Y-m-d'),
             'status' => 'Belum Ditinjau',
             'metode_pembayaran' => 'Tunai',
-            'specification' => 'Laptop untuk menunjang pekerjaan',
+            'spesifikasi_barang' => 'Laptop untuk menunjang pekerjaan',
         ];
 
         $this->actingAs($this->staffMurabahah)->post('/admin/pembiayaan/store', $payload)->assertSessionHasNoErrors()->assertStatus(302);
@@ -117,18 +117,18 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $this->actingAs($this->staffMurabahah)
             ->post('/admin/pembiayaan/finalize', array_merge($payload, [
                 'pembiayaan' => [
-                    'name' => 'Laptop ASUS',
+                    'nama_barang' => 'Laptop ASUS',
                     'jenis_barang_id' => $this->jenisBarang->id,
-                    'price_per_unit' => 10000000,
+                    'harga_beli_per_unit' => 10000000,
                     'harga_perolehan' => 10000000,
                     'margin_keuntungan' => 1000000, // Margin koperasi
                     'metode_pembayaran' => 'Tunai',
-                    'qty' => 1,
-                    'condition' => 'Baru',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
                     'tgl_akad' => now()->format('Y-m-d'),
                     'pemasok_id' => $this->pemasok->id,
                     'status' => FinancingReqStatusEnum::PAID->value,
-                    'specification' => 'Laptop untuk menunjang pekerjaan',
+                    'spesifikasi_barang' => 'Laptop untuk menunjang pekerjaan',
                     'harga_perkiraan' => 10000000,
                 ],
                 'pemasok' => [
@@ -150,15 +150,15 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         // staf ngajuin metode tangguh (bayar nanti sekalian)
         $payload = $this->payloadPengajuan;
         $payload['pembiayaan'] = [
-            'name' => 'Bahan Baku Usaha',
+            'nama_barang' => 'Bahan Baku Usaha',
             'jenis_barang_id' => $this->jenisBarang->id,
             'harga_perkiraan' => 5000000,
-            'qty' => 1,
-            'condition' => 'Baru',
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
             'tgl_akad' => now()->format('Y-m-d'),
             'status' => 'Belum Ditinjau',
             'metode_pembayaran' => 'Tangguh',
-            'specification' => 'Tangguh bayar 1 bulan',
+            'spesifikasi_barang' => 'Tangguh bayar 1 bulan',
         ];
 
         $this->actingAs($this->staffMurabahah)->post('/admin/pembiayaan/store', $payload)->assertSessionHasNoErrors();
@@ -171,14 +171,14 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $this->actingAs($this->staffMurabahah)
             ->post('/admin/pembiayaan/finalize', array_merge($payload, [
                 'pembiayaan' => [
-                    'name' => 'Bahan Baku Usaha',
+                    'nama_barang' => 'Bahan Baku Usaha',
                     'jenis_barang_id' => $this->jenisBarang->id,
-                    'price_per_unit' => 5000000,
+                    'harga_beli_per_unit' => 5000000,
                     'harga_perolehan' => 5000000,
                     'margin_keuntungan' => 500000,
                     'metode_pembayaran' => 'Tangguh',
-                    'qty' => 1,
-                    'condition' => 'Baru',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
                     'tgl_akad' => now()->format('Y-m-d'),
                     'pemasok_id' => $this->pemasok->id,
                     'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
@@ -220,15 +220,15 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         // ajuin pembiayaan pakai metode cicilan
         $payload = $this->payloadPengajuan;
         $payload['pembiayaan'] = [
-            'name' => 'Motor Honda',
+            'nama_barang' => 'Motor Honda',
             'jenis_barang_id' => $this->jenisBarang->id,
             'harga_perkiraan' => 24000000,
-            'qty' => 1,
-            'condition' => 'Baru',
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
             'tgl_akad' => now()->format('Y-m-d'),
             'status' => 'Belum Ditinjau',
             'metode_pembayaran' => 'Cicilan',
-            'specification' => 'Cicilan 12 bulan',
+            'spesifikasi_barang' => 'Cicilan 12 bulan',
             'tenor' => 12,
         ];
 
@@ -242,18 +242,18 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $this->actingAs($this->staffMurabahah)
             ->post('/admin/pembiayaan/finalize', array_merge($payload, [
                 'pembiayaan' => [
-                    'name' => 'Motor Honda',
+                    'nama_barang' => 'Motor Honda',
                     'jenis_barang_id' => $this->jenisBarang->id,
-                    'price_per_unit' => 24000000,
+                    'harga_beli_per_unit' => 24000000,
                     'harga_perolehan' => 24000000,
                     'margin_keuntungan' => 2400000,
                     'metode_pembayaran' => 'Cicilan',
-                    'qty' => 1,
-                    'condition' => 'Baru',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
                     'tgl_akad' => now()->format('Y-m-d'),
                     'pemasok_id' => $this->pemasok->id,
                     'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-                    'specification' => 'Cicilan 12 bulan',
+                    'spesifikasi_barang' => 'Cicilan 12 bulan',
                     'harga_perkiraan' => 24000000,
                     'tenor' => 12,
                 ],

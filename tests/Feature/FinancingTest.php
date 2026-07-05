@@ -5,7 +5,7 @@ use App\Enums\MemberStatusEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Pembiayaan;
-use App\Models\FinancingItem;
+use App\Models\ObjekPembiayaan;
 use App\Models\GlobalSetting;
 use App\Models\Installment;
 use App\Models\InstallmentPaymentTransaction;
@@ -61,14 +61,14 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     ],
                 ],
                 'pembiayaan' => [
-                    'name' => 'Motor Honda',
+                    'nama_barang' => 'Motor Honda',
                     'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
-                    'qty' => 1,
-                    'condition' => 'Baru',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
                     'tgl_akad' => '2024-01-01',
                     'status' => 'Belum Ditinjau',
-                    'specification' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
+                    'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
                 'collateral' => [
                     'collateral_type' => 'Motor',
@@ -84,7 +84,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
         $this->assertDatabaseHas('pembiayaan', [
             'harga_perkiraan' => 50000000,
         ]);
-        $this->assertDatabaseHas('financing_items', ['name' => 'Motor Honda']);
+        $this->assertDatabaseHas('objek_pembiayaan', ['nama_barang' => 'Motor Honda']);
         $this->assertDatabaseHas('collaterals', ['collateral_type' => 'Motor']);
     });
 
@@ -113,14 +113,14 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     ],
                 ],
                 'pembiayaan' => [
-                    'name' => 'Motor Honda',
+                    'nama_barang' => 'Motor Honda',
                     'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
-                    'qty' => 1,
-                    'condition' => 'Baru',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
                     'tgl_akad' => '2024-01-01',
                     'status' => 'Belum Ditinjau',
-                    'specification' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
+                    'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
                 'collateral' => [
                     'collateral_type' => 'Motor',
@@ -174,14 +174,14 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     ],
                 ],
                 'pembiayaan' => [
-                    'name' => 'Motor Honda',
+                    'nama_barang' => 'Motor Honda',
                     'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
-                    'qty' => 1,
-                    'condition' => 'Baru',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
                     'tgl_akad' => '2024-01-01',
                     'status' => 'Belum Ditinjau',
-                    'specification' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
+                    'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
                 'collateral' => [
                     'collateral_type' => 'Motor',
@@ -221,14 +221,14 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                     ],
                 ],
                 'pembiayaan' => [
-                    'name' => 'Motor Honda',
+                    'nama_barang' => 'Motor Honda',
                     'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
-                    'qty' => 1,
-                    'condition' => 'Baru',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
                     'tgl_akad' => '2024-01-01',
                     'status' => 'Belum Ditinjau',
-                    'specification' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
+                    'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
                 'collateral' => [
                     'collateral_type' => 'Motor',
@@ -253,11 +253,11 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
             ->post('/admin/pembiayaan/store', [
                 'anggota'=> ['kode_pengguna' => 'M001', 'nama' => 'John Doe', 'nik' => '1234567890123456'],
                 'pembiayaan' => [
-                    'name' => 'Motor',
+                    'nama_barang' => 'Motor',
                     'status' => 'Belum Ditinjau',
-                    'specification' => 'Permohonan pembiayaan untuk motor.',
-                    'qty' => 1,
-                    'condition' => 'Baru',
+                    'spesifikasi_barang' => 'Permohonan pembiayaan untuk motor.',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
                 ],
                 'collateral' => [
                     'collateral_type' => 'Motor',
@@ -310,20 +310,20 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
                     ],
                 ],
                 'pembiayaan' => [
-                    'name' => 'Motor Honda',
+                    'nama_barang' => 'Motor Honda',
                     'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
-                    'price_per_unit' => 50000000,
+                    'harga_beli_per_unit' => 50000000,
                     'harga_perolehan' => 50000000,
                     'margin_keuntungan' => 10000000,
                     'metode_pembayaran' => 'Cicilan',
-                    'qty' => 1,
-                    'condition' => 'Baru',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
                     'tgl_akad' => '2024-01-01',
                     'akad_wakalah_date' => '2024-01-02',
                     'status' => 'Angsuran Berjalan',
                     'pemasok_id' => $pemasok->id,
-                    'specification' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
+                    'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
                 ],
                 'pemasok' => [
                     'nama_pemasok' => 'PT. Pemasok Jaya',
@@ -349,7 +349,7 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
             'margin_keuntungan' => 10000000,
             'status' => 'Angsuran Berjalan',
         ]);
-        $this->assertDatabaseHas('financing_items', ['name' => 'Motor Honda']);
+        $this->assertDatabaseHas('objek_pembiayaan', ['nama_barang' => 'Motor Honda']);
         $this->assertDatabaseHas('collaterals', ['collateral_type' => 'Motor']);
     });
 });
@@ -689,12 +689,12 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pelunasan sebelum jat
             'tgl_akad' => now()->subMonths(11),
         ]);
 
-        FinancingItem::factory()->create([
+        ObjekPembiayaan::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'name' => 'Motor Honda',
-            'price_per_unit' => 50000000,
-            'qty' => 1,
-            'condition' => 'Baru',
+            'nama_barang' => 'Motor Honda',
+            'harga_beli_per_unit' => 50000000,
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
         ]);
 
         $installment = Installment::factory()->create([
@@ -732,12 +732,12 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pelunasan sebelum jat
             'tgl_akad' => now()->subMonths(11),
         ]);
 
-        FinancingItem::factory()->create([
+        ObjekPembiayaan::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'name' => 'Motor Honda',
-            'price_per_unit' => 50000000,
-            'qty' => 1,
-            'condition' => 'Baru',
+            'nama_barang' => 'Motor Honda',
+            'harga_beli_per_unit' => 50000000,
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
         ]);
 
         $installment = Installment::factory()->create([

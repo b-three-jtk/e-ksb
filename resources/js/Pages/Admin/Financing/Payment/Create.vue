@@ -367,7 +367,7 @@ async function handleSubmit() {
                                 </label>
 
                                 <input
-                                    :value="selectedFinancing.qty"
+                                    :value="selectedFinancing.kuantitas"
                                     readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />
@@ -395,7 +395,7 @@ async function handleSubmit() {
                                 </label>
 
                                 <input
-                                    :value="selectedFinancing.product_specification"
+                                    :value="selectedFinancing.product_spesifikasi_barang"
                                     readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />

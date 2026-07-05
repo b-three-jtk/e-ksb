@@ -63,13 +63,13 @@ class StoreFinancingDraftRequest extends FormRequest
             'anggota.jumlah_biaya_lainnya_amount' => 'nullable|numeric|min:0',
 
             // Pembiayaan data
-            'pembiayaan.name' => 'required|string|max:255',
+            'pembiayaan.nama_barang' => 'required|string|max:255',
             'pembiayaan.jenis_barang_id' => 'required|exists:jenis_barang,id',
-            'pembiayaan.condition' => 'required|string|max:255',
-            'pembiayaan.qty' => 'required|integer|min:1',
-            'pembiayaan.specification' => 'required|string|max:1000',
+            'pembiayaan.kondisi_produk' => 'required|string|max:255',
+            'pembiayaan.kuantitas' => 'required|integer|min:1',
+            'pembiayaan.spesifikasi_barang' => 'required|string|max:1000',
 
-            'pembiayaan.price_per_unit' => 'nullable|numeric|min:0',
+            'pembiayaan.harga_beli_per_unit' => 'nullable|numeric|min:0',
             'pembiayaan.harga_perolehan' => 'nullable|numeric|min:0',
             'pembiayaan.margin_keuntungan' => 'nullable|numeric|min:0',
             'pembiayaan.metode_pembayaran' => 'nullable|string|max:255',

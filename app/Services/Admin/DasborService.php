@@ -91,7 +91,7 @@ class DasborService
                 'tanggal' => $t->created_at->toDateString(),
             ]);
 
-        $transaksiPembiayaan = Pembiayaan::with('anggota.user', 'financingItem')
+        $transaksiPembiayaan = Pembiayaan::with('anggota.user', 'objekPembiayaan')
             ->latest()->take($amount)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
@@ -315,7 +315,7 @@ class DasborService
 
     public function getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)
     {
-        return Pembiayaan::with('anggota.user', 'financingItem')
+        return Pembiayaan::with('anggota.user', 'objekPembiayaan')
             ->whereBetween('tgl_permohonan', [$tanggalAwal, $tanggalAkhir])
             ->latest()
             ->take(5)

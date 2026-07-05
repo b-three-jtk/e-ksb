@@ -12,14 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('financing_items', function (Blueprint $table) {
+        Schema::create('objek_pembiayaan', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('specification')->nullable();
-            $table->integer('qty');
-            $table->enum('condition', array_column(ConditionEnum::cases(), 'value'));
-            $table->decimal('price_per_unit', 15, 2)->nullable();
-            $table->string('purchase_receipt')->nullable();
+            $table->string('nama_barang');
+            $table->text('spesifikasi_barang')->nullable();
+            $table->integer('kuantitas');
+            $table->enum('kondisi_produk', array_column(ConditionEnum::cases(), 'value'));
+            $table->decimal('harga_beli_per_unit', 15, 2)->nullable();
+            $table->string('struk_pembelian')->nullable();
 
             $table->foreignId('jenis_barang_id')->nullable()->references('id')->on('jenis_barang')->onDelete('set null');
             $table->foreignId('pemasok_id')->nullable()->references('id')->on('pemasok')->onDelete('set null');
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('financing_items');
+        Schema::dropIfExists('objek_pembiayaan');
     }
 };
