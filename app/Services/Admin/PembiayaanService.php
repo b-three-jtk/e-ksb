@@ -16,7 +16,7 @@ use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
 use App\Models\GlobalSetting;
 use App\Models\AhliWaris;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use App\Models\JournalEntry;
 use App\Models\Anggota;
 use App\Models\Pemasok;
@@ -38,7 +38,7 @@ class PembiayaanService
             'anggota.user' => function ($query) {
                 $query->select('id', 'nama', 'kode_pengguna');
             },
-            'installment',
+            'angsuran',
             'objekPembiayaan.jenisBarang' => function ($query) {
                 $query->select('jenis_barang.id', 'jenis_barang.nama_jenis_barang');
             }
@@ -376,11 +376,11 @@ class PembiayaanService
 
         $installmentAmount = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $pembiayaan->tenor;
         for ($i = 1; $i <= $pembiayaan->tenor; $i++) {
-            Installment::create([
+            Angsuran::create([
                 'pembiayaan_id'   => $pembiayaan->id,
-                'installment_no' => $i,
-                'amount'         => round($installmentAmount, 2),
-                'due_date'       => $pembiayaan->tgl_akad->addMonths($i),
+                'angsuran_ke' => $i,
+                'nominal_angsuran'         => round($installmentAmount, 2),
+                'tgl_jatuh_tempo'       => $pembiayaan->tgl_akad->addMonths($i),
                 'status'         => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             ]);
         }
@@ -431,11 +431,11 @@ class PembiayaanService
     {
         if (!$tangguhPaymentDate) return;
 
-        Installment::create([
+        Angsuran::create([
             'pembiayaan_id'   => $pembiayaan->id,
-            'installment_no' => 1,
-            'amount'         => $pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka,
-            'due_date'       => $tangguhPaymentDate,
+            'angsuran_ke' => 1,
+            'nominal_angsuran'         => $pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka,
+            'tgl_jatuh_tempo'       => $tangguhPaymentDate,
             'status'         => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
         ]);
     }

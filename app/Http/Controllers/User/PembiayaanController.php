@@ -71,13 +71,13 @@ class PembiayaanController extends Controller
         $this->pembiayaanService->computepembiayaanummary($pembiayaan);
         $this->pembiayaanService->computeNextDueDate($pembiayaan);
 
-        $pembiayaan->setRelation('installment', $pembiayaan->installment->map(function ($item) {
+        $pembiayaan->setRelation('angsuran', $pembiayaan->angsuran->map(function ($item) {
             return [
-                'installment_no'              => $item->installment_no,
+                'angsuran_ke'              => $item->angsuran_ke,
                 'installment_trans_code'      => $item->payment?->installment_trans_code,
-                'due_date'                    => $item->due_date,
+                'tgl_jatuh_tempo'                    => $item->tgl_jatuh_tempo,
                 'payment_date'               => $item->payment?->payment_date,
-                'amount'                     => $item->payment?->nominal,
+                'nominal_angsuran'                     => $item->payment?->nominal,
                 'is_early_repayment'         => $item->payment?->is_early_repayment ?? false,
                 'installment_payment_receipt' => $item->payment?->installment_payment_receipt ? asset('storage/' . $item->payment->installment_payment_receipt) : null,
             ];

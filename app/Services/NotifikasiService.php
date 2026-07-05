@@ -7,12 +7,10 @@ use App\Enums\NotificationStatusEnum;
 use App\Enums\NotificationTypeEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\UserRoleEnum;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use App\Models\Anggota;
 use App\Models\Notification;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Builder;
 
 class NotifikasiService
 {
@@ -97,9 +95,9 @@ class NotifikasiService
             })
             ->get();
 
-        foreach ($anggota as $anggota) {
+        foreach ($anggota as $a) {
             if ($this->findByDuplicateCriteria(
-                $anggota->id,
+                $a->id,
                 NotificationTypeEnum::MANDATORY_SAVING->value,
                 $currentPeriod,
                 $reminderType->value
@@ -108,7 +106,7 @@ class NotifikasiService
             }
 
             $notification = Notification::create([
-                'anggota_id' => $anggota->id,
+                'anggota_id' => $a->id,
                 'title' => 'Pengingat Simpanan Wajib Bulan ' . now()->locale('id')->isoFormat('MMMM YYYY'),
                 'message' => 'Simpanan wajib untuk periode ' . now()->locale('id')->isoFormat('MMMM YYYY') . ' jatuh tempo pada ' . $dueDate->locale('id')->translatedFormat('d F Y') . '. Pastikan Anda melakukan setoran sebelum jatuh tempo.',
                 'notification_type' => NotificationTypeEnum::MANDATORY_SAVING->value,
@@ -128,39 +126,39 @@ class NotifikasiService
     public function processInstallmentReminders(): void
     {
         $today = now()->startOfDay();
-        $installments = Installment::with('pembiayaan.anggota')
+        $angsuran = Angsuran::with('pembiayaan.anggota')
             ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
-            ->whereBetween('due_date', [$today, $today->copy()->addDays(7)])
+            ->whereBetween('tgl_jatuh_tempo', [$today, $today->copy()->addDays(7)])
             ->get();
 
-        foreach ($installments as $installment) {
-            $dueDate = Carbon::parse($installment->due_date)->startOfDay();
+        foreach ($angsuran as $a) {
+            $dueDate = Carbon::parse($a->tgl_jatuh_tempo)->startOfDay();
             $daysLeft = $today->diffInDays($dueDate, false);
             $reminderType = $this->matchReminderType($daysLeft);
-            if (!$reminderType || !$installment->pembiayaan?->anggota) {
+            if (!$reminderType || !$a->pembiayaan?->anggota) {
                 continue;
             }
 
             $period = $dueDate->format('Y-m');
-            $anggotaId = $installment->pembiayaan->anggota->id;
+            $anggotaId = $a->pembiayaan->anggota->id;
 
             if ($this->findByDuplicateCriteria(
                 $anggotaId,
                 NotificationTypeEnum::INSTALLMENT->value,
                 $period,
                 $reminderType->value,
-                $installment->id
+                $a->id
             )) {
                 continue;
             }
 
             $notification = Notification::create([
                 'anggota_id' => $anggotaId,
-                'title' => 'Pengingat Angsuran Pembiayaan #' . $installment->installment_no,
-                'message' => 'Angsuran ke-' . $installment->installment_no . ' sebesar Rp ' . number_format($installment->amount, 0, ',', '.') . ' jatuh tempo pada ' . $dueDate->locale('id')->translatedFormat('d F Y') . '.',
+                'title' => 'Pengingat Angsuran Pembiayaan #' . $a->angsuran_ke,
+                'message' => 'Angsuran ke-' . $a->angsuran_ke . ' sebesar Rp ' . number_format($a->nominal_angsuran, 0, ',', '.') . ' jatuh tempo pada ' . $dueDate->locale('id')->translatedFormat('d F Y') . '.',
                 'notification_type' => NotificationTypeEnum::INSTALLMENT->value,
-                'reference_type' => Installment::class,
-                'reference_id' => $installment->id,
+                'reference_type' => Angsuran::class,
+                'reference_id' => $a->id,
                 'notification_period' => $period,
                 'reminder_type' => $reminderType->value,
                 'status' => NotificationStatusEnum::DRAFT->value,
@@ -205,7 +203,7 @@ class NotifikasiService
 
     public function getMemberNotifications(string $anggotaId, bool $unreadOnly = false, int $perPage = 10)
     {
-        $query = Notification::with('installment')
+        $query = Notification::with('angsuran')
             ->where('anggota_id', $anggotaId)
             ->where('status', NotificationStatusEnum::SENT->value)
             ->orderBy('scheduled_at', 'desc');

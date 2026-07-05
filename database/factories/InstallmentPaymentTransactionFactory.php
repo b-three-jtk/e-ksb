@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\PaymentMethodsEnum;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,7 +20,7 @@ class InstallmentPaymentTransactionFactory extends Factory
             'is_early_repayment' => $this->faker->boolean(),
             'nominal' => $this->faker->numberBetween(100000, 10000000),
             'payment_date' => $this->faker->dateTime(),
-            'installment_id' => Installment::factory(),
+            'angsuran_id' => Angsuran::factory(),
             'updated_by' => Pengguna::factory(),
             'installment_payment_receipt' => $this->faker->optional()->filePath(),
         ];

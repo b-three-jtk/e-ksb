@@ -46,9 +46,9 @@ class Notification extends Model
     }
 
 
-    public function installment()
+    public function angsuran()
     {
-        return $this->belongsTo(Installment::class, 'reference_id');
+        return $this->belongsTo(Angsuran::class, 'reference_id');
     }
 
     public function scopeForMember($query, $anggotaId)

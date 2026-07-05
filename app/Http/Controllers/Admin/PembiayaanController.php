@@ -70,7 +70,7 @@ class PembiayaanController extends Controller
                         ? ($f->anggota->user->kode_pengguna . ' - ' . $f->anggota->user->nama)
                         : '-',
                     'user_role' => $f->anggota->user?->getRoleNames()->first() ?? '-',
-                    'tenor_left' => $f->installment ? max(0, $f->tenor - ($f->installment->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
+                    'tenor_left' => $f->angsuran ? max(0, $f->tenor - ($f->angsuran->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
                     'product_name' => $f->objekPembiayaan?->nama_barang,
                     'status' => $f->status,
                 ];
@@ -96,13 +96,13 @@ class PembiayaanController extends Controller
         $this->pembiayaanService->computepembiayaanummary($pembiayaan);
         $this->pembiayaanService->computeNextDueDate($pembiayaan);
 
-        $pembiayaan->setRelation('installment', $pembiayaan->installment->map(function ($item) {
+        $pembiayaan->setRelation('angsuran', $pembiayaan->angsuran->map(function ($item) {
             return [
-                'installment_no'              => $item->installment_no,
+                'angsuran_ke'              => $item->angsuran_ke,
                 'installment_trans_code'      => $item->payment?->installment_trans_code,
-                'due_date'                    => $item->due_date,
+                'tgl_jatuh_tempo'                    => $item->tgl_jatuh_tempo,
                 'payment_date'               => $item->payment?->payment_date,
-                'amount'                     => $item->amount,
+                'nominal_angsuran'                     => $item->nominal_angsuran,
                 'is_early_repayment'         => $item->payment?->is_early_repayment ?? false,
                 'installment_payment_receipt' => $item->payment?->installment_payment_receipt ? asset('storage/' . $item->payment->installment_payment_receipt) : null,
             ];
@@ -759,7 +759,7 @@ class PembiayaanController extends Controller
     {
         $pembiayaan = Pembiayaan::with([
             'anggota.user',
-            'installment.payment',
+            'angsuran.payment',
             'objekPembiayaan.jenisBarang',
             'objekPembiayaan.pemasok',
             'collateral'
@@ -769,15 +769,15 @@ class PembiayaanController extends Controller
 
         $data['pengurus'] = auth()->user()->nama;
 
-        $unpaidInstallment = $pembiayaan->installment
+        $unpaidInstallment = $pembiayaan->angsuran
             ->whereNotIn('status', [
                 InstallmentPaymentScheduleStatusEnum::PAID->value,
                 InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
             ])
-            ->sortBy('installment_no')
+            ->sortBy('angsuran_ke')
             ->first();
 
-        $data['installment_id'] = $unpaidInstallment?->id;
+        $data['angsuran_id'] = $unpaidInstallment?->id;
 
         return inertia('Admin/Financing/Repayment/Create', [
             'data' => $data,
@@ -811,7 +811,7 @@ class PembiayaanController extends Controller
     public function storePayment(Request $request)
     {
         $validated = $request->validate([
-            'installment_id' => 'required|exists:installments,id',
+            'angsuran_id' => 'required|exists:angsuran,id',
             'pembiayaan_id'   => 'required|exists:pembiayaan,id',
             'metode_pembayaran' => 'required|string',
             'nominal'        => 'required|numeric|min:1',
@@ -839,15 +839,15 @@ class PembiayaanController extends Controller
     public function reschedulePayment(Request $request, Pembiayaan $pembiayaan)
     {
         $validated = $request->validate([
-            'installment_id' => 'required|exists:installments,id',
-            'due_date'       => ['required', 'date', 'after_or_equal:today'],
+            'angsuran_id' => 'required|exists:angsuran,id',
+            'tgl_jatuh_tempo'       => ['required', 'date', 'after_or_equal:today'],
         ]);
 
         try {
             $this->pembayaranAngsuranService->rescheduleInstallments(
                 $pembiayaan,
-                $validated['installment_id'],
-                $validated['due_date']
+                $validated['angsuran_id'],
+                $validated['tgl_jatuh_tempo']
             );
 
             return redirect("/admin/pembiayaan/show/{pembiayaan->id}")

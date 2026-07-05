@@ -8,7 +8,7 @@ use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PaymentMethodsEnum;
 use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Journal;
 use App\Models\JournalEntry;
@@ -250,7 +250,7 @@ class MurabahaProductSeeder extends Seeder
             'transaction_date' => $akadDate,
         ]);
 
-        // 2. Buat Installment sesuai skenario kolektibilitas
+        // 2. Buat Angsuran sesuai skenario kolektibilitas
         for ($i = 1; $i <= $tenor; $i++) {
             $monthlyPayment = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $tenor;
             $monthlyMargin = $pembiayaan->margin_keuntungan / $tenor;
@@ -266,11 +266,11 @@ class MurabahaProductSeeder extends Seeder
                 $isPaid = $dueDate->isBefore($batasTunggakan);
             }
 
-            $installment = Installment::create([
+            $angsuran = Angsuran::create([
                 'pembiayaan_id' => $pembiayaan->id,
-                'installment_no' => $i,
-                'due_date' => $dueDate,
-                'amount' => $monthlyPayment,
+                'angsuran_ke' => $i,
+                'tgl_jatuh_tempo' => $dueDate,
+                'nominal_angsuran' => $monthlyPayment,
                 'status' => $isPaid ? InstallmentPaymentScheduleStatusEnum::PAID->value : InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             ]);
 
@@ -278,7 +278,7 @@ class MurabahaProductSeeder extends Seeder
             if ($isPaid) {
                 InstallmentPaymentTransaction::create([
                     'installment_trans_code' => $this->getUniqueTransCode(),
-                    'installment_id' => $installment->id,
+                    'angsuran_id' => $angsuran->id,
                     'nominal' => $monthlyPayment,
                     'principal_amount' => $monthlyCostPrice,
                     'margin_keuntungan' => $monthlyMargin,
@@ -485,17 +485,17 @@ class MurabahaProductSeeder extends Seeder
             $akadDate = Carbon::parse($pembiayaan->tgl_akad);
             $dueDate = $akadDate->copy()->addMonths($i);
 
-            $installment = Installment::create([
+            $angsuran = Angsuran::create([
                 'pembiayaan_id' => $pembiayaan->id,
-                'installment_no' => $i,
-                'due_date' => $dueDate,
-                'amount' => $monthlyPayment,
+                'angsuran_ke' => $i,
+                'tgl_jatuh_tempo' => $dueDate,
+                'nominal_angsuran' => $monthlyPayment,
                 'status' => $dueDate->isPast() ? InstallmentPaymentScheduleStatusEnum::PENDING->value : InstallmentPaymentScheduleStatusEnum::PAID->value,
             ]);
 
             InstallmentPaymentTransaction::create([
                 'installment_trans_code' => $this->getUniqueTransCode(),
-                'installment_id' => $installment->id,
+                'angsuran_id' => $angsuran->id,
                 'nominal' => $monthlyPayment,
                 'principal_amount' => $monthlyCostPrice,
                 'margin_keuntungan' => $monthlyMargin,

@@ -28,7 +28,7 @@ it('Menghitung detail pelunasan sebelum jatuh tempo', function () {
     $pembiayaan->uang_muka = 2000;
     $pembiayaan->margin_keuntungan = 2000;
 
-    $pembiayaan->setRelation('installment', collect([
+    $pembiayaan->setRelation('angsuran', collect([
         (object) ['status' => InstallmentPaymentScheduleStatusEnum::PAID->value],
         (object) ['status' => InstallmentPaymentScheduleStatusEnum::PAID->value],
         (object) ['status' => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value],
@@ -68,10 +68,10 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
         'tgl_permohonan' => '2026-01-01',
         'tenor' => 12,
     ]);
-    $lancar->installment()->create([
-        'installment_no' => 1,
-        'amount' => 1000,
-        'due_date' => '2026-07-01',
+    $lancar->angsuran()->create([
+        'angsuran_ke' => 1,
+        'nominal_angsuran' => 1000,
+        'tgl_jatuh_tempo' => '2026-07-01',
         'status' => $statusScheduled,
     ]);
 
@@ -85,10 +85,10 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
         'tgl_permohonan' => '2025-10-01',
         'tenor' => 24, // Jatuh tempo akhir masih 2027
     ]);
-    $kurangLancar->installment()->create([
-        'installment_no' => 1,
-        'amount' => 1000,
-        'due_date' => '2026-01-01',
+    $kurangLancar->angsuran()->create([
+        'angsuran_ke' => 1,
+        'nominal_angsuran' => 1000,
+        'tgl_jatuh_tempo' => '2026-01-01',
         'status' => $statusScheduled,
     ]);
 
@@ -102,10 +102,10 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
         'tgl_permohonan' => '2025-05-01',
         'tenor' => 24, // Jatuh tempo akhir masih 2027
     ]);
-    $diragukan->installment()->create([
-        'installment_no' => 1,
-        'amount' => 1000,
-        'due_date' => '2025-10-01',
+    $diragukan->angsuran()->create([
+        'angsuran_ke' => 1,
+        'nominal_angsuran' => 1000,
+        'tgl_jatuh_tempo' => '2025-10-01',
         'status' => $statusScheduled,
     ]);
 
@@ -119,10 +119,10 @@ it('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', function (
         'tgl_permohonan' => '2025-01-01',
         'tenor' => 12, // Kontrak tamat pada Januari 2026
     ]);
-    $macet->installment()->create([
-        'installment_no' => 1,
-        'amount' => 1000,
-        'due_date' => '2025-12-01', // Angsuran bulan terakhir yang belum dibayar
+    $macet->angsuran()->create([
+        'angsuran_ke' => 1,
+        'nominal_angsuran' => 1000,
+        'tgl_jatuh_tempo' => '2025-12-01', // Angsuran bulan terakhir yang belum dibayar
         'status' => $statusScheduled,
     ]);
 

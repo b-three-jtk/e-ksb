@@ -4,7 +4,7 @@ use App\Enums\FinancingReqStatusEnum;
 use App\Enums\MemberStatusEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Pembiayaan;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use App\Models\Anggota;
 use App\Models\JenisBarang;
 use App\Models\AkunSimpanan;
@@ -187,18 +187,18 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             ]));
 
         // ceritanya pas finalisasi ini ngebikin 1 angsuran otomatis
-        $installment = Installment::factory()->create([
+        $angsuran = Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'installment_no' => 1,
-            'amount' => 5500000,
-            'due_date' => now()->addMonth()->startOfDay(),
+            'angsuran_ke' => 1,
+            'nominal_angsuran' => 5500000,
+            'tgl_jatuh_tempo' => now()->addMonth()->startOfDay(),
             'status' => 'Terjadwal',
         ]);
 
         // tes bayar angsurannya sekali lunas
         $this->actingAs($this->staffMurabahah)
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
-                'installment_id' => $installment->id,
+                'angsuran_id' => $angsuran->id,
                 'pembiayaan_id' => $pembiayaan->id,
                 'nominal' => 5500000,
                 'payment_date' => now()->format('Y-m-d'),
@@ -206,7 +206,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             ])->assertSessionHasNoErrors()->assertStatus(302);
 
         $this->assertDatabaseHas('installment_payment_transactions', [
-            'installment_id' => $installment->id,
+            'angsuran_id' => $angsuran->id,
             'nominal' => 5500000,
         ]);
 
@@ -266,17 +266,17 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
             ]))->assertSessionHasNoErrors();
 
         // bikin dummy cicilan buat dites
-        $installment1 = Installment::factory()->create([
-            'pembiayaan_id' => $pembiayaan->id, 'installment_no' => 1, 'amount' => 2200000, 'status' => 'Terjadwal',
+        $installment1 = Angsuran::factory()->create([
+            'pembiayaan_id' => $pembiayaan->id, 'angsuran_ke' => 1, 'nominal_angsuran' => 2200000, 'status' => 'Terjadwal',
         ]);
-        $installment2 = Installment::factory()->create([
-            'pembiayaan_id' => $pembiayaan->id, 'installment_no' => 2, 'amount' => 2200000, 'status' => 'Terjadwal',
+        $installment2 = Angsuran::factory()->create([
+            'pembiayaan_id' => $pembiayaan->id, 'angsuran_ke' => 2, 'nominal_angsuran' => 2200000, 'status' => 'Terjadwal',
         ]);
 
         // tes bayar cicilan bulan pertama
         $this->actingAs($this->staffMurabahah)
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
-                'installment_id' => $installment1->id,
+                'angsuran_id' => $installment1->id,
                 'pembiayaan_id' => $pembiayaan->id,
                 'nominal' => 2200000,
                 'payment_date' => now()->format('Y-m-d'),
@@ -287,7 +287,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         $this->actingAs($this->staffMurabahah)
             ->post('/admin/pembiayaan/repayment', [
                 'method' => 'Non-Tunai',
-                'installment_id' => $installment2->id,
+                'angsuran_id' => $installment2->id,
             ])->assertSessionHasNoErrors()->assertStatus(200);
 
         $this->assertDatabaseHas('pembiayaan', [

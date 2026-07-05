@@ -105,7 +105,7 @@ class AnggotaService
             'anggota.akunSimpanan.transactions' => fn($q) => $q->orderBy('transaction_date', 'desc'),
             'anggota.akunSimpanan',
             'anggota.ahliWaris',
-            'anggota.pembiayaan.installment.payment',
+            'anggota.pembiayaan.angsuran.payment',
             'anggota.pembiayaan.objekPembiayaan',
         ])->findOrFail($id);
 
@@ -190,8 +190,8 @@ class AnggotaService
     public function getRiwayatPembiayaanAnggota($financingId)
     {
         return Pembiayaan::with([
-            'installment' => fn($q) => $q->orderBy('installment_no', 'asc'),
-            'installment.payment'
+            'angsuran' => fn($q) => $q->orderBy('angsuran_ke', 'asc'),
+            'angsuran.payment'
         ])->findOrFail($financingId);
     }
 }

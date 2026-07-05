@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\Collateral;
 use App\Models\ObjekPembiayaan;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use App\Models\Anggota;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -63,9 +63,9 @@ class Pembiayaan extends Model
     }
 
     // Angsuran
-    public function installment()
+    public function angsuran()
     {
-        return $this->hasMany(Installment::class);
+        return $this->hasMany(Angsuran::class);
     }
 
     // Objek Pembiayaan

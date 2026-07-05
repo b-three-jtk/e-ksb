@@ -122,7 +122,7 @@ class SimpananController extends Controller
             SavingTypeEnum::SIMPANAN_POKOK->value,
             SavingTypeEnum::SIMPANAN_WAJIB->value,
         ])) {
-            $data['amount'] = $this->simpananService->getSettingValue(
+            $data['nominal_angsuran'] = $this->simpananService->getSettingValue(
                 $data['saving_category'] === SavingTypeEnum::SIMPANAN_POKOK->value
                     ? 'saving_pokok_amount'
                     : 'saving_wajib_amount'

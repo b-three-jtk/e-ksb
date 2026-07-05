@@ -64,8 +64,8 @@ class PembiayaanService
             + ($pembiayaan->margin_keuntungan ?? 0)
             - ($pembiayaan->uang_muka ?? 0);
 
-        $installments = $pembiayaan->installment;
-        $hasInstallments = $installments && $installments->count() > 0;
+        $angsuran = $pembiayaan->angsuran;
+        $hasInstallments = $angsuran && $angsuran->count() > 0;
 
         $pembiayaan->installment_per_month = $pembiayaan->tenor > 0
             ? $pembiayaan->total_price / $pembiayaan->tenor
@@ -83,14 +83,14 @@ class PembiayaanService
         $pembiayaan->setAttribute('documents', $dokumenPendukung);
 
         if ($hasInstallments) {
-            $pembiayaan->total_paid = $installments
+            $pembiayaan->total_paid = $angsuran
                 ->sum(fn($i) => $i->payment?->nominal ?? 0);
         } else {
             $pembiayaan->total_paid = 0;
         }
 
-        $hasEarlyRepayment = $installments
-            ? $installments->contains(fn($i) => $i->payment?->is_early_repayment)
+        $hasEarlyRepayment = $angsuran
+            ? $angsuran->contains(fn($i) => $i->payment?->is_early_repayment)
             : false;
 
         $pembiayaan->remaining_balance = $hasEarlyRepayment ? 0 : max(0, $pembiayaan->total_price - $pembiayaan->total_paid);
@@ -98,14 +98,14 @@ class PembiayaanService
 
     public function computeNextDueDate(Pembiayaan $pembiayaan): void
     {
-        $installments = $pembiayaan->installment;
+        $angsuran = $pembiayaan->angsuran;
 
-        if (!$installments || !$pembiayaan->tgl_akad) {
+        if (!$angsuran || !$pembiayaan->tgl_akad) {
             $pembiayaan->next_due_date = null;
             return;
         }
 
-        $paidCount = $installments->count();
+        $paidCount = $angsuran->count();
 
         $pembiayaan->next_due_date = $paidCount < $pembiayaan->tenor
             ? Carbon::parse($pembiayaan->tgl_akad)
@@ -124,8 +124,8 @@ class PembiayaanService
             'anggota.memberJobs',
             'objekPembiayaan.jenisBarang',
             'collateral',
-            'installment' => function ($q) {
-                $q->orderBy('installment_no');
+            'angsuran' => function ($q) {
+                $q->orderBy('angsuran_ke');
             },
             'wakalah',
         ])->findOrFail($id);

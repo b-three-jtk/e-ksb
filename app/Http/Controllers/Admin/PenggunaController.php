@@ -114,12 +114,12 @@ class PenggunaController extends Controller
             if ($user->anggota->pembiayaan) {
                 $user->anggota->pembiayaan->each(function ($pembiayaan) use ($service) {
                     $service->computepembiayaanummary($pembiayaan);
-                    $nextInstallment = $pembiayaan->installment
+                    $nextInstallment = $pembiayaan->angsuran
                     ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
-                    ->sortBy('due_date')
+                    ->sortBy('tgl_jatuh_tempo')
                     ->first();
 
-                $pembiayaan->setAttribute('next_due_date', $nextInstallment?->due_date);
+                $pembiayaan->setAttribute('next_due_date', $nextInstallment?->tgl_jatuh_tempo);
                 });
             }
         }
@@ -180,11 +180,11 @@ class PenggunaController extends Controller
     {
         $pembiayaan = $this->anggotaService->getRiwayatPembiayaanAnggota($financingId);
 
-        if ($pembiayaan->installment->isEmpty()) {
+        if ($pembiayaan->angsuran->isEmpty()) {
             return response()->json([]);
         }
 
-        return response()->json($pembiayaan->installment);
+        return response()->json($pembiayaan->angsuran);
     }
 
     public function verificationDetail(Pengguna $user)

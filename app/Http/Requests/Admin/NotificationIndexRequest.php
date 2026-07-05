@@ -15,7 +15,7 @@ class NotificationIndexRequest extends FormRequest
     {
         return [
             'periode' => ['nullable', 'string', 'regex:/^\d{4}-\d{2}$/'],
-            'notification_type' => ['nullable', 'string', 'in:mandatory_saving,installment'],
+            'notification_type' => ['nullable', 'string', 'in:mandatory_saving,angsuran'],
             'status' => ['nullable', 'string', 'in:draft,sent,failed'],
             'is_read' => ['nullable', 'in:0,1,true,false'],
             'search' => ['nullable', 'string', 'max:255'],

@@ -22,7 +22,7 @@ class InstallmentPaymentTransaction extends Model
         'payment_date',
         'installment_payment_receipt',
 
-        'installment_id',
+        'angsuran_id',
         'updated_by',
     ];
 
@@ -30,9 +30,9 @@ class InstallmentPaymentTransaction extends Model
         'payment_date' => 'datetime',
     ];
 
-    public function installment()
+    public function angsuran()
     {
-        return $this->belongsTo(Installment::class);
+        return $this->belongsTo(Angsuran::class);
     }
 
     public function updatedBy()

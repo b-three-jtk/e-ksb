@@ -57,8 +57,8 @@ public function handle(): int
         $periodLabel = Carbon::parse($startDate)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($endDate)->translatedFormat('d M Y');
 
         $userMargins = InstallmentPaymentTransaction::query()
-            ->join('installments', 'installment_payment_transactions.installment_id', '=', 'installments.id')
-            ->join('pembiayaan', 'installments.pembiayaan_id', '=', 'pembiayaan.id')
+            ->join('angsuran', 'installment_payment_transactions.angsuran_id', '=', 'angsuran.id')
+            ->join('pembiayaan', 'angsuran.pembiayaan_id', '=', 'pembiayaan.id')
             ->join('anggota', 'pembiayaan.anggota_id', '=', 'anggota.id')
             ->whereDate('installment_payment_transactions.payment_date', '>=', $startDate)
             ->whereDate('installment_payment_transactions.payment_date', '<=', $endDate)

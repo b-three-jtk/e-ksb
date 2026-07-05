@@ -4,7 +4,7 @@ namespace App\Services\User;
 
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use App\Models\Poin;
 use App\Models\SavingTransaction;
 use Carbon\Carbon;
@@ -18,7 +18,7 @@ class DasborService
             ->where('anggota_id', $anggotaId)
             ->sum('saldo');
 
-        $totalInstallment = Installment::whereHas('pembiayaan', function ($q) use ($anggotaId) {
+        $totalInstallment = Angsuran::whereHas('pembiayaan', function ($q) use ($anggotaId) {
             $q->where('anggota_id', $anggotaId)
                 ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value);
         })
@@ -27,7 +27,7 @@ class DasborService
             InstallmentPaymentScheduleStatusEnum::PENDING->value,
             InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
         ])
-        ->sum('amount');
+        ->sum('nominal_angsuran');
 
         $totalPoints = Poin::where('pengguna_id', $userId)
             ->sum('jml_perolehan');

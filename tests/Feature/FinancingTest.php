@@ -7,7 +7,7 @@ use App\Enums\UserStatusEnum;
 use App\Models\Pembiayaan;
 use App\Models\ObjekPembiayaan;
 use App\Models\GlobalSetting;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use App\Models\InstallmentPaymentTransaction;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
@@ -511,10 +511,10 @@ describe('Aplikasi harus dapat mengirimkan notifikasi jatuh tempo pembayaran ang
             'tgl_akad' => now()->subMonths(11),
         ]);
 
-        Installment::factory()->create([
+        Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'installment_no' => 1,
-            'due_date' => now()->addDays(3)->startOfDay(),
+            'angsuran_ke' => 1,
+            'tgl_jatuh_tempo' => now()->addDays(3)->startOfDay(),
             'status' => 'Terjadwal',
         ]);
 
@@ -542,10 +542,10 @@ describe('Aplikasi harus menyediakan pemantauan notifikasi koperasi oleh penangg
             'tgl_akad' => now()->subMonths(11),
         ]);
 
-        Installment::factory()->create([
+        Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'installment_no' => 1,
-            'due_date' => now()->addDays(3)->startOfDay(),
+            'angsuran_ke' => 1,
+            'tgl_jatuh_tempo' => now()->addDays(3)->startOfDay(),
             'status' => 'Terjadwal',
         ]);
 
@@ -579,17 +579,17 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
             'metode_pembayaran' => \App\Enums\FinancingPaymentMethodEnum::INSTALLMENT->value,
         ]);
 
-        $installment = Installment::factory()->create([
+        $angsuran = Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'installment_no' => 1,
-            'amount' => 1833333,
-            'due_date' => now()->addDays(3)->startOfDay(),
+            'angsuran_ke' => 1,
+            'nominal_angsuran' => 1833333,
+            'tgl_jatuh_tempo' => now()->addDays(3)->startOfDay(),
             'status' => 'Terjadwal',
         ]);
 
         $response = $this->actingAs($staffMurabahah)
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
-                'installment_id' => $installment->id,
+                'angsuran_id' => $angsuran->id,
                 'pembiayaan_id' => $pembiayaan->id,
                 'nominal' => 1833333,
                 'payment_date' => now()->format('Y-m-d'),
@@ -599,7 +599,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
         $response->assertSessionHasNoErrors();
         $response->assertStatus(302);
         $this->assertDatabaseHas('installment_payment_transactions', [
-            'installment_id' => $installment->id,
+            'angsuran_id' => $angsuran->id,
             'nominal' => 1833333,
         ]);
     });
@@ -617,16 +617,16 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
             'tgl_akad' => now()->subMonths(11),
         ]);
 
-        $installment = Installment::factory()->create([
+        $angsuran = Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'installment_no' => 1,
-            'amount' => 1833333,
-            'due_date' => now()->addDays(3)->startOfDay(),
+            'angsuran_ke' => 1,
+            'nominal_angsuran' => 1833333,
+            'tgl_jatuh_tempo' => now()->addDays(3)->startOfDay(),
             'status' => 'Terjadwal',
         ]);
         $response = $this->actingAs($user)
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
-                'installment_id' => $installment->id,
+                'angsuran_id' => $angsuran->id,
                 'pembiayaan_id' => $pembiayaan->id,
                 'nominal' => 1833333,
                 'payment_date' => now()->format('Y-m-d'),
@@ -652,24 +652,24 @@ describe('Aplikasi harus dapat menyediakan penjadwalan ulang pembayaran angsuran
             'tgl_akad' => now()->subMonths(11),
         ]);
 
-        $installment = Installment::factory()->create([
+        $angsuran = Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'installment_no' => 1,
-            'amount' => 1833333,
-            'due_date' => now()->addDays(3)->startOfDay(),
+            'angsuran_ke' => 1,
+            'nominal_angsuran' => 1833333,
+            'tgl_jatuh_tempo' => now()->addDays(3)->startOfDay(),
             'status' => 'Terjadwal',
         ]);
 
         $response = $this->actingAs($staffMurabahah)
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/reschedule", [
-                'installment_id' => $installment->id,
-                'due_date' => now()->addDays(7)->format('Y-m-d'),
+                'angsuran_id' => $angsuran->id,
+                'tgl_jatuh_tempo' => now()->addDays(7)->format('Y-m-d'),
             ]);
 
         $response->assertStatus(302);
-        $this->assertDatabaseHas('installments', [
-            'id' => $installment->id,
-            'due_date' => now()->addDays(7)->format('Y-m-d'),
+        $this->assertDatabaseHas('angsuran', [
+            'id' => $angsuran->id,
+            'tgl_jatuh_tempo' => now()->addDays(7)->format('Y-m-d'),
         ]);
     });
 });
@@ -697,18 +697,18 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pelunasan sebelum jat
             'kondisi_produk' => 'Baru',
         ]);
 
-        $installment = Installment::factory()->create([
+        $angsuran = Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'installment_no' => 1,
-            'amount' => 1833333,
-            'due_date' => now()->addDays(3)->startOfDay(),
+            'angsuran_ke' => 1,
+            'nominal_angsuran' => 1833333,
+            'tgl_jatuh_tempo' => now()->addDays(3)->startOfDay(),
             'status' => 'Terjadwal',
         ]);
 
         $response = $this->actingAs($staffMurabahah)
             ->post("/admin/pembiayaan/repayment", [
                 'method' => 'Tunai',
-                'installment_id' => $installment->id,
+                'angsuran_id' => $angsuran->id,
             ]);
 
         $response->assertStatus(200);
@@ -740,18 +740,18 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pelunasan sebelum jat
             'kondisi_produk' => 'Baru',
         ]);
 
-        $installment = Installment::factory()->create([
+        $angsuran = Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'installment_no' => 1,
-            'amount' => 1833333,
-            'due_date' => now()->addDays(3)->startOfDay(),
+            'angsuran_ke' => 1,
+            'nominal_angsuran' => 1833333,
+            'tgl_jatuh_tempo' => now()->addDays(3)->startOfDay(),
             'status' => 'Terjadwal',
         ]);
 
         $response = $this->actingAs($user)
             ->post("/admin/pembiayaan/repayment", [
                 'method' => 'Tunai',
-                'installment_id' => $installment->id,
+                'angsuran_id' => $angsuran->id,
             ]);
 
         $response->assertStatus(403);
@@ -772,10 +772,10 @@ describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', func
             'tgl_akad' => '2026-05-01',
             'tenor' => 12,
         ]);
-        Installment::factory()->create([
+        Angsuran::factory()->create([
             'pembiayaan_id' => $finLancar->id,
             'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
-            'due_date' => '2026-07-26',
+            'tgl_jatuh_tempo' => '2026-07-26',
         ]);
 
         // bikin data kurang lancar: ceritanya dia nunggak 5 bulan tapi akadnya masih jalan
@@ -785,10 +785,10 @@ describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', func
             'tgl_akad' => '2025-12-01',
             'tenor' => 12,
         ]);
-        Installment::factory()->create([
+        Angsuran::factory()->create([
             'pembiayaan_id' => $finKurangLancar->id,
             'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
-            'due_date' => '2026-01-26',
+            'tgl_jatuh_tempo' => '2026-01-26',
         ]);
 
         // bikin data diragukan: nunggaknya udah 8 bulan
@@ -798,10 +798,10 @@ describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', func
             'tgl_akad' => '2025-09-01',
             'tenor' => 12,
         ]);
-        Installment::factory()->create([
+        Angsuran::factory()->create([
             'pembiayaan_id' => $finDiragukan->id,
             'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
-            'due_date' => '2025-10-26',
+            'tgl_jatuh_tempo' => '2025-10-26',
         ]);
 
         // bikin data macet: kontraknya udah expired dari akhir tahun kemaren (Desember 2025)
@@ -811,10 +811,10 @@ describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', func
             'tgl_akad' => '2024-12-01',
             'tenor' => 12,
         ]);
-        Installment::factory()->create([
+        Angsuran::factory()->create([
             'pembiayaan_id' => $finMacet->id,
             'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
-            'due_date' => '2025-11-26',
+            'tgl_jatuh_tempo' => '2025-11-26',
         ]);
 
         $dasborService = app(\App\Services\Admin\DasborService::class);
@@ -851,12 +851,12 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
         ]);
 
-        $installment = Installment::factory()->create([
+        $angsuran = Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
         ]);
 
         InstallmentPaymentTransaction::factory()->create([
-            'installment_id' => $installment->id,
+            'angsuran_id' => $angsuran->id,
             'margin_keuntungan' => 150000,
             'principal_amount' => 0,
             'nominal' => 150000,
@@ -895,12 +895,12 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
         ]);
 
-        $installment = Installment::factory()->create([
+        $angsuran = Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
         ]);
 
         InstallmentPaymentTransaction::factory()->create([
-            'installment_id' => $installment->id,
+            'angsuran_id' => $angsuran->id,
             'margin_keuntungan' => 50000,
             'principal_amount' => 0,
             'nominal' => 50000,
@@ -938,17 +938,17 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'metode_pembayaran' => \App\Enums\FinancingPaymentMethodEnum::INSTALLMENT->value,
         ]);
 
-        $installment = Installment::factory()->create([
+        $angsuran = Angsuran::factory()->create([
             'pembiayaan_id' => $pembiayaan->id,
-            'installment_no' => 1,
-            'amount' => 1833333,
-            'due_date' => now()->addDays(3)->startOfDay(),
+            'angsuran_ke' => 1,
+            'nominal_angsuran' => 1833333,
+            'tgl_jatuh_tempo' => now()->addDays(3)->startOfDay(),
             'status' => 'Terjadwal',
         ]);
 
         $response = $this->actingAs($staffMurabahah)
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
-                'installment_id' => $installment->id,
+                'angsuran_id' => $angsuran->id,
                 'pembiayaan_id' => $pembiayaan->id,
                 'nominal' => 1833333,
                 'payment_date' => now()->format('Y-m-d'),

@@ -8,7 +8,7 @@ use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Pembiayaan;
 use App\Models\GlobalSetting;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use App\Models\JournalEntry;
 use App\Models\Notification;
 use App\Models\SavingTransaction;
@@ -268,7 +268,7 @@ class DasborService
             'reference' => function (MorphTo $morphTo) {
                 $morphTo->morphWith([
                     SavingTransaction::class => ['akunSimpanan'],
-                    Installment::class => ['pembiayaan'],
+                    Angsuran::class => ['pembiayaan'],
                 ]);
             }
         ])
@@ -279,11 +279,11 @@ class DasborService
         if ($filter === 'simpanan') {
             $query->where('reference_type', SavingTransaction::class);
         } elseif ($filter === 'pembiayaan') {
-            $query->where('reference_type', Installment::class);
+            $query->where('reference_type', Angsuran::class);
         } else {
             $query->whereIn('reference_type', [
                 SavingTransaction::class,
-                Installment::class
+                Angsuran::class
             ]);
         }
 
@@ -297,7 +297,7 @@ class DasborService
                     return $this->mapJatuhTempoSimpanan($notif, $ref, $savingDueDate, $savingNominal);
                 }
 
-                if ($notif->reference_type === Installment::class) {
+                if ($notif->reference_type === Angsuran::class) {
                     return $this->mapJatuhTempoInstallment($notif, $ref);
                 }
 
@@ -330,8 +330,8 @@ class DasborService
 
     public function getPembayaranTerlambat($tanggalAkhir)
     {
-        $data = Installment::with('pembiayaan.anggota.user')
-            ->where('due_date', '<=', $tanggalAkhir)
+        $data = Angsuran::with('pembiayaan.anggota.user')
+            ->where('tgl_jatuh_tempo', '<=', $tanggalAkhir)
             ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
             ->latest()
             ->take(5)
@@ -340,8 +340,8 @@ class DasborService
                 'id' => $i->id,
                 'no_transaksi' => $i->pembiayaan->kode_pembiayaan,
                 'anggota' => $i->pembiayaan->anggota->user->nama,
-                'jumlah' => $i->amount,
-                'hari_terlambat' => round(Carbon::parse($i->due_date)->diffInDays(Carbon::parse($tanggalAkhir))),
+                'jumlah' => $i->nominal_angsuran,
+                'hari_terlambat' => round(Carbon::parse($i->tgl_jatuh_tempo)->diffInDays(Carbon::parse($tanggalAkhir))),
             ]);
 
         return $data->toArray();
@@ -378,12 +378,12 @@ class DasborService
 
     public function getTotalAngsuranBelumLunas()
     {
-        $total = Installment::with('pembiayaan.anggota')
+        $total = Angsuran::with('pembiayaan.anggota')
             ->whereHas('pembiayaan.anggota', function ($query) {
                 $query->where('pj_anggota_id', auth()->id());
             })
             ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
-            ->sum('amount');
+            ->sum('nominal_angsuran');
 
         return $total;
     }
@@ -411,7 +411,7 @@ class DasborService
 
         // Cari semua pembiayaan dengan status aktif dan ambil jadwal angsurannya yang belum lunas
         $pembiayaan = Pembiayaan::where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->with(['installment' => function ($query) {
+            ->with(['angsuran' => function ($query) {
                 $query->whereIn('status', [
                     InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
                 ]);
@@ -626,7 +626,7 @@ class DasborService
     }
 
     /**
-     * Helper untuk getJatuhTempoTerdekat: mapping notifikasi bertipe Installment.
+     * Helper untuk getJatuhTempoTerdekat: mapping notifikasi bertipe Angsuran.
      * Mengembalikan null jika status angsuran sudah tidak terjadwal (SCHEDULED).
      */
     private function mapJatuhTempoInstallment($notif, $ref): ?array
@@ -638,9 +638,9 @@ class DasborService
         return [
             'id' => $ref->id,
             'anggota' => $notif->anggota?->user?->nama ?? '-',
-            'nominal' => $ref->amount,
+            'nominal' => $ref->nominal_angsuran,
             'produk' => 'Pembiayaan',
-            'jatuh_tempo' => Carbon::parse($ref->due_date)->toDateString(),
+            'jatuh_tempo' => Carbon::parse($ref->tgl_jatuh_tempo)->toDateString(),
             'status_notifikasi' => $notif->status ?? 'Belum Terkirim',
         ];
     }
@@ -652,14 +652,14 @@ class DasborService
      */
     private function klasifikasikanKolektibilitasPembiayaan(Pembiayaan $pembiayaan, Carbon $targetDate): string
     {
-        $oldestUnpaid = $pembiayaan->installment->sortBy('due_date')->first();
+        $oldestUnpaid = $pembiayaan->angsuran->sortBy('tgl_jatuh_tempo')->first();
 
         // Jika tidak ada jadwal angsuran yang belum lunas, berarti pembiayaan ini 100% lancar
         if (!$oldestUnpaid) {
             return 'Lancar';
         }
 
-        $dueDate = Carbon::parse($oldestUnpaid->due_date)->startOfDay();
+        $dueDate = Carbon::parse($oldestUnpaid->tgl_jatuh_tempo)->startOfDay();
 
         // Cek 0: Jika target tanggal yang dipilih user SEBELUM due date (belum waktunya bayar)
         if ($targetDate->lessThanOrEqualTo($dueDate)) {

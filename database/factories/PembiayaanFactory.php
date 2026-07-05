@@ -42,7 +42,7 @@ class PembiayaanFactory extends Factory
     }
 
     /**
-     * Active pembiayaan with installments.
+     * Active pembiayaan with angsuran.
      */
     public function activeInstallments(): static
     {

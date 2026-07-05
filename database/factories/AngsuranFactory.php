@@ -4,19 +4,19 @@ namespace Database\Factories;
 
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Models\Pembiayaan;
-use App\Models\Installment;
+use App\Models\Angsuran;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class InstallmentFactory extends Factory
+class AngsuranFactory extends Factory
 {
-    protected $model = Installment::class;
+    protected $model = Angsuran::class;
 
     public function definition(): array
     {
         return [
-            'due_date' => $this->faker->dateTimeBetween('now', '+1 year'),
-            'installment_no' => $this->faker->numberBetween(1, 36),
-            'amount' => $this->faker->randomFloat(2, 100000, 1000000),
+            'tgl_jatuh_tempo' => $this->faker->dateTimeBetween('now', '+1 year'),
+            'angsuran_ke' => $this->faker->numberBetween(1, 36),
+            'nominal_angsuran' => $this->faker->randomFloat(2, 100000, 1000000),
             'status' => $this->faker->randomElement(array_column(InstallmentPaymentScheduleStatusEnum::cases(), 'value')),
             'pembiayaan_id' => Pembiayaan::factory(),
         ];

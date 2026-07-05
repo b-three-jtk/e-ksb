@@ -8,21 +8,22 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class Installment extends Model
+class Angsuran extends Model
 {
     use HasFactory, HasUuids;
+    protected $table = 'angsuran';
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'due_date',
-        'installment_no',
-        'amount',
+        'tgl_jatuh_tempo',
+        'angsuran_ke',
+        'nominal_angsuran',
         'status',
         'pembiayaan_id',
     ];
 
     protected $casts = [
-        'due_date' => 'datetime',
+        'tgl_jatuh_tempo' => 'datetime',
     ];
 
     public function pembiayaan()

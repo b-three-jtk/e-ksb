@@ -41,15 +41,15 @@ class PengunduranDiriService
 
     public function getTotalKewajiban(Pengguna $user)
     {
-        return Pembiayaan::with('installment.payment')->where('anggota_id', $user->anggota->id)
+        return Pembiayaan::with('angsuran.payment')->where('anggota_id', $user->anggota->id)
             ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
             ->get()
             ->sum(function ($accountpembiayaan) {
-                $installment = $accountpembiayaan->installment;
-                if (!$installment) return 0;
+                $angsuran = $accountpembiayaan->angsuran;
+                if (!$angsuran) return 0;
 
-                $paidInstallments = $installment->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
-                $remainingInstallments = $installment->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)->count();
+                $paidInstallments = $angsuran->where('status', InstallmentPaymentScheduleStatusEnum::PAID->value)->count();
+                $remainingInstallments = $angsuran->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)->count();
 
                 // Asumsi margin flat, jadi margin per bulan tetap
                 $marginPerMonth = $accountpembiayaan->margin_keuntungan / $accountpembiayaan->tenor;

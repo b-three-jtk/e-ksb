@@ -66,7 +66,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
             ->post('/admin/savings/deposit', [
                 'anggota_id' => $anggota->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
-                'amount' => 500000,
+                'amount' => 100000,
                 'date' => now()->format('Y-m-d'),
                 'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran pokok anggota baru',
@@ -83,7 +83,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
             ->post('/admin/savings/deposit', [
                 'anggota_id' => $anggota->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
-                'amount' => 500000,
+                'amount' => 100000,
                 'date' => now()->format('Y-m-d'),
                 'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran pokok anggota kedua',
@@ -171,7 +171,7 @@ describe('Aplikasi harus menyediakan pencatatan transaksi penyetoran simpanan an
             ->post('/admin/savings/deposit', [
                 'anggota_id' => $anggota->id,
                 'saving_category' => SavingTypeEnum::SIMPANAN_POKOK->value,
-                'amount' => 500000,
+                'amount' => 100000,
                 'date' => now()->format('Y-m-d'),
                 'saving_metode_pembayaran' => 'Tunai',
                 'notes' => 'Setoran pokok anggota baru',
