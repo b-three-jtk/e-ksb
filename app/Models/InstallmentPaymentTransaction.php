@@ -6,10 +6,11 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class InstallmentPaymentTransaction extends Model
 {
-    use HasUuids, HasFactory;
+    use HasUuids, HasFactory, Auditable;
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [

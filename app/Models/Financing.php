@@ -10,10 +10,11 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class Financing extends Model
 {
-    use HasUuids, HasFactory;
+    use HasUuids, HasFactory, Auditable;
 
     protected $keyType = 'string';
     protected $fillable = [

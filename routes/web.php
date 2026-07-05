@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\PengunduranDiriController;
 use App\Http\Controllers\Admin\PeranAksesController;
 use App\Http\Controllers\Admin\SimpananController;
 use App\Http\Controllers\PengaturanUmumController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\AutentikasiController;
 use App\Http\Controllers\User\PembiayaanController as UserPembiayaanController;
@@ -28,7 +29,8 @@ $adminRoles = [
     UserRoleEnum::DPS->value,
     UserRoleEnum::KETUAMURABAHAH->value,
     UserRoleEnum::STAFMURABAHAH->value,
-    UserRoleEnum::PJANGGOTA->value
+    UserRoleEnum::PJANGGOTA->value,
+    UserRoleEnum::ADMIN->value
 ];
 
 Route::get('/', function () {
@@ -152,6 +154,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     // Pengaturan Umum
     Route::get('/settings', [PengaturanUmumController::class, 'index'])->middleware('permission:view_pengaturan')->name('settings.index');
     Route::post('/settings', [PengaturanUmumController::class, 'store'])->middleware('permission:create_pengaturan|edit_pengaturan')->name('settings.store');
+
+    // Logs
+    Route::get('/logs', [AuditLogController::class, 'index'])->middleware('permission:view_log')->name('logs.index');
 
     // Personal
     Route::get('/dashboard', [DasborController::class, 'index'])->name('dashboard');
