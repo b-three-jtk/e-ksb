@@ -5,13 +5,13 @@ namespace Database\Factories;
 use App\Enums\NotificationReminderTypeEnum;
 use App\Enums\NotificationStatusEnum;
 use App\Enums\NotificationTypeEnum;
-use App\Models\Notification;
+use App\Models\Notifikasi;
 use App\Models\Anggota;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class NotificationFactory extends Factory
 {
-    protected $model = Notification::class;
+    protected $model = Notifikasi::class;
 
     public function definition()
     {

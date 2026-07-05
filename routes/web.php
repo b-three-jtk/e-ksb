@@ -161,7 +161,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::put('/profile/update', [PengurusController::class, 'updateProfil'])->name('profile.update');
 
     // Notifikasi
-    Route::get('/notifications', [NotifikasiController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifications.index');
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->middleware('permission:view_notifikasi')->name('notifikasi.index');
 
     // Peran dan Akses
     Route::get('/roles', [PeranAksesController::class, 'index'])->middleware('permission:view_peran_akses')->name('roles.index');
@@ -187,10 +187,10 @@ Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'reval
     Route::post('/resign', [AnggotaController::class, 'storeResign'])->name('resign.store');
 
     // Notifikasi
-    Route::get('/notifications', [UserNotifikasiController::class, 'index'])->name('notifications.index');
-    Route::get('/notifications/{notification}', [UserNotifikasiController::class, 'show'])->name('notifications.show');
-    Route::post('/notifications/mark-all-read', [UserNotifikasiController::class, 'markAllAsRead'])->name('notifications.markAllRead');
-    Route::post('/notifications/mark-popup-displayed', [UserNotifikasiController::class, 'markPopupDisplayed'])->name('notifications.markPopupDisplayed');
+    Route::get('/notifikasi', [UserNotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::get('/notifikasi/{notification}', [UserNotifikasiController::class, 'show'])->name('notifikasi.show');
+    Route::post('/notifikasi/mark-all-read', [UserNotifikasiController::class, 'markAllAsRead'])->name('notifikasi.markAllRead');
+    Route::post('/notifikasi/mark-popup-displayed', [UserNotifikasiController::class, 'markPopupDisplayed'])->name('notifikasi.markPopupDisplayed');
 
     // Tabungan
     Route::get('/tabungan', [UserSimpananController::class, 'index'])->name('tabungan.index');

@@ -8,7 +8,7 @@ const dropdownRef = ref(null)
 
 const page = usePage()
 
-const notifications = computed(
+const notifikasi = computed(
     () => page.props.notification_dropdown || []
 )
 
@@ -55,7 +55,7 @@ const markPopupDisplayed = async () => {
     )
 
     try {
-        await fetch('/user/notifications/mark-popup-displayed', {
+        await fetch('/user/notifikasi/mark-popup-displayed', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -161,14 +161,14 @@ onUnmounted(() => {
                 class="flex flex-col flex-1 overflow-y-auto custom-scrollbar"
             >
                 <li
-                    v-if="notifications.length === 0"
+                    v-if="notifikasi.length === 0"
                     class="flex items-center justify-center flex-1 text-sm text-gray-500 dark:text-gray-400"
                 >
                     Tidak ada notifikasi terbaru.
                 </li>
 
                 <li
-                    v-for="notification in notifications"
+                    v-for="notification in notifikasi"
                     :key="notification.id"
                 >
                     <Link
@@ -221,7 +221,7 @@ onUnmounted(() => {
 
             <!-- Footer -->
             <Link
-                href="/user/notifications"
+                href="/user/notifikasi"
                 @click="closeDropdown"
                 class="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             >

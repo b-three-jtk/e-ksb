@@ -5,7 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\MarkAllNotificationsReadRequest;
 use App\Http\Requests\User\MarkNotificationPopupDisplayedRequest;
-use App\Models\Notification;
+use App\Models\Notifikasi;
 use App\Services\NotifikasiService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,29 +22,29 @@ class NotifikasiController extends Controller
         $unreadOnly = $request->boolean('unread', false);
         $anggotaId = auth()->user()->anggota->id;
 
-        $notifications = $this->notificationService->getMemberNotifications($anggotaId, $unreadOnly, $perPage)
+        $notifikasi = $this->notificationService->getMemberNotifications($anggotaId, $unreadOnly, $perPage)
             ->through(fn($notification) => [
                 'id' => $notification->id,
-                'title' => $notification->title,
-                'message' => $notification->message,
-                'notification_type' => $notification->notification_type,
-                'reminder_type' => $notification->reminder_type,
+                'judul' => $notification->judul,
+                'pesan' => $notification->pesan,
+                'jenis_notifikasi' => $notification->jenis_notifikasi,
+                'jenis_pengingat' => $notification->jenis_pengingat,
                 'status' => $notification->status,
-                'is_read' => $notification->is_read,
-                'scheduled_at' => optional($notification->scheduled_at)?->format('d/m/Y H:i'),
-                'sent_at' => optional($notification->sent_at)?->format('d/m/Y H:i'),
-                'read_at' => optional($notification->read_at)?->format('d/m/Y H:i'),
+                'sudah_dibaca' => $notification->sudah_dibaca,
+                'dijadwalkan_pada' => optional($notification->dijadwalkan_pada)?->format('d/m/Y H:i'),
+                'dikirim_pada' => optional($notification->dikirim_pada)?->format('d/m/Y H:i'),
+                'dibaca_pada' => optional($notification->dibaca_pada)?->format('d/m/Y H:i'),
             ]);
 
         return Inertia::render('User/Notifications/Index', [
-            'notifications' => $notifications,
+            'notifikasi' => $notifikasi,
             'filters' => [
                 'unread' => $unreadOnly,
             ],
         ]);
     }
 
-    public function show(Notification $notification)
+    public function show(Notifikasi $notification)
     {
         if ($notification->anggota_id !== auth()->user()->anggota->id) {
             abort(403);
@@ -55,15 +55,15 @@ class NotifikasiController extends Controller
         return Inertia::render('User/Notifications/Show', [
             'notification' => [
                 'id' => $notification->id,
-                'title' => $notification->title,
-                'message' => $notification->message,
-                'notification_type' => $notification->notification_type,
-                'reminder_type' => $notification->reminder_type,
+                'judul' => $notification->judul,
+                'pesan' => $notification->pesan,
+                'jenis_notifikasi' => $notification->jenis_notifikasi,
+                'jenis_pengingat' => $notification->jenis_pengingat,
                 'status' => $notification->status,
-                'is_read' => $notification->is_read,
-                'scheduled_at' => optional($notification->scheduled_at)?->format('d/m/Y H:i'),
-                'sent_at' => optional($notification->sent_at)?->format('d/m/Y H:i'),
-                'read_at' => optional($notification->read_at)?->format('d/m/Y H:i'),
+                'sudah_dibaca' => $notification->sudah_dibaca,
+                'dijadwalkan_pada' => optional($notification->dijadwalkan_pada)?->format('d/m/Y H:i'),
+                'dikirim_pada' => optional($notification->dikirim_pada)?->format('d/m/Y H:i'),
+                'dibaca_pada' => optional($notification->dibaca_pada)?->format('d/m/Y H:i'),
             ],
         ]);
     }
@@ -79,6 +79,6 @@ class NotifikasiController extends Controller
     {
         $this->notificationService->markPopupDisplayed($request->input('notification_ids'), auth()->user()->anggota->id);
 
-        return response()->json(['message' => 'Popup notification status updated']);
+        return response()->json(['pesan' => 'Popup notification status updated']);
     }
 }

@@ -90,7 +90,7 @@ const menuGroups = [
             {
                 icon: NotificationsIcon,
                 name: "Monitoring Notifikasi",
-                path: "/admin/notifications",
+                path: "/admin/notifikasi",
                 permission: "view_notifikasi"
             },
         ],

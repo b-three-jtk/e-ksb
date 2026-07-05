@@ -10,7 +10,7 @@ use App\Models\Pembiayaan;
 use App\Models\PengaturanUmum;
 use App\Models\Angsuran;
 use App\Models\DetailJurnal;
-use App\Models\Notification;
+use App\Models\Notifikasi;
 use App\Models\TransaksiSimpanan;
 use App\Models\Pengguna;
 use Carbon\Carbon;
@@ -266,7 +266,7 @@ class DasborService
         $savingDueDate = PengaturanUmum::where('key', 'due_date_simpanan')->first()->value ?? 30;
         $savingNominal = PengaturanUmum::where('key', 'saving_wajib_amount')->first()->value ?? 0;
 
-        $query = Notification::with([
+        $query = Notifikasi::with([
             'anggota.user',
             'reference' => function (MorphTo $morphTo) {
                 $morphTo->morphWith([

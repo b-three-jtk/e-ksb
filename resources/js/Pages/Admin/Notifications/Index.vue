@@ -49,7 +49,7 @@ interface Filters {
 }
 
 const props = defineProps<{
-    notifications: NotificationPagination
+    notifikasi: NotificationPagination
     filters: Filters
 }>()
 
@@ -81,7 +81,7 @@ const filters = reactive({
 
 const applyFilters = () => {
     router.get(
-        '/admin/notifications',
+        '/admin/notifikasi',
         {
             periode: filters.periode || undefined,
             notification_type: filters.notification_type || undefined,
@@ -231,9 +231,9 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
 
                 <BaseTable
                     :columns="columns"
-                    :data="notifications.data.map((item, idx) => ({
+                    :data="notifikasi.data.map((item, idx) => ({
                         ...item,
-                        no: ((notifications.current_page - 1) * notifications.per_page) + idx + 1
+                        no: ((notifikasi.current_page - 1) * notifikasi.per_page) + idx + 1
                     }))"
                 >
                     <template #cell-notification_type="{ row }">
@@ -286,8 +286,8 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
 
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     <Pagination
-                        :links="notifications.links"
-                        :total="notifications.total"
+                        :links="notifikasi.links"
+                        :total="notifikasi.total"
                     />
                 </div>
             </div>

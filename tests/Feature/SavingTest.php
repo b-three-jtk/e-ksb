@@ -847,12 +847,12 @@ describe('Sistem mengirimkan notifikasi H-7 sebelum jatuh tempo pembayaran simpa
         // Simulasikan waktu ke H-7 sebelum akhir bulan (jatuh tempo simpanan wajib)
         $this->travelTo(now()->endOfMonth()->subDays(7)->startOfDay());
 
-        $this->artisan('notifications:send-reminders')->assertSuccessful();
+        $this->artisan('notifikasi:send-reminders')->assertSuccessful();
 
-        $this->assertDatabaseHas('notifications', [
+        $this->assertDatabaseHas('notifikasi', [
             'anggota_id' => $anggota->id,
-            'notification_type' => NotificationTypeEnum::MANDATORY_SAVING->value,
-            'reminder_type' => NotificationReminderTypeEnum::H_7->value,
+            'jenis_notifikasi' => NotificationTypeEnum::MANDATORY_SAVING->value,
+            'jenis_pengingat' => NotificationReminderTypeEnum::H_7->value,
             'status' => NotificationStatusEnum::SENT->value,
         ]);
 

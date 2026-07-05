@@ -8,7 +8,7 @@ use App\Models\AhliWaris;
 use App\Models\RekeningAnggota;
 use App\Models\DokumenAnggota;
 use App\Models\PekerjaanAnggota;
-use App\Models\Notification;
+use App\Models\Notifikasi;
 use App\Models\AkunSimpanan;
 use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -85,8 +85,8 @@ class Anggota extends Model
         return $this->hasMany(Pembiayaan::class);
     }
 
-    public function notifications()
+    public function notifikasi()
     {
-        return $this->hasMany(Notification::class);
+        return $this->hasMany(Notifikasi::class);
     }
 }

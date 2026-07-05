@@ -15,5 +15,5 @@ Schedule::command('points:calculate-monthly-savings')
 Schedule::command('points:calculate-murabahah-points')
     ->daily();
 
-Schedule::command('notifications:send-reminders')
+Schedule::command('notifikasi:send-reminders')
     ->daily();

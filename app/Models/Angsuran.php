@@ -36,8 +36,8 @@ class Angsuran extends Model
         return $this->hasOne(PembayaranAngsuran::class);
     }
 
-    public function notifications(): MorphMany
+    public function notifikasi(): MorphMany
     {
-        return $this->morphMany(Notification::class, 'reference');
+        return $this->morphMany(Notifikasi::class, 'reference');
     }
 }

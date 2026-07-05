@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pengaturan_umum', function (Blueprint $table) {
             $table->id();
-            $table->string('key')->unique();
+            $table->string('key');
             $table->text('value')->nullable();
             $table->date('tgl_diberlakukan')->nullable();
             $table->text('deskripsi')->nullable();

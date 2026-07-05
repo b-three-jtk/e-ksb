@@ -54,8 +54,8 @@ class TransaksiSimpanan extends Model
         return $this->belongsTo(Poin::class, 'poin_id');
     }
 
-    public function notifications(): MorphMany
+    public function notifikasi(): MorphMany
     {
-        return $this->morphMany(Notification::class, 'reference');
+        return $this->morphMany(Notifikasi::class, 'reference');
     }
 }

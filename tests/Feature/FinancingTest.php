@@ -518,10 +518,10 @@ describe('Aplikasi harus dapat mengirimkan notifikasi jatuh tempo pembayaran ang
             'status' => 'Terjadwal',
         ]);
 
-        $this->artisan('notifications:send-reminders')
+        $this->artisan('notifikasi:send-reminders')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('notifications', [
+        $this->assertDatabaseHas('notifikasi', [
             'anggota_id' => $anggota->id,
         ]);
     });
@@ -549,14 +549,14 @@ describe('Aplikasi harus menyediakan pemantauan notifikasi koperasi oleh penangg
             'status' => 'Terjadwal',
         ]);
 
-        $this->artisan('notifications:send-reminders')
+        $this->artisan('notifikasi:send-reminders')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('notifications', [
+        $this->assertDatabaseHas('notifikasi', [
             'anggota_id' => $anggota->id,
         ]);
 
-        $response = $this->actingAs($pjAnggota)->get('/admin/notifications');
+        $response = $this->actingAs($pjAnggota)->get('/admin/notifikasi');
         $response->assertStatus(200);
     });
 });

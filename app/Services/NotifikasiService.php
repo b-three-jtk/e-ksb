@@ -9,7 +9,7 @@ use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Models\Angsuran;
 use App\Models\Anggota;
-use App\Models\Notification;
+use App\Models\Notifikasi;
 use Illuminate\Support\Carbon;
 
 class NotifikasiService
@@ -20,14 +20,14 @@ class NotifikasiService
         string $period,
         string $reminderType,
         ?string $referenceId = null
-    ): ?Notification {
-        $query = Notification::where('anggota_id', $anggotaId)
-            ->where('notification_type', $type)
-            ->where('notification_period', $period)
-            ->where('reminder_type', $reminderType);
+    ): ?Notifikasi {
+        $query = Notifikasi::where('anggota_id', $anggotaId)
+            ->where('jenis_notifikasi', $type)
+            ->where('periode_notifikasi', $period)
+            ->where('jenis_pengingat', $reminderType);
 
         if ($referenceId) {
-            $query->where('reference_id', $referenceId);
+            $query->where('referensi_id', $referenceId);
         }
 
         return $query->first();
@@ -35,28 +35,28 @@ class NotifikasiService
 
     public function getAdminList(array $filters, int $perPage = 10, ?string $pjUserId = null)
     {
-        $query = Notification::with(['anggota.user'])
+        $query = Notifikasi::with(['anggota.user'])
             ->when($pjUserId, function ($query, $pjUserId) {
                 $query->whereHas('anggota', function ($memberQuery) use ($pjUserId) {
                     $memberQuery->where('pj_anggota_id', $pjUserId);
                 });
             })
-            ->orderBy('scheduled_at', 'desc');
+            ->orderBy('dijadwalkan_pada', 'desc');
 
         if (!empty($filters['periode'])) {
-            $query->where('notification_period', $filters['periode']);
+            $query->where('periode_notifikasi', $filters['periode']);
         }
 
-        if (!empty($filters['notification_type'])) {
-            $query->where('notification_type', $filters['notification_type']);
+        if (!empty($filters['jenis_notifikasi'])) {
+            $query->where('jenis_notifikasi', $filters['jenis_notifikasi']);
         }
 
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (isset($filters['is_read']) && $filters['is_read'] !== '') {
-            $query->where('is_read', filter_var($filters['is_read'], FILTER_VALIDATE_BOOLEAN));
+        if (isset($filters['sudah_dibaca']) && $filters['sudah_dibaca'] !== '') {
+            $query->where('sudah_dibaca', filter_var($filters['sudah_dibaca'], FILTER_VALIDATE_BOOLEAN));
         }
 
         if (!empty($filters['search'])) {
@@ -105,18 +105,18 @@ class NotifikasiService
                 continue;
             }
 
-            $notification = Notification::create([
+            $notification = Notifikasi::create([
                 'anggota_id' => $a->id,
-                'title' => 'Pengingat Simpanan Wajib Bulan ' . now()->locale('id')->isoFormat('MMMM YYYY'),
-                'message' => 'Simpanan wajib untuk periode ' . now()->locale('id')->isoFormat('MMMM YYYY') . ' jatuh tempo pada ' . $dueDate->locale('id')->translatedFormat('d F Y') . '. Pastikan Anda melakukan setoran sebelum jatuh tempo.',
-                'notification_type' => NotificationTypeEnum::MANDATORY_SAVING->value,
-                'reference_type' => null,
-                'reference_id' => null,
-                'notification_period' => $currentPeriod,
-                'reminder_type' => $reminderType->value,
+                'judul' => 'Pengingat Simpanan Wajib Bulan ' . now()->locale('id')->isoFormat('MMMM YYYY'),
+                'pesan' => 'Simpanan wajib untuk periode ' . now()->locale('id')->isoFormat('MMMM YYYY') . ' jatuh tempo pada ' . $dueDate->locale('id')->translatedFormat('d F Y') . '. Pastikan Anda melakukan setoran sebelum jatuh tempo.',
+                'jenis_notifikasi' => NotificationTypeEnum::MANDATORY_SAVING->value,
+                'jenis_referensi' => null,
+                'referensi_id' => null,
+                'periode_notifikasi' => $currentPeriod,
+                'jenis_pengingat' => $reminderType->value,
                 'status' => NotificationStatusEnum::DRAFT->value,
-                'is_read' => false,
-                'scheduled_at' => now(),
+                'sudah_dibaca' => false,
+                'dijadwalkan_pada' => now(),
             ]);
 
             $this->deliverNotification($notification);
@@ -152,18 +152,18 @@ class NotifikasiService
                 continue;
             }
 
-            $notification = Notification::create([
+            $notification = Notifikasi::create([
                 'anggota_id' => $anggotaId,
-                'title' => 'Pengingat Angsuran Pembiayaan #' . $a->angsuran_ke,
-                'message' => 'Angsuran ke-' . $a->angsuran_ke . ' sebesar Rp ' . number_format($a->nominal_angsuran, 0, ',', '.') . ' jatuh tempo pada ' . $dueDate->locale('id')->translatedFormat('d F Y') . '.',
-                'notification_type' => NotificationTypeEnum::INSTALLMENT->value,
-                'reference_type' => Angsuran::class,
-                'reference_id' => $a->id,
-                'notification_period' => $period,
-                'reminder_type' => $reminderType->value,
+                'judul' => 'Pengingat Angsuran Pembiayaan #' . $a->angsuran_ke,
+                'pesan' => 'Angsuran ke-' . $a->angsuran_ke . ' sebesar Rp ' . number_format($a->nominal_angsuran, 0, ',', '.') . ' jatuh tempo pada ' . $dueDate->locale('id')->translatedFormat('d F Y') . '.',
+                'jenis_notifikasi' => NotificationTypeEnum::INSTALLMENT->value,
+                'jenis_referensi' => Angsuran::class,
+                'referensi_id' => $a->id,
+                'periode_notifikasi' => $period,
+                'jenis_pengingat' => $reminderType->value,
                 'status' => NotificationStatusEnum::DRAFT->value,
-                'is_read' => false,
-                'scheduled_at' => now(),
+                'sudah_dibaca' => false,
+                'dijadwalkan_pada' => now(),
             ]);
 
             $this->deliverNotification($notification);
@@ -180,11 +180,11 @@ class NotifikasiService
         };
     }
 
-    public function deliverNotification(Notification $notification): void
+    public function deliverNotification(Notifikasi $notification): void
     {
         try {
             $notification->status = NotificationStatusEnum::SENT->value;
-            $notification->sent_at = now();
+            $notification->dikirim_pada = now();
             $notification->save();
         } catch (\Throwable $exception) {
             report($exception);
@@ -203,85 +203,85 @@ class NotifikasiService
 
     public function getMemberNotifications(string $anggotaId, bool $unreadOnly = false, int $perPage = 10)
     {
-        $query = Notification::with('angsuran')
+        $query = Notifikasi::with('angsuran')
             ->where('anggota_id', $anggotaId)
             ->where('status', NotificationStatusEnum::SENT->value)
-            ->orderBy('scheduled_at', 'desc');
+            ->orderBy('dijadwalkan_pada', 'desc');
 
         if ($unreadOnly) {
-            $query->where('is_read', false);
+            $query->where('sudah_dibaca', false);
         }
 
         return $query->paginate($perPage)->withQueryString();
     }
 
-    public function markAsRead(Notification $notification): void
+    public function markAsRead(Notifikasi $notification): void
     {
-        if (!$notification->is_read) {
+        if (!$notification->sudah_dibaca) {
             $notification->update([
-                'is_read' => true,
-                'read_at' => now(),
+                'sudah_dibaca' => true,
+                'dibaca_pada' => now(),
             ]);
         }
     }
 
     public function markAllAsRead(string $anggotaId): void
     {
-        Notification::where('anggota_id', $anggotaId)
-            ->where('is_read', false)
+        Notifikasi::where('anggota_id', $anggotaId)
+            ->where('sudah_dibaca', false)
             ->update([
-                'is_read' => true,
-                'read_at' => now(),
+                'sudah_dibaca' => true,
+                'dibaca_pada' => now(),
             ]);
     }
 
     public function markPopupDisplayed(array $ids, string $anggotaId): void
     {
-        Notification::where('anggota_id', $anggotaId)
+        Notifikasi::where('anggota_id', $anggotaId)
             ->whereIn('id', $ids)
-            ->whereNull('alert_displayed_at')
-            ->update(['alert_displayed_at' => now()]);
+            ->whereNull('peringatan_ditampilkan_pada')
+            ->update(['peringatan_ditampilkan_pada' => now()]);
     }
 
     public function getNotificationDropdown(string $anggotaId): array
     {
-        return Notification::where('anggota_id', $anggotaId)
+        return Notifikasi::where('anggota_id', $anggotaId)
             ->where('status', NotificationStatusEnum::SENT->value)
-            ->orderBy('scheduled_at', 'desc')
+            ->orderBy('dijadwalkan_pada', 'desc')
             ->limit(5)
             ->get()
-            ->map(fn(Notification $notification) => [
+            ->map(fn(Notifikasi $notification) => [
                 'id' => $notification->id,
-                'title' => $notification->title,
-                'message' => $notification->message,
-                'is_read' => $notification->is_read,
-                'scheduled_at' => $notification->scheduled_at?->format('Y-m-d H:i:s'),
-                'href' => route('user.notifications.show', ['notification' => $notification->id]),
+                'judul' => $notification->judul,
+                'pesan' => $notification->pesan,
+                'sudah_dibaca' => $notification->sudah_dibaca,
+                'dijadwalkan_pada' => $notification->dijadwalkan_pada?->format('Y-m-d H:i:s'),
+                'href' => route('user.notifikasi.show', ['notification' => $notification->id]),
             ])
             ->toArray();
     }
 
     public function getUnreadCount(string $anggotaId): int
     {
-        return Notification::where('anggota_id', $anggotaId)
+        return Notifikasi::where('anggota_id', $anggotaId)
             ->where('status', NotificationStatusEnum::SENT->value)
-            ->where('is_read', false)
+            ->where('sudah_dibaca', false)
             ->count();
     }
 
     public function getPendingPopupNotifications(string $anggotaId): array
     {
-        return Notification::where('anggota_id', $anggotaId)
+        return Notifikasi::where('anggota_id', $anggotaId)
             ->where('status', NotificationStatusEnum::SENT->value)
-            ->where('is_read', false)
-            ->whereNull('alert_displayed_at')
+            ->where('sudah_dibaca', false)
+            ->whereNull('peringatan_ditampilkan_pada')
             ->where('created_at', '>=', now()->subDay())
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(fn(Notification $notification) => [
+            ->map(fn(Notifikasi $notification) => [
                 'id' => $notification->id,
-                'title' => $notification->title,
-                'message' => $notification->message,
+                'judul' => $notification->judul,
+                'pesan' => $notification->pesan,
             ])
             ->toArray();
     }
