@@ -4,7 +4,7 @@ import PageBreadcrumb from '@/Components/PageBreadcrumb.vue';
 import { useForm } from '@inertiajs/vue3';
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue';
 import { useUserValidation } from '@/Composables/Validation/useUserValidation';
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import Swal from 'sweetalert2';
 import { toast } from "vue3-toastify";
 import Button from '@/Components/Form/Button.vue';
@@ -49,11 +49,6 @@ const form = useForm({
 });
 
 const { errors } = useUserValidation(form)
-
-const maxBirthDate = computed(() => {
-    const today = new Date()
-    return new Date(today.getFullYear() - 17, today.getMonth(), today.getDate())
-})
 
 watch(() => form.ktp_file, (file) => {
     if (!file) return
@@ -197,7 +192,6 @@ const submitForm = () => {
                     <BaseInputAdmin label="Tempat Lahir" required v-model="form.birth_place" :error="errors.birth_place"
                         placeholder="Masukkan tempat lahir" @input="onlyAlpha" />
                     <BaseInputAdmin label="Tanggal Lahir" required type="date" v-model="form.birth_date"
-                        :maxDate="maxBirthDate"
                         :error="errors.birth_date" />
                     <BaseInputAdmin v-model="form.residential_address" label="Alamat KTP" type="textarea"
                         placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address"

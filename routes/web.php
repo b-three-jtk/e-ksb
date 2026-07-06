@@ -82,7 +82,16 @@ Route::post('/auth/logout', [AutentikasiController::class, 'logout'])
     ->middleware('auth')
     ->name('auth.logout');
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'revalidate'])->group(function () {
+Route::post('/auth/select-role', [AutentikasiController::class, 'selectRole'])
+    ->middleware('auth')
+    ->name('auth.select-role');
+
+Route::get('/auth/choose-role', [AutentikasiController::class, 'chooseRolePage'])
+    ->middleware('auth')
+    ->name('auth.choose-role');
+
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|', $adminRoles), 'admin_mode', 'revalidate'])->group(function () {
     //  Pengelolaan Anggota
     Route::get('/users', [PenggunaController::class, 'index'])->middleware('permission:view_anggota')->name('users.index');
     Route::get('/users/create', [PenggunaController::class, 'create'])->middleware('permission:create_anggota')->name('users.create');
@@ -178,7 +187,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
 });
 
 // User Routes
-Route::prefix('user')->name('user.')->middleware(['auth', 'role:Anggota', 'revalidate'])->group(function () {
+Route::prefix('user')->name('user.')->middleware(['auth', 'member_access', 'revalidate'])->group(function () {
     Route::get('/dashboard', [AnggotaController::class, 'index'])->name('userDashboard');
 
     Route::get('/profile', [AnggotaController::class, 'profileShow'])->name('profile.show');

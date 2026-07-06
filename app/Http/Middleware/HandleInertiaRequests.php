@@ -74,6 +74,8 @@ class HandleInertiaRequests extends Middleware
                 'struk' => fn() => $request->session()->get('struk'),
                 'receipt' => fn () => $request->session()->get('receipt'),
                 'pdf_url' => fn() => $request->session()->get('pdf_url'),
+                'needs_role_selection' => fn() => $request->session()->get('needs_role_selection'),
+                'login_success' => fn() => $request->session()->get('login_success'),
             ],
             'csrf_token' => csrf_token(),
         ]);
