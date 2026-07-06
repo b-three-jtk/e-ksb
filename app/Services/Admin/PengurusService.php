@@ -132,10 +132,11 @@ class PengurusService
 
     public function updateProfil($user, $data)
     {
-        if ($data->hasFile('profile_picture_file')) {
-                $path = $data->file('profile_picture_file')->store('profile_pictures', 'public');
-                $data['profile_picture'] = $path;
-            }
+        if (isset($data['profile_picture_file'])) {
+            $path = $data['profile_picture_file']->store('profile_pictures', 'public');
+            $data['profile_picture'] = $path;
+            unset($data['profile_picture_file']);
+        }
 
         $user->update($data);
     }
