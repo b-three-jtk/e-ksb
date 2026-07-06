@@ -1,9 +1,10 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import Base from '../../Layouts/Base.vue'
 import BaseTable from '../../Components/Table/BaseTable.vue';
 import { Icon } from '@iconify/vue';
+import { toast } from 'vue3-toastify';
 
 const page = usePage()
 
@@ -13,6 +14,15 @@ const tabungan = computed(() => page.props.tabungan)
 
 const rupiah = (value) =>
     'Rp ' + new Intl.NumberFormat('id-ID').format(value ?? 0)
+
+onMounted(() => {
+    if (page.props.flash?.login_success) {
+        toast.success('Login berhasil, Selamat Datang!', {
+            autoClose: 3000,
+            position: 'bottom-right',
+        })
+    }
+})
 </script>
 
 <template>

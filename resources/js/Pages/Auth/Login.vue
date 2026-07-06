@@ -1,5 +1,5 @@
 <script setup>
-import { Link, useForm, router } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue3'
 import AuthLayout from '@/Layouts/AuthLayout.vue'
 import BaseInput from '@/Components/Form/BaseInput.vue'
 import { toast } from 'vue3-toastify'
@@ -11,12 +11,6 @@ const form = useForm({
 
 const submit = () => {
   form.post('/auth/login', {
-    onSuccess: () => {
-      toast.success('Login berhasil, Selamat Datang!', {
-        autoClose: 2000,
-        position: 'bottom-right',
-      })
-    },
     onError: () => {
       form.reset('password')
       toast.error('Login gagal. Periksa kembali kode pengguna dan password Anda.', {

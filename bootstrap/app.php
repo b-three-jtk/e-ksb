@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\EnsureUserRole;
+use App\Http\Middleware\EnsureMemberAccess;
+use App\Http\Middleware\EnsureAdminMode;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PreventBackHistory;
 use Illuminate\Foundation\Application;
@@ -22,6 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => EnsureUserRole::class,
+            'member_access' => EnsureMemberAccess::class,
+            'admin_mode' => EnsureAdminMode::class,
             'permission' => PermissionMiddleware::class,
             'revalidate' => PreventBackHistory::class,
         ]);

@@ -4,6 +4,7 @@ import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { router, usePage } from '@inertiajs/vue3';
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import { defineAsyncComponent } from 'vue';
+import { toast } from 'vue3-toastify';
 
 const KetuaPengawas = defineAsyncComponent(() => import('./Dashboard/KetuaPengawas.vue'));
 const Bendahara = defineAsyncComponent(() => import('./Dashboard/Bendahara.vue'));
@@ -42,6 +43,13 @@ const isDarkMode = ref(false);
 console.log(props);
 
 onMounted(() => {
+    if (page.props.flash?.login_success) {
+        toast.success('Login berhasil, Selamat Datang!', {
+            autoClose: 3000,
+            position: 'bottom-right',
+        })
+    }
+
     isDarkMode.value = document.documentElement.classList.contains('dark')
 
     const observer = new MutationObserver(() => {
