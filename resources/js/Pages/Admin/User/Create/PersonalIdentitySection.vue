@@ -1,5 +1,4 @@
 <script setup>
-import { computed } from 'vue'
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
 
 defineProps({
@@ -35,11 +34,6 @@ defineProps({
 		type: Array,
 		default: () => [],
 	},
-})
-
-const maxBirthDate = computed(() => {
-	const today = new Date()
-	return new Date(today.getFullYear() - 17, today.getMonth(), today.getDate())
 })
 </script>
 
@@ -85,7 +79,6 @@ const maxBirthDate = computed(() => {
 				label="Tanggal Lahir"
 				type="date"
 				required
-				:maxDate="maxBirthDate"
 				:error="getFieldError('birth_date', errors.birth_date)"
 			/>
 
