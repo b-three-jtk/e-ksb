@@ -8,6 +8,7 @@ use App\Models\Pengguna;
 use App\Services\AutentikasiService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -46,12 +47,68 @@ class AutentikasiController extends Controller
         $request->session()->regenerate();
 
         $userRoles = $user->getRoleNames();
+        $isAnggota = $userRoles->contains(UserRoleEnum::ANGGOTA->value);
+        $isPengurus = !$isAnggota;
 
-        if (!$userRoles->contains(UserRoleEnum::ANGGOTA->value)) {
-            return redirect()->intended('/admin/dashboard');
+        // Jika hanya anggota
+        if ($isAnggota) {
+            $request->session()->put('auth_mode', 'anggota');
+            return redirect()->intended('/user/dashboard')->with('login_success', true);
         }
 
-        return redirect()->intended('/user/dashboard');
+        // Jika pengurus, cek apakah terdaftar sebagai anggota
+        $jugaAnggota = $user->member()->exists();
+
+        if ($isPengurus && $jugaAnggota) {
+            // Simpan flag di session agar halaman choose-role bisa diakses
+            $request->session()->put('pending_role_selection', true);
+
+            // Redirect ke halaman pilihan peran
+            return redirect()->route('auth.choose-role');
+        }
+
+        // Sebagai pengurus
+        $request->session()->put('auth_mode', 'admin');
+        return redirect()->intended('/admin/dashboard')->with('login_success', true);
+    }
+
+    /**
+     * Tampilkan halaman pilihan peran (untuk user yang merupakan pengurus sekaligus anggota).
+     */
+    public function chooseRolePage(Request $request)
+    {
+        // Jika tidak ada flag session, berarti bukan dari proses login → tolak
+        if (!$request->session()->get('pending_role_selection')) {
+            return redirect()->route('login');
+        }
+
+        return Inertia::render('Auth/ChooseRole');
+    }
+
+    /**
+     * Handle role selection for users who are both pengurus and anggota.
+     */
+    public function selectRole(Request $request)
+    {
+        $request->validate([
+            'role' => ['required', 'in:admin,anggota'],
+        ]);
+
+        // flag session (mencegah akses langsung tanpa login)
+        if (!$request->session()->get('pending_role_selection')) {
+            return redirect()->route('login');
+        }
+
+        $request->session()->forget('pending_role_selection');
+
+        if ($request->role === 'anggota') {
+            $request->session()->put('auth_mode', 'anggota');
+            return redirect('/user/dashboard')->with('login_success', true);
+        }
+
+        $request->session()->put('auth_mode', 'admin');
+        return redirect('/admin/dashboard')->with('login_success', true);
+
     }
 
     /**
