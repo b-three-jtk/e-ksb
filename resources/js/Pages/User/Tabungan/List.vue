@@ -170,7 +170,7 @@ const handleExport = () => {
         <div class="space-y-8 p-2 sm:p-4 lg:p-6">
             <div v-if="memberInfo" class="w-full">
                 <h1 class="text-3xl font-bold font-head text-emerald-800 dark:text-emerald-500 mb-4">
-                    Simpanan Anggota
+                    Riwayat Transaksi Tabungan Anggota
                 </h1>
 
                 <div class="rounded-xl bg-[#ecf3ff] dark:bg-gray-800 text-emerald-900 dark:text-emerald-300 shadow-sm overflow-hidden">
