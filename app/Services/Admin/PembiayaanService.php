@@ -260,13 +260,13 @@ class PembiayaanService
         }
     }
 
-    public function syncFinancingData(User $user, Request $request, string $updatedBy): ?Financing
+    public function syncFinancingData(User $user, Request $request, Array $data, string $updatedBy): ?Financing
     {
-        if (!isset($request['financing']['name'])) return null;
+        if (!isset($data['financing']['name'])) return null;
 
-        $financingData  = $request['financing'];
-        $supplierData   = $request['supplier'] ?? null;
-        $collateralData = $request['collateral'] ?? null;
+        $financingData  = $data['financing'];
+        $supplierData   = $data['supplier'] ?? null;
+        $collateralData = $data['collateral'] ?? null;
 
         $existingFinancing = Financing::where('member_id', $user->member->id)
             ->whereIn('status', [

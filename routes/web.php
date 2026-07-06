@@ -144,6 +144,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::put('/financings/validate/{id}', [PembiayaanController::class, 'validate'])->middleware('permission:approve_murabahah')->name('financings.validation.submit');
     Route::get('/financings/repayment/{id}', [PembiayaanController::class, 'showRepayment'])->middleware('permission:payment_murabahah')->name('financings.repayment');
     Route::post('/financings/repayment', [PembiayaanController::class, 'storeRepayment'])->middleware('permission:payment_murabahah')->name('financings.repayment.request');
+    Route::get('/financings/payment/success', [PembiayaanController::class, 'showPaymentSuccess'])->middleware('permission:payment_murabahah')->name('financings.payment.success');
     Route::get('repayment/{id}/receipt', [PembiayaanController::class, 'viewRepaymentReceipt'])->middleware('permission:payment_murabahah')->name('financings.repayment.view');
     Route::get('repayment/{id}/download', [PembiayaanController::class, 'downloadRepaymentReceipt'])->middleware('permission:payment_murabahah')->name('financings.repayment.download');
     Route::get('/financings/{financing}/payments/create',[PembiayaanController::class, 'createPayment'])->middleware('permission:payment_murabahah')->name('financing.payments.create');
