@@ -32,8 +32,6 @@ class MurabahaProductSeeder extends Seeder
         // Reset counter setiap kali seeder dijalankan
         self::$transCodeCounter = 1000000;
 
-        Member::factory()->count(100)->create();
-
         // Ambil semua members
         $members = Member::all();
 
@@ -79,10 +77,17 @@ class MurabahaProductSeeder extends Seeder
             }
         }
 
-        // PENYESUAIAN RUMUS DASHBOARD: KAS (101) JADI 70M, PIUTANG (104) JADI 150M
+        // PENYESUAIAN RUMUS DASHBOARD: KAS (101) JADI 75% DARI DEPOSIT, PIUTANG (104) JADI 35% DARI DEPOSIT
         $admin = User::first();
         $date = now()->endOfDay();
         
+        $totalDeposit = JournalEntry::whereIn('no_ref_account', ['201', '202', '203'])
+            ->selectRaw("SUM(CASE WHEN position = 'Credit' THEN nominal ELSE -nominal END) as total")
+            ->value('total') ?? 0;
+            
+        $targetKas = $totalDeposit * 0.75;
+        $targetPiutang = $totalDeposit * 0.35;
+
         $kasBalance = JournalEntry::where('no_ref_account', '101')
             ->selectRaw("SUM(CASE WHEN position = 'Debit' THEN nominal ELSE -nominal END) as total")
             ->value('total') ?? 0;
@@ -93,24 +98,24 @@ class MurabahaProductSeeder extends Seeder
 
         $groupId = \Illuminate\Support\Str::uuid();
         
-        // Sesuaikan Kas ke 70M
-        if ($kasBalance > 70000000) {
-            $diffKas = $kasBalance - 70000000;
+        // Sesuaikan Kas ke targetKas
+        if ($kasBalance > $targetKas) {
+            $diffKas = $kasBalance - $targetKas;
             JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '102', 'position' => 'Debit', 'nominal' => $diffKas, 'transaction_date' => $date, 'updated_by' => $admin->id]);
             JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '101', 'position' => 'Credit', 'nominal' => $diffKas, 'transaction_date' => $date, 'updated_by' => $admin->id]);
-        } elseif ($kasBalance < 70000000) {
-            $diffKas = 70000000 - $kasBalance;
+        } elseif ($kasBalance < $targetKas) {
+            $diffKas = $targetKas - $kasBalance;
             JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '101', 'position' => 'Debit', 'nominal' => $diffKas, 'transaction_date' => $date, 'updated_by' => $admin->id]);
             JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '102', 'position' => 'Credit', 'nominal' => $diffKas, 'transaction_date' => $date, 'updated_by' => $admin->id]);
         }
 
-        // Sesuaikan Piutang ke 150M
-        if ($piutangBalance > 150000000) {
-            $diffPiutang = $piutangBalance - 150000000;
+        // Sesuaikan Piutang ke targetPiutang
+        if ($piutangBalance > $targetPiutang) {
+            $diffPiutang = $piutangBalance - $targetPiutang;
             JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '102', 'position' => 'Debit', 'nominal' => $diffPiutang, 'transaction_date' => $date, 'updated_by' => $admin->id]);
             JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '104', 'position' => 'Credit', 'nominal' => $diffPiutang, 'transaction_date' => $date, 'updated_by' => $admin->id]);
-        } elseif ($piutangBalance < 150000000) {
-            $diffPiutang = 150000000 - $piutangBalance;
+        } elseif ($piutangBalance < $targetPiutang) {
+            $diffPiutang = $targetPiutang - $piutangBalance;
             JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '104', 'position' => 'Debit', 'nominal' => $diffPiutang, 'transaction_date' => $date, 'updated_by' => $admin->id]);
             JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '102', 'position' => 'Credit', 'nominal' => $diffPiutang, 'transaction_date' => $date, 'updated_by' => $admin->id]);
         }

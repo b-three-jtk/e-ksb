@@ -140,8 +140,8 @@ class UserSeeder extends Seeder
             return Carbon::createFromTimestamp($randomTimestamp);
         };
 
-        // create 110 random users with Anggota role
-        User::factory(110)->create()->each(function ($user) use ($getRandomDate) {
+        // create 100 random users with Anggota role (1 explicit + 100 random + 10 resigned = 111 total)
+        User::factory(111)->create()->each(function ($user) use ($getRandomDate) {
             $randomDate = $getRandomDate();
             $user->update([
                 'created_at' => $randomDate,
