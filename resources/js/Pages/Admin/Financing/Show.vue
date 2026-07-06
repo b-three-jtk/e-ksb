@@ -169,7 +169,7 @@ const openReceiptModal = (receiptPath) => {
 
                 </div>
                 <div class="flex flex-col col-span-1 lg:col-span-2 gap-2">
-                    <div v-if="hasInstallmentHistory" class="card-layout">
+                    <div v-if="hasInstallmentHistory && data.status != 'Lunas'" class="card-layout">
                         <h1 class="card-title mb-4">Progres Angsuran</h1>
                         <FinancingChart :total-price="Number(data.total_price)" :total-paid="Number(data.total_paid)"
                             :remaining-balance="Number(data.remaining_balance)" />
