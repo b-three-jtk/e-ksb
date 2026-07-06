@@ -354,9 +354,77 @@ class PembayaranAngsuranService
                 'tanggal_cetak'   => now()->translatedFormat('d F Y'),
             ];
 
-            $pdf = Pdf::loadView('exports.financing_payment_receipt', ['receipt' => $receipt])
-                ->setPaper('a5', 'landscape')
-                ->setOptions(['isRemoteEnabled' => true]);
+        $isLunas = $pembiayaan->status === 'Lunas';
+
+            if ($isLunas) {
+                $now = now();
+                $hari = $now->translatedFormat('l');
+                $tanggal = $now->format('d');
+                $bulan = $now->translatedFormat('F');
+                $tahun = $now->format('Y');
+
+                $strukData = [
+                    'no_transaksi' => $payment->installment_trans_code,
+                    'hari' => $hari,
+                    'tanggal' => $tanggal,
+                    'bulan' => $bulan,
+                    'tahun' => $tahun,
+                    'no_anggota' => $pembiayaan->member->user->user_code,
+                    'nama_anggota' => $pembiayaan->member->user->name,
+                    'financing_transaction_code' => $pembiayaan->financing_transaction_code,
+                    'product_name' => $pembiayaan->financingItem->name ?? '-',
+                    'total_paid_amount' => $hargaJual,
+                    'metode' => $payment->payment_method,
+                    'repayment_total' => $payment->nominal,
+                    'tenor' => $pembiayaan->tenor ?? 0,
+                    'nama_pengurus' => auth()->user()->name,
+                    'jabatan_pengurus' => auth()->user()->roles->first()->name ?? 'Pengurus',
+                    'alamat' => $pembiayaan->member->domicile_address ?? $pembiayaan->member->residential_address ?? '-',
+                    'harga_perolehan' => $pembiayaan->cost_price,
+                    'margin_keuntungan' => $pembiayaan->margin_amount,
+                    'no_telp' => $pembiayaan->member->user->phone_number,
+                    'qimah_ismiyyah' => $hargaJual,
+                    'qimah_haliyyah' => $hargaJual,
+                    'logo' => $logo,
+                ];
+
+                $pdf = Pdf::loadView('exports.repayment_receipt', $strukData);
+            } else {
+                $receipt = [
+                    'logo'           => $logo,
+                    'payment_method' => $payment->payment_method,
+                    'organization'   => [
+                        'name'    => 'Koperasi Syariah Berkah',
+                        'address' => 'Komplek Puri Cipageran Indah 2, RW 21, Desa Ngamprah, Kec. Tanimulya, Kabupaten Bandung Barat',
+                    ],
+                    'petugas'          => auth()->user()->name,
+                    'tanggal_angsuran' => Carbon::parse($payment->payment_date)->translatedFormat('d F Y'),
+                    'nomor_pembiayaan' => $pembiayaan->financing_transaction_code,
+                    'no_anggota'       => $pembiayaan->member?->user?->user_code,
+                    'diterima_dari'    => $pembiayaan->member?->user?->name,
+                    'sejumlah_uang'    => $payment->nominal,
+                    'items'            => [[
+                        'no'         => 1,
+                        'keterangan' => 'Angsuran ke ' . $angsuran->angsuran_ke,
+                        'jumlah'     => $payment->nominal,
+                    ]],
+                    'harga_perolehan' => $pembiayaan->cost_price,
+                    'margin'          => $pembiayaan->margin_amount,
+                    'harga_jual'      => $hargaJual,
+                    'total_angsuran'  => $payment->nominal,
+                    'sisa_hutang'     => max($sisa, 0),
+                    'status'          => max($sisa, 0) <= 0 ? 'Lunas' : 'Belum Lunas',
+                    'jatuh_tempo'     => $nextInstallment
+                        ? $nextInstallment->due_date->translatedFormat('d F Y')
+                        : '-',
+                    'catatan'         => 'Dasar akad yang digunakan adalah akad murabahah yang merupakan kontrak jual beli syariah.',
+                    'tanggal_cetak'   => now()->translatedFormat('d F Y'),
+                ];
+
+                $pdf = Pdf::loadView('exports.financing_payment_receipt', ['receipt' => $receipt])
+                    ->setPaper('a5', 'landscape')
+                    ->setOptions(['isRemoteEnabled' => true]);
+            }
 
             $fileName = 'receipts/' . $pembiayaan->anggota->id . '/receipt-' . time() . '.pdf';
 

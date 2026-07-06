@@ -16,6 +16,7 @@ use App\Http\Requests\StoreFinancingRequest;
 use App\Models\Akun;
 use App\Models\AkunSimpanan;
 use App\Models\Anggota;
+use App\Models\DokumenAnggota;
 use App\Models\Pembiayaan;
 use App\Models\VerifikasiPembiayaan;
 use App\Models\PengaturanUmum;
@@ -27,11 +28,13 @@ use App\Services\Admin\JurnalService;
 use App\Services\Admin\PembayaranAngsuranService;
 use App\Services\Admin\PembiayaanService;
 use App\Services\PembiayaanService as SharedPembiayaanService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -432,7 +435,7 @@ class PembiayaanController extends Controller
     public function finalize(StoreFinancingRequest $request)
     {
         try {
-            DB::transaction(function () use ($request) {
+            $pembiayaan = DB::transaction(function () use ($request) {
                 $validated = $request->validated();
                 $user = Pengguna::with('anggota.akunSimpanan')
                     ->where('kode_pengguna', $validated['anggota']['kode_pengguna'])
@@ -612,6 +615,65 @@ class PembiayaanController extends Controller
                             'harga_perolehan' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
                         ]);
                     }
+
+                    // Generate Berita Acara Pelunasan
+                    $logoPath = public_path('images/logo/logo-icon.svg');
+                    $src = '';
+                    if (file_exists($logoPath)) {
+                        $data_logo = file_get_contents($logoPath);
+                        $src = 'data:image/svg+xml;base64,' . base64_encode($data_logo);
+                    }
+
+                    Carbon::setLocale('id');
+                    $now = now();
+                    $hari = $now->translatedFormat('l');
+                    $tanggal = $now->format('d');
+                    $bulan = $now->translatedFormat('F');
+                    $tahun = $now->format('Y');
+
+                    $transCode = 'LP' . str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+
+                    $strukData = [
+                        'no_transaksi' => $transCode,
+                        'hari' => $hari,
+                        'tanggal' => $tanggal,
+                        'bulan' => $bulan,
+                        'tahun' => $tahun,
+                        'no_anggota' => $pembiayaan->member->user->user_code,
+                        'nama_anggota' => $pembiayaan->member->user->name,
+                        'financing_transaction_code' => $pembiayaan->financing_transaction_code,
+                        'product_name' => $pembiayaan->financingItem->name ?? '-',
+                        'total_paid_amount' => $costPrice + $margin,
+                        'metode' => 'Tunai',
+                        'repayment_total' => $costPrice + $margin,
+                        'tenor' => $pembiayaan->tenor ?? 0,
+                        'nama_pengurus' => auth()->user()->nama,
+                        'jabatan_pengurus' => auth()->user()->roles->first()->name ?? 'Pengurus',
+                        'alamat' => $pembiayaan->member->domicile_address ?? $pembiayaan->member->residential_address ?? '-',
+                        'harga_perolehan' => $costPrice,
+                        'margin_keuntungan' => $margin,
+                        'no_telp' => $pembiayaan->member->user->phone_number,
+                        'qimah_ismiyyah' => $costPrice + $margin,
+                        'qimah_haliyyah' => $costPrice + $margin,
+                        'logo' => $src,
+                    ];
+
+                    $pdf = Pdf::loadView('exports.repayment_receipt', $strukData);
+                    $filePath = 'receipts/repayment/' . $transCode . '.pdf';
+
+                    Storage::disk('public')->put($filePath, $pdf->output());
+
+                    DokumenAnggota::create([
+                        'member_id' => $pembiayaan->member_id,
+                        'doc_name' => 'Berita Acara Pelunasan ' . $transCode,
+                        'doc_attachment' => $filePath,
+                    ]);
+
+                    $pembiayaan->update([
+                        'status' => FinancingReqStatusEnum::PAID->value
+                    ]);
+
+                    session()->flash('receipt_url', asset('storage/' . $filePath));
                 }
 
                 // Klo pembiayaan tangguh
@@ -668,7 +730,15 @@ class PembiayaanController extends Controller
                 }
                 return $pembiayaan;
             });
-            return redirect()->route('admin.pembiayaan.index')
+
+            if ($pembiayaan->payment_method === FinancingPaymentMethodEnum::CASH->value && session('receipt_url')) {
+                return redirect()->route('admin.financings.payment.success')->with('receipt_data', [
+                    'financing_id' => $pembiayaan->id,
+                    'installment_payment_receipt' => session('receipt_url')
+                ]);
+            }
+
+            return redirect()->route('admin.financings.index')
                 ->with('success', 'Pembiayaan berhasil difinalisasi');
         } catch (Exception $e) {
             Log::error('Error storing pembiayaan: ' . $e->getMessage());
@@ -686,7 +756,7 @@ class PembiayaanController extends Controller
                     ->firstOrFail();
 
                 $this->pembiayaanService->syncMemberData($user, $validated['anggota'], $request);
-                $this->pembiayaanService->syncFinancingData($user, $request, auth()->id());
+                $this->pembiayaanService->syncFinancingData($user, $request, $validated, auth()->id());
             });
 
             return redirect()->route('admin.pembiayaan.index')
@@ -789,9 +859,7 @@ class PembiayaanController extends Controller
         try {
             $transaction = $this->pembayaranAngsuranService->processRepayment($request->validated(), auth()->id());
 
-            return inertia('Admin/Financing/Repayment/Result', [
-                'data' => $transaction,
-            ]);
+            return redirect()->route('admin.financings.payment.success')->with('receipt_data', $transaction);
 
         } catch (Exception $e) {
             Log::error('Error processing repayment: ' . $e->getMessage());
@@ -799,6 +867,22 @@ class PembiayaanController extends Controller
                 'error' => 'Gagal memproses pembayaran: ' . $e->getMessage(),
             ]);
         }
+    }
+
+    public function showPaymentSuccess(Request $request)
+    {
+        $data = session('receipt_data');
+
+        if (!$data) {
+            return redirect()->route('admin.financings.index');
+        }
+
+        // Reflash the session so if user reloads the page, they don't get redirected back immediately.
+        session()->reflash();
+
+        return inertia('Admin/Financing/Repayment/Result', [
+            'data' => $data,
+        ]);
     }
 
     public function createPayment(Pembiayaan $pembiayaan)

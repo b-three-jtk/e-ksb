@@ -17,11 +17,11 @@ const breadcrumbItems = [
 </script>
 
 <template>
-    <AdminLayout title="Pelunasan Sebelum Jatuh Tempo">
-        <PageBreadcrumb :page-title="'Pelunasan Sebelum Jatuh Tempo'" :items="breadcrumbItems" />
+    <AdminLayout title="Pembayaran Pembiayaan Murabahah">
+        <PageBreadcrumb :page-title="'Pembayaran Pembiayaan Murabahah'" :items="breadcrumbItems" />
         <div class="card-layout">
-            <h2 class="card-title">Pelunasan Berhasil</h2>
-            <p class="mb-4 text-gray-500 text-sm">Pembayaran pelunasan telah berhasil diproses. Berikut adalah struk pembayaran Anda:</p>
+            <h2 class="card-title">Pembayaran Berhasil</h2>
+            <p class="mb-4 text-gray-500 text-sm">Pembayaran telah berhasil diproses. Berikut adalah struk pembayaran Anda:</p>
             <div v-if="props.data.installment_payment_receipt" class="border p-4 rounded">
                 <iframe :src="props.data.installment_payment_receipt" class="w-full h-full min-h-150" frameborder="0"></iframe>
             </div>
