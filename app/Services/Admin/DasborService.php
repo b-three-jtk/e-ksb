@@ -150,7 +150,7 @@ class DasborService
     {
         $totalKas = $this->getSaldoAkun('101', $tanggalAkhir, 'Debit', 'Credit');
 
-        $totalLiabilitas = $this->getSaldoAkun(['201', '202', '203'], $tanggalAkhir, 'Credit', 'Debit');
+        $totalLiabilitas = $this->getSaldoAkun(['201', '202', '203', '204'], $tanggalAkhir, 'Credit', 'Debit');
 
         $rasioKas = 0;
         if ($totalLiabilitas > 0) {
