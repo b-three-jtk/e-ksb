@@ -19,7 +19,7 @@ class PenggunaFactory extends Factory
     protected static ?string $password;
 
     /**
-     * Sequence for user_code.
+     * Sequence for kode_pengguna.
      */
     protected static ?int $sequence = null;
 
@@ -35,9 +35,9 @@ class PenggunaFactory extends Factory
 
         if (self::$sequence === null) {
             $last = Pengguna::query()
-                ->where('user_code', 'like', $prefix . '%')
-                ->orderBy('user_code', 'desc')
-                ->value('user_code');
+                ->where('kode_pengguna', 'like', $prefix . '%')
+                ->orderBy('kode_pengguna', 'desc')
+                ->value('kode_pengguna');
             
             self::$sequence = $last ? (int) substr($last, -3) : 0;
         }

@@ -639,8 +639,8 @@ class PembiayaanController extends Controller
                         'tanggal' => $tanggal,
                         'bulan' => $bulan,
                         'tahun' => $tahun,
-                        'no_anggota' => $pembiayaan->member->user->user_code,
-                        'nama_anggota' => $pembiayaan->member->user->name,
+                        'no_anggota' => $pembiayaan->anggota->user->user_code,
+                        'nama_anggota' => $pembiayaan->anggota->user->name,
                         'financing_transaction_code' => $pembiayaan->financing_transaction_code,
                         'product_name' => $pembiayaan->financingItem->name ?? '-',
                         'total_paid_amount' => $costPrice + $margin,
@@ -649,10 +649,10 @@ class PembiayaanController extends Controller
                         'tenor' => $pembiayaan->tenor ?? 0,
                         'nama_pengurus' => auth()->user()->nama,
                         'jabatan_pengurus' => auth()->user()->roles->first()->name ?? 'Pengurus',
-                        'alamat' => $pembiayaan->member->domicile_address ?? $pembiayaan->member->residential_address ?? '-',
+                        'alamat' => $pembiayaan->anggota->alamat_domisili ?? $pembiayaan->anggota->residential_address ?? '-',
                         'harga_perolehan' => $costPrice,
                         'margin_keuntungan' => $margin,
-                        'no_telp' => $pembiayaan->member->user->phone_number,
+                        'no_telp' => $pembiayaan->anggota->user->phone_number,
                         'qimah_ismiyyah' => $costPrice + $margin,
                         'qimah_haliyyah' => $costPrice + $margin,
                         'logo' => $src,
@@ -664,7 +664,7 @@ class PembiayaanController extends Controller
                     Storage::disk('public')->put($filePath, $pdf->output());
 
                     DokumenAnggota::create([
-                        'member_id' => $pembiayaan->member_id,
+                        'member_id' => $pembiayaan->anggota_id,
                         'doc_name' => 'Berita Acara Pelunasan ' . $transCode,
                         'doc_attachment' => $filePath,
                     ]);

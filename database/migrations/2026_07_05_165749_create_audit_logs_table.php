@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
-            $table->uuid('user_id')->nullable();
+            $table->uuid('pengguna_id')->nullable();
             $table->string('auditable_type');
             $table->string('auditable_id');
             $table->string('event');
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('pengguna_id')->references('id')->on('pengguna')->onDelete('set null');
             $table->index(['auditable_type', 'auditable_id']);
         });
     }

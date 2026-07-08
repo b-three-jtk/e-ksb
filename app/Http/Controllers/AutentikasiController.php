@@ -57,7 +57,7 @@ class AutentikasiController extends Controller
         }
 
         // Jika pengurus, cek apakah terdaftar sebagai anggota
-        $jugaAnggota = $user->member()->exists();
+        $jugaAnggota = $user->anggota()->exists();
 
         if ($isPengurus && $jugaAnggota) {
             // Simpan flag di session agar halaman choose-role bisa diakses
