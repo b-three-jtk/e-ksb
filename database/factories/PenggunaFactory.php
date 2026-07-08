@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\UserStatusEnum;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -33,7 +34,7 @@ class PenggunaFactory extends Factory
         $prefix = 'KSB' . $yymm;
 
         if (self::$sequence === null) {
-            $last = User::query()
+            $last = Pengguna::query()
                 ->where('user_code', 'like', $prefix . '%')
                 ->orderBy('user_code', 'desc')
                 ->value('user_code');
