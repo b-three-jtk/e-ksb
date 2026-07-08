@@ -39,6 +39,14 @@ class PengaturanUmumService
                 'label' => 'Poin Margin Murabahah',
                 'deskripsi' => 'Jumlah poin yang diberikan untuk setiap kelipatan margin murabahah dibayarkan.',
             ],
+            'murabaha_point_amount' => [
+                'label' => 'Jumlah Margin Murabahah',
+                'description' => 'Penetapan besaran margin murabahah yang dibayarkan untuk memperoleh poin.',
+            ],
+            'murabaha_point_reward' => [
+                'label' => 'Poin Margin Murabahah',
+                'description' => 'Jumlah poin yang diberikan untuk setiap kelipatan margin murabahah dibayarkan.',
+            ],
         ],
         'savings' => [
             'saving_pokok_amount' => [
@@ -195,6 +203,16 @@ class PengaturanUmumService
                         'value' => $validated['murabaha_point_reward'],
                         'tgl_diberlakukan' => $validated['murabaha_effective_date'],
                         'deskripsi' => self::SETTING_MAP['points']['murabaha_point_reward']['deskripsi'],
+                    ],
+                    'murabaha_point_amount' => [
+                        'value' => $validated['murabaha_point_amount'],
+                        'effective_date' => $validated['murabaha_effective_date'],
+                        'description' => self::SETTING_MAP['points']['murabaha_point_amount']['description'],
+                    ],
+                    'murabaha_point_reward' => [
+                        'value' => $validated['murabaha_point_reward'],
+                        'effective_date' => $validated['murabaha_effective_date'],
+                        'description' => self::SETTING_MAP['points']['murabaha_point_reward']['description'],
                     ],
                 ], $userId),
                 'savings' => $this->saveSettingGroup([

@@ -227,8 +227,8 @@ const summaryCards = computed(() => {
                 label: 'Poin Simpanan Diperoleh',
             },
             {
-                value: formatDate(pointsAmount.effective_date || pointReward.effective_date),
-                label: 'Berlaku Sejak',
+                value: formatMoney(mbPointsAmount.value),
+                label: 'Jumlah Margin Murabahah',
             },
             {
                 value: formatInteger(mbPointReward.value),
@@ -295,6 +295,11 @@ const syncForms = () => {
     forms.points.saving_point_reward = props.settings?.points?.saving_point_reward?.value ?? ''
     forms.points.tgl_diberlakukan = props.settings?.points?.saving_point_amount?.tgl_diberlakukan
         ?? props.settings?.points?.saving_point_reward?.tgl_diberlakukan
+        ?? ''
+    forms.points.murabaha_point_amount = props.settings?.points?.murabaha_point_amount?.value ?? ''
+    forms.points.murabaha_point_reward = props.settings?.points?.murabaha_point_reward?.value ?? ''
+    forms.points.murabaha_effective_date = props.settings?.points?.murabaha_point_amount?.effective_date
+        ?? props.settings?.points?.murabaha_point_reward?.effective_date
         ?? ''
     forms.points.murabaha_point_amount = props.settings?.points?.murabaha_point_amount?.value ?? ''
     forms.points.murabaha_point_reward = props.settings?.points?.murabaha_point_reward?.value ?? ''

@@ -28,7 +28,6 @@ use App\Services\Admin\JurnalService;
 use App\Services\Admin\PembayaranAngsuranService;
 use App\Services\Admin\PembiayaanService;
 use App\Services\PembiayaanService as SharedPembiayaanService;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -859,6 +858,7 @@ class PembiayaanController extends Controller
         try {
             $transaction = $this->pembayaranAngsuranService->processRepayment($request->validated(), auth()->id());
 
+            return redirect()->route('admin.financings.payment.success')->with('receipt_data', $transaction);
             return redirect()->route('admin.financings.payment.success')->with('receipt_data', $transaction);
 
         } catch (Exception $e) {

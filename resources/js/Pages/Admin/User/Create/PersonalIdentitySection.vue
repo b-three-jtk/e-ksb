@@ -79,7 +79,6 @@ defineProps({
 				label="Tanggal Lahir"
 				type="date"
 				required
-				:maxDate="maxBirthDate"
 				:error="getFieldError('tgl_lahir', errors.tgl_lahir)"
 			/>
 
