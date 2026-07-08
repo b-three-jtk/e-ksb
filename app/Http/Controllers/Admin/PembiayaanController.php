@@ -16,18 +16,19 @@ use App\Http\Requests\StoreFinancingRequest;
 use App\Models\Akun;
 use App\Models\AkunSimpanan;
 use App\Models\Anggota;
-use App\Models\DokumenAnggota;
-use App\Models\Pembiayaan;
-use App\Models\VerifikasiPembiayaan;
-use App\Models\PengaturanUmum;
-use App\Models\JenisBarang;
 use App\Models\DetailJurnal;
+use App\Models\DokumenAnggota;
+use App\Models\JenisBarang;
 use App\Models\Pemasok;
+use App\Models\Pembiayaan;
+use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
+use App\Models\VerifikasiPembiayaan;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PembayaranAngsuranService;
 use App\Services\Admin\PembiayaanService;
 use App\Services\PembiayaanService as SharedPembiayaanService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -419,7 +420,7 @@ class PembiayaanController extends Controller
                 $validated['pembiayaan']['status'] = 'Belum Ditinjau';
 
                 $this->pembiayaanService->syncMemberData($user, $validated['anggota'], $request);
-                $this->pembiayaanService->syncFinancingData($user, $request, auth()->id());
+                $this->pembiayaanService->syncFinancingData($user, $request, $validated, auth()->id());
             });
 
             return redirect()->route('admin.pembiayaan.index')
@@ -461,7 +462,7 @@ class PembiayaanController extends Controller
                 }
 
                 $this->pembiayaanService->syncMemberData($user, $validated['anggota'], $request);
-                $pembiayaan = $this->pembiayaanService->syncFinancingData($user, $request, auth()->id());
+                $pembiayaan = $this->pembiayaanService->syncFinancingData($user, $request, $validated, auth()->id());
 
                 if (isset($validated['pembiayaan']['tenor']) && $validated['pembiayaan']['metode_pembayaran'] === FinancingPaymentMethodEnum::INSTALLMENT->value) {
                     $this->pembiayaanService->generateInstallments($pembiayaan);
@@ -731,7 +732,7 @@ class PembiayaanController extends Controller
             });
 
             if ($pembiayaan->payment_method === FinancingPaymentMethodEnum::CASH->value && session('receipt_url')) {
-                return redirect()->route('admin.financings.payment.success')->with('receipt_data', [
+                return redirect()->route('admin.pembiayaan.pembayaran.success')->with('receipt_data', [
                     'financing_id' => $pembiayaan->id,
                     'installment_payment_receipt' => session('receipt_url')
                 ]);
@@ -858,8 +859,7 @@ class PembiayaanController extends Controller
         try {
             $transaction = $this->pembayaranAngsuranService->processRepayment($request->validated(), auth()->id());
 
-            return redirect()->route('admin.financings.payment.success')->with('receipt_data', $transaction);
-            return redirect()->route('admin.financings.payment.success')->with('receipt_data', $transaction);
+            return redirect()->route('admin.pembiayaan.pembayaran.success')->with('receipt_data', $transaction);
 
         } catch (Exception $e) {
             Log::error('Error processing repayment: ' . $e->getMessage());

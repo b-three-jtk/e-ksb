@@ -423,7 +423,7 @@ const isProcessing = (section) => processingSection.value === section
             </div>
 
             <div class="relative pt-4">
-                <div class="flex gap-1 mb-[-1px]">
+                <div class="flex gap-1 -mb-px">
                     <button
                         v-for="tab in tabs"
                         :key="tab.key"
