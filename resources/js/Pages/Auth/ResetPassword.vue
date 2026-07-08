@@ -8,12 +8,12 @@ import { Icon } from '@iconify/vue'
 
 const props = defineProps({
     token: String,
-    phone_number: String, 
+    no_telp: String, 
 })
 
 const form = useForm({
     token: props.token,
-    phone_number: props.phone_number ?? '',
+    no_telp: props.no_telp ?? '',
     password: '',
     password_confirmation: '',
 })

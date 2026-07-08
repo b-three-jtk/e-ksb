@@ -18,17 +18,17 @@ export function useFinancingValidation(form) {
     const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     const isValidPhone = (phone) => /^[0-9]{8,14}$/.test(phone)
     const isValidNik   = (nik)   => /^[0-9]{16}$/.test(nik)
-    const isValidDependents = (dependents) => /^[0-9]+$/.test(dependents)
+    const isValidDependents = (jml_tanggungan) => /^[0-9]+$/.test(jml_tanggungan)
 
     const validateStep1 = () => {
         const errs = {}
-        const m = form.member
+        const m = form.anggota
 
-        if (!m.user_code)
-            errs.user_code = 'Nomor anggota wajib dipilih.'
+        if (!m.kode_pengguna)
+            errs.kode_pengguna = 'Nomor anggota wajib dipilih.'
 
-        if (!m.name?.trim())
-            errs.name = 'Nama lengkap wajib diisi.'
+        if (!m.nama?.trim())
+            errs.nama = 'Nama lengkap wajib diisi.'
 
         if (!m.nik)
             errs.nik = 'NIK wajib diisi.'
@@ -38,20 +38,20 @@ export function useFinancingValidation(form) {
         if (!isValidEmail(m.email))
             errs.email = 'Format email tidak valid.'
 
-        if (!/^62\d{10,20}$/.test(m.phone_number)) {
-            errs.phone_number = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
+        if (!/^62\d{10,20}$/.test(m.no_telp)) {
+            errs.no_telp = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
         }
 
-        if (!m.gender)
-            errs.gender = 'Jenis kelamin wajib dipilih.'
+        if (!m.jenis_kelamin)
+            errs.jenis_kelamin = 'Jenis kelamin wajib dipilih.'
 
-        if (!isValidDependents(m.dependents))
-            errs.dependents = 'Jumlah tanggungan harus angka.'
+        if (!isValidDependents(m.jml_tanggungan))
+            errs.jml_tanggungan = 'Jumlah tanggungan harus angka.'
 
-        if (!form.member.heirs || form.member.heirs.length === 0)
-            errs.heirs = 'Minimal satu data ahli waris wajib ditambahkan.'
+        if (!form.anggota.ahli_waris || form.anggota.ahli_waris.length === 0)
+            errs.ahli_waris = 'Minimal satu data ahli waris wajib ditambahkan.'
 
-        if (form.financing.status !== 'Belum Ditinjau') {
+        if (form.pembiayaan.status !== 'Belum Ditinjau') {
             if (m.is_have_eligible_saving === false)
                 errs.eligible_saving = 'Pemohon belum memiliki tabungan yang memenuhi syarat.'
             if (m.is_have_no_obligation === false)
@@ -63,30 +63,30 @@ export function useFinancingValidation(form) {
 
     const validateStep2 = () => {
         const errs = {}
-        const m = form.member
-        const isValidTenureYear = (tenure_year) => /^[0-9]+$/.test(tenure_year)
+        const m = form.anggota
+        const isValidTenureYear = (lama_bekerja) => /^[0-9]+$/.test(lama_bekerja)
 
-        if (!m.job_title?.trim())
-            errs.job_title = 'Jabatan wajib diisi.'
+        if (!m.jabatan_pekerjaan?.trim())
+            errs.jabatan_pekerjaan = 'Jabatan wajib diisi.'
 
-        if (!m.company_or_business_name?.trim())
-            errs.company_or_business_name = 'Nama perusahaan/bisnis wajib diisi.'
+        if (!m.nama_perusahaan?.trim())
+            errs.nama_perusahaan = 'Nama perusahaan/bisnis wajib diisi.'
 
-        if (!m.business_field?.trim())
-            errs.business_field = 'Bidang pekerjaan wajib diisi.'
+        if (!m.bidang_usaha?.trim())
+            errs.bidang_usaha = 'Bidang pekerjaan wajib diisi.'
 
-        if (!m.tenure_year && m.tenure_year !== 0)
-            errs.tenure_year = 'Lama bekerja wajib diisi.'
-        else if (!isValidTenureYear(m.tenure_year))
-            errs.tenure_year = 'Lama bekerja harus berupa angka.'
+        if (!m.lama_bekerja && m.lama_bekerja !== 0)
+            errs.lama_bekerja = 'Lama bekerja wajib diisi.'
+        else if (!isValidTenureYear(m.lama_bekerja))
+            errs.lama_bekerja = 'Lama bekerja harus berupa angka.'
 
-        if (!m.workplace_contact?.trim())
-            errs.workplace_contact = 'Kontak perusahaan wajib diisi.'
-        else if (!isValidPhone(m.workplace_contact))
-            errs.workplace_contact = 'Kontak perusahaan harus 8-13 digit angka.'
+        if (!m.no_telp_kantor?.trim())
+            errs.no_telp_kantor = 'Kontak perusahaan wajib diisi.'
+        else if (!isValidPhone(m.no_telp_kantor))
+            errs.no_telp_kantor = 'Kontak perusahaan harus 8-13 digit angka.'
 
-        if (!m.workplace_address?.trim())
-            errs.workplace_address = 'Alamat perusahaan wajib diisi.'
+        if (!m.alamat_tempat_bekerja?.trim())
+            errs.alamat_tempat_bekerja = 'Alamat perusahaan wajib diisi.'
 
         if (!form.income_slip_file && !form.documents?.income_slip)
             errs.income_slip_file = 'Slip gaji wajib diunggah.'
@@ -108,28 +108,28 @@ export function useFinancingValidation(form) {
     const validateStep3 = () => {
         const errs = {}
 
-        if (!form.financing.name?.trim())
+        if (!form.pembiayaan.name?.trim())
             errs.name = 'Nama objek pembiayaan wajib diisi.'
 
-        if (!form.financing.condition)
-            errs.condition = 'Kondisi objek pembiayaan wajib diisi.'
+        if (!form.pembiayaan.kondisi_produk)
+            errs.kondisi_produk = 'Kondisi objek pembiayaan wajib diisi.'
 
-        if (isNaN(form.financing.qty) || form.financing.qty <= 0)
-            errs.qty = 'Jumlah objek pembiayaan harus berupa angka positif.'
-        else if (!form.financing.qty)
-            errs.qty = 'Jumlah objek pembiayaan wajib diisi.'
+        if (isNaN(form.pembiayaan.kuantitas) || form.pembiayaan.kuantitas <= 0)
+            errs.kuantitas = 'Jumlah objek pembiayaan harus berupa angka positif.'
+        else if (!form.pembiayaan.kuantitas)
+            errs.kuantitas = 'Jumlah objek pembiayaan wajib diisi.'
 
-        if (!form.financing.predicted_cost_price)
-            errs.predicted_cost_price = 'Harga perkiraan wajib diisi.'
+        if (!form.pembiayaan.harga_perkiraan)
+            errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
 
-        if (!form.financing.specification?.trim())
-            errs.specification = 'Spesifikasi objek pembiayaan wajib diisi.'
+        if (!form.pembiayaan.spesifikasi_barang?.trim())
+            errs.spesifikasi_barang = 'Spesifikasi objek pembiayaan wajib diisi.'
 
-        if (!form.financing.predicted_cost_price)
-            errs.predicted_cost_price = 'Harga perkiraan wajib diisi.'
+        if (!form.pembiayaan.harga_perkiraan)
+            errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
 
-        if (!form.collateral.collateral_type)
-            errs.collateral_type = 'Jenis jaminan wajib dipilih.'
+        if (!form.collateral.jenis_jaminan)
+            errs.jenis_jaminan = 'Jenis jaminan wajib dipilih.'
 
         return errs
     }
@@ -137,16 +137,16 @@ export function useFinancingValidation(form) {
     const validateStep4 = () => {
         const errs = {}
 
-        if (!form.financing.supplier_id)
-            errs.supplier_name = 'Supplier wajib diisi.'
+        if (!form.pembiayaan.pemasok_id)
+            errs.nama_pemasok = 'Pemasok wajib diisi.'
 
-        if (!form.financing.cost_price)
-            errs.cost_price = 'Harga pokok wajib diisi.'
+        if (!form.pembiayaan.harga_perolehan)
+            errs.harga_perolehan = 'Harga pokok wajib diisi.'
 
-        if (!form.financing.price_per_unit)
-            errs.price_per_unit = 'Harga per unit wajib diisi.'
+        if (!form.pembiayaan.harga_beli_per_unit)
+            errs.harga_beli_per_unit = 'Harga per unit wajib diisi.'
 
-        if (!form.purchase_receipt_file && !form.documents?.purchase_receipt)
+        if (!form.purchase_receipt_file && !form.documents?.struk_pembelian)
             errs.purchase_receipt_file = 'Nota pembelian wajib diunggah.'
         else if (form.purchase_receipt_file && !['image/jpeg', 'image/png'].includes(form.purchase_receipt_file.type))
             errs.purchase_receipt_file = 'Format nota pembelian harus JPG, JPEG, atau PNG.'
@@ -161,7 +161,7 @@ export function useFinancingValidation(form) {
             else if (form.akad_wakalah_file && form.akad_wakalah_file.size > 2 * 1024 * 1024)
                 errs.akad_wakalah_file = 'Ukuran dokumen akad wakalah maksimal 2 MB.'
 
-            if (!form.financing.akad_wakalah_date || form.financing.akad_wakalah_date === '')
+            if (!form.pembiayaan.akad_wakalah_date || form.pembiayaan.akad_wakalah_date === '')
                 errs.akad_wakalah_date = 'Tanggal akad wakalah wajib diisi.'
         }
 
@@ -171,23 +171,23 @@ export function useFinancingValidation(form) {
     const validateStep5 = () => {
         const errs = {}
 
-        if (form.financing.status !== 'Disetujui')
+        if (form.pembiayaan.status !== 'Disetujui')
             errs.status = 'Status pembiayaan harus Disetujui sebelum finalisasi.'
 
-        if (!form.financing.akad_date)
-            errs.akad_date = 'Tanggal akad wajib diisi.'
+        if (!form.pembiayaan.tgl_akad)
+            errs.tgl_akad = 'Tanggal akad wajib diisi.'
 
         if (!form.akad_document_file && !form.documents?.akad_document)
             errs.akad_document_file = 'Dokumen akad wajib diunggah.'
 
-        if (!form.financing.payment_method)
-            errs.payment_method = 'Metode pembayaran wajib dipilih.'
+        if (!form.pembiayaan.metode_pembayaran)
+            errs.metode_pembayaran = 'Metode pembayaran wajib dipilih.'
 
-        if (form.financing.payment_method === 'Tangguh') {
-            if (!form.financing.tangguh_payment_date)
-                errs.tangguh_payment_date = 'Tanggal pembayaran tangguh wajib diisi.'
-            else if (new Date(form.financing.tangguh_payment_date) <= new Date(form.financing.akad_date))
-                errs.tangguh_payment_date = 'Tanggal pembayaran tangguh harus setelah tanggal akad.'
+        if (form.pembiayaan.metode_pembayaran === 'Tangguh') {
+            if (!form.pembiayaan.tangguh_tgl_pembayaran)
+                errs.tangguh_tgl_pembayaran = 'Tanggal pembayaran tangguh wajib diisi.'
+            else if (new Date(form.pembiayaan.tangguh_tgl_pembayaran) <= new Date(form.pembiayaan.tgl_akad))
+                errs.tangguh_tgl_pembayaran = 'Tanggal pembayaran tangguh harus setelah tanggal akad.'
         }
 
         return errs
@@ -266,14 +266,14 @@ export function useFinancingValidation(form) {
 
 function getAllKeysForStep(step) {
     const map = {
-        1: ['user_code', 'name', 'nik', 'email', 'phone_number', 'gender',
-            'residential_address', 'heirs', 'eligible_saving', 'no_obligation'],
-        2: ['job_title', 'company_or_business_name', 'business_field',
-            'tenure_year', 'workplace_contact', 'workplace_address',
+        1: ['kode_pengguna', 'name', 'nik', 'email', 'no_telp', 'jenis_kelamin',
+            'alamat_ktp', 'ahli_waris', 'eligible_saving', 'no_obligation'],
+        2: ['jabatan_pekerjaan', 'nama_perusahaan', 'bidang_usaha',
+            'lama_bekerja', 'no_telp_kantor', 'alamat_tempat_bekerja',
             'income_slip_file', 'bank_book_file'],
-        3: ['financing_name', 'collateral_type'],
-        4: ['supplier_name', 'cost_price', 'purchase_receipt_file'],
-        5: ['status', 'akad_date', 'akad_document_file', 'payment_method'],
+        3: ['financing_name', 'jenis_jaminan'],
+        4: ['nama_pemasok', 'harga_perolehan', 'purchase_receipt_file'],
+        5: ['status', 'tgl_akad', 'akad_document_file', 'metode_pembayaran'],
     }
     return map[step] ?? []
 }

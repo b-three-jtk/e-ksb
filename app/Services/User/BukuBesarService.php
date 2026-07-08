@@ -2,8 +2,8 @@
 
 namespace App\Services\User;
 
-use App\Models\SavingAccount;
-use App\Models\SavingTransaction;
+use App\Models\AkunSimpanan;
+use App\Models\TransaksiSimpanan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,40 +18,40 @@ class BukuBesarService
         $accountBalances = [];
 
         return $transactions->map(function ($transaction) use (&$accountBalances, $includeId) {
-            $isDeposit = in_array(strtolower((string) $transaction->transaction_type), ['penyetoran', 'deposit'], true);
-            $amount = (float) ($transaction->saving_amount ?? 0);
-            $transactionDate = $transaction->transaction_date ? Carbon::parse($transaction->transaction_date) : null;
+            $isDeposit = in_array(strtolower((string) $transaction->tipe_transaksi), ['penyetoran', 'deposit'], true);
+            $amount = (float) ($transaction->nominal_simpanan ?? 0);
+            $transactionDate = $transaction->tgl_transaksi ? Carbon::parse($transaction->tgl_transaksi) : null;
 
-            $savingAccountId = (string) ($transaction->saving_account_id ?? '');
-            if (!array_key_exists($savingAccountId, $accountBalances)) {
-                $accountBalances[$savingAccountId] = (float) ($transaction->savingAccount?->balance ?? 0);
+            $akunSimpananId = (string) ($transaction->akun_simpanan_id ?? '');
+            if (!array_key_exists($akunSimpananId, $accountBalances)) {
+                $accountBalances[$akunSimpananId] = (float) ($transaction->akunSimpanan?->saldo ?? 0);
             }
 
-            $saldoSesudah = (float) $accountBalances[$savingAccountId];
+            $saldoSesudah = (float) $accountBalances[$akunSimpananId];
             $transactionEffect = $isDeposit ? $amount : -$amount;
             $saldoSebelum = $saldoSesudah - $transactionEffect;
-            $accountBalances[$savingAccountId] = $saldoSebelum;
+            $accountBalances[$akunSimpananId] = $saldoSebelum;
 
-            $linkedAccount = $transaction->memberBankAccount;
-            if (!$linkedAccount && $transaction->savingAccount?->member?->bankAccounts) {
-                $linkedAccount = $transaction->savingAccount->member->bankAccounts
-                    ->firstWhere('account_number', $transaction->account_number)
-                    ?? $transaction->savingAccount->member->bankAccounts->first();
+            $linkedAccount = $transaction->rekeningAnggota;
+            if (!$linkedAccount && $transaction->akunSimpanan?->anggota?->bankAccounts) {
+                $linkedAccount = $transaction->akunSimpanan->anggota->bankAccounts
+                    ->firstWhere('no_rekening', $transaction->no_rekening)
+                    ?? $transaction->akunSimpanan->anggota->bankAccounts->first();
             }
 
-            $receiptPath = (string) ($transaction->saving_transaction_receipt ?? '');
+            $receiptPath = (string) ($transaction->struk_simpanan ?? '');
 
             $result = [
-                'no_transaksi' => $transaction->saving_transaction_code,
+                'no_transaksi' => $transaction->kode_transaksi_simpanan,
                 'tanggal_raw' => $transactionDate?->toISOString(),
                 'tanggal' => $transactionDate?->format('d/m/Y') ?? '-',
-                'produk' => $transaction->savingAccount?->saving_type ?? 'N/A',
-                'jenis' => $transaction->transaction_type,
-                'jenis_simpanan' => $transaction->savingAccount?->saving_type ?? 'N/A',
-                'metode' => $transaction->saving_payment_method ?? 'N/A',
-                'petugas' => $transaction->updatedBy?->name ?? 'System',
-                'nama_anggota' => $transaction->savingAccount?->member?->user?->name ?? '-',
-                'no_anggota' => $transaction->savingAccount?->member?->user?->user_code ?? '-',
+                'produk' => $transaction->akunSimpanan?->jenis_simpanan ?? 'N/A',
+                'jenis' => $transaction->tipe_transaksi,
+                'jenis_simpanan' => $transaction->akunSimpanan?->jenis_simpanan ?? 'N/A',
+                'metode' => $transaction->metode_pembayaran_simpanan ?? 'N/A',
+                'petugas' => $transaction->updatedBy?->nama ?? 'System',
+                'nama_anggota' => $transaction->akunSimpanan?->anggota?->user?->nama ?? '-',
+                'no_anggota' => $transaction->akunSimpanan?->anggota?->user?->kode_pengguna ?? '-',
                 'debit' => $isDeposit ? $amount : 0,
                 'kredit' => !$isDeposit ? $amount : 0,
                 'saldo' => $saldoSesudah,
@@ -59,11 +59,11 @@ class BukuBesarService
                 'saldo_sesudah' => $saldoSesudah,
                 'nominal_transaksi' => $amount,
                 'status' => null,
-                'bank_name' => $linkedAccount?->bank_name ?? '',
-                'account_name' => $linkedAccount?->account_name ?? '',
-                'account_number' => $linkedAccount?->account_number ?? ($transaction->account_number ?? ''),
-                'tenor' => $transaction->savingAccount?->saving_tenor,
-                'target' => $transaction->savingAccount?->target_amount,
+                'nama_bank' => $linkedAccount?->nama_bank ?? '',
+                'atas_nama' => $linkedAccount?->atas_nama ?? '',
+                'no_rekening' => $linkedAccount?->no_rekening ?? ($transaction->no_rekening ?? ''),
+                'tenor' => $transaction->akunSimpanan?->berjangka?->tenor,
+                'target' => $transaction->akunSimpanan?->ibadah?->target_tabungan,
                 'struk_nama' => $receiptPath !== '' ? basename($receiptPath) : null,
                 'struk_attachment' => $receiptPath !== ''
                     ? asset('storage/' . ltrim($receiptPath, '/'))
@@ -80,10 +80,10 @@ class BukuBesarService
 
     public function buildTabunganTransactionQuery(int|string $userId, ?string $month, ?string $search): Builder
     {
-        $query = SavingTransaction::query()
-            ->with(['savingAccount.member.bankAccounts', 'savingAccount', 'updatedBy', 'memberBankAccount'])
-            ->whereHas('savingAccount.member', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
+        $query = TransaksiSimpanan::query()
+            ->with(['akunSimpanan.anggota.bankAccounts', 'akunSimpanan', 'updatedBy', 'rekeningAnggota'])
+            ->whereHas('akunSimpanan.anggota', function ($q) use ($userId) {
+                $q->where('pengguna_id', $userId);
             });
 
         if ($month && $month !== '') {
@@ -100,18 +100,18 @@ class BukuBesarService
             }
 
             if ($parsedYear && $parsedMonth) {
-                $query->whereYear('transaction_date', $parsedYear)
-                    ->whereMonth('transaction_date', $parsedMonth);
+                $query->whereYear('tgl_transaksi', $parsedYear)
+                    ->whereMonth('tgl_transaksi', $parsedMonth);
             }
         }
 
         if ($search) {
             $searchLower = strtolower($search);
             $query->where(function ($q) use ($searchLower) {
-                $q->whereRaw('LOWER(transaction_type) LIKE ?', ['%' . $searchLower . '%'])
-                    ->orWhereRaw('LOWER(saving_payment_method) LIKE ?', ['%' . $searchLower . '%'])
-                    ->orWhereHas('savingAccount', function ($subQ) use ($searchLower) {
-                        $subQ->whereRaw('LOWER(saving_type) LIKE ?', ['%' . $searchLower . '%']);
+                $q->whereRaw('LOWER(tipe_transaksi) LIKE ?', ['%' . $searchLower . '%'])
+                    ->orWhereRaw('LOWER(metode_pembayaran_simpanan) LIKE ?', ['%' . $searchLower . '%'])
+                    ->orWhereHas('akunSimpanan', function ($subQ) use ($searchLower) {
+                        $subQ->whereRaw('LOWER(jenis_simpanan) LIKE ?', ['%' . $searchLower . '%']);
                     });
             });
         }
@@ -121,9 +121,9 @@ class BukuBesarService
 
     public function buildSavingSummaryAndMeta(int|string $userId): array
     {
-        $savingAccounts = SavingAccount::query()
-            ->whereHas('member', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
+        $akunSimpanan = AkunSimpanan::query()
+            ->whereHas('anggota', function ($q) use ($userId) {
+                $q->where('pengguna_id', $userId);
             })
             ->get();
 
@@ -139,9 +139,9 @@ class BukuBesarService
             ],
         ];
 
-        foreach ($savingAccounts as $account) {
-            $accountType = Str::lower((string) ($account->saving_type ?? ''));
-            $rawBalance = (float) ($account->balance ?? 0);
+        foreach ($akunSimpanan as $account) {
+            $accountType = Str::lower((string) ($account->jenis_simpanan ?? ''));
+            $rawBalance = (float) ($account->saldo ?? 0);
             $currentBalance = max(0, $rawBalance);
 
             $savingSummary['total_saldo'] += $currentBalance;
@@ -162,7 +162,7 @@ class BukuBesarService
             $savingSummary[$typeKey] += $currentBalance;
 
             if ($typeKey === 'tabungan_berjangka') {
-                $tenorMonths = (int) ($account->saving_tenor ?? 0);
+                $tenorMonths = (int) ($account->berjangka?->tenor ?? 0);
 
                 if ($tenorMonths > 0 && $account->created_at) {
                     $maturityDate = Carbon::parse($account->created_at)
@@ -177,7 +177,7 @@ class BukuBesarService
             }
 
             if ($typeKey === 'tabungan_ibadah') {
-                $targetAmount = (float) ($account->target_amount ?? 0);
+                $targetAmount = (float) ($account->ibadah?->target_tabungan ?? 0);
                 $currentMinimumTarget = $savingMeta['tabungan_ibadah']['minimum_target'];
 
                 if ($targetAmount > 0 && (!$currentMinimumTarget || $targetAmount < $currentMinimumTarget)) {
@@ -192,11 +192,11 @@ class BukuBesarService
     public function exportTabunganPdf(int|string $userId, ?string $month, ?string $search): array
     {
         $query = $this->buildTabunganTransactionQuery($userId, $month, $search);
-        $query->orderBy('transaction_date', 'asc');
+        $query->orderBy('tgl_transaksi', 'asc');
 
         $transactions = $query->get();
         $rows = $this->transformTransactions($transactions, false);
-        $member = Auth::user();
+        $anggota = Auth::user();
 
         $totalDebit = $rows->sum('debit');
         $totalKredit = $rows->sum('kredit');
@@ -206,17 +206,17 @@ class BukuBesarService
         $endDate = $rows->max('tanggal_raw') ? Carbon::parse($rows->max('tanggal_raw')) : now();
 
         $memberInfo = [
-            'nama' => $member->name,
-            'no_anggota' => $member->user_code,
-            'status' => $member->status,
-            'tanggal_bergabung' => optional($member->created_at)->format('d F Y'),
+            'nama' => $anggota->nama,
+            'no_anggota' => $anggota->kode_pengguna,
+            'status' => $anggota->status,
+            'tanggal_bergabung' => optional($anggota->created_at)->format('d F Y'),
         ];
 
-        $filename = 'Mutasi_Simpanan_' . $member->user_code . '_' . now()->format('Ymd_His') . '.pdf';
+        $filename = 'Mutasi_Simpanan_' . $anggota->kode_pengguna . '_' . now()->format('Ymd_His') . '.pdf';
 
         $pdf = Pdf::loadView('exports.tabungan_statement', [
             'transactions' => $rows,
-            'member' => $memberInfo,
+            'anggota'=> $memberInfo,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'totalDebit' => $totalDebit,

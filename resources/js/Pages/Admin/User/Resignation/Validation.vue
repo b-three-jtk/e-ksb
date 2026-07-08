@@ -49,7 +49,7 @@ const acceptTransaction = () => {
                         html: `
                             <div style="text-align:left;font-size:14px;line-height:1.8">
                                 <div><strong>Nama:</strong> ${props.data.name ?? '-'}</div>
-                                <div><strong>Nomor Anggota:</strong> ${props.data.user_code ?? '-'}</div>
+                                <div><strong>Nomor Anggota:</strong> ${props.data.kode_pengguna ?? '-'}</div>
                             </div>
                         `,
                         icon: 'success',
@@ -78,9 +78,9 @@ const acceptTransaction = () => {
                 <div class="card-layout px-0! md:col-span-2">
                     <h1 class="card-title border-b border-b-stroke px-6 pb-6">Detail Data Pengunduran Diri Anggota</h1>
                     <div class="grid grid-cols-2 gap-6 p-8 pb-6">
-                        <BaseInputAdmin label="Nama" type="text" v-model="props.data.name" isDisabled />
-                        <BaseInputAdmin label="Nomor Anggota" type="text" v-model="props.data.user_code" isDisabled />
-                        <BaseInputAdmin label="Tanggal Bergabung" type="date" v-model="props.data.joined_date"
+                        <BaseInputAdmin label="Nama" type="text" v-model="props.data.nama" isDisabled />
+                        <BaseInputAdmin label="Nomor Anggota" type="text" v-model="props.data.kode_pengguna" isDisabled />
+                        <BaseInputAdmin label="Tanggal Bergabung" type="date" v-model="props.data.tgl_bergabung"
                             isDisabled />
                         <BaseInputAdmin label="Email" type="email" v-model="props.data.email" isDisabled />
                         <div class="grid grid-cols-2 col-span-2 gap-6">

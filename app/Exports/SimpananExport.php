@@ -21,16 +21,16 @@ class SimpananExport implements FromCollection, WithEvents, ShouldAutoSize
 
         foreach ($this->transactions as $trx) {
             $rows->push([
-                $trx->saving_transaction_code,
-                Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                $trx->savingAccount->member->user->user_code
+                $trx->kode_transaksi_simpanan,
+                Carbon::parse($trx->tgl_transaksi)->format('d/m/Y'),
+                $trx->akunSimpanan->anggota->user->kode_pengguna
                     . ' - '
-                    . $trx->savingAccount->member->user->name,
-                $trx->savingAccount->saving_type ?? '-',
-                $trx->transaction_type,
-                $trx->transaction_type === 'Penarikan'
-                    ? -$trx->saving_amount
-                    : $trx->saving_amount,
+                    . $trx->akunSimpanan->anggota->user->nama,
+                $trx->akunSimpanan->jenis_simpanan ?? '-',
+                $trx->tipe_transaksi,
+                $trx->tipe_transaksi === 'Penarikan'
+                    ? -$trx->nominal_simpanan
+                    : $trx->nominal_simpanan,
             ]);
         }
 
@@ -69,36 +69,36 @@ class SimpananExport implements FromCollection, WithEvents, ShouldAutoSize
 
                     $sheet->setCellValue(
                         'A'.$row,
-                        $trx->saving_transaction_code
+                        $trx->kode_transaksi_simpanan
                     );
 
                     $sheet->setCellValue(
                         'B'.$row,
-                        Carbon::parse($trx->transaction_date)->format('d/m/Y')
+                        Carbon::parse($trx->tgl_transaksi)->format('d/m/Y')
                     );
 
                     $sheet->setCellValue(
                         'C'.$row,
-                        $trx->savingAccount->member->user->user_code
+                        $trx->akunSimpanan->anggota->user->kode_pengguna
                         . ' - '
-                        . $trx->savingAccount->member->user->name
+                        . $trx->akunSimpanan->anggota->user->nama
                     );
 
                     $sheet->setCellValue(
                         'D'.$row,
-                        $trx->savingAccount->saving_type ?? '-'
+                        $trx->akunSimpanan->jenis_simpanan ?? '-'
                     );
 
                     $sheet->setCellValue(
                         'E'.$row,
-                        $trx->transaction_type
+                        $trx->tipe_transaksi
                     );
 
                     $sheet->setCellValue(
                         'F'.$row,
-                        $trx->transaction_type === 'Penarikan'
-                            ? -$trx->saving_amount
-                            : $trx->saving_amount
+                        $trx->tipe_transaksi === 'Penarikan'
+                            ? -$trx->nominal_simpanan
+                            : $trx->nominal_simpanan
                     );
 
                     $row++;

@@ -6,15 +6,15 @@ use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PaymentMethodsEnum;
-use App\Models\Financing;
-use App\Models\FinancingItem;
-use App\Models\Installment;
-use App\Models\InstallmentPaymentTransaction;
-use App\Models\Journal;
-use App\Models\JournalEntry;
-use App\Models\Member;
-use App\Models\ProductType;
-use App\Models\User;
+use App\Models\Pembiayaan;
+use App\Models\ObjekPembiayaan;
+use App\Models\Angsuran;
+use App\Models\PembayaranAngsuran;
+use App\Models\Jurnal;
+use App\Models\DetailJurnal;
+use App\Models\Anggota;
+use App\Models\JenisBarang;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -32,11 +32,13 @@ class MurabahaProductSeeder extends Seeder
         // Reset counter setiap kali seeder dijalankan
         self::$transCodeCounter = 1000000;
 
-        // Ambil semua members
-        $members = Member::all();
+        Anggota::factory()->count(100)->create();
 
-        if ($members->isEmpty()) {
-            return; // Skip jika tidak ada member
+        // Ambil semua anggota
+        $anggota = Anggota::all();
+
+        if ($anggota->isEmpty()) {
+            return; // Skip jika tidak ada anggota
         }
 
         // Mapping skenario
@@ -50,17 +52,17 @@ class MurabahaProductSeeder extends Seeder
         ];
 
         $items = [
-            ['name' => 'Kipas Angin Miyako', 'spec' => 'Kipas Angin', 'price' => 300000, 'type' => 'Elektronik'],
-            ['name' => 'Smartphone Samsung Galaxy A05', 'spec' => 'Samsung Galaxy A05', 'price' => 1500000, 'type' => 'Elektronik'],
-            ['name' => 'Motor Honda Vario 160', 'spec' => 'Motor Honda Vario 160cc Tahun 2024', 'price' => 50000000, 'type' => 'Kendaraan Roda Dua'],
-            ['name' => 'Laptop ASUS VivoBook', 'spec' => 'Laptop ASUS VivoBook 15, Intel i5, RAM 8GB', 'price' => 30000000, 'type' => 'Elektronik'],
-            ['name' => 'Mesin Jahit Singer', 'spec' => 'Mesin Jahit Singer Portable, Semi Otomatis', 'price' => 2000000, 'type' => 'Peralatan Usaha'],
+            ['nama_barang' => 'Kipas Angin Miyako', 'spec' => 'Kipas Angin', 'price' => 300000, 'type' => 'Elektronik'],
+            ['nama_barang' => 'Smartphone Samsung Galaxy A05', 'spec' => 'Samsung Galaxy A05', 'price' => 1500000, 'type' => 'Elektronik'],
+            ['nama_barang' => 'Motor Honda Vario 160', 'spec' => 'Motor Honda Vario 160cc Tahun 2024', 'price' => 50000000, 'type' => 'Kendaraan Roda Dua'],
+            ['nama_barang' => 'Laptop ASUS VivoBook', 'spec' => 'Laptop ASUS VivoBook 15, Intel i5, RAM 8GB', 'price' => 30000000, 'type' => 'Elektronik'],
+            ['nama_barang' => 'Mesin Jahit Singer', 'spec' => 'Mesin Jahit Singer Portable, Semi Otomatis', 'price' => 2000000, 'type' => 'Peralatan Usaha'],
         ];
 
         // Generate 50 pembiayaan yang bervariasi agar grafiknya penuh
         for ($j = 0; $j < 50; $j++) {
-            $memberIndex = $j % $members->count();
-            $member = $members[$memberIndex];
+            $memberIndex = $j % $anggota->count();
+            $currentAnggota = $anggota[$memberIndex];
 
             $scenarioIndex = $j % count($scenarios);
             $scenario = $scenarios[$scenarioIndex];
@@ -69,55 +71,54 @@ class MurabahaProductSeeder extends Seeder
             $item = $items[$itemIndex];
 
             if ($scenario['status'] === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
-                $this->seedActiveFinancing($member, $item, $scenario['kolektibilitas']);
+                $this->seedActiveFinancing($currentAnggota, $item, $scenario['kolektibilitas']);
             } elseif ($scenario['status'] === FinancingReqStatusEnum::PENDING_REVIEW->value) {
-                $this->seedPendingFinancing($member, $item);
+                $this->seedPendingFinancing($currentAnggota, $item);
             } else {
-                $this->seedCompletedFinancing($member, $item);
+                $this->seedCompletedFinancing($currentAnggota, $item);
             }
         }
 
-        // PENYESUAIAN RUMUS DASHBOARD: KAS (101) JADI 75% DARI DEPOSIT, PIUTANG (104) JADI 35% DARI DEPOSIT
-        $admin = User::first();
+        // PENYESUAIAN RUMUS DASHBOARD: KAS (101) JADI 70M, PIUTANG (104) JADI 150M
+        $admin = Pengguna::first();
         $date = now()->endOfDay();
         
-        $totalDeposit = JournalEntry::whereIn('no_ref_account', ['201', '202', '203'])
-            ->selectRaw("SUM(CASE WHEN position = 'Credit' THEN nominal ELSE -nominal END) as total")
+        $kasBalance = DetailJurnal::where('no_ref_akun', '101')
+            ->selectRaw("SUM(CASE WHEN posisi_akun = 'Debit' THEN nominal ELSE -nominal END) as total")
             ->value('total') ?? 0;
             
-        $targetKas = $totalDeposit * 0.75;
-        $targetPiutang = $totalDeposit * 0.35;
-
-        $kasBalance = JournalEntry::where('no_ref_account', '101')
-            ->selectRaw("SUM(CASE WHEN position = 'Debit' THEN nominal ELSE -nominal END) as total")
-            ->value('total') ?? 0;
-            
-        $piutangBalance = JournalEntry::where('no_ref_account', '104')
-            ->selectRaw("SUM(CASE WHEN position = 'Debit' THEN nominal ELSE -nominal END) as total")
+        $piutangBalance = DetailJurnal::where('no_ref_akun', '104')
+            ->selectRaw("SUM(CASE WHEN posisi_akun = 'Debit' THEN nominal ELSE -nominal END) as total")
             ->value('total') ?? 0;
 
         $groupId = \Illuminate\Support\Str::uuid();
         
-        // Sesuaikan Kas ke targetKas
-        if ($kasBalance > $targetKas) {
-            $diffKas = $kasBalance - $targetKas;
-            JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '102', 'position' => 'Debit', 'nominal' => $diffKas, 'transaction_date' => $date, 'updated_by' => $admin->id]);
-            JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '101', 'position' => 'Credit', 'nominal' => $diffKas, 'transaction_date' => $date, 'updated_by' => $admin->id]);
-        } elseif ($kasBalance < $targetKas) {
-            $diffKas = $targetKas - $kasBalance;
-            JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '101', 'position' => 'Debit', 'nominal' => $diffKas, 'transaction_date' => $date, 'updated_by' => $admin->id]);
-            JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '102', 'position' => 'Credit', 'nominal' => $diffKas, 'transaction_date' => $date, 'updated_by' => $admin->id]);
+        Jurnal::create([
+            'id' => $groupId,
+            'tgl_transaksi' => $date,
+            'created_by' => $admin->id,
+        ]);
+        
+        // Sesuaikan Kas ke 70M
+        if ($kasBalance > 70000000) {
+            $diffKas = $kasBalance - 70000000;
+            DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '102', 'posisi_akun' => 'Debit', 'nominal' => $diffKas, 'updated_by' => $admin->id]);
+            DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '101', 'posisi_akun' => 'Credit', 'nominal' => $diffKas, 'updated_by' => $admin->id]);
+        } elseif ($kasBalance < 70000000) {
+            $diffKas = 70000000 - $kasBalance;
+            DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '101', 'posisi_akun' => 'Debit', 'nominal' => $diffKas, 'updated_by' => $admin->id]);
+            DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '102', 'posisi_akun' => 'Credit', 'nominal' => $diffKas, 'updated_by' => $admin->id]);
         }
 
-        // Sesuaikan Piutang ke targetPiutang
-        if ($piutangBalance > $targetPiutang) {
-            $diffPiutang = $piutangBalance - $targetPiutang;
-            JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '102', 'position' => 'Debit', 'nominal' => $diffPiutang, 'transaction_date' => $date, 'updated_by' => $admin->id]);
-            JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '104', 'position' => 'Credit', 'nominal' => $diffPiutang, 'transaction_date' => $date, 'updated_by' => $admin->id]);
-        } elseif ($piutangBalance < $targetPiutang) {
-            $diffPiutang = $targetPiutang - $piutangBalance;
-            JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '104', 'position' => 'Debit', 'nominal' => $diffPiutang, 'transaction_date' => $date, 'updated_by' => $admin->id]);
-            JournalEntry::create(['journal_group_id' => $groupId, 'no_ref_account' => '102', 'position' => 'Credit', 'nominal' => $diffPiutang, 'transaction_date' => $date, 'updated_by' => $admin->id]);
+        // Sesuaikan Piutang ke 150M
+        if ($piutangBalance > 150000000) {
+            $diffPiutang = $piutangBalance - 150000000;
+            DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '102', 'posisi_akun' => 'Debit', 'nominal' => $diffPiutang, 'updated_by' => $admin->id]);
+            DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '104', 'posisi_akun' => 'Credit', 'nominal' => $diffPiutang, 'updated_by' => $admin->id]);
+        } elseif ($piutangBalance < 150000000) {
+            $diffPiutang = 150000000 - $piutangBalance;
+            DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '104', 'posisi_akun' => 'Debit', 'nominal' => $diffPiutang, 'updated_by' => $admin->id]);
+            DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '102', 'posisi_akun' => 'Credit', 'nominal' => $diffPiutang, 'updated_by' => $admin->id]);
         }
     }
 
@@ -126,9 +127,9 @@ class MurabahaProductSeeder extends Seeder
         return 'TP' . str_pad(self::$transCodeCounter++, 8, '0', STR_PAD_LEFT);
     }
 
-    private function seedActiveFinancing(Member $member, array $item, string $kolektibilitas = 'lancar'): void
+    private function seedActiveFinancing(Anggota $anggota, array $item, string $kolektibilitas = 'lancar'): void
     {
-        $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? User::first();
+        $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.2); // 20% margin
         $downPayment = (int)($item['price'] * 0.1); // 10% DP
 
@@ -162,104 +163,97 @@ class MurabahaProductSeeder extends Seeder
 
         $akadDate = now()->subMonths($akadMonthsAgo)->startOfDay();
 
-        $financing = Financing::create([
-            'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
-            'member_id' => $member->id,
-            'cost_price' => $item['price'],
-            'margin_amount' => $margin,
-            'down_payment' => $downPayment,
-            'akad_date' => $akadDate,
+        $pembiayaan = Pembiayaan::create([
+            'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
+            'anggota_id' => $anggota->id,
+            'harga_perolehan' => $item['price'],
+            'margin_keuntungan' => $margin,
+            'uang_muka' => $downPayment,
+            'tgl_akad' => $akadDate,
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-            'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
+            'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin?->id,
             'tenor' => $tenor,
         ]);
 
-        // Create Financing Item
-        FinancingItem::create([
-            'financing_id' => $financing->id,
-            'name' => $item['name'],
-            'specification' => $item['spec'],
-            'qty' => 1,
-            'condition' => 'Baru',
-            'price_per_unit' => $item['price'],
-            'product_type_id' => ProductType::where('product_type_name', $item['type'])->first()?->id,
+        // Create Pembiayaan Item
+        ObjekPembiayaan::create([
+            'pembiayaan_id' => $pembiayaan->id,
+            'nama_barang' => $item['nama_barang'],
+            'spesifikasi_barang' => $item['spec'],
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
+            'harga_beli_per_unit' => $item['price'],
+            'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
-        $akadJournal = Journal::create([
+        $akadJournal = Jurnal::create([
             'tgl_transaksi' => $akadDate,
             'created_by' => $admin?->id,
         ]);
         
-        JournalEntry::create([
-            'journal_group_id' => $akadJournal->id,
-            'no_ref_account' => '103', // Pembiayaan Dalam Proses
-            'position' => 'Debit',
-            'nominal' => $financing->cost_price,
+        DetailJurnal::create([
+            'jurnal_id' => $akadJournal->id,
+            'no_ref_akun' => '103', // Pembiayaan Dalam Proses
+            'posisi_akun' => 'Debit',
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
-            'transaction_date' => $akadDate,
         ]);
-        JournalEntry::create([
-            'journal_group_id' => $akadJournal->id,
-            'no_ref_account' => '102', // Dana Alokasi Pembiayaan
-            'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+        DetailJurnal::create([
+            'jurnal_id' => $akadJournal->id,
+            'no_ref_akun' => '102', // Dana Alokasi Pembiayaan
+            'posisi_akun' => 'Credit',
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
-            'transaction_date' => $akadDate,
         ]);
 
         if ($downPayment > 0) {
-            JournalEntry::create([
-                'journal_group_id' => $akadJournal->id,
-                'no_ref_account' => '101', // Kas
-                'position' => 'Debit',
+            DetailJurnal::create([
+                'jurnal_id' => $akadJournal->id,
+                'no_ref_akun' => '101', // Kas
+                'posisi_akun' => 'Debit',
                 'nominal' => $downPayment,
                 'updated_by' => $admin?->id,
-                'transaction_date' => $akadDate,
             ]);
-            JournalEntry::create([
-                'journal_group_id' => $akadJournal->id,
-                'no_ref_account' => '204', // Uang Muka Murabahah
-                'position' => 'Credit',
+            DetailJurnal::create([
+                'jurnal_id' => $akadJournal->id,
+                'no_ref_akun' => '204', // Uang Muka Murabahah
+                'posisi_akun' => 'Credit',
                 'nominal' => $downPayment,
                 'updated_by' => $admin?->id,
-                'transaction_date' => $akadDate,
             ]);
         }
 
-        $piutangPokok = $financing->cost_price - $downPayment;
-        JournalEntry::create([
-            'journal_group_id' => $akadJournal->id,
-            'no_ref_account' => '104', // Piutang Murabahah
-            'position' => 'Debit',
+        $piutangPokok = $pembiayaan->harga_perolehan - $downPayment;
+        DetailJurnal::create([
+            'jurnal_id' => $akadJournal->id,
+            'no_ref_akun' => '104', // Piutang Murabahah
+            'posisi_akun' => 'Debit',
             'nominal' => $piutangPokok,
             'updated_by' => $admin?->id,
-            'transaction_date' => $akadDate,
         ]);
         if ($downPayment > 0) {
-            JournalEntry::create([
-                'journal_group_id' => $akadJournal->id,
-                'no_ref_account' => '204', // Uang Muka Murabahah
-                'position' => 'Debit',
+            DetailJurnal::create([
+                'jurnal_id' => $akadJournal->id,
+                'no_ref_akun' => '204', // Uang Muka Murabahah
+                'posisi_akun' => 'Debit',
                 'nominal' => $downPayment,
                 'updated_by' => $admin?->id,
-                'transaction_date' => $akadDate,
             ]);
         }
-        JournalEntry::create([
-            'journal_group_id' => $akadJournal->id,
-            'no_ref_account' => '103', // Pembiayaan Dalam Proses
-            'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+        DetailJurnal::create([
+            'jurnal_id' => $akadJournal->id,
+            'no_ref_akun' => '103', // Pembiayaan Dalam Proses
+            'posisi_akun' => 'Credit',
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
-            'transaction_date' => $akadDate,
         ]);
 
-        // 2. Buat Installment sesuai skenario kolektibilitas
+        // 2. Buat Angsuran sesuai skenario kolektibilitas
         for ($i = 1; $i <= $tenor; $i++) {
-            $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $tenor;
-            $monthlyMargin = $financing->margin_amount / $tenor;
-            $monthlyCostPrice = ($financing->cost_price - $financing->down_payment) / $tenor;
+            $monthlyPayment = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $tenor;
+            $monthlyMargin = $pembiayaan->margin_keuntungan / $tenor;
+            $monthlyCostPrice = ($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $tenor;
             $dueDate = $akadDate->copy()->addMonths($i);
 
             // Tentukan status pembayaran cicilan
@@ -271,278 +265,263 @@ class MurabahaProductSeeder extends Seeder
                 $isPaid = $dueDate->isBefore($batasTunggakan);
             }
 
-            $installment = Installment::create([
-                'financing_id' => $financing->id,
-                'installment_no' => $i,
-                'due_date' => $dueDate,
-                'amount' => $monthlyPayment,
+            $angsuran = Angsuran::create([
+                'pembiayaan_id' => $pembiayaan->id,
+                'angsuran_ke' => $i,
+                'tgl_jatuh_tempo' => $dueDate,
+                'nominal_angsuran' => $monthlyPayment,
                 'status' => $isPaid ? InstallmentPaymentScheduleStatusEnum::PAID->value : InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             ]);
 
             // Jika dibayar, buat history transaksinya
             if ($isPaid) {
-                InstallmentPaymentTransaction::create([
-                    'installment_trans_code' => $this->getUniqueTransCode(),
-                    'installment_id' => $installment->id,
-                    'nominal' => $monthlyPayment,
-                    'principal_amount' => $monthlyCostPrice,
-                    'margin_amount' => $monthlyMargin,
-                    'payment_method' => PaymentMethodsEnum::CASHLESS->value,
-                    'is_early_repayment' => false,
-                    'payment_date' => $dueDate,
+                PembayaranAngsuran::create([
+                    'kode_transaksi_pembayaran' => $this->getUniqueTransCode(),
+                    'angsuran_id' => $angsuran->id,
+                    'jumlah_angsuran_dibayar' => $monthlyPayment,
+                    'pokok_dibayar' => $monthlyCostPrice,
+                    'margin_dibayar' => $monthlyMargin,
+                    'metode_pembayaran' => PaymentMethodsEnum::CASHLESS->value,
+                    'is_pelunasan_lebih_cepat' => false,
+                    'tgl_pembayaran' => $dueDate,
                     'updated_by' => $admin?->id,
                 ]);
 
-                $journal = Journal::create([
+                $journal = Jurnal::create([
                     'tgl_transaksi' => $dueDate,
                     'created_by' => $admin?->id,
                 ]);
 
-                JournalEntry::create([
-                    'journal_group_id' => $journal->id,
-                    'no_ref_account' => '101',
-                    'position' => 'Debit',
+                DetailJurnal::create([
+                    'jurnal_id' => $journal->id,
+                    'no_ref_akun' => '101',
+                    'posisi_akun' => 'Debit',
                     'nominal' => $monthlyPayment,
                     'updated_by' => $admin?->id,
-                    'transaction_date' => $dueDate,
                 ]);
 
-                JournalEntry::create([
-                    'journal_group_id' => $journal->id,
-                    'no_ref_account' => '104', // Piutang Murabahah
-                    'position' => 'Credit',
+                DetailJurnal::create([
+                    'jurnal_id' => $journal->id,
+                    'no_ref_akun' => '104', // Piutang Murabahah
+                    'posisi_akun' => 'Credit',
                     'nominal' => $monthlyCostPrice,
                     'updated_by' => $admin?->id,
-                    'transaction_date' => $dueDate,
                 ]);
 
-                JournalEntry::create([
-                    'journal_group_id' => $journal->id,
-                    'no_ref_account' => '401', // Pendapatan Margin
-                    'position' => 'Credit',
+                DetailJurnal::create([
+                    'jurnal_id' => $journal->id,
+                    'no_ref_akun' => '401', // Pendapatan Margin
+                    'posisi_akun' => 'Credit',
                     'nominal' => $monthlyMargin,
                     'updated_by' => $admin?->id,
-                    'transaction_date' => $dueDate,
                 ]);
             }
         }
     }
 
-    private function seedPendingFinancing(Member $member, array $item): void
+    private function seedPendingFinancing(Anggota $anggota, array $item): void
     {
-        $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? User::first();
+        $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.1);
         $downPayment = (int)($item['price'] * 0.1);
 
-        $financing = Financing::create([
-            'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
-            'member_id' => $member->id,
-            'cost_price' => $item['price'],
-            'margin_amount' => $margin,
-            'down_payment' => $downPayment,
-            'requested_date' => now(),
+        $pembiayaan = Pembiayaan::create([
+            'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
+            'anggota_id' => $anggota->id,
+            'harga_perolehan' => $item['price'],
+            'margin_keuntungan' => $margin,
+            'uang_muka' => $downPayment,
+            'tgl_permohonan' => now(),
             'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
-            'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
+            'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin?->id,
         ]);
 
-        // Create Financing Item
-        FinancingItem::create([
-            'financing_id' => $financing->id,
-            'name' => $item['name'],
-            'specification' => $item['spec'],
-            'qty' => 1,
-            'condition' => 'Baru',
-            'price_per_unit' => $item['price'],
-            'product_type_id' => ProductType::where('product_type_name', $item['type'])->first()?->id,
+        // Create Pembiayaan Item
+        ObjekPembiayaan::create([
+            'pembiayaan_id' => $pembiayaan->id,
+            'nama_barang' => $item['nama_barang'],
+            'spesifikasi_barang' => $item['spec'],
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
+            'harga_beli_per_unit' => $item['price'],
+            'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
-        $journal = Journal::create([
+        $journal = Jurnal::create([
             'tgl_transaksi' => now(),
             'created_by' => $admin?->id,
         ]);
 
-        JournalEntry::create([
-            'journal_group_id' => $journal->id,
-            'no_ref_account' => '103',
-            'position' => 'Debit',
-            'nominal' => $financing->cost_price,
+        DetailJurnal::create([
+            'jurnal_id' => $journal->id,
+            'no_ref_akun' => '103',
+            'posisi_akun' => 'Debit',
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
-            'transaction_date' => now(),
         ]);
 
-        JournalEntry::create([
-            'journal_group_id' => $journal->id,
-            'no_ref_account' => '102',
-            'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+        DetailJurnal::create([
+            'jurnal_id' => $journal->id,
+            'no_ref_akun' => '102',
+            'posisi_akun' => 'Credit',
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
-            'transaction_date' => now(),
         ]);
     }
 
-    private function seedCompletedFinancing(Member $member, array $item): void
+    private function seedCompletedFinancing(Anggota $anggota, array $item): void
     {
-        $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? User::first();
+        $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.1);
         $downPayment = (int)($item['price'] * 0.1);
         $tenor = 10;
 
-        $financing = Financing::create([
-            'financing_transaction_code' => 'PM' . strtoupper(uniqid()),
-            'member_id' => $member->id,
-            'cost_price' => $item['price'],
-            'margin_amount' => $margin,
-            'down_payment' => $downPayment,
-            'akad_date' => now()->subMonths($tenor),
-            'paid_date' => now(),
+        $pembiayaan = Pembiayaan::create([
+            'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
+            'anggota_id' => $anggota->id,
+            'harga_perolehan' => $item['price'],
+            'margin_keuntungan' => $margin,
+            'uang_muka' => $downPayment,
+            'tgl_akad' => now()->subMonths($tenor),
+            'tgl_lunas' => now(),
             'status' => FinancingReqStatusEnum::PAID->value,
-            'payment_method' => FinancingPaymentMethodEnum::INSTALLMENT->value,
+            'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin?->id,
         ]);
 
-        // Create Financing Item
-        FinancingItem::create([
-            'financing_id' => $financing->id,
-            'name' => $item['name'],
-            'specification' => $item['spec'],
-            'qty' => 1,
-            'condition' => 'Baru',
-            'price_per_unit' => $item['price'],
-            'product_type_id' => ProductType::where('product_type_name', $item['type'])->first()?->id,
+        // Create Pembiayaan Item
+        ObjekPembiayaan::create([
+            'pembiayaan_id' => $pembiayaan->id,
+            'nama_barang' => $item['nama_barang'],
+            'spesifikasi_barang' => $item['spec'],
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
+            'harga_beli_per_unit' => $item['price'],
+            'jenis_barang_id' => JenisBarang::where('nama_jenis_barang', $item['type'])->first()?->id,
         ]);
 
-        $akadDate = Carbon::parse($financing->akad_date);
-        $akadJournal = Journal::create([
+        $akadDate = Carbon::parse($pembiayaan->tgl_akad);
+        $akadJournal = Jurnal::create([
             'tgl_transaksi' => $akadDate,
             'created_by' => $admin?->id,
         ]);
         
-        JournalEntry::create([
-            'journal_group_id' => $akadJournal->id,
-            'no_ref_account' => '103', // Pembiayaan Dalam Proses
-            'position' => 'Debit',
-            'nominal' => $financing->cost_price,
+        DetailJurnal::create([
+            'jurnal_id' => $akadJournal->id,
+            'no_ref_akun' => '103', // Pembiayaan Dalam Proses
+            'posisi_akun' => 'Debit',
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
-            'transaction_date' => $akadDate,
         ]);
-        JournalEntry::create([
-            'journal_group_id' => $akadJournal->id,
-            'no_ref_account' => '102', // Dana Alokasi Pembiayaan
-            'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+        DetailJurnal::create([
+            'jurnal_id' => $akadJournal->id,
+            'no_ref_akun' => '102', // Dana Alokasi Pembiayaan
+            'posisi_akun' => 'Credit',
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
-            'transaction_date' => $akadDate,
         ]);
 
         if ($downPayment > 0) {
-            JournalEntry::create([
-                'journal_group_id' => $akadJournal->id,
-                'no_ref_account' => '101', // Kas
-                'position' => 'Debit',
+            DetailJurnal::create([
+                'jurnal_id' => $akadJournal->id,
+                'no_ref_akun' => '101', // Kas
+                'posisi_akun' => 'Debit',
                 'nominal' => $downPayment,
                 'updated_by' => $admin?->id,
-                'transaction_date' => $akadDate,
             ]);
-            JournalEntry::create([
-                'journal_group_id' => $akadJournal->id,
-                'no_ref_account' => '204', // Uang Muka Murabahah
-                'position' => 'Credit',
+            DetailJurnal::create([
+                'jurnal_id' => $akadJournal->id,
+                'no_ref_akun' => '204', // Uang Muka Murabahah
+                'posisi_akun' => 'Credit',
                 'nominal' => $downPayment,
                 'updated_by' => $admin?->id,
-                'transaction_date' => $akadDate,
             ]);
         }
 
-        $piutangPokok = $financing->cost_price - $downPayment;
-        JournalEntry::create([
-            'journal_group_id' => $akadJournal->id,
-            'no_ref_account' => '104', // Piutang Murabahah
-            'position' => 'Debit',
+        $piutangPokok = $pembiayaan->harga_perolehan - $downPayment;
+        DetailJurnal::create([
+            'jurnal_id' => $akadJournal->id,
+            'no_ref_akun' => '104', // Piutang Murabahah
+            'posisi_akun' => 'Debit',
             'nominal' => $piutangPokok,
             'updated_by' => $admin?->id,
-            'transaction_date' => $akadDate,
         ]);
         if ($downPayment > 0) {
-            JournalEntry::create([
-                'journal_group_id' => $akadJournal->id,
-                'no_ref_account' => '204', // Uang Muka Murabahah
-                'position' => 'Debit',
+            DetailJurnal::create([
+                'jurnal_id' => $akadJournal->id,
+                'no_ref_akun' => '204', // Uang Muka Murabahah
+                'posisi_akun' => 'Debit',
                 'nominal' => $downPayment,
                 'updated_by' => $admin?->id,
-                'transaction_date' => $akadDate,
             ]);
         }
-        JournalEntry::create([
-            'journal_group_id' => $akadJournal->id,
-            'no_ref_account' => '103', // Pembiayaan Dalam Proses
-            'position' => 'Credit',
-            'nominal' => $financing->cost_price,
+        DetailJurnal::create([
+            'jurnal_id' => $akadJournal->id,
+            'no_ref_akun' => '103', // Pembiayaan Dalam Proses
+            'posisi_akun' => 'Credit',
+            'nominal' => $pembiayaan->harga_perolehan,
             'updated_by' => $admin?->id,
-            'transaction_date' => $akadDate,
         ]);
 
         for ($i = 1; $i <= $tenor; $i++) {
-            $monthlyPayment = ($financing->cost_price + $financing->margin_amount - $financing->down_payment) / $tenor;
-            $monthlyMargin = $financing->margin_amount / $tenor;
-            $monthlyCostPrice = ($financing->cost_price - $financing->down_payment) / $tenor;
+            $monthlyPayment = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $tenor;
+            $monthlyMargin = $pembiayaan->margin_keuntungan / $tenor;
+            $monthlyCostPrice = ($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $tenor;
 
-            $akadDate = Carbon::parse($financing->akad_date);
+            $akadDate = Carbon::parse($pembiayaan->tgl_akad);
             $dueDate = $akadDate->copy()->addMonths($i);
 
-            $installment = Installment::create([
-                'financing_id' => $financing->id,
-                'installment_no' => $i,
-                'due_date' => $dueDate,
-                'amount' => $monthlyPayment,
+            $angsuran = Angsuran::create([
+                'pembiayaan_id' => $pembiayaan->id,
+                'angsuran_ke' => $i,
+                'tgl_jatuh_tempo' => $dueDate,
+                'nominal_angsuran' => $monthlyPayment,
                 'status' => $dueDate->isPast() ? InstallmentPaymentScheduleStatusEnum::PENDING->value : InstallmentPaymentScheduleStatusEnum::PAID->value,
             ]);
 
-            InstallmentPaymentTransaction::create([
-                'installment_trans_code' => $this->getUniqueTransCode(),
-                'installment_id' => $installment->id,
-                'nominal' => $monthlyPayment,
-                'principal_amount' => $monthlyCostPrice,
-                'margin_amount' => $monthlyMargin,
-                'payment_method' => PaymentMethodsEnum::CASHLESS->value,
-                'is_early_repayment' => false,
-                'payment_date' => $dueDate,
+            PembayaranAngsuran::create([
+                'kode_transaksi_pembayaran' => $this->getUniqueTransCode(),
+                'angsuran_id' => $angsuran->id,
+                'jumlah_angsuran_dibayar' => $monthlyPayment,
+                'pokok_dibayar' => $monthlyCostPrice,
+                'margin_dibayar' => $monthlyMargin,
+                'metode_pembayaran' => PaymentMethodsEnum::CASHLESS->value,
+                'is_pelunasan_lebih_cepat' => false,
+                'tgl_pembayaran' => $dueDate,
                 'updated_by' => $admin?->id,
             ]);
 
-            $journal = Journal::create([
+            $journal = Jurnal::create([
                 'tgl_transaksi' => $dueDate,
                 'created_by' => $admin?->id,
             ]);
 
             // kas
-            JournalEntry::create([
-                'journal_group_id' => $journal->id,
-                'no_ref_account' => '101',
-                'position' => 'Debit',
+            DetailJurnal::create([
+                'jurnal_id' => $journal->id,
+                'no_ref_akun' => '101',
+                'posisi_akun' => 'Debit',
                 'nominal' => $monthlyPayment,
                 'updated_by' => $admin?->id,
-                'transaction_date' => $dueDate,
             ]);
 
             // piutang murabahah
-            JournalEntry::create([
-                'journal_group_id' => $journal->id,
-                'no_ref_account' => '104',
-                'position' => 'Credit',
+            DetailJurnal::create([
+                'jurnal_id' => $journal->id,
+                'no_ref_akun' => '104',
+                'posisi_akun' => 'Credit',
                 'nominal' => $monthlyCostPrice,
                 'updated_by' => $admin?->id,
-                'transaction_date' => $dueDate,
             ]);
 
             // pendapatan margin murabahah
-            JournalEntry::create([
-                'journal_group_id' => $journal->id,
-                'no_ref_account' => '401',
-                'position' => 'Credit',
+            DetailJurnal::create([
+                'jurnal_id' => $journal->id,
+                'no_ref_akun' => '401',
+                'posisi_akun' => 'Credit',
                 'nominal' => $monthlyMargin,
                 'updated_by' => $admin?->id,
-                'transaction_date' => $dueDate,
             ]);
         }
     }

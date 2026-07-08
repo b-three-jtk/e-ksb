@@ -17,7 +17,7 @@ class EnsureMemberAccess
         }
 
         $isAnggota = $user->hasRole('Anggota');
-        $hasMemberData = $user->member()->exists();
+        $hasMemberData = $user->anggota()->exists();
 
         if (!$isAnggota && !$hasMemberData) {
             abort(403, 'Unauthorized');

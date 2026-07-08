@@ -43,7 +43,7 @@ interface NotificationFilters {
 
 const props = withDefaults(
     defineProps<{
-        notifications: NotificationPagination
+        notifikasi: NotificationPagination
         filters?: NotificationFilters
     }>(),
     {
@@ -69,7 +69,7 @@ const columns = [
 ]
 
 const tableData = computed(() =>
-    props.notifications.data.map((item) => ({
+    props.notifikasi.data.map((item) => ({
         ...item,
         notification_type:
             item.notification_type === 'mandatory_saving'
@@ -80,7 +80,7 @@ const tableData = computed(() =>
 
 const applyFilters = () => {
     router.get(
-        '/user/notifications',
+        '/user/notifikasi',
         {
             unread: filters.unread ? 1 : 0,
             per_page: filters.per_page,
@@ -187,7 +187,7 @@ const getReadStatusClass = (isRead: boolean) => {
 
                         <template #cell-actions="{ row }">
                             <Link
-                                :href="`/user/notifications/${row.id}`"
+                                :href="`/user/notifikasi/${row.id}`"
                                 class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 transition-colors"
                             >
                                 Detail
@@ -196,8 +196,8 @@ const getReadStatusClass = (isRead: boolean) => {
                     </BaseTable>
 
                     <Pagination
-                        :links="notifications.links"
-                        :total="notifications.total"
+                        :links="notifikasi.links"
+                        :total="notifikasi.total"
                     />
                 </div>
             </div>

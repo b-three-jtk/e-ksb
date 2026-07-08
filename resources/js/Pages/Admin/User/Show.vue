@@ -1,20 +1,20 @@
 <script setup>
-import AdminLayout from '@/Layouts/Admin/Layout.vue';
-import PageBreadcrumb from '@/Components/PageBreadcrumb.vue';
-import dateParser from '@/Composables/dateParser.js';
-import parseCurrencyAmount from '@/Composables/moneyParser.js';
-import NoArchiveIcon from '@/Icons/NoArchiveIcon.vue';
-import UserIcon from '@/Icons/UserIcon.vue';
-import Swal from 'sweetalert2';
-import { useForm } from '@inertiajs/vue3'
-import Button from '@/Components/Form/Button.vue';
-import InfoCircleIcon from '@/Icons/InfoCircleIcon.vue'
-import EyeIcon from '@/Icons/EyeIcon.vue';
-import ModalDocument from '@/Components/ModalDocument.vue';
-import { ref } from 'vue'
-import ModalMutasi from '@/Components/ModalMutasi.vue';
-import { computed } from 'vue';
-import { usePage, router } from '@inertiajs/vue3';
+import AdminLayout from "@/Layouts/Admin/Layout.vue";
+import PageBreadcrumb from "@/Components/PageBreadcrumb.vue";
+import dateParser from "@/Composables/dateParser.js";
+import parseCurrencyAmount from "@/Composables/moneyParser.js";
+import NoArchiveIcon from "@/Icons/NoArchiveIcon.vue";
+import UserIcon from "@/Icons/UserIcon.vue";
+import Swal from "sweetalert2";
+import { useForm } from "@inertiajs/vue3";
+import Button from "@/Components/Form/Button.vue";
+import InfoCircleIcon from "@/Icons/InfoCircleIcon.vue";
+import EyeIcon from "@/Icons/EyeIcon.vue";
+import ModalDocument from "@/Components/ModalDocument.vue";
+import { ref } from "vue";
+import ModalMutasi from "@/Components/ModalMutasi.vue";
+import { computed } from "vue";
+import { usePage, router } from "@inertiajs/vue3";
 
 const page = usePage();
 
@@ -27,195 +27,281 @@ const props = defineProps({
 const can = computed(() => page.props.auth.can);
 
 const form = useForm({
-    status: '',
+    status: "",
 });
 
-const ktpModalRef = ref(null)
-const kkModalRef = ref(null)
+const ktpModalRef = ref(null);
+const kkModalRef = ref(null);
 
-const mutasiModalRef = ref(null)
-const riwayatModalRef = ref(null)
-const isLoadingMutasi = ref(false)
-const isLoadingRiwayat = ref(false)
+const mutasiModalRef = ref(null);
+const riwayatModalRef = ref(null);
+const isLoadingMutasi = ref(false);
+const isLoadingRiwayat = ref(false);
 
-const mutasiData = ref([])
-const riwayatData = ref([])
+const mutasiData = ref([]);
+const riwayatData = ref([]);
 
-const selectedAccount = ref(null)
-const selectedFinancing = ref(null)
+const selectedAccount = ref(null);
+const selectedFinancing = ref(null);
 
-const openKtpModal = () => ktpModalRef.value?.openModal()
-const openKkModal = () => kkModalRef.value?.openModal()
+const openKtpModal = () => ktpModalRef.value?.openModal();
+const openKkModal = () => kkModalRef.value?.openModal();
 
 const nonactiveUser = () => {
     Swal.fire({
-        title: 'Konfirmasi',
-        text: 'Apakah Anda yakin ingin menonaktifkan pengguna ini?',
-        icon: 'warning',
+        title: "Konfirmasi",
+        text: "Apakah Anda yakin ingin menonaktifkan pengguna ini?",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: 'Ya, nonaktifkan',
-        cancelButtonText: 'Batal',
-        confirmButtonColor: '#009141',
+        confirmButtonText: "Ya, nonaktifkan",
+        cancelButtonText: "Batal",
+        confirmButtonColor: "#009141",
     }).then((result) => {
         if (result.isConfirmed) {
-            form.put((`/admin/users/${props.user.id}/disable`), {
+            form.put(`/admin/users/${props.user.id}/disable`, {
                 onSuccess: () => {
-                    Swal.fire('Berhasil', 'Pengguna berhasil dinonaktifkan!', 'success').then(() => {
-                        router.push(route('admin.users.index'))
-                    })
+                    Swal.fire(
+                        "Berhasil",
+                        "Pengguna berhasil dinonaktifkan!",
+                        "success",
+                    ).then(() => {
+                        router.push(route("admin.users.index"));
+                    });
                 },
                 onError: () => {
-                    Swal.fire('Gagal', 'Gagal menonaktifkan pengguna.', 'error')
-                }
-            })
+                    Swal.fire(
+                        "Gagal",
+                        "Gagal menonaktifkan pengguna.",
+                        "error",
+                    );
+                },
+            });
         }
-    })
-}
+    });
+};
 
 const getStatusClass = () => {
-    const baseClass = 'font-semibold rounded-2xl px-4 text-theme-sm py-1 border border-stroke'
+    const baseClass =
+        "font-semibold rounded-2xl px-4 text-theme-sm py-1 border border-stroke";
 
     switch (props.user.status) {
-        case 'Aktif':
-            return `${baseClass} text-green-600 bg-green-50`
-        case 'Tidak Aktif':
-            return `${baseClass} text-red-600 bg-red-100`
-        case 'Mengundurkan Diri':
-            return `${baseClass} text-yellow-600 bg-yellow-100`
-        case 'Dalam Peninjauan':
-            return `${baseClass} text-blue-600 bg-blue-100`
-        case 'Menunggu Pembayaran':
-            return `${baseClass} text-purple-600 bg-purple-100`
-        case 'Ditolak dengan alasan':
-            return `${baseClass} text-orange-600 bg-orange-100`
+        case "Aktif":
+            return `${baseClass} text-green-600 bg-green-50`;
+        case "Tidak Aktif":
+            return `${baseClass} text-red-600 bg-red-100`;
+        case "Mengundurkan Diri":
+            return `${baseClass} text-yellow-600 bg-yellow-100`;
+        case "Dalam Peninjauan":
+            return `${baseClass} text-blue-600 bg-blue-100`;
+        case "Menunggu Pembayaran":
+            return `${baseClass} text-purple-600 bg-purple-100`;
+        case "Ditolak dengan alasan":
+            return `${baseClass} text-orange-600 bg-orange-100`;
         default:
-            return `${baseClass} text-gray-600 bg-gray-100`
+            return `${baseClass} text-gray-600 bg-gray-100`;
     }
-}
+};
 
 const openMutasiModal = async (account) => {
-    selectedAccount.value = account
-    isLoadingMutasi.value = true
-    mutasiModalRef.value?.openModal()
+    selectedAccount.value = account;
+    isLoadingMutasi.value = true;
+    mutasiModalRef.value?.openModal();
 
     try {
-        const res = await axios.get(`/admin/accounts/${account.id}/mutasi`)
-        mutasiData.value = res.data
+        const res = await axios.get(`/admin/akun/${account.id}/mutasi`);
+        mutasiData.value = res.data;
     } catch (error) {
-        console.error('Error fetching mutasi:', error)
+        console.error("Error fetching mutasi:", error);
     } finally {
-        isLoadingMutasi.value = false
+        isLoadingMutasi.value = false;
     }
-}
+};
 
-const openRiwayatModal = async (financing) => {
-    selectedFinancing.value = financing
-    isLoadingRiwayat.value = true
-    riwayatModalRef.value?.openModal()
+const openRiwayatModal = async (pembiayaan) => {
+    selectedFinancing.value = pembiayaan;
+    isLoadingRiwayat.value = true;
+    riwayatModalRef.value?.openModal();
 
     try {
-        const res = await axios.get(`/admin/financings/${financing.id}/history`)
-        riwayatData.value = res.data
+        const res = await axios.get(
+            `/admin/pembiayaan/${pembiayaan.id}/history`,
+        );
+        riwayatData.value = res.data;
     } catch (error) {
-        console.error('Error fetching riwayat:', error)
+        console.error("Error fetching riwayat:", error);
     } finally {
-        isLoadingRiwayat.value = false
+        isLoadingRiwayat.value = false;
     }
-}
+};
 
 const breadcrumbItems = [
-    { name: 'Dashboard', link: '/admin/dashboard' },
-    { name: 'Pengelolaan Anggota', link: '/admin/users' },
-    { name: 'Detail Anggota' },
+    { name: "Dashboard", link: "/admin/dashboard" },
+    { name: "Pengelolaan Anggota", link: "/admin/users" },
+    { name: "Detail Anggota" },
 ];
 </script>
 
 <template>
     <AdminLayout title="Detail Anggota">
         <div class="flex flex-col">
-            <PageBreadcrumb :page-title="'Detail Anggota'" :items="breadcrumbItems" />
+            <PageBreadcrumb
+                :page-title="'Detail Anggota'"
+                :items="breadcrumbItems"
+            />
             <div class="flex flex-col gap-6">
-                <div class="card-layout flex flex-col xl:flex-row justify-between gap-4 items-center">
-                    <div class="flex flex-col xl:flex-row justify-center items-center text-center xl:text-left gap-6">
-                        <div v-if="user.profile_picture">
-                            <img class="w-20 h-20 rounded-full object-cover bg-gray-400" :src="user.profile_picture"
-                                alt="User avatar">
+                <div
+                    class="card-layout flex flex-col xl:flex-row justify-between gap-4 items-center"
+                >
+                    <div
+                        class="flex flex-col xl:flex-row justify-center items-center text-center xl:text-left gap-6"
+                    >
+                        <div v-if="user.foto_profil">
+                            <img
+                                class="w-20 h-20 rounded-full object-cover bg-gray-400"
+                                :src="user.foto_profil"
+                                alt="User avatar"
+                            />
                         </div>
-                        <div v-else
-                            class="w-20 h-20 rounded-full bg-white border border-stroke flex items-center justify-center text-gray-500">
+                        <div
+                            v-else
+                            class="w-20 h-20 rounded-full bg-white border border-stroke flex items-center justify-center text-gray-500"
+                        >
                             <UserIcon />
                         </div>
                         <div class="flex flex-col justify-center gap-1">
                             <div class="flex gap-2">
-                                <h1 class="card-title">{{ user.name }}</h1>
-                                <span :class="getStatusClass()">{{ user.status }}</span>
+                                <h1 class="card-title">{{ user.nama }}</h1>
+                                <span :class="getStatusClass()">{{
+                                    user.status
+                                }}</span>
                             </div>
                             <p class="text-gray-500">
-                                {{ user.roles[0].name }} - {{ user.user_code }}
+                                {{ user.roles[0].name }} - {{ user.kode_pengguna }}
                             </p>
                         </div>
                     </div>
                     <div class="flex gap-4">
-                        <button @click="nonactiveUser()" v-if="user.status === 'Aktif'"
-                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-error-500 px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-error-400 dark:border-gray-700 dark:hover:bg-error-500/70 dark:hover:text-gray-200">
-                            <span class="icon-[tabler--ban]" style="width: 24px; height: 24px;"></span>
+                        <button
+                            @click="nonactiveUser()"
+                            v-if="user.status === 'Aktif'"
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-error-500 px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-error-400 dark:border-gray-700 dark:hover:bg-error-500/70 dark:hover:text-gray-200"
+                        >
+                            <span
+                                class="icon-[tabler--ban]"
+                                style="width: 24px; height: 24px"
+                            ></span>
                             Nonaktifkan
                         </button>
                     </div>
                 </div>
                 <div class="card-layout grid gap-5">
-                    <div class="card-layout py-0! grid xl:grid-cols-2 grid-cols-1">
+                    <div
+                        class="card-layout py-0! grid xl:grid-cols-2 grid-cols-1"
+                    >
                         <div class="grid grid-cols-1 gap-8 py-6">
                             <h1 class="card-title">Identitas</h1>
                             <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">NIK</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.nik }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >NIK</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{ user.nik }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Jenis Kelamin</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.gender ?? '-'
-                                    }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Jenis Kelamin</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{ user.anggota.jenis_kelamin ?? "-" }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Lahir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ dateParser(user.member.birth_date) ?? '-'
-                                        }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Tanggal Lahir</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{
+                                            dateParser(
+                                                user.anggota.tgl_lahir,
+                                            ) ?? "-"
+                                        }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Pendidikan Terakhir</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.last_education ??
-                                        '-'
-                                    }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Pendidikan Terakhir</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{
+                                            user.anggota.pendidikan_terakhir ?? "-"
+                                        }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Status Pernikahan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.marital_status ??
-                                        '-'
-                                    }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Status Pernikahan</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{
+                                            user.anggota.status_pernikahan ?? "-"
+                                        }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Jumlah Tanggungan
-                                        Keluarga</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.dependents ?? '-'
-                                        }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Jumlah Tanggungan Keluarga</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{
+                                            user.anggota.jml_tanggungan ?? "-"
+                                        }}</span
+                                    >
                                 </li>
                             </ul>
                         </div>
                         <div
-                            class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6">
+                            class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6"
+                        >
                             <h1 class="card-title">Berkas Pendukung</h1>
                             <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
                                 <li class="flex flex-col gap-2 w-fit">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Foto KTP</span>
-                                    <Button :disabled="!ktp_photo" variant="gray" @click="openKtpModal">
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Foto KTP</span
+                                    >
+                                    <Button
+                                        :disabled="!ktp_photo"
+                                        variant="gray"
+                                        @click="openKtpModal"
+                                    >
                                         <EyeIcon />
                                         Lihat
                                     </Button>
                                 </li>
                                 <li class="flex flex-col gap-2 w-fit">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Foto KK</span>
-                                    <Button variant="gray" :disabled="!kk_photo" @click="openKkModal()">
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Foto KK</span
+                                    >
+                                    <Button
+                                        variant="gray"
+                                        :disabled="!kk_photo"
+                                        @click="openKkModal()"
+                                    >
                                         <EyeIcon />
                                         Lihat
                                     </Button>
@@ -223,52 +309,100 @@ const breadcrumbItems = [
                             </ul>
                         </div>
                     </div>
-                    <div class="card-layout py-0! grid xl:grid-cols-2 grid-cols-1">
+                    <div
+                        class="card-layout py-0! grid xl:grid-cols-2 grid-cols-1"
+                    >
                         <div class="grid grid-cols-1 gap-8 py-6">
                             <h1 class="card-title">Kontak dan Alamat</h1>
                             <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Telepon</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.phone_number ?? '-'
-                                        }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Nomor Telepon</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{ user.no_telp ?? "-" }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Email</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.email }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Email</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{ user.email }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Sesuai KTP</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.residential_address ?? '-'
-                                    }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Alamat Sesuai KTP</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{
+                                            user.anggota.alamat_ktp ??
+                                            "-"
+                                        }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Alamat Domisili</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.domicile_address
-                                        ?? '-'
-                                    }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Alamat Domisili</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{
+                                            user.anggota.alamat_domisili ?? "-"
+                                        }}</span
+                                    >
                                 </li>
                             </ul>
                         </div>
                         <div
-                            class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6">
+                            class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6"
+                        >
                             <h1 class="card-title">Ahli Waris</h1>
                             <ul class="grid xl:grid-cols-2 grid-cols-1 gap-6">
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Nama Ahli Waris</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.heirs.name ?? '-'
-                                    }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Nama Ahli Waris</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{
+                                            user.anggota.ahli_waris.name ?? "-"
+                                        }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Hubungan Keluarga</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.heirs.relationship
-                                        ?? '-'
-                                    }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Hubungan Keluarga</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{
+                                            user.anggota.ahli_waris.hubungan ??
+                                            "-"
+                                        }}</span
+                                    >
                                 </li>
                                 <li class="flex flex-col gap-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-300">Kontak Ahli Waris</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ user.member.heirs.contact ??
-                                        '-'
-                                    }}</span>
+                                    <span
+                                        class="text-sm text-gray-500 dark:text-gray-300"
+                                        >Kontak Ahli Waris</span
+                                    >
+                                    <span
+                                        class="font-medium text-dark-text dark:text-white"
+                                        >{{
+                                            user.anggota.ahli_waris.contact ?? "-"
+                                        }}</span
+                                    >
                                 </li>
                             </ul>
                         </div>
@@ -276,126 +410,318 @@ const breadcrumbItems = [
                 </div>
                 <div class="card-layout flex flex-col gap-4">
                     <h1 class="card-title">Akun</h1>
-                    <div v-if="user.member.saving_accounts?.length && user.member.saving_accounts?.length"
-                        class="flex flex-col gap-4">
+                    <div
+                        v-if="
+                            user.anggota.akun_simpanan?.length &&
+                            user.anggota.akun_simpanan?.length
+                        "
+                        class="flex flex-col gap-4"
+                    >
                         <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
-                            <div v-for="account in user.member.saving_accounts" class="card-layout flex flex-col gap-12">
-                                <h1 class="card-title">{{ account.saving_type }}</h1>
-                                <ul class="grid sm:grid-cols-2 grid-cols-1 gap-6">
+                            <div
+                                v-for="account in user.anggota.akun_simpanan"
+                                class="card-layout flex flex-col gap-12"
+                            >
+                                <h1 class="card-title">
+                                    {{ account.jenis_simpanan }}
+                                </h1>
+                                <ul
+                                    class="grid sm:grid-cols-2 grid-cols-1 gap-6"
+                                >
                                     <li class="flex flex-col gap-2">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Saldo</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(account.balance) }}</span>
-                                    </li>
-                                    <li class="flex flex-col gap-2">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir
-                                            Diperbarui</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            dateParser(account.updated_at) ?? '-' }}</span>
-                                    </li>
-                                    <li class="flex flex-col gap-2">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Transaksi Terakhir</span>
                                         <span
-                                            :class="account.transactions[0]?.transaction_type == 'Penyetoran' ? 'text-green-500' : 'text-red-500'"
-                                            class="font-medium text-dark-text dark:text-white">{{
-                                                account.transactions[0]?.transaction_type == 'Penyetoran' ? '+' : '-' }}
-                                            {{ parseCurrencyAmount(account.transactions[0]?.saving_amount) ?? '-' }}</span>
+                                            class="text-sm text-gray-500 dark:text-gray-300"
+                                            >Saldo</span
+                                        >
+                                        <span
+                                            class="font-medium text-dark-text dark:text-white"
+                                            >{{
+                                                parseCurrencyAmount(
+                                                    account.saldo,
+                                                )
+                                            }}</span
+                                        >
                                     </li>
                                     <li class="flex flex-col gap-2">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Transaksi</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            dateParser(account.transactions[0]?.transaction_date) ?? '-' }}</span>
+                                        <span
+                                            class="text-sm text-gray-500 dark:text-gray-300"
+                                            >Terakhir Diperbarui</span
+                                        >
+                                        <span
+                                            class="font-medium text-dark-text dark:text-white"
+                                            >{{
+                                                dateParser(
+                                                    account.updated_at,
+                                                ) ?? "-"
+                                            }}</span
+                                        >
+                                    </li>
+                                    <li class="flex flex-col gap-2">
+                                        <span
+                                            class="text-sm text-gray-500 dark:text-gray-300"
+                                            >Transaksi Terakhir</span
+                                        >
+                                        <span
+                                            :class="
+                                                account.transactions[0]
+                                                    ?.tipe_transaksi ==
+                                                'Penyetoran'
+                                                    ? 'text-green-500'
+                                                    : 'text-red-500'
+                                            "
+                                            class="font-medium text-dark-text dark:text-white"
+                                            >{{
+                                                account.transactions[0]
+                                                    ?.tipe_transaksi ==
+                                                "Penyetoran"
+                                                    ? "+"
+                                                    : "-"
+                                            }}
+                                            {{
+                                                parseCurrencyAmount(
+                                                    account.transactions[0]
+                                                        ?.nominal_simpanan,
+                                                ) ?? "-"
+                                            }}</span
+                                        >
+                                    </li>
+                                    <li class="flex flex-col gap-2">
+                                        <span
+                                            class="text-sm text-gray-500 dark:text-gray-300"
+                                            >Tanggal Transaksi</span
+                                        >
+                                        <span
+                                            class="font-medium text-dark-text dark:text-white"
+                                            >{{
+                                                dateParser(
+                                                    account.transactions[0]
+                                                        ?.tgl_transaksi,
+                                                ) ?? "-"
+                                            }}</span
+                                        >
                                     </li>
                                 </ul>
-                                <Button full size="small" variant="light" @click="openMutasiModal(account)">
+                                <Button
+                                    full
+                                    size="small"
+                                    variant="light"
+                                    @click="openMutasiModal(account)"
+                                >
                                     <InfoCircleIcon />
                                     Mutasi
                                 </Button>
                             </div>
                         </div>
                         <div class="grid xl:grid-cols-3 grid-cols-1 gap-4">
-                            <div v-for="financing in user.member.financings" class="card-layout flex flex-col gap-8 px-0!">
-                                <div class="border-b-2 border-gray-200 dark:border-gray-700 pb-4 px-8">
-                                    <h1 class="font-semibold text-dark-text dark:text-white/90">{{ financing.financing_item?.name }}
-                                        <span class="text-sm text-gray-400 dark:text-gray-300">#{{ financing.financing_transaction_code }}</span>
+                            <div
+                                v-for="pembiayaan in user.anggota.pembiayaan"
+                                class="card-layout flex flex-col gap-8 px-0!"
+                            >
+                                <div
+                                    class="border-b-2 border-gray-200 dark:border-gray-700 pb-4 px-8"
+                                >
+                                    <h1
+                                        class="font-semibold text-dark-text dark:text-white/90"
+                                    >
+                                        {{ pembiayaan.objek_pembiayaan?.nama_barang }}
+                                        <span
+                                            class="text-sm text-gray-400 dark:text-gray-300"
+                                            >#{{
+                                                pembiayaan.kode_pembiayaan
+                                            }}</span
+                                        >
                                     </h1>
                                 </div>
                                 <ul class="grid grid-cols-1 gap-4 px-8">
-                                    <li class="flex sm:flex-row flex-col justify-between">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Harga Pembiayaan</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(financing.total_price) }}</span>
+                                    <li
+                                        class="flex sm:flex-row flex-col justify-between"
+                                    >
+                                        <span
+                                            class="text-sm text-gray-500 dark:text-gray-300"
+                                            >Harga Pembiayaan</span
+                                        >
+                                        <span
+                                            class="font-medium text-dark-text dark:text-white"
+                                            >{{
+                                                parseCurrencyAmount(
+                                                    pembiayaan.total_price,
+                                                )
+                                            }}</span
+                                        >
                                     </li>
-                                    <li class="flex sm:flex-row flex-col justify-between">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Terakhir
-                                            Diperbarui</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            dateParser(financing.updated_at) }}</span>
+                                    <li
+                                        class="flex sm:flex-row flex-col justify-between"
+                                    >
+                                        <span
+                                            class="text-sm text-gray-500 dark:text-gray-300"
+                                            >Terakhir Diperbarui</span
+                                        >
+                                        <span
+                                            class="font-medium text-dark-text dark:text-white"
+                                            >{{
+                                                dateParser(pembiayaan.updated_at)
+                                            }}</span
+                                        >
                                     </li>
                                     <li class="flex flex-col gap-2">
-                                        <div class="flex sm:flex-row flex-col justify-between items-center">
-                                            <span class="text-sm text-gray-500 dark:text-gray-300">Sisa
-                                                Pembiayaan</span>
-                                            <span class="font-medium text-dark-text dark:text-white">
-                                                {{ parseCurrencyAmount(financing.remaining_balance) }}
+                                        <div
+                                            class="flex sm:flex-row flex-col justify-between items-center"
+                                        >
+                                            <span
+                                                class="text-sm text-gray-500 dark:text-gray-300"
+                                                >Sisa Pembiayaan</span
+                                            >
+                                            <span
+                                                class="font-medium text-dark-text dark:text-white"
+                                            >
+                                                {{
+                                                    parseCurrencyAmount(
+                                                        pembiayaan.remaining_balance,
+                                                    )
+                                                }}
                                             </span>
                                         </div>
                                         <div class="progress-container">
-                                            <div class="progress-bar"
-                                                :style="{ width: (Math.min(((financing.tenor ?? 0) > 0
-                                                    ? (((financing.total_paid ?? 0) / (financing.total_price ?? 0)) * 100)
-                                                    : 0), 100)) + '%' }">
-                                            </div>
+                                            <div
+                                                class="progress-bar"
+                                                :style="{
+                                                    width:
+                                                        Math.min(
+                                                            (pembiayaan.tenor ??
+                                                                0) > 0
+                                                                ? ((pembiayaan.total_paid ??
+                                                                      0) /
+                                                                      (pembiayaan.total_price ??
+                                                                          0)) *
+                                                                      100
+                                                                : 0,
+                                                            100,
+                                                        ) + '%',
+                                                }"
+                                            ></div>
                                         </div>
                                     </li>
-                                    <li class="flex sm:flex-row flex-col justify-between">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            parseCurrencyAmount(financing.installment_per_month) }}</span>
+                                    <li
+                                        class="flex sm:flex-row flex-col justify-between"
+                                    >
+                                        <span
+                                            class="text-sm text-gray-500 dark:text-gray-300"
+                                            >Angsuran Per-Bulan</span
+                                        >
+                                        <span
+                                            class="font-medium text-dark-text dark:text-white"
+                                            >{{
+                                                parseCurrencyAmount(
+                                                    pembiayaan.installment_per_month,
+                                                )
+                                            }}</span
+                                        >
                                     </li>
-                                    <li class="flex sm:flex-row flex-col justify-between">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Angsuran Per-Bulan</span>
-                                        <span class="font-medium text-dark-text dark:text-white">{{
-                                            dateParser(financing.next_due_date) }}</span>
+                                    <li
+                                        class="flex sm:flex-row flex-col justify-between"
+                                    >
+                                        <span
+                                            class="text-sm text-gray-500 dark:text-gray-300"
+                                            >Angsuran Per-Bulan</span
+                                        >
+                                        <span
+                                            class="font-medium text-dark-text dark:text-white"
+                                            >{{
+                                                dateParser(
+                                                    pembiayaan.next_due_date,
+                                                )
+                                            }}</span
+                                        >
                                     </li>
-                                    <li class="flex sm:flex-row flex-col justify-between">
-                                        <span class="text-sm text-gray-500 dark:text-gray-300">Jangka Waktu Angsuran</span>
-                                        <span class="font-medium text-dark-text dark:text-white">
-                                            {{ financing.tenor ?? 0
-                                            }} bulan</span>
+                                    <li
+                                        class="flex sm:flex-row flex-col justify-between"
+                                    >
+                                        <span
+                                            class="text-sm text-gray-500 dark:text-gray-300"
+                                            >Jangka Waktu Angsuran</span
+                                        >
+                                        <span
+                                            class="font-medium text-dark-text dark:text-white"
+                                        >
+                                            {{
+                                                pembiayaan.tenor ?? 0
+                                            }}
+                                            bulan</span
+                                        >
                                     </li>
                                 </ul>
                                 <div class="flex gap-4 w-full px-8">
-                                    <Button v-if="can['view_murabahah']" :href="`/admin/financings/show/${financing.id}`" size="small" full variant="info">
+                                    <Button
+                                        v-if="can['view_murabahah']"
+                                        :href="`/admin/pembiayaan/show/${pembiayaan.id}`"
+                                        size="small"
+                                        full
+                                        variant="info"
+                                    >
                                         <InfoCircleIcon />
                                         Detail
                                     </Button>
-                                    <Button full size="small" variant="light" @click="openRiwayatModal(financing)">
-                                        <span class="icon-[tabler--history]" style="width: 24px; height: 24px;"></span>
+                                    <Button
+                                        full
+                                        size="small"
+                                        variant="light"
+                                        @click="openRiwayatModal(pembiayaan)"
+                                    >
+                                        <span
+                                            class="icon-[tabler--history]"
+                                            style="width: 24px; height: 24px"
+                                        ></span>
                                         Riwayat
                                     </Button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div v-else class="flex flex-col items-center justify-center py-12">
+                    <div
+                        v-else
+                        class="flex flex-col items-center justify-center py-12"
+                    >
                         <NoArchiveIcon width="120px" height="120px" />
-                        <p class="text-dark-text text-sm dark:text-gray-400 pt-4">
+                        <p
+                            class="text-dark-text text-sm dark:text-gray-400 pt-4"
+                        >
                             Tidak ada data akun.
                         </p>
                     </div>
                 </div>
             </div>
         </div>
-        <ModalMutasi ref="mutasiModalRef" modal-id="modal-mutasi" title="Mutasi Rekening Anggota"
-            :account="selectedAccount" :transactions="mutasiData" :loading="isLoadingMutasi"
-            :key="selectedAccount?.id" />
-        <ModalMutasi ref="riwayatModalRef" modal-id="modal-riwayat" title="Riwayat Pembiayaan"
-            :financing="selectedFinancing" :schedules="riwayatData" :loading="isLoadingRiwayat"
-            :key="selectedFinancing?.id" />
-        <ModalDocument ref="ktpModalRef" modal-id="modal-ktp" title="Dokumen KTP Anggota" name="KTP"
-            :attachment="ktp_photo" />
-        <ModalDocument ref="kkModalRef" modal-id="modal-kk" title="Dokumen KK Anggota" name="KK"
-            :attachment="kk_photo" />
+        <ModalMutasi
+            ref="mutasiModalRef"
+            modal-id="modal-mutasi"
+            title="Mutasi Rekening Anggota"
+            :account="selectedAccount"
+            :transactions="mutasiData"
+            :loading="isLoadingMutasi"
+            :key="selectedAccount?.id"
+        />
+        <ModalMutasi
+            ref="riwayatModalRef"
+            modal-id="modal-riwayat"
+            title="Riwayat Pembiayaan"
+            :pembiayaan="selectedFinancing"
+            :schedules="riwayatData"
+            :loading="isLoadingRiwayat"
+            :key="selectedFinancing?.id"
+        />
+        <ModalDocument
+            ref="ktpModalRef"
+            modal-id="modal-ktp"
+            title="Dokumen KTP Anggota"
+            name="KTP"
+            :attachment="ktp_photo"
+        />
+        <ModalDocument
+            ref="kkModalRef"
+            modal-id="modal-kk"
+            title="Dokumen KK Anggota"
+            name="KK"
+            :attachment="kk_photo"
+        />
     </AdminLayout>
 </template>

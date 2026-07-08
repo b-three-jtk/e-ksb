@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\GlobalSetting;
-use App\Models\InstallmentPaymentTransaction;
-use App\Models\PointTransaction;
+use App\Models\PengaturanUmum;
+use App\Models\PembayaranAngsuran;
+use App\Models\Poin;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -19,11 +19,11 @@ class CalculateMurabahahPoints extends Command
     protected $signature = 'points:calculate-murabahah-points';
 
     /**
-     * The console command description.
+     * The console command deskripsi.
      *
      * @var string
      */
-    protected $description = 'Calculate and store murabahah points for members';
+    protected $deskripsi = 'Calculate and store murabahah points for anggota';
 
     /**
      * Execute the console command.
@@ -56,14 +56,14 @@ public function handle(): int
 
         $periodLabel = Carbon::parse($startDate)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($endDate)->translatedFormat('d M Y');
 
-        $userMargins = InstallmentPaymentTransaction::query()
-            ->join('installments', 'installment_payment_transactions.installment_id', '=', 'installments.id')
-            ->join('financings', 'installments.financing_id', '=', 'financings.id')
-            ->join('members', 'financings.member_id', '=', 'members.id')
-            ->whereDate('installment_payment_transactions.payment_date', '>=', $startDate)
-            ->whereDate('installment_payment_transactions.payment_date', '<=', $endDate)
-            ->select('members.user_id', DB::raw('SUM(installment_payment_transactions.margin_amount) as total_margin'))
-            ->groupBy('members.user_id')
+        $userMargins = PembayaranAngsuran::query()
+            ->join('angsuran', 'pembayaran_angsuran.angsuran_id', '=', 'angsuran.id')
+            ->join('pembiayaan', 'angsuran.pembiayaan_id', '=', 'pembiayaan.id')
+            ->join('anggota', 'pembiayaan.anggota_id', '=', 'anggota.id')
+            ->whereDate('pembayaran_angsuran.tgl_pembayaran', '>=', $startDate)
+            ->whereDate('pembayaran_angsuran.tgl_pembayaran', '<=', $endDate)
+            ->select('anggota.pengguna_id', DB::raw('SUM(pembayaran_angsuran.margin_dibayar) as total_margin'))
+            ->groupBy('anggota.pengguna_id')
             ->get();
 
         $created = 0;
@@ -78,10 +78,10 @@ public function handle(): int
                 continue;
             }
 
-            $hasPoint = PointTransaction::query()
-                ->where('user_id', $data->user_id)
-                ->whereDate('calculation_period', $endDate)
-                ->where('activity_description', 'LIKE', '%murabahah%')
+            $hasPoint = Poin::query()
+                ->where('pengguna_id', $data->pengguna_id)
+                ->whereDate('periode_kalkulasi', $endDate)
+                ->where('deskripsi', 'LIKE', '%murabahah%')
                 ->exists();
 
             if ($hasPoint) {
@@ -90,15 +90,15 @@ public function handle(): int
             }
 
             DB::transaction(function () use ($data, $endDate, $periodLabel, $totalMargin, $pointsEarned): void {
-                PointTransaction::create([
-                    'user_id' => $data->user_id,
-                    'amount_earned' => $pointsEarned,
-                    'activity_description' => sprintf(
+                Poin::create([
+                    'pengguna_id' => $data->pengguna_id,
+                    'jml_perolehan' => $pointsEarned,
+                    'deskripsi' => sprintf(
                         'Perhitungan poin murabahah periode %s dengan total margin Rp %s',
                         $periodLabel,
                         number_format($totalMargin, 0, ',', '.')
                     ),
-                    'calculation_period' => $endDate,
+                    'periode_kalkulasi' => $endDate,
                 ]);
             });
 
@@ -115,10 +115,10 @@ public function handle(): int
      */
     private function resolveActiveSettingValue(string $key, string $periodDate): ?float
     {
-        $setting = GlobalSetting::query()
+        $setting = PengaturanUmum::query()
             ->where('key', $key)
-            ->whereDate('effective_date', '<=', $periodDate)
-            ->orderByDesc('effective_date')
+            ->whereDate('tgl_diberlakukan', '<=', $periodDate)
+            ->orderByDesc('tgl_diberlakukan')
             ->orderByDesc('id')
             ->first();
 
@@ -134,10 +134,10 @@ public function handle(): int
      */
     private function resolveStringSettingValue(string $key, string $periodDate): ?string
     {
-        $setting = GlobalSetting::query()
+        $setting = PengaturanUmum::query()
             ->where('key', $key)
-            ->whereDate('effective_date', '<=', $periodDate)
-            ->orderByDesc('effective_date')
+            ->whereDate('tgl_diberlakukan', '<=', $periodDate)
+            ->orderByDesc('tgl_diberlakukan')
             ->orderByDesc('id')
             ->first();
 

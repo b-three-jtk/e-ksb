@@ -2,10 +2,10 @@
 
 namespace App\Services\Admin;
 
-use App\Models\Account;
-use App\Models\JournalEntry;
+use App\Models\Akun;
+use App\Models\DetailJurnal;
 use App\Enums\PositionEnum;
-use App\Enums\AccountCategoryEnum;
+use App\Enums\AkunCategoryEnum;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -67,39 +67,41 @@ class AruskasService
 
     public function buildBaseQuery(array $filters)
     {
-        $query = JournalEntry::query()
-            ->join('accounts', 'journal_entries.no_ref_account', '=', 'accounts.no_ref_account')
+        $query = DetailJurnal::query()
+            ->join('jurnal', 'detail_jurnal.jurnal_id', '=', 'jurnal.id')
+            ->join('akun', 'detail_jurnal.no_ref_akun', '=', 'akun.no_ref_akun')
             ->select([
-                'journal_entries.*',
-                'accounts.account_name',
-                'accounts.account_category',
+                'detail_jurnal.*',
+                'jurnal.tgl_transaksi',
+                'akun.nama_akun',
+                'akun.kategori_akun',
             ]);
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
-                $q->where('accounts.account_name', 'like', '%' . $filters['search'] . '%')
-                    ->orWhere('journal_entries.journal_group_id', 'like', '%' . $filters['search'] . '%')
-                    ->orWhere('journal_entries.no_ref_account', 'like', '%' . $filters['search'] . '%');
+                $q->where('akun.nama_akun', 'like', '%' . $filters['search'] . '%')
+                    ->orWhere('detail_jurnal.jurnal_id', 'like', '%' . $filters['search'] . '%')
+                    ->orWhere('detail_jurnal.no_ref_akun', 'like', '%' . $filters['search'] . '%');
             });
         }
 
         if (!empty($filters['periode'])) {
             switch ($filters['periode']) {
                 case '1_minggu':
-                    $query->whereDate('journal_entries.transaction_date', '>=', now()->subWeek());
+                    $query->whereDate('jurnal.tgl_transaksi', '>=', now()->subWeek());
                     break;
                 case '1_bulan':
-                    $query->whereDate('journal_entries.transaction_date', '>=', now()->subMonth());
+                    $query->whereDate('jurnal.tgl_transaksi', '>=', now()->subMonth());
                     break;
                 case '3_bulan':
-                    $query->whereDate('journal_entries.transaction_date', '>=', now()->subMonths(3));
+                    $query->whereDate('jurnal.tgl_transaksi', '>=', now()->subMonths(3));
                     break;
                 case '1_tahun':
-                    $query->whereDate('journal_entries.transaction_date', '>=', now()->subYear());
+                    $query->whereDate('jurnal.tgl_transaksi', '>=', now()->subYear());
                     break;
                 case 'custom':
                     if (!empty($filters['date_from']) && !empty($filters['date_to'])) {
-                        $query->whereBetween('journal_entries.transaction_date', [
+                        $query->whereBetween('jurnal.tgl_transaksi', [
                             $filters['date_from'],
                             $filters['date_to'],
                         ]);
@@ -114,71 +116,71 @@ class AruskasService
     public function getTransactions(array $filters): array
     {
         $sortMap = [
-            'tanggal'   => 'journal_entries.transaction_date',
-            'no_jurnal' => 'journal_entries.journal_group_id',
+            'tanggal'   => 'jurnal.tgl_transaksi',
+            'no_jurnal' => 'detail_jurnal.jurnal_id',
         ];
 
-        $sortBy  = $sortMap[$filters['sort_by'] ?? 'tanggal'] ?? 'journal_entries.transaction_date';
+        $sortBy  = $sortMap[$filters['sort_by'] ?? 'tanggal'] ?? 'jurnal.tgl_transaksi';
         $sortDir = $filters['sort_dir'] ?? 'desc';
 
         $query = $this->buildBaseQuery($filters);
 
-        $journalEntries = $query
+        $detailJurnal = $query
             ->orderBy($sortBy, $sortDir)
-            ->orderBy('journal_entries.created_at', $sortDir)
-            ->orderBy('journal_entries.journal_group_id', $sortDir)
-            ->orderBy('journal_entries.id', 'asc')
+            ->orderBy('detail_jurnal.created_at', $sortDir)
+            ->orderBy('detail_jurnal.jurnal_id', $sortDir)
+            ->orderBy('detail_jurnal.id', 'asc')
             ->paginate($filters['per_page'] ?? 10)
             ->withQueryString();
 
         $allGroups = $this->buildBaseQuery($filters)
             ->orderBy($sortBy, $sortDir)
-            ->orderBy('journal_entries.created_at', $sortDir)
-            ->orderBy('journal_entries.journal_group_id', $sortDir)
+            ->orderBy('detail_jurnal.created_at', $sortDir)
+            ->orderBy('detail_jurnal.jurnal_id', $sortDir)
             ->distinct()
-            ->pluck('journal_entries.journal_group_id')
+            ->pluck('detail_jurnal.jurnal_id')
             ->values();
 
-        $firstGroupOnPage = collect($journalEntries->items())->first()?->journal_group_id;
+        $firstGroupOnPage = collect($detailJurnal->items())->first()?->jurnal_id;
         $groupStartIndex  = $firstGroupOnPage ? ($allGroups->search($firstGroupOnPage) + 1) : 1;
 
         $groupCounter  = $groupStartIndex;
         $lastJournal   = null;
         $currentNumber = null;
 
-        $transactions = $journalEntries->through(
+        $transactions = $detailJurnal->through(
             function ($item) use (&$groupCounter, &$lastJournal, &$currentNumber) {
-                if ($lastJournal !== $item->journal_group_id) {
+                if ($lastJournal !== $item->jurnal_id) {
                     $currentNumber = $groupCounter++;
-                    $lastJournal   = $item->journal_group_id;
+                    $lastJournal   = $item->jurnal_id;
                 }
 
                 return [
                     'id'         => $item->id,
                     'no'         => $currentNumber,
-                    'no_jurnal'  => $item->journal_group_id,
-                    'tanggal'    => Carbon::parse($item->transaction_date)->format('d/m/Y'),
-                    'akun'       => $item->no_ref_account . ' - ' . $item->account_name,
-                    'jenis_akun' => $item->account_category,
-                    'debit'      => $item->position === PositionEnum::DEBIT->value  ? $item->nominal : null,
-                    'kredit'     => $item->position === PositionEnum::CREDIT->value ? $item->nominal : null,
+                    'no_jurnal'  => $item->jurnal_id,
+                    'tanggal'    => Carbon::parse($item->tgl_transaksi)->format('d/m/Y'),
+                    'akun'       => $item->no_ref_akun . ' - ' . $item->nama_akun,
+                    'jenis_akun' => $item->kategori_akun,
+                    'debit'      => $item->posisi_akun === PositionEnum::DEBIT->value  ? $item->nominal : null,
+                    'kredit'     => $item->posisi_akun === PositionEnum::CREDIT->value ? $item->nominal : null,
                 ];
             }
         );
 
-        return [$journalEntries, $transactions];
+        return [$detailJurnal, $transactions];
     }
 
     public function getKasSummary(): array
     {
-        $kasAccount = Account::where('account_name', 'Kas')->firstOrFail();
+        $kasAkun = Akun::where('nama_akun', 'Kas')->firstOrFail();
 
-        $totalKasMasuk = JournalEntry::where('no_ref_account', $kasAccount->no_ref_account)
-            ->where('position', PositionEnum::DEBIT->value)
+        $totalKasMasuk = DetailJurnal::where('no_ref_akun', $kasAkun->no_ref_akun)
+            ->where('posisi_akun', PositionEnum::DEBIT->value)
             ->sum('nominal');
 
-        $totalKasKeluar = JournalEntry::where('no_ref_account', $kasAccount->no_ref_account)
-            ->where('position', PositionEnum::CREDIT->value)
+        $totalKasKeluar = DetailJurnal::where('no_ref_akun', $kasAkun->no_ref_akun)
+            ->where('posisi_akun', PositionEnum::CREDIT->value)
             ->sum('nominal');
 
         $saldoKas = $totalKasMasuk - $totalKasKeluar;
@@ -205,29 +207,29 @@ class AruskasService
     public function buildCsvRows(array $filters): \Illuminate\Support\Collection
     {
         $sortMap = [
-            'tanggal'   => 'journal_entries.transaction_date',
-            'no_jurnal' => 'journal_entries.journal_group_id',
+            'tanggal'   => 'jurnal.tgl_transaksi',
+            'no_jurnal' => 'detail_jurnal.jurnal_id',
         ];
 
         $sortBy  = $sortMap[$filters['sort_by'] ?? 'tanggal']
-            ?? 'journal_entries.transaction_date';
+            ?? 'jurnal.tgl_transaksi';
 
         $sortDir = $filters['sort_dir'] ?? 'desc';
 
         return $this->buildBaseQuery($filters)
             ->orderBy($sortBy, $sortDir)
-            ->orderBy('journal_entries.created_at', $sortDir)
-            ->orderBy('journal_entries.journal_group_id', $sortDir)
-            ->orderBy('journal_entries.id')
+            ->orderBy('detail_jurnal.created_at', $sortDir)
+            ->orderBy('detail_jurnal.jurnal_id', $sortDir)
+            ->orderBy('detail_jurnal.id')
             ->get()
             ->map(fn ($trx) => [
-                Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-                $trx->no_ref_account . ' - ' . $trx->account_name,
-                $trx->account_category,
-                $trx->position === PositionEnum::DEBIT->value
+                Carbon::parse($trx->tgl_transaksi)->format('d/m/Y'),
+                $trx->no_ref_akun . ' - ' . $trx->nama_akun,
+                $trx->kategori_akun,
+                $trx->posisi_akun === PositionEnum::DEBIT->value
                     ? number_format($trx->nominal, 0, ',', '.')
                     : '',
-                $trx->position === PositionEnum::CREDIT->value
+                $trx->posisi_akun === PositionEnum::CREDIT->value
                     ? number_format($trx->nominal, 0, ',', '.')
                     : '',
             ]);

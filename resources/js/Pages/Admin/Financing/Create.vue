@@ -21,35 +21,35 @@ const totalSteps = 5
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financings' },
+    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/pembiayaan' },
     { name: 'Permohonan Pembiayaan Murabahah' },
 ]
 
 const props = defineProps({
     data: Object,
-    financing: Object,
+    pembiayaan: Object,
 })
 
 const {
     form,
     searchQuery,
-    memberResults,
+    anggotaResults,
     isLoadingSearch,
-    isMemberSelected,
-    searchSupplierQuery,
-    supplierResults,
-    isLoadingSearchSupplier,
-    isSupplierSelected,
-    selectMember,
-    selectSupplier,
-    addHeir,
-    removeHeir,
-    resetMemberSelection,
-    resetSupplierSelection,
+    isAnggotaSelected,
+    searchPemasokQuery,
+    pemasokResults,
+    isLoadingSearchPemasok,
+    isPemasokSelected,
+    selectAnggota,
+    selectPemasok,
+    addAhliWaris,
+    removeAhliWaris,
+    resetAnggotaSelection,
+    resetPemasokSelection,
     submit,
     saveDraft,
     finalize,
-} = useFinancingForm(props.financing)
+} = useFinancingForm(props.pembiayaan)
 
 const {
     errors,
@@ -68,14 +68,14 @@ const prevStep = () => {
 }
 
 const isStep3Valid = computed(() =>
-    form.financing.name && form.collateral.collateral_type && !form.processing
+    form.pembiayaan.name && form.collateral.jenis_jaminan && !form.processing
 )
 
 const isFinalizationValid = computed(() =>
-    form.financing.status === 'Disetujui' &&
-    form.financing.akad_date &&
+    form.pembiayaan.status === 'Disetujui' &&
+    form.pembiayaan.tgl_akad &&
     (form.akad_document_file || form.documents?.akad_document) &&
-    form.financing.payment_method
+    form.pembiayaan.metode_pembayaran
 )
 
 const draftStatuses = [
@@ -85,7 +85,7 @@ const draftStatuses = [
 ]
 
 const showSubmitButton = computed(() => {
-    return activeStep.value === 3 && draftStatuses.includes(form.financing.status)
+    return activeStep.value === 3 && draftStatuses.includes(form.pembiayaan.status)
 })
 
 const showNextButton = computed(() => {
@@ -93,7 +93,7 @@ const showNextButton = computed(() => {
         return false
     }
 
-    if (activeStep.value === 3 && draftStatuses.includes(form.financing.status)) {
+    if (activeStep.value === 3 && draftStatuses.includes(form.pembiayaan.status)) {
         return false
     }
 
@@ -136,17 +136,17 @@ const handleSaveDraft = () => {
                     :form="form"
                     :search-query="searchQuery"
                     :is-loading-search="isLoadingSearch"
-                    :is-member-selected="isMemberSelected"
-                    :member-results="memberResults"
+                    :is-anggota-selected="isAnggotaSelected"
+                    :anggota-results="anggotaResults"
                     :data="props.data"
                     :only-letters="onlyLetters"
                     :only-numbers="onlyNumbers"
                     :errors="errors"
                     @update:search-query="searchQuery = $event"
-                    @selectMember="selectMember"
-                    @addHeir="addHeir"
-                    @removeHeir="removeHeir"
-                    @resetMemberSelection="resetMemberSelection"
+                    @selectAnggota="selectAnggota"
+                    @addAhliWaris="addAhliWaris"
+                    @removeAhliWaris="removeAhliWaris"
+                    @resetAnggotaSelection="resetAnggotaSelection"
                     @validate-field="(field) => validateField(field, 1)"
                 />
 
@@ -170,14 +170,14 @@ const handleSaveDraft = () => {
                     v-if="activeStep === 4"
                     :form="form"
                     :data="props.data"
-                    :search-supplier-query="searchSupplierQuery"
-                    :is-loading-search-supplier="isLoadingSearchSupplier"
-                    :is-supplier-selected="isSupplierSelected"
-                    :supplier-results="supplierResults"
+                    :search-pemasok-query="searchPemasokQuery"
+                    :is-loading-search-pemasok="isLoadingSearchPemasok"
+                    :is-pemasok-selected="isPemasokSelected"
+                    :pemasok-results="pemasokResults"
                     :errors="errors"
-                    @update:search-supplier-query="searchSupplierQuery = $event"
-                    @selectSupplier="selectSupplier"
-                    @resetSupplierSelection="resetSupplierSelection"
+                    @update:search-pemasok-query="searchPemasokQuery = $event"
+                    @selectPemasok="selectPemasok"
+                    @resetPemasokSelection="resetPemasokSelection"
                     @validate-field="(field) => validateField(field, 4)"
                 />
 

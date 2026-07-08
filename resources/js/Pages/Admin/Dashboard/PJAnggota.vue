@@ -12,7 +12,7 @@ defineProps({
     stats: Object,
     jatuh_tempo_terdekat: Object,
     transaksi_simpanan_terbaru: Object,
-    selectedSavingTransactionFilter: String,
+    selectedTransaksiSimpananFilter: String,
     selectedNearestDueFilter: String,
 });
 
@@ -104,8 +104,8 @@ const getStatusClass = (status) => {
             <div class="flex justify-between items-center">
                 <h1 class="card-title">Transaksi Simpanan Terbaru</h1>
                 <div class="relative z-20 bg-transparent">
-                    <select :value="selectedSavingTransactionFilter"
-                        @input="$emit('update:selectedSavingTransactionFilter', $event.target.value)"
+                    <select :value="selectedTransaksiSimpananFilter"
+                        @input="$emit('update:selectedTransaksiSimpananFilter', $event.target.value)"
                         class="h-11 w-full font-body appearance-none rounded-lg border px-4 bg-white pr-11 text-sm shadow-theme-xs focus:outline-hidden dark:bg-dark-900 text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                         <option value="all">Semua</option>
                         <option value="Simpanan Pokok">Simpanan Pokok</option>

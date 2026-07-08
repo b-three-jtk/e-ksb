@@ -36,7 +36,7 @@ const emit = defineEmits(['submit'])
                 placeholder="Masukkan persentase margin koperasi"
             />
             <BaseInputAdmin
-                v-model="form.effective_date"
+                v-model="form.tgl_diberlakukan"
                 label="Tanggal Berlaku"
                 type="date"
                 required

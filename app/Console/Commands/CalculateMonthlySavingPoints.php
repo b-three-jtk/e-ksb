@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\GlobalSetting;
-use App\Models\PointTransaction;
-use App\Models\User;
+use App\Models\PengaturanUmum;
+use App\Models\Poin;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +13,7 @@ class CalculateMonthlySavingPoints extends Command
 {
     protected $signature = 'points:calculate-monthly-savings';
 
-    protected $description = 'Calculate and store monthly saving points for members';
+    protected $deskripsi = 'Calculate and store monthly saving points for anggota';
 
     public function handle(): int
     {
@@ -36,12 +36,12 @@ class CalculateMonthlySavingPoints extends Command
             return self::FAILURE;
         }
 
-        $users = User::query()
-            ->whereHas('member.savingAccounts')
+        $users = Pengguna::query()
+            ->whereHas('anggota.akunSimpanan')
             ->with([
-                'member.savingAccounts',
-                'pointTransactions' => function ($query) use ($periodDate) {
-                    $query->whereDate('calculation_period', $periodDate);
+                'anggota.akunSimpanan',
+                'poin' => function ($query) use ($periodDate) {
+                    $query->whereDate('periode_kalkulasi', $periodDate);
                 },
             ])
             ->get();
@@ -50,12 +50,12 @@ class CalculateMonthlySavingPoints extends Command
         $skipped = 0;
 
         foreach ($users as $user) {
-            if ($user->pointTransactions->isNotEmpty()) {
+            if ($user->poin->isNotEmpty()) {
                 $skipped++;
                 continue;
             }
 
-            $totalSavings = (float) $user->member->savingAccounts->sum('balance');
+            $totalSavings = (float) $user->anggota->akunSimpanan->sum('saldo');
             $pointsEarned = (int) floor($totalSavings / $savingPointAmount) * (int) $savingPointReward;
 
             if ($pointsEarned <= 0) {
@@ -64,16 +64,16 @@ class CalculateMonthlySavingPoints extends Command
             }
 
             DB::transaction(function () use ($user, $periodDate, $periodLabel, $totalSavings, $pointsEarned): void {
-                PointTransaction::create([
-                    'user_id' => $user->id,
-                    'amount_earned' => $pointsEarned,
-                    'activity_description' => sprintf(
+                Poin::create([
+                    'pengguna_id' => $user->id,
+                    'jml_perolehan' => $pointsEarned,
+                    'deskripsi' => sprintf(
                         'Perhitungan poin simpanan periode %s dengan total simpanan Rp %s',
                         $periodLabel,
                         number_format($totalSavings, 0, ',', '.')
                     ),
-                    'calculation_period' => $periodDate,
-                    'saving_balance_snapshot' => $totalSavings,
+                    'periode_kalkulasi' => $periodDate,
+                    'sisa_tabungan_snapshot' => $totalSavings,
                 ]);
             });
 
@@ -87,10 +87,10 @@ class CalculateMonthlySavingPoints extends Command
 
     private function resolveActiveSettingValue(string $key, string $periodDate): ?float
     {
-        $setting = GlobalSetting::query()
+        $setting = PengaturanUmum::query()
             ->where('key', $key)
-            ->whereDate('effective_date', '<=', $periodDate)
-            ->orderByDesc('effective_date')
+            ->whereDate('tgl_diberlakukan', '<=', $periodDate)
+            ->orderByDesc('tgl_diberlakukan')
             ->orderByDesc('id')
             ->first();
 

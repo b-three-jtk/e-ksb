@@ -26,11 +26,11 @@ defineProps({
 		type: Array,
 		default: () => [],
 	},
-	maritalStatusOptions: {
+	statusPernikahanOptions: {
 		type: Array,
 		default: () => [],
 	},
-	educationOptions: {
+	pendidikanOptions: {
 		type: Array,
 		default: () => [],
 	},
@@ -43,16 +43,16 @@ defineProps({
 
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<BaseInputAdmin
-				v-model="form.name"
+				v-model="form.nama"
 				label="Nama Anggota"
 				type="text"
 				placeholder="Isi dengan huruf"
 				required
-				@input="form.name = onlyLetters(form.name)"
-				:error="getFieldError('name', errors.name)"
+				@input="form.nama = onlyLetters(form.nama)"
+				:error="getFieldError('nama', errors.nama)"
 			/>
 
-			<BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required :selectables="genderOptions" :error="getFieldError('gender', errors.gender)" />
+			<BaseInputAdmin v-model="form.jenis_kelamin" label="Jenis Kelamin" type="radio" required :selectables="genderOptions" :error="getFieldError('jenis_kelamin', errors.jenis_kelamin)" />
 
 			<BaseInputAdmin
 				v-model="form.nik"
@@ -66,38 +66,38 @@ defineProps({
 			/>
 
 			<BaseInputAdmin
-				v-model="form.birth_place"
+				v-model="form.tempat_lahir"
 				label="Tempat Lahir"
 				type="text"
 				placeholder="Isi tempat lahir"
 				required
-				:error="getFieldError('birth_place', errors.birth_place)"
+				:error="getFieldError('tempat_lahir', errors.tempat_lahir)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.birth_date"
+				v-model="form.tgl_lahir"
 				label="Tanggal Lahir"
 				type="date"
 				required
-				:error="getFieldError('birth_date', errors.birth_date)"
+				:error="getFieldError('tgl_lahir', errors.tgl_lahir)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.marital_status"
+				v-model="form.status_pernikahan"
 				label="Status Perkawinan"
 				type="select"
 				required
-				:selectables="maritalStatusOptions"
-				:error="getFieldError('marital_status', errors.marital_status)"
+				:selectables="statusPernikahanOptions"
+				:error="getFieldError('status_pernikahan', errors.status_pernikahan)"
 			/>
 
 			<BaseInputAdmin
-				v-model="form.last_education"
+				v-model="form.pendidikan_terakhir"
 				label="Pendidikan Terakhir"
 				type="select"
 				required
-				:selectables="educationOptions"
-				:error="getFieldError('last_education', errors.last_education)"
+				:selectables="pendidikanOptions"
+				:error="getFieldError('pendidikan_terakhir', errors.pendidikan_terakhir)"
 			/>
 		</div>
 	</section>

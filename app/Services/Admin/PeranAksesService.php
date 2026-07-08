@@ -3,7 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Enums\UserRoleEnum;
-use App\Models\User;
+use App\Models\Pengguna;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -26,13 +26,13 @@ class PeranAksesService
             ->pluck('name');
     }
 
-    public function syncUserRole(User $user, int|string $roleId): void
+    public function syncUserRole(Pengguna $user, int|string $roleId): void
     {
         $role = Role::findOrFail($roleId);
         $user->syncRoles([$role->name]);
     }
 
-    public function assignRoleToUser(User $user, int|string $roleId): void
+    public function assignRoleToUser(Pengguna $user, int|string $roleId): void
     {
         $role = Role::findOrFail($roleId);
         $user->assignRole($role->name);

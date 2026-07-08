@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Models;
+
+use App\Models\Pengguna;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class PembayaranAngsuran extends Model
+{
+    use HasUuids, HasFactory;
+    protected $keyType = 'string';
+    public $incrementing = false;
+    protected $table = 'pembayaran_angsuran';
+    protected $fillable = [
+        'kode_transaksi_pembayaran',
+        'metode_pembayaran',
+        'is_pelunasan_lebih_cepat',
+        'jumlah_angsuran_dibayar',
+        'pokok_dibayar',
+        'margin_dibayar',
+        'tgl_pembayaran',
+        'struk_pembayaran',
+
+        'angsuran_id',
+        'updated_by',
+    ];
+
+    protected $casts = [
+        'tgl_pembayaran' => 'datetime',
+    ];
+
+    public function angsuran()
+    {
+        return $this->belongsTo(Angsuran::class);
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(Pengguna::class, 'updated_by');
+    }
+}

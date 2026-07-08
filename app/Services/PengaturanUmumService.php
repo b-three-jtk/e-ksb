@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use Illuminate\Support\Facades\DB;
 
 class PengaturanUmumService
@@ -11,25 +11,33 @@ class PengaturanUmumService
         'general' => [
             'tanggal_awal_periode' => [
                 'label' => 'Tanggal Awal Periode',
-                'description' => 'Tanggal awal periode keuangan.',
+                'deskripsi' => 'Tanggal awal periode keuangan.',
             ],
             'tanggal_akhir_periode' => [
                 'label' => 'Tanggal Akhir Periode',
-                'description' => 'Tanggal akhir periode keuangan.',
+                'deskripsi' => 'Tanggal akhir periode keuangan.',
             ],
             'status_tutup_buku' => [
                 'label' => 'Status Tutup Buku',
-                'description' => 'Status dari penutupan buku (open/closed).',
+                'deskripsi' => 'Status dari penutupan buku (open/closed).',
             ],
         ],
         'points' => [
             'saving_point_amount' => [
                 'label' => 'Jumlah Simpanan',
-                'description' => 'Penetapan besaran simpanan yang dibutuhkan untuk memperoleh poin.',
+                'deskripsi' => 'Penetapan besaran simpanan yang dibutuhkan untuk memperoleh poin.',
             ],
             'saving_point_reward' => [
                 'label' => 'Poin yang Diperoleh',
-                'description' => 'Jumlah poin yang diberikan untuk setiap kelipatan simpanan.',
+                'deskripsi' => 'Jumlah poin yang diberikan untuk setiap kelipatan simpanan.',
+            ],
+            'murabaha_point_amount' => [
+                'label' => 'Jumlah Margin Murabahah',
+                'deskripsi' => 'Penetapan besaran margin murabahah yang dibayarkan untuk memperoleh poin.',
+            ],
+            'murabaha_point_reward' => [
+                'label' => 'Poin Margin Murabahah',
+                'deskripsi' => 'Jumlah poin yang diberikan untuk setiap kelipatan margin murabahah dibayarkan.',
             ],
             'murabaha_point_amount' => [
                 'label' => 'Jumlah Margin Murabahah',
@@ -43,25 +51,25 @@ class PengaturanUmumService
         'savings' => [
             'saving_pokok_amount' => [
                 'label' => 'Simpanan Pokok',
-                'description' => 'Nominal simpanan pokok anggota.',
+                'deskripsi' => 'Nominal simpanan pokok anggota.',
             ],
             'saving_wajib_amount' => [
                 'label' => 'Simpanan Wajib',
-                'description' => 'Nominal simpanan wajib anggota.',
+                'deskripsi' => 'Nominal simpanan wajib anggota.',
             ],
         ],
-        'financing' => [
+        'pembiayaan' => [
             'murabahah_margin_percentage' => [
                 'label' => 'Persentase Margin',
-                'description' => 'Persentase margin pembiayaan murabahah.',
+                'deskripsi' => 'Persentase margin pembiayaan murabahah.',
             ],
         ],
     ];
 
     public function getSettingValue(string $key): float
     {
-        return (float) GlobalSetting::where('key', $key)
-            ->latest('effective_date')
+        return (float) PengaturanUmum::where('key', $key)
+            ->latest('tgl_diberlakukan')
             ->value('value') ?? 0;
     }
 
@@ -77,11 +85,11 @@ class PengaturanUmumService
                 $settings[$section][$key] = [
                     'key' => $key,
                     'label' => $meta['label'],
-                    'description' => $meta['description'],
+                    'deskripsi' => $meta['deskripsi'],
                     'value' => $setting?->value,
-                    'effective_date' => $setting?->effective_date?->toDateString(),
+                    'tgl_diberlakukan' => $setting?->tgl_diberlakukan?->toDateString(),
                     'updated_at' => $setting?->updated_at?->toDateTimeString(),
-                    'updated_by' => $setting?->updatedBy?->name,
+                    'updated_by' => $setting?->updatedBy?->nama,
                 ];
             }
         }
@@ -105,9 +113,9 @@ class PengaturanUmumService
                 'key' => $record->key,
                 'label' => self::SETTING_MAP[$section][$record->key]['label'],
                 'value' => $record->value,
-                'effective_date' => $record->effective_date?->toDateString(),
+                'tgl_diberlakukan' => $record->tgl_diberlakukan?->toDateString(),
                 'updated_at' => $record->updated_at?->toDateTimeString(),
-                'updated_by' => $record->updatedBy?->name,
+                'updated_by' => $record->updatedBy?->nama,
             ];
         }
 
@@ -122,8 +130,8 @@ class PengaturanUmumService
             $allKeys = array_merge($allKeys, array_keys($items));
         }
 
-        return GlobalSetting::query()
-            ->with(['updatedBy:id,name'])
+        return PengaturanUmum::query()
+            ->with(['updatedBy:id,nama'])
             ->whereIn('key', $allKeys)
             ->orderByDesc('created_at')
             ->orderByDesc('id')
@@ -144,11 +152,11 @@ class PengaturanUmumService
     public function saveSettingGroup(array $items, string $userId): void
     {
         foreach ($items as $key => $payload) {
-            GlobalSetting::query()->create([
+            PengaturanUmum::query()->create([
                 'key' => $key,
                 'value' => $payload['value'],
-                'effective_date' => $payload['effective_date'],
-                'description' => $payload['description'],
+                'tgl_diberlakukan' => $payload['tgl_diberlakukan'],
+                'deskripsi' => $payload['deskripsi'],
                 'updated_by' => $userId,
             ]);
         }
@@ -161,30 +169,40 @@ class PengaturanUmumService
                 'general' => $this->saveSettingGroup([
                     'tanggal_awal_periode' => [
                         'value' => $validated['tanggal_awal_periode'],
-                        'effective_date' => $validated['period_effective_date'],
-                        'description' => self::SETTING_MAP['general']['tanggal_awal_periode']['description'],
+                        'tgl_diberlakukan' => $validated['period_effective_date'],
+                        'deskripsi' => self::SETTING_MAP['general']['tanggal_awal_periode']['deskripsi'],
                     ],
                     'tanggal_akhir_periode' => [
                         'value' => $validated['tanggal_akhir_periode'],
-                        'effective_date' => $validated['period_effective_date'],
-                        'description' => self::SETTING_MAP['general']['tanggal_akhir_periode']['description'],
+                        'tgl_diberlakukan' => $validated['period_effective_date'],
+                        'deskripsi' => self::SETTING_MAP['general']['tanggal_akhir_periode']['deskripsi'],
                     ],
                     'status_tutup_buku' => [
                         'value' => $validated['status_tutup_buku'],
-                        'effective_date' => $validated['period_effective_date'],
-                        'description' => self::SETTING_MAP['general']['status_tutup_buku']['description'],
+                        'tgl_diberlakukan' => $validated['period_effective_date'],
+                        'deskripsi' => self::SETTING_MAP['general']['status_tutup_buku']['deskripsi'],
                     ],
                 ], $userId),
                 'points' => $this->saveSettingGroup([
                     'saving_point_amount' => [
                         'value' => $validated['saving_point_amount'],
-                        'effective_date' => $validated['effective_date'],
-                        'description' => self::SETTING_MAP['points']['saving_point_amount']['description'],
+                        'tgl_diberlakukan' => $validated['tgl_diberlakukan'],
+                        'deskripsi' => self::SETTING_MAP['points']['saving_point_amount']['deskripsi'],
                     ],
                     'saving_point_reward' => [
                         'value' => $validated['saving_point_reward'],
-                        'effective_date' => $validated['effective_date'],
-                        'description' => self::SETTING_MAP['points']['saving_point_reward']['description'],
+                        'tgl_diberlakukan' => $validated['tgl_diberlakukan'],
+                        'deskripsi' => self::SETTING_MAP['points']['saving_point_reward']['deskripsi'],
+                    ],
+                    'murabaha_point_amount' => [
+                        'value' => $validated['murabaha_point_amount'],
+                        'tgl_diberlakukan' => $validated['murabaha_effective_date'],
+                        'deskripsi' => self::SETTING_MAP['points']['murabaha_point_amount']['deskripsi'],
+                    ],
+                    'murabaha_point_reward' => [
+                        'value' => $validated['murabaha_point_reward'],
+                        'tgl_diberlakukan' => $validated['murabaha_effective_date'],
+                        'deskripsi' => self::SETTING_MAP['points']['murabaha_point_reward']['deskripsi'],
                     ],
                     'murabaha_point_amount' => [
                         'value' => $validated['murabaha_point_amount'],
@@ -200,20 +218,20 @@ class PengaturanUmumService
                 'savings' => $this->saveSettingGroup([
                     'saving_pokok_amount' => [
                         'value' => $validated['saving_pokok_amount'],
-                        'effective_date' => $validated['saving_pokok_effective_date'],
-                        'description' => self::SETTING_MAP['savings']['saving_pokok_amount']['description'],
+                        'tgl_diberlakukan' => $validated['saving_pokok_effective_date'],
+                        'deskripsi' => self::SETTING_MAP['savings']['saving_pokok_amount']['deskripsi'],
                     ],
                     'saving_wajib_amount' => [
                         'value' => $validated['saving_wajib_amount'],
-                        'effective_date' => $validated['saving_wajib_effective_date'],
-                        'description' => self::SETTING_MAP['savings']['saving_wajib_amount']['description'],
+                        'tgl_diberlakukan' => $validated['saving_wajib_effective_date'],
+                        'deskripsi' => self::SETTING_MAP['savings']['saving_wajib_amount']['deskripsi'],
                     ],
                 ], $userId),
-                'financing' => $this->saveSettingGroup([
+                'pembiayaan' => $this->saveSettingGroup([
                     'murabahah_margin_percentage' => [
                         'value' => $validated['murabahah_margin_percentage'],
-                        'effective_date' => $validated['effective_date'],
-                        'description' => self::SETTING_MAP['financing']['murabahah_margin_percentage']['description'],
+                        'tgl_diberlakukan' => $validated['tgl_diberlakukan'],
+                        'deskripsi' => self::SETTING_MAP['pembiayaan']['murabahah_margin_percentage']['deskripsi'],
                     ],
                 ], $userId),
             };

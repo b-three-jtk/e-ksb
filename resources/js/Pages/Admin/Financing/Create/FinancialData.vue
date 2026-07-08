@@ -12,25 +12,25 @@ const props = defineProps({
 const emit = defineEmits(['validate-field'])
 
 const incomes = computed(() => [
-    { label: 'Gaji Pokok & Tunjangan', model: 'gaji_pokok_amount' },
-    { label: 'Penghasilan Usaha', model: 'penghasilan_usaha_amount' },
-    { label: 'Penghasilan Pasangan', model: 'penghasilan_pasangan_amount' },
-    { label: 'Penghasilan Lainnya', model: 'penghasilan_lainnya_amount' },
+    { label: 'Gaji Pokok & Tunjangan', model: 'jml_gaji_pokok' },
+    { label: 'Penghasilan Usaha', model: 'jml_penghasilan_usaha' },
+    { label: 'Penghasilan Pasangan', model: 'jml_penghasilan_pasangan' },
+    { label: 'Penghasilan Lainnya', model: 'jml_penghasilan_lainnya' },
 ])
 
 const expenses = computed(() => [
-    { label: 'Biaya Hidup Keluarga', model: 'biaya_hidup_keluarga_amount' },
-    { label: 'Biaya Pendidikan', model: 'biaya_pendidikan_amount' },
-    { label: 'Jumlah Cicilan Lainnya', model: 'jumlah_cicilan_amount' },
-    { label: 'Jumlah Biaya Lainnya', model: 'jumlah_biaya_lainnya_amount' },
+    { label: 'Biaya Hidup Keluarga', model: 'jml_biaya_hidup_keluarga' },
+    { label: 'Biaya Pendidikan', model: 'jml_biaya_pendidikan' },
+    { label: 'Jumlah Cicilan Lainnya', model: 'jml_cicilan' },
+    { label: 'Jumlah Biaya Lainnya', model: 'jml_biaya_lainnya' },
 ])
 
 const totalIncome = computed(() =>
-    incomes.value.reduce((total, item) => total + (Number(props.form.member[item.model]) || 0), 0)
+    incomes.value.reduce((total, item) => total + (Number(props.form.anggota[item.model]) || 0), 0)
 )
 
 const totalExpense = computed(() =>
-    expenses.value.reduce((total, item) => total + (Number(props.form.member[item.model]) || 0), 0)
+    expenses.value.reduce((total, item) => total + (Number(props.form.anggota[item.model]) || 0), 0)
 )
 
 const netIncome = computed(() => totalIncome.value - totalExpense.value)
@@ -48,57 +48,57 @@ const onFieldChange = (field) => emit('validate-field', field)
             <!-- Data Pekerjaan -->
             <div class="border-b border-gray-200 grid grid-cols-2 gap-4 p-4">
                 <BaseInputAdmin
-                    v-model="form.member.employment_status"
+                    v-model="form.anggota.status_pekerjaan"
                     required
                     label="Status Pekerjaan"
                     placeholder="Masukkan status pekerjaan, contoh: Karyawan Swasta"
-                    @input="onFieldChange('employment_status')"
+                    @input="onFieldChange('status_pekerjaan')"
                 />
                 <BaseInputAdmin
-                    v-model="form.member.job_title"
+                    v-model="form.anggota.jabatan_pekerjaan"
                     label="Jabatan"
                     placeholder="Masukkan jabatan"
-                    :error="errors?.job_title"
-                    @input="onFieldChange('job_title')"
+                    :error="errors?.jabatan_pekerjaan"
+                    @input="onFieldChange('jabatan_pekerjaan')"
                 />
                 <BaseInputAdmin
-                    v-model="form.member.company_or_business_name"
+                    v-model="form.anggota.nama_perusahaan"
                     label="Nama Perusahaan atau Bisnis"
                     placeholder="Masukkan nama perusahaan atau bisnis"
-                    :error="errors?.company_or_business_name"
-                    @input="onFieldChange('company_or_business_name')"
+                    :error="errors?.nama_perusahaan"
+                    @input="onFieldChange('nama_perusahaan')"
                 />
                 <BaseInputAdmin
-                    v-model="form.member.business_field"
+                    v-model="form.anggota.bidang_usaha"
                     label="Bidang Pekerjaan"
                     placeholder="Masukkan bidang pekerjaan"
-                    :error="errors?.business_field"
-                    @input="onFieldChange('business_field')"
+                    :error="errors?.bidang_usaha"
+                    @input="onFieldChange('bidang_usaha')"
                 />
                 <BaseInputAdmin
-                    v-model="form.member.tenure_year"
+                    v-model="form.anggota.lama_bekerja"
                     label="Lama Bekerja (Tahun)"
                     type="number"
                     placeholder="Masukkan lama bekerja"
-                    :error="errors?.tenure_year"
-                    @input="onFieldChange('tenure_year')"
+                    :error="errors?.lama_bekerja"
+                    @input="onFieldChange('lama_bekerja')"
                 />
                 <BaseInputAdmin
-                    v-model="form.member.workplace_contact"
+                    v-model="form.anggota.no_telp_kantor"
                     max="13"
                     label="Kontak Perusahaan"
                     placeholder="Masukkan kontak perusahaan"
-                    :error="errors?.workplace_contact"
-                    @input="onFieldChange('workplace_contact')"
+                    :error="errors?.no_telp_kantor"
+                    @input="onFieldChange('no_telp_kantor')"
                 />
                 <BaseInputAdmin
                     rows="3"
-                    v-model="form.member.workplace_address"
+                    v-model="form.anggota.alamat_tempat_bekerja"
                     label="Alamat Perusahaan"
                     type="textarea"
                     placeholder="Masukkan alamat perusahaan"
-                    :error="errors?.workplace_address"
-                    @input="onFieldChange('workplace_address')"
+                    :error="errors?.alamat_tempat_bekerja"
+                    @input="onFieldChange('alamat_tempat_bekerja')"
                 />
             </div>
 
@@ -117,7 +117,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                             <td class="py-2 text-left pl-6">{{ income.label }}</td>
                             <td class="py-2 text-right pr-6">
                                 <BaseInputAdmin
-                                    v-model="form.member[income.model]"
+                                    v-model="form.anggota[income.model]"
                                     isMoney
                                     input-class="text-right"
                                 />
@@ -146,7 +146,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                             <td class="py-2 text-left pl-6">{{ expense.label }}</td>
                             <td class="py-2 text-right pr-6">
                                 <BaseInputAdmin
-                                    v-model="form.member[expense.model]"
+                                    v-model="form.anggota[expense.model]"
                                     isMoney
                                     input-class="text-right"
                                 />

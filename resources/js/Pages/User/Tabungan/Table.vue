@@ -69,7 +69,7 @@ const sortedTransactions = computed(() => {
 })
 
 const receiptAttachmentUrl = computed(() => {
-    return selectedTransaction.value?.saving_transaction_receipt
+    return selectedTransaction.value?.struk_simpanan
         || selectedTransaction.value?.struk_attachment
         || ''
 })

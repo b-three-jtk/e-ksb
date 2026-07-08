@@ -25,27 +25,27 @@ class UpdateMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nik' => 'required|digits:16|unique:users,nik,' . $this->route('id'),
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255|unique:users,email,' . $this->route('id'),
-            'phone_number' => 'required|string|max:20',
-            'gender' => 'nullable|in:'. implode(',', ['Laki-laki', 'Perempuan']),
-            'birth_place' => 'required|string|max:255',
-            'birth_date' => 'required|date',
-            'residential_address' => 'nullable|string|max:255',
-            'domicile_address' => 'required|string|max:255',
-            'last_education' => 'required|string|max:255|in:'. implode(',', array_column(EducationEnum::cases(), 'value')),
-            'marital_status' => 'required|string|max:255|in:'. implode(',', array_column(MaritalStatusEnum::cases(), 'value')),
-            'dependents' => 'nullable|integer|min:0',
+            'nik' => 'required|digits:16|unique:pengguna,nik,' . $this->route('id'),
+            'nama' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255|unique:pengguna,email,' . $this->route('id'),
+            'no_telp' => 'required|string|max:20',
+            'jenis_kelamin' => 'nullable|in:'. implode(',', ['Laki-laki', 'Perempuan']),
+            'tempat_lahir' => 'required|string|max:255',
+            'tgl_lahir' => 'required|date',
+            'alamat_ktp' => 'nullable|string|max:255',
+            'alamat_domisili' => 'required|string|max:255',
+            'pendidikan_terakhir' => 'required|string|max:255|in:'. implode(',', array_column(EducationEnum::cases(), 'value')),
+            'status_pernikahan' => 'required|string|max:255|in:'. implode(',', array_column(MaritalStatusEnum::cases(), 'value')),
+            'jml_tanggungan' => 'nullable|integer|min:0',
 
             'ktp_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'kk_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
 
-            'heirs' => 'nullable|array',
-            'heirs.*.heir_nik' => 'required|string|max:16',
-            'heirs.*.heir_name' => 'required|string|max:255',
-            'heirs.*.relationship' => 'required|string',
-            'heirs.*.heir_contact' => 'required|string|max:20',
+            'ahli_waris' => 'nullable|array',
+            'ahli_waris.*.nik_ahli_waris' => 'required|string|max:16',
+            'ahli_waris.*.nama_ahli_waris' => 'required|string|max:255',
+            'ahli_waris.*.hubungan' => 'required|string',
+            'ahli_waris.*.kontak_ahli_waris' => 'required|string|max:20',
         ];
     }
 }

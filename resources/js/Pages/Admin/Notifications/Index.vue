@@ -15,7 +15,7 @@ interface NotificationItem {
     member_name: string
     title: string
     message: string
-    phone_number: string | null
+    no_telp: string | null
     notification_type: string
     reminder_type: string
     status: string
@@ -49,7 +49,7 @@ interface Filters {
 }
 
 const props = defineProps<{
-    notifications: NotificationPagination
+    notifikasi: NotificationPagination
     filters: Filters
 }>()
 
@@ -81,7 +81,7 @@ const filters = reactive({
 
 const applyFilters = () => {
     router.get(
-        '/admin/notifications',
+        '/admin/notifikasi',
         {
             periode: filters.periode || undefined,
             notification_type: filters.notification_type || undefined,
@@ -231,9 +231,9 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
 
                 <BaseTable
                     :columns="columns"
-                    :data="notifications.data.map((item, idx) => ({
+                    :data="notifikasi.data.map((item, idx) => ({
                         ...item,
-                        no: ((notifications.current_page - 1) * notifications.per_page) + idx + 1
+                        no: ((notifikasi.current_page - 1) * notifikasi.per_page) + idx + 1
                     }))"
                 >
                     <template #cell-notification_type="{ row }">
@@ -266,8 +266,8 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
 
                     <template #cell-actions="{ row }">
                         <a
-                            v-if="row.phone_number"
-                            :href="createWhatsAppUrl(row.phone_number, row.message)"
+                            v-if="row.no_telp"
+                            :href="createWhatsAppUrl(row.no_telp, row.message)"
                             class="inline-flex items-center justify-center rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-600"
                             target="_blank"
                             rel="noopener noreferrer"
@@ -286,8 +286,8 @@ const createWhatsAppUrl = (phoneNumber: string, message: string) => {
 
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     <Pagination
-                        :links="notifications.links"
-                        :total="notifications.total"
+                        :links="notifikasi.links"
+                        :total="notifikasi.total"
                     />
                 </div>
             </div>

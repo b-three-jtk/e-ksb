@@ -15,7 +15,7 @@ class MarkNotificationPopupDisplayedRequest extends FormRequest
     {
         return [
             'notification_ids' => ['required', 'array'],
-            'notification_ids.*' => ['required', 'integer', 'exists:notifications,id'],
+            'notification_ids.*' => ['required', 'integer', 'exists:notifikasi,id'],
         ];
     }
 }

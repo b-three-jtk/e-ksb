@@ -21,43 +21,43 @@ return new class extends Migration
                 v_saving_ref  VARCHAR;
                 v_debit_ref   VARCHAR;
                 v_credit_ref  VARCHAR;
-                v_saving_type VARCHAR;
+                v_jenis_simpanan VARCHAR;
             BEGIN
-                -- Ambil saving_type dari saving_accounts
-                SELECT saving_type INTO v_saving_type
-                FROM saving_accounts
-                WHERE id = NEW.saving_account_id;
+                -- Ambil jenis_simpanan dari akun_simpanan
+                SELECT jenis_simpanan INTO v_jenis_simpanan
+                FROM akun_simpanan
+                WHERE id = NEW.akun_simpanan_id;
 
-                -- Kas → no_ref_account '101'
-                SELECT no_ref_account INTO v_kas_ref
-                FROM accounts
-                WHERE account_name = 'Kas'
+                -- Kas → no_ref_akun '101'
+                SELECT no_ref_akun INTO v_kas_ref
+                FROM akun
+                WHERE nama_akun = 'Kas'
                 LIMIT 1;
 
-                -- Simpanan → cocokkan dengan saving_type
+                -- Simpanan → cocokkan dengan jenis_simpanan
                 -- Nilai yang valid: 'Tabungan Anggota', 'Tabungan Berjangka',
                 --                   'Tabungan Ibadah', 'Simpanan Pokok', 'Simpanan Wajib'
-                SELECT no_ref_account INTO v_saving_ref
-                FROM accounts
-                WHERE account_name = v_saving_type
+                SELECT no_ref_akun INTO v_saving_ref
+                FROM akun
+                WHERE nama_akun = v_jenis_simpanan
                 LIMIT 1;
 
                 -- Guard: kalau akun tidak ditemukan, batalkan dan kasih pesan jelas
                 IF v_kas_ref IS NULL THEN
-                    RAISE EXCEPTION 'Akun Kas tidak ditemukan di tabel accounts';
+                    RAISE EXCEPTION 'Akun Kas tidak ditemukan di tabel akun';
                 END IF;
 
                 IF v_saving_ref IS NULL THEN
-                    RAISE EXCEPTION 'Akun untuk saving_type ''%'' tidak ditemukan di tabel accounts',
-                        v_saving_type;
+                    RAISE EXCEPTION 'Akun untuk jenis_simpanan ''%'' tidak ditemukan di tabel akun',
+                        v_jenis_simpanan;
                 END IF;
 
                 -- Arah jurnal
-                IF NEW.transaction_type = 'Penyetoran' THEN
+                IF NEW.tipe_transaksi = 'Penyetoran' THEN
                     v_debit_ref  := v_kas_ref;
                     v_credit_ref := v_saving_ref;
 
-                ELSIF NEW.transaction_type = 'Penarikan' THEN
+                ELSIF NEW.tipe_transaksi = 'Penarikan' THEN
                     v_debit_ref  := v_saving_ref;
                     v_credit_ref := v_kas_ref;
 
@@ -68,12 +68,11 @@ return new class extends Migration
                 v_group_id := gen_random_uuid();
 
                 -- Baris DEBIT
-                INSERT INTO journal_entries (
-                    journal_group_id,
-                    no_ref_account,
-                    position,
+                INSERT INTO detail_jurnal (
+                    jurnal_id,
+                    no_ref_akun,
+                    posisi_akun,
                     nominal,
-                    transaction_date,
                     updated_by,
                     created_at,
                     updated_at
@@ -81,20 +80,18 @@ return new class extends Migration
                     v_group_id,
                     v_debit_ref,
                     'Debit',
-                    NEW.saving_amount,
-                    NEW.transaction_date::DATE,
+                    NEW.nominal_simpanan,
                     NEW.updated_by,
                     NOW(),
                     NOW()
                 );
 
                 -- Baris CREDIT
-                INSERT INTO journal_entries (
-                    journal_group_id,
-                    no_ref_account,
-                    position,
+                INSERT INTO detail_jurnal (
+                    jurnal_id,
+                    no_ref_akun,
+                    posisi_akun,
                     nominal,
-                    transaction_date,
                     updated_by,
                     created_at,
                     updated_at
@@ -102,8 +99,7 @@ return new class extends Migration
                     v_group_id,
                     v_credit_ref,
                     'Credit',
-                    NEW.saving_amount,
-                    NEW.transaction_date::DATE,
+                    NEW.nominal_simpanan,
                     NEW.updated_by,
                     NOW(),
                     NOW()
@@ -116,7 +112,7 @@ return new class extends Migration
 
         DB::unprepared("
             CREATE TRIGGER trg_saving_journal
-            AFTER INSERT ON saving_transactions
+            AFTER INSERT ON transaksi_simpanan
             FOR EACH ROW
             EXECUTE FUNCTION fn_journal_saving();
         ");
@@ -127,7 +123,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::unprepared('DROP TRIGGER IF EXISTS trg_saving_journal ON saving_transactions');
+        DB::unprepared('DROP TRIGGER IF EXISTS trg_saving_journal ON transaksi_simpanan');
         DB::unprepared('DROP FUNCTION IF EXISTS fn_journal_saving');
     }
 };

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\NotificationIndexRequest;
 use App\Services\NotifikasiService;
-use App\Models\Notification;
+use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -18,49 +18,49 @@ class NotifikasiController extends Controller
     public function index(NotificationIndexRequest $request)
     {
         $perPage = $request->input('per_page', 10);
-        $filters = $request->only(['periode', 'notification_type', 'status', 'is_read', 'search']);
+        $filters = $request->only(['periode', 'jenis_notifikasi', 'status', 'sudah_dibaca', 'search']);
 
-        $notifications = $this->notificationService->getAdminNotifications($filters, $perPage)
+        $notifikasi = $this->notificationService->getAdminNotifications($filters, $perPage)
             ->through(fn($notification) => [
                 'id' => $notification->id,
-                'member_name' => $notification->member?->user?->name,
-                'title' => $notification->title,
-                'message' => $notification->message,
-                'phone_number' => $notification->member?->user?->phone_number,
-                'notification_type' => $notification->notification_type,
-                'reminder_type' => $notification->reminder_type,
+                'member_name' => $notification->anggota?->user?->nama,
+                'judul' => $notification->judul,
+                'pesan' => $notification->pesan,
+                'no_telp' => $notification->anggota?->user?->no_telp,
+                'jenis_notifikasi' => $notification->jenis_notifikasi,
+                'jenis_pengingat' => $notification->jenis_pengingat,
                 'status' => $notification->status,
-                'is_read' => $notification->is_read,
-                'scheduled_at' => optional($notification->scheduled_at)?->format('d/m/Y H:i'),
-                'sent_at' => optional($notification->sent_at)?->format('d/m/Y H:i'),
+                'sudah_dibaca' => $notification->sudah_dibaca,
+                'dijadwalkan_pada' => optional($notification->dijadwalkan_pada)?->format('d/m/Y H:i'),
+                'dikirim_pada' => optional($notification->dikirim_pada)?->format('d/m/Y H:i'),
             ]);
 
         return Inertia::render('Admin/Notifications/Index', [
-            'notifications' => $notifications,
+            'notifikasi' => $notifikasi,
             'filters' => $filters,
         ]);
     }
 
-    public function show(Notification $notification)
+    public function show(Notifikasi $notification)
     {
-        $notification->load('member.user');
+        $notification->load('anggota.user');
 
         return Inertia::render('Admin/Notifications/Show', [
             'notification' => [
                 'id' => $notification->id,
-                'member_name' => $notification->member?->user?->name,
-                'title' => $notification->title,
-                'message' => $notification->message,
-                'notification_type' => $notification->notification_type,
-                'reference_type' => $notification->reference_type,
-                'reference_id' => $notification->reference_id,
-                'notification_period' => $notification->notification_period,
-                'reminder_type' => $notification->reminder_type,
+                'member_name' => $notification->anggota?->user?->nama,
+                'judul' => $notification->judul,
+                'pesan' => $notification->pesan,
+                'jenis_notifikasi' => $notification->jenis_notifikasi,
+                'jenis_referensi' => $notification->jenis_referensi,
+                'referensi_id' => $notification->referensi_id,
+                'periode_notifikasi' => $notification->periode_notifikasi,
+                'jenis_pengingat' => $notification->jenis_pengingat,
                 'status' => $notification->status,
-                'is_read' => $notification->is_read,
-                'scheduled_at' => optional($notification->scheduled_at)?->format('d/m/Y H:i'),
-                'sent_at' => optional($notification->sent_at)?->format('d/m/Y H:i'),
-                'read_at' => optional($notification->read_at)?->format('d/m/Y H:i'),
+                'sudah_dibaca' => $notification->sudah_dibaca,
+                'dijadwalkan_pada' => optional($notification->dijadwalkan_pada)?->format('d/m/Y H:i'),
+                'dikirim_pada' => optional($notification->dikirim_pada)?->format('d/m/Y H:i'),
+                'dibaca_pada' => optional($notification->dibaca_pada)?->format('d/m/Y H:i'),
                 'created_at' => optional($notification->created_at)?->format('d/m/Y H:i'),
                 'updated_at' => optional($notification->updated_at)?->format('d/m/Y H:i'),
             ],

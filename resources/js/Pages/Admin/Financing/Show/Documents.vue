@@ -7,7 +7,7 @@ const props = defineProps({
 
 const documentsList = [
     { key: 'akad_wakalah_document', label: 'Dokumen Wakalah' },
-    { key: 'purchase_receipt', label: 'Bukti Pembelian' },
+    { key: 'struk_pembelian', label: 'Bukti Pembelian' },
     { key: 'akad_document', label: 'Dokumen Akad' },
 ]
 

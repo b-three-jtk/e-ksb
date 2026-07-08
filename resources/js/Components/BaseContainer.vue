@@ -33,26 +33,26 @@
 export default {
   name: 'EmptyContainer',
   props: {
-    title: {
-      type: String,
-      default: ''
-    },
-    subtitle: {
-      type: String,
-      default: ''
-    },
-    showHeader: {
-      type: Boolean,
-      default: true
-    },
-    showDivider: {
-      type: Boolean,
-      default: true
-    },
-    contentClass: {
-      type: String,
-      default: 'mt-8'
-    }
+  title: {
+    type: String,
+    default: ''
+  },
+  subtitle: {
+    type: String,
+    default: ''
+  },
+  showHeader: {
+    type: Boolean,
+    default: true
+  },
+  showDivider: {
+    type: Boolean,
+    default: true
+  },
+  contentClass: {
+    type: String,
+    default: 'mt-8'
+  }
   }
 }
 </script>

@@ -10,18 +10,18 @@ import Swal from 'sweetalert2'
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
-    { name: 'Pengelolaan Murabahah', link: '/admin/financings' },
+    { name: 'Pengelolaan Murabahah', link: '/admin/pembiayaan' },
     { name: 'Pembayaran Murabahah' },
 ]
 
 const props = defineProps({
-    financing: {
+    pembiayaan: {
         type: Object,
         required: true,
     },
 })
 
-const selectedFinancing = ref(props.financing)
+const selectedFinancing = ref(props.pembiayaan)
 
 // Format
 function formatRp(value) {
@@ -32,7 +32,7 @@ function formatRp(value) {
 const nominalDisplay = ref(
     'Rp ' +
     formatRp(
-        props.financing.installment_per_month
+        props.pembiayaan.installment_per_month
     )
 )
 
@@ -128,7 +128,7 @@ async function submitReschedule() {
     rescheduleLoading.value = true
 
     router.post(
-        `/admin/financings/${props.financing.id}/payments/reschedule`,
+        `/admin/pembiayaan/${props.pembiayaan.id}/payments/reschedule`,
         {
             installment_id:
                 selectedFinancing.value.installment_id,
@@ -193,21 +193,21 @@ async function handleSubmit() {
     }
     isSubmittingPayment.value = true
     router.post(
-        `/admin/financings/${props.financing.id}/payments/store`,
+        `/admin/pembiayaan/${props.pembiayaan.id}/payments/store`,
         {
-            financing_id:
+            pembiayaan_id:
                 selectedFinancing.value.id,
 
             installment_id:
                 selectedFinancing.value.installment_id,
 
-            payment_method:
+            metode_pembayaran:
                 depositMethod.value,
 
             nominal:
                 selectedFinancing.value.installment_per_month,
 
-            payment_date:
+            tgl_pembayaran:
                 tanggalPembayaran.value,
         },
         {
@@ -230,8 +230,8 @@ async function handleSubmit() {
                 // if (pdfUrl) {
                 //     window.open(pdfUrl, '_blank')
                 // }
-                // if (page.props.financing) {
-                //     selectedFinancing.value = page.props.financing
+                // if (page.props.pembiayaan) {
+                //     selectedFinancing.value = page.props.pembiayaan
                 // }
             },
             onError: (errors) => {
@@ -295,7 +295,7 @@ async function handleSubmit() {
                             </p>
 
                             <p class="font-medium text-gray-800">
-                                {{ selectedFinancing.user.name }}
+                                {{ selectedFinancing.user.nama }}
                             </p>
                         </div>
 
@@ -353,7 +353,7 @@ async function handleSubmit() {
                                 </label>
 
                                 <input
-                                    :value="selectedFinancing.product_type"
+                                    :value="selectedFinancing.jenis_barang"
                                     readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />
@@ -367,7 +367,7 @@ async function handleSubmit() {
                                 </label>
 
                                 <input
-                                    :value="selectedFinancing.qty"
+                                    :value="selectedFinancing.kuantitas"
                                     readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />
@@ -395,7 +395,7 @@ async function handleSubmit() {
                                 </label>
 
                                 <input
-                                    :value="selectedFinancing.product_specification"
+                                    :value="selectedFinancing.product_spesifikasi_barang"
                                     readonly
                                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50"
                                 />

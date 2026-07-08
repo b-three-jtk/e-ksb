@@ -5,10 +5,10 @@ namespace App\Services\User;
 use App\Enums\MemberStatusEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
-use App\Models\Member;
-use App\Models\MemberBankAccount;
-use App\Models\SavingAccount;
-use App\Models\SavingTransaction;
+use App\Models\Anggota;
+use App\Models\RekeningAnggota;
+use App\Models\AkunSimpanan;
+use App\Models\TransaksiSimpanan;
 use App\Services\Admin\JurnalService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -24,13 +24,13 @@ class SimpananServices
 
     public function storeWithdrawal(array $validated, string $userId): array
     {
-        $member = Member::with('user')->findOrFail($validated['member_id']);
-        $savingAccount = SavingAccount::with(['ibadah', 'berjangka'])->findOrFail($validated['saving_account_id']);
-        $savingBalance = $savingAccount->balance;
+        $anggota = Anggota::with('user')->findOrFail($validated['anggota_id']);
+        $akunSimpanan = AkunSimpanan::with(['ibadah', 'berjangka'])->findOrFail($validated['akun_simpanan_id']);
+        $savingBalance = $akunSimpanan->saldo;
 
-        if ((int) $savingAccount->member_id !== (int) $member->id) {
+        if ((int) $akunSimpanan->anggota_id !== (int) $anggota->id) {
             throw ValidationException::withMessages([
-                'saving_account_id' => 'Rekening simpanan tidak ditemukan untuk anggota ini'
+                'akun_simpanan_id' => 'Rekening simpanan tidak ditemukan untuk anggota ini'
             ]);
         }
 
@@ -40,45 +40,45 @@ class SimpananServices
             ]);
         }
 
-        if ($member->status === MemberStatusEnum::ACTIVE->value && in_array($savingAccount->saving_type, [SavingTypeEnum::SIMPANAN_POKOK->value, SavingTypeEnum::SIMPANAN_WAJIB->value])) {
+        if ($anggota->status === MemberStatusEnum::ACTIVE->value && in_array($akunSimpanan->jenis_simpanan, [SavingTypeEnum::SIMPANAN_POKOK->value, SavingTypeEnum::SIMPANAN_WAJIB->value])) {
             throw ValidationException::withMessages([
-                'saving_account_id' => $savingAccount->saving_type . ' tidak dapat ditarik selama status keanggotaan masih aktif.'
+                'akun_simpanan_id' => $akunSimpanan->jenis_simpanan . ' tidak dapat ditarik selama status keanggotaan masih aktif.'
             ]);
         }
 
-        $savingType = (string)($savingAccount->saving_type ?? '');
+        $savingType = (string)($akunSimpanan->jenis_simpanan ?? '');
         $typeLower = mb_strtolower($savingType);
 
         if (str_contains($typeLower, 'berjangka')) {
-            $tenorMonths = (int) ($savingAccount->berjangka?->tenor ?? 0);
-            if ($tenorMonths > 0 && $savingAccount->created_at) {
-                $maturityDate = Carbon::parse($savingAccount->created_at)->addMonths($tenorMonths)->startOfDay();
+            $tenorMonths = (int) ($akunSimpanan->berjangka?->tenor ?? 0);
+            if ($tenorMonths > 0 && $akunSimpanan->created_at) {
+                $maturityDate = Carbon::parse($akunSimpanan->created_at)->addMonths($tenorMonths)->startOfDay();
                 if (Carbon::today()->lt($maturityDate)) {
                     throw ValidationException::withMessages([
-                        'saving_account_id' => 'Tabungan berjangka belum jatuh tempo. Pencairan dapat dilakukan mulai ' . $maturityDate->format('d/m/Y'),
+                        'akun_simpanan_id' => 'Tabungan berjangka belum jatuh tempo. Pencairan dapat dilakukan mulai ' . $maturityDate->format('d/m/Y'),
                     ]);
                 }
             }
         }
 
         if (str_contains($typeLower, 'ibadah')) {
-            $targetAmount = (float) ($savingAccount->ibadah?->target_amount ?? 0);
+            $targetAmount = (float) ($akunSimpanan->ibadah?->target_tabungan ?? 0);
             if ($targetAmount > 0 && (float) $savingBalance < $targetAmount) {
                 throw ValidationException::withMessages([
-                    'saving_account_id' => 'Tabungan ibadah belum mencapai target minimal Rp ' . number_format($targetAmount, 0, ',', '.'),
+                    'akun_simpanan_id' => 'Tabungan ibadah belum mencapai target minimal Rp ' . number_format($targetAmount, 0, ',', '.'),
                 ]);
             }
         }
 
-        [$transaction, $saldoSebelum] = DB::transaction(function () use ($validated, $member, $savingAccount, $savingType, $userId) {
-            $lockedSavingAccount = SavingAccount::query()
-                ->whereKey($savingAccount->id)
+        [$transaction, $saldoSebelum] = DB::transaction(function () use ($validated, $anggota, $akunSimpanan, $savingType, $userId) {
+            $lockedSavingAccount = AkunSimpanan::query()
+                ->whereKey($akunSimpanan->id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $saldoSebelum = $lockedSavingAccount->balance;
+            $saldoSebelum = $lockedSavingAccount->saldo;
             if ($saldoSebelum === null) {
-                $saldoSebelum = (float) ($lockedSavingAccount->balance ?? 0);
+                $saldoSebelum = (float) ($lockedSavingAccount->saldo ?? 0);
             } else {
                 $saldoSebelum = (float) $saldoSebelum;
             }
@@ -87,37 +87,37 @@ class SimpananServices
                 throw new \RuntimeException('Saldo tidak cukup untuk penarikan.');
             }
 
-            $transaction = SavingTransaction::create([
-                'saving_transaction_code' => $this->generateWithdrawalTransactionCode($savingType),
-                'saving_account_id' => $lockedSavingAccount->id,
-                'balance_after_transaction' => $saldoSebelum - $validated['amount'],
-                'saving_amount' => $validated['amount'],
-                'transaction_type' => TransactionTypeEnum::WITHDRAWAL->value,
-                'saving_payment_method' => $validated['method'],
-                'transaction_date' => $validated['withdrawal_date'],
-                'saving_description' => $validated['notes'] ?? '',
+            $transaction = TransaksiSimpanan::create([
+                'kode_transaksi_simpanan' => $this->generateWithdrawalTransactionCode($savingType),
+                'akun_simpanan_id' => $lockedSavingAccount->id,
+                'saldo_setelah_transaksi' => $saldoSebelum - $validated['amount'],
+                'nominal_simpanan' => $validated['amount'],
+                'tipe_transaksi' => TransactionTypeEnum::WITHDRAWAL->value,
+                'metode_pembayaran_simpanan' => $validated['method'],
+                'tgl_transaksi' => $validated['withdrawal_date'],
+                'deskripsi_simpanan' => $validated['catatan'] ?? '',
                 'updated_by' => $userId,
             ]);
 
             if ($validated['method'] === 'Non-Tunai') {
-                MemberBankAccount::updateOrCreate(
+                RekeningAnggota::updateOrCreate(
                     [
-                        'member_id' => $member->id,
-                        'account_number' => $validated['account_number'],
+                        'anggota_id' => $anggota->id,
+                        'no_rekening' => $validated['no_rekening'],
                     ],
                     [
-                        'bank_name' => $validated['bank_name'],
-                        'account_name' => $validated['account_name'],
+                        'nama_bank' => $validated['nama_bank'],
+                        'atas_nama' => $validated['atas_nama'],
                     ]
                 );
 
                 $transaction->update([
-                    'account_number' => $validated['account_number'],
+                    'no_rekening' => $validated['no_rekening'],
                 ]);
             }
 
             $lockedSavingAccount->update([
-                'balance' => $saldoSebelum - $validated['amount'],
+                'saldo' => $saldoSebelum - $validated['amount'],
             ]);
 
             return [$transaction, $saldoSebelum];
@@ -125,26 +125,26 @@ class SimpananServices
 
         $strukData = [
             'transaction_id' => $transaction->id,
-            'no_transaksi' => $transaction->saving_transaction_code,
-            'tanggal' => $transaction->transaction_date,
-            'pengurus' => auth()->user()->name ?? 'Pengurus',
-            'nama_anggota' => $member->user?->name ?? '-',
-            'no_anggota' => $member->user?->user_code ?? '-',
+            'no_transaksi' => $transaction->kode_transaksi_simpanan,
+            'tanggal' => $transaction->tgl_transaksi,
+            'pengurus' => auth()->user()->nama ?? 'Pengurus',
+            'nama_anggota' => $anggota->user?->nama ?? '-',
+            'no_anggota' => $anggota->user?->kode_pengguna ?? '-',
             'jenis' => $savingType !== '' ? $savingType : '-',
             'metode' => $validated['method'],
             'nominal' => $validated['amount'],
             'saldo_sebelum' => $saldoSebelum,
             'saldo_sesudah' => $saldoSebelum - $validated['amount'],
-            'bank_name' => $validated['bank_name'] ?? '',
-            'account_name' => $validated['account_name'] ?? '',
-            'account_number' => $validated['account_number'] ?? '',
+            'nama_bank' => $validated['nama_bank'] ?? '',
+            'atas_nama' => $validated['atas_nama'] ?? '',
+            'no_rekening' => $validated['no_rekening'] ?? '',
         ];
 
         try {
             $receiptPath = $this->storeReceiptWithdrawalPdf($transaction, $strukData);
             if ($receiptPath) {
                 $transaction->update([
-                    'saving_transaction_receipt' => $receiptPath,
+                    'struk_simpanan' => $receiptPath,
                 ]);
             }
         } catch (\Throwable $receiptException) {
@@ -157,14 +157,14 @@ class SimpananServices
         ];
     }
 
-    private function storeReceiptWithdrawalPdf(SavingTransaction $transaction, array $strukData): ?string
+    private function storeReceiptWithdrawalPdf(TransaksiSimpanan $transaction, array $strukData): ?string
     {
         try {
             $pdf = Pdf::loadView('exports.withdrawal_receipt', [
                 'struk' => $strukData,
             ])->setPaper([0, 0, 226.77, 600], 'portrait');
             
-            $directory = 'member_docs/receipts/' . now()->format('Y-m');
+            $directory = 'dokumen_anggota/receipts/' . now()->format('Y-m');
             Storage::disk('public')->makeDirectory($directory);
             
             $filename = 'struk-withdrawal-' . $transaction->id . '.pdf';
@@ -201,15 +201,15 @@ class SimpananServices
         $categoryPrefix = $this->getTrxPrefix($savingType);
         $prefix = $categoryPrefix . $yymm;
 
-        $latestTransaction = SavingTransaction::where('transaction_type', TransactionTypeEnum::WITHDRAWAL->value)
-            ->where('saving_transaction_code', 'like', $prefix . '%')
+        $latestTransaction = TransaksiSimpanan::where('tipe_transaksi', TransactionTypeEnum::WITHDRAWAL->value)
+            ->where('kode_transaksi_simpanan', 'like', $prefix . '%')
             ->lockForUpdate()
-            ->orderByDesc('saving_transaction_code')
+            ->orderByDesc('kode_transaksi_simpanan')
             ->first();
 
         $lastNumber = 0;
         if ($latestTransaction) {
-            preg_match('/(\d{4})$/', (string) $latestTransaction->saving_transaction_code, $matches);
+            preg_match('/(\d{4})$/', (string) $latestTransaction->kode_transaksi_simpanan, $matches);
             $lastNumber = (int) ($matches[1] ?? 0);
         }
 

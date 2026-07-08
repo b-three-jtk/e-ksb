@@ -66,12 +66,12 @@ const buttonClass = computed(() =>
 )
 
 const finalBalance = computed(() => {
-  const balance = Number(props.data.balance ?? 0)
+  const saldo = Number(props.data.saldo ?? 0)
   const amount = Number(props.data.amount ?? 0)
 
   return isDeposit.value
-    ? balance + amount
-    : balance - amount
+    ? saldo + amount
+    : saldo - amount
 })
 
 watch(() => props.isOpen, (isOpen) => {
@@ -197,7 +197,7 @@ function close() {
                             </div>
 
                             <div class="text-xs text-gray-500 mt-2">
-                                <template v-if="data.balance">
+                                <template v-if="data.saldo">
                                     {{
                                     isDeposit
                                         ? 'Saldo Setelah Penyetoran'
@@ -207,7 +207,7 @@ function close() {
                                 </template>
 
                                 <template v-else>
-                                    Saldo Awal: {{ formatRp(data.balance) }}
+                                    Saldo Awal: {{ formatRp(data.saldo) }}
                                 </template>
                             </div>
                         </div>

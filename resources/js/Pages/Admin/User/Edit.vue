@@ -25,19 +25,19 @@ const props = defineProps({
 const form = useForm({
     _method: 'put',
     id: props.data.id,
-    user_code: props.data.user_code || '',
+    kode_pengguna: props.data.kode_pengguna || '',
     nik: props.data.nik || '',
-    name: props.data.name || '',
+    nama: props.data.nama || '',
     email: props.data.email || '',
-    phone_number: props.data.phone_number || '',
-    gender: props.data.member.gender || '',
-    birth_place: props.data.member.birth_place || '',
-    birth_date: props.data.member.birth_date || '',
-    last_education: props.data.member.last_education || '',
-    marital_status: props.data.member.marital_status || '',
-    domicile_address: props.data.member.domicile_address || '',
-    residential_address: props.data.member.residential_address || '',
-    dependents: props.data.member.dependents || [],
+    no_telp: props.data.no_telp || '',
+    jenis_kelamin: props.data.anggota.jenis_kelamin || '',
+    tempat_lahir: props.data.anggota.tempat_lahir || '',
+    tgl_lahir: props.data.anggota.tgl_lahir || '',
+    pendidikan_terakhir: props.data.anggota.pendidikan_terakhir || '',
+    status_pernikahan: props.data.anggota.status_pernikahan || '',
+    alamat_domisili: props.data.anggota.alamat_domisili || '',
+    alamat_ktp: props.data.anggota.alamat_ktp || '',
+    jml_tanggungan: props.data.anggota.jml_tanggungan || [],
 
     kk: props.data.kk || '',
     ktp: props.data.ktp || '',
@@ -45,7 +45,12 @@ const form = useForm({
     kk_file: null,
     ktp_file: null,
 
-    heirs: props.data.member.heirs || [],
+    ahli_waris: (props.data.anggota.ahli_waris || []).map(h => ({
+        nik_ahli_waris: h.nik_ahli_waris,
+        nama_ahli_waris: h.nama_ahli_waris,
+        kontak_ahli_waris: h.kontak_ahli_waris,
+        hubungan: h.pivot ? h.pivot.hubungan : h.hubungan
+    })),
 });
 
 const { errors } = useUserValidation(form)
@@ -108,28 +113,50 @@ const onlyAlphaNumericDash = (event) => {
 }
 
 const heirInput = ref({
-    heir_nik: '',
-    heir_name: '',
-    relationship: '',
-    heir_contact: '',
+    nik_ahli_waris: '',
+    nama_ahli_waris: '',
+    hubungan: '',
+    kontak_ahli_waris: '',
 })
 
-const addHeir = (heirData) => {
-    if (!heirData.heir_nik || !heirData.heir_name || !heirData.relationship || !heirData.heir_contact) {
-        alert('Lengkapi semua field untuk menambahkan ahli waris!')
+const addAhliWaris = (heirData) => {
+    if (!heirData.nik_ahli_waris || !heirData.nama_ahli_waris || !heirData.hubungan || !heirData.kontak_ahli_waris) {
+        toast.error('Lengkapi semua field untuk menambahkan ahli waris!', { position: 'bottom-right' });
         return
     }
 
-    form.heirs.push({
-        heir_nik: heirData.heir_nik,
-        heir_name: heirData.heir_name,
-        relationship: heirData.relationship,
-        heir_contact: heirData.heir_contact,
+    if (heirData.nik_ahli_waris.length !== 16) {
+        toast.error('NIK Ahli Waris harus terdiri dari 16 digit.', { position: 'bottom-right' });
+        return;
+    }
+
+    if (form.ahli_waris.some(h => h.nik_ahli_waris === heirData.nik_ahli_waris)) {
+        toast.error('Ahli waris dengan NIK ini sudah ditambahkan.', { position: 'bottom-right' });
+        return;
+    }
+
+    if (!/^\d+$/.test(heirData.kontak_ahli_waris)) {
+        toast.error('Kontak Ahli Waris harus terdiri dari angka.', { position: 'bottom-right' });
+        return;
+    }
+
+    form.ahli_waris.push({
+        nik_ahli_waris: heirData.nik_ahli_waris,
+        nama_ahli_waris: heirData.nama_ahli_waris,
+        hubungan: heirData.hubungan,
+        kontak_ahli_waris: heirData.kontak_ahli_waris,
     })
+
+    heirInput.value = {
+        nik_ahli_waris: '',
+        nama_ahli_waris: '',
+        hubungan: '',
+        kontak_ahli_waris: '',
+    }
 }
 
-const removeHeir = (index) => {
-    form.heirs.splice(index, 1)
+const removeAhliWaris = (index) => {
+    form.ahli_waris.splice(index, 1)
 }
 
 const submitForm = () => {
@@ -154,7 +181,8 @@ const submitForm = () => {
                     })
                 },
                 onError: (err) => {
-                    toast("Gagal memperbarui data anggota.", {
+                    const errorMessage = err && Object.values(err)[0] ? Object.values(err)[0] : "Terjadi kesalahan.";
+                    toast("Gagal memperbarui data anggota. " + errorMessage, {
                         "type": "error",
                         "position": "bottom-right",
                         "transition": "slide",
@@ -174,51 +202,52 @@ const submitForm = () => {
             <div class="card-layout flex flex-col gap-4">
                 <div class="grid grid-cols-2 gap-4">
                     <BaseInputAdmin label="Nomor Anggota" placeholder="Masukkan nomor anggota"
-                        v-model="form.user_code" disabled :errors="errors.user_code" @input="onlyAlpha" />
-                    <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" v-model="form.name"
-                        required :errors="errors.name" @input="onlyAlpha" />
+                        v-model="form.kode_pengguna" disabled :errors="errors.kode_pengguna" @input="onlyAlpha" />
+                    <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" v-model="form.nama"
+                        required :errors="errors.nama" @input="onlyAlpha" />
                     <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" v-model="form.nik" max="16" required
                         :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" />
                     <BaseInputAdmin label="Email" placeholder="Masukkan email" v-model="form.email"
                         :errors="errors.email" type="email" />
                     <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="14"
-                        v-model="form.phone_number" :errors="errors.phone_number" @input="onlyNumbers"
+                        v-model="form.no_telp" :errors="errors.no_telp" @input="onlyNumbers"
                         inputmode="numeric" />
-                    <BaseInputAdmin v-model="form.gender" label="Jenis Kelamin" type="radio" required :selectables="[
+                    <BaseInputAdmin v-model="form.jenis_kelamin" label="Jenis Kelamin" type="radio" required :selectables="[
                         { value: 'Laki-laki', text: 'Laki-laki' },
                         { value: 'Perempuan', text: 'Perempuan' }
-                    ]" :error="errors.gender">
+                    ]" :error="errors.jenis_kelamin">
                     </BaseInputAdmin>
-                    <BaseInputAdmin label="Tempat Lahir" required v-model="form.birth_place" :error="errors.birth_place"
+                    <BaseInputAdmin label="Tempat Lahir" required v-model="form.tempat_lahir" :error="errors.tempat_lahir"
                         placeholder="Masukkan tempat lahir" @input="onlyAlpha" />
-                    <BaseInputAdmin label="Tanggal Lahir" required type="date" v-model="form.birth_date"
-                        :error="errors.birth_date" />
-                    <BaseInputAdmin v-model="form.residential_address" label="Alamat KTP" type="textarea"
-                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.residential_address"
+                    <BaseInputAdmin label="Tanggal Lahir" required type="date" v-model="form.tgl_lahir"
+                        :maxDate="maxBirthDate"
+                        :error="errors.tgl_lahir" />
+                    <BaseInputAdmin v-model="form.alamat_ktp" label="Alamat KTP" type="textarea"
+                        placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.alamat_ktp"
                         @input="onlyAlphaNumericDash" />
-                    <BaseInputAdmin v-model="form.domicile_address" label="Alamat Domisili" type="textarea"
-                        placeholder="Masukkan alamat domisili" rows="4" :error="errors.domicile_address"
+                    <BaseInputAdmin v-model="form.alamat_domisili" label="Alamat Domisili" type="textarea"
+                        placeholder="Masukkan alamat domisili" rows="4" :error="errors.alamat_domisili"
                         @input="onlyAlphaNumericDash" />
-                    <BaseInputAdmin v-model="form.last_education" required label="Pendidikan Terakhir" type="select"
-                        :selectables="props.opsiPendidikan.map((item) => ({ value: item.value, text: item.text }))" :error="errors.last_education" />
-                    <BaseInputAdmin v-model="form.marital_status" required label="Status Perkawinan" type="select"
+                    <BaseInputAdmin v-model="form.pendidikan_terakhir" required label="Pendidikan Terakhir" type="select"
+                        :selectables="props.opsiPendidikan.map((item) => ({ value: item.value, text: item.text }))" :error="errors.pendidikan_terakhir" />
+                    <BaseInputAdmin v-model="form.status_pernikahan" required label="Status Perkawinan" type="select"
                         :selectables="props.opsiStatusPerkawinan" />
-                    <BaseInputAdmin v-model="form.dependents" label="Jumlah Tanggungan Keluarga" type="number"
+                    <BaseInputAdmin v-model="form.jml_tanggungan" label="Jumlah Tanggungan Keluarga" type="number"
                         @input="onlyNumbers" inputmode="numeric" min="0" />
                 </div>
 
                 <div class="flex flex-col gap-4 w-3/4 py-4 col-span-2">
                     <div class="flex gap-4 w-full items-end">
                         <BaseInputAdmin label="Data Ahli Waris" max="16" pattern="[0-9]{16}"
-                            placeholder="Masukkan NIK Ahli Waris" v-model="heirInput.heir_nik" @input="onlyNumbers"
+                            placeholder="Masukkan NIK Ahli Waris" v-model="heirInput.nik_ahli_waris" @input="onlyNumbers"
                             inputmode="numeric" />
-                        <BaseInputAdmin v-model="heirInput.heir_name" placeholder="Nama Ahli Waris"
+                        <BaseInputAdmin v-model="heirInput.nama_ahli_waris" placeholder="Nama Ahli Waris"
                             @input="onlyAlpha" />
-                        <BaseInputAdmin v-model="heirInput.relationship" type="select"
+                        <BaseInputAdmin v-model="heirInput.hubungan" type="select"
                             :selectables="props.opsiHubunganKeluarga" placeholder="Hubungan dengan anggota" />
-                        <BaseInputAdmin v-model="heirInput.heir_contact" max="20" placeholder="Nomor Kontak"
+                        <BaseInputAdmin v-model="heirInput.kontak_ahli_waris" max="20" placeholder="Nomor Kontak"
                             @input="onlyNumbers" inputmode="numeric" />
-                        <Button variant="primary" @click="addHeir(heirInput)">
+                        <Button variant="primary" @click="addAhliWaris(heirInput)">
                             Tambah
                         </Button>
                     </div>
@@ -233,15 +262,15 @@ const submitForm = () => {
                                 <th class="py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody v-if="form.heirs.length > 0">
-                            <tr v-for="(item, index) in form.heirs" :key="index"
-                                class="bg-white border-b text-dark-text dark:bg-gray-800 dark:border-gray-700">
-                                <td class="py-2 text-left pl-6">{{ item.heir_nik }}</td>
-                                <td class="py-2 text-right pr-6">{{ item.heir_name }}</td>
-                                <td class="py-2 text-right pr-6">{{ item.pivot.relationship }}</td>
-                                <td class="py-2 text-right pr-6">{{ item.heir_contact }}</td>
+                        <tbody v-if="form.ahli_waris.length > 0">
+                            <tr v-for="(item, index) in form.ahli_waris" :key="index"
+                                class="bg-white border-b text-dark-text dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
+                                <td class="py-2 text-left pl-6">{{ item.nik_ahli_waris }}</td>
+                                <td class="py-2 text-right pr-6">{{ item.nama_ahli_waris }}</td>
+                                <td class="py-2 text-right pr-6">{{ item.hubungan }}</td>
+                                <td class="py-2 text-right pr-6">{{ item.kontak_ahli_waris }}</td>
                                 <td class="py-2 text-center flex justify-center">
-                                    <Button size="small" variant="light" @click="removeHeir(index)">
+                                    <Button size="small" variant="light" @click="removeAhliWaris(index)">
                                         -
                                     </Button>
                                 </td>

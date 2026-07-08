@@ -8,25 +8,25 @@ const props = defineProps({
 })
 
 const incomes = computed(() => [
-    { label: 'Gaji Pokok & Tunjangan', model: 'gaji_pokok_amount' },
-    { label: 'Penghasilan Usaha', model: 'penghasilan_usaha_amount' },
-    { label: 'Penghasilan Pasangan', model: 'penghasilan_pasangan_amount' },
-    { label: 'Penghasilan Lainnya', model: 'penghasilan_lainnya_amount' },
+    { label: 'Gaji Pokok & Tunjangan', model: 'jml_gaji_pokok' },
+    { label: 'Penghasilan Usaha', model: 'jml_penghasilan_usaha' },
+    { label: 'Penghasilan Pasangan', model: 'jml_penghasilan_pasangan' },
+    { label: 'Penghasilan Lainnya', model: 'jml_penghasilan_lainnya' },
 ])
 
 const expenses = computed(() => [
-    { label: 'Biaya Hidup Keluarga', model: 'biaya_hidup_keluarga_amount' },
-    { label: 'Biaya Pendidikan', model: 'biaya_pendidikan_amount' },
-    { label: 'Jumlah Cicilan Lainnya', model: 'jumlah_cicilan_amount' },
-    { label: 'Jumlah Biaya Lainnya', model: 'jumlah_biaya_lainnya_amount' },
+    { label: 'Biaya Hidup Keluarga', model: 'jml_biaya_hidup_keluarga' },
+    { label: 'Biaya Pendidikan', model: 'jml_biaya_pendidikan' },
+    { label: 'Jumlah Cicilan Lainnya', model: 'jml_cicilan' },
+    { label: 'Jumlah Biaya Lainnya', model: 'jml_biaya_lainnya' },
 ])
 
 const totalIncome = computed(() => {
-    return incomes.value.reduce((total, item) => total + (Number(props.data.member[item.model]) || 0), 0)
+    return incomes.value.reduce((total, item) => total + (Number(props.data.anggota[item.model]) || 0), 0)
 })
 
 const totalExpense = computed(() => {
-    return expenses.value.reduce((total, item) => total + (Number(props.data.member[item.model]) || 0), 0)
+    return expenses.value.reduce((total, item) => total + (Number(props.data.anggota[item.model]) || 0), 0)
 })
 
 const netIncome = computed(() => totalIncome.value - totalExpense.value)
@@ -38,13 +38,13 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
         <div>
             <h1 class="card-title">Informasi Pekerjaan</h1>
             <div class="grid grid-cols-2 gap-6 mt-8">
-                <Info label="Status Pekerjaan" :value="data.member.employment_status" />
-                <Info label="Jabatan" :value="data.member.job_title" />
-                <Info label="Nama Perusahaan atau Bisnis" :value="data.member.company_or_business_name" />
-                <Info label="Bidang Pekerjaan" :value="data.member.business_field" />
-                <Info label="Lama Bekerja (Tahun)" :value="data.member.tenure_year" />
-                <Info label="Kontak Perusahaan" :value="data.member.workplace_contact" />
-                <Info label="Alamat Perusahaan" :value="data.member.workplace_address" />
+                <Info label="Status Pekerjaan" :value="data.anggota.status_pekerjaan" />
+                <Info label="Jabatan" :value="data.anggota.jabatan_pekerjaan" />
+                <Info label="Nama Perusahaan atau Bisnis" :value="data.anggota.nama_perusahaan" />
+                <Info label="Bidang Pekerjaan" :value="data.anggota.bidang_usaha" />
+                <Info label="Lama Bekerja (Tahun)" :value="data.anggota.lama_bekerja" />
+                <Info label="Kontak Perusahaan" :value="data.anggota.no_telp_kantor" />
+                <Info label="Alamat Perusahaan" :value="data.anggota.alamat_tempat_bekerja" />
             </div>
         </div>
         <div class="card-layout">
@@ -60,7 +60,7 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
                     <tr v-for="item in incomes" :key="item.model"
                         class="bg-white border-b text-dark-text dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700">
                         <td class="py-4 text-left pl-6">{{ item.label }}</td>
-                        <td class="py-4 text-right pr-6">{{ moneyParser(data.member[item.model]) }}</td>
+                        <td class="py-4 text-right pr-6">{{ moneyParser(data.anggota[item.model]) }}</td>
                     </tr>
                     <tr class="font-semibold text-dark-text dark:text-gray-200">
                         <td class="pt-4 text-left pl-6">Total Penghasilan Bulanan</td>
@@ -82,7 +82,7 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
                     <tr v-for="item in expenses" :key="item.model"
                         class="bg-white border-b text-dark-text dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700">
                         <td class="py-4 text-left pl-6">{{ item.label }}</td>
-                        <td class="py-4 text-right pr-6">{{ moneyParser(data.member[item.model]) }}</td>
+                        <td class="py-4 text-right pr-6">{{ moneyParser(data.anggota[item.model]) }}</td>
                     </tr>
                     <tr class="font-semibold text-dark-text dark:text-gray-200">
                         <td class="py-4 text-left pl-6">Total Pengeluaran Bulanan</td>

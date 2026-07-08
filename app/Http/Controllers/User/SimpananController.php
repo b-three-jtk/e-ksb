@@ -17,17 +17,17 @@ class SimpananController extends Controller
         $perPage = (int) $request->input('per_page', 10);
 
         $query = $bukuBesarService->buildTabunganTransactionQuery($userId, $month, $search);
-        $query->orderBy('transaction_date', 'desc');
+        $query->orderBy('tgl_transaksi', 'desc');
 
         $transactions = $query->paginate($perPage)->withQueryString();
         $transactions->setCollection($bukuBesarService->transformTransactions($transactions->getCollection(), true));
 
-        $member = auth()->user();
+        $anggota = auth()->user();
         $memberInfo = [
-            'nama' => $member->name,
-            'no_anggota' => $member->user_code,
-            'status' => $member->status,
-            'tanggal_bergabung' => $member->joined_date->format('d F Y'),
+            'nama' => $anggota->nama,
+            'no_anggota' => $anggota->kode_pengguna,
+            'status' => $anggota->status,
+            'tanggal_bergabung' => $anggota->tgl_bergabung->format('d F Y'),
         ];
 
         [$savingSummary, $savingMeta] = $bukuBesarService->buildSavingSummaryAndMeta($userId);

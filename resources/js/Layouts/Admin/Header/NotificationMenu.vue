@@ -33,7 +33,7 @@
             </div>
 
             <ul class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-                <li v-for="notification in notifications" :key="notification.id" @click="handleItemClick">
+                <li v-for="notification in notifikasi" :key="notification.id" @click="handleItemClick">
                     <a class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
                         href="#">
                         <span class="relative block w-full h-10 rounded-full z-1 max-w-10">
@@ -63,7 +63,7 @@
                 </li>
             </ul>
 
-            <Link href="/notifications"
+            <Link href="/notifikasi"
                 class="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200"
                 @click="handleViewAllClick">
                 View All Notification
@@ -81,7 +81,7 @@ const dropdownOpen = ref(false)
 const notifying = ref(true)
 const dropdownRef = ref(null)
 
-const notifications = ref([
+const notifikasi = ref([
     {
         id: 1,
         userName: 'Terry Franci',
@@ -102,7 +102,7 @@ const notifications = ref([
         time: '5 min ago',
         status: 'offline',
     },
-    // ...existing notifications...
+    // ...existing notifikasi...
 ])
 
 const toggleDropdown = () => {

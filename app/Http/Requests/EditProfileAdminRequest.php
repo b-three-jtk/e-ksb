@@ -23,10 +23,10 @@ class EditProfileAdminRequest extends FormRequest
     {
         return [
             'nik' => 'required|string|size:16',
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255|unique:users,email,'. $this->user()->id,
-            'phone_number' => 'required|string',
-            'profile_picture_file' => 'nullable|image|mimes:png,jpg,jpeg,gif|max:2048',
+            'nama' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'no_telp' => 'required|string', 
+            'foto_profile_file' => 'nullable|image|mimes:png,jpg,jpeg,gif|max:2048',
         ];
     }
 }

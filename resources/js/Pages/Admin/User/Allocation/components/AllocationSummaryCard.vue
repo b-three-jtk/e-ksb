@@ -25,7 +25,7 @@ defineEmits(['submit'])
           {{ selectedPj?.name || '-' }}
         </div>
         <div class="text-sm text-slate-500 dark:text-slate-400">
-          {{ selectedPj?.user_code || '-' }}
+          {{ selectedPj?.kode_pengguna || '-' }}
         </div>
       </div>
 

@@ -22,7 +22,7 @@ const page = usePage()
 
 const can = computed(() => page.props.auth.can)
 
-const installments = computed(() => props.data?.installment ?? {
+const installments = computed(() => props.data?.angsuran ?? {
     data: [], current_page: 1, per_page: 10, total: 0, links: [],
 })
 
@@ -34,13 +34,13 @@ const canPayBill = computed(() =>
 )
 
 const INSTALLMENT_COLUMNS = [
-    { key: 'installment_no', label: 'Pembayaran Ke' },
-    { key: 'installment_trans_code', label: 'No. Transaksi' },
-    { key: 'due_date', label: 'Tanggal Jatuh Tempo' },
-    { key: 'payment_date', label: 'Tanggal Pembayaran' },
-    { key: 'amount', label: 'Nominal' },
-    { key: 'is_early_repayment', label: 'Keterangan' },
-    { key: 'installment_payment_receipt', label: 'Aksi' },
+    { key: 'angsuran_ke', label: 'Pembayaran Ke' },
+    { key: 'kode_transaksi_pembayaran', label: 'No. Transaksi' },
+    { key: 'tgl_jatuh_tempo', label: 'Tanggal Jatuh Tempo' },
+    { key: 'tgl_pembayaran', label: 'Tanggal Pembayaran' },
+    { key: 'nominal_angsuran', label: 'Nominal' },
+    { key: 'is_pelunasan_lebih_cepat', label: 'Keterangan' },
+    { key: 'struk_pembayaran', label: 'Aksi' },
 ]
 
 const BREADCRUMBS = [
@@ -80,16 +80,16 @@ const openReceiptModal = (receiptPath) => {
             <div class="card-layout flex justify-between">
                 <div class="flex gap-2 items-center">
                     <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{
-                        data.financing_transaction_code }} <span class="my-auto ml-2"
+                        data.kode_pembiayaan }} <span class="my-auto ml-2"
                             :class="useFinancingStatus(data.status)">{{ data.status }}</span>
                     </h1>
                 </div>
                 <div class="flex items-center gap-4">
-                    <Button v-if="canPayBill && data.status === 'Angsuran Berjalan'" :href="`/admin/financings/repayment/${data.id}`" variant="secondary">
+                    <Button v-if="canPayBill && data.status === 'Angsuran Berjalan'" :href="`/admin/pembiayaan/repayment/${data.id}`" variant="secondary">
                         <span class="icon-[tabler--moneybag-move]" style="width:18px;height:18px;" />
                         Pelunasan Dipercepat
                     </Button>
-                    <Button v-if="canPayBill" :href="`/admin/financings/${data.id}/payments/create`" variant="info">
+                    <Button v-if="canPayBill" :href="`/admin/pembiayaan/${data.id}/payments/create`" variant="info">
                         <span class="icon-[tabler--credit-card-pay]" style="width:18px;height:18px;" />
                         Bayar Tagihan
                     </Button>
@@ -101,9 +101,9 @@ const openReceiptModal = (receiptPath) => {
                         <div class="card-layout">
                             <h2 class="card-title mb-4">Detail Transaksi</h2>
                             <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
-                                <Info label="Harga Pokok" :value="moneyParser(data.cost_price)" />
-                                <Info label="Margin" :value="moneyParser(data.margin_amount)" />
-                                <Info label="Uang Muka" :value="moneyParser(data.down_payment)" />
+                                <Info label="Harga Pokok" :value="moneyParser(data.harga_perolehan)" />
+                                <Info label="Margin" :value="moneyParser(data.margin_keuntungan)" />
+                                <Info label="Uang Muka" :value="moneyParser(data.uang_muka)" />
                                 <Info label="Total Pembiayaan" :value="moneyParser(data.total_price)" />
                                 <Info label="Total Dibayar" :value="moneyParser(data.total_paid)" />
                                 <Info label="Sisa Tagihan" :value="moneyParser(data.remaining_balance)" />
@@ -117,12 +117,12 @@ const openReceiptModal = (receiptPath) => {
                             <h1 class="card-title mb-4">Detail Objek Pembiayaan</h1>
                             <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <Info label="Kategori Produk"
-                                    :value="data.financing_item?.product_type?.product_type_name" />
-                                <Info label="Nama Produk" :value="data.financing_item?.name" />
-                                <Info label="Tanggal Akad" :value="dateParser(data.akad_date)" />
-                                <Info label="Jumlah/Kuantitas" :value="data.financing_item?.qty" />
-                                <Info label="Kondisi" :value="data.financing_item?.condition" />
-                                <Info label="Deskripsi Spesifikasi" :value="data.financing_item?.specification" />
+                                    :value="data.objek_pembiayaan?.jenis_barang?.nama_jenis_barang" />
+                                <Info label="Nama Produk" :value="data.objek_pembiayaan?.nama_barang" />
+                                <Info label="Tanggal Akad" :value="dateParser(data.tgl_akad)" />
+                                <Info label="Jumlah/Kuantitas" :value="data.objek_pembiayaan?.kuantitas" />
+                                <Info label="Kondisi" :value="data.objek_pembiayaan?.kondisi_produk" />
+                                <Info label="Deskripsi Spesifikasi" :value="data.objek_pembiayaan?.spesifikasi_barang" />
                             </ul>
                         </div>
                         <section class="flex flex-col py-2 gap-2">
@@ -130,28 +130,28 @@ const openReceiptModal = (receiptPath) => {
                             <div class="card-layout p-0!">
                                 <BaseTable :columns="INSTALLMENT_COLUMNS" :data="installments">
 
-                                    <template #cell-installment_trans_code="{ row }">
-                                        {{ row.installment_trans_code ?? '-' }}
+                                    <template #cell-kode_transaksi_pembayaran="{ row }">
+                                        {{ row.kode_transaksi_pembayaran ?? '-' }}
                                     </template>
-                                    <template #cell-due_date="{ row }">
-                                        {{ dateParser(row.due_date) }}
+                                    <template #cell-tgl_jatuh_tempo="{ row }">
+                                        {{ dateParser(row.tgl_jatuh_tempo) }}
                                     </template>
-                                    <template #cell-payment_date="{ row }">
-                                        {{ dateParser(row.payment_date) }}
+                                    <template #cell-tgl_pembayaran="{ row }">
+                                        {{ dateParser(row.tgl_pembayaran) }}
                                     </template>
-                                    <template #cell-amount="{ row }">
-                                        {{ moneyParser(row.amount) }}
+                                    <template #cell-nominal_angsuran="{ row }">
+                                        {{ moneyParser(row.nominal_angsuran) }}
                                     </template>
-                                    <template #cell-is_early_repayment="{ row }">
-                                        <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="row.is_early_repayment
+                                    <template #cell-is_pelunasan_lebih_cepat="{ row }">
+                                        <span class="font-semibold rounded-lg px-3 py-1 text-xs" :class="row.is_pelunasan_lebih_cepat
                                             ? 'text-blue-600 bg-blue-50'
                                             : 'text-green-600 bg-green-50'">
-                                            {{ row.is_early_repayment ? 'Pelunasan Dipercepat' : 'Reguler' }}
+                                            {{ row.is_pelunasan_lebih_cepat ? 'Pelunasan Dipercepat' : 'Reguler' }}
                                         </span>
                                     </template>
-                                    <template #cell-installment_payment_receipt="{ row }">
-                                        <Button v-if="row.installment_payment_receipt" size="small" variant="primary"
-                                            @click="openReceiptModal(row.installment_payment_receipt)">
+                                    <template #cell-struk_pembayaran="{ row }">
+                                        <Button v-if="row.struk_pembayaran" size="small" variant="primary"
+                                            @click="openReceiptModal(row.struk_pembayaran)">
                                             <EyeIcon width="18px" height="18px" />
                                             Lihat Bukti
                                         </Button>
@@ -174,22 +174,22 @@ const openReceiptModal = (receiptPath) => {
                         <FinancingChart :total-price="Number(data.total_price)" :total-paid="Number(data.total_paid)"
                             :remaining-balance="Number(data.remaining_balance)" />
                     </div>
-                    <div v-if="data.supplier" class="card-layout h-fit flex flex-col gap-6">
+                    <div v-if="data.pemasok" class="card-layout h-fit flex flex-col gap-6">
                         <h1 class="card-title">Informasi Pemasok</h1>
                         <ul class="grid grid-cols-1 gap-6">
-                            <Info label="Nama Pemasok" :value="data.supplier?.supplier_name" />
-                            <Info label="Alamat Pemasok" :value="data.supplier?.supplier_address" />
-                            <Info label="Kontak Pemasok" :value="data.supplier?.supplier_contact" />
+                            <Info label="Nama Pemasok" :value="data.pemasok?.nama_pemasok" />
+                            <Info label="Alamat Pemasok" :value="data.pemasok?.pemasok_address" />
+                            <Info label="Kontak Pemasok" :value="data.pemasok?.pemasok_contact" />
                         </ul>
                     </div>
                     <div v-if="data.collateral" class="card-layout flex flex-col pb-12.5! gap-6">
                         <h1 class="card-title">Informasi Jaminan</h1>
                         <ul class="grid grid-cols-1 gap-6">
-                            <Info label="Tipe Jaminan" :value="data.collateral.collateral_type" />
-                            <Info label="Nama Pemilik" :value="data.collateral.owner_name" />
-                            <Info label="Lokasi Jaminan" :value="data.collateral.collateral_location" />
+                            <Info label="Tipe Jaminan" :value="data.collateral.jenis_jaminan" />
+                            <Info label="Nama Pemilik" :value="data.collateral.nama_pemilik" />
+                            <Info label="Lokasi Jaminan" :value="data.collateral.lokasi_kondisi_jaminan" />
                             <Info label="Nilai Pasar Estimasi"
-                                :value="moneyParser(data.collateral.estimated_market_value)" />
+                                :value="moneyParser(data.collateral.nilai_perkiraan_pasar)" />
                         </ul>
                     </div>
                     <Documents :data="data" />

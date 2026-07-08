@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Enums\SavingTypeEnum;
-use App\Models\Member;
-use App\Models\SavingAccount;
-use App\Models\SavingTransaction;
-use App\Models\User;
+use App\Models\Anggota;
+use App\Models\AkunSimpanan;
+use App\Models\TransaksiSimpanan;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,151 +20,151 @@ class SavingProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $members = Member::all();
+        $anggota = Anggota::all();
 
-        if ($members->isEmpty()) {
-            return; // Skip jika tidak ada member
+        if ($anggota->isEmpty()) {
+            return; // Skip jika tidak ada anggota
         }
 
-        $admin = User::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? User::first();
+        $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? Pengguna::first();
 
-        foreach ($members as $index => $member) {
-            // Semua member punya Simpanan Pokok dan Wajib
-            $this->seedSimpananPokok($member, $admin);
-            $this->seedSimpananWajib($member, $admin);
+        foreach ($anggota as $index => $anggota) {
+            // Semua anggota punya Simpanan Pokok dan Wajib
+            $this->seedSimpananPokok($anggota, $admin);
+            $this->seedSimpananWajib($anggota, $admin);
 
             if ($index < 50) {
-                // 50 members * 2M = 100M
-                $this->seedTabunganAnggota($member, $admin, 2000000);
+                // 50 anggota * 2M = 100M
+                $this->seedTabunganAnggota($anggota, $admin, 2000000);
             }
             if ($index >= 50 && $index < 60) {
-                // 10 members * 5M = 50M
-                $this->seedTabunganBerjangka($member, $admin, 5000000);
+                // 10 anggota * 5M = 50M
+                $this->seedTabunganBerjangka($anggota, $admin, 5000000);
             }
             if ($index >= 60 && $index < 65) {
-                // 5 members * 10M = 50M
-                $this->seedTabunganIbadah($member, $admin, 10000000);
+                // 5 anggota * 10M = 50M
+                $this->seedTabunganIbadah($anggota, $admin, 10000000);
             }
         }
     }
 
-    private function seedSimpananPokok(Member $member, User $admin): void
+    private function seedSimpananPokok(Anggota $anggota, Pengguna $admin): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'SP-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::SIMPANAN_POKOK->value,
-            'balance' => 100000,
-            'member_id' => $member->id,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'SP-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::SIMPANAN_POKOK->value,
+            'saldo' => 100000,
+            'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(12),
         ]);
 
         // Transaksi awal (setor simpanan pokok)
-        SavingTransaction::create([
-            'saving_account_id' => $account->id,
-            'saving_transaction_code' => 'SP' . str_pad($member->id, 8, '0', STR_PAD_LEFT),
-            'transaction_type' => 'Penyetoran',
-            'saving_amount' => 100000,
-            'balance_after_transaction' => 100000,
-            'transaction_date' => now()->subMonths(12),
-            'saving_payment_method' => 'Tunai',
-            'saving_description' => 'Setor Awal Simpanan Pokok',
+        TransaksiSimpanan::create([
+            'akun_simpanan_id' => $account->id,
+            'kode_transaksi_simpanan' => 'SP' . str_pad($anggota->id, 8, '0', STR_PAD_LEFT),
+            'tipe_transaksi' => 'Penyetoran',
+            'nominal_simpanan' => 100000,
+            'saldo_setelah_transaksi' => 100000,
+            'tgl_transaksi' => now()->subMonths(12),
+            'metode_pembayaran_simpanan' => 'Tunai',
+            'deskripsi_simpanan' => 'Setor Awal Simpanan Pokok',
             'updated_by' => $admin->id,
         ]);
     }
 
-    private function seedSimpananWajib(Member $member, User $admin): void
+    private function seedSimpananWajib(Anggota $anggota, Pengguna $admin): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'SW-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::SIMPANAN_WAJIB->value,
-            'balance' => 600000,
-            'member_id' => $member->id,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'SW-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::SIMPANAN_WAJIB->value,
+            'saldo' => 600000,
+            'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(12),
         ]);
 
         // Transaksi bulanan selama 12 bulan
-        $balance = 0;
+        $saldo = 0;
         for ($i = 1; $i <= 12; $i++) {
-            $balance += 50000;
-            SavingTransaction::create([
-                'saving_account_id' => $account->id,
-                'saving_transaction_code' => 'SW' . str_pad($member->id, 4, '0', STR_PAD_LEFT) . str_pad($i, 4, '0', STR_PAD_LEFT),
-                'transaction_type' => 'Penyetoran',
-                'saving_amount' => 50000,
-                'balance_after_transaction' => $balance,
-                'transaction_date' => now()->subMonths(13 - $i),
-                'saving_payment_method' => 'Tunai',
-                'saving_description' => 'Setoran Simpanan Wajib Bulan ke-' . $i,
+            $saldo += 50000;
+            TransaksiSimpanan::create([
+                'akun_simpanan_id' => $account->id,
+                'kode_transaksi_simpanan' => 'SW' . str_pad($anggota->id, 4, '0', STR_PAD_LEFT) . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'tipe_transaksi' => 'Penyetoran',
+                'nominal_simpanan' => 50000,
+                'saldo_setelah_transaksi' => $saldo,
+                'tgl_transaksi' => now()->subMonths(13 - $i),
+                'metode_pembayaran_simpanan' => 'Tunai',
+                'deskripsi_simpanan' => 'Setoran Simpanan Wajib Bulan ke-' . $i,
                 'updated_by' => $admin->id,
             ]);
         }
     }
 
-    private function seedTabunganAnggota(Member $member, User $admin, $amount): void
+    private function seedTabunganAnggota(Anggota $anggota, Pengguna $admin, $amount): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'TA-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
-            'balance' => $amount,
-            'member_id' => $member->id,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'TA-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => $amount,
+            'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(8),
         ]);
 
-        SavingTransaction::create([
-            'saving_account_id' => $account->id,
-            'saving_transaction_code' => 'TA' . str_pad($member->id, 5, '0', STR_PAD_LEFT) . '1',
-            'transaction_type' => 'Penyetoran',
-            'saving_amount' => $amount,
-            'saving_payment_method' => 'Tunai',
-            'balance_after_transaction' => $amount,
-            'transaction_date' => now()->subMonths(8),
-            'saving_description' => 'Setor Awal Tabungan Anggota',
+        TransaksiSimpanan::create([
+            'akun_simpanan_id' => $account->id,
+            'kode_transaksi_simpanan' => 'TA' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
+            'tipe_transaksi' => 'Penyetoran',
+            'nominal_simpanan' => $amount,
+            'metode_pembayaran_simpanan' => 'Tunai',
+            'saldo_setelah_transaksi' => $amount,
+            'tgl_transaksi' => now()->subMonths(8),
+            'deskripsi_simpanan' => 'Setor Awal Tabungan Anggota',
             'updated_by' => $admin->id,
         ]);
     }
 
-    private function seedTabunganBerjangka(Member $member, User $admin, $amount): void
+    private function seedTabunganBerjangka(Anggota $anggota, Pengguna $admin, $amount): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'TB-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::TABUNGAN_BERJANGKA->value,
-            'balance' => $amount,
-            'member_id' => $member->id,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'TB-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_BERJANGKA->value,
+            'saldo' => $amount,
+            'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(6),
         ]);
 
-        SavingTransaction::create([
-            'saving_account_id' => $account->id,
-            'saving_transaction_code' => 'TB' . str_pad($member->id, 5, '0', STR_PAD_LEFT) . '1',
-            'transaction_type' => 'Penyetoran',
-            'saving_amount' => $amount,
-            'balance_after_transaction' => $amount,
-            'saving_payment_method' => 'Tunai',
-            'transaction_date' => now()->subMonths(6),
-            'saving_description' => 'Setor Tabungan Berjangka',
+        TransaksiSimpanan::create([
+            'akun_simpanan_id' => $account->id,
+            'kode_transaksi_simpanan' => 'TB' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
+            'tipe_transaksi' => 'Penyetoran',
+            'nominal_simpanan' => $amount,
+            'saldo_setelah_transaksi' => $amount,
+            'metode_pembayaran_simpanan' => 'Tunai',
+            'tgl_transaksi' => now()->subMonths(6),
+            'deskripsi_simpanan' => 'Setor Tabungan Berjangka',
             'updated_by' => $admin->id,
         ]);
     }
 
-    private function seedTabunganIbadah(Member $member, User $admin, $amount): void
+    private function seedTabunganIbadah(Anggota $anggota, Pengguna $admin, $amount): void
     {
-        $account = SavingAccount::create([
-            'saving_account_code' => 'TI-' . str_pad($member->id, 6, '0', STR_PAD_LEFT),
-            'saving_type' => SavingTypeEnum::TABUNGAN_IBADAH->value,
-            'balance' => $amount,
-            'member_id' => $member->id,
+        $account = AkunSimpanan::create([
+            'kode_akun_simpanan' => 'TI-' . str_pad($anggota->id, 6, '0', STR_PAD_LEFT),
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_IBADAH->value,
+            'saldo' => $amount,
+            'anggota_id' => $anggota->id,
             'created_at' => now()->subMonths(10),
         ]);
 
-        SavingTransaction::create([
-            'saving_account_id' => $account->id,
-            'saving_transaction_code' => 'TI' . str_pad($member->id, 5, '0', STR_PAD_LEFT) . '1',
-            'transaction_type' => 'Penyetoran',
-            'saving_amount' => $amount,
-            'balance_after_transaction' => $amount,
-            'transaction_date' => now()->subMonths(10),
-            'saving_payment_method' => 'Tunai',
-            'saving_description' => 'Setor Awal Tabungan Ibadah',
+        TransaksiSimpanan::create([
+            'akun_simpanan_id' => $account->id,
+            'kode_transaksi_simpanan' => 'TI' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
+            'tipe_transaksi' => 'Penyetoran',
+            'nominal_simpanan' => $amount,
+            'saldo_setelah_transaksi' => $amount,
+            'tgl_transaksi' => now()->subMonths(10),
+            'metode_pembayaran_simpanan' => 'Tunai',
+            'deskripsi_simpanan' => 'Setor Awal Tabungan Ibadah',
             'updated_by' => $admin->id,
         ]);
     }

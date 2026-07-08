@@ -21,7 +21,7 @@ const breadcrumbItems = [
 
 const page = usePage()
 
-const members = computed(() => page.props.members || [])
+const anggota = computed(() => page.props.anggota || [])
 
 
 const selectedMember = ref(null)
@@ -62,7 +62,7 @@ const isFormValid = computed(() => {
   if (!form) return false
 
   const nominal = Number(form.nominalRaw || 0)
-  const maxWithdrawal = Number(selectedSaving.value?.balance || 0)
+  const maxWithdrawal = Number(selectedSaving.value?.saldo || 0)
 
   return (
     form.nominalRaw &&
@@ -77,19 +77,19 @@ const isFormValid = computed(() => {
 
 const confirmationData = computed(() => ({
   memberName: selectedMember.value?.name || '',
-  memberNumber: selectedMember.value?.user_code || '',
+  memberNumber: selectedMember.value?.kode_pengguna || '',
   savingType: selectedSaving.value?.type || '',
   method: currentFormData.value.method || 'Tunai',
   amount: currentFormData.value.nominalRaw || 0,
-  balance: selectedSaving.value?.balance || 0,
+  saldo: selectedSaving.value?.saldo || 0,
   date: currentFormData.value.withdrawalDate || getTodayYmd(),
   bankName: currentFormData.value.bankName || '',
   accountName: currentFormData.value.accountName || '',
   accountNumber: currentFormData.value.accountNumber || '',
 }))
 
-function onMemberSelected(member) {
-  selectedMember.value = member
+function onMemberSelected(anggota) {
+  selectedMember.value = anggota
   selectedSaving.value = null
 }
 
@@ -120,17 +120,17 @@ function submitWithdrawal() {
   isSubmitting.value = true
 
   const formData = new FormData()
-  formData.append('member_id', selectedMember.value.id)
-  formData.append('saving_account_id', selectedSaving.value.id)
+  formData.append('anggota_id', selectedMember.value.id)
+  formData.append('akun_simpanan_id', selectedSaving.value.id)
   formData.append('amount', currentFormData.value.nominalRaw)
   formData.append('withdrawal_date', currentFormData.value.withdrawalDate)
   formData.append('method', currentFormData.value.method)
-  formData.append('notes', currentFormData.value.notes || '')
+  formData.append('catatan', currentFormData.value.catatan || '')
 
   if (currentFormData.value.method === 'Non-Tunai') {
-    formData.append('bank_name', currentFormData.value.bankName)
-    formData.append('account_name', currentFormData.value.accountName)
-    formData.append('account_number', currentFormData.value.accountNumber)
+    formData.append('nama_bank', currentFormData.value.bankName)
+    formData.append('atas_nama', currentFormData.value.accountName)
+    formData.append('no_rekening', currentFormData.value.accountNumber)
   }
 
   router.post('/admin/savings/withdrawal', formData, {
@@ -164,7 +164,7 @@ function reset() {
     <div class="py-6 px-4 sm:px-6 lg:px-8">
       <div class="w-full px-4 sm:px-10 lg:px-10 space-y-6 font-body">
         <SelectMemberSection
-          :members="members"
+          :anggota="anggota"
           :selected="selectedMember"
           @selected="onMemberSelected"
           @reset="onMemberReset"

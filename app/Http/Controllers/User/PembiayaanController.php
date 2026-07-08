@@ -18,11 +18,11 @@ class PembiayaanController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $member = $user->member;
+        $anggota = $user->anggota;
 
-        if (!$member) {
+        if (!$anggota) {
             return inertia('User/Financing/List', [
-                'financings' => [
+                'pembiayaan' => [
                     'data' => [],
                     'current_page' => 1,
                     'per_page' => 10,
@@ -42,11 +42,11 @@ class PembiayaanController extends Controller
         $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
         $search = trim((string) $request->input('search', ''));
 
-        $financings = $this->pembiayaanService->getPersonalFinancings($member->id, $perPage, $search);
-        $activeFinancing = $this->pembiayaanService->getActiveFinancing($member->id);
+        $pembiayaan = $this->pembiayaanService->getPersonalpembiayaan($anggota->id, $perPage, $search);
+        $activeFinancing = $this->pembiayaanService->getActiveFinancing($anggota->id);
 
         return inertia('User/Financing/List', [
-            'financings' => $financings,
+            'pembiayaan' => $pembiayaan,
             'activeFinancing' => $activeFinancing,
             'filters' => [
                 'search' => $search,
@@ -61,28 +61,28 @@ class PembiayaanController extends Controller
     public function show(string $id)
     {
         $user = auth()->user();
-        $member = $user->member;
-        $financing = $this->pembiayaanService->getPembiayaanById($id);
+        $anggota = $user->anggota;
+        $pembiayaan = $this->pembiayaanService->getPembiayaanById($id);
 
-        if ($financing->member_id !== $member->id) {
+        if ($pembiayaan->anggota_id !== $anggota->id) {
             abort(403, 'Anggota tidak memiliki akses ke pembiayaan ini.');
         }
 
-        $this->pembiayaanService->computeFinancingSummary($financing);
-        $this->pembiayaanService->computeNextDueDate($financing);
+        $this->pembiayaanService->computepembiayaanummary($pembiayaan);
+        $this->pembiayaanService->computeNextDueDate($pembiayaan);
 
-        $financing->setRelation('installment', $financing->installment->map(function ($item) {
+        $pembiayaan->setRelation('angsuran', $pembiayaan->angsuran->map(function ($item) {
             return [
-                'installment_no'              => $item->installment_no,
-                'installment_trans_code'      => $item->payment?->installment_trans_code,
-                'due_date'                    => $item->due_date,
-                'payment_date'               => $item->payment?->payment_date,
-                'amount'                     => $item->payment?->nominal,
-                'is_early_repayment'         => $item->payment?->is_early_repayment ?? false,
-                'installment_payment_receipt' => $item->payment?->installment_payment_receipt ? asset('storage/' . $item->payment->installment_payment_receipt) : null,
+                'angsuran_ke'              => $item->angsuran_ke,
+                'kode_transaksi_pembayaran'      => $item->payment?->kode_transaksi_pembayaran,
+                'tgl_jatuh_tempo'                    => $item->tgl_jatuh_tempo,
+                'tgl_pembayaran'               => $item->payment?->tgl_pembayaran,
+                'nominal_angsuran'                     => $item->payment?->jumlah_angsuran_dibayar,
+                'is_pelunasan_lebih_cepat'         => $item->payment?->is_pelunasan_lebih_cepat ?? false,
+                'struk_pembayaran' => $item->payment?->struk_pembayaran ? asset('storage/' . $item->payment->struk_pembayaran) : null,
             ];
         }));
 
-        return inertia('User/Financing/Show', ['data' => $financing]);
+        return inertia('User/Financing/Show', ['data' => $pembiayaan]);
     }
 }

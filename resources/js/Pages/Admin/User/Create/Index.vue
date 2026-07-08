@@ -15,52 +15,52 @@ import ContactSection from './ContactSection.vue'
 import HeirSection from './HeirSection.vue'
 
 const props = defineProps({
-	educationOptions: {
+	pendidikanOptions: {
 		type: Array,
 		default: () => [],
 	},
-	maritalStatusOptions: {
+	statusPernikahanOptions: {
 		type: Array,
 		default: () => [],
 	},
-	heirRelationshipOptions: {
+	hubunganOptions: {
 		type: Array,
 		default: () => [],
 	},
 })
 
 const requiredMemberFields = computed(() => [
-	'name',
-	'gender',
+	'nama',
+	'jenis_kelamin',
 	'nik',
-	'birth_place',
-	'birth_date',
-	'marital_status',
-	'phone_number',
-	'domicile_address',
-	'last_education',
-	'heir_nik',
-	'heir_name',
-	'heir_relationship',
-	'heir_contact',
+	'tempat_lahir',
+	'tgl_lahir',
+	'status_pernikahan',
+	'no_telp',
+	'alamat_domisili',
+	'pendidikan_terakhir',
+	'nik_ahli_waris',
+	'nama_ahli_waris',
+	'heir_hubungan',
+	'kontak_ahli_waris',
 ])
 
 const form = useForm({
-	name: '',
-	gender: '',
+	nama: '',
+	jenis_kelamin: '',
 	nik: '',
-	birth_place: '',
-	birth_date: '',
-	marital_status: '',
-	phone_number: '',
+	tempat_lahir: '',
+	tgl_lahir: '',
+	status_pernikahan: '',
+	no_telp: '',
 	email: '',
-	domicile_address: '',
-	last_education: '',
-	residential_address: '',
-	heir_nik: '',
-	heir_name: '',
-	heir_relationship: '',
-	heir_contact: '',
+	alamat_domisili: '',
+	pendidikan_terakhir: '',
+	alamat_ktp: '',
+	nik_ahli_waris: '',
+	nama_ahli_waris: '',
+	heir_hubungan: '',
+	kontak_ahli_waris: '',
 	ktp_photo: null,
 	kk_photo: null,
 })
@@ -173,9 +173,9 @@ const submitForm = () => {
 						:get-field-error="getFieldError"
 						:only-letters="onlyLetters"
 						:only-numbers="onlyNumbers"
-						:gender-options="genderOptions"
-						:marital-status-options="props.maritalStatusOptions"
-						:education-options="props.educationOptions"
+						:jenis_kelamin-options="genderOptions"
+						:marital-status-options="props.statusPernikahanOptions"
+						:education-options="props.pendidikanOptions"
 					/>
 
 					<SupportingDocument
@@ -201,7 +201,7 @@ const submitForm = () => {
 						:get-field-error="getFieldError"
 						:only-letters="onlyLetters"
 						:only-numbers="onlyNumbers"
-						:heir-relationship-options="props.heirRelationshipOptions"
+						:ahli_waris-hubungan-options="props.hubunganOptions"
 					/>
 				</div>
 

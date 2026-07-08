@@ -47,7 +47,7 @@ class PengurusController extends Controller
     {
         return inertia('Admin/Admins/Create', [
             'roles' => $this->peranAksesService->getSemuaPeran(),
-            'members' => $this->pengurusService->getAnggotaAktif(),
+            'anggota' => $this->pengurusService->getAnggotaAktif(),
         ]);
     }
 

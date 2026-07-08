@@ -4,15 +4,18 @@ type UserValidationOptions = {
     requireEmail?: boolean;
 };
 
-export function useUserValidation(form: any, options: UserValidationOptions = {}) {
+export function useUserValidation(
+    form: any,
+    options: UserValidationOptions = {},
+) {
     const errors = reactive({
         email: "",
         nik: "",
-        heir_nik: "",
+        nik_ahli_waris: "",
         name: "",
         role_id: "",
-        phone_number: "",
-        profile_picture: "",
+        no_telp: "",
+        foto_profil: "",
     });
 
     watch(
@@ -27,7 +30,7 @@ export function useUserValidation(form: any, options: UserValidationOptions = {}
             } else {
                 errors.email = "";
             }
-        }
+        },
     );
 
     watch(
@@ -42,72 +45,85 @@ export function useUserValidation(form: any, options: UserValidationOptions = {}
             } else {
                 errors.nik = "";
             }
-        }
+        },
     );
 
     watch(
-        () => form.heir_nik,
+        () => form.nik_ahli_waris,
         (v) => {
             if (!v) {
-                errors.heir_nik = "NIK ahli waris wajib diisi";
+                errors.nik_ahli_waris = "NIK ahli waris wajib diisi";
             } else if (!/^\d+$/.test(v)) {
-                errors.heir_nik = "NIK ahli waris hanya boleh berisi angka";
+                errors.nik_ahli_waris = "NIK ahli waris hanya boleh berisi angka";
             } else if (v.length !== 16) {
-                errors.heir_nik = "NIK ahli waris harus 16 digit";
+                errors.nik_ahli_waris = "NIK ahli waris harus 16 digit";
             } else {
-                errors.heir_nik = "";
+                errors.nik_ahli_waris = "";
             }
-        }
+        },
     );
 
     watch(
         () => form.name,
         (v) => {
             errors.name = v ? "" : "Nama lengkap wajib diisi";
-        }
+        },
     );
 
     watch(
         () => form.role_id,
         (v) => {
             errors.role_id = v ? "" : "Posisi wajib diisi";
-        }
+        },
     );
 
     watch(
-        () => form.phone_number,
+        () => form.no_telp,
         (v) => {
             const value = (v ?? "").toString().trim();
-            const normalized = value.startsWith('0') ? `62${value.slice(1)}` : value.startsWith('62') ? value : `62${value}`;
+            const normalized = value.startsWith("0")
+                ? `62${value.slice(1)}`
+                : value.startsWith("62")
+                  ? value
+                  : `62${value}`;
 
             if (!/^62\d{8,20}$/.test(normalized)) {
-                errors.phone_number = "Nomor telepon wajib diawali 62 dan minimal 10 digit";
+                errors.no_telp =
+                    "Nomor telepon wajib diawali 62 dan minimal 10 digit";
             } else {
-                errors.phone_number = "";
+                errors.no_telp = "";
             }
-        }
+        },
     );
 
     watch(
-        () => form.profile_picture,
+        () => form.foto_profil,
         (v) => {
-            if (typeof v === 'string') {
-                errors.profile_picture = "";
+            if (typeof v === "string") {
+                errors.foto_profil = "";
                 return;
             }
 
             if (v && v instanceof File) {
-                if (!(v.type === "image/png" || v.type === "image/jpeg" || v.type === "image/jpg" || v.type === "image/gif")) {
-                    errors.profile_picture = "Hanya format JPG atau PNG yang diperbolehkan";
+                if (
+                    !(
+                        v.type === "image/png" ||
+                        v.type === "image/jpeg" ||
+                        v.type === "image/jpg" ||
+                        v.type === "image/gif"
+                    )
+                ) {
+                    errors.foto_profil =
+                        "Hanya format JPG atau PNG yang diperbolehkan";
                 } else if (v.size > 2 * 1024 * 1024) {
-                    errors.profile_picture = "Ukuran gambar maksimal 2MB";
+                    errors.foto_profil = "Ukuran gambar maksimal 2MB";
                 } else {
-                    errors.profile_picture = "";
+                    errors.foto_profil = "";
                 }
             } else {
-                errors.profile_picture = "";
+                errors.foto_profil = "";
             }
-        }
+        },
     );
 
     return { errors };

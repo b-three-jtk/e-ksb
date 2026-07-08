@@ -112,7 +112,7 @@ const emit = defineEmits(['update:selectedFilter']);
                         {{ parseCurrencyAmount(item.jumlah) }}
                     </template>
                     <template #action="{ item }">
-                        <Link :href="`/admin/financings/show/${item.id}`">
+                        <Link :href="`/admin/pembiayaan/show/${item.id}`">
                             <EyeIcon
                                 class="w-5 h-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
                         </Link>
@@ -124,7 +124,7 @@ const emit = defineEmits(['update:selectedFilter']);
             <div v-else class="card-layout">
                 <div class="flex justify-between items-center">
                     <h1 class="card-title">Permohonan Pembiayaan Sedang Berjalan</h1>
-                    <Button href="/admin/financings" variant="outline">Selengkapnya</Button>
+                    <Button href="/admin/pembiayaan" variant="outline">Selengkapnya</Button>
                 </div>
                 <TransactionTable :columns="kolomTabelPermohonanMurabahah" :rows="permohonan_murabahah">
                     <template #status="{ item }">
@@ -136,18 +136,18 @@ const emit = defineEmits(['update:selectedFilter']);
                         <div class="flex items-center justify-center">
                             <Button
                                 v-if="can['edit_murabahah'] && (role === 'Staf Murabahah' && (item.status === 'Disetujui' || item.status === 'Ditolak' || item.status === 'Menunggu Kelengkapan Dokumen' || item.status === 'Disetujui dengan Catatan'))"
-                                :href="`/admin/financings/draft/${item.id}`" size="small" variant="transparent">
+                                :href="`/admin/pembiayaan/draft/${item.id}`" size="small" variant="transparent">
                                 <ReviewIcon width="18px" height="18px" />
                             </Button>
                             <Button
                                 v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((item.status === 'Angsuran Berjalan') || (item.status === 'Belum Ditinjau') || (item.status === 'Lunas'))) || (role === 'Ketua Murabahah' && (item.status !== 'Belum Ditinjau')))"
-                                :href="`/admin/financings/show/${item.id}`" size="small" variant="transparent">
+                                :href="`/admin/pembiayaan/show/${item.id}`" size="small" variant="transparent">
                                 <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                             </Button>
 
                             <Button
                                 v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (item.status === 'Belum Ditinjau'))"
-                                :href="`/admin/financings/validation/${item.id}`" size="small" variant="transparent">
+                                :href="`/admin/pembiayaan/validation/${item.id}`" size="small" variant="transparent">
                                 <ReviewIcon width="18px" height="18px" />
                             </Button>
                         </div>

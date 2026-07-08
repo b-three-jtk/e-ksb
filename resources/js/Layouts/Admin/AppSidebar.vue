@@ -80,7 +80,7 @@ const menuGroups = [
             {
                 icon: AccountIcon,
                 name: "Pengelolaan Akun",
-                path: "/admin/accounts",
+                path: "/admin/akun",
                 permission: "view_kas"
             },
             {
@@ -92,7 +92,7 @@ const menuGroups = [
             {
                 icon: NotificationsIcon,
                 name: "Monitoring Notifikasi",
-                path: "/admin/notifications",
+                path: "/admin/notifikasi",
                 permission: "view_notifikasi"
             },
         ],
@@ -109,7 +109,7 @@ const menuGroups = [
             {
                 icon: MoneyIcon,
                 name: "Pembiayaan Murabahah",
-                path: "/admin/financings",
+                path: "/admin/pembiayaan",
                 permission: "view_murabahah"
             }
         ],

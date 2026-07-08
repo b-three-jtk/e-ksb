@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\EducationEnum;
-use App\Enums\HeirEnum;
+use App\Enums\AhliWarisEnum;
 use App\Enums\MaritalStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -35,21 +35,21 @@ class StoreMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'gender' => 'required|in:Laki-laki,Perempuan',
-            'nik' => 'required|digits:16|unique:users,nik',
-            'birth_place' => 'required|string|max:255',
-            'birth_date' => 'required|date',
-            'marital_status' => 'required|in:' . implode(',', array_column(MaritalStatusEnum::cases(), 'value')),
-            'phone_number' => 'required|string|max:20|unique:users,phone_number',
-            'email' => 'nullable|email|max:255|unique:users,email',
-            'domicile_address' => 'required|string|max:500',
-            'residential_address' => 'nullable|string|max:500',
-            'last_education' => 'required|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
-            'heir_nik' => 'required|digits:16|unique:heirs,heir_nik',
-            'heir_name' => 'required|string|max:255',
-            'heir_relationship' => 'required|in:' . implode(',', array_column(HeirEnum::cases(), 'value')),
-            'heir_contact' => 'required|string|max:20',
+            'nama' => 'required|string|max:255',
+            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+            'nik' => 'required|digits:16|unique:pengguna,nik',
+            'tempat_lahir' => 'required|string|max:255',
+            'tgl_lahir' => 'required|date',
+            'status_pernikahan' => 'required|in:' . implode(',', array_column(MaritalStatusEnum::cases(), 'value')),
+            'no_telp' => 'required|string|max:20|unique:pengguna,no_telp',
+            'email' => 'nullable|email|max:255|unique:pengguna,email',
+            'alamat_domisili' => 'required|string|max:500',
+            'alamat_ktp' => 'nullable|string|max:500',
+            'pendidikan_terakhir' => 'required|in:' . implode(',', array_column(EducationEnum::cases(), 'value')),
+            'nik_ahli_waris' => 'required|digits:16|unique:ahli_waris,nik_ahli_waris',
+            'nama_ahli_waris' => 'required|string|max:255',
+            'heir_hubungan' => 'required|in:' . implode(',', array_column(AhliWarisEnum::cases(), 'value')),
+            'kontak_ahli_waris' => 'required|string|max:20',
             'ktp_photo' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
             'kk_photo' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
         ];

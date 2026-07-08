@@ -11,7 +11,7 @@ import AllocationSummaryCard from './components/AllocationSummaryCard.vue'
 import useUserAllocation from '@/Composables/useUserAllocation'
 
 const props = defineProps({
-  members: { type: Object, required: true },
+  anggota: { type: Object, required: true },
   pjUsers: { type: Array, required: true },
   filters: { type: Object, required: true },
   summary: { type: Object, required: true },
@@ -119,13 +119,13 @@ watch(() => filterState.allocation_status, applyFilters)
           />
 
           <MemberAllocationTable
-            :members="members"
-            :selected-member-ids="selectedMemberIds"
+            :anggota="anggota"
+            :selected-anggota-ids="selectedMemberIds"
             :all-visible-selected="allVisibleSelected"
-            :broken-member-avatar-ids="brokenMemberAvatarIds"
+            :broken-anggota-avatar-ids="brokenMemberAvatarIds"
             @toggle-visible-selection="toggleVisibleSelection"
             @update-selection="updateSelection"
-            @mark-broken-member-avatar="markBrokenMemberAvatar"
+            @mark-broken-anggota-avatar="markBrokenMemberAvatar"
           />
         </section>
 

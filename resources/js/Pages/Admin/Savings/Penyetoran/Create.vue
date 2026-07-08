@@ -11,9 +11,9 @@ import Struk from '@/Components/Savings/Struk.vue'
 import Swal from 'sweetalert2'
 
 const props = defineProps({
-    saving_types: { type: Array, required: true },
-    members: { type: Array, required: true },
-    accounts: { type: Array, required: true },
+    jenis_simpanans: { type: Array, required: true },
+    anggota: { type: Array, required: true },
+    akun: { type: Array, required: true },
     pengurus: { type: Object, required: true },
     global_saving: { type: Object, required: true },
     struk: Object,
@@ -23,7 +23,7 @@ const props = defineProps({
 const filteredSavingTypes = computed(() => {
   if (!selectedMember.value) return []
 
-  let types = props.saving_types
+  let types = props.jenis_simpanans
 
   if (selectedMember.value.status === 'Menunggu Pembayaran') {
     return ['Simpanan Pokok']
@@ -44,10 +44,10 @@ const selectedMember = ref(null)
 const memberSuggestions = computed(() => {
   const q = memberQuery.value.toLowerCase().trim()
   if (!q || q.length < 2) return []
-  return props.members
+  return props.anggota
     .filter(m =>
       m.name?.toLowerCase().includes(q) ||
-      m.user_code?.toLowerCase().includes(q)
+      m.kode_pengguna?.toLowerCase().includes(q)
     )
     .slice(0, 6)
 })
@@ -56,9 +56,9 @@ const showSuggestions = computed(() =>
   memberSuggestions.value.length > 0 && !selectedMember.value
 )
 
-function pilihAnggota(member) {
-  selectedMember.value = member
-  memberQuery.value    = member.name
+function pilihAnggota(anggota) {
+  selectedMember.value = anggota
+  memberQuery.value    = anggota.name
   jenisSimpanan.value  = ''
 }
 
@@ -77,7 +77,7 @@ watch(memberQuery, val => {
 const jenisSimpanan  = ref('')
 const selectedAccountId = ref('')
 const isCreatingNew   = ref(false)
-const purposeInput    = ref('')
+const tujuanInput    = ref('')
 const nominalRaw     = ref('')
 const nominalDisplay = ref('')
 const tanggalSetor   = ref(today())
@@ -121,7 +121,7 @@ watch(jenisSimpanan, () => {
 watch(jenisSimpanan, () => {
   selectedAccountId.value = '' 
   isCreatingNew.value   = false
-  purposeInput.value    = ''
+  tujuanInput.value    = ''
   tenorMonths.value     = ''
   targetAmount.value    = ''
   targetDisplay.value   = ''
@@ -137,9 +137,9 @@ watch(jenisSimpanan, () => {
 
 const existingAccounts = computed(() => {
   if (!selectedMember.value) return []
-  const accounts = selectedMember.value.savingAccounts ?? []
+  const akun = selectedMember.value.akunSimpanan ?? []
   if (!['Tabungan Ibadah', 'Tabungan Berjangka'].includes(jenisSimpanan.value)) return []
-  return accounts.filter(acc => acc.type === jenisSimpanan.value)
+  return akun.filter(acc => acc.type === jenisSimpanan.value)
 })
 
 const isMultiAccountType = computed(() =>
@@ -197,11 +197,11 @@ const selectedAccount = computed(() => {
   if (!selectedMember.value) return null
   if (isMultiAccountType.value) {
     if (isCreatingNew.value || !selectedAccountId.value) return null
-    return (selectedMember.value.savingAccounts || []).find(
+    return (selectedMember.value.akunSimpanan || []).find(
       acc => acc.id === selectedAccountId.value
     )
   }
-  return (selectedMember.value.savingAccounts || []).find(
+  return (selectedMember.value.akunSimpanan || []).find(
     acc => acc.type === jenisSimpanan.value
   )
 })
@@ -223,9 +223,9 @@ const errorsForm = computed(() => {
 
   if (isMultiAccountType.value) {
     if (!isCreatingNew.value && !selectedAccountId.value)
-      e.purpose = 'Pilih tujuan tabungan atau buat baru'
+      e.tujuan = 'Pilih tujuan tabungan atau buat baru'
     if (isCreatingNew.value) {
-      if (!purposeInput.value) e.purposeInput = 'Tujuan tabungan wajib diisi'
+      if (!tujuanInput.value) e.tujuanInput = 'Tujuan tabungan wajib diisi'
       if (jenisSimpanan.value === 'Tabungan Berjangka' && !tenorMonths.value)
         e.tenor = 'Jatuh tempo wajib diisi'
       if (jenisSimpanan.value === 'Tabungan Ibadah' && !targetAmount.value)
@@ -257,7 +257,7 @@ function resetForm() {
   jenisSimpanan.value   = ''
   selectedAccountId.value = '' 
   isCreatingNew.value   = false
-  purposeInput.value    = ''
+  tujuanInput.value    = ''
   nominalRaw.value      = ''
   nominalDisplay.value  = ''
   tanggalSetor.value    = today()
@@ -282,7 +282,7 @@ function bukaDialog() {
 
 const confirmationData = computed(() => ({
   memberName: selectedMember.value?.name,
-  memberNumber: selectedMember.value?.user_code,
+  memberNumber: selectedMember.value?.kode_pengguna,
   savingType: jenisSimpanan.value,
   method: depositMethod.value,
   amount: nominalRaw.value,
@@ -290,7 +290,7 @@ const confirmationData = computed(() => ({
   tenorMonths: tenorMonths.value,
   targetAmount: targetAmount.value,
   officerName: props.pengurus?.name,
-  balance: selectedAccount.value ? Number(selectedAccount.value.balance) : 0,
+  saldo: selectedAccount.value ? Number(selectedAccount.value.saldo) : 0,
 }))
 
 const konfirmasiChecked = ref(false)
@@ -321,26 +321,26 @@ function submitDeposit() {
   const accountId = selectedAccount.value?.id
 
   if (accountId && accountId !== 'undefined') {
-    formData.append('saving_account_id', accountId)
+    formData.append('akun_simpanan_id', accountId)
   }
 
-  formData.append('member_id', selectedMember.value.id)
+  formData.append('anggota_id', selectedMember.value.id)
   formData.append('saving_category', jenisSimpanan.value)
   formData.append('amount', nominalRaw.value)
   formData.append('date', tanggalSetor.value)
-  formData.append('saving_payment_method', depositMethod.value)
-  formData.append('notes', catatan.value)
+  formData.append('metode_pembayaran_simpanan', depositMethod.value)
+  formData.append('catatan', catatan.value)
 
   if (isMultiAccountType.value) {
     formData.append(
-      'purpose',
-      isCreatingNew.value ? purposeInput.value : selectedAccount.value?.purpose
+      'tujuan',
+      isCreatingNew.value ? tujuanInput.value : selectedAccount.value?.tujuan
     )
   }
 
   if (isNewAccount.value) {
     formData.append('tenor_months', tenorMonths.value)
-    formData.append('target_amount', targetAmount.value)
+    formData.append('target_tabungan', targetAmount.value)
   }
 
   router.post('/admin/savings/deposit', formData, {
@@ -355,7 +355,7 @@ function submitDeposit() {
       showDialog.value = false
       toast.success('Penyetoran berhasil diposting', { position: 'bottom-right' })
       resetForm()
-      router.reload({ only: ['members'] })
+      router.reload({ only: ['anggota'] })
       await nextTick()
       modalReceipt.value?.openModal()
     },
@@ -445,13 +445,13 @@ const akadType = computed(() => {
                   </div>
                   <div>
                     <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ m.name }}</div>
-                    <div class="text-xs text-gray-500">{{ m.user_code }}</div>
+                    <div class="text-xs text-gray-500">{{ m.kode_pengguna }}</div>
                   </div>
                 </button>
               </div>
             </div>
 
-            <!-- Selected member card -->
+            <!-- Selected anggota card -->
             <Transition name="fade">
               <div
                 v-if="selectedMember"
@@ -462,7 +462,7 @@ const akadType = computed(() => {
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
-                  <div class="text-sm text-gray-500">{{ selectedMember.user_code }}</div>
+                  <div class="text-sm text-gray-500">{{ selectedMember.kode_pengguna }}</div>
                 </div>
                 <button @click="resetAnggota" type="button" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
                   <Icon icon="mdi:close" width="20" />
@@ -562,10 +562,10 @@ const akadType = computed(() => {
                     </label>
 
                     <div class="space-y-2">
-                      <!-- Existing accounts -->
+                      <!-- Existing akun -->
                       <div
                         v-for="acc in existingAccounts"
-                        :key="acc.purpose"
+                        :key="acc.tujuan"
                         @click="!acc.is_frozen && !acc.is_matured && selectAccount(acc)"
                         class="p-3 border rounded-lg"
                         :class="[
@@ -584,10 +584,10 @@ const akadType = computed(() => {
                           class="mt-0.5 text-secondary"
                         />
                         <div class="flex-1 min-w-0">
-                          <div class="font-medium text-sm text-gray-800 dark:text-gray-200">{{ acc.purpose }}</div>
+                          <div class="font-medium text-sm text-gray-800 dark:text-gray-200">{{ acc.tujuan }}</div>
                           <div class="text-xs text-gray-500 mt-0.5 flex gap-3">
-                            <span>Saldo: Rp {{ formatRp(acc.balance) }}</span>
-                            <span v-if="acc.target_amount">· Target: Rp {{ formatRp(acc.target_amount) }}</span>
+                            <span>Saldo: Rp {{ formatRp(acc.saldo) }}</span>
+                            <span v-if="acc.target_tabungan">· Target: Rp {{ formatRp(acc.target_tabungan) }}</span>
                             <span v-if="acc.matured_at">· Jatuh Tempo: {{ acc.matured_at }}</span>
                           </div>
                           <!-- Badge frozen / matured -->
@@ -625,8 +625,8 @@ const akadType = computed(() => {
                       </label>
                     </div>
 
-                    <p v-if="errorsForm.purpose" class="mt-1 text-xs text-red-500 flex items-center gap-1">
-                      <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.purpose }}
+                    <p v-if="errorsForm.tujuan" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                      <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.tujuan }}
                     </p>
                   </div>
 
@@ -640,17 +640,17 @@ const akadType = computed(() => {
                           Tujuan Tabungan <span class="text-red-500">*</span>
                         </label>
                         <input
-                          v-model="purposeInput"
+                          v-model="tujuanInput"
                           type="text"
                           placeholder="Contoh: Haji 2027, Umroh bersama keluarga..."
                           class="w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-gray-700
                                 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors"
-                          :class="errorsForm.purposeInput
+                          :class="errorsForm.tujuanInput
                             ? 'border-red-400 focus:ring-red-400'
                             : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'"
                         />
-                        <p v-if="errorsForm.purposeInput" class="mt-1 text-xs text-red-500 flex items-center gap-1">
-                          <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.purposeInput }}
+                        <p v-if="errorsForm.tujuanInput" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                          <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorsForm.tujuanInput }}
                         </p>
                       </div>
 

@@ -23,7 +23,7 @@ const form = ref({
   bankName: '',
   accountName: '',
   accountNumber: '',
-  notes: ''
+  catatan: ''
 })
 
 const selectedSavedAccountNumber = ref('')
@@ -37,15 +37,15 @@ const defaultBankOptions = [
 ]
 
 const savedAccounts = computed(() => {
-  const accounts = props.selectedMember?.accounts
-  return Array.isArray(accounts) ? accounts : []
+  const akun = props.selectedMember?.akun
+  return Array.isArray(akun) ? akun : []
 })
 
 const hasSavedAccounts = computed(() => savedAccounts.value.length > 0)
 
 const bankOptions = computed(() => {
   const savedBanks = savedAccounts.value
-    .map((acc) => String(acc?.bank_name || '').trim())
+    .map((acc) => String(acc?.nama_bank || '').trim())
     .filter(Boolean)
 
   return [...new Set([...savedBanks, ...defaultBankOptions])]
@@ -80,8 +80,8 @@ function validateNominal() {
     return
   }
 
-  if (form.value.nominalRaw && nominal > props.selectedSaving.balance) {
-    errors.value.nominal = `Nominal tidak boleh melebihi saldo (${formatRp(props.selectedSaving.balance)})`
+  if (form.value.nominalRaw && nominal > props.selectedSaving.saldo) {
+    errors.value.nominal = `Nominal tidak boleh melebihi saldo (${formatRp(props.selectedSaving.saldo)})`
   }
 }
 
@@ -118,18 +118,18 @@ function applySavedBankInfo() {
   if (!latest) return
 
   if (!form.value.bankName) {
-    form.value.bankName = latest.bank_name || ''
+    form.value.bankName = latest.nama_bank || ''
   }
 
   if (!form.value.accountName) {
-    form.value.accountName = latest.account_name || ''
+    form.value.accountName = latest.atas_nama || ''
   }
 
   if (!form.value.accountNumber) {
-    form.value.accountNumber = latest.account_number || ''
+    form.value.accountNumber = latest.no_rekening || ''
   }
 
-  selectedSavedAccountNumber.value = latest.account_number || ''
+  selectedSavedAccountNumber.value = latest.no_rekening || ''
 }
 
 function applySavedBankInfoByBank(bankName) {
@@ -139,14 +139,14 @@ function applySavedBankInfoByBank(bankName) {
   if (!selectedBank) return
 
   const matched = savedAccounts.value.find(
-    (acc) => String(acc?.bank_name || '').trim().toLowerCase() === selectedBank
+    (acc) => String(acc?.nama_bank || '').trim().toLowerCase() === selectedBank
   )
 
   if (!matched) return
 
-  form.value.accountName = matched.account_name || ''
-  form.value.accountNumber = matched.account_number || ''
-  selectedSavedAccountNumber.value = matched.account_number || ''
+  form.value.accountName = matched.atas_nama || ''
+  form.value.accountNumber = matched.no_rekening || ''
+  selectedSavedAccountNumber.value = matched.no_rekening || ''
 }
 
 function applySavedBankInfoByAccountNumber(accountNumber) {
@@ -156,14 +156,14 @@ function applySavedBankInfoByAccountNumber(accountNumber) {
   if (!selectedNumber) return
 
   const matched = savedAccounts.value.find(
-    (acc) => String(acc?.account_number || '').trim() === selectedNumber
+    (acc) => String(acc?.no_rekening || '').trim() === selectedNumber
   )
 
   if (!matched) return
 
-  form.value.bankName = matched.bank_name || ''
-  form.value.accountName = matched.account_name || ''
-  form.value.accountNumber = matched.account_number || ''
+  form.value.bankName = matched.nama_bank || ''
+  form.value.accountName = matched.atas_nama || ''
+  form.value.accountNumber = matched.no_rekening || ''
 }
 
 function onAccountNumberInput(e) {
@@ -228,13 +228,13 @@ watch(() => props.selectedSaving?.id, (newId, oldId) => {
   resetNonCashFields()
   selectedSavedAccountNumber.value = ''
   accountInputMode.value = 'saved'
-  form.value.notes = ''
+  form.value.catatan = ''
   errors.value = {}
 
   if (props.selectedSaving?.isFullWithdrawal) {
-    const balance = String(props.selectedSaving.balance || 0)
-    form.value.nominalRaw = balance
-    form.value.nominalDisplay = formatRp(balance)
+    const saldo = String(props.selectedSaving.saldo || 0)
+    form.value.nominalRaw = saldo
+    form.value.nominalDisplay = formatRp(saldo)
   } else {
     form.value.nominalRaw = ''
     form.value.nominalDisplay = ''
@@ -391,10 +391,10 @@ defineExpose({
             <option value="">Pilih rekening (opsional)</option>
             <option
               v-for="account in savedAccounts"
-              :key="account.account_number"
-              :value="account.account_number"
+              :key="account.no_rekening"
+              :value="account.no_rekening"
             >
-              {{ account.bank_name }} - {{ account.account_number }} ({{ account.account_name }})
+              {{ account.nama_bank }} - {{ account.no_rekening }} ({{ account.atas_nama }})
             </option>
           </select>
         </div>
@@ -468,7 +468,7 @@ defineExpose({
           Catatan / Deskripsi
         </label>
         <textarea
-          v-model="form.notes"
+          v-model="form.catatan"
           placeholder="Catatan tambahan (opsional)"
           rows="3"
           class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

@@ -6,27 +6,27 @@ defineProps({
 const steps = [
     {
         title: 'Identitas Pribadi',
-        description: 'Isi identitas pemohon',
+        deskripsi: 'Isi identitas pemohon',
         icon: 'icon-[tabler--user]',
     },
     {
         title: 'Data Tanggungan dan Penghasilan',
-        description: 'Validasi kemampuan pemohon membayar angsuran',
+        deskripsi: 'Validasi kemampuan pemohon membayar angsuran',
         icon: 'icon-[fa7-solid--hands-holding-child]',
     },
     {
         title: 'Objek Pembiayaan',
-        description: 'Isi detail objek pembiayaan',
+        deskripsi: 'Isi detail objek pembiayaan',
         icon: 'icon-[carbon--financial-assets]',
     },
     {
         title: 'Pengadaan Barang',
-        description: 'Isi dan unggah bukti pembelian barang',
+        deskripsi: 'Isi dan unggah bukti pembelian barang',
         icon: 'icon-[tabler--archive]',
     },
     {
         title: 'Finalisasi Pembiayaan Murabahah',
-        description: 'Isi rincian angsuran dan unggah dokumen akad',
+        deskripsi: 'Isi rincian angsuran dan unggah dokumen akad',
         icon: 'icon-[tabler--clipboard-check]',
     },
 ]
@@ -43,7 +43,7 @@ const steps = [
             </div>
             <div class="flex flex-col">
                 <h1 class="font-medium text-dark-text dark:text-gray-300">{{ step.title }}</h1>
-                <p class="text-sm text-gray-400 font-body">{{ step.description }}</p>
+                <p class="text-sm text-gray-400 font-body">{{ step.deskripsi }}</p>
             </div>
         </div>
     </div>

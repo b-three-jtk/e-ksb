@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\GlobalSetting;
+use App\Models\PengaturanUmum;
 use App\Services\PengaturanUmumService;
 use Illuminate\Http\Request;
 
@@ -36,7 +36,7 @@ class PengaturanUmumController extends Controller
             'points' => [
                 'saving_point_amount' => ['required', 'numeric', 'min:1'],
                 'saving_point_reward' => ['required', 'numeric', 'min:1'],
-                'effective_date' => ['required', 'date'],
+                'tgl_diberlakukan' => ['required', 'date'],
                 'murabaha_point_amount' => ['required', 'numeric', 'min:1'],
                 'murabaha_point_reward' => ['required', 'numeric', 'min:1'],
                 'murabaha_effective_date' => ['required', 'date'],
@@ -47,9 +47,9 @@ class PengaturanUmumController extends Controller
                 'saving_wajib_amount' => ['required', 'numeric', 'min:1'],
                 'saving_wajib_effective_date' => ['required', 'date'],
             ],
-            'financing' => [
+            'pembiayaan' => [
                 'murabahah_margin_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
-                'effective_date' => ['required', 'date'],
+                'tgl_diberlakukan' => ['required', 'date'],
             ],
             default => [],
         };
@@ -62,11 +62,11 @@ class PengaturanUmumController extends Controller
             'general' => ['tanggal_awal_periode', 'tanggal_akhir_periode', 'status_tutup_buku'],
             'points' => ['saving_point_amount', 'saving_point_reward', 'murabaha_point_amount', 'murabaha_point_reward'],
             'savings' => ['saving_pokok_amount', 'saving_wajib_amount'],
-            'financing' => ['murabahah_margin_percentage'],
+            'pembiayaan' => ['murabahah_margin_percentage'],
             default => [],
         };
 
-        $hasData = GlobalSetting::whereIn('key', $keys)->exists();
+        $hasData = PengaturanUmum::whereIn('key', $keys)->exists();
 
         if ($hasData) {
             if (!$request->user()->can('edit_pengaturan')) {

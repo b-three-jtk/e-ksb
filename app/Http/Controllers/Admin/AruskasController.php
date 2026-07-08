@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Account;
+use App\Models\Akun;
 use App\Enums\PositionEnum;
 use App\Enums\UserRoleEnum;
 use App\Services\Admin\AruskasService;
@@ -36,11 +36,11 @@ class AruskasController extends Controller
             'summary'      => $this->aruskasService->getKasSummary(),
             'cashFlowReport'=>$this->aruskasService->getCashFlowReport($filters),
             'filters'      => $filters,
-            'akunOptions'  => Account::select(
-                                'no_ref_account as nomor_akun',
-                                'account_name as nama_akun'
+            'akunOptions'  => Akun::select(
+                                'no_ref_akun as nomor_akun',
+                                'nama_akun as nama_akun'
                               )
-                              ->orderBy('no_ref_account')
+                              ->orderBy('no_ref_akun')
                               ->get(),
             'can' => [
                 'tambah_alokasi' => Auth::user()->hasRole(UserRoleEnum::BENDAHARA->value),
@@ -52,8 +52,8 @@ class AruskasController extends Controller
     {
         $validated = $request->validate([
             'nominal'     => ['required', 'numeric', 'min:1'],
-            'akun_debit'  => ['required', 'exists:accounts,no_ref_account'],
-            'akun_kredit' => ['required', 'exists:accounts,no_ref_account'],
+            'akun_debit'  => ['required', 'exists:akun,no_ref_akun'],
+            'akun_kredit' => ['required', 'exists:akun,no_ref_akun'],
         ]);
 
         if ($validated['akun_debit'] === $validated['akun_kredit']) {
@@ -62,13 +62,13 @@ class AruskasController extends Controller
             ]);
         }
 
-        $debitAccount  = Account::where('no_ref_account', $validated['akun_debit'])->firstOrFail();
-        $creditAccount = Account::where('no_ref_account', $validated['akun_kredit'])->firstOrFail();
+        $debitAkun  = Akun::where('no_ref_akun', $validated['akun_debit'])->firstOrFail();
+        $creditAkun = Akun::where('no_ref_akun', $validated['akun_kredit'])->firstOrFail();
 
         app(JurnalService::class)->create(
             [
-                ['account' => $debitAccount->no_ref_account,  'position' => PositionEnum::DEBIT->value,  'nominal' => $validated['nominal']],
-                ['account' => $creditAccount->no_ref_account, 'position' => PositionEnum::CREDIT->value, 'nominal' => $validated['nominal']],
+                ['akun' => $debitAkun->no_ref_akun,  'posisi_akun' => PositionEnum::DEBIT->value,  'nominal' => $validated['nominal']],
+                ['akun' => $creditAkun->no_ref_akun, 'posisi_akun' => PositionEnum::CREDIT->value, 'nominal' => $validated['nominal']],
             ],
             now()->toDateString(),
             auth()->id()

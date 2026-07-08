@@ -26,8 +26,8 @@ const props = defineProps({
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
-    { name: 'Pengelolaan Pembiayaan', link: '/admin/financings' },
-    { name: 'Detail Pembiayaan', link: `/admin/financings/${props.data?.financing?.id}` },
+    { name: 'Pengelolaan Pembiayaan', link: '/admin/pembiayaan' },
+    { name: 'Detail Pembiayaan', link: `/admin/pembiayaan/${props.data?.pembiayaan?.id}` },
     { name: 'Permohonan Pelunasan' },
 ];
 
@@ -48,7 +48,7 @@ const submitForm = () => {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            form.post('/admin/financings/repayment', {
+            form.post('/admin/pembiayaan/repayment', {
                 forceFormData: true,
                 onSuccess: () => {
                     toast("Permohonan berhasil dikirim!", {
@@ -85,27 +85,27 @@ const submitForm = () => {
                 <div class="card-layout mx-8 mt-8">
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                         <li>
-                            <Info label="Nomor Anggota KSPPS" :value="props.data?.financing?.member.user.user_code" />
+                            <Info label="Nomor Anggota KSPPS" :value="props.data?.pembiayaan?.anggota.user.kode_pengguna" />
                         </li>
                         <li>
-                            <Info label="Nama Lengkap" :value="props.data?.financing?.member.user.name" />
+                            <Info label="Nama Lengkap" :value="props.data?.pembiayaan?.anggota.user.nama" />
                         </li>
                         <li>
-                            <Info label="Tanggal Akad" :value="dateParser(props.data?.financing?.akad_date)" />
+                            <Info label="Tanggal Akad" :value="dateParser(props.data?.pembiayaan?.tgl_akad)" />
                         </li>
                         <li>
-                            <Info label="Nomor Transaksi" :value="props.data?.financing?.financing_transaction_code" />
+                            <Info label="Nomor Transaksi" :value="props.data?.pembiayaan?.kode_pembiayaan" />
                         </li>
                         <li>
-                            <Info label="Objek Pembiayaan" :value="props.data?.financing?.financing_item.name" />
+                            <Info label="Objek Pembiayaan" :value="props.data?.pembiayaan?.objek_pembiayaan.nama_barang" />
                         </li>
                         <li>
                             <Info label="Kategori Objek Pembiayaan"
-                                :value="props.data?.financing?.financing_item.product_type.product_type_name" />
+                                :value="props.data?.pembiayaan?.objek_pembiayaan.jenis_barang.nama_jenis_barang" />
                         </li>
                         <li>
                             <Info label="Informasi Cicilan"
-                                :value="props.data?.total_paid_installments + ' dari ' + props.data?.financing?.tenor + ' Bulan'" />
+                                :value="props.data?.total_paid_installments + ' dari ' + props.data?.pembiayaan?.tenor + ' Bulan'" />
                         </li>
                     </ul>
                 </div>
@@ -121,7 +121,7 @@ const submitForm = () => {
                                 </td>
                                 <td class="py-5 px-2 flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data?.financing?.cost_price) }}
+                                        {{ moneyParser(props.data?.pembiayaan?.harga_perolehan) }}
                                     </p>
                                 </td>
                             </tr>
@@ -133,7 +133,7 @@ const submitForm = () => {
                                 </td>
                                 <td class="py-5 px-2 flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data?.financing?.margin_amount) }}
+                                        {{ moneyParser(props.data?.pembiayaan?.margin_keuntungan) }}
                                     </p>
                                 </td>
                             </tr>
@@ -145,7 +145,7 @@ const submitForm = () => {
                                 </td>
                                 <td class="py-5 px-2 flex-wrap">
                                     <p class="text-dark-text dark:text-gray-400">
-                                        {{ moneyParser(props.data?.financing?.down_payment) }}
+                                        {{ moneyParser(props.data?.pembiayaan?.uang_muka) }}
                                     </p>
                                 </td>
                             </tr>
@@ -163,19 +163,19 @@ const submitForm = () => {
                                         <div class="grid grid-cols-2 gap-2">
                                             <span class="font-head">Harga Perolehan </span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data?.financing?.cost_price) }}
+                                                {{ moneyParser(props.data?.pembiayaan?.harga_perolehan) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
                                             <span class="font-head">Margin</span>
                                             <span class="font-medium text-blue-500">
-                                                {{ moneyParser(props.data?.financing?.margin_amount) }}
+                                                {{ moneyParser(props.data?.pembiayaan?.margin_keuntungan) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
                                             <span class="font-head">Uang Muka </span>
                                             <span class="font-medium text-blue-500 border-b border-b-gray-300">
-                                                {{ moneyParser(props.data?.financing?.down_payment) }}
+                                                {{ moneyParser(props.data?.pembiayaan?.uang_muka) }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-1.5">

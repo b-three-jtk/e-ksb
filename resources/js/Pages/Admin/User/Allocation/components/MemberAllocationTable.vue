@@ -5,20 +5,20 @@ import Pagination from '@/Components/Table/Pagination.vue'
 import UserIcon from '@/Icons/UserIcon.vue'
 
 const props = defineProps({
-  members: { type: Object, required: true },
+  anggota: { type: Object, required: true },
   selectedMemberIds: { type: Array, required: true },
   allVisibleSelected: { type: Boolean, required: true },
   brokenMemberAvatarIds: { type: Object, required: true },
 })
 
-defineEmits(['toggle-visible-selection', 'update-selection', 'mark-broken-member-avatar'])
+defineEmits(['toggle-visible-selection', 'update-selection', 'mark-broken-anggota-avatar'])
 
-const memberRows = computed(() => props.members?.data ?? [])
+const memberRows = computed(() => props.anggota?.data ?? [])
 
 const memberColumns = [
   { key: 'selection', label: '', align: 'center' },
   { key: 'profil', label: 'Profil Anggota' },
-  { key: 'joined_date', label: 'Tanggal Bergabung' },
+  { key: 'tgl_bergabung', label: 'Tanggal Bergabung' },
   { key: 'status', label: 'Status' },
   { key: 'pj_name', label: 'Penanggung Jawab Saat Ini' },
 ]
@@ -55,8 +55,8 @@ const allocationBadgeClass = (status) => {
     <template #cell-selection="{ row }">
       <input
         type="checkbox"
-        :checked="selectedMemberIds.includes(row.member_id)"
-        @change="$emit('update-selection', row.member_id, $event.target.checked)"
+        :checked="selectedMemberIds.includes(row.anggota_id)"
+        @change="$emit('update-selection', row.anggota_id, $event.target.checked)"
         class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
       />
     </template>
@@ -67,22 +67,22 @@ const allocationBadgeClass = (status) => {
           <img
             v-if="row.avatar && !brokenMemberAvatarIds.has(row.id)"
             :src="row.avatar"
-            :alt="row.name"
+            :alt="row.nama"
             class="h-full w-full object-cover"
-            @error="$emit('mark-broken-member-avatar', row.id)"
+            @error="$emit('mark-broken-anggota-avatar', row.id)"
           />
           <UserIcon v-else class="h-6 w-6" />
         </div>
         <div>
-          <div class="font-semibold text-slate-900 dark:text-white">{{ row.name }}</div>
-          <div class="text-sm text-slate-500 dark:text-slate-400">{{ row.user_code }}</div>
-          <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ row.phone_number || '-' }}</div>
+          <div class="font-semibold text-slate-900 dark:text-white">{{ row.nama }}</div>
+          <div class="text-sm text-slate-500 dark:text-slate-400">{{ row.kode_pengguna }}</div>
+          <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ row.no_telp || '-' }}</div>
         </div>
       </div>
     </template>
 
-    <template #cell-joined_date="{ row }">
-      <span class="text-sm text-slate-600 dark:text-slate-300">{{ row.joined_date }}</span>
+    <template #cell-tgl_bergabung="{ row }">
+      <span class="text-sm text-slate-600 dark:text-slate-300">{{ row.tgl_bergabung }}</span>
     </template>
 
     <template #cell-status="{ row }">
@@ -109,5 +109,5 @@ const allocationBadgeClass = (status) => {
     </template>
   </BaseTable>
 
-  <Pagination :links="members.links" :total="members.total" />
+  <Pagination :links="anggota.links" :total="anggota.total" />
 </template>

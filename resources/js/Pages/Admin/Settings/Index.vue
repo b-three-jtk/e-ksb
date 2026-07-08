@@ -36,7 +36,7 @@ const hasSavingsData = computed(() => {
 })
 
 const hasFinancingData = computed(() => {
-    const margin = props.settings?.financing?.murabahah_margin_percentage?.value
+    const margin = props.settings?.pembiayaan?.murabahah_margin_percentage?.value
     return margin !== null && margin !== undefined && margin !== ''
 })
 
@@ -77,7 +77,7 @@ const tabs = [
     { key: 'general', label: 'Umum' },
     { key: 'points', label: 'Poin' },
     { key: 'savings', label: 'Simpanan' },
-    { key: 'financing', label: 'Pembiayaan Murabahah' },
+    { key: 'pembiayaan', label: 'Pembiayaan Murabahah' },
 ]
 
 const activeTab = ref('general')
@@ -93,7 +93,7 @@ const forms = reactive({
     points: {
         saving_point_amount: '',
         saving_point_reward: '',
-        effective_date: '',
+        tgl_diberlakukan: '',
         murabaha_point_amount: '',
         murabaha_point_reward: '',
         murabaha_effective_date: '',
@@ -104,9 +104,9 @@ const forms = reactive({
         saving_wajib_amount: '',
         saving_wajib_effective_date: '',
     },
-    financing: {
+    pembiayaan: {
         murabahah_margin_percentage: '',
-        effective_date: '',
+        tgl_diberlakukan: '',
     },
 })
 
@@ -205,7 +205,7 @@ const summaryCards = computed(() => {
                 label: 'Status Buku',
             },
             {
-                value: formatDate(awal.effective_date || akhir.effective_date || status.effective_date),
+                value: formatDate(awal.tgl_diberlakukan || akhir.tgl_diberlakukan || status.tgl_diberlakukan),
                 label: 'Berlaku Sejak',
             },
         ]
@@ -246,7 +246,7 @@ const summaryCards = computed(() => {
                 label: '',
                 details: [
                     { label: 'Besaran', value: formatMoney(savingsPokok.value) },
-                    { label: 'Berlaku Sejak', value: formatDate(savingsPokok.effective_date) },
+                    { label: 'Berlaku Sejak', value: formatDate(savingsPokok.tgl_diberlakukan) },
                     { label: 'Dibayarkan', value: 'Saat Berhasil Mendaftar' },
                     { label: 'Tanggal Diperbarui', value: formatDate(savingsPokok.updated_at) },
                 ],
@@ -256,7 +256,7 @@ const summaryCards = computed(() => {
                 label: '',
                 details: [
                     { label: 'Besaran', value: formatMoney(savingsWajib.value) },
-                    { label: 'Berlaku Sejak', value: formatDate(savingsWajib.effective_date) },
+                    { label: 'Berlaku Sejak', value: formatDate(savingsWajib.tgl_diberlakukan) },
                     { label: 'Dibayarkan', value: 'Setiap Bulan' },
                     { label: 'Tanggal Diperbarui', value: formatDate(savingsWajib.updated_at) },
                 ],
@@ -264,19 +264,19 @@ const summaryCards = computed(() => {
         ]
     }
 
-    const financing = getSetting('financing', 'murabahah_margin_percentage')
+    const pembiayaan = getSetting('pembiayaan', 'murabahah_margin_percentage')
 
     return [
         {
-            value: `${formatInteger(financing.value)} %`,
+            value: `${formatInteger(pembiayaan.value)} %`,
             label: 'Besaran Margin Pembiayaan',
         },
         {
-            value: formatDate(financing.effective_date),
+            value: formatDate(pembiayaan.tgl_diberlakukan),
             label: 'Berlaku Sejak',
         },
         {
-            value: formatDate(financing.updated_at),
+            value: formatDate(pembiayaan.updated_at),
             label: 'Terakhir Diperbarui',
         },
     ]
@@ -286,15 +286,20 @@ const syncForms = () => {
     forms.general.tanggal_awal_periode = props.settings?.general?.tanggal_awal_periode?.value ?? ''
     forms.general.tanggal_akhir_periode = props.settings?.general?.tanggal_akhir_periode?.value ?? ''
     forms.general.status_tutup_buku = props.settings?.general?.status_tutup_buku?.value ?? 'open'
-    forms.general.period_effective_date = props.settings?.general?.tanggal_awal_periode?.effective_date
-        ?? props.settings?.general?.tanggal_akhir_periode?.effective_date
-        ?? props.settings?.general?.status_tutup_buku?.effective_date
+    forms.general.period_effective_date = props.settings?.general?.tanggal_awal_periode?.tgl_diberlakukan
+        ?? props.settings?.general?.tanggal_akhir_periode?.tgl_diberlakukan
+        ?? props.settings?.general?.status_tutup_buku?.tgl_diberlakukan
         ?? ''
 
     forms.points.saving_point_amount = props.settings?.points?.saving_point_amount?.value ?? ''
     forms.points.saving_point_reward = props.settings?.points?.saving_point_reward?.value ?? ''
-    forms.points.effective_date = props.settings?.points?.saving_point_amount?.effective_date
-        ?? props.settings?.points?.saving_point_reward?.effective_date
+    forms.points.tgl_diberlakukan = props.settings?.points?.saving_point_amount?.tgl_diberlakukan
+        ?? props.settings?.points?.saving_point_reward?.tgl_diberlakukan
+        ?? ''
+    forms.points.murabaha_point_amount = props.settings?.points?.murabaha_point_amount?.value ?? ''
+    forms.points.murabaha_point_reward = props.settings?.points?.murabaha_point_reward?.value ?? ''
+    forms.points.murabaha_effective_date = props.settings?.points?.murabaha_point_amount?.effective_date
+        ?? props.settings?.points?.murabaha_point_reward?.effective_date
         ?? ''
     forms.points.murabaha_point_amount = props.settings?.points?.murabaha_point_amount?.value ?? ''
     forms.points.murabaha_point_reward = props.settings?.points?.murabaha_point_reward?.value ?? ''
@@ -303,12 +308,12 @@ const syncForms = () => {
         ?? ''
 
     forms.savings.saving_pokok_amount = props.settings?.savings?.saving_pokok_amount?.value ?? ''
-    forms.savings.saving_pokok_effective_date = props.settings?.savings?.saving_pokok_amount?.effective_date ?? ''
+    forms.savings.saving_pokok_effective_date = props.settings?.savings?.saving_pokok_amount?.tgl_diberlakukan ?? ''
     forms.savings.saving_wajib_amount = props.settings?.savings?.saving_wajib_amount?.value ?? ''
-    forms.savings.saving_wajib_effective_date = props.settings?.savings?.saving_wajib_amount?.effective_date ?? ''
+    forms.savings.saving_wajib_effective_date = props.settings?.savings?.saving_wajib_amount?.tgl_diberlakukan ?? ''
 
-    forms.financing.murabahah_margin_percentage = props.settings?.financing?.murabahah_margin_percentage?.value ?? ''
-    forms.financing.effective_date = props.settings?.financing?.murabahah_margin_percentage?.effective_date ?? ''
+    forms.pembiayaan.murabahah_margin_percentage = props.settings?.pembiayaan?.murabahah_margin_percentage?.value ?? ''
+    forms.pembiayaan.tgl_diberlakukan = props.settings?.pembiayaan?.murabahah_margin_percentage?.tgl_diberlakukan ?? ''
 }
 
 const historyItems = computed(() => props.settingsHistory?.[activeTab.value] ?? [])
@@ -346,7 +351,7 @@ const historyColumns = [
         label: 'Nilai',
     },
     {
-        key: 'effective_date',
+        key: 'tgl_diberlakukan',
         label: 'Tanggal Berlaku',
     },
     {
@@ -467,12 +472,12 @@ const isProcessing = (section) => processingSection.value === section
                         />
                     </div>
 
-                    <div v-else-if="activeTab === 'financing'" class="p-6 md:p-8">
+                    <div v-else-if="activeTab === 'pembiayaan'" class="p-6 md:p-8">
                         <FormPembiayaan
-                            :form="forms.financing"
-                            :is-processing="isProcessing('financing')"
+                            :form="forms.pembiayaan"
+                            :is-processing="isProcessing('pembiayaan')"
                             :readonly="readonlyFinancing"
-                            @submit="submitAlert('financing')"
+                            @submit="submitAlert('pembiayaan')"
                         />
                     </div>
                 </div>
@@ -491,8 +496,8 @@ const isProcessing = (section) => processingSection.value === section
                                 {{ formatHistoryValue(row.value, row.key) }}
                             </template>
 
-                            <template #cell-effective_date="{ row }">
-                                {{ formatDate(row.effective_date) }}
+                            <template #cell-tgl_diberlakukan="{ row }">
+                                {{ formatDate(row.tgl_diberlakukan) }}
                             </template>
 
                             <template #cell-updated_by="{ row }">

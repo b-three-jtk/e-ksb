@@ -19,10 +19,10 @@ type LoanInfo = {
 	next_due_date?: string
 }
 
-type FinancingItem = {
+type ObjekPembiayaan = {
 	id: string
 	transaction_code?: string
-	akad_date?: string
+	tgl_akad?: string
 	product_name?: string
 	product_brand?: string
 	status?: string
@@ -31,7 +31,7 @@ type FinancingItem = {
 }
 
 type FinancingPagination = {
-	data: FinancingItem[]
+	data: ObjekPembiayaan[]
 	current_page: number
 	per_page: number
 	total: number
@@ -40,14 +40,14 @@ type FinancingPagination = {
 }
 
 const props = withDefaults(defineProps<{
-	financings?: FinancingPagination
-	activeFinancing?: FinancingItem | null
+	pembiayaan?: FinancingPagination
+	activeFinancing?: ObjekPembiayaan | null
 	filters?: {
 		search?: string
 		per_page?: number
 	}
 }>(), {
-	financings: () => ({
+	pembiayaan: () => ({
 		data: [],
 		current_page: 1,
 		per_page: 10,
@@ -90,7 +90,7 @@ const currentRemaining = computed(() => {
 })
 
 const applyFilters = () => {
-	router.get('/user/financings', {
+	router.get('/user/pembiayaan', {
 		search: filterState.value.search || undefined,
 		per_page: filterState.value.per_page,
 	}, {
@@ -147,12 +147,12 @@ const getStatusClass = (status?: string) => {
 							</h2>
 						</div>
 						<p class="text-sm text-gray-500 dark:text-gray-400">
-							Tanggal Akad: {{ dateParser(currentFinancing.akad_date) }}
+							Tanggal Akad: {{ dateParser(currentFinancing.tgl_akad) }}
 						</p>
 					</div>
 
 					<Link
-						:href="`/user/financings/show/${currentFinancing.id}`"
+						:href="`/user/pembiayaan/show/${currentFinancing.id}`"
 						class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
 					>
 						<Icon icon="mdi:eye-outline" class="w-4 h-4" />
@@ -193,25 +193,25 @@ const getStatusClass = (status?: string) => {
 						</thead>
 
 						<tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-							<tr v-if="!financings.data.length">
+							<tr v-if="!pembiayaan.data.length">
 								<td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
 									Belum ada data pembiayaan.
 								</td>
 							</tr>
 
 							<tr
-								v-for="(item, index) in financings.data"
+								v-for="(item, index) in pembiayaan.data"
 								:key="item.id"
 								class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
 							>
 								<td class="px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-200">
-									{{ ((financings.current_page - 1) * financings.per_page) + index + 1 }}
+									{{ ((pembiayaan.current_page - 1) * pembiayaan.per_page) + index + 1 }}
 								</td>
 								<td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-gray-100 font-medium">
 									{{ item.transaction_code || '-' }}
 								</td>
 								<td class="px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-200">
-									{{ dateParser(item.akad_date) }}
+									{{ dateParser(item.tgl_akad) }}
 								</td>
 								<td class="px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-200">
 									{{ item.product_name || '-' }}
@@ -223,7 +223,7 @@ const getStatusClass = (status?: string) => {
 								</td>
 								<td class="px-4 py-3 text-center">
 									<Link
-										:href="`/user/financings/show/${item.id}`"
+										:href="`/user/pembiayaan/show/${item.id}`"
 										class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 transition-colors"
 									>
 										<Icon icon="mdi:eye-outline" class="w-4 h-4" />
@@ -234,7 +234,7 @@ const getStatusClass = (status?: string) => {
 						</tbody>
 					</table>
 
-					<Pagination :links="financings.links" :total="financings.total" />
+					<Pagination :links="pembiayaan.links" :total="pembiayaan.total" />
 				</div>
 			</div>
 		</div>

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use App\Models\Pengguna;
 use App\Enums\UserStatusEnum;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -12,31 +12,31 @@ class AutentikasiService
     /**
      * Authenticate a user with code and password.
      *
-     * @param array{user_code: string, password: string} $credentials
+     * @param array{kode_pengguna: string, password: string} $credentials
      * @param bool $remember
-     * @return User
+     * @return Pengguna
      * @throws ValidationException
      */
-    public function login(array $credentials, bool $remember = false): User
+    public function login(array $credentials, bool $remember = false): Pengguna
     {
-        $user = User::where('user_code', $credentials['user_code'])->first();
+        $user = Pengguna::where('kode_pengguna', $credentials['kode_pengguna'])->first();
 
         if (!$user) {
             throw ValidationException::withMessages([
-                'user_code' => 'Kode pengguna atau password tidak sesuai.',
+                'kode_pengguna' => 'Kode pengguna atau password tidak sesuai.',
             ]);
         }
 
         // Allow users to login for non-inactive statuses (e.g., resigned requests/rejections)
         if ($user->status === UserStatusEnum::INACTIVE->value) {
             throw ValidationException::withMessages([
-                'user_code' => 'Akun Anda tidak aktif. Hubungi pengurus koperasi untuk mengaktifkan kembali.',
+                'kode_pengguna' => 'Akun Anda tidak aktif. Hubungi pengurus koperasi untuk mengaktifkan kembali.',
             ]);
         }
 
         if (!Auth::attempt($credentials, $remember)) {
             throw ValidationException::withMessages([
-                'user_code' => 'Kode pengguna atau password tidak sesuai.',
+                'kode_pengguna' => 'Kode pengguna atau password tidak sesuai.',
             ]);
         }
 

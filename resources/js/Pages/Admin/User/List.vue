@@ -15,7 +15,7 @@ import UserIcon from '../../../Icons/UserIcon.vue'
 import Button from '../../../Components/Form/Button.vue'
 
 const props = defineProps({
-    members: Object,
+    anggota: Object,
     filters: Object,
     statuses: Array,
     summary: Object,
@@ -29,7 +29,7 @@ const memberCredentials = ref(null)
 const can = computed(() => page.props.auth.can);
 
 const showNewMemberCredentials = async () => {
-    if (!memberCredentials.value?.user_code || !memberCredentials.value?.initial_password) {
+    if (!memberCredentials.value?.kode_pengguna || !memberCredentials.value?.initial_password) {
         return
     }
 
@@ -37,8 +37,8 @@ const showNewMemberCredentials = async () => {
         title: 'Akun Anggota Berhasil Dibuat',
         html: `
             <div style="text-align:left;font-size:14px;line-height:1.8">
-                <div><strong>Nama:</strong> ${memberCredentials.value.name ?? '-'}</div>
-                <div><strong>Kode Pengguna:</strong> ${memberCredentials.value.user_code}</div>
+                <div><strong>Nama:</strong> ${memberCredentials.value.nama ?? '-'}</div>
+                <div><strong>Kode Pengguna:</strong> ${memberCredentials.value.kode_pengguna}</div>
                 <div><strong>Password Awal:</strong> ${memberCredentials.value.initial_password}</div>
             </div>
         `,
@@ -89,7 +89,7 @@ const filters = reactive({
     search: props.filters.search ?? '',
     status: props.filters.status ?? '',
     per_page: props.filters.per_page ?? 10,
-    sort_by: props.filters.sort_by ?? 'joined_date',
+    sort_by: props.filters.sort_by ?? 'tgl_bergabung',
     sort_dir: props.filters.sort_dir ?? 'desc',
 })
 
@@ -204,14 +204,14 @@ const breadcrumbItems = [
             <!-- Table -->
             <BaseTable
                 :columns="columns"
-                :data="members.data"
-                :pagination="members"
+                :data="anggota.data"
+                :pagination="anggota"
                 :sort-by="filters.sort_by"
                 :sort-dir="filters.sort_dir"
                 @sort="toggleSort"
             >
                 <template #cell-no="{ index }">
-                    {{ (members.current_page - 1) * members.per_page + index + 1 }}
+                    {{ (anggota.current_page - 1) * anggota.per_page + index + 1 }}
                 </template>
 
                 <template #cell-profil="{ row }">
@@ -224,7 +224,7 @@ const breadcrumbItems = [
                         >
                             <UserIcon />
                         </div> -->
-                        <span>{{ row.name }}</span>
+                        <span>{{ row.nama }}</span>
                     </div>
                 </template>
 
@@ -266,8 +266,8 @@ const breadcrumbItems = [
 
             <!-- Pagination -->
             <Pagination
-                :links="members.links"
-                :total="members.total"
+                :links="anggota.links"
+                :total="anggota.total"
             />
         </div>
     </AdminLayout>

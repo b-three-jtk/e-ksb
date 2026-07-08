@@ -21,15 +21,15 @@ class StoreWithdrawalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'member_id' => 'required|exists:members,id',
-            'saving_account_id' => 'required|exists:saving_accounts,id',
+            'anggota_id' => 'required|exists:anggota,id',
+            'akun_simpanan_id' => 'required|exists:akun_simpanan,id',
             'amount' => 'required|numeric|min:1',
             'withdrawal_date' => 'required|date|before_or_equal:today',
             'method' => 'required|in:Tunai,Non-Tunai',
-            'bank_name' => 'required_if:method,Non-Tunai|nullable|string',
-            'account_name' => 'required_if:method,Non-Tunai|nullable|string',
-            'account_number' => 'required_if:method,Non-Tunai|nullable|string',
-            'notes' => 'nullable|string|max:1000',
+            'nama_bank' => 'required_if:method,Non-Tunai|nullable|string',
+            'atas_nama' => 'required_if:method,Non-Tunai|nullable|string',
+            'no_rekening' => 'required_if:method,Non-Tunai|nullable|string',
+            'catatan' => 'nullable|string|max:1000',
         ];
     }
 }

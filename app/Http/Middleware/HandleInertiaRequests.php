@@ -46,15 +46,15 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
-        $notifications = [];
+        $notifikasi = [];
         $unreadCount = 0;
         $pendingPopup = [];
 
-        if ($user && $user->member) {
+        if ($user && $user->anggota) {
             $service = app(NotifikasiService::class);
-            $notifications = $service->getNotificationDropdown($user->member->id);
-            $unreadCount = $service->getUnreadCount($user->member->id);
-            $pendingPopup = $service->getPendingPopupNotifications($user->member->id);
+            $notifikasi = $service->getNotificationDropdown($user->anggota->id);
+            $unreadCount = $service->getUnreadCount($user->anggota->id);
+            $pendingPopup = $service->getPendingPopupNotifications($user->anggota->id);
         }
 
         return array_merge(parent::share($request), [
@@ -64,7 +64,7 @@ class HandleInertiaRequests extends Middleware
                 'can' => $permissions,
             ],
             'guest' => $request->user() === null,
-            'notification_dropdown' => $notifications,
+            'notification_dropdown' => $notifikasi,
             'unread_notification_count' => $unreadCount,
             'pending_notification_popups' => $pendingPopup,
             'flash' => [

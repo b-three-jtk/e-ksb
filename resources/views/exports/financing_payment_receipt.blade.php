@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -109,11 +110,7 @@
         <table>
             <tr>
                 <td rowspan="4" style="width: 80px">
-                    <img
-                        style="width: 55px"
-                        src="{{ $receipt['logo'] }}"
-                        alt="Logo"
-                    >
+                    <img style="width: 55px" src="{{ $receipt['logo'] }}" alt="Logo">
                 </td>
 
                 <td>
@@ -198,7 +195,7 @@
                 <td>Metode Pembayaran</td>
                 <td>:</td>
                 <td>
-                    {{ $receipt['payment_method'] ?? '-' }}
+                    {{ $receipt['metode_pembayaran'] ?? '-' }}
                 </td>
             </tr>
 
@@ -291,4 +288,5 @@
     </div>
 
 </body>
+
 </html>

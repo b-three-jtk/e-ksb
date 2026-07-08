@@ -19,7 +19,7 @@ const props = defineProps({
         type: String,
         default: 'month',
     },
-    description: {
+    deskripsi: {
         type: String,
         default: '',
     },
@@ -39,10 +39,10 @@ const filterText = computed(() => {
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-1">
                 <p class="text-gray-text dark:text-gray-400">{{ title }}</p>
-                <Tooltip v-if="description">
+                <Tooltip v-if="deskripsi">
                     <p class="font-semibold">Informasi {{ title }}</p>
                     <p>Nilai ini menunjukkan {{ title.toLowerCase() }} untuk periode yang dipilih.</p>
-                    <p>{{ description }}.</p>
+                    <p>{{ deskripsi }}.</p>
                 </Tooltip>
             </div>
 

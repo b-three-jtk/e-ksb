@@ -15,7 +15,7 @@ import { toast } from 'vue3-toastify'
 const isLoading = ref(false)
 
 const props = defineProps({
-    members: Object,
+    anggota: Object,
     filters: Object,
 })
 
@@ -26,8 +26,8 @@ const can = computed(() => page.props.auth.can);
 const columns = computed(() => {
     const baseColumns = [
         { key: 'no', label: 'No' },
-        { key: 'user_code', label: 'Nomor Anggota' },
-        { key: 'name', label: 'Nama' },
+        { key: 'kode_pengguna', label: 'Nomor Anggota' },
+        { key: 'nama', label: 'Nama' },
         { key: 'email', label: 'Email' },
     ]
 
@@ -61,7 +61,7 @@ const toggleSort = (column) => {
     applyFilters()
 }
 
-const members = computed(() => page.props.members ?? {
+const anggota = computed(() => page.props.anggota ?? {
     data: [],
     current_page: 1,
     per_page: 10,
@@ -113,8 +113,8 @@ const showResignationInfo = async () => {
         title: 'Pengunduran Diri Disetujui',
         html: `
             <div style="text-align:left;font-size:14px;line-height:1.8">
-                <div><strong>Nama:</strong> ${resignationInfo.value.name ?? '-'}</div>
-                <div><strong>Nomor Anggota:</strong> ${resignationInfo.value.user_code ?? '-'}</div>
+                <div><strong>Nama:</strong> ${resignationInfo.value.nama ?? '-'}</div>
+                <div><strong>Nomor Anggota:</strong> ${resignationInfo.value.kode_pengguna ?? '-'}</div>
             </div>
         `,
         icon: 'success',
@@ -161,15 +161,15 @@ onMounted(() => {
 
             <BaseTable
                 :columns="columns"
-                :data="members.data"
+                :data="anggota.data"
                 :is-loading="isLoading"
-                :pagination="members"
+                :pagination="anggota"
                 :sort-by="filters.sort_by"
                 :sort-dir="filters.sort_dir"
                 @sort="toggleSort"
             >
                 <template #cell-no="{ index }">
-                    {{ (members.current_page - 1) * members.per_page + index + 1 }}
+                    {{ (anggota.current_page - 1) * anggota.per_page + index + 1 }}
                 </template>
                 <template #cell-aksi="{ row }">
                     <Button  variant="warning" size="small" :href="`/admin/resignations/${row.id}`">
@@ -180,8 +180,8 @@ onMounted(() => {
             </BaseTable>
 
             <Pagination
-                :links="members.links"
-                :total="members.total"
+                :links="anggota.links"
+                :total="anggota.total"
             />
         </div>
     </AdminLayout>

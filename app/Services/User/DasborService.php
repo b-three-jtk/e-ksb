@@ -4,22 +4,22 @@ namespace App\Services\User;
 
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
-use App\Models\Installment;
-use App\Models\PointTransaction;
-use App\Models\SavingTransaction;
+use App\Models\Angsuran;
+use App\Models\Poin;
+use App\Models\TransaksiSimpanan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DasborService
 {
-    public function getSummary(int $memberId, string $userId): array
+    public function getSummary(int $anggotaId, string $userId): array
     {
-        $totalSaving = DB::table('saving_accounts')
-            ->where('member_id', $memberId)
-            ->sum('balance');
+        $totalSaving = DB::table('akun_simpanan')
+            ->where('anggota_id', $anggotaId)
+            ->sum('saldo');
 
-        $totalInstallment = Installment::whereHas('financing', function ($q) use ($memberId) {
-            $q->where('member_id', $memberId)
+        $totalInstallment = Angsuran::whereHas('pembiayaan', function ($q) use ($anggotaId) {
+            $q->where('anggota_id', $anggotaId)
                 ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value);
         })
         ->whereIn('status', [
@@ -27,10 +27,10 @@ class DasborService
             InstallmentPaymentScheduleStatusEnum::PENDING->value,
             InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
         ])
-        ->sum('amount');
+        ->sum('nominal_angsuran');
 
-        $totalPoints = PointTransaction::where('user_id', $userId)
-            ->sum('amount_earned');
+        $totalPoints = Poin::where('pengguna_id', $userId)
+            ->sum('jml_perolehan');
 
         return [
             'total_saving'      => $totalSaving,
@@ -39,21 +39,21 @@ class DasborService
         ];
     }
 
-    public function getTabungan(int $memberId): \Illuminate\Support\Collection
+    public function getTabungan(int $anggotaId): \Illuminate\Support\Collection
     {
-        return SavingTransaction::whereHas(
-            'savingAccount.member',
-            fn($q) => $q->where('member_id', $memberId)
+        return TransaksiSimpanan::whereHas(
+            'akunSimpanan.anggota',
+            fn($q) => $q->where('anggota_id', $anggotaId)
         )
-        ->with('savingAccount')
-        ->latest('transaction_date')
+        ->with('akunSimpanan')
+        ->latest('tgl_transaksi')
         ->limit(5)
         ->get()
         ->map(fn($trx) => [
-            'date'    => Carbon::parse($trx->transaction_date)->format('d/m/Y'),
-            'product' => $trx->savingAccount->saving_type,
-            'type'    => $trx->transaction_type,
-            'amount'  => 'Rp ' . number_format($trx->saving_amount, 0, ',', '.'),
+            'date'    => Carbon::parse($trx->tgl_transaksi)->format('d/m/Y'),
+            'product' => $trx->akunSimpanan->jenis_simpanan,
+            'type'    => $trx->tipe_transaksi,
+            'amount'  => 'Rp ' . number_format($trx->nominal_simpanan, 0, ',', '.'),
         ]);
     }
 }

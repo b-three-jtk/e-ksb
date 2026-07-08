@@ -20,7 +20,7 @@ const activeStep = ref(1)
 const totalSteps = 3
 
 const form = useForm({
-    notes: '',
+    catatan: '',
     collateral_document_status: '',
     suitability_status: '',
     income_feasibility_status: '',
@@ -40,7 +40,7 @@ const isValidationComplete = computed(() => {
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
-    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/financings' },
+    { name: 'Pengelolaan Pembiayaan Murabahah', link: '/admin/pembiayaan' },
     { name: 'Validasi Permohonan Pembiayaan Murabahah' },
 ]
 
@@ -77,10 +77,10 @@ const submit = () => {
         if (result.isConfirmed) {
             const submitForm = useForm({
                 status: form.final_decision_status,
-                notes: form.notes,
+                catatan: form.catatan,
             })
 
-            submitForm.put(`/admin/financings/validate/${props.data.financing.id}`, {
+            submitForm.put(`/admin/pembiayaan/validate/${props.data.pembiayaan.id}`, {
                 onSuccess: (page) => {
                     if (page.props.flash?.success) {
                         toast(page.props.flash.success, {
@@ -116,21 +116,21 @@ const submit = () => {
         <div class="grid grid-cols-6 gap-6">
             <div class="bg-secondary dark:bg-primary flex flex-col col-span-6 rounded-2xl">
                 <div class="px-10 py-6 flex justify-between items-center">
-                    <h1 class="font-semibold text-white">{{ data.financing.name }}</h1>
+                    <h1 class="font-semibold text-white">{{ data.pembiayaan.name }}</h1>
                     <div class="flex items-center gap-4">
-                        <p class="text-white">No. Transaksi : #{{ data.financing.financing_transaction_code }}</p>
-                        <span :class="useFinancingStatus(data.financing.status)">
-                            {{ getStatusLabel(data.financing.status) }}
+                        <p class="text-white">No. Transaksi : #{{ data.pembiayaan.kode_pembiayaan }}</p>
+                        <span :class="useFinancingStatus(data.pembiayaan.status)">
+                            {{ getStatusLabel(data.pembiayaan.status) }}
                         </span>
                     </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 grid grid-cols-3 gap-6 p-6 rounded-2xl">
-                    <Info label="Spesifikasi Produk" :value="data.financing.specification" />
-                    <Info label="Kategori Produk" :value="data.financing.product_type" />
-                    <Info label="Kondisi" :value="data.financing.condition" />
-                    <Info label="Kuantitas" :value="data.financing.qty" />
-                    <Info label="Harga Perkiraan" :value="moneyParser(data.financing.predicted_cost_price)" />
-                    <Info label="Uang Muka" :value="moneyParser(data.financing.down_payment)" />
+                    <Info label="Spesifikasi Produk" :value="data.pembiayaan.spesifikasi_barang" />
+                    <Info label="Kategori Produk" :value="data.pembiayaan.jenis_barang" />
+                    <Info label="Kondisi" :value="data.pembiayaan.kondisi_produk" />
+                    <Info label="Kuantitas" :value="data.pembiayaan.kuantitas" />
+                    <Info label="Harga Perkiraan" :value="moneyParser(data.pembiayaan.harga_perkiraan)" />
+                    <Info label="Uang Muka" :value="moneyParser(data.pembiayaan.uang_muka)" />
                 </div>
             </div>
             <div class="justify-between card-layout flex flex-col col-span-4">

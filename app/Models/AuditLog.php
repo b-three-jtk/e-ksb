@@ -14,7 +14,7 @@ class AuditLog extends Model
     protected $table = 'audit_logs';
 
     protected $fillable = [
-        'user_id',
+        'pengguna_id',
         'auditable_type',
         'auditable_id',
         'event',
@@ -40,8 +40,8 @@ class AuditLog extends Model
     /**
      * Get the user who performed the action.
      */
-    public function user(): BelongsTo
+    public function pengguna(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Pengguna::class);
     }
 }

@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 
 const props = defineProps({
-  members: {
+  anggota: {
     type: Array,
     default: () => []
   },
@@ -20,8 +20,8 @@ const showDropdown = ref(false)
 const selectedMember = computed(() => props.selected)
 
 const memberList = computed(() => {
-  if (Array.isArray(props.members)) return props.members
-  if (props.members && typeof props.members === 'object') return Object.values(props.members)
+  if (Array.isArray(props.anggota)) return props.anggota
+  if (props.anggota && typeof props.anggota === 'object') return Object.values(props.anggota)
   return []
 })
 
@@ -36,7 +36,7 @@ const memberSuggestions = computed(() => {
   return memberList.value
     .filter((m) => {
       const name = normalizeSearchValue(m?.name)
-      const memberNumber = normalizeSearchValue(m?.user_code)
+      const memberNumber = normalizeSearchValue(m?.kode_pengguna)
 
       return name.includes(q) || memberNumber.includes(q)
     })
@@ -55,10 +55,10 @@ function initials(name = '') {
     .join('')
 }
 
-function selectMember(member) {
-  memberQuery.value = member.name
+function selectMember(anggota) {
+  memberQuery.value = anggota.name
   showDropdown.value = false
-  emit('selected', member)
+  emit('selected', anggota)
 }
 
 function resetSelection() {
@@ -124,24 +124,24 @@ watch(
           class="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg mt-1 max-h-64 overflow-auto"
         >
           <button
-            v-for="member in memberSuggestions"
-            :key="member.id"
-            @mousedown.prevent="selectMember(member)"
+            v-for="anggota in memberSuggestions"
+            :key="anggota.id"
+            @mousedown.prevent="selectMember(anggota)"
             type="button"
             class="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
           >
             <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-700 dark:text-blue-300 font-semibold text-sm shrink-0">
-              {{ initials(member.name) }}
+              {{ initials(anggota.name) }}
             </div>
             <div>
-              <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ member.name }}</div>
-              <div class="text-xs text-gray-500">{{ member.user_code }}</div>
+              <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ anggota.name }}</div>
+              <div class="text-xs text-gray-500">{{ anggota.kode_pengguna }}</div>
             </div>
           </button>
         </div>
       </div>
 
-      <!-- Selected Member Summary -->
+      <!-- Selected Anggota Summary -->
       <Transition name="fade">
         <div
           v-if="selectedMember"
@@ -152,7 +152,7 @@ watch(
           </div>
           <div class="flex-1 min-w-0">
             <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
-            <div class="text-sm text-gray-500">{{ selectedMember.user_code }}</div>
+            <div class="text-sm text-gray-500">{{ selectedMember.kode_pengguna }}</div>
           </div>
           <button @click="resetSelection" type="button" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
             <Icon icon="mdi:close" width="20" />

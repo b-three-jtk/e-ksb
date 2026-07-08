@@ -9,7 +9,7 @@ import ModalDocument from '@/Components/ModalDocument.vue';
 
 const props = defineProps({
     data: { type: Object, required: true },
-    saving_transaction_receipt: String,
+    struk_simpanan: String,
 });
 
 const breadcrumbItems = [
@@ -30,10 +30,10 @@ const openModalBukti = () => modalRef.value?.openModal()
             <div class="flex flex-col gap-4">
                 <div class="card-layout flex justify-between">
                     <div class="flex gap-2 items-center">
-                        <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{ data.saving_transaction_code }}
+                        <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{ data.kode_transaksi_simpanan }}
                         </h1>
                     </div>
-                    <div v-if="data.saving_transaction_receipt" class="flex items-center gap-4">
+                    <div v-if="data.struk_simpanan" class="flex items-center gap-4">
                         <Button @click="openModalBukti()" variant="primary">Lihat Bukti</Button>
                     </div>
                 </div>
@@ -44,12 +44,12 @@ const openModalBukti = () => modalRef.value?.openModal()
                             <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nominal Simpanan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ moneyParser(data.saving_amount)
+                                    <span class="font-medium text-dark-text dark:text-white">{{ moneyParser(data.nominal_simpanan)
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Kategori Simpanan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_account.saving_type
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.akun_simpanan.jenis_simpanan
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
@@ -60,21 +60,21 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Jenis Transaksi</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.transaction_type }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.tipe_transaksi }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Tanggal Transaksi</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        dateParser(data.transaction_date)
+                                        dateParser(data.tgl_transaksi)
                                     }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Metode Pembayaran</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_payment_method }}</span>
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.metode_pembayaran_simpanan }}</span>
                                 </li>
                                 <li class="flex flex-col gap-2">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Keterangan</span>
-                                    <span class="font-medium text-dark-text dark:text-white">{{ data.saving_description ?? '-'
+                                    <span class="font-medium text-dark-text dark:text-white">{{ data.deskripsi_simpanan ?? '-'
                                     }}</span>
                                 </li>
                             </ul>
@@ -87,17 +87,17 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Anggota</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.member.user.user_code }}</span>
+                                        data.akun_simpanan.anggota.user.kode_pengguna }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Anggota</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.member.user.name }}</span>
+                                        data.akun_simpanan.anggota.user.nama }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Status Keanggotaan</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.saving_account.member.user.status }}</span>
+                                        data.akun_simpanan.anggota.user.status }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -107,17 +107,17 @@ const openModalBukti = () => modalRef.value?.openModal()
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nomor Rekening</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.member_bank_account?.account_number }}</span>
+                                        data.member_bank_account?.no_rekening }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Pemilik Rekening</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.member_bank_account?.account_name }}</span>
+                                        data.member_bank_account?.atas_nama }}</span>
                                 </li>
                                 <li class="flex lg:flex-row flex-col gap-2 justify-between">
                                     <span class="text-sm text-gray-500 dark:text-gray-300">Nama Bank</span>
                                     <span class="font-medium text-dark-text dark:text-white">{{
-                                        data.member_bank_account?.bank_name }}</span>
+                                        data.member_bank_account?.nama_bank }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -125,6 +125,6 @@ const openModalBukti = () => modalRef.value?.openModal()
                 </div>
             </div>
         </div>
-        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Transaksi Simpanan" :name="saving_transaction_receipt" :attachment="saving_transaction_receipt" />
+        <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Transaksi Simpanan" :name="struk_simpanan" :attachment="struk_simpanan" />
     </AdminLayout>
 </template>

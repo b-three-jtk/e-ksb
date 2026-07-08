@@ -6,32 +6,32 @@ use App\Enums\EducationEnum;
 use App\Enums\GenderEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\MemberStatusEnum;
-use App\Models\Member;
-use App\Models\User;
+use App\Models\Anggota;
+use App\Models\Pengguna;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MemberFactory extends Factory
 {
-    protected $model = Member::class;
+    protected $model = Anggota::class;
 
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
-            'gender' => $this->faker->randomElement(GenderEnum::cases())->value,
-            'birth_place' => $this->faker->city(),
-            'birth_date' => $this->faker->dateTimeBetween('-60 years', '-18 years'),
+            'pengguna_id' => Pengguna::factory(),
+            'jenis_kelamin' => $this->faker->randomElement(GenderEnum::cases())->value,
+            'tempat_lahir' => $this->faker->city(),
+            'tgl_lahir' => $this->faker->dateTimeBetween('-60 years', '-18 years'),
             'status' => MemberStatusEnum::ACTIVE->value,
-            'domicile_address' => $this->faker->address(),
-            'residential_address' => $this->faker->address(),
-            'marital_status' => $this->faker->randomElement(MaritalStatusEnum::cases())->value,
-            'last_education' => $this->faker->randomElement(EducationEnum::cases())->value,
-            'dependents' => $this->faker->numberBetween(0, 5),
+            'alamat_domisili' => $this->faker->address(),
+            'alamat_ktp' => $this->faker->address(),
+            'status_pernikahan' => $this->faker->randomElement(MaritalStatusEnum::cases())->value,
+            'pendidikan_terakhir' => $this->faker->randomElement(EducationEnum::cases())->value,
+            'jml_tanggungan' => $this->faker->numberBetween(0, 5),
         ];
     }
 
     /**
-     * Indicate that the member is waiting for payment.
+     * Indicate that the anggota is waiting for payment.
      */
     public function waitingPayment(): static
     {
@@ -41,7 +41,7 @@ class MemberFactory extends Factory
     }
 
     /**
-     * Indicate that the member is active.
+     * Indicate that the anggota is active.
      */
     public function active(): static
     {

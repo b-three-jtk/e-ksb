@@ -16,15 +16,15 @@ class StoreMemberAllocationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pj_user_id' => ['required', 'uuid', 'exists:users,id'],
+            'pj_anggota_id' => ['required', 'uuid', 'exists:pengguna,id'],
             'member_ids' => ['required', 'array', 'min:1'],
             'member_ids.*' => [
                 'required',
                 'integer',
-                Rule::exists('members', 'id')->where(function ($query) {
-                    $query->whereIn('user_id', function ($userQuery) {
+                Rule::exists('anggota', 'id')->where(function ($query) {
+                    $query->whereIn('pengguna_id', function ($userQuery) {
                         $userQuery->select('id')
-                            ->from('users')
+                            ->from('pengguna')
                             ->where('status', UserStatusEnum::ACTIVE->value);
                     });
                 }),

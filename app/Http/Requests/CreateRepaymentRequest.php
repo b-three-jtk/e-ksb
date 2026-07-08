@@ -23,7 +23,7 @@ class CreateRepaymentRequest extends FormRequest
     {
         return [
             'method' => 'required|in:Tunai,Non-Tunai',
-            'installment_id' => 'required',
+            'angsuran_id' => 'required',
         ];
     }
 }

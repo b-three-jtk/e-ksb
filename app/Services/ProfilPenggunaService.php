@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\PointTransaction;
-use App\Models\User;
+use App\Models\Poin;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -14,97 +14,97 @@ class ProfilPenggunaService
     /**
      * Build profile payload data including point histories and document paths.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @return array
      */
-    public function index(User $user): array
+    public function index(Pengguna $user): array
     {
-        $member = $user->member?->loadMissing(['heirs', 'memberDocs']);
-        $pointTransactions = $user->pointTransactions()
-            ->with('savingTransactions')
+        $anggota = $user->anggota?->loadMissing(['ahliWaris', 'dokumenAnggota']);
+        $poin = $user->poin()
+            ->with('transaksiSimpanan')
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
 
-        $getSnapshotValue = function (PointTransaction $transaction): float {
-            return (float) ($transaction->saving_balance_snapshot
-                ?? $transaction->savingTransactions?->balance_after_transaction
+        $getSnapshotValue = function (Poin $transaction): float {
+            return (float) ($transaction->sisa_tabungan_snapshot
+                ?? $transaction->transaksiSimpanan?->saldo_setelah_transaksi
                 ?? 0);
         };
 
         $runningPointTotal = 0;
-        $pointHistory = $pointTransactions
-            ->map(function (PointTransaction $transaction) use (&$runningPointTotal, $getSnapshotValue) {
-                $runningPointTotal += (int) $transaction->amount_earned;
+        $pointHistory = $poin
+            ->map(function (Poin $transaction) use (&$runningPointTotal, $getSnapshotValue) {
+                $runningPointTotal += (int) $transaction->jml_perolehan;
 
                 return [
                     'id' => $transaction->id,
-                    'calculation_date' => $transaction->calculation_period
-                        ? Carbon::parse($transaction->calculation_period)->translatedFormat('d/m/Y')
+                    'calculation_date' => $transaction->periode_kalkulasi
+                        ? Carbon::parse($transaction->periode_kalkulasi)->translatedFormat('d/m/Y')
                         : Carbon::parse($transaction->created_at)->format('d/m/Y'),
                     'total_simpanan' => $getSnapshotValue($transaction),
-                    'points_earned' => (int) $transaction->amount_earned,
+                    'points_earned' => (int) $transaction->jml_perolehan,
                     'total_points' => $runningPointTotal,
-                    'activity_description' => $transaction->activity_description,
+                    'deskripsi' => $transaction->deskripsi,
                 ];
             })
             ->reverse()
             ->values();
 
-        $latestPointTransaction = $pointTransactions->last();
+        $latestPointTransaction = $poin->last();
 
-        $photoUrl = $user->profile_picture ? asset('storage/' . $user->profile_picture) : null;
-        $heirs = $member?->heirs?->map(function ($heir) {
+        $photoUrl = $user->foto_profil ? asset('storage/' . $user->foto_profil) : null;
+        $ahli_waris = $anggota?->ahliWaris?->map(function ($ahli_waris) {
             return [
-                'heir_nik' => $heir->heir_nik,
-                'heir_name' => $heir->heir_name,
-                'relationship' => $heir->relationship,
-                'heir_contact' => $heir->heir_contact,
+                'nik_ahli_waris' => $ahli_waris->nik_ahli_waris,
+                'nama_ahli_waris' => $ahli_waris->nama_ahli_waris,
+                'hubungan' => $ahli_waris->hubungan,
+                'kontak_ahli_waris' => $ahli_waris->kontak_ahli_waris,
             ];
         })->values() ?? collect();
 
-        $spouseHeir = $heirs->first(function ($heir) {
-            return in_array($heir['relationship'] ?? '', ['Suami', 'Istri'], true);
+        $spouseAhliWaris = $ahli_waris->first(function ($ahli_waris) {
+            return in_array($ahli_waris['hubungan'] ?? '', ['Suami', 'Istri'], true);
         });
 
-        $ktpDocument = $member?->memberDocs?->firstWhere('doc_name', 'ktp');
-        $kkDocument = $member?->memberDocs?->firstWhere('doc_name', 'kartu_keluarga');
+        $ktpDocument = $anggota?->dokumenAnggota?->firstWhere('nama_dokumen', 'ktp');
+        $kkDocument = $anggota?->dokumenAnggota?->firstWhere('nama_dokumen', 'kartu_keluarga');
 
         return [
             'id' => $user->id,
-            'user_code' => $user->user_code,
-            'name' => $user->name,
+            'kode_pengguna' => $user->kode_pengguna,
+            'nama' => $user->nama,
             'nik' => $user->nik,
             'email' => $user->email,
-            'phone_number' => $user->phone_number,
-            'profile_picture' => $user->profile_picture,
+            'no_telp' => $user->no_telp,
+            'foto_profil' => $user->foto_profil,
             'photo_url' => $photoUrl,
             'role_name' => $user->getRoleNames()->first() ?? 'Anggota',
-            'member' => [
-                'gender' => $member?->gender,
-                'birth_place' => $member?->birth_place,
-                'birth_date' => $member?->birth_date
-                    ? Carbon::parse($member->birth_date)->translatedFormat('d M Y')
+            'anggota'=> [
+                'jenis_kelamin' => $anggota?->jenis_kelamin,
+                'tempat_lahir' => $anggota?->tempat_lahir,
+                'tgl_lahir' => $anggota?->tgl_lahir
+                    ? Carbon::parse($anggota->tgl_lahir)->translatedFormat('d M Y')
                     : null,
-                'status' => $member?->status,
-                'domicile_address' => $member?->domicile_address,
-                'residential_address' => $member?->residential_address,
-                'marital_status' => $member?->marital_status,
-                'last_education' => $member?->last_education,
-                'dependents' => $member?->dependents,
-                'spouse_name' => $member?->spouse_name ?? $spouseHeir['heir_name'] ?? null,
-                'heirs' => $heirs,
+                'status' => $anggota?->status,
+                'alamat_domisili' => $anggota?->alamat_domisili,
+                'alamat_ktp' => $anggota?->alamat_ktp,
+                'status_pernikahan' => $anggota?->status_pernikahan,
+                'pendidikan_terakhir' => $anggota?->pendidikan_terakhir,
+                'jml_tanggungan' => $anggota?->jml_tanggungan,
+                'spouse_name' => $anggota?->spouse_name ?? $spouseAhliWaris['nama_ahli_waris'] ?? null,
+                'ahli_waris' => $ahli_waris,
                 'documents' => [
-                    'ktp' => $ktpDocument?->doc_attachment ? asset('storage/' . $ktpDocument->doc_attachment) : null,
-                    'kk' => $kkDocument?->doc_attachment ? asset('storage/' . $kkDocument->doc_attachment) : null,
+                    'ktp' => $ktpDocument?->lampiran_dokumen ? asset('storage/' . $ktpDocument->lampiran_dokumen) : null,
+                    'kk' => $kkDocument?->lampiran_dokumen ? asset('storage/' . $kkDocument->lampiran_dokumen) : null,
                 ],
             ],
             'points' => [
                 'summary' => [
-                    'total_points' => (int) $pointTransactions->sum('amount_earned'),
-                    'latest_points_earned' => (int) ($latestPointTransaction?->amount_earned ?? 0),
-                    'latest_calculated_at' => $latestPointTransaction?->calculation_period
-                        ? Carbon::parse($latestPointTransaction->calculation_period)->translatedFormat('d/m/Y')
+                    'total_points' => (int) $poin->sum('jml_perolehan'),
+                    'latest_points_earned' => (int) ($latestPointTransaction?->jml_perolehan ?? 0),
+                    'latest_calculated_at' => $latestPointTransaction?->periode_kalkulasi
+                        ? Carbon::parse($latestPointTransaction->periode_kalkulasi)->translatedFormat('d/m/Y')
                         : ($latestPointTransaction?->created_at
                             ? Carbon::parse($latestPointTransaction->created_at)->format('d/m/Y')
                             : null),
@@ -118,24 +118,24 @@ class ProfilPenggunaService
     }
 
     /**
-     * Update basic user and member profile details.
+     * Update basic user and anggota profile details.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @param array $validated
      * @return void
      */
-    public function update(User $user, array $validated): void
+    public function update(Pengguna $user, array $validated): void
     {
         $user->update([
-            'name' => $validated['name'],
+            'nama' => $validated['nama'],
             'email' => $validated['email'] ?? null,
-            'phone_number' => $validated['phone_number'] ?? null,
+            'no_telp' => $validated['no_telp'] ?? null,
         ]);
 
-        if ($user->member) {
-            $user->member->update([
-                'last_education' => $validated['last_education'] ?? null,
-                'residential_address' => $validated['residential_address'] ?? null,
+        if ($user->anggota) {
+            $user->anggota->update([
+                'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
+                'alamat_ktp' => $validated['alamat_ktp'] ?? null,
             ]);
         }
     }
@@ -143,48 +143,48 @@ class ProfilPenggunaService
     /**
      * Update/upload user profile avatar picture.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @param UploadedFile $profilePicture
      * @return void
      */
-    public function updateAvatar(User $user, UploadedFile $profilePicture): void
+    public function updateAvatar(Pengguna $user, UploadedFile $profilePicture): void
     {
-        if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
-            Storage::disk('public')->delete($user->profile_picture);
+        if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {
+            Storage::disk('public')->delete($user->foto_profil);
         }
 
-        $path = $profilePicture->store('profile_pictures', 'public');
+        $path = $profilePicture->store('profil', 'public');
 
         $user->update([
-            'profile_picture' => $path,
+            'foto_profil' => $path,
         ]);
     }
 
     /**
      * Delete user profile avatar picture.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @return void
      */
-    public function deleteAvatar(User $user): void
+    public function deleteAvatar(Pengguna $user): void
     {
-        if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
-            Storage::disk('public')->delete($user->profile_picture);
+        if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {
+            Storage::disk('public')->delete($user->foto_profil);
         }
 
         $user->update([
-            'profile_picture' => null,
+            'foto_profil' => null,
         ]);
     }
 
     /**
      * Update user password.
      *
-     * @param User $user
+     * @param Pengguna $user
      * @param string $password
      * @return void
      */
-    public function updatePassword(User $user, string $password): void
+    public function updatePassword(Pengguna $user, string $password): void
     {
         $user->update([
             'password' => Hash::make($password),

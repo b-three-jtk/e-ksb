@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Pengguna;
 use Spatie\Permission\DefaultTeamResolver;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -7,6 +8,7 @@ use Spatie\Permission\Models\Role;
 return [
 
     'models' => [
+        'user' => Pengguna::class,
 
         /*
          * When using the "HasPermissions" trait from this package, we need to know which

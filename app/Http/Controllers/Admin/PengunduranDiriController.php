@@ -20,10 +20,10 @@ class PengunduranDiriController extends Controller
         $sort_dir = $request->input('sort_dir', 'desc');
 
         // Paginate results
-        $members = $this->service->getSemuaPengunduranDiri($search, $per_page, $sort_by, $sort_dir);
+        $anggota = $this->service->getSemuaPengunduranDiri($search, $per_page, $sort_by, $sort_dir);
 
         return inertia('Admin/User/Resignation/List', [
-            'members' => $members,
+            'anggota' => $anggota,
             'filters' => [
                 'search' => $search,
                 'per_page' => $per_page,
@@ -41,9 +41,9 @@ class PengunduranDiriController extends Controller
         $data = [];
         $data['user'] = $this->service->getAnggotaMengundurkanDiri($id);
 
-        $resignationDoc = $data['user']->member->memberDocs?->first()?->doc_attachment ? asset('storage/' . $data['user']->member->memberDocs->first()->doc_attachment) : null;
+        $resignationDoc = $data['user']->anggota->dokumenAnggota?->first()?->lampiran_dokumen ? asset('storage/' . $data['user']->anggota->dokumenAnggota->first()->lampiran_dokumen) : null;
 
-        $totalSavings = $data['user']->member->savingAccounts()->sum('balance');
+        $totalSavings = $data['user']->anggota->akunSimpanan()->sum('saldo');
         $totalObligation = $this->service->getTotalKewajiban($data['user']);
 
         return inertia('Admin/User/Resignation/Validation', [
@@ -64,9 +64,9 @@ class PengunduranDiriController extends Controller
         return to_route('admin.resignations.index')->with([
             'success' => 'Pengunduran diri berhasil divalidasi.',
             'resignation_info' => [
-                'name'      => $user->name,
-                'user_code' => $user->user_code,
-                'phone'     => $user->phone_number,
+                'nama'      => $user->nama,
+                'kode_pengguna' => $user->kode_pengguna,
+                'phone'     => $user->no_telp,
             ],
         ]);
     }

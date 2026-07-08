@@ -51,7 +51,7 @@ trait Auditable
         }
 
         AuditLog::create([
-            'user_id' => auth()->check() ? auth()->id() : null,
+            'pengguna_id' => auth()->check() ? auth()->id() : null,
             'auditable_type' => get_class($this),
             'auditable_id' => $this->getKey(),
             'event' => $event,

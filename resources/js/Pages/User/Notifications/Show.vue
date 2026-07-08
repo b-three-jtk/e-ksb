@@ -16,7 +16,7 @@ const props = defineProps({
                         <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ notification.title }}</h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ notification.notification_type === 'mandatory_saving' ? 'Simpanan Wajib' : 'Angsuran Pembiayaan' }}</p>
                     </div>
-                    <Link href="/user/notifications" class="text-primary hover:underline">Kembali</Link>
+                    <Link href="/user/notifikasi" class="text-primary hover:underline">Kembali</Link>
                 </div>
 
                 <div class="space-y-4 text-sm text-gray-700 dark:text-gray-300">

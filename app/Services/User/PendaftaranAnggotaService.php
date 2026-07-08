@@ -4,10 +4,10 @@ namespace App\Services\User;
 
 use App\Enums\MemberStatusEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Heir;
-use App\Models\Member;
-use App\Models\MemberDoc;
-use App\Models\User;
+use App\Models\AhliWaris;
+use App\Models\Anggota;
+use App\Models\DokumenAnggota;
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -17,11 +17,11 @@ use Illuminate\Support\Str;
 class PendaftaranAnggotaService
 {
     /**
-     * Register a new member with heir and optional documents.
+     * Register a new anggota with ahli_waris and optional documents.
      *
      * @param array<string, mixed> $validated
      * @param Request $request
-     * @return array{name: string, user_code: string, initial_password: string, phone_number: string}
+     * @return array{nama: string, kode_pengguna: string, initial_password: string, no_telp: string}
      */
     public function register(array $validated, Request $request): array
     {
@@ -30,20 +30,20 @@ class PendaftaranAnggotaService
 
         DB::transaction(function () use ($validated, $request, $memberNumber, $initialPassword) {
             $user = $this->createUser($validated, $memberNumber, $initialPassword);
-            $member = $this->createMember($validated, $user->id);
+            $anggota = $this->createMember($validated, $user->id);
 
             $user->assignRole('Anggota');
 
-            Log::info("User {$user->id} registered as member with user code {$memberNumber}");
-            $this->createMemberHeir($validated, $member->id);
-            $this->createMemberDocuments($request, $member->id);
+            Log::info("User {$user->id} registered as anggota with user code {$memberNumber}");
+            $this->createMemberAhliWaris($validated, $anggota->id);
+            $this->createDokumenAnggota($request, $anggota->id);
         });
 
         return [
-            'name' => $validated['name'],
-            'user_code' => $memberNumber,
+            'nama' => $validated['nama'],
+            'kode_pengguna' => $memberNumber,
             'initial_password' => $initialPassword,
-            'phone_number' => $validated['phone_number'],
+            'no_telp' => $validated['no_telp'],
         ];
     }
 
@@ -53,11 +53,11 @@ class PendaftaranAnggotaService
         $prefix = 'KSB' . $yymm;
 
         // Ambil suffix 3 digit terakhir saja, bukan seluruh angka
-        $last = User::query()
-            ->where('user_code', 'like', $prefix . '%')
-            ->orderBy('user_code', 'desc')
-            ->lockForUpdate() // ← cegah race condition
-            ->value('user_code');
+        $last = Pengguna::query()
+            ->where('kode_pengguna', 'like', $prefix . '%')
+            ->orderBy('kode_pengguna', 'desc')
+            ->lockForUpdate() // ← cegah race kondisi_produk
+            ->value('kode_pengguna');
 
         $lastSequence = $last ? (int) substr($last, -3) : 0;
         $nextSequence = $lastSequence + 1;
@@ -69,20 +69,20 @@ class PendaftaranAnggotaService
      * @param array<string, mixed> $validated
      * @param string $memberNumber
      * @param string $initialPassword
-     * @return User
+     * @return Pengguna
      */
-    private function createUser(array $validated, string $memberNumber, string $initialPassword): User
+    private function createUser(array $validated, string $memberNumber, string $initialPassword): Pengguna
     {
         $email = $validated['email'] ?? null;
 
-        return User::create([
-            'user_code' => $memberNumber,
-            'name' => $validated['name'],
+        return Pengguna::create([
+            'kode_pengguna' => $memberNumber,
+            'nama' => $validated['nama'],
             'nik' => $validated['nik'],
-            'phone_number' => $validated['phone_number'],
+            'no_telp' => $validated['no_telp'],
             'email' => $email,
             'status' => UserStatusEnum::ACTIVE->value,
-            'joined_date' => now()->toDateString(),
+            'tgl_bergabung' => now()->toDateString(),
             'password' => Hash::make($initialPassword),
         ]);
     }
@@ -90,61 +90,65 @@ class PendaftaranAnggotaService
     /**
      * @param array<string, mixed> $validated
      * @param string $userId
-     * @return Member
+     * @return Anggota
      */
-    private function createMember(array $validated, string $userId): Member
+    private function createMember(array $validated, string $userId): Anggota
     {
-        return Member::create([
-            'user_id' => $userId,
-            'gender' => $validated['gender'],
-            'birth_place' => $validated['birth_place'],
-            'birth_date' => $validated['birth_date'],
-            'marital_status' => $validated['marital_status'],
-            'domicile_address' => $validated['domicile_address'],
-            'residential_address' => $validated['residential_address'] ?? null,
-            'last_education' => $validated['last_education'],
+        return Anggota::create([
+            'pengguna_id' => $userId,
+            'jenis_kelamin' => $validated['jenis_kelamin'],
+            'tempat_lahir' => $validated['tempat_lahir'],
+            'tgl_lahir' => $validated['tgl_lahir'],
+            'status_pernikahan' => $validated['status_pernikahan'],
+            'alamat_domisili' => $validated['alamat_domisili'],
+            'alamat_ktp' => $validated['alamat_ktp'] ?? null,
+            'pendidikan_terakhir' => $validated['pendidikan_terakhir'],
             'status' => MemberStatusEnum::PAYMENT_PENDING->value,
         ]);
     }
 
     /**
      * @param array<string, mixed> $validated
-     * @param string $memberId
+     * @param string $anggotaId
      * @return void
      */
-    private function createMemberHeir(array $validated, string $memberId): void
+    private function createMemberAhliWaris(array $validated, string $anggotaId): void
     {
-        Heir::create([
-            'heir_nik' => $validated['heir_nik'],
-            'heir_name' => $validated['heir_name'],
-            'relationship' => $validated['heir_relationship'],
-            'heir_contact' => $validated['heir_contact'],
-            'member_id' => $memberId,
+        $ahli_waris = AhliWaris::firstOrCreate(
+            ['nik_ahli_waris' => $validated['nik_ahli_waris']],
+            [
+                'nama_ahli_waris' => $validated['nama_ahli_waris'],
+                'kontak_ahli_waris' => $validated['kontak_ahli_waris'],
+            ]
+        );
+
+        Anggota::find($anggotaId)->ahliWaris()->syncWithoutDetaching([
+            $ahli_waris->nik_ahli_waris => ['hubungan' => $validated['heir_hubungan']]
         ]);
     }
 
     /**
      * @param Request $request
-     * @param string $memberId
+     * @param string $anggotaId
      * @return void
      */
-    private function createMemberDocuments(Request $request, string $memberId): void
+    private function createDokumenAnggota(Request $request, string $anggotaId): void
     {
         if ($request->hasFile('ktp_photo')) {
             $ktpPath = $request->file('ktp_photo')->store('documents', 'public');
-            MemberDoc::create([
-                'doc_name' => 'ktp',
-                'doc_attachment' => $ktpPath,
-                'member_id' => $memberId,
+            DokumenAnggota::create([
+                'nama_dokumen' => 'ktp',
+                'lampiran_dokumen' => $ktpPath,
+                'anggota_id' => $anggotaId,
             ]);
         }
 
         if ($request->hasFile('kk_photo')) {
             $kkPath = $request->file('kk_photo')->store('documents', 'public');
-            MemberDoc::create([
-                'doc_name' => 'kartu_keluarga',
-                'doc_attachment' => $kkPath,
-                'member_id' => $memberId,
+            DokumenAnggota::create([
+                'nama_dokumen' => 'kartu_keluarga',
+                'lampiran_dokumen' => $kkPath,
+                'anggota_id' => $anggotaId,
             ]);
         }
     }
