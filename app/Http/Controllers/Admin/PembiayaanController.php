@@ -665,8 +665,8 @@ class PembiayaanController extends Controller
 
                     DokumenAnggota::create([
                         'member_id' => $pembiayaan->anggota_id,
-                        'doc_name' => 'Berita Acara Pelunasan ' . $transCode,
-                        'doc_attachment' => $filePath,
+                        'nama_dokumen' => 'Berita Acara Pelunasan ' . $transCode,
+                        'lampiran_dokumen' => $filePath,
                     ]);
 
                     $pembiayaan->update([
@@ -738,7 +738,7 @@ class PembiayaanController extends Controller
                 ]);
             }
 
-            return redirect()->route('admin.financings.index')
+            return redirect()->route('admin.pembiayaan.index')
                 ->with('success', 'Pembiayaan berhasil difinalisasi');
         } catch (Exception $e) {
             Log::error('Error storing pembiayaan: ' . $e->getMessage());
@@ -874,7 +874,7 @@ class PembiayaanController extends Controller
         $data = session('receipt_data');
 
         if (!$data) {
-            return redirect()->route('admin.financings.index');
+            return redirect()->route('admin.pembiayaan.index');
         }
 
         // Reflash the session so if user reloads the page, they don't get redirected back immediately.
