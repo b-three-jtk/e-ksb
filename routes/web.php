@@ -139,6 +139,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/pembiayaan/store', [PembiayaanController::class, 'store'])->middleware('permission:create_murabahah')->name('pembiayaan.store');
     Route::post('/product-types', [PembiayaanController::class, 'storeJenisBarang'])->middleware('permission:create_murabahah')->name('product-types.store');
     Route::post('/pemasok', [PembiayaanController::class, 'storePemasok'])->middleware('permission:create_murabahah')->name('pemasok.store');
+    Route::post('/pembiayaan/rekening-anggota', [PembiayaanController::class, 'storeRekening'])->middleware('permission:payment_murabahah')->name('pembiayaan.rekening.store');
     Route::get('/pembiayaan/draft/{id}', [PembiayaanController::class, 'loadDraft'])->middleware('permission:create_murabahah')->name('pembiayaan.load-draft');
     Route::get('/pembiayaan/validation/{id}', [PembiayaanController::class, 'showValidation'])->middleware('permission:approve_murabahah')->name('pembiayaan.validation');
     Route::put('/pembiayaan/validate/{id}', [PembiayaanController::class, 'validate'])->middleware('permission:approve_murabahah')->name('pembiayaan.validation.submit');
@@ -149,7 +150,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('/pembiayaan/{pembiayaan}/payments/create',[PembiayaanController::class, 'createPayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.payments.create');
     Route::post('/pembiayaan/{pembiayaan}/payments/store', [PembiayaanController::class, 'storePayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.payments.store');
     Route::post('/pembiayaan/{pembiayaan}/payments/reschedule', [PembiayaanController::class, 'reschedulePayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.payments.reschedule');
-    Route::post('/pembiayaan/pembayaran/struk', [PembiayaanController::class, 'showPaymentSuccess'])->middleware('permission:view_murabahah')->name('pembiayaan.pembayaran.success');
+    Route::get('/pembiayaan/pembayaran/struk', [PembiayaanController::class, 'showPaymentSuccess'])->middleware('permission:view_murabahah')->name('pembiayaan.pembayaran.success');
 
     // Pengelolaan Akun
     Route::get('/akun', [AkunController::class, 'index'])->middleware('permission:view_kas')->name('akun.index');

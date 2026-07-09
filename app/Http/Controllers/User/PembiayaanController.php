@@ -68,7 +68,7 @@ class PembiayaanController extends Controller
             abort(403, 'Anggota tidak memiliki akses ke pembiayaan ini.');
         }
 
-        $this->pembiayaanService->computepembiayaanummary($pembiayaan);
+        $this->pembiayaanService->computePembiayaanSummary($pembiayaan);
         $this->pembiayaanService->computeNextDueDate($pembiayaan);
 
         $pembiayaan->setRelation('angsuran', $pembiayaan->angsuran->map(function ($item) {

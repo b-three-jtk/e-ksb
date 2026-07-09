@@ -113,7 +113,7 @@ class PenggunaController extends Controller
 
             if ($user->anggota->pembiayaan) {
                 $user->anggota->pembiayaan->each(function ($pembiayaan) use ($service) {
-                    $service->computepembiayaanummary($pembiayaan);
+                    $service->computePembiayaanSummary($pembiayaan);
                     $nextInstallment = $pembiayaan->angsuran
                     ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
                     ->sortBy('tgl_jatuh_tempo')

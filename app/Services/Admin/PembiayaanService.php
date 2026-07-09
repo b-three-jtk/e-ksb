@@ -21,6 +21,7 @@ use App\Models\Pemasok;
 use App\Models\Pembiayaan;
 use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
+use App\Models\RekeningAnggota;
 use App\Models\Wakalah;
 use App\Services\PembiayaanService as SharedPembiayaanService;
 use Carbon\Carbon;
@@ -466,6 +467,16 @@ class PembiayaanService
     public function computeNextDueDate(Pembiayaan $pembiayaan): void
     {
         $this->sharedPembiayaanService->computeNextDueDate($pembiayaan);
+    }
+
+    public function storeRekeningAnggota(Array $data)
+    {
+        return RekeningAnggota::create([
+            'no_rekening' => $data['no_rekening'],
+            'nama_bank' => $data['nama_bank'],
+            'atas_nama' => $data['atas_nama'],
+            'anggota_id' => $data['anggota_id'],
+        ]);
     }
 
 }

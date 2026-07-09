@@ -13,6 +13,7 @@ use App\Http\Requests\Admin\StorePreFinancingRequest;
 use App\Http\Requests\CreateRepaymentRequest;
 use App\Http\Requests\StoreFinancingDraftRequest;
 use App\Http\Requests\StoreFinancingRequest;
+use App\Http\Requests\StoreRekeningRequest;
 use App\Models\Akun;
 use App\Models\AkunSimpanan;
 use App\Models\Anggota;
@@ -23,6 +24,7 @@ use App\Models\Pemasok;
 use App\Models\Pembiayaan;
 use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
+use App\Models\RekeningAnggota;
 use App\Models\VerifikasiPembiayaan;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PembayaranAngsuranService;
@@ -648,7 +650,7 @@ class PembiayaanController extends Controller
                     Storage::disk('public')->put($filePath, $pdf->output());
 
                     DokumenAnggota::create([
-                        'member_id' => $pembiayaan->anggota_id,
+                        'anggota_id' => $pembiayaan->anggota_id,
                         'nama_dokumen' => 'Berita Acara Pelunasan ' . $transCode,
                         'lampiran_dokumen' => $filePath,
                     ]);
@@ -718,7 +720,7 @@ class PembiayaanController extends Controller
             if ($pembiayaan->payment_method === FinancingPaymentMethodEnum::CASH->value && session('receipt_url')) {
                 return redirect()->route('admin.pembiayaan.pembayaran.success')->with('receipt_data', [
                     'financing_id' => $pembiayaan->id,
-                    'installment_payment_receipt' => session('receipt_url')
+                    'struk_pembayaran' => session('receipt_url')
                 ]);
             }
 
@@ -818,6 +820,7 @@ class PembiayaanController extends Controller
     {
         $pembiayaan = Pembiayaan::with([
             'anggota.user',
+            'anggota.bankAccounts',
             'angsuran.payment',
             'objekPembiayaan.jenisBarang',
             'objekPembiayaan.pemasok',
@@ -852,9 +855,21 @@ class PembiayaanController extends Controller
 
         } catch (Exception $e) {
             Log::error('Error processing repayment: ' . $e->getMessage());
-            return inertia('Admin/Financing/Repayment/Result', [
-                'error' => 'Gagal memproses pembayaran: ' . $e->getMessage(),
-            ]);
+            return redirect()->back()->withErrors(['error' => 'Gagal memproses pembayaran: ' . $e->getMessage()]);
+        }
+    }
+
+    public function storeRekening(StoreRekeningRequest $request)
+    {
+        $validated = $request->validated();
+
+        try {
+            $rekening = $this->pembiayaanService->storeRekeningAnggota($validated);
+
+            return response()->json($rekening, 201);
+        } catch (Exception $e) {
+            Log::error('Error creating rekening: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menyimpan rekening. Terjadi kesalahan pada server.'], 500);
         }
     }
 

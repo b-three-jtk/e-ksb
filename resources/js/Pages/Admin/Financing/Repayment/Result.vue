@@ -11,7 +11,7 @@ console.log('Received data:', props.data)
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
     { name: 'Pengelolaan Pembiayaan', link: '/admin/pembiayaan' },
-    { name: 'Detail Pembiayaan', link: `/admin/pembiayaan/${props.data.pembiayaan_id}` },
+    { name: 'Detail Pembiayaan', link: `/admin/pembiayaan/${props.data?.pembiayaan_id || ''}` },
     { name: 'Permohonan Pelunasan' },
 ];
 </script>
@@ -22,8 +22,8 @@ const breadcrumbItems = [
         <div class="card-layout">
             <h2 class="card-title">Pembayaran Berhasil</h2>
             <p class="mb-4 text-gray-500 text-sm">Pembayaran telah berhasil diproses. Berikut adalah struk pembayaran Anda:</p>
-            <div v-if="props.data.installment_payment_receipt" class="border p-4 rounded">
-                <iframe :src="props.data.installment_payment_receipt" class="w-full h-full min-h-150" frameborder="0"></iframe>
+            <div v-if="props.data?.struk_pembayaran" class="border p-4 rounded">
+                <iframe :src="props.data.struk_pembayaran" class="w-full h-full min-h-[600px]" frameborder="0"></iframe>
             </div>
             <div v-else class="text-red-500">
                 Struk pembayaran tidak tersedia.

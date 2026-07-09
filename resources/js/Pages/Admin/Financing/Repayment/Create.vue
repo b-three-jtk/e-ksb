@@ -8,10 +8,12 @@ import Button from '@/Components/Form/Button.vue';
 import Tooltip from '@/Components/Form/Tooltip.vue';
 import { useForm } from '@inertiajs/vue3'
 
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { toast } from 'vue3-toastify'
 import Swal from 'sweetalert2'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+
+import RekeningModal from '@/Components/Form/RekeningModal.vue';
 
 const showPanel = ref(false)
 const methodError = ref('')
@@ -33,8 +35,41 @@ const breadcrumbItems = [
 
 const form = useForm({
     method: '',
-    installment_id: props.data?.installment_id || '',
+    angsuran_id: props.data?.angsuran_id || '',
+    no_rekening: '',
+    bukti_pembayaran: null,
 })
+
+const showNewRekeningInput = ref(false)
+
+const rekeningSelectables = computed(() => {
+    const accounts = props.data?.pembiayaan?.anggota?.bank_accounts?.map(b => ({
+        value: b.no_rekening,
+        text: `${b.nama_bank} - ${b.no_rekening} (a.n ${b.atas_nama})`
+    })) || []
+    return [
+        ...accounts,
+        { value: 'NEW', text: '+ Tambah Rekening Baru', isAction: true }
+    ]
+})
+
+const handleRekeningChange = (value) => {
+    if (value === 'NEW') {
+        showNewRekeningInput.value = true
+        form.no_rekening = ''
+    } else {
+        showNewRekeningInput.value = false
+        form.no_rekening = value
+    }
+}
+
+const onRekeningCreated = (newRekening) => {
+    if (!props.data.pembiayaan.anggota.bank_accounts) {
+        props.data.pembiayaan.anggota.bank_accounts = []
+    }
+    props.data.pembiayaan.anggota.bank_accounts.push(newRekening)
+    form.no_rekening = newRekening.no_rekening
+}
 
 const submitForm = () => {
     Swal.fire({
@@ -279,20 +314,48 @@ const submitForm = () => {
                         </ul>
                     </div>
                 </div>
-                <div class="flex flex-col px-8 pt-6">
-                    <BaseInputAdmin v-model="form.method" label="Metode Pelunasan" type="radio" required :selectables="[
-                        { value: 'Tunai', text: 'Tunai' },
-                        { value: 'Non-Tunai', text: 'Non-Tunai' }
-                    ]">
-                    </BaseInputAdmin>
-                    <p v-if="methodError" class="text-red-500 text-xs mt-2">
-                        {{ methodError }}
-                    </p>
-                    <div class="self-end mt-4">
-                        <Button @click="submitForm" :disabled="form.processing" variant="secondary">{{ form.processing ? 'Menyimpan...' : 'Kirim' }}</Button>
-                    </div>
+            <div class="flex flex-col px-8 pt-6">
+                <BaseInputAdmin v-model="form.method" label="Metode Pelunasan" type="radio" required :selectables="[
+                    { value: 'Tunai', text: 'Tunai' },
+                    { value: 'Non-Tunai', text: 'Non-Tunai' }
+                ]">
+                </BaseInputAdmin>
+                <p v-if="methodError" class="text-red-500 text-xs mt-2">
+                    {{ methodError }}
+                </p>
+
+                <div v-if="form.method === 'Non-Tunai'" class="mt-6 flex flex-col gap-6">
+                    <BaseInputAdmin 
+                        v-model="form.no_rekening" 
+                        label="Rekening Bank Anggota" 
+                        type="select" 
+                        required 
+                        :selectables="rekeningSelectables"
+                        @update:modelValue="handleRekeningChange"
+                        hint="Pilih rekening bank yang digunakan untuk transfer pembayaran pelunasan."
+                    />
+                    <BaseInputAdmin 
+                        v-model="form.bukti_pembayaran" 
+                        label="Bukti Pembayaran (Transfer)" 
+                        type="file" 
+                        required 
+                        accept="image/*,.pdf"
+                        hint="Unggah bukti transfer (format JPG, PNG, atau PDF)."
+                    />
                 </div>
+
+                <div class="self-end mt-4">
+                    <Button @click="submitForm" :disabled="form.processing" variant="secondary">{{ form.processing ? 'Menyimpan...' : 'Kirim' }}</Button>
+                </div>
+            </div>
             </div>
         </div>
     </AdminLayout>
+
+    <RekeningModal 
+        :show="showNewRekeningInput" 
+        :anggotaId="props.data?.pembiayaan?.anggota?.id"
+        @close="showNewRekeningInput = false"
+        @created="onRekeningCreated"
+    />
 </template>

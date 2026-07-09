@@ -140,12 +140,19 @@ class PembayaranAngsuranService
 
             Storage::disk('public')->put($filePath, $pdf->output());
 
+            $buktiPembayaranPath = null;
+            if (isset($validatedData['bukti_pembayaran'])) {
+                $buktiPembayaranPath = $validatedData['bukti_pembayaran']->store('receipts/transfer', 'public');
+            }
+
             $transaction = PembayaranAngsuran::create([
                 'kode_transaksi_pembayaran' => $transCode,
                 'jumlah_angsuran_dibayar' => $calculatedData['repayment_total'],
                 'pokok_dibayar' => $remainingPrincipal,
                 'margin_dibayar' => $marginSettlement,
                 'metode_pembayaran' => $validatedData['method'],
+                'no_rekening' => $validatedData['no_rekening'] ?? null,
+                'bukti_pembayaran' => $buktiPembayaranPath,
                 'is_pelunasan_lebih_cepat' => true,
                 'tgl_pembayaran' => now(),
                 'angsuran_id' => $angsuran->id,
@@ -153,17 +160,17 @@ class PembayaranAngsuranService
                 'struk_pembayaran' => $filePath,
             ]);
 
-            $kas = Akun::where(
+            Akun::where(
                 'nama_akun',
                 'Kas'
             )->firstOrFail();
 
-            $piutangMurabahah = Akun::where(
+            Akun::where(
                 'nama_akun',
                 'Piutang Murabahah'
             )->firstOrFail();
 
-            $pendapatanMargin = Akun::where(
+            Akun::where(
                 'nama_akun',
                 'Pendapatan Margin Murabahah'
             )->firstOrFail();
@@ -256,7 +263,8 @@ class PembayaranAngsuranService
             $principalPerMonth = $pembiayaan->harga_perolehan - ($pembiayaan->uang_muka ?? 0);
             $marginPerMonth    = $pembiayaan->margin_keuntungan;
         } else {
-            $marginPerMonth    = round($pembiayaan->margin_keuntungan / $pembiayaan->tenor, 2);
+            $tenor = $pembiayaan->tenor > 0 ? $pembiayaan->tenor : 1;
+            $marginPerMonth    = round($pembiayaan->margin_keuntungan / $tenor, 2);
             $principalPerMonth = round($validated['jumlah_angsuran_dibayar'] - $marginPerMonth, 2);
         }
 
