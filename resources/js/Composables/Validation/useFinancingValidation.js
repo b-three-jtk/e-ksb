@@ -128,8 +128,8 @@ export function useFinancingValidation(form) {
         if (!form.pembiayaan.harga_perkiraan)
             errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
 
-        if (!form.collateral.jenis_jaminan)
-            errs.jenis_jaminan = 'Jenis jaminan wajib dipilih.'
+        if (form.collateral.nilai_perkiraan_pasar > harga_perkiraan)
+            errs.nilai_perkiraan_pasar = 'Nilai jaminan harus kurang dari atau sama dengan perkiraan harga objek.'
 
         return errs
     }

@@ -58,7 +58,7 @@ class PembiayaanService
         ];
     }
 
-    public function computepembiayaanummary(Pembiayaan $pembiayaan): void
+    public function computePembiayaanSummary(Pembiayaan $pembiayaan): void
     {
         $pembiayaan->total_price = ($pembiayaan->harga_perolehan ?? 0)
             + ($pembiayaan->margin_keuntungan ?? 0)

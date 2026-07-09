@@ -1,28 +1,29 @@
 <?php
 namespace App\Services\Admin;
 
+use App\Enums\AhliWarisEnum;
 use App\Enums\ConditionEnum;
 use App\Enums\EducationEnum;
-use App\Enums\KeuanganAnggotaCostEnum;
-use App\Enums\KeuanganAnggotaIncomeEnum;
 use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
-use App\Enums\AhliWarisEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
+use App\Enums\KeuanganAnggotaCostEnum;
+use App\Enums\KeuanganAnggotaIncomeEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
-use App\Models\KeuanganAnggota;
-use App\Models\Pembiayaan;
-use App\Models\ObjekPembiayaan;
-use App\Models\PengaturanUmum;
 use App\Models\AhliWaris;
+use App\Models\Anggota;
 use App\Models\Angsuran;
 use App\Models\DetailJurnal;
-use App\Models\Anggota;
+use App\Models\KeuanganAnggota;
+use App\Models\ObjekPembiayaan;
 use App\Models\Pemasok;
+use App\Models\Pembiayaan;
+use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
 use App\Models\Wakalah;
 use App\Services\PembiayaanService as SharedPembiayaanService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -32,9 +33,9 @@ class PembiayaanService
     {
     }
 
-    public function getSemuaPembiayaan($search, $tab, $verifikator)
+    public function getSemuaPembiayaan($search, $tab, $sortBy, $sortDir, $perPage, $verifikator)
     {
-        return Pembiayaan::with([
+        $q = Pembiayaan::with([
             'anggota.user' => function ($query) {
                 $query->select('id', 'nama', 'kode_pengguna');
             },
@@ -43,15 +44,15 @@ class PembiayaanService
                 $query->select('jenis_barang.id', 'jenis_barang.nama_jenis_barang');
             }
         ])
-            ->when($search, function ($q) use ($search) {
+        ->when($search, function ($q) use ($search) {
                 $q->whereHas('anggota.user', function ($userQuery) use ($search) {
                     $userQuery->where(function ($userSearchQuery) use ($search) {
                         $userSearchQuery->where('nama', 'like', "%{$search}%")
                             ->orWhere('kode_pengguna', 'like', "%{$search}%");
                     });
                 });
-            })
-            ->when($tab === 'request', function ($q) use ($verifikator) {
+        })
+        ->when($tab === 'request', function ($q) use ($verifikator) {
                 if (in_array($verifikator->getRoleNames()->first(), ['Ketua Murabahah'])) {
                     $q->where(
                         'status',
@@ -67,23 +68,40 @@ class PembiayaanService
                         FinancingReqStatusEnum::PENDING_REVIEW->value,
                     ]);
                 }
-            })
-            ->when($tab === 'validated', function ($q) {
+        })
+        ->when($tab === 'validated', function ($q) {
                 $q->whereIn('status', [
                     FinancingReqStatusEnum::APPROVED->value,
                     FinancingReqStatusEnum::REJECTED->value,
                     FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
                 ]);
-            })
-            ->when($tab === 'active', function ($q) {
+        })
+        ->when($tab === 'active', function ($q) {
                 $q->where(
                     'status',
                     FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
                 );
-            })->latest('updated_at');
+        })->orderBy($sortBy, $sortDir)->latest('updated_at');
+            
+        return $q->paginate($perPage)
+        ->withQueryString()
+        ->through(function ($f) {
+            return [
+                'id' => $f->id,
+                'kode_pembiayaan' => $f->kode_pembiayaan,
+                'tgl_akad' => Carbon::parse($f->tgl_akad)->format('Y-m-d') ?? '',
+                'user' => $f->anggota->user
+                    ? ($f->anggota->user->kode_pengguna . ' - ' . $f->anggota->user->nama)
+                    : '-',
+                'user_role' => $f->anggota->user?->getRoleNames()->first() ?? '-',
+                'tenor_left' => $f->angsuran ? max(0, $f->tenor - ($f->angsuran->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
+                'product_name' => $f->objekPembiayaan?->nama_barang,
+                'status' => $f->status,
+            ];
+        });
     }
 
-    public function getTotalPermohonanPembiayaan()
+    public function getTotalPermohonanPembiayaan($tgl)
     {
         return Pembiayaan::whereIn('status', [
             FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
@@ -91,7 +109,7 @@ class PembiayaanService
             FinancingReqStatusEnum::APPROVED->value,
             FinancingReqStatusEnum::REJECTED->value,
             FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
-        ])->count();
+        ])->where('tgl_permohonan', '<=', $tgl)->count();
     }
 
     public function getModalBelumDiputar()
@@ -440,9 +458,9 @@ class PembiayaanService
         ]);
     }
 
-    public function computepembiayaanummary(Pembiayaan $pembiayaan): void
+    public function computePembiayaanSummary(Pembiayaan $pembiayaan): void
     {
-        $this->sharedPembiayaanService->computepembiayaanummary($pembiayaan);
+        $this->sharedPembiayaanService->computePembiayaanSummary($pembiayaan);
     }
 
     public function computeNextDueDate(Pembiayaan $pembiayaan): void

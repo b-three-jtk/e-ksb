@@ -59,35 +59,17 @@ class PembiayaanController extends Controller
         $sortBy = $request->input('sort_by', 'created_at');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $query = $this->pembiayaanService->getSemuaPembiayaan($search, $tab, $user);
+        $pembiayaan = $this->pembiayaanService->getSemuaPembiayaan($search, $tab, $sortBy, $sortDir, $perPage, $user);
 
-        $pembiayaan = $query
-            ->paginate($perPage)
-            ->withQueryString()
-            ->through(function ($f) {
-                return [
-                    'id' => $f->id,
-                    'kode_pembiayaan' => $f->kode_pembiayaan,
-                    'tgl_akad' => Carbon::parse($f->tgl_akad)->format('Y-m-d') ?? '',
-                    'user' => $f->anggota->user
-                        ? ($f->anggota->user->kode_pengguna . ' - ' . $f->anggota->user->nama)
-                        : '-',
-                    'user_role' => $f->anggota->user?->getRoleNames()->first() ?? '-',
-                    'tenor_left' => $f->angsuran ? max(0, $f->tenor - ($f->angsuran->where('status', '!=', InstallmentPaymentScheduleStatusEnum::PAID->value)->count())) : null,
-                    'product_name' => $f->objekPembiayaan?->nama_barang,
-                    'status' => $f->status,
-                ];
-            });
-
-        $summary = [
-            ['title' => 'Total Pengajuan Pembiayaan Murabahah','value' => $this->pembiayaanService->getTotalPermohonanPembiayaan()],
+        $ringkasanData = [
+            ['title' => 'Total Pengajuan Pembiayaan Murabahah','value' => $this->pembiayaanService->getTotalPermohonanPembiayaan(now())],
             ['title' => 'Total Pembiayaan Berlangsung', 'value' => $this->pembiayaanService->getTotalPembiayaanBerlangsung()],
             ['title' => 'Total Modal Belum Diputar', 'value' => $this->pembiayaanService->getModalBelumDiputar()],
         ];
 
         return inertia('Admin/Financing/Index', [
             'pembiayaan' => $pembiayaan,
-            'summary' => $summary,
+            'ringkasan_data' => $ringkasanData,
             'filters' => compact('search', 'perPage', 'tab', 'sortBy', 'sortDir'),
         ]);
     }
@@ -96,10 +78,12 @@ class PembiayaanController extends Controller
     {
         $pembiayaan = $this->sharedPembiayaanService->getPembiayaanById($id);
 
-        $this->pembiayaanService->computepembiayaanummary($pembiayaan);
+        $this->pembiayaanService->computePembiayaanSummary($pembiayaan);
         $this->pembiayaanService->computeNextDueDate($pembiayaan);
 
-        $pembiayaan->setRelation('angsuran', $pembiayaan->angsuran->map(function ($item) {
+        $data = $pembiayaan->toArray();
+
+        $data['angsuran'] = $pembiayaan->angsuran->map(function ($item) {
             return [
                 'angsuran_ke'              => $item->angsuran_ke,
                 'kode_transaksi_pembayaran'      => $item->payment?->kode_transaksi_pembayaran,
@@ -109,9 +93,9 @@ class PembiayaanController extends Controller
                 'is_pelunasan_lebih_cepat'         => $item->payment?->is_pelunasan_lebih_cepat ?? false,
                 'struk_pembayaran' => $item->payment?->struk_pembayaran ? asset('storage/' . $item->payment->struk_pembayaran) : null,
             ];
-        }));
+        });
 
-        return inertia('Admin/Financing/Show', ['data' => $pembiayaan]);
+        return inertia('Admin/Financing/Show', ['data' => $data]);
     }
 
     /**
@@ -170,12 +154,12 @@ class PembiayaanController extends Controller
                     ];
                 })->sortByDesc('diverifikasi_pada')->values(),
                 'documents' => [
-                    'family_card' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()?->lampiran_dokumen),
-                    'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'slip_gaji')->first()?->lampiran_dokumen),
-                    'bank_book' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'buku_tabungan')->first()?->lampiran_dokumen),
-                    'struk_pembelian' => $this->getDocumentUrl($pembiayaan->objekPembiayaan->struk_pembelian),
-                    'akad_document' => $this->getDocumentUrl($pembiayaan->dokumen_akad),
-                    'akad_wakalah_document' => $this->getDocumentUrl($pembiayaan->wakalah?->dokumen_akad),
+                    'family_card' => getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()?->lampiran_dokumen),
+                    'income_slip' => getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'slip_gaji')->first()?->lampiran_dokumen),
+                    'bank_book' => getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'buku_tabungan')->first()?->lampiran_dokumen),
+                    'struk_pembelian' => getDocumentUrl($pembiayaan->objekPembiayaan->struk_pembelian),
+                    'akad_document' => getDocumentUrl($pembiayaan->dokumen_akad),
+                    'akad_wakalah_document' => getDocumentUrl($pembiayaan->wakalah?->dokumen_akad),
                 ],
                 'pemasok' => $pembiayaan->objekPembiayaan->pemasok ? [
                     'nama_pemasok' => $pembiayaan->objekPembiayaan->pemasok->nama_pemasok,
@@ -770,12 +754,13 @@ class PembiayaanController extends Controller
 
     public function searchMembers(Request $request)
     {
-        $query = $request->input('q');
+        try {
+            $query = $request->input('q');
 
         $anggota = Anggota::query()
             ->with(['user:id,kode_pengguna,nama,email,nik,no_telp', 'dokumenAnggota', 'keuanganAnggota', 'ahliWaris', 'pekerjaanAnggota', 'pembiayaan:id,status', 'akunSimpanan:id,saldo,created_at'])
             ->whereHas('user', function ($q) use ($query) {
-                $q->whereHas('roles', fn($roleQ) => $roleQ->where('nama_barang', 'Anggota'))
+                $q->whereHas('roles', fn($roleQ) => $roleQ->where('name', 'Anggota'))
                     ->where('status', UserStatusEnum::ACTIVE->value)
                     ->where(function ($searchQ) use ($query) {
                         $searchQ->where('nama', 'ILIKE', "%{$query}%")
@@ -785,13 +770,13 @@ class PembiayaanController extends Controller
             ->limit(5)
             ->get()
             ->map(function ($anggota) {
-                $hasActiveFinancing = $anggota->pembiayaan?->where(
+                $hasNoActiveFinancing = $anggota->pembiayaan?->where(
                     'status',
                         FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
                         FinancingReqStatusEnum::TANGGUH->value,
                 )->isNotEmpty() ?? false;
 
-                $anggota->is_have_no_obligation = !$hasActiveFinancing;
+                $anggota->is_have_no_obligation = $hasNoActiveFinancing;
 
                 $hasEligibleSaving = AkunSimpanan::where('anggota_id', $anggota->id)
                     ->where('jenis_simpanan', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
@@ -811,7 +796,11 @@ class PembiayaanController extends Controller
                 return $anggota;
             });
 
-        return response()->json(['anggota' => $anggota->values()]);
+            return response()->json(['anggota' => $anggota->values()]);
+        } catch (Exception $exception) {
+            Log::info($exception->getMessage());
+            return response()->json(['errors'=> $exception->getMessage()]);
+        }
     }
     public function searchPemasoks(Request $request)
     {

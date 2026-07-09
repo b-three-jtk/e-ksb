@@ -23,7 +23,7 @@ const isLoading = ref(false);
 
 const props = defineProps({
     pembiayaan: Object,
-    summary: Array,
+    ringkasan_data: Array,
     filters: Object,
 });
 
@@ -128,7 +128,7 @@ watch(() => filters.tab, applyFilters)
                 </h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <CardInfo v-for="item in summary" :key="item.title" :title="item.title" :content="item.title === 'Total Modal Belum Diputar' ? moneyParser(item.value) : item.value"
+                <CardInfo v-for="item in ringkasan_data" :key="item.title" :title="item.title" :content="item.title === 'Total Modal Belum Diputar' ? moneyParser(item.value) : item.value"
                     :percentage="item.percentage" />
             </div>
         </div>

@@ -20,6 +20,7 @@ use Illuminate\Support\Collection;
 
 class DasborService
 {
+    public function __construct(private PembiayaanService $pembiayaanService){}
     public function getPeriodeSebelumnya(Carbon $awal, string $filter): array
     {
         return match ($filter) {
@@ -451,18 +452,8 @@ class DasborService
 
     public function getTotalPermohonanPembiayaan($tanggalAkhir, $tanggalAkhirSebelumnya)
     {
-        $statusDihitung = [
-            FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
-            FinancingReqStatusEnum::PENDING_REVIEW->value,
-            FinancingReqStatusEnum::APPROVED->value,
-            FinancingReqStatusEnum::REJECTED->value,
-            FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
-        ];
-
         return $this->getTotalDenganPersenPerubahan(
-            fn($tgl) => Pembiayaan::whereIn('status', $statusDihitung)
-                ->where('tgl_permohonan', '<=', $tgl)
-                ->count(),
+            fn($tgl) => $this->pembiayaanService->getTotalPermohonanPembiayaan($tgl),
             $tanggalAkhir,
             $tanggalAkhirSebelumnya
         );

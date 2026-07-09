@@ -103,7 +103,7 @@ const onFieldChange = (field) => emit('validate-field', field)
 
                 <p v-if="errors?.kode_pengguna" class="mt-1 text-xs text-red-500">{{ errors.kode_pengguna }}</p>
 
-                <div v-if="anggotaResults.length > 0 && !isAnggotaSelected"
+                <div v-if="anggotaResults?.length > 0 && !isAnggotaSelected"
                     class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 dark:border-gray-600 border border-gray-300 rounded-lg shadow-lg z-10">
                     <div v-for="anggota in anggotaResults" :key="anggota.id"
                         @click="$emit('selectAnggota', anggota)"
