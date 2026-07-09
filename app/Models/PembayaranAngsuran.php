@@ -22,7 +22,9 @@ class PembayaranAngsuran extends Model
         'margin_dibayar',
         'tgl_pembayaran',
         'struk_pembayaran',
+        'bukti_pembayaran',
 
+        'no_rekening',
         'angsuran_id',
         'updated_by',
     ];

@@ -20,11 +20,14 @@ return new class extends Migration
             $table->boolean('is_pelunasan_lebih_cepat')->default(false);
             $table->datetime('tgl_pembayaran');
             $table->string('struk_pembayaran')->nullable();
+            $table->string('bukti_pembayaran')->nullable();
             $table->decimal('pokok_dibayar', 15, 2)
                   ->nullable();
             $table->decimal('margin_dibayar', 15, 2)
                   ->nullable();
 
+            $table->string('no_rekening')->nullable();
+            $table->foreign('no_rekening')->references('no_rekening')->on('rekening_anggota')->onDelete('set null');
             $table->foreignUuid('angsuran_id')->nullable()->references('id')->on('angsuran')->onDelete('set null');
             $table->foreignUuid('updated_by')->constrained('pengguna')->onDelete('set null');
             $table->timestamps();

@@ -711,7 +711,7 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pelunasan sebelum jat
                 'angsuran_id' => $angsuran->id,
             ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(302);
         $this->assertDatabaseHas('pembiayaan', [
             'id' => $pembiayaan->id,
             'status' => FinancingReqStatusEnum::PAID->value,

@@ -205,7 +205,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                 'pembiayaan_id' => $pembiayaan->id,
                 'jumlah_angsuran_dibayar' => 5500000,
                 'tgl_pembayaran' => now()->format('Y-m-d'),
-                'metode_pembayaran' => 'Non-Tunai',
+                'metode_pembayaran' => 'Tunai',
             ])->assertSessionHasNoErrors()->assertStatus(302);
 
         $this->assertDatabaseHas('pembayaran_angsuran', [
@@ -283,15 +283,15 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                 'pembiayaan_id' => $pembiayaan->id,
                 'jumlah_angsuran_dibayar' => 2200000,
                 'tgl_pembayaran' => now()->format('Y-m-d'),
-                'metode_pembayaran' => 'Non-Tunai',
+                'metode_pembayaran' => 'Tunai',
             ])->assertSessionHasNoErrors();
 
         // anggota mau lunasin sisa angsurannya lebih awal
         $this->actingAs($this->staffMurabahah)
             ->post('/admin/pembiayaan/repayment', [
-                'method' => 'Non-Tunai',
+                'method' => 'Tunai',
                 'angsuran_id' => $installment2->id,
-            ])->assertSessionHasNoErrors()->assertStatus(200);
+            ])->assertSessionHasNoErrors()->assertStatus(302);
 
         $this->assertDatabaseHas('pembiayaan', [
             'id' => $pembiayaan->id,

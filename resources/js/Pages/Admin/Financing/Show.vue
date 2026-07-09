@@ -30,7 +30,7 @@ const hasInstallmentHistory = computed(() => Number(props.data.total_price) > 0)
 
 const canPayBill = computed(() =>
     can.value['payment_murabahah']
-    && props.data.installment
+    && props.data.angsuran
 )
 
 const INSTALLMENT_COLUMNS = [
@@ -89,7 +89,7 @@ const openReceiptModal = (receiptPath) => {
                         <span class="icon-[tabler--moneybag-move]" style="width:18px;height:18px;" />
                         Pelunasan Dipercepat
                     </Button>
-                    <Button v-if="canPayBill" :href="`/admin/pembiayaan/${data.id}/payments/create`" variant="info">
+                    <Button v-if="canPayBill && (data.status === 'Angsuran Berjalan' || data.status === 'Tangguh')" :href="`/admin/pembiayaan/${data.id}/payments/create`" variant="info">
                         <span class="icon-[tabler--credit-card-pay]" style="width:18px;height:18px;" />
                         Bayar Tagihan
                     </Button>

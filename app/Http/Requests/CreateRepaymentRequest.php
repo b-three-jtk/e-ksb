@@ -24,6 +24,8 @@ class CreateRepaymentRequest extends FormRequest
         return [
             'method' => 'required|in:Tunai,Non-Tunai',
             'angsuran_id' => 'required',
+            'no_rekening' => 'required_if:method,Non-Tunai',
+            'bukti_pembayaran' => 'required_if:method,Non-Tunai|file|mimes:jpeg,png,jpg,pdf|max:2048',
         ];
     }
 }

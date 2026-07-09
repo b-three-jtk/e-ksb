@@ -648,7 +648,7 @@ class PembiayaanController extends Controller
                     Storage::disk('public')->put($filePath, $pdf->output());
 
                     DokumenAnggota::create([
-                        'member_id' => $pembiayaan->anggota_id,
+                        'anggota_id' => $pembiayaan->anggota_id,
                         'nama_dokumen' => 'Berita Acara Pelunasan ' . $transCode,
                         'lampiran_dokumen' => $filePath,
                     ]);
@@ -818,6 +818,7 @@ class PembiayaanController extends Controller
     {
         $pembiayaan = Pembiayaan::with([
             'anggota.user',
+            'anggota.bankAccounts',
             'angsuran.payment',
             'objekPembiayaan.jenisBarang',
             'objekPembiayaan.pemasok',
@@ -852,9 +853,31 @@ class PembiayaanController extends Controller
 
         } catch (Exception $e) {
             Log::error('Error processing repayment: ' . $e->getMessage());
-            return inertia('Admin/Financing/Repayment/Result', [
-                'error' => 'Gagal memproses pembayaran: ' . $e->getMessage(),
+            return redirect()->back()->withErrors(['error' => 'Gagal memproses pembayaran: ' . $e->getMessage()]);
+        }
+    }
+
+    public function storeRekening(Request $request)
+    {
+        $validated = $request->validate([
+            'no_rekening' => 'required|string|max:50|unique:rekening_anggota,no_rekening',
+            'nama_bank' => 'required|string|max:100',
+            'atas_nama' => 'required|string|max:255',
+            'anggota_id' => 'required|exists:anggota,id',
+        ]);
+
+        try {
+            $rekening = \App\Models\RekeningAnggota::create([
+                'no_rekening' => $validated['no_rekening'],
+                'nama_bank' => $validated['nama_bank'],
+                'atas_nama' => $validated['atas_nama'],
+                'anggota_id' => $validated['anggota_id'],
             ]);
+
+            return response()->json($rekening, 201);
+        } catch (Exception $e) {
+            Log::error('Error creating rekening: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menyimpan rekening. Terjadi kesalahan pada server.'], 500);
         }
     }
 
