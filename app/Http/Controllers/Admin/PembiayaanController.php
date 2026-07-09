@@ -13,6 +13,7 @@ use App\Http\Requests\Admin\StorePreFinancingRequest;
 use App\Http\Requests\CreateRepaymentRequest;
 use App\Http\Requests\StoreFinancingDraftRequest;
 use App\Http\Requests\StoreFinancingRequest;
+use App\Http\Requests\StoreRekeningRequest;
 use App\Models\Akun;
 use App\Models\AkunSimpanan;
 use App\Models\Anggota;
@@ -23,6 +24,7 @@ use App\Models\Pemasok;
 use App\Models\Pembiayaan;
 use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
+use App\Models\RekeningAnggota;
 use App\Models\VerifikasiPembiayaan;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PembayaranAngsuranService;
@@ -718,7 +720,7 @@ class PembiayaanController extends Controller
             if ($pembiayaan->payment_method === FinancingPaymentMethodEnum::CASH->value && session('receipt_url')) {
                 return redirect()->route('admin.pembiayaan.pembayaran.success')->with('receipt_data', [
                     'financing_id' => $pembiayaan->id,
-                    'installment_payment_receipt' => session('receipt_url')
+                    'struk_pembayaran' => session('receipt_url')
                 ]);
             }
 
@@ -857,22 +859,12 @@ class PembiayaanController extends Controller
         }
     }
 
-    public function storeRekening(Request $request)
+    public function storeRekening(StoreRekeningRequest $request)
     {
-        $validated = $request->validate([
-            'no_rekening' => 'required|string|max:50|unique:rekening_anggota,no_rekening',
-            'nama_bank' => 'required|string|max:100',
-            'atas_nama' => 'required|string|max:255',
-            'anggota_id' => 'required|exists:anggota,id',
-        ]);
+        $validated = $request->validated();
 
         try {
-            $rekening = \App\Models\RekeningAnggota::create([
-                'no_rekening' => $validated['no_rekening'],
-                'nama_bank' => $validated['nama_bank'],
-                'atas_nama' => $validated['atas_nama'],
-                'anggota_id' => $validated['anggota_id'],
-            ]);
+            $rekening = $this->pembiayaanService->storeRekeningAnggota($validated);
 
             return response()->json($rekening, 201);
         } catch (Exception $e) {

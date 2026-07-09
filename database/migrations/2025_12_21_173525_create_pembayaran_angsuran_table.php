@@ -26,7 +26,7 @@ return new class extends Migration
             $table->decimal('margin_dibayar', 15, 2)
                   ->nullable();
 
-            $table->string('no_rekening')->nullable();
+            $table->string('no_rekening', 20)->nullable();
             $table->foreign('no_rekening')->references('no_rekening')->on('rekening_anggota')->onDelete('set null');
             $table->foreignUuid('angsuran_id')->nullable()->references('id')->on('angsuran')->onDelete('set null');
             $table->foreignUuid('updated_by')->constrained('pengguna')->onDelete('set null');
