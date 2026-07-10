@@ -71,12 +71,13 @@ class StorePreFinancingRequest extends FormRequest
             'pembiayaan.status' => 'required|string|max:255',
             'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
             'pembiayaan.uang_muka' => 'nullable|numeric|min:0',
+            'pembiayaan.satuan_tenor' => 'nullable|string|in:Bulan,Minggu',
 
             // Jaminan data
-            'jaminan.jenis_jaminan' => 'required|string|max:255',
-            'jaminan.nama_pemilik' => 'required|string|max:255',
-            'jaminan.nilai_perkiraan_pasar' => 'nullable|numeric|min:0',
-            'jaminan.lokasi_kondisi_jaminan' => 'nullable|string|max:500',
+            'jaminan.jenis_jaminan' => 'nullable|string|max:255',
+            'jaminan.nama_pemilik' => 'required_with:jaminan.jenis_jaminan|nullable|string|max:255',
+            'jaminan.nilai_perkiraan_pasar' => 'required_with:jaminan.jenis_jaminan|nullable|numeric|min:0',
+            'jaminan.lokasi_kondisi_jaminan' => 'required_with:jaminan.jenis_jaminan|nullable|string|max:500',
 
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',

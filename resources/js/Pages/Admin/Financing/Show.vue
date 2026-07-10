@@ -108,7 +108,7 @@ const openReceiptModal = (receiptPath) => {
                                 <Info label="Total Dibayar" :value="moneyParser(data.total_paid)" />
                                 <Info label="Sisa Tagihan" :value="moneyParser(data.remaining_balance)" />
                                 <Info label="Angsuran/Bulan" :value="moneyParser(data.installment_per_month)" />
-                                <Info v-if="data.tenor" label="Tenor" :value="`${data.tenor} Bulan`" />
+                                <Info v-if="data.tenor" label="Tenor" :value="`${data.tenor} ${data.satuan_tenor}`" />
                                 <Info v-if="data.next_due_date" label="Jatuh Tempo Terdekat"
                                     :value="dateParser(data.next_due_date)" />
                             </ul>
@@ -182,14 +182,14 @@ const openReceiptModal = (receiptPath) => {
                             <Info label="Kontak Pemasok" :value="data.pemasok?.pemasok_contact" />
                         </ul>
                     </div>
-                    <div v-if="data.collateral" class="card-layout flex flex-col pb-12.5! gap-6">
+                    <div v-if="data.jaminan" class="card-layout flex flex-col pb-12.5! gap-6">
                         <h1 class="card-title">Informasi Jaminan</h1>
                         <ul class="grid grid-cols-1 gap-6">
-                            <Info label="Tipe Jaminan" :value="data.collateral.jenis_jaminan" />
-                            <Info label="Nama Pemilik" :value="data.collateral.nama_pemilik" />
-                            <Info label="Lokasi Jaminan" :value="data.collateral.lokasi_kondisi_jaminan" />
+                            <Info label="Tipe Jaminan" :value="data.jaminan.jenis_jaminan" />
+                            <Info label="Nama Pemilik" :value="data.jaminan.nama_pemilik" />
+                            <Info label="Lokasi Jaminan" :value="data.jaminan.lokasi_kondisi_jaminan" />
                             <Info label="Nilai Pasar Estimasi"
-                                :value="moneyParser(data.collateral.nilai_perkiraan_pasar)" />
+                                :value="moneyParser(data.jaminan.nilai_perkiraan_pasar)" />
                         </ul>
                     </div>
                     <Documents :data="data" />

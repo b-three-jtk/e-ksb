@@ -61,7 +61,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                         Memiliki tabungan anggota yang sudah berjalan selama 1 bulan
                     </li>
                     <li v-if="form.anggota.is_have_no_obligation === false">
-                        Tidak memiliki kewajiban atau permohonan pembiayaan aktif
+                        Memiliki kewajiban atau permohonan pembiayaan aktif
                     </li>
                 </ul>
             </div>
