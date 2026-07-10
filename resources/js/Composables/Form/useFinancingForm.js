@@ -2,7 +2,7 @@ import { ref, watch, computed, onMounted } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify'
-import { useForm } from '@inertiajs/vue3'
+import { useForm, router } from '@inertiajs/vue3'
 
 export function useFinancingForm(initialData = null) {
     // State
@@ -480,6 +480,54 @@ export function useFinancingForm(initialData = null) {
         })
     }
 
+    const batalkan = () => {
+    Swal.fire({
+            title: 'Konfirmasi',
+            text: 'Apakah Anda yakin ingin membatalkan permohonan ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, batal',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#009141',
+    }).then((result) => {
+            if (result.isConfirmed) {
+                if (form.pembiayaan.id) {
+                    form.delete(`/admin/pembiayaan/batal/${form.pembiayaan.id}`, {
+                    onSuccess: (page) => {
+                        if (page.props.flash?.success) {
+                            toast(page.props.flash.success, {
+                                type: 'success',
+                                position: 'bottom-right',
+                            })
+                        }
+                    },
+                    onError: (errors) => {
+                        const errorMessages = Object.values(errors).flat()
+
+                        if (errorMessages.length > 0) {
+                            toast(errorMessages.join(', '), {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        } else {
+                            toast('Gagal menyimpan permohonan', {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        }
+                    }
+                })
+                } else {
+                    router.visit('/admin/pembiayaan')
+                    toast('Berhasil membatalkan permohonan', {
+                        type: 'success',
+                        position:'bottom-right'
+                    })
+                }
+            }
+    })
+    }
+
     onMounted(() => {
     if (initialData?.anggota) {
             isAnggotaSelected.value = true
@@ -510,6 +558,7 @@ export function useFinancingForm(initialData = null) {
         removeAhliWaris,
         submit,
         saveDraft,
-        finalize
+        finalize,
+        batalkan
     }
 }

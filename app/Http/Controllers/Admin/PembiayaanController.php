@@ -483,11 +483,13 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon harus dalam status aktif']);
                 }
 
-                $hasActiveFinancing = $user->anggota->pembiayaan?->whereIn('status', [FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, FinancingReqStatusEnum::TANGGUH->value])
-                ->isNotEmpty() ?? false;
+                $hasActiveFinancing = $user->anggota->pembiayaan?->whereIn('status', [
+                    FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                    FinancingReqStatusEnum::TANGGUH->value,
+                ])->isNotEmpty();
 
                 if ($hasActiveFinancing) {
-                    throw ValidationException::withMessages(['anggota'=> 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
+                    throw ValidationException::withMessages(['anggota'=> 'Pemohon masih memiliki pembiayaan yang sedang berjalan']);
                 }
 
                 $hasEligibleSaving = AkunSimpanan::where('anggota_id', $user->anggota->id)
@@ -876,7 +878,7 @@ class PembiayaanController extends Controller
                     FinancingReqStatusEnum::TANGGUH->value,
                 ])->isNotEmpty();
 
-                $anggota->is_have_no_obligation = !$hasActiveFinancing;
+                $anggota->is_have_no_obligation = $hasActiveFinancing;
 
                 $hasEligibleSaving = AkunSimpanan::where('anggota_id', $anggota->id)
                     ->where('jenis_simpanan', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
@@ -941,6 +943,31 @@ class PembiayaanController extends Controller
         return inertia('Admin/Financing/Repayment/Create', [
             'data' => $data,
         ]);
+    }
+
+    public function batalkanPermohonan(string $id)
+    {
+        try {
+            $pembiayaan = Pembiayaan::findOrFail($id);
+
+            $allowedStatuses = [
+                FinancingReqStatusEnum::PENDING_REVIEW->value,
+                FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                FinancingReqStatusEnum::REJECTED->value,
+                FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
+            ];
+
+            if (!in_array($pembiayaan->status, $allowedStatuses)) {
+                return back()->withErrors(['error' => 'Status pembiayaan tidak mengizinkan pembatalan.']);
+            }
+
+            $pembiayaan->delete();
+
+            return redirect()->route('admin.pembiayaan.index')->with('success', 'Permohonan pembiayaan berhasil dibatalkan dan dihapus.');
+        } catch (Exception $e) {
+            Log::error('Error membatalkan permohonan pembiayaan: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal membatalkan permohonan.']);
+        }
     }
 
     public function storeRepayment(CreateRepaymentRequest $request)

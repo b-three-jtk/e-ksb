@@ -59,6 +59,7 @@ const {
     submit,
     saveDraft,
     finalize,
+    batalkan
 } = useFinancingForm(props.pembiayaan)
 
 const {
@@ -133,6 +134,10 @@ const handleFinalize = () => {
 const handleSaveDraft = () => {
     saveDraft()
 }
+
+const handleCancel = () => {
+    batalkan()
+}
 </script>
 
 <template>
@@ -205,6 +210,13 @@ const handleSaveDraft = () => {
                     </Button>
 
                     <div class="flex items-center gap-4 justify-end">
+                        <Button
+                            v-if="activeStep >= 3"
+                            variant="gray"
+                            @click="handleCancel()"
+                        >
+                            Batalkan Permohonan
+                        </Button>
 
                         <Button
                             v-if="activeStep >= 3"
