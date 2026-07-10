@@ -14,6 +14,7 @@ use App\Http\Requests\CreateRepaymentRequest;
 use App\Http\Requests\StoreFinancingDraftRequest;
 use App\Http\Requests\StoreFinancingRequest;
 use App\Http\Requests\StoreRekeningRequest;
+use App\Models\AhliWaris;
 use App\Models\Akun;
 use App\Models\AkunSimpanan;
 use App\Models\Anggota;
@@ -24,7 +25,6 @@ use App\Models\Pemasok;
 use App\Models\Pembiayaan;
 use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
-use App\Models\RekeningAnggota;
 use App\Models\VerifikasiPembiayaan;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PembayaranAngsuranService;
@@ -101,6 +101,99 @@ class PembiayaanController extends Controller
         return inertia('Admin/Financing/Show', ['data' => $data]);
     }
 
+    public function downloadWakalahAgreement(string $id)
+    {
+        $pembiayaan = Pembiayaan::with(['anggota.user', 'objekPembiayaan', 'wakalah'])->findOrFail($id);
+
+        if (!$pembiayaan->tgl_akad) {
+            $pembiayaan->tgl_akad = now();
+        }
+
+        $logoPath = public_path('images/logo/logo-icon.svg');
+        $src = '';
+        if (file_exists($logoPath)) {
+            $data_logo = file_get_contents($logoPath);
+            $src = 'data:image/svg+xml;base64,' . base64_encode($data_logo);
+        }
+
+        Carbon::setLocale('id');
+
+        $ketuaKoperasi = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Ketua'))->first()->nama ?? '..............................';
+        $ketuaMurabahah = Pengguna::role('Ketua Murabahah')->first()->nama ?? '..............................';
+
+        $pdf = Pdf::loadView('exports.wakalah_agreement', compact('pembiayaan', 'src', 'ketuaKoperasi', 'ketuaMurabahah'));
+
+        return $pdf->download('Wakalah_Agreement_' . $pembiayaan->kode_pembiayaan . '.pdf');
+    }
+
+    public function downloadMurabahahAgreement(string $id)
+    {
+        $pembiayaan = Pembiayaan::with(['anggota.user', 'objekPembiayaan', 'objekPembiayaan.jenisBarang', 'jaminan'])->findOrFail($id);
+
+        if (!$pembiayaan->tgl_akad) {
+            $pembiayaan->tgl_akad = now();
+        }
+
+        $logoPath = public_path('images/logo/logo-icon.svg');
+        $src = '';
+        if (file_exists($logoPath)) {
+            $data_logo = file_get_contents($logoPath);
+            $src = 'data:image/svg+xml;base64,' . base64_encode($data_logo);
+        }
+
+        Carbon::setLocale('id');
+
+        $ketuaKoperasi = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Ketua'))->first()->nama ?? '..............................';
+
+        $hargaPerolehan = (float) $pembiayaan->harga_perolehan;
+        $hargaPerkiraan = (float) $pembiayaan->harga_perkiraan;
+        $hargaBeliPerUnit = (float) ($pembiayaan->objekPembiayaan->harga_beli_per_unit ?? 0);
+        $kuantitas = (int) ($pembiayaan->objekPembiayaan->kuantitas ?? 0);
+
+        $hargaBeli = $hargaPerolehan > 0 ? $hargaPerolehan : ($hargaPerkiraan > 0 ? $hargaPerkiraan : ($hargaBeliPerUnit * $kuantitas));
+        
+        $margin = (float) request('margin', $pembiayaan->margin_keuntungan ?: 0);
+        
+        if ($margin == 0 && $hargaBeli > 0) {
+            $marginPercent = PengaturanUmum::where('key', 'murabahah_margin_percentage')
+                ->where('tgl_diberlakukan', '<=', now())
+                ->orderBy('tgl_diberlakukan', 'desc')
+                ->first()->value ?? 0;
+            $margin = $hargaBeli * ($marginPercent / 100);
+        }
+
+        $uangMuka = (float) request('uang_muka', $pembiayaan->uang_muka ?: 0);
+        $hargaJual = $hargaBeli + $margin;
+        $piutang = $hargaJual - $uangMuka;
+        $tenor = (int) request('tenor', $pembiayaan->tenor ?: 1);
+        $satuanTenor = request('satuan_tenor', $pembiayaan->satuan_tenor ?: 'Bulan');
+        $angsuran = $tenor > 0 ? $piutang / $tenor : 0;
+        
+        $tglAkad = $pembiayaan->tgl_akad ?? now();
+        $tanggalJatuhTempo = strtolower($satuanTenor) === 'minggu'
+            ? Carbon::parse($tglAkad)->translatedFormat('l')
+            : Carbon::parse($tglAkad)->format('d');
+            
+        $tglLunas = strtolower($satuanTenor) === 'minggu' 
+            ? Carbon::parse($tglAkad)->addWeeks($tenor) 
+            : Carbon::parse($tglAkad)->addMonths($tenor);
+
+        $kuantitas = $pembiayaan->objekPembiayaan->kuantitas ?: 1;
+        $hargaBeliPerUnit = $pembiayaan->objekPembiayaan->harga_beli_per_unit ?: ($hargaBeli / $kuantitas);
+        $totalHargaBeli = $kuantitas * $hargaBeliPerUnit;
+        
+        $namaPemasok = request('nama_pemasok') ?: ($pembiayaan->objekPembiayaan->pemasok->nama_pemasok ?? '..........................................................');
+        $alamatPemasok = request('alamat_pemasok') ?: ($pembiayaan->objekPembiayaan->pemasok->alamat_pemasok ?? '..........................................................');
+
+        $pdf = Pdf::loadView('exports.murabahah_agreement', compact(
+            'pembiayaan', 'src', 'ketuaKoperasi', 'hargaBeli', 'margin', 'satuanTenor',
+            'hargaJual', 'uangMuka', 'piutang', 'tenor', 'angsuran', 'tanggalJatuhTempo',
+            'tglLunas', 'kuantitas', 'hargaBeliPerUnit', 'totalHargaBeli', 'namaPemasok', 'alamatPemasok'
+        ));
+
+        return $pdf->download('Murabahah_Agreement_' . $pembiayaan->kode_pembiayaan . '.pdf');
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -124,6 +217,7 @@ class PembiayaanController extends Controller
             'pembiayaan' => [
                 'anggota' => $this->pembiayaanService->formatMemberData($pembiayaan->anggota),
                 'pembiayaan' => [
+                    'id' => $pembiayaan->id,
                     'nama_barang' => $pembiayaan->objekPembiayaan->nama_barang,
                     'jenis_barang_id' => $pembiayaan->objekPembiayaan->jenis_barang_id,
                     'kondisi_produk' => $pembiayaan->objekPembiayaan->kondisi_produk,
@@ -234,7 +328,8 @@ class PembiayaanController extends Controller
         ]);
 
         try {
-            $pembiayaan = $this->pembiayaanService->getPembiayaanBelumDireview($id);
+            DB::transaction(function () use ($validated, $id) {
+                $pembiayaan = $this->pembiayaanService->getPembiayaanBelumDireview($id);
 
                 if ($validated['status'] === FinancingReqStatusEnum::APPROVED->value) {
 
@@ -361,7 +456,8 @@ class PembiayaanController extends Controller
                         auth()->id()
                     );
                 }
-            }
+                }
+            });
 
             return redirect()->route('admin.pembiayaan.index')->with('success', 'Keputusan validasi berhasil disimpan');
         } catch (ValidationException $e) {
@@ -388,11 +484,13 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon harus dalam status aktif']);
                 }
 
-                $hasActiveFinancing = $user->anggota->pembiayaan?->whereIn('status', [FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, FinancingReqStatusEnum::TANGGUH->value])
-                ->isNotEmpty() ?? false;
+                $hasActiveFinancing = $user->anggota->pembiayaan?->whereIn('status', [
+                    FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                    FinancingReqStatusEnum::TANGGUH->value,
+                ])->isNotEmpty();
 
                 if ($hasActiveFinancing) {
-                    throw ValidationException::withMessages(['anggota'=> 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
+                    throw ValidationException::withMessages(['anggota'=> 'Pemohon masih memiliki pembiayaan yang sedang berjalan']);
                 }
 
                 $hasEligibleSaving = AkunSimpanan::where('anggota_id', $user->anggota->id)
@@ -441,8 +539,10 @@ class PembiayaanController extends Controller
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon harus memiliki simpanan aktif minimal satu bulan']);
                 }
 
-                $hasActiveFinancing = $user->anggota->pembiayaan?->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-                ->isNotEmpty() ?? false;
+                $hasActiveFinancing = $user->anggota->pembiayaan?->whereIn('status', [
+                    FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                    FinancingReqStatusEnum::TANGGUH->value,
+                ])->isNotEmpty() ?? false;
 
                 if ($hasActiveFinancing) {
                     throw ValidationException::withMessages(['anggota'=> 'Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses']);
@@ -626,20 +726,21 @@ class PembiayaanController extends Controller
                         'tanggal' => $tanggal,
                         'bulan' => $bulan,
                         'tahun' => $tahun,
-                        'no_anggota' => $pembiayaan->anggota->user->user_code,
-                        'nama_anggota' => $pembiayaan->anggota->user->name,
-                        'financing_transaction_code' => $pembiayaan->financing_transaction_code,
-                        'product_name' => $pembiayaan->financingItem->name ?? '-',
+                        'no_anggota' => $pembiayaan->anggota->user->kode_pengguna,
+                        'nama_anggota' => $pembiayaan->anggota->user->nama,
+                        'financing_transaction_code' => $pembiayaan->kode_pembiayaan,
+                        'product_name' => $pembiayaan->objekPembiayaan->nama_barang ?? '-',
                         'total_paid_amount' => $costPrice + $margin,
                         'metode' => 'Tunai',
                         'repayment_total' => $costPrice + $margin,
                         'tenor' => $pembiayaan->tenor ?? 0,
+                        'satuan_tenor' => $pembiayaan->satuan_tenor,
                         'nama_pengurus' => auth()->user()->nama,
                         'jabatan_pengurus' => auth()->user()->roles->first()->name ?? 'Pengurus',
-                        'alamat' => $pembiayaan->anggota->alamat_domisili ?? $pembiayaan->anggota->residential_address ?? '-',
+                        'alamat' => $pembiayaan->anggota->alamat_domisili ?? $pembiayaan->anggota->alamat_ktp ?? '-',
                         'harga_perolehan' => $costPrice,
                         'margin_keuntungan' => $margin,
-                        'no_telp' => $pembiayaan->anggota->user->phone_number,
+                        'no_telp' => $pembiayaan->anggota->user->no_telp,
                         'qimah_ismiyyah' => $costPrice + $margin,
                         'qimah_haliyyah' => $costPrice + $margin,
                         'logo' => $src,
@@ -718,7 +819,7 @@ class PembiayaanController extends Controller
                 return $pembiayaan;
             });
 
-            if ($pembiayaan->payment_method === FinancingPaymentMethodEnum::CASH->value && session('receipt_url')) {
+            if ($pembiayaan->metode_pembayaran === FinancingPaymentMethodEnum::CASH->value && session('receipt_url')) {
                 return redirect()->route('admin.pembiayaan.pembayaran.success')->with('receipt_data', [
                     'financing_id' => $pembiayaan->id,
                     'struk_pembayaran' => session('receipt_url')
@@ -772,24 +873,23 @@ class PembiayaanController extends Controller
             })
             ->limit(5)
             ->get()
-            ->map(function ($anggota) {
-                $hasNoActiveFinancing = $anggota->pembiayaan?->where(
-                    'status',
-                        FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
-                        FinancingReqStatusEnum::TANGGUH->value,
-                )->isNotEmpty() ?? false;
+            ->map(function (Anggota $anggota) {
+                $hasActiveFinancing = $anggota->pembiayaan?->whereIn('status', [
+                FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                    FinancingReqStatusEnum::TANGGUH->value,
+                ])->isNotEmpty();
 
-                $anggota->is_have_no_obligation = $hasNoActiveFinancing;
+                $anggota->is_have_no_obligation = $hasActiveFinancing;
 
                 $hasEligibleSaving = AkunSimpanan::where('anggota_id', $anggota->id)
                     ->where('jenis_simpanan', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
                     ->where('created_at', '<=', now()->subMonth())
                     ->exists();
 
-                $anggota->ahliWaris = $anggota->ahliWaris->map(function ($ahli_waris) {
+                $anggota->setRelation('ahliWaris', $anggota->ahliWaris->map(function (AhliWaris $ahli_waris) {
                     $ahli_waris->hubungan = $ahli_waris->pivot->hubungan;
                     return $ahli_waris;
-                });
+                }));
 
                 $anggota->is_have_eligible_saving = $hasEligibleSaving;
                 $anggota->family_card = $anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()?->lampiran_dokumen ? asset('storage/' . $anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()->lampiran_dokumen) : null;
@@ -833,10 +933,9 @@ class PembiayaanController extends Controller
         $data['pengurus'] = auth()->user()->nama;
 
         $unpaidInstallment = $pembiayaan->angsuran
-            ->whereNotIn('status', [
-                InstallmentPaymentScheduleStatusEnum::PAID->value,
-                InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
-            ])
+            ->where('status', 
+                InstallmentPaymentScheduleStatusEnum::SCHEDULED->value
+            )
             ->sortBy('angsuran_ke')
             ->first();
 
@@ -845,6 +944,31 @@ class PembiayaanController extends Controller
         return inertia('Admin/Financing/Repayment/Create', [
             'data' => $data,
         ]);
+    }
+
+    public function batalkanPermohonan(string $id)
+    {
+        try {
+            $pembiayaan = Pembiayaan::findOrFail($id);
+
+            $allowedStatuses = [
+                FinancingReqStatusEnum::PENDING_REVIEW->value,
+                FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
+                FinancingReqStatusEnum::REJECTED->value,
+                FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value,
+            ];
+
+            if (!in_array($pembiayaan->status, $allowedStatuses)) {
+                return back()->withErrors(['error' => 'Status pembiayaan tidak mengizinkan pembatalan.']);
+            }
+
+            $pembiayaan->delete();
+
+            return redirect()->route('admin.pembiayaan.index')->with('success', 'Permohonan pembiayaan berhasil dibatalkan dan dihapus.');
+        } catch (Exception $e) {
+            Log::error('Error membatalkan permohonan pembiayaan: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal membatalkan permohonan.']);
+        }
     }
 
     public function storeRepayment(CreateRepaymentRequest $request)
@@ -882,7 +1006,6 @@ class PembiayaanController extends Controller
             return redirect()->route('admin.pembiayaan.index');
         }
 
-        // Reflash the session so if user reloads the page, they don't get redirected back immediately.
         session()->reflash();
 
         return inertia('Admin/Financing/Repayment/Result', [

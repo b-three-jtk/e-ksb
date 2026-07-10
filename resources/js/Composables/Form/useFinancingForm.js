@@ -2,7 +2,7 @@ import { ref, watch, computed, onMounted } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import { toast } from 'vue3-toastify'
-import { useForm } from '@inertiajs/vue3'
+import { useForm, router } from '@inertiajs/vue3'
 
 export function useFinancingForm(initialData = null) {
     // State
@@ -22,7 +22,7 @@ export function useFinancingForm(initialData = null) {
         // Anggota data
         anggota: {
             kode_pengguna: initialData?.anggota?.kode_pengguna || '',
-            name: initialData?.anggota?.nama || '',
+            nama: initialData?.anggota?.nama || '',
             nik: initialData?.anggota?.nik || '',
             email: initialData?.anggota?.email || '',
             no_telp: initialData?.anggota?.no_telp || '',
@@ -39,7 +39,7 @@ export function useFinancingForm(initialData = null) {
             jabatan_pekerjaan: initialData?.anggota?.jabatan_pekerjaan || '',
             nama_perusahaan: initialData?.anggota?.nama_perusahaan || '',
             bidang_usaha: initialData?.anggota?.bidang_usaha || '',
-            lama_bekerja: initialData?.anggota?.lama_bekerja || 0,
+            lama_bekerja: initialData?.anggota?.lama_bekerja,
             alamat_tempat_bekerja: initialData?.anggota?.alamat_tempat_bekerja || '',
             no_telp_kantor: initialData?.anggota?.no_telp_kantor || '',
 
@@ -58,7 +58,8 @@ export function useFinancingForm(initialData = null) {
         },
         // Pembiayaan data
         pembiayaan: {
-            name: initialData?.pembiayaan?.name || '',
+            id: initialData?.pembiayaan?.id || null,
+            nama_barang: initialData?.pembiayaan?.nama_barang || '',
             jenis_barang_id: initialData?.pembiayaan?.jenis_barang_id || null,
             brand: initialData?.pembiayaan?.brand || '',
             kondisi_produk: initialData?.pembiayaan?.kondisi_produk || '',
@@ -74,15 +75,16 @@ export function useFinancingForm(initialData = null) {
             status: initialData?.pembiayaan?.status || 'Menunggu Kelengkapan Dokumen',
             struk_pembelian: initialData?.pembiayaan?.struk_pembelian || null,
             tenor: initialData?.pembiayaan?.tenor || null,
+            satuan_tenor: initialData?.pembiayaan?.satuan_tenor || 'Bulan',
             harga_perkiraan: initialData?.pembiayaan?.harga_perkiraan || null,
             pemasok_id: initialData?.pembiayaan?.pemasok_id || null,
             tangguh_tgl_pembayaran: initialData?.pembiayaan?.tangguh_tgl_pembayaran || null,
         },
-        collateral: {
-            jenis_jaminan: initialData?.collateral?.jenis_jaminan || '',
-            nama_pemilik: initialData?.collateral?.nama_pemilik || '',
-            nilai_perkiraan_pasar: initialData?.collateral?.nilai_perkiraan_pasar || 0,
-            lokasi_kondisi_jaminan: initialData?.collateral?.lokasi_kondisi_jaminan || '',
+        jaminan: {
+            jenis_jaminan: initialData?.jaminan?.jenis_jaminan || '',
+            nama_pemilik: initialData?.jaminan?.nama_pemilik || '',
+            nilai_perkiraan_pasar: initialData?.jaminan?.nilai_perkiraan_pasar || 0,
+            lokasi_kondisi_jaminan: initialData?.jaminan?.lokasi_kondisi_jaminan || '',
         },
         verification: initialData?.verification || [],
         documents: {
@@ -254,7 +256,7 @@ export function useFinancingForm(initialData = null) {
             status: '',
             pemasok_id: null,
         }
-        form.collateral = {
+        form.jaminan = {
             jenis_jaminan: '',
             nama_pemilik: '',
             nilai_perkiraan_pasar: null,
@@ -478,6 +480,54 @@ export function useFinancingForm(initialData = null) {
         })
     }
 
+    const batalkan = () => {
+    Swal.fire({
+            title: 'Konfirmasi',
+            text: 'Apakah Anda yakin ingin membatalkan permohonan ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, batal',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#009141',
+    }).then((result) => {
+            if (result.isConfirmed) {
+                if (form.pembiayaan.id) {
+                    form.delete(`/admin/pembiayaan/batal/${form.pembiayaan.id}`, {
+                    onSuccess: (page) => {
+                        if (page.props.flash?.success) {
+                            toast(page.props.flash.success, {
+                                type: 'success',
+                                position: 'bottom-right',
+                            })
+                        }
+                    },
+                    onError: (errors) => {
+                        const errorMessages = Object.values(errors).flat()
+
+                        if (errorMessages.length > 0) {
+                            toast(errorMessages.join(', '), {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        } else {
+                            toast('Gagal menyimpan permohonan', {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        }
+                    }
+                })
+                } else {
+                    router.visit('/admin/pembiayaan')
+                    toast('Berhasil membatalkan permohonan', {
+                        type: 'success',
+                        position:'bottom-right'
+                    })
+                }
+            }
+    })
+    }
+
     onMounted(() => {
     if (initialData?.anggota) {
             isAnggotaSelected.value = true
@@ -508,6 +558,7 @@ export function useFinancingForm(initialData = null) {
         removeAhliWaris,
         submit,
         saveDraft,
-        finalize
+        finalize,
+        batalkan
     }
 }

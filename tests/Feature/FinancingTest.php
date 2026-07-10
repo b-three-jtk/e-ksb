@@ -1,21 +1,28 @@
 <?php
 
+use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MemberStatusEnum;
+use App\Enums\PositionEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\Pembiayaan;
-use App\Models\ObjekPembiayaan;
-use App\Models\PengaturanUmum;
-use App\Models\Angsuran;
-use App\Models\PembayaranAngsuran;
-use App\Models\Anggota;
+use App\Models\Akun;
 use App\Models\AkunSimpanan;
+use App\Models\Anggota;
+use App\Models\Angsuran;
+use App\Models\DetailJurnal;
+use App\Models\JenisBarang;
+use App\Models\Jurnal;
+use App\Models\ObjekPembiayaan;
 use App\Models\Pemasok;
+use App\Models\PembayaranAngsuran;
+use App\Models\Pembiayaan;
+use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
 use Database\Seeders\AkunSeeder;
-use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\JenisBarangSeeder;
+use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -62,7 +69,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'pembiayaan' => [
                     'nama_barang' => 'Motor Honda',
-                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
+                    'jenis_barang_id' => JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
                     'kuantitas' => 1,
                     'kondisi_produk' => 'Baru',
@@ -114,7 +121,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'pembiayaan' => [
                     'nama_barang' => 'Motor Honda',
-                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
+                    'jenis_barang_id' => JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
                     'kuantitas' => 1,
                     'kondisi_produk' => 'Baru',
@@ -175,7 +182,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'pembiayaan' => [
                     'nama_barang' => 'Motor Honda',
-                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
+                    'jenis_barang_id' => JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
                     'kuantitas' => 1,
                     'kondisi_produk' => 'Baru',
@@ -222,7 +229,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 ],
                 'pembiayaan' => [
                     'nama_barang' => 'Motor Honda',
-                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
+                    'jenis_barang_id' => JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
                     'kuantitas' => 1,
                     'kondisi_produk' => 'Baru',
@@ -233,7 +240,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
                 'jaminan' => [
                     'jenis_jaminan' => 'Motor',
                     'nama_pemilik' => 'Pemohon',
-                    'nilai_perkiraan_pasar' => 30000000,
+                    'nilai_perkiraan_pasar' => 52000000,
                     'lokasi_kondisi_jaminan' => 'Bandung',
                 ],
                 'income_slip_file' => UploadedFile::fake()->create('income_slip.jpg'),
@@ -311,7 +318,7 @@ describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah 
                 ],
                 'pembiayaan' => [
                     'nama_barang' => 'Motor Honda',
-                    'jenis_barang_id' => \App\Models\JenisBarang::first()->id,
+                    'jenis_barang_id' => JenisBarang::first()->id,
                     'harga_perkiraan' => 50000000,
                     'harga_beli_per_unit' => 50000000,
                     'harga_perolehan' => 50000000,
@@ -359,8 +366,20 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pembiayaan murabahah 
         $ketuaMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $ketuaMurabahah->syncRoles('Ketua Murabahah');
 
+        $danaAlokasi = Akun::where('nama_akun', 'Dana Alokasi Pembiayaan Murabahah')->first();
+        $jurnal = Jurnal::create([
+            'tgl_transaksi' => now(),
+        ]);
+        DetailJurnal::factory()->create([
+            'jurnal_id' => $jurnal->id,
+            'no_ref_akun' => $danaAlokasi->no_ref_akun,
+            'posisi_akun' => PositionEnum::DEBIT->value,
+            'nominal' => 100000000,
+        ]);
+
         $pembiayaan = Pembiayaan::factory()->create([
             'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
+            'harga_perkiraan' => 50000000,
         ]);
 
         $response = $this->actingAs($ketuaMurabahah)
@@ -404,9 +423,21 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pembiayaan murabahah 
         $ketuaMurabahahMember = Anggota::factory()->create(['pengguna_id' => $ketuaMurabahah->id, 'status' => MemberStatusEnum::ACTIVE->value]);
         $ketuaMurabahah->syncRoles('Ketua Murabahah');
 
+        $danaAlokasi = Akun::where('nama_akun', 'Dana Alokasi Pembiayaan Murabahah')->first();
+        $jurnal = Jurnal::create([
+            'tgl_transaksi' => now(),
+        ]);
+        DetailJurnal::factory()->create([
+            'jurnal_id' => $jurnal->id,
+            'no_ref_akun' => $danaAlokasi->no_ref_akun,
+            'posisi_akun' => PositionEnum::DEBIT->value,
+            'nominal' => 100000000,
+        ]);
+
         $pembiayaan = Pembiayaan::factory()->create([
             'anggota_id' => $ketuaMurabahahMember->id,
             'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
+            'harga_perkiraan' => 50000000,
         ]);
 
         $response = $this->actingAs($ketuaKoperasi)
@@ -576,7 +607,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan transaksi pembayaran angsu
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
             'tgl_akad' => now()->subMonths(11),
             'tenor' => 12,
-            'metode_pembayaran' => \App\Enums\FinancingPaymentMethodEnum::INSTALLMENT->value,
+            'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
         ]);
 
         $angsuran = Angsuran::factory()->create([
@@ -774,7 +805,7 @@ describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', func
         ]);
         Angsuran::factory()->create([
             'pembiayaan_id' => $finLancar->id,
-            'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            'status' => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             'tgl_jatuh_tempo' => '2026-07-26',
         ]);
 
@@ -787,7 +818,7 @@ describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', func
         ]);
         Angsuran::factory()->create([
             'pembiayaan_id' => $finKurangLancar->id,
-            'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            'status' => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             'tgl_jatuh_tempo' => '2026-01-26',
         ]);
 
@@ -800,7 +831,7 @@ describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', func
         ]);
         Angsuran::factory()->create([
             'pembiayaan_id' => $finDiragukan->id,
-            'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            'status' => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             'tgl_jatuh_tempo' => '2025-10-26',
         ]);
 
@@ -813,7 +844,7 @@ describe('Dapat memetakan seluruh kolektibilitas pembiayaan dengan akurat', func
         ]);
         Angsuran::factory()->create([
             'pembiayaan_id' => $finMacet->id,
-            'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+            'status' => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             'tgl_jatuh_tempo' => '2025-11-26',
         ]);
 
@@ -935,7 +966,7 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
             'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
             'tgl_akad' => now()->subMonths(11),
             'tenor' => 12,
-            'metode_pembayaran' => \App\Enums\FinancingPaymentMethodEnum::INSTALLMENT->value,
+            'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
         ]);
 
         $angsuran = Angsuran::factory()->create([

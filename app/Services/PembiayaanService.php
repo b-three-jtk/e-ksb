@@ -7,56 +7,6 @@ use Carbon\Carbon;
 
 class PembiayaanService
 {
-    public function getPersonalpembiayaan(string $anggotaId, int $perPage = 10, string $search = '')
-    {
-        return Pembiayaan::query()
-            ->with(['objekPembiayaan.jenisBarang'])
-            ->where('anggota_id', $anggotaId)
-            ->whereIn('status', ['Lunas', 'Angsuran Berjalan', 'Pembayaran Tangguh'])
-            ->when($search !== '', function ($q) use ($search) {
-                $q->whereRaw(
-                    'LOWER(kode_pembiayaan) LIKE ?',
-                    ['%' . mb_strtolower($search) . '%']
-                );
-            })
-            ->orderByDesc('tgl_akad')
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
-            ->withQueryString()
-            ->through(fn (Pembiayaan $pembiayaan) => $this->mapFinancingForList($pembiayaan));
-    }
-
-    public function getActiveFinancing(string $anggotaId): ?array
-    {
-        $activeFinancingModel = Pembiayaan::query()
-            ->with(['objekPembiayaan.jenisBarang'])
-            ->where('anggota_id', $anggotaId)
-            ->where('status', 'Angsuran Berjalan')
-            ->orderByDesc('tgl_akad')
-            ->orderByDesc('created_at')
-            ->first();
-
-        return $activeFinancingModel ? $this->mapFinancingForList($activeFinancingModel) : null;
-    }
-
-    public function mapFinancingForList(Pembiayaan $pembiayaan): array
-    {
-        $productName = null;
-
-        if ($pembiayaan->objekPembiayaan) {
-            $productName = $pembiayaan->objekPembiayaan->nama_barang;
-        }
-
-        return [
-            'id' => $pembiayaan->id,
-            'transaction_code' => $pembiayaan->kode_pembiayaan,
-            'tgl_akad' => $pembiayaan->tgl_akad,
-            'product_name' => $productName,
-            'status' => $pembiayaan->status,
-            'remaining_balance' => 0,
-            'loan' => null,
-        ];
-    }
 
     public function computePembiayaanSummary(Pembiayaan $pembiayaan): void
     {

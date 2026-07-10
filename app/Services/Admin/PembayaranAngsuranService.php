@@ -125,6 +125,7 @@ class PembayaranAngsuranService
                 'metode' => $validatedData['method'],
                 'repayment_total' => $calculatedData['repayment_total'],
                 'tenor' => $pembiayaan->tenor,
+                'satuan_tenor' => $pembiayaan->satuan_tenor ?: 'Bulan',
                 'nama_pengurus' => auth()->user()->name,
                 'jabatan_pengurus' => auth()->user()->roles->first()->name ?? 'Pengurus',
                 'alamat' => $pembiayaan->anggota->alamat_domisili ?? $pembiayaan->anggota->alamat_ktp ?? '-',

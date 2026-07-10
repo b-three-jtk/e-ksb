@@ -19,7 +19,6 @@ class DetailJurnalFactory extends Factory
             'posisi_akun' => $this->faker->randomElement(PositionEnum::cases())->value,
             'nominal' => $this->faker->numberBetween(10000, 100000000),
             'updated_by' => Pengguna::factory(),
-            'tgl_transaksi' => $this->faker->dateTime(),
         ];
     }
 }

@@ -1,7 +1,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Button from '@/Components/Form/Button.vue'
 import { useFinancingForm } from '@/Composables/Form/useFinancingForm'
 import { useFinancingValidation } from '@/Composables/Validation/useFinancingValidation'
@@ -18,6 +18,16 @@ const { onlyLetters, onlyNumbers } = useInputSanitizers()
 
 const activeStep = ref(1)
 const totalSteps = 5
+
+onMounted(() => {
+    if (props.pembiayaan && form.pembiayaan.status) {
+        if (form.pembiayaan.status === 'Disetujui') {
+            activeStep.value = 4
+        } else if (['Disetujui dengan Catatan', 'Menunggu Kelengkapan Dokumen', 'Ditolak'].includes(form.pembiayaan.status)) {
+            activeStep.value = 3
+        }
+    }
+})
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
@@ -49,6 +59,7 @@ const {
     submit,
     saveDraft,
     finalize,
+    batalkan
 } = useFinancingForm(props.pembiayaan)
 
 const {
@@ -68,7 +79,7 @@ const prevStep = () => {
 }
 
 const isStep3Valid = computed(() =>
-    form.pembiayaan.name && form.collateral.jenis_jaminan && !form.processing
+    form.pembiayaan.nama_barang && !form.processing
 )
 
 const isFinalizationValid = computed(() =>
@@ -122,6 +133,10 @@ const handleFinalize = () => {
 
 const handleSaveDraft = () => {
     saveDraft()
+}
+
+const handleCancel = () => {
+    batalkan()
 }
 </script>
 
@@ -184,6 +199,7 @@ const handleSaveDraft = () => {
                 <Finalization
                     v-if="activeStep === 5"
                     :form="form"
+                    :data="props.data"
                     :errors="errors"
                     @validate-field="(field) => validateField(field, 5)"
                 />
@@ -194,6 +210,13 @@ const handleSaveDraft = () => {
                     </Button>
 
                     <div class="flex items-center gap-4 justify-end">
+                        <Button
+                            v-if="activeStep >= 3"
+                            variant="gray"
+                            @click="handleCancel()"
+                        >
+                            Batalkan Permohonan
+                        </Button>
 
                         <Button
                             v-if="activeStep >= 3"

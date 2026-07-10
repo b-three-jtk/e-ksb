@@ -16,7 +16,7 @@ export function useFinancingValidation(form) {
 
     // Helper validators
     const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    const isValidPhone = (phone) => /^[0-9]{8,14}$/.test(phone)
+    const isValidPhone = (phone) => /^[0-9]{10,20}$/.test(phone)
     const isValidNik   = (nik)   => /^[0-9]{16}$/.test(nik)
     const isValidDependents = (jml_tanggungan) => /^[0-9]+$/.test(jml_tanggungan)
 
@@ -48,8 +48,20 @@ export function useFinancingValidation(form) {
         if (!isValidDependents(m.jml_tanggungan))
             errs.jml_tanggungan = 'Jumlah tanggungan harus angka.'
 
-        if (!form.anggota.ahli_waris || form.anggota.ahli_waris.length === 0)
+        if (!form.anggota.ahli_waris || form.anggota.ahli_waris.length === 0) {
             errs.ahli_waris = 'Minimal satu data ahli waris wajib ditambahkan.'
+        } else {
+            const hasInvalidAhliWaris = form.anggota.ahli_waris.some(heir => {
+                return !heir.nik_ahli_waris || !isValidNik(heir.nik_ahli_waris) ||
+                       !heir.nama_ahli_waris?.trim() ||
+                       !heir.hubungan?.trim() ||
+                       !heir.kontak_ahli_waris || !isValidPhone(heir.kontak_ahli_waris);
+            });
+
+            if (hasInvalidAhliWaris) {
+                errs.ahli_waris = 'Pastikan NIK (16 digit), Nama, Hubungan, dan Kontak pada semua data ahli waris telah diisi dengan benar.';
+            }
+        }
 
         if (form.pembiayaan.status !== 'Belum Ditinjau') {
             if (m.is_have_eligible_saving === false)
@@ -66,27 +78,14 @@ export function useFinancingValidation(form) {
         const m = form.anggota
         const isValidTenureYear = (lama_bekerja) => /^[0-9]+$/.test(lama_bekerja)
 
-        if (!m.jabatan_pekerjaan?.trim())
-            errs.jabatan_pekerjaan = 'Jabatan wajib diisi.'
+        if (!m.status_pekerjaan?.trim())
+            errs.status_pekerjaan = 'Status Pekerjaan wajib diisi.'
 
-        if (!m.nama_perusahaan?.trim())
-            errs.nama_perusahaan = 'Nama perusahaan/bisnis wajib diisi.'
-
-        if (!m.bidang_usaha?.trim())
-            errs.bidang_usaha = 'Bidang pekerjaan wajib diisi.'
-
-        if (!m.lama_bekerja && m.lama_bekerja !== 0)
-            errs.lama_bekerja = 'Lama bekerja wajib diisi.'
-        else if (!isValidTenureYear(m.lama_bekerja))
+        if (m.lama_bekerja && !isValidTenureYear(m.lama_bekerja))
             errs.lama_bekerja = 'Lama bekerja harus berupa angka.'
 
-        if (!m.no_telp_kantor?.trim())
-            errs.no_telp_kantor = 'Kontak perusahaan wajib diisi.'
-        else if (!isValidPhone(m.no_telp_kantor))
+        if (m.no_telp_kantor && !isValidPhone(m.no_telp_kantor))
             errs.no_telp_kantor = 'Kontak perusahaan harus 8-13 digit angka.'
-
-        if (!m.alamat_tempat_bekerja?.trim())
-            errs.alamat_tempat_bekerja = 'Alamat perusahaan wajib diisi.'
 
         if (!form.income_slip_file && !form.documents?.income_slip)
             errs.income_slip_file = 'Slip gaji wajib diunggah.'
@@ -108,8 +107,8 @@ export function useFinancingValidation(form) {
     const validateStep3 = () => {
         const errs = {}
 
-        if (!form.pembiayaan.name?.trim())
-            errs.name = 'Nama objek pembiayaan wajib diisi.'
+        if (!form.pembiayaan.nama_barang?.trim())
+            errs.nama_barang = 'Nama objek pembiayaan wajib diisi.'
 
         if (!form.pembiayaan.kondisi_produk)
             errs.kondisi_produk = 'Kondisi objek pembiayaan wajib diisi.'
@@ -125,11 +124,21 @@ export function useFinancingValidation(form) {
         if (!form.pembiayaan.spesifikasi_barang?.trim())
             errs.spesifikasi_barang = 'Spesifikasi objek pembiayaan wajib diisi.'
 
-        if (!form.pembiayaan.harga_perkiraan)
-            errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
+        if (form.jaminan.jenis_jaminan?.trim()) {
+            if (!form.jaminan.nama_pemilik?.trim()) {
+                errs.nama_pemilik = 'Atas nama pemilik jaminan wajib diisi.';
+            }
+            if (!form.jaminan.nilai_perkiraan_pasar) {
+                errs.nilai_perkiraan_pasar = 'Nilai perkiraan pasar wajib diisi.';
+            }
+            if (!form.jaminan.lokasi_kondisi_jaminan?.trim()) {
+                errs.lokasi_kondisi_jaminan = 'Lokasi/kondisi jaminan wajib diisi.';
+            }
+        }
 
-        if (form.collateral.nilai_perkiraan_pasar > harga_perkiraan)
+        if (form.jaminan.nilai_perkiraan_pasar && form.jaminan.nilai_perkiraan_pasar > form.pembiayaan.harga_perkiraan) {
             errs.nilai_perkiraan_pasar = 'Nilai jaminan harus kurang dari atau sama dengan perkiraan harga objek.'
+        }
 
         return errs
     }
