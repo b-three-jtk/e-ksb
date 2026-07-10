@@ -1074,10 +1074,27 @@ class PembiayaanController extends Controller
 
     public function reschedulePayment(Request $request, Pembiayaan $pembiayaan)
     {
+        $tanggalAkhirPeriode = \App\Models\PengaturanUmum::where('key', 'tanggal_akhir_periode')->value('value');
         $validated = $request->validate([
             'angsuran_id' => 'required|exists:angsuran,id',
-            'tgl_jatuh_tempo'       => ['required', 'date', 'after_or_equal:today'],
+            'tgl_jatuh_tempo'       => ['required', 'date', 'after_or_equal:today', 'before_or_equal:' . $tanggalAkhirPeriode],
+        ], [
+            'tgl_jatuh_tempo.before_or_equal' => 'Jadwal angsuran tidak boleh melebihi tanggal akhir periode (' . $tanggalAkhirPeriode . ').'
         ]);
+
+        $currentInstallment = \App\Models\Angsuran::findOrFail($validated['angsuran_id']);
+        $remainingInstallmentsCount = \App\Models\Angsuran::where('pembiayaan_id', $pembiayaan->id)
+            ->where('angsuran_ke', '>=', $currentInstallment->angsuran_ke)
+            ->count();
+
+        if ($remainingInstallmentsCount > 1) {
+            $lastInstallmentDate = \Carbon\Carbon::parse($validated['tgl_jatuh_tempo'])->addMonths($remainingInstallmentsCount - 1);
+            $endDate = \Carbon\Carbon::parse($tanggalAkhirPeriode);
+
+            if ($lastInstallmentDate->gt($endDate)) {
+                return back()->withErrors(['tgl_jatuh_tempo' => 'Reschedule ditolak karena jadwal angsuran terakhir (' . $lastInstallmentDate->format('Y-m-d') . ') akan melebihi tanggal akhir periode pengaturan umum (' . $tanggalAkhirPeriode . ').']);
+            }
+        }
 
         try {
             $this->pembayaranAngsuranService->rescheduleInstallments(
@@ -1086,7 +1103,7 @@ class PembiayaanController extends Controller
                 $validated['tgl_jatuh_tempo']
             );
 
-            return redirect("/admin/pembiayaan/show/{pembiayaan->id}")
+            return redirect("/admin/pembiayaan/show/{$pembiayaan->id}")
                 ->with('success', 'Jadwal pembayaran berhasil diperbarui');
 
         } catch (\Throwable $th) {

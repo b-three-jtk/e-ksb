@@ -131,9 +131,9 @@ async function submitReschedule() {
     router.post(
         `/admin/pembiayaan/${props.pembiayaan.id}/payments/reschedule`,
         {
-            installment_id:
+            angsuran_id:
                 selectedFinancing.value.angsuran_id,
-            due_date:
+            tgl_jatuh_tempo:
                 rescheduleDate.value,
         },
         {
@@ -153,16 +153,20 @@ async function submitReschedule() {
             },
 
             onError: (errors) => {
-
                 console.error(errors)
-
-                toast(
-                    'Gagal melakukan reschedule',
-                    {
+                const errorMessages = Object.values(errors).flat()
+                
+                if (errorMessages.length > 0) {
+                    toast(errorMessages.join(', '), {
                         type: 'error',
                         position: 'bottom-right',
-                    },
-                )
+                    })
+                } else {
+                    toast('Gagal melakukan reschedule', {
+                        type: 'error',
+                        position: 'bottom-right',
+                    })
+                }
             },
 
             onFinish: () => {
