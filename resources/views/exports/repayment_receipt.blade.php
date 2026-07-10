@@ -195,7 +195,7 @@
             <tr>
                 <td>Jangka Waktu Pembiayaan</td>
                 <td>:</td>
-                <td>{{ $tenor }} Bulan</td>
+                <td>{{ $tenor }} {{ $satuan_tenor }}</td>
             </tr>
             <tr>
                 <td colspan="6">Berdasarkan hasil verifikasi dan perhitungan pembiayaan, dengan ini dinyatakan bahwa:</td>

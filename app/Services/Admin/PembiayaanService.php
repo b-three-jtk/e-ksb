@@ -148,6 +148,7 @@ class PembiayaanService
             'jenisBarang' => DB::table('jenis_barang')->select('id', 'nama_jenis_barang')->get(),
             'pemasok' => DB::table('pemasok')->select('id', 'nama_pemasok', 'alamat_pemasok')->get(),
             'margin_percentage' => PengaturanUmum::where('key', 'murabahah_margin_percentage')->where('tgl_diberlakukan', '<=', now())->latest()->first()?->value,
+            'tanggal_akhir_periode' => PengaturanUmum::where('key', 'tanggal_akhir_periode')->latest()->first()?->value,
         ];
     }
 
@@ -297,37 +298,52 @@ class PembiayaanService
             ->latest()
             ->first();
 
+        $hargaPerolehan = (float) ($financingData['harga_perolehan'] ?? 0);
+        $marginKeuntungan = (float) ($financingData['margin_keuntungan'] ?? 0);
+        
+        if ($marginKeuntungan == 0 && $hargaPerolehan > 0) {
+            $marginPercent = PengaturanUmum::where('key', 'murabahah_margin_percentage')
+                ->where('tgl_diberlakukan', '<=', now())
+                ->orderBy('tgl_diberlakukan', 'desc')
+                ->first()?->value ?? 0;
+            $marginKeuntungan = $hargaPerolehan * ($marginPercent / 100);
+        }
+        
+        if ($hargaPerolehan > 0) {
+            $hargaPerkiraan = $hargaPerolehan + $marginKeuntungan;
+        } else {
+            $hargaPerkiraan = $financingData['harga_perkiraan'] ?? null;
+        }
+
         if ($existingFinancing) {
             // Update yang sudah ada
             $existingFinancing->update([
                 'uang_muka'   => $financingData['uang_muka'] ?? 0,
                 'tgl_akad'      => $financingData['tgl_akad'] ?? null,
-                'harga_perolehan'     => $financingData['harga_perolehan'] ?? null,
-                'margin_keuntungan'  => $financingData['margin_keuntungan'] ?? null,
+                'harga_perolehan'     => $hargaPerolehan,
+                'margin_keuntungan'  => $marginKeuntungan,
                 'metode_pembayaran' => $financingData['metode_pembayaran'] ?? null,
                 'updated_by'     => $updatedBy,
-                'harga_perkiraan' => $financingData['harga_perkiraan'] ?? null,
+                'harga_perkiraan' => $hargaPerkiraan,
                 'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
                 'dokumen_akad' => $request->hasFile('akad_document_file') ? $request->file('akad_document_file')->store('documents', 'public') : $existingFinancing->dokumen_akad ?? null,
+                'tenor' => $financingData['tenor'] ?? null,
+                'satuan_tenor' => $financingData['satuan_tenor'] ?? 'Bulan',
             ]);
 
-            if (($financingData['metode_pembayaran'] ?? null) === FinancingPaymentMethodEnum::INSTALLMENT->value) {
-                $existingFinancing->update([
-                    'tenor' => $financingData['tenor'] ?? null,
-                ]);
-            }
             $pembiayaan = $existingFinancing;
         } else {
             // Buat baru kalau memang belum ada sama sekali
             $pembiayaan = Pembiayaan::create([
                 'anggota_id'      => $user->anggota->id,
                 'uang_muka'   => $financingData['uang_muka'] ?? 0,
-                'harga_perkiraan' => $financingData['harga_perkiraan'] ?? null,
-                'harga_perolehan'     => $financingData['harga_perolehan'] ?? null,
-                'margin_keuntungan'  => $financingData['margin_keuntungan'] ?? null,
+                'harga_perkiraan' => $hargaPerkiraan,
+                'harga_perolehan'     => $hargaPerolehan,
+                'margin_keuntungan'  => $marginKeuntungan,
                 'tgl_akad'      => $financingData['tgl_akad'] ?? null,
                 'metode_pembayaran' => $financingData['metode_pembayaran'] ?? null,
                 'tenor'          => $financingData['tenor'] ?? null,
+                'satuan_tenor' => $financingData['satuan_tenor'] ?? 'Bulan',
                 'updated_by'     => $updatedBy,
                 'status'         => $financingData['status'] ?? FinancingReqStatusEnum::WAITING_DOCUMENTS->value,
             ]);
@@ -394,12 +410,14 @@ class PembiayaanService
         if (!$pembiayaan->tenor) return;
 
         $installmentAmount = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $pembiayaan->tenor;
+        $intervalMethod = $pembiayaan->satuan_tenor === 'Minggu' ? 'addWeeks' : 'addMonths';
+        
         for ($i = 1; $i <= $pembiayaan->tenor; $i++) {
             Angsuran::create([
                 'pembiayaan_id'   => $pembiayaan->id,
                 'angsuran_ke' => $i,
                 'nominal_angsuran'         => round($installmentAmount, 2),
-                'tgl_jatuh_tempo'       => $pembiayaan->tgl_akad->addMonths($i),
+                'tgl_jatuh_tempo'       => $pembiayaan->tgl_akad->copy()->{$intervalMethod}($i),
                 'status'         => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
             ]);
         }

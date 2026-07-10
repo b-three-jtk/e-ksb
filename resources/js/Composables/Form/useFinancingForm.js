@@ -22,7 +22,7 @@ export function useFinancingForm(initialData = null) {
         // Anggota data
         anggota: {
             kode_pengguna: initialData?.anggota?.kode_pengguna || '',
-            name: initialData?.anggota?.nama || '',
+            nama: initialData?.anggota?.nama || '',
             nik: initialData?.anggota?.nik || '',
             email: initialData?.anggota?.email || '',
             no_telp: initialData?.anggota?.no_telp || '',
@@ -39,7 +39,7 @@ export function useFinancingForm(initialData = null) {
             jabatan_pekerjaan: initialData?.anggota?.jabatan_pekerjaan || '',
             nama_perusahaan: initialData?.anggota?.nama_perusahaan || '',
             bidang_usaha: initialData?.anggota?.bidang_usaha || '',
-            lama_bekerja: initialData?.anggota?.lama_bekerja || 0,
+            lama_bekerja: initialData?.anggota?.lama_bekerja,
             alamat_tempat_bekerja: initialData?.anggota?.alamat_tempat_bekerja || '',
             no_telp_kantor: initialData?.anggota?.no_telp_kantor || '',
 
@@ -58,7 +58,8 @@ export function useFinancingForm(initialData = null) {
         },
         // Pembiayaan data
         pembiayaan: {
-            name: initialData?.pembiayaan?.name || '',
+            id: initialData?.pembiayaan?.id || null,
+            nama_barang: initialData?.pembiayaan?.nama_barang || '',
             jenis_barang_id: initialData?.pembiayaan?.jenis_barang_id || null,
             brand: initialData?.pembiayaan?.brand || '',
             kondisi_produk: initialData?.pembiayaan?.kondisi_produk || '',
@@ -74,15 +75,16 @@ export function useFinancingForm(initialData = null) {
             status: initialData?.pembiayaan?.status || 'Menunggu Kelengkapan Dokumen',
             struk_pembelian: initialData?.pembiayaan?.struk_pembelian || null,
             tenor: initialData?.pembiayaan?.tenor || null,
+            satuan_tenor: initialData?.pembiayaan?.satuan_tenor || 'Bulan',
             harga_perkiraan: initialData?.pembiayaan?.harga_perkiraan || null,
             pemasok_id: initialData?.pembiayaan?.pemasok_id || null,
             tangguh_tgl_pembayaran: initialData?.pembiayaan?.tangguh_tgl_pembayaran || null,
         },
-        collateral: {
-            jenis_jaminan: initialData?.collateral?.jenis_jaminan || '',
-            nama_pemilik: initialData?.collateral?.nama_pemilik || '',
-            nilai_perkiraan_pasar: initialData?.collateral?.nilai_perkiraan_pasar || 0,
-            lokasi_kondisi_jaminan: initialData?.collateral?.lokasi_kondisi_jaminan || '',
+        jaminan: {
+            jenis_jaminan: initialData?.jaminan?.jenis_jaminan || '',
+            nama_pemilik: initialData?.jaminan?.nama_pemilik || '',
+            nilai_perkiraan_pasar: initialData?.jaminan?.nilai_perkiraan_pasar || 0,
+            lokasi_kondisi_jaminan: initialData?.jaminan?.lokasi_kondisi_jaminan || '',
         },
         verification: initialData?.verification || [],
         documents: {
@@ -254,7 +256,7 @@ export function useFinancingForm(initialData = null) {
             status: '',
             pemasok_id: null,
         }
-        form.collateral = {
+        form.jaminan = {
             jenis_jaminan: '',
             nama_pemilik: '',
             nilai_perkiraan_pasar: null,

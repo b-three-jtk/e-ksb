@@ -1,4 +1,4 @@
-<script setup>
+r<script setup>
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import { ref, computed } from 'vue'

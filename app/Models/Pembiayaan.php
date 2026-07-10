@@ -28,6 +28,7 @@ class Pembiayaan extends Model
         'status',
         'metode_pembayaran',
         'tenor',
+        'satuan_tenor',
         'dokumen_akad',
         'harga_perkiraan',
 

@@ -324,7 +324,7 @@ const submitForm = () => {
                     {{ methodError }}
                 </p>
 
-                <div v-if="form.method === 'Non-Tunai'" class="mt-6 flex flex-col gap-6">
+                <div v-if="form.method === 'Non-Tunai'" class="mt-6 grid grid-cols-2 gap-6">
                     <BaseInputAdmin 
                         v-model="form.no_rekening" 
                         label="Rekening Bank Anggota" 
@@ -332,16 +332,21 @@ const submitForm = () => {
                         required 
                         :selectables="rekeningSelectables"
                         @update:modelValue="handleRekeningChange"
-                        hint="Pilih rekening bank yang digunakan untuk transfer pembayaran pelunasan."
+                        hint="Pilih rekening bank/e-wallet yang digunakan untuk transfer pembayaran pelunasan"
                     />
-                    <BaseInputAdmin 
+                    <div class="">
+                        <BaseInputAdmin 
                         v-model="form.bukti_pembayaran" 
                         label="Bukti Pembayaran (Transfer)" 
                         type="file" 
                         required 
-                        accept="image/*,.pdf"
-                        hint="Unggah bukti transfer (format JPG, PNG, atau PDF)."
+                        accept="image/*"
                     />
+                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <p>Format: JPG, JPEG, PNG</p>
+                        <p>Max. 2 MB per file</p>
+                    </div>
+                    </div>
                 </div>
 
                 <div class="self-end mt-4">

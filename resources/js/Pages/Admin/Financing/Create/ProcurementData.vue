@@ -156,12 +156,12 @@ const onFieldChange = (field) => emit('validate-field', field)
 
             <!-- Wakalah section -->
             <div v-if="form.is_wakalah || form.pembiayaan.akad_wakalah_date" class="grid grid-cols-2 items-end gap-6 mt-4">
-                <a href="/docs/AkadWakalah.docx" target="_blank"
-                    class="border border-gray-300 flex justify-between rounded-lg p-4">
-                    <div class="text-sm text-primary hover:underline">
+                <a :href="form.pembiayaan.id ? `/admin/pembiayaan/${form.pembiayaan.id}/wakalah/download` : '#'" target="_blank"
+                    class="border border-primary bg-primary/5 flex justify-between rounded-lg p-4 transition-colors hover:bg-primary/10">
+                    <div class="text-sm text-primary font-medium">
                         Unduh Dokumen Akad Wakalah
                     </div>
-                    <span class="icon-[tabler--download] text-green-500"></span>
+                    <span class="icon-[tabler--download] text-primary text-xl"></span>
                 </a>
                 <div class="col-span-2 grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">

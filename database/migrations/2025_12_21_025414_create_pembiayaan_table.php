@@ -26,6 +26,7 @@ return new class extends Migration
             $table->date('tgl_akad')->nullable();
             $table->date('tgl_lunas')->nullable();
             $table->integer('tenor')->nullable();
+            $table->string('satuan_tenor')->nullable()->default('Bulan');
             $table->decimal('harga_perkiraan', 15, 2)->nullable();
 
             // set null so that if the anggota is deleted, the pembiayaan record will not be deleted but the id fk will be set to null

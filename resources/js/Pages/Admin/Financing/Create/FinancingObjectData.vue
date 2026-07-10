@@ -85,9 +85,9 @@ const onFieldChange = (field) => emit('validate-field', field)
                 </div>
             </div>
 
-            <BaseInputAdmin v-model="form.pembiayaan.name" label="Nama Produk" placeholder="Masukkan nama produk"
-                required :error="errors?.financing_name" @input="onFieldChange('financing_name')" />
-            <BaseInputAdmin v-model="form.pembiayaan.jenis_barang_id" label="Kategori Produk" type="select"
+            <BaseInputAdmin v-model="form.pembiayaan.nama_barang" label="Nama Produk" placeholder="Masukkan nama produk"
+                required :error="errors?.nama_barang" @input="onFieldChange('financing_name')" />
+            <BaseInputAdmin required v-model="form.pembiayaan.jenis_barang_id" label="Kategori Produk" type="select"
                 :selectables="jenisBarangelectables" @update:modelValue="handleJenisBarangChange" />
             <BaseInputAdmin required v-model="form.pembiayaan.kondisi_produk" label="Kondisi" type="select"
                 :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
@@ -105,14 +105,14 @@ const onFieldChange = (field) => emit('validate-field', field)
             <h1 class="card-title">Jaminan (Rahn)</h1>
         </div>
         <div class="grid grid-cols-2 gap-4 p-4">
-            <BaseInputAdmin v-model="form.collateral.jenis_jaminan" label="Jenis Agunan"
-                placeholder="Masukkan jenis agunan" required :error="errors?.jenis_jaminan"
+            <BaseInputAdmin v-model="form.jaminan.jenis_jaminan" label="Jenis Agunan"
+                placeholder="Masukkan jenis agunan" :error="errors?.jenis_jaminan"
                 @input="onFieldChange('jenis_jaminan')" />
-            <BaseInputAdmin v-model="form.collateral.nama_pemilik" required label="Atas Nama"
+            <BaseInputAdmin v-model="form.jaminan.nama_pemilik" label="Atas Nama"
                 placeholder="Masukkan nama pemilik" />
-            <BaseInputAdmin v-model="form.collateral.nilai_perkiraan_pasar" label="Nilai Perkiraan Pasar" isMoney
+            <BaseInputAdmin v-model="form.jaminan.nilai_perkiraan_pasar" label="Nilai Perkiraan Pasar" isMoney
                 placeholder="Masukkan nilai perkiraan pasar" />
-            <BaseInputAdmin v-model="form.collateral.lokasi_kondisi_jaminan" label="Lokasi/Kondisi Agunan" type="textarea"
+            <BaseInputAdmin v-model="form.jaminan.lokasi_kondisi_jaminan" label="Lokasi/Kondisi Agunan" type="textarea"
                 rows="4" placeholder="Masukkan lokasi atau kondisi agunan" />
         </div>
 

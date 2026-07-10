@@ -70,12 +70,13 @@ class StoreFinancingRequest extends FormRequest
             'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
             'pembiayaan.pemasok_id' => 'required|exists:pemasok,id',
             'pembiayaan.tangguh_tgl_pembayaran' => 'nullable|date|after_or_equal:pembiayaan.tgl_akad',
+            'pembiayaan.satuan_tenor' => 'nullable|string|in:Bulan,Minggu',
 
             // Jaminan data
             'jaminan.jenis_jaminan' => 'nullable|string|max:255',
-            'jaminan.nama_pemilik' => 'nullable|string|max:255',
-            'jaminan.nilai_perkiraan_pasar' => 'nullable|numeric|min:0',
-            'jaminan.lokasi_kondisi_jaminan' => 'nullable|string|max:500',
+            'jaminan.nama_pemilik' => 'required_with:jaminan.jenis_jaminan|nullable|string|max:255',
+            'jaminan.nilai_perkiraan_pasar' => 'required_with:jaminan.jenis_jaminan|nullable|numeric|min:0',
+            'jaminan.lokasi_kondisi_jaminan' => 'required_with:jaminan.jenis_jaminan|nullable|string|max:500',
 
             // Pemasok data
             'pemasok.nama_pemasok' => 'required|string|max:255',
