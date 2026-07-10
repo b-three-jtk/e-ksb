@@ -148,7 +148,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                 label="Nomor Telepon"
                 required
                 placeholder="Masukkan nomor telepon"
-                max="14"
+                max="20"
                 v-model="form.anggota.no_telp"
                 :error="errors?.no_telp"
                 @input="form.anggota.no_telp = normalizePhoneNumber(form.anggota.no_telp, props.onlyNumbers)"

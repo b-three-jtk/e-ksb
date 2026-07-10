@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
-import { usePage } from '@inertiajs/vue3'
+import { usePage, router } from '@inertiajs/vue3'
+import { toast } from 'vue3-toastify'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import Info from '@/Components/Form/Info.vue'
@@ -14,6 +15,7 @@ import dateParser from '@/Composables/dateParser.js'
 import useFinancingStatus from '@/Composables/useFinancingStatus.js'
 import ModalDocument from '@/Components/ModalDocument.vue'
 import Documents from './Show/Documents.vue'
+import Swal from 'sweetalert2'
 
 const props = defineProps({
     data: { type: Object, required: true },
@@ -71,6 +73,46 @@ const openReceiptModal = (receiptPath) => {
 
     modalRef.value.openModal()
 }
+
+const batalkan = () => {
+    Swal.fire({
+            title: 'Konfirmasi',
+            text: 'Apakah Anda yakin ingin membatalkan permohonan ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, batal',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#009141',
+    }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(`/admin/pembiayaan/batal/${props.data.id}`, {
+                    onSuccess: (page) => {
+                        if (page.props.flash?.success) {
+                            toast(page.props.flash.success, {
+                                type: 'success',
+                                position: 'bottom-right',
+                            })
+                        }
+                    },
+                    onError: (errors) => {
+                        const errorMessages = Object.values(errors).flat()
+
+                        if (errorMessages.length > 0) {
+                            toast(errorMessages.join(', '), {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        } else {
+                            toast('Gagal menyimpan permohonan', {
+                                type: 'error',
+                                position: 'bottom-right',
+                            })
+                        }
+                    }
+                })
+            }
+    })
+}
 </script>
 
 <template>
@@ -85,6 +127,12 @@ const openReceiptModal = (receiptPath) => {
                     </h1>
                 </div>
                 <div class="flex items-center gap-4">
+                    <Button
+                        v-if="data.status !== 'Angsuran Berjalan' && data.status !== 'Tangguh'"
+                        variant="gray"
+                        @click="batalkan()">
+                        Batalkan Permohonan
+                    </Button>
                     <Button v-if="canPayBill && data.status === 'Angsuran Berjalan'" :href="`/admin/pembiayaan/repayment/${data.id}`" variant="secondary">
                         <span class="icon-[tabler--moneybag-move]" style="width:18px;height:18px;" />
                         Pelunasan Dipercepat

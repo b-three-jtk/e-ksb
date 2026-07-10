@@ -153,6 +153,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/pembiayaan/{pembiayaan}/payments/store', [PembiayaanController::class, 'storePayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.payments.store');
     Route::post('/pembiayaan/{pembiayaan}/payments/reschedule', [PembiayaanController::class, 'reschedulePayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.payments.reschedule');
     Route::get('/pembiayaan/pembayaran/struk', [PembiayaanController::class, 'showPaymentSuccess'])->middleware('permission:view_murabahah')->name('pembiayaan.pembayaran.success');
+    Route::delete('/pembiayaan/batal/{id}', [PembiayaanController::class, 'batalkanPermohonan'])->middleware('permission:edit_murabahah')->name('pembiayaan/batal');
 
     // Pengelolaan Akun
     Route::get('/akun', [AkunController::class, 'index'])->middleware('permission:view_kas')->name('akun.index');

@@ -16,7 +16,7 @@ export function useFinancingValidation(form) {
 
     // Helper validators
     const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    const isValidPhone = (phone) => /^[0-9]{8,14}$/.test(phone)
+    const isValidPhone = (phone) => /^[0-9]{10,20}$/.test(phone)
     const isValidNik   = (nik)   => /^[0-9]{16}$/.test(nik)
     const isValidDependents = (jml_tanggungan) => /^[0-9]+$/.test(jml_tanggungan)
 
