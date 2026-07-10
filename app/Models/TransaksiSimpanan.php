@@ -27,6 +27,7 @@ class TransaksiSimpanan extends Model
         'deskripsi_simpanan',
         'tgl_transaksi',
         'struk_simpanan',
+        'bukti_penyetoran',
 
         'updated_by',
         'akun_simpanan_id',
