@@ -4,13 +4,11 @@ import { toast } from 'vue3-toastify'
 import axios from 'axios'
 
 const props = defineProps({
-    show: {
-        type: Boolean,
-        default: false
-    },
-    anggotaId: {
-        type: [String, Number],
-        required: true
+    show: { type: Boolean, default: false },
+    anggotaId: { type: [String, Number], required: true },
+    endpoint: {
+        type: String,
+        default: '/admin/pembiayaan/rekening-anggota'
     }
 })
 
@@ -25,7 +23,7 @@ const createNewRekening = async () => {
     if (!newRekeningNo.value.trim() || !newRekeningBank.value.trim() || !newRekeningName.value.trim()) return
     isCreatingRekening.value = true
     try {
-        const response = await axios.post('/admin/pembiayaan/rekening-anggota', {
+        const response = await axios.post(props.endpoint, {
             no_rekening: newRekeningNo.value,
             nama_bank: newRekeningBank.value,
             atas_nama: newRekeningName.value,

@@ -8,6 +8,7 @@ use App\Models\Pembiayaan;
 use App\Models\Angsuran;
 use App\Models\PembayaranAngsuran;
 use App\Models\DokumenAnggota;
+use App\Models\RekeningAnggota;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -191,6 +192,7 @@ class PembayaranAngsuranService
     {
         $pembiayaan->load([
             'anggota.user',
+            'anggota.bankAccounts',
             'objekPembiayaan.jenisBarang',
             'angsuran',
         ]);
@@ -220,6 +222,7 @@ class PembayaranAngsuranService
 
         return [
             'id'                      => $pembiayaan->id,
+            'anggota_id'              => $pembiayaan->anggota_id,
             'transaction_code'        => $pembiayaan->kode_pembiayaan,
             'product_name'            => $pembiayaan->objekPembiayaan?->nama_barang,
             'jenis_barang'            => $pembiayaan->objekPembiayaan?->jenisBarang?->nama_jenis_barang,
@@ -230,12 +233,18 @@ class PembayaranAngsuranService
                 'nama'      => $pembiayaan->anggota?->user?->nama,
                 'kode_pengguna' => $pembiayaan->anggota?->user?->kode_pengguna,
             ],
+                'bank_accounts' => $pembiayaan->anggota?->bankAccounts?->map(fn($r) => [
+                'no_rekening' => $r->no_rekening,
+                'nama_bank'   => $r->nama_bank,
+                'atas_nama'   => $r->atas_nama,
+            ])->values() ?? [],
             'installment_per_month'   => $angsuran?->nominal_angsuran ?? 0,
             'remaining_balance'       => max($sisa, 0),
             'next_installment_number' => $angsuran?->angsuran_ke,
             'current_due_date'        => $angsuran?->tgl_jatuh_tempo?->format('Y-m-d'),
             'payment_count'           => $paymentCount + 1,
             'next_due_date'           => $nextInstallment?->tgl_jatuh_tempo?->format('Y-m-d'),
+            'tanggal_akhir_periode'   => \App\Models\PengaturanUmum::where('key', 'tanggal_akhir_periode')->value('value'),
             'pembiayaan_id'            => $pembiayaan->id,
             'angsuran_id'          => $angsuran?->id,
         ];
@@ -250,6 +259,16 @@ class PembayaranAngsuranService
         $seq    = str_pad((string)($lastNo + 1), 4, '0', STR_PAD_LEFT);
 
         return "{$prefix}{$yymm}{$seq}";
+    }
+
+    public function storeRekeningAnggota(array $validated)
+    {
+        return RekeningAnggota::create([
+            'anggota_id'  => $validated['anggota_id'],
+            'no_rekening' => $validated['no_rekening'],
+            'nama_bank'   => $validated['nama_bank'],
+            'atas_nama'   => $validated['atas_nama'],
+        ]);
     }
 
     public function processPayment(array $validated): array
@@ -269,6 +288,14 @@ class PembayaranAngsuranService
             $principalPerMonth = round($validated['jumlah_angsuran_dibayar'] - $marginPerMonth, 2);
         }
 
+        $buktiPembayaranPath = null;
+        if (
+            ($validated['metode_pembayaran'] ?? null) === 'Non-Tunai'
+            && isset($validated['bukti_pembayaran'])
+        ) {
+            $buktiPembayaranPath = $validated['bukti_pembayaran']->store('bukti_pembayaran', 'public');
+        }
+
         $payment = PembayaranAngsuran::create([
             'kode_transaksi_pembayaran' => $this->generateTransactionCode(),
             'metode_pembayaran'         => $validated['metode_pembayaran'],
@@ -278,6 +305,8 @@ class PembayaranAngsuranService
             'margin_dibayar'          => $marginPerMonth,
             'tgl_pembayaran'           => $validated['tgl_pembayaran'],
             'angsuran_id'         => $validated['angsuran_id'],
+            'no_rekening'               => $validated['no_rekening'] ?? null,
+            'bukti_pembayaran'          => $buktiPembayaranPath,
             'updated_by'             => auth()->id(),
         ]);
 
@@ -351,7 +380,7 @@ class PembayaranAngsuranService
                     'jumlah'     => $payment->jumlah_angsuran_dibayar,
                 ]],
                 'harga_perolehan' => $pembiayaan->harga_perolehan,
-                'margin'          => $pembiayaan->margin_keuntungan,
+                'margin'          => $payment->margin_dibayar,
                 'harga_jual'      => $hargaJual,
                 'total_angsuran'  => $payment->jumlah_angsuran_dibayar,
                 'sisa_hutang'     => max($sisa, 0),
@@ -373,26 +402,25 @@ class PembayaranAngsuranService
                 $tahun = $now->format('Y');
 
                 $strukData = [
-                    'no_transaksi' => $payment->installment_trans_code,
+                    'no_transaksi' => $payment->kode_transaksi_pembayaran,
                     'hari' => $hari,
                     'tanggal' => $tanggal,
                     'bulan' => $bulan,
                     'tahun' => $tahun,
                     'no_anggota' => $pembiayaan->anggota->user->kode_pengguna,
-                    'nama_anggota' => $pembiayaan->anggota->user->name,
-                    'financing_transaction_code' => $pembiayaan->financing_transaction_code,
-                    'product_name' => $pembiayaan->financingItem->name ?? '-',
+                    'nama_anggota' => $pembiayaan->anggota->user->nama,
+                    'financing_transaction_code' => $pembiayaan->kode_pembiayaan,
+                    'product_name' => $pembiayaan->financingItem->nama ?? '-',
                     'total_paid_amount' => $hargaJual,
-                    'metode' => $payment->payment_method,
-                    'repayment_total' => $payment->nominal,
+                    'metode' => $payment->metode_pembayaran,
+                    'repayment_total' => $payment->jumlah_angsuran_dibayar,
                     'tenor' => $pembiayaan->tenor ?? 0,
-                    'satuan_tenor' => $pembiayaan->satuan_tenor,
-                    'nama_pengurus' => auth()->user()->name,
-                    'jabatan_pengurus' => auth()->user()->roles->first()->name ?? 'Pengurus',
+                    'nama_pengurus' => auth()->user()->nama,
+                    'jabatan_pengurus' => auth()->user()->roles->first()->nama ?? 'Pengurus',
                     'alamat' => $pembiayaan->anggota->alamat_domisili ?? $pembiayaan->anggota->residential_address ?? '-',
-                    'harga_perolehan' => $pembiayaan->cost_price,
-                    'margin_keuntungan' => $pembiayaan->margin_amount,
-                    'no_telp' => $pembiayaan->anggota->user->phone_number,
+                    'harga_perolehan' => $pembiayaan->harga_perolehan,
+                    'margin_keuntungan' => $pembiayaan->margin_keuntungan,
+                    'no_telp' => $pembiayaan->anggota->user->no_telp,
                     'qimah_ismiyyah' => $hargaJual,
                     'qimah_haliyyah' => $hargaJual,
                     'logo' => $logo,
@@ -402,30 +430,30 @@ class PembayaranAngsuranService
             } else {
                 $receipt = [
                     'logo'           => $logo,
-                    'payment_method' => $payment->payment_method,
+                    'metode_pembayaran' => $payment->metode_pembayaran,
                     'organization'   => [
                         'name'    => 'Koperasi Syariah Berkah',
                         'address' => 'Komplek Puri Cipageran Indah 2, RW 21, Desa Ngamprah, Kec. Tanimulya, Kabupaten Bandung Barat',
                     ],
-                    'petugas'          => auth()->user()->name,
-                    'tanggal_angsuran' => Carbon::parse($payment->payment_date)->translatedFormat('d F Y'),
-                    'nomor_pembiayaan' => $pembiayaan->financing_transaction_code,
+                    'petugas'          => auth()->user()->nama,
+                    'tanggal_angsuran' => Carbon::parse($payment->tgl_pembayaran)->translatedFormat('d F Y'),
+                    'nomor_pembiayaan' => $pembiayaan->kode_pembiayaan,
                     'no_anggota'       => $pembiayaan->anggota?->user?->kode_pengguna,
-                    'diterima_dari'    => $pembiayaan->anggota?->user?->name,
-                    'sejumlah_uang'    => $payment->nominal,
+                    'diterima_dari'    => $pembiayaan->anggota?->user?->nama,
+                    'sejumlah_uang'    => $payment->jumlah_angsuran_dibayar,
                     'items'            => [[
                         'no'         => 1,
                         'keterangan' => 'Angsuran ke ' . $angsuran->angsuran_ke,
-                        'jumlah'     => $payment->nominal,
+                        'jumlah'     => $payment->jumlah_angsuran_dibayar,
                     ]],
-                    'harga_perolehan' => $pembiayaan->cost_price,
-                    'margin'          => $pembiayaan->margin_amount,
+                    'harga_perolehan' => $pembiayaan->harga_perolehan,
+                    'margin'          => $payment->margin_dibayar,
                     'harga_jual'      => $hargaJual,
-                    'total_angsuran'  => $payment->nominal,
+                    'total_angsuran'  => $payment->jumlah_angsuran_dibayar,
                     'sisa_hutang'     => max($sisa, 0),
                     'status'          => max($sisa, 0) <= 0 ? 'Lunas' : 'Belum Lunas',
                     'jatuh_tempo'     => $nextInstallment
-                        ? $nextInstallment->due_date->translatedFormat('d F Y')
+                        ? $nextInstallment->tgl_jatuh_tempo->translatedFormat('d F Y')
                         : '-',
                     'catatan'         => 'Dasar akad yang digunakan adalah akad murabahah yang merupakan kontrak jual beli syariah.',
                     'tanggal_cetak'   => now()->translatedFormat('d F Y'),

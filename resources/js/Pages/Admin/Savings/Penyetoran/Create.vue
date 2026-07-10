@@ -5,6 +5,8 @@ import { router, usePage } from '@inertiajs/vue3'
 import { Icon } from '@iconify/vue'
 import { toast } from 'vue3-toastify'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
+import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
+import RekeningModal from '@/Components/Form/RekeningModal.vue'
 import ConfirmationModal from '@/Components/Savings/ConfirmationModal.vue'
 import ModalDocument from '@/Components/ModalDocument.vue'
 import Struk from '@/Components/Savings/Struk.vue'
@@ -43,10 +45,12 @@ const selectedMember = ref(null)
 
 const memberSuggestions = computed(() => {
   const q = memberQuery.value.toLowerCase().trim()
+
   if (!q || q.length < 2) return []
+
   return props.anggota
     .filter(m =>
-      m.name?.toLowerCase().includes(q) ||
+      m.nama?.toLowerCase().includes(q) ||
       m.kode_pengguna?.toLowerCase().includes(q)
     )
     .slice(0, 6)
@@ -58,7 +62,7 @@ const showSuggestions = computed(() =>
 
 function pilihAnggota(anggota) {
   selectedMember.value = anggota
-  memberQuery.value    = anggota.name
+  memberQuery.value    = anggota.nama
   jenisSimpanan.value  = ''
 }
 
@@ -69,10 +73,23 @@ function resetAnggota() {
 }
 
 watch(memberQuery, val => {
-  if (selectedMember.value && val !== selectedMember.value.name) {
+  if (selectedMember.value && val !== selectedMember.value.nama) {
     selectedMember.value = null
   }
 })
+
+function handleRekeningCreated(rekening) {
+    if (!selectedMember.value.rekeningAnggota) {
+        selectedMember.value.rekeningAnggota = []
+    }
+
+    selectedMember.value.rekeningAnggota.push(rekening)
+
+    selectedRekening.value = rekening
+    rekeningNo.value = rekening.no_rekening
+    rekeningBank.value = rekening.nama_bank
+    rekeningName.value = rekening.atas_nama
+}
 
 const jenisSimpanan  = ref('')
 const selectedAccountId = ref('')
@@ -83,6 +100,71 @@ const nominalDisplay = ref('')
 const tanggalSetor   = ref(today())
 const catatan        = ref('')
 const depositMethod  = ref('Tunai')
+const selectedRekening = ref(null)
+const showRekeningModal = ref(false)
+
+const rekeningNo = ref('')
+const rekeningBank = ref('')
+const rekeningName = ref('')
+const buktiPenyetoran = ref(null)
+const errorBukti = ref('')
+
+const MAX_FILE_SIZE = 2 * 1024 * 1024
+
+function onBuktiChange(file) {
+  if (!file) {
+    buktiPenyetoran.value = null
+    errorBukti.value = ''
+    return
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    errorBukti.value = 'Ukuran file maksimal 2MB'
+    buktiPenyetoran.value = null
+    toast('Ukuran bukti penyetoran maksimal 2MB', { type: 'warning' })
+    return
+  }
+
+  errorBukti.value = ''
+  buktiPenyetoran.value = file
+}
+
+const rekeningSelectables = computed(() => {
+  if (!selectedMember.value) return []
+
+  const accounts = (selectedMember.value.rekeningAnggota || []).map(r => ({
+    value: r.no_rekening,
+    text: `${r.nama_bank} - ${r.no_rekening} (a.n ${r.atas_nama})`
+  }))
+
+  return [
+    ...accounts,
+    { value: 'NEW', text: '+ Tambah Rekening Baru', isAction: true }
+  ]
+})
+
+function handleRekeningChange(value) {
+  if (value === 'NEW') {
+    showRekeningModal.value = true
+    rekeningNo.value = ''
+    rekeningBank.value = ''
+    rekeningName.value = ''
+    selectedRekening.value = null
+    return
+  }
+
+  rekeningNo.value = value
+
+  const found = (selectedMember.value?.rekeningAnggota || [])
+    .find(r => r.no_rekening === value)
+
+  if (found) {
+    selectedRekening.value = found
+    rekeningBank.value = found.nama_bank
+    rekeningName.value = found.atas_nama
+  }
+}
+
 const errorTarget = ref('')
 const errorNominal   = ref('')
 
@@ -216,10 +298,10 @@ const isNewAccount = computed(() => {
 const errorsForm = computed(() => {
   const e = {}
   if (!selectedMember.value) e.anggota = 'Pilih anggota dulu'
-  if (!jenisSimpanan.value)  e.jenis   = 'Pilih jenis simpanan'
+  if (!jenisSimpanan.value) e.jenis   = 'Pilih jenis simpanan'
   if (!nominalRaw.value || Number(nominalRaw.value) <= 0) e.nominal = 'Masukkan nominal valid'
-  if (!tanggalSetor.value)           e.tanggal = 'Pilih tanggal'
-  if (tanggalSetor.value > today())  e.tanggal = 'Tanggal tidak boleh di masa depan'
+  if (!tanggalSetor.value) e.tanggal = 'Pilih tanggal'
+  if (tanggalSetor.value > today()) e.tanggal = 'Tanggal tidak boleh di masa depan'
 
   if (isMultiAccountType.value) {
     if (!isCreatingNew.value && !selectedAccountId.value)
@@ -236,6 +318,36 @@ const errorsForm = computed(() => {
       e.tenor = 'Jangka waktu wajib diisi'
     if (jenisSimpanan.value === 'Tabungan Ibadah' && !targetAmount.value)
       e.target = 'Target wajib diisi'
+  }
+
+  if (depositMethod.value === 'Non-Tunai') {
+    if (!rekeningNo.value)
+      e.no_rekening = 'Nomor rekening wajib diisi'
+
+    if (!rekeningBank.value)
+      e.nama_bank = 'Nama bank wajib diisi'
+
+    if (!rekeningName.value)
+      e.atas_nama = 'Atas nama wajib diisi'
+
+    if (!buktiPenyetoran.value)
+      e.bukti_penyetoran = 'Bukti penyetoran wajib diunggah'
+    }
+    if (depositMethod.value === 'Non-Tunai') {
+      if (!rekeningNo.value)
+        e.no_rekening = 'Nomor rekening wajib diisi'
+
+      if (!rekeningBank.value)
+        e.nama_bank = 'Nama bank wajib diisi'
+
+      if (!rekeningName.value)
+        e.atas_nama = 'Atas nama wajib diisi'
+
+      if (!buktiPenyetoran.value)
+        e.bukti_penyetoran = 'Bukti penyetoran wajib diunggah'
+
+      if (errorBukti.value)
+        e.bukti_penyetoran = errorBukti.value
   }
   return e
 })
@@ -268,6 +380,11 @@ function resetForm() {
   targetDisplay.value   = ''
   errorNominal.value    = ''
   errorTarget.value     = ''
+  rekeningNo.value = ''
+  rekeningBank.value = ''
+  rekeningName.value = ''
+  selectedRekening.value = null
+  buktiPenyetoran.value = null
 }
 
 // Submit
@@ -281,7 +398,7 @@ function bukaDialog() {
 }
 
 const confirmationData = computed(() => ({
-  memberName: selectedMember.value?.name,
+  memberName: selectedMember.value?.nama,
   memberNumber: selectedMember.value?.kode_pengguna,
   savingType: jenisSimpanan.value,
   method: depositMethod.value,
@@ -330,6 +447,16 @@ function submitDeposit() {
   formData.append('date', tanggalSetor.value)
   formData.append('metode_pembayaran_simpanan', depositMethod.value)
   formData.append('catatan', catatan.value)
+
+ if (depositMethod.value === 'Non-Tunai') {
+    formData.append('no_rekening', rekeningNo.value)
+    formData.append('nama_bank', rekeningBank.value)
+    formData.append('atas_nama', rekeningName.value)
+
+    if (buktiPenyetoran.value) {
+        formData.append('bukti_penyetoran', buktiPenyetoran.value)
+    }
+}
 
   if (isMultiAccountType.value) {
     formData.append(
@@ -441,10 +568,10 @@ const akadType = computed(() => {
                   class="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
                 >
                   <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-700 dark:text-blue-300 font-semibold text-sm shrink-0">
-                    {{ initials(m.name) }}
+                    {{ initials(m.nama) }}
                   </div>
                   <div>
-                    <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ m.name }}</div>
+                    <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ m.nama }}</div>
                     <div class="text-xs text-gray-500">{{ m.kode_pengguna }}</div>
                   </div>
                 </button>
@@ -458,10 +585,10 @@ const akadType = computed(() => {
                 class="flex items-center gap-4 p-2 bg-green-50 dark:bg-blue-900/20 border border-green-100 dark:border-blue-800 rounded-lg"
               >
                 <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-blue-900 flex items-center justify-center text-xl font-bold text-green-700 dark:text-blue-300 shrink-0">
-                  {{ initials(selectedMember.name) }}
+                  {{ initials(selectedMember.nama) }}
                 </div>
                 <div class="flex-1 min-w-0">
-                  <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
+                  <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.nama }}</div>
                   <div class="text-sm text-gray-500">{{ selectedMember.kode_pengguna }}</div>
                 </div>
                 <button @click="resetAnggota" type="button" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
@@ -848,20 +975,38 @@ const akadType = computed(() => {
               </div>
 
               <!-- Metode -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 font-head">
-                  Metode Penyetoran
-                </label>
-                <div class="flex gap-6">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" value="Tunai" v-model="depositMethod" class="text-blue-600" />
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Tunai</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" value="Non-Tunai" v-model="depositMethod" class="text-blue-600" />
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Non-Tunai</span>
-                  </label>
-                </div>
+              <BaseInputAdmin
+                  v-model="depositMethod"
+                  label="Metode Penyetoran"
+                  type="radio"
+                  required
+                  :selectables="[
+                      { value: 'Tunai', text: 'Tunai' },
+                      { value: 'Non-Tunai', text: 'Non-Tunai' }
+                  ]"
+              />
+              <div v-if="depositMethod === 'Non-Tunai'" class="mt-6 flex flex-col gap-6">
+                <BaseInputAdmin
+                    :model-value="rekeningNo"
+                    label="Rekening Tujuan"
+                    type="select"
+                    required
+                    :selectables="rekeningSelectables"
+                    @update:modelValue="handleRekeningChange"
+                    hint="Pilih rekening tujuan yang digunakan anggota untuk menyetor."
+                />
+
+                <BaseInputAdmin
+                    label="Bukti Penyetoran"
+                    type="file"
+                    accept="image/*,.pdf"
+                    required
+                    @update:modelValue="onBuktiChange"
+                    hint="Unggah bukti transfer (format JPG, PNG, atau PDF, maks. 2MB)."
+                />
+                <p v-if="errorBukti" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                  <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorBukti }}
+                </p>
               </div>
             </fieldset>
           </div>
@@ -889,6 +1034,14 @@ const akadType = computed(() => {
 
       </div>
     </div>
+
+    <RekeningModal
+        :show="showRekeningModal"
+        :anggota-id="selectedMember?.id"
+        endpoint="/admin/savings/rekening-anggota"
+        @close="showRekeningModal = false"
+        @created="handleRekeningCreated"
+    />
 
     <ConfirmationModal
       :isOpen="showDialog"

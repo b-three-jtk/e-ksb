@@ -23,7 +23,8 @@ return new class extends Migration
             $table->text('deskripsi_simpanan')->nullable();
             $table->datetime('tgl_transaksi');
             $table->string('struk_simpanan')->nullable();
-
+            $table->string('bukti_penyetoran')->nullable();
+            
             $table->foreignUuid('updated_by')->nullable()->constrained('pengguna')->onDelete('set null');
             $table->foreignUuid('akun_simpanan_id')->nullable()->constrained('akun_simpanan')->onDelete('set null');
             $table->string('no_rekening')->nullable();
