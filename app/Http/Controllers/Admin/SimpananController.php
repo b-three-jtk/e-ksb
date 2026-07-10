@@ -114,6 +114,26 @@ class SimpananController extends Controller
         ]);
     }
 
+    public function storeRekening(Request $request)
+    {
+        $data = $request->validate([
+            'no_rekening' => 'required|string|max:50',
+            'nama_bank'   => 'required|string|max:100',
+            'atas_nama'   => 'required|string|max:100',
+            'anggota_id'  => 'required|exists:anggota,id',
+        ]);
+
+        if (RekeningAnggota::where('no_rekening', $data['no_rekening'])->exists()) {
+            return response()->json([
+                'message' => 'Nomor rekening sudah terdaftar.'
+            ], 422);
+        }
+
+        $rekening = RekeningAnggota::create($data);
+
+        return response()->json($rekening);
+    }
+
     public function storeDeposit(StoreDepositRequest $request)
     {
         $data = $request->validated();
@@ -136,6 +156,7 @@ class SimpananController extends Controller
         }
 
         $akunSimpanan = $this->simpananService->resolveOrCreateSavingAccount($data, $anggota);
+        $this->simpananService->resolveOrCreateMemberBankAccount($data, $anggota);
 
         Log::info('Saving account for anggota', [
             'anggota_id'            => $anggota->id,
@@ -167,6 +188,9 @@ class SimpananController extends Controller
             'saldo_sebelum' => $saldoSebelumnya,
             'saldo_sesudah' => $saldoSebelumnya + $transaction->nominal_simpanan,
             'tujuan'       => $data['tujuan'] ?? null,
+            'nama_bank'     => $data['nama_bank'] ?? null,
+            'atas_nama'     => $data['atas_nama'] ?? null,
+            'no_rekening'   => $data['no_rekening'] ?? null,
         ];
 
         $this->simpananService->storeReceiptDepositPdf($transaction, $strukData, $anggota->id);
@@ -269,6 +293,12 @@ class SimpananController extends Controller
                             'no_rekening' => $acc->no_rekening,
                         ];
                     })->toArray(),
+                    'bukti_penyetoran' => [
+                        'nullable',
+                        'file',
+                        'mimes:jpg,jpeg,png,pdf',
+                        'max:5120',
+                    ],
                 ];
             }
 

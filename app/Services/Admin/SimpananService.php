@@ -13,6 +13,7 @@ use App\Models\AkunIbadah;
 use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\TransaksiSimpanan;
+use App\Models\RekeningAnggota;
 use App\Services\PengaturanUmumService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -265,6 +266,7 @@ class SimpananService
             'user:id,kode_pengguna,nama',
             'akunSimpanan.ibadah',
             'akunSimpanan.berjangka',
+            'bankAccounts',
         ]);
 
         return $query->get()->map(fn($anggota) => [
@@ -293,6 +295,12 @@ class SimpananService
                     'is_matured'    => $acc->berjangka
                         ? now()->gte($acc->created_at->copy()->addMonths($acc->berjangka->tenor))
                         : false,
+                ]),
+            'rekeningAnggota' => $anggota->bankAccounts
+                ->map(fn ($rekening) => [
+                    'no_rekening' => $rekening->no_rekening,
+                    'nama_bank'   => $rekening->nama_bank,
+                    'atas_nama'   => $rekening->atas_nama,
                 ])
                 ->values()
                 ->toArray(),
@@ -325,6 +333,32 @@ class SimpananService
             'jenis_simpanan'         => $data['saving_category'],
             'kode_akun_simpanan' => $this->generateAccountCode($data['saving_category']),
         ]);
+    }
+
+    public function resolveOrCreateMemberBankAccount(array $data, Anggota $anggota): ?RekeningAnggota
+    {
+        if (($data['metode_pembayaran_simpanan'] ?? null) !== 'Non-Tunai') {
+            return null;
+        }
+
+        if (
+            empty($data['no_rekening']) ||
+            empty($data['nama_bank']) ||
+            empty($data['atas_nama'])
+        ) {
+            return null;
+        }
+
+        return RekeningAnggota::firstOrCreate(
+            [
+                'no_rekening' => $data['no_rekening'],
+            ],
+            [
+                'anggota_id' => $anggota->id,
+                'nama_bank'  => $data['nama_bank'],
+                'atas_nama'  => $data['atas_nama'],
+            ]
+        );
     }
 
     public function validateDepositRules(array $data, AkunSimpanan $akunSimpanan, Anggota $anggota): void
@@ -419,6 +453,16 @@ class SimpananService
         return DB::transaction(function () use ($data, $akunSimpanan, $anggota) {
             $akunSimpanan->refresh();
             $newBalance = $akunSimpanan->saldo + $data['amount'];
+            $buktiPenyetoran = null;
+            if (
+                ($data['metode_pembayaran_simpanan'] ?? null) === 'Non-Tunai'
+                && isset($data['bukti_penyetoran'])
+            ) {
+                $buktiPenyetoran = $data['bukti_penyetoran']->store(
+                    'bukti_penyetoran',
+                    'public'
+                );
+            }
             $trx = TransaksiSimpanan::create([
                 'kode_transaksi_simpanan' => $this->generateTransactionCode($data['saving_category']),
                 'nominal_simpanan'              => $data['amount'],
@@ -429,6 +473,8 @@ class SimpananService
                 'tgl_transaksi'           => $data['date'],
                 'updated_by'                 => Auth::id(),
                 'akun_simpanan_id'          => $akunSimpanan->id,
+                'no_rekening' => $data['no_rekening'] ?? null,
+                'bukti_penyetoran' => $buktiPenyetoran,
             ]);
 
             $akunSimpanan->update([
