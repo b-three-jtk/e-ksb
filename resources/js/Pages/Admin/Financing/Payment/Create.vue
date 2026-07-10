@@ -2,8 +2,9 @@
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
 import BaseInputAdmin from '@/Components/Form/BaseInputAdmin.vue'
+import RekeningModal from '@/Components/Form/RekeningModal.vue'
 import { Icon } from '@iconify/vue'
-import { ref } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { toast } from 'vue3-toastify'
 import Swal from 'sweetalert2'
@@ -131,7 +132,7 @@ async function submitReschedule() {
         `/admin/pembiayaan/${props.pembiayaan.id}/payments/reschedule`,
         {
             installment_id:
-                selectedFinancing.value.installment_id,
+                selectedFinancing.value.angsuran_id,
             due_date:
                 rescheduleDate.value,
         },
@@ -173,84 +174,133 @@ async function submitReschedule() {
 
 // Metode Pembayaran
 const depositMethod = ref('Tunai')
+const selectedRekening = ref(null)
+const showRekeningModal = ref(false)
+const rekeningNo = ref('')
+const rekeningBank = ref('')
+const rekeningName = ref('')
+const buktiPembayaran = ref(null)
+const errorBukti = ref('')
+
+const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
+
+function onBuktiChange(file) {
+  if (!file) {
+    buktiPembayaran.value = null
+    errorBukti.value = ''
+    return
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    errorBukti.value = 'Ukuran file maksimal 2MB'
+    buktiPembayaran.value = null
+    toast('Ukuran bukti pembayaran maksimal 2MB', { type: 'warning', position: 'bottom-right' })
+    return
+  }
+  errorBukti.value = ''
+  buktiPembayaran.value = file
+}
+
+const rekeningSelectables = computed(() => {
+  const accounts = (props.pembiayaan?.bank_accounts || []).map(r => ({
+    value: r.no_rekening,
+    text: `${r.nama_bank} - ${r.no_rekening} (a.n ${r.atas_nama})`
+  }))
+  return [
+    ...accounts,
+    { value: 'NEW', text: '+ Tambah Rekening Baru', isAction: true }
+  ]
+})
+
+function handleRekeningChange(value) {
+  if (value === 'NEW') {
+    showRekeningModal.value = true
+    rekeningNo.value = ''
+    rekeningBank.value = ''
+    rekeningName.value = ''
+    selectedRekening.value = null
+    return
+  }
+  rekeningNo.value = value
+  const found = (props.pembiayaan?.bank_accounts || [])
+    .find(r => r.no_rekening === value)
+  if (found) {
+    selectedRekening.value = found
+    rekeningBank.value = found.nama_bank
+    rekeningName.value = found.atas_nama
+  }
+}
+
+function handleRekeningCreated(rekening) {
+  if (!props.pembiayaan.bank_accounts) {
+    props.pembiayaan.bank_accounts = []
+  }
+  props.pembiayaan.bank_accounts.push(rekening)
+  selectedRekening.value = rekening
+  rekeningNo.value = rekening.no_rekening
+  rekeningBank.value = rekening.nama_bank
+  rekeningName.value = rekening.atas_nama
+}
 
 // Submit
 async function handleSubmit() {
-    const result = await Swal.fire({
-        title: 'Posting Pembayaran?',
-        text: 'Pembayaran akan diproses dan tidak dapat dibatalkan.',
-        icon: 'question',
-        iconColor: '#009141',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, Posting',
-        cancelButtonText: 'Batal',
-        reverseButtons: true,
-        confirmButtonColor: '#009141'
-    })
-
-    if (!result.isConfirmed) {
-        return
+  if (depositMethod.value === 'Non-Tunai') {
+    if (!rekeningNo.value) {
+      toast('Pilih rekening tujuan terlebih dahulu', { type: 'warning', position: 'bottom-right' })
+      return
     }
-    isSubmittingPayment.value = true
-    router.post(
-        `/admin/pembiayaan/${props.pembiayaan.id}/payments/store`,
-        {
-            pembiayaan_id:
-                selectedFinancing.value.id,
+    if (!buktiPembayaran.value) {
+      toast('Unggah bukti pembayaran terlebih dahulu', { type: 'warning', position: 'bottom-right' })
+      return
+    }
+  }
 
-            installment_id:
-                selectedFinancing.value.installment_id,
+  const result = await Swal.fire({
+    title: 'Posting Pembayaran?',
+    text: 'Pembayaran akan diproses dan tidak dapat dibatalkan.',
+    icon: 'question',
+    iconColor: '#009141',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, Posting',
+    cancelButtonText: 'Batal',
+    reverseButtons: true,
+    confirmButtonColor: '#009141'
+  })
 
-            metode_pembayaran:
-                depositMethod.value,
+  if (!result.isConfirmed) return
 
-            nominal:
-                selectedFinancing.value.installment_per_month,
+  isSubmittingPayment.value = true
 
-            tgl_pembayaran:
-                tanggalPembayaran.value,
-        },
-        {
-            preserveScroll: true,
+  const formData = new FormData()
+  formData.append('pembiayaan_id', selectedFinancing.value.id)
+  formData.append('angsuran_id', selectedFinancing.value.angsuran_id)
+  formData.append('metode_pembayaran', depositMethod.value)
+  formData.append('jumlah_angsuran_dibayar', selectedFinancing.value.installment_per_month)
+  formData.append('tgl_pembayaran', tanggalPembayaran.value)
 
-            onSuccess: (page) => {
-                console.log(page.props.flash)
+  if (depositMethod.value === 'Non-Tunai') {
+    formData.append('no_rekening', rekeningNo.value)
+    formData.append('bukti_pembayaran', buktiPembayaran.value)
+  }
 
-                toast(
-                    'Pembayaran berhasil diposting',
-                    {
-                        type: 'success',
-                        position: 'bottom-right',
-                    },
-                )
-
-                // const pdfUrl =
-                //     page.props.flash?.pdf_url
-
-                // if (pdfUrl) {
-                //     window.open(pdfUrl, '_blank')
-                // }
-                // if (page.props.pembiayaan) {
-                //     selectedFinancing.value = page.props.pembiayaan
-                // }
-            },
-            onError: (errors) => {
-
-                console.error(errors)
-
-                toast(
-                    'Terjadi kesalahan saat memproses pembayaran',
-                    {
-                        type: 'error',
-                        position: 'bottom-right',
-                    },
-                )
-            },
-            onFinish: () => {
-                isSubmittingPayment.value = false
-            },
-        },
-    )
+  router.post(
+    `/admin/pembiayaan/${props.pembiayaan.id}/payments/store`,
+    formData,
+    {
+      forceFormData: true,
+      preserveScroll: true,
+      onSuccess: () => {
+        toast('Pembayaran berhasil diposting', { type: 'success', position: 'bottom-right' })
+      },
+      onError: (errors) => {
+        console.error(errors)
+        const msg = Object.values(errors).flat().join(', ')
+        toast(msg || 'Terjadi kesalahan saat memproses pembayaran', { type: 'error', position: 'bottom-right' })
+      },
+      onFinish: () => {
+        isSubmittingPayment.value = false
+      },
+    },
+  )
 }
 </script>
 
@@ -579,6 +629,30 @@ async function handleSubmit() {
                                 </label>
                             </div>
                         </div>
+                        <!-- REKENING & BUKTI -->
+                        <div v-if="depositMethod === 'Non-Tunai'" class="mt-2 flex flex-col gap-4">
+                            <BaseInputAdmin
+                                :model-value="rekeningNo"
+                                label="Rekening Tujuan"
+                                type="select"
+                                required
+                                :selectables="rekeningSelectables"
+                                @update:modelValue="handleRekeningChange"
+                                hint="Pilih rekening tujuan yang digunakan anggota untuk membayar."
+                            />
+
+                            <BaseInputAdmin
+                                label="Bukti Pembayaran"
+                                type="file"
+                                accept="image/*,.pdf"
+                                required
+                                @update:modelValue="onBuktiChange"
+                                hint="Unggah bukti transfer (format JPG, PNG, atau PDF, maks. 2MB)."
+                            />
+                            <p v-if="errorBukti" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+                            <Icon icon="mdi:alert-circle-outline" width="13" />{{ errorBukti }}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -631,7 +705,7 @@ async function handleSubmit() {
                             <BaseInputAdmin
                                 v-model="rescheduleDate"
                                 type="date"
-                                :max-date="undefined"
+                                :max-date="selectedFinancing.tanggal_akhir_periode"
                                 placeholder="Pilih tanggal"
                             />
                         </div>
@@ -661,5 +735,13 @@ async function handleSubmit() {
                 </div>
             </div>
         </Teleport>
+
+        <RekeningModal
+            :show="showRekeningModal"
+            :anggota-id="selectedFinancing?.anggota_id"
+            endpoint="/admin/pembiayaan/rekening-angsuran"
+            @close="showRekeningModal = false"
+            @created="handleRekeningCreated"
+        />
     </AdminLayout>
 </template>

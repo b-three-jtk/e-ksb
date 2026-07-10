@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Illuminate\Validation\Rule;
 
 class PembiayaanController extends Controller
 {
@@ -889,6 +890,19 @@ class PembiayaanController extends Controller
         ]);
     }
 
+    public function storeRekeningPayment(StoreRekeningRequest $request)
+    {
+        $validated = $request->validated();
+
+        try {
+            $rekening = $this->pembayaranAngsuranService->storeRekeningAnggota($validated);
+            return response()->json($rekening, 201);
+        } catch (\Throwable $e) {
+            Log::error('Error creating rekening: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menyimpan rekening. Terjadi kesalahan pada server.'], 500);
+        }
+    }
+
     public function createPayment(Pembiayaan $pembiayaan)
     {
         return Inertia::render('Admin/Financing/Payment/Create', [
@@ -900,10 +914,21 @@ class PembiayaanController extends Controller
     {
         $validated = $request->validate([
             'angsuran_id' => 'required|exists:angsuran,id',
-            'pembiayaan_id'   => 'required|exists:pembiayaan,id',
-            'metode_pembayaran' => 'required|string',
-            'jumlah_angsuran_dibayar'        => 'required|numeric|min:1',
-            'tgl_pembayaran'   => 'required|date',
+            'pembiayaan_id' => 'required|exists:pembiayaan,id',
+            'metode_pembayaran' => 'required|in:Tunai,Non-Tunai',
+            'jumlah_angsuran_dibayar' => 'required|numeric|min:1',
+            'tgl_pembayaran' => 'required|date',
+            'no_rekening' => 'nullable|string|exists:rekening_anggota,no_rekening',
+            'bukti_pembayaran' => [
+                Rule::requiredIf($request->metode_pembayaran === 'Non-Tunai'),
+                'file',
+                'mimes:jpg,jpeg,png,pdf',
+                'max:2048',
+            ],
+        ], [
+            'bukti_pembayaran.required' => 'Bukti pembayaran wajib diunggah untuk metode Non-Tunai.',
+            'bukti_pembayaran.max' => 'Ukuran bukti pembayaran maksimal 2MB.',
+            'bukti_pembayaran.mimes' => 'Bukti pembayaran harus berformat JPG, PNG, atau PDF.',
         ]);
 
         DB::beginTransaction();

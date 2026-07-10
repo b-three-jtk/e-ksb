@@ -149,6 +149,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::get('repayment/{id}/receipt', [PembiayaanController::class, 'viewRepaymentReceipt'])->middleware('permission:payment_murabahah')->name('pembiayaan.repayment.view');
     Route::get('repayment/{id}/download', [PembiayaanController::class, 'downloadRepaymentReceipt'])->middleware('permission:payment_murabahah')->name('pembiayaan.repayment.download');
     Route::get('/pembiayaan/{pembiayaan}/payments/create',[PembiayaanController::class, 'createPayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.payments.create');
+    Route::post('/pembiayaan/rekening-angsuran', [PembiayaanController::class, 'storeRekeningPayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.rekening.payment.store');
     Route::post('/pembiayaan/{pembiayaan}/payments/store', [PembiayaanController::class, 'storePayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.payments.store');
     Route::post('/pembiayaan/{pembiayaan}/payments/reschedule', [PembiayaanController::class, 'reschedulePayment'])->middleware('permission:payment_murabahah')->name('pembiayaan.payments.reschedule');
     Route::get('/pembiayaan/pembayaran/struk', [PembiayaanController::class, 'showPaymentSuccess'])->middleware('permission:view_murabahah')->name('pembiayaan.pembayaran.success');
