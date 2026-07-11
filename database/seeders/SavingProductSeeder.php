@@ -87,9 +87,12 @@ class SavingProductSeeder extends Seeder
             'created_at' => now()->subMonths(12),
         ]);
 
-        // Transaksi bulanan selama 12 bulan
+        // Transaksi bulanan selama 12 bulan (atau kurang jika bermasalah)
         $saldo = 0;
-        for ($i = 1; $i <= 12; $i++) {
+        $isProblematic = rand(1, 100) <= 20; // 20% chance to be problematic
+        $maxMonths = $isProblematic ? rand(5, 8) : 12; // Stop early if problematic
+
+        for ($i = 1; $i <= $maxMonths; $i++) {
             $saldo += 50000;
             TransaksiSimpanan::create([
                 'akun_simpanan_id' => $account->id,
@@ -103,6 +106,8 @@ class SavingProductSeeder extends Seeder
                 'updated_by' => $admin->id,
             ]);
         }
+        
+        $account->update(['saldo' => $saldo]);
     }
 
     private function seedTabunganAnggota(Anggota $anggota, Pengguna $admin, $amount): void

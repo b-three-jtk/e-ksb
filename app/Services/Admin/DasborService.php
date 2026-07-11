@@ -3,6 +3,7 @@ namespace App\Services\Admin;
 
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
+use App\Enums\TransactionTypeEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
@@ -437,46 +438,71 @@ class DasborService
         return $total;
     }
 
-    public function getRingkasanAnggotaPJ()
+    public function getAnggotaBermasalahPJ()
     {
         $pjId = auth()->id();
-        $anggota = Anggota::with(['user', 'akunSimpanan', 'pembiayaan.angsuran'])
+        $anggota = Anggota::with(['user', 'akunSimpanan.transactions', 'pembiayaan.angsuran'])
             ->where('pj_anggota_id', $pjId)
             ->get();
             
-        return $anggota->map(function ($a) {
-            // Breakdown simpanan per jenis
-            $simpananBreakdown = [];
-            $totalSimpanan = 0;
-            foreach ($a->akunSimpanan as $akun) {
-                $simpananBreakdown[] = [
-                    'jenis' => $akun->jenis_simpanan,
-                    'saldo' => $akun->saldo,
-                ];
-                $totalSimpanan += $akun->saldo;
-            }
+        $bermasalah = [];
+        
+        foreach ($anggota as $a) {
+            $masalah = [];
             
-            $sisaAngsuran = 0;
-            foreach ($a->pembiayaan as $p) {
-                if ($p->status === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
-                    $sisaAngsuran += $p->angsuran
-                        ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
-                        ->sum('nominal_angsuran');
+            // 1. Tunggakan Simpanan Wajib
+            $akunWajib = $a->akunSimpanan->where('jenis_simpanan', 'Simpanan Wajib')->first();
+            if ($akunWajib) {
+                $lastDeposit = $akunWajib->transactions()
+                    ->where('tipe_transaksi', TransactionTypeEnum::DEPOSIT->value)
+                    ->latest('tgl_transaksi')
+                    ->first();
+                
+                if (!$lastDeposit) {
+                    $joinDate = $a->user?->tgl_bergabung ? \Carbon\Carbon::parse($a->user->tgl_bergabung) : $a->created_at;
+                    $monthsSinceJoin = now()->diffInMonths($joinDate);
+                    if ($monthsSinceJoin >= 2) {
+                        $masalah[] = "Belum bayar Simpanan Wajib sejak bergabung ({$monthsSinceJoin} bln)";
+                    }
+                } else {
+                    $monthsSinceLastDeposit = now()->diffInMonths(\Carbon\Carbon::parse($lastDeposit->tgl_transaksi));
+                    if ($monthsSinceLastDeposit >= 2) {
+                        $masalah[] = "Tunggakan Simpanan Wajib ({$monthsSinceLastDeposit} bln)";
+                    }
                 }
             }
             
-            $statusUser = $a->user?->status === UserStatusEnum::ACTIVE->value ? 'Aktif' : 'Non-Aktif';
+            // 2. Tunggakan Angsuran
+            $tunggakanAngsuran = 0;
+            $jumlahBulanTunggakan = 0;
+            foreach ($a->pembiayaan as $p) {
+                if ($p->status === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
+                    $tunggakan = $p->angsuran
+                        ->whereIn('status', [InstallmentPaymentScheduleStatusEnum::SCHEDULED->value, InstallmentPaymentScheduleStatusEnum::OVERDUE->value])
+                        ->where('tgl_jatuh_tempo', '<', now()->startOfDay());
+                        
+                    if ($tunggakan->isNotEmpty()) {
+                        $tunggakanAngsuran += $tunggakan->sum('nominal_angsuran');
+                        $jumlahBulanTunggakan += $tunggakan->count();
+                    }
+                }
+            }
             
-            return [
-                'id' => $a->id,
-                'nama' => $a->user?->nama ?? 'Tanpa Nama',
-                'no_telp' => $a->user?->no_telp,
-                'total_simpanan' => $totalSimpanan,
-                'simpanan_breakdown' => $simpananBreakdown,
-                'sisa_angsuran' => $sisaAngsuran,
-                'status' => $statusUser,
-            ];
-        })->toArray();
+            if ($tunggakanAngsuran > 0) {
+                $masalah[] = "Tunggakan Angsuran {$jumlahBulanTunggakan} bln (Rp " . number_format($tunggakanAngsuran, 0, ',', '.') . ")";
+            }
+            
+            if (!empty($masalah)) {
+                $bermasalah[] = [
+                    'id' => $a->id,
+                    'nama' => $a->user?->nama ?? 'Tanpa Nama',
+                    'no_telp' => $a->user?->no_telp,
+                    'daftar_masalah' => $masalah,
+                ];
+            }
+        }
+        
+        return $bermasalah;
     }
 
     public function getJumlahPiutangMurabahahAktif($tanggalAkhir, $tanggalAkhirSebelumnya)

@@ -50,7 +50,7 @@ class PenggunaFactory extends Factory
             'nik' => fake()->unique()->numerify('################'),
             'nama' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'no_telp' => fake()->unique()->numerify('08##########'),
+            'no_telp' => fake()->unique()->numerify('628##########'),
             'tgl_bergabung' => fake()->date(),
             'status' => UserStatusEnum::ACTIVE->value,
             'password' => static::$password ??= Hash::make('password'),
