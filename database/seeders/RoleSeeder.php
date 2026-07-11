@@ -20,7 +20,7 @@ public function run(): void
             'anggota' => ['view', 'create', 'edit'],
             'pengunduran_diri' => ['view', 'create', 'edit'],
             'pengurus' => ['view', 'create', 'edit'],
-            'murabahah' => ['view', 'create', 'edit', 'approve', 'payment'],
+            'murabahah' => ['view', 'create', 'edit', 'approve', 'payment', 'verify'],
             'simpanan' => ['view', 'create', 'edit', 'verify'],
             'kas' => ['view', 'create', 'edit'],
             'pengaturan' => ['view', 'create', 'edit'],
@@ -63,7 +63,7 @@ public function run(): void
                     $role->givePermissionTo(['create_anggota', 'view_anggota', 'edit_anggota', 'create_pengurus', 'view_pengurus', 'edit_pengurus', 'view_pengaturan']);
                     break;
                 case UserRoleEnum::BENDAHARA:
-                    $role->givePermissionTo(['view_simpanan', 'verify_simpanan', 'view_murabahah', 'create_kas', 'view_kas', 'edit_kas', 'view_pengaturan']);
+                    $role->givePermissionTo(['view_simpanan', 'verify_simpanan', 'view_murabahah', 'verify_murabahah', 'create_kas', 'view_kas', 'edit_kas', 'view_pengaturan']);
                     break;
                 case UserRoleEnum::KETUAMURABAHAH:
                     $role->givePermissionTo(['view_murabahah', 'approve_murabahah']);
