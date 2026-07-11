@@ -31,6 +31,7 @@ const props = defineProps({
     permohonan_murabahah: Object,
     pembayaran_terlambat: Object,
     transaksi_simpanan_terbaru: Object,
+    ringkasan_anggota_pj: Object,
 });
 
 const dates = ref([new Date(), new Date()]);
@@ -61,7 +62,7 @@ onMounted(() => {
     router.reload({
         only: [
             'pertumbuhan_pendapatan', 'pertumbuhan_anggota', 'peta_simpanan', 'peta_pembiayaan',
-            'transaksi_terbaru', 'jatuh_tempo_terdekat', 'permohonan_murabahah', 'pembayaran_terlambat', 'transaksi_simpanan_terbaru',
+            'transaksi_terbaru', 'jatuh_tempo_terdekat', 'permohonan_murabahah', 'pembayaran_terlambat', 'transaksi_simpanan_terbaru', 'ringkasan_anggota_pj',
         ],
         preserveState: true,
     })
@@ -77,7 +78,8 @@ const globalUpdateFields = [
     'jatuh_tempo_terdekat', 
     'permohonan_murabahah', 
     'pembayaran_terlambat', 
-    'transaksi_simpanan_terbaru'
+    'transaksi_simpanan_terbaru',
+    'ringkasan_anggota_pj'
 ];
 
 const filterDataMap = {
@@ -275,6 +277,7 @@ watch(selectedTransaksiSimpananFilter, () => applyFilter('selectedTransaksiSimpa
                 :stats="props.stats"
                 :jatuh_tempo_terdekat="props.jatuh_tempo_terdekat"
                 :transaksi_simpanan_terbaru="props.transaksi_simpanan_terbaru"
+                :ringkasan_anggota_pj="props.ringkasan_anggota_pj"
             />
         </div>
     </AdminLayout>

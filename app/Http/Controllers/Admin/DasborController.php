@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\DasborService;
@@ -106,6 +107,7 @@ class DasborController extends Controller
                 'permohonan_murabahah' => Inertia::lazy(fn() => $service->getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)),
                 'pembayaran_terlambat' => Inertia::lazy(fn() => $service->getPembayaranTerlambat($tanggalAkhir)),
                 'transaksi_simpanan_terbaru' => Inertia::lazy(fn() => $service->getTransaksiSimpananTerbaru($tanggalAkhir, $req->saving_transaction_filter ?? 'all')),
+                'ringkasan_anggota_pj' => Inertia::lazy(fn() => $role === UserRoleEnum::PJANGGOTA->value ? $service->getRingkasanAnggotaPJ() : []),
         ]);
     }
 }
