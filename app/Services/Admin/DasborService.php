@@ -6,6 +6,7 @@ use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
+use App\Models\PembayaranAngsuran;
 use App\Models\Pembiayaan;
 use App\Models\PengaturanUmum;
 use App\Models\Angsuran;
@@ -21,7 +22,7 @@ use Illuminate\Support\Collection;
 class DasborService
 {
     public function __construct(private PembiayaanService $pembiayaanService){}
-    public function getPeriodeSebelumnya(Carbon $awal, string $filter): array
+    public function getPeriodeSebelumnya(Carbon $awal, string $filter, ?Carbon $akhir = null): array
     {
         return match ($filter) {
             'month' => [
@@ -32,9 +33,13 @@ class DasborService
                 $awal->copy()->subYear()->startOfYear(),
                 $awal->copy()->subYear()->endOfYear()
             ],
+            'custom' => [
+                $akhir ? $awal->copy()->subDays($awal->diffInDays($akhir) + 1)->startOfDay() : $awal->copy()->subDay()->startOfDay(),
+                $awal->copy()->subDay()->endOfDay()
+            ],
             default => [
-                $awal->copy()->subDay(),
-                $awal->copy()->subDay()
+                $awal->copy()->subDay()->startOfDay(),
+                $awal->copy()->subDay()->endOfDay()
             ],
         };
     }
@@ -77,46 +82,68 @@ class DasborService
         );
     }
 
-    public function getTransaksiTerbaru($filter, $role)
+    public function getTransaksiTerbaru($filter, $role, $tanggalAwal, $tanggalAkhir)
     {
         $amount = $role === UserRoleEnum::DPS->value ? 5 : 6;
-        $transaksiSimpanan = TransaksiSimpanan::with('akunSimpanan.anggota.user')
+        $transaksiSimpanan = TransaksiSimpanan::with('akunSimpanan.anggota.user', 'updatedBy')
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
             ->latest()->take($amount)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
-                'no_transaksi' => $t->kode_transaksi_simpanan,
-                'anggota' => $t->akunSimpanan->anggota->user->nama,
-                'jumlah' => $t->amount,
-                'produk' => $t->akunSimpanan->jenis_simpanan,
-                'akad' => $this->getAkadSimpanan($t->akunSimpanan->jenis_simpanan),
+                'anggota' => $t->akunSimpanan?->anggota?->user?->nama ?? '-',
+                'jumlah' => $t->nominal_simpanan,
+                'produk' => $t->akunSimpanan?->jenis_simpanan ?? '-',
+                'dicatat_oleh' => $t->updatedBy?->nama ?? '-', 
+                'akad' => $this->getAkadSimpanan($t->akunSimpanan?->jenis_simpanan ?? ''),
                 'tanggal' => $t->created_at->toDateString(),
             ]);
 
-        $transaksiPembiayaan = Pembiayaan::with('anggota.user', 'objekPembiayaan')
+        $transaksiPembiayaan = Pembiayaan::with('anggota.user', 'objekPembiayaan', 'updatedBy')
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
             ->latest()->take($amount)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
-                'no_transaksi' => $f->kode_pembiayaan,
-                'anggota' => $f->anggota->user->nama,
-                'jumlah' => $f->amount,
+                'anggota' => $f->anggota?->user?->nama ?? '-',
+                'jumlah' => ($f->harga_perolehan - $f->uang_muka) + $f->margin_keuntungan,
                 'produk' => 'Pembiayaan',
                 'akad' => 'Murabahah',
+                'dicatat_oleh' => $f->updatedBy?->nama ?? '-', 
                 'tanggal' => $f->created_at->toDateString(),
             ]);
 
-        $data = $filter === 'all' ? $transaksiSimpanan->concat($transaksiPembiayaan)
+        $transaksiAngsuran = PembayaranAngsuran::with('angsuran.pembiayaan.anggota.user', 'updatedBy')
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+            ->latest()->take($amount)->get()
+            ->map(fn($a) => [
+                'id' => $a->id,
+                'anggota' => $a->angsuran?->pembiayaan?->anggota?->user?->nama ?? '-',
+                'jumlah' => $a->jumlah_angsuran_dibayar,
+                'produk' => 'Pembiayaan - Pembayaran Angsuran',
+                'akad' => '-',
+                'dicatat_oleh' => $a->updatedBy?->nama ?? '-', 
+                'tanggal' => $a->created_at->toDateString(),
+            ]);
+
+        $data = match ($filter) {
+            'all' => $transaksiSimpanan->concat($transaksiPembiayaan)->concat($transaksiAngsuran),
+            'simpanan' => $transaksiSimpanan,
+            'pembiayaan' => $transaksiPembiayaan,
+            default => $transaksiAngsuran,
+        };
+
+        $data = $data
             ->sortByDesc('tanggal')
             ->take($amount)
             ->values()
-            ->toArray() : ($filter === 'simpanan' ? $transaksiSimpanan : $transaksiPembiayaan)->toArray();
+            ->toArray();
 
         return $data;
     }
 
     public function getPendapatanPerPeriode($tanggalAwal, $tanggalAkhir, $filter)
     {
-        [$data, $format] = $this->buildSkeletonPeriode($tanggalAkhir, $filter);
-        [$rangeAwal, $rangeAkhir] = $this->getRangeUntukFilterPeriode($tanggalAkhir, $filter);
+        [$data, $format] = $this->buildSkeletonPeriode($tanggalAwal, $tanggalAkhir, $filter);
+        [$rangeAwal, $rangeAkhir] = $this->getRangeUntukFilterPeriode($tanggalAwal, $tanggalAkhir, $filter);
 
         $pendapatan = DetailJurnal::where('detail_jurnal.no_ref_akun', '401')
             ->join('jurnal', 'detail_jurnal.jurnal_id', '=', 'jurnal.id')
@@ -132,7 +159,7 @@ class DasborService
 
     public function getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filter)
     {
-        [$data, $format] = $this->buildSkeletonPeriode($tanggalAkhir, $filter);
+        [$data, $format] = $this->buildSkeletonPeriode($tanggalAwal, $tanggalAkhir, $filter);
 
         $anggota = Pengguna::where('status', UserStatusEnum::ACTIVE->value)
             ->with('roles')
@@ -469,17 +496,28 @@ class DasborService
      *
      * @return array{0: Collection, 1: string} [$skeletonData, $dateFormat]
      */
-    private function buildSkeletonPeriode($tanggalAkhir, string $filter): array
+    private function buildSkeletonPeriode($tanggalAwal, $tanggalAkhir, string $filter): array
     {
         $data = collect();
-        [$rangeAwal, $rangeAkhir] = $this->getRangeUntukFilterPeriode($tanggalAkhir, $filter);
+        [$rangeAwal, $rangeAkhir] = $this->getRangeUntukFilterPeriode($tanggalAwal, $tanggalAkhir, $filter);
 
-        $format = match ($filter) {
-            'day' => 'd M',
-            'month' => 'M',
-            'year' => 'Y',
-            default => '',
-        };
+        if ($filter === 'custom') {
+            $diffDays = $rangeAwal->diffInDays($rangeAkhir);
+            if ($diffDays <= 31) {
+                $format = 'd M';
+            } elseif ($diffDays <= 365) {
+                $format = 'M Y';
+            } else {
+                $format = 'Y';
+            }
+        } else {
+            $format = match ($filter) {
+                'day' => 'd M',
+                'month' => 'M',
+                'year' => 'Y',
+                default => 'd M',
+            };
+        }
 
         switch ($filter) {
             case 'day':
@@ -501,6 +539,26 @@ class DasborService
                     $data->put(Carbon::create($y, 1, 1)->format($format), 0);
                 }
                 break;
+                
+            case 'custom':
+                if ($format === 'd M') {
+                    foreach (CarbonPeriod::create($rangeAwal, $rangeAkhir) as $date) {
+                        $data->put($date->format($format), 0);
+                    }
+                } elseif ($format === 'M Y') {
+                    $start = $rangeAwal->copy()->startOfMonth();
+                    $end = $rangeAkhir->copy()->endOfMonth();
+                    foreach (CarbonPeriod::create($start, '1 month', $end) as $date) {
+                        $data->put($date->format($format), 0);
+                    }
+                } else {
+                    $start = $rangeAwal->copy()->startOfYear();
+                    $end = $rangeAkhir->copy()->endOfYear();
+                    foreach (CarbonPeriod::create($start, '1 year', $end) as $date) {
+                        $data->put($date->format($format), 0);
+                    }
+                }
+                break;
         }
 
         return [$data, $format];
@@ -512,7 +570,7 @@ class DasborService
      *
      * @return array{0: Carbon, 1: Carbon} [$rangeAwal, $rangeAkhir]
      */
-    private function getRangeUntukFilterPeriode($tanggalAkhir, string $filter): array
+    private function getRangeUntukFilterPeriode($tanggalAwal, $tanggalAkhir, string $filter): array
     {
         return match ($filter) {
             // 7 hari terakhir dari $tanggalAkhir
@@ -529,6 +587,10 @@ class DasborService
             'year' => [
                 Carbon::parse($tanggalAkhir)->subYears(4)->startOfYear(),
                 Carbon::parse($tanggalAkhir)->endOfYear(),
+            ],
+            'custom' => [
+                Carbon::parse($tanggalAwal)->startOfDay(),
+                Carbon::parse($tanggalAkhir)->endOfDay(),
             ],
             default => [
                 Carbon::parse($tanggalAkhir),

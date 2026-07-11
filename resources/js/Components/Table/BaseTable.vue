@@ -43,8 +43,7 @@ const toggleSort = (field: string) => {
                         v-for="col in columns"
                         :key="col.key"
                         @click="col.sortable && toggleSort(col.key)"
-                        class="px-6 py-3 text-sm font-medium
-                            text-gray-700 dark:text-gray-200"
+                        class="px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-200"
                         :class="[
                             col.align === 'center' && 'text-center',
                             col.align === 'right' && 'text-right',
@@ -110,7 +109,7 @@ const toggleSort = (field: string) => {
                         <td
                             v-for="col in columns"
                             :key="col.key"
-                            class="px-6 py-4 text-sm text-gray-800 dark:text-gray-100"
+                            class="px-6 py-4 text-lg text-gray-800 dark:text-gray-100"
                             :class="[
                                 col.align === 'center' && 'text-center',
                                 col.align === 'right' && 'text-right'

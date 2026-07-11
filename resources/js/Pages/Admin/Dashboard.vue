@@ -12,6 +12,7 @@ const Sekretaris = defineAsyncComponent(() => import('./Dashboard/Sekretaris.vue
 const KetuaStafMurabahah = defineAsyncComponent(() => import('./Dashboard/KetuaStafMurabahah.vue'));
 const PJAnggota = defineAsyncComponent(() => import('./Dashboard/PJAnggota.vue'));
 const DPS = defineAsyncComponent(() => import('./Dashboard/DPS.vue'));
+const Pengawas = defineAsyncComponent(() => import('./Dashboard/Pengawas.vue'));
 
 const page = usePage()
 
@@ -66,9 +67,22 @@ onMounted(() => {
     })
 })
 
+const globalUpdateFields = [
+    'stats', 
+    'pertumbuhan_pendapatan', 
+    'pertumbuhan_anggota', 
+    'peta_simpanan', 
+    'peta_pembiayaan', 
+    'transaksi_terbaru', 
+    'jatuh_tempo_terdekat', 
+    'permohonan_murabahah', 
+    'pembayaran_terlambat', 
+    'transaksi_simpanan_terbaru'
+];
+
 const filterDataMap = {
-    dates:                        ['pertumbuhan_pendapatan', 'pertumbuhan_anggota', 'peta_simpanan', 'peta_pembiayaan', 'transaksi_terbaru', 'jatuh_tempo_terdekat', 'permohonan_murabahah', 'pembayaran_terlambat', 'transaksi_simpanan_terbaru'],
-    selectedFilter:               ['pertumbuhan_pendapatan', 'pertumbuhan_anggota'],
+    dates:                        globalUpdateFields,
+    selectedFilter:               globalUpdateFields,
     selectedTransactionFilter:    ['transaksi_terbaru'],
     selectedSavingsFilter:        ['peta_simpanan'],
     selectedNearestDueFilter:     ['jatuh_tempo_terdekat'],
@@ -76,22 +90,54 @@ const filterDataMap = {
 };
 
 const applyFilter = (changedKey) => {
+    let startDate = null;
+    let endDate = null;
+    
+    if (dates.value && Array.isArray(dates.value) && dates.value.length === 2 && dates.value[0] && dates.value[1]) {
+        startDate = dates.value[0].toISOString();
+        endDate = dates.value[1].toISOString();
+    }
+
     router.get('/admin/dashboard', {
         filter_by:                selectedFilter.value,
         transaction_filter:       selectedTransactionFilter.value,
         savings_filter:           selectedSavingsFilter.value,
         nearest_filter:           selectedNearestDueFilter.value,
         saving_transaction_filter: selectedTransaksiSimpananFilter.value,
+        start_date:               startDate,
+        end_date:                 endDate,
     }, {
         preserveState:  true,
         preserveScroll: true,
         replace:        true,
-        only: filterDataMap[changedKey],
+        only: filterDataMap[changedKey] || [],
     });
 };
 
-watch(dates,                        () => applyFilter('dates'),                        { deep: true });
-watch(selectedFilter,               () => applyFilter('selectedFilter'));
+let isProgrammaticChange = false;
+
+watch(dates, () => {
+    if (isProgrammaticChange) return;
+    if (dates.value && Array.isArray(dates.value) && dates.value[0] && dates.value[1]) {
+        isProgrammaticChange = true;
+        selectedFilter.value = 'custom';
+        applyFilter('dates');
+        setTimeout(() => isProgrammaticChange = false, 0);
+    } else if (!dates.value) {
+        applyFilter('dates');
+    }
+}, { deep: true });
+
+watch(selectedFilter, () => {
+    if (isProgrammaticChange) return;
+    if (selectedFilter.value !== 'custom') {
+        isProgrammaticChange = true;
+        dates.value = null;
+        applyFilter('selectedFilter');
+        setTimeout(() => isProgrammaticChange = false, 0);
+    }
+});
+
 watch(selectedTransactionFilter,    () => applyFilter('selectedTransactionFilter'));
 watch(selectedSavingsFilter,        () => applyFilter('selectedSavingsFilter'));
 watch(selectedNearestDueFilter,     () => applyFilter('selectedNearestDueFilter'));
@@ -100,7 +146,42 @@ watch(selectedTransaksiSimpananFilter, () => applyFilter('selectedTransaksiSimpa
 
 <template>
     <AdminLayout title="Dashboard Admin">
+
+
         <div class="flex flex-col gap-4">
+            <!-- Header & Global Filter Bar -->
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-200/60 dark:border-gray-800 shadow-xs mb-2">
+                <div class="flex flex-col gap-1">
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+                        Selamat Datang, {{ page.props.auth.user.nama }}!
+                    </h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Saat ini berada pada Periode Buku {{ new Date().getFullYear() }}
+                    </p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3 mt-4 xl:mt-0">
+                    <!-- Date Range Picker -->
+                    <div class="w-64">
+                        <VueDatePicker 
+                            v-model="dates" 
+                            range 
+                            :enable-time-picker="false" 
+                            :is-dark="isDarkMode" 
+                            placeholder="Pilih Tanggal"
+                            format="dd MMM yyyy"
+                        ></VueDatePicker>
+                    </div>
+
+                    <!-- Filter Dropdown -->
+                    <select v-model="selectedFilter" class="h-[38px] rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-sm focus:ring-primary focus:border-primary">
+                        <option value="day">Harian</option>
+                        <option value="month">Bulanan</option>
+                        <option value="year">Tahunan</option>
+                        <option value="custom" disabled hidden>Kustom</option>
+                    </select>
+                </div>
+            </div>
             <KetuaPengawas
                 @update:selected-transaction-filter="selectedTransactionFilter = $event"
                 :selected-transaction-filter="selectedTransactionFilter"
@@ -109,7 +190,23 @@ watch(selectedTransaksiSimpananFilter, () => applyFilter('selectedTransaksiSimpa
                 @update:selected-savings-filter="selectedSavingsFilter = $event"
                 :selected-savings-filter="selectedSavingsFilter"
                 :can="can"
-                v-if="role === 'Ketua' || role === 'Pengawas' || role === 'Administrator Sistem'"
+                v-if="role === 'Ketua' || role === 'Administrator Sistem'"
+                :stats="props.stats"
+                :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
+                :peta_simpanan="props.peta_simpanan"
+                :peta_pembiayaan="props.peta_pembiayaan"
+                :transaksi_terbaru="props.transaksi_terbaru"
+            />
+            <!-- Dashboard Pengawas -->
+            <Pengawas
+                @update:selected-transaction-filter="selectedTransactionFilter = $event"
+                :selected-transaction-filter="selectedTransactionFilter"
+                @update:selected-filter="selectedFilter = $event"
+                :selected-filter="selectedFilter"
+                @update:selected-savings-filter="selectedSavingsFilter = $event"
+                :selected-savings-filter="selectedSavingsFilter"
+                :can="can"
+                v-if="role === 'Pengawas'"
                 :stats="props.stats"
                 :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
                 :peta_simpanan="props.peta_simpanan"
