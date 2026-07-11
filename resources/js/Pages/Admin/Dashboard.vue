@@ -6,7 +6,7 @@ import { VueDatePicker } from '@vuepic/vue-datepicker';
 import { defineAsyncComponent } from 'vue';
 import { toast } from 'vue3-toastify';
 
-const KetuaPengawas = defineAsyncComponent(() => import('./Dashboard/KetuaPengawas.vue'));
+const Ketua = defineAsyncComponent(() => import('./Dashboard/Ketua.vue'));
 const Bendahara = defineAsyncComponent(() => import('./Dashboard/Bendahara.vue'));
 const Sekretaris = defineAsyncComponent(() => import('./Dashboard/Sekretaris.vue'));
 const KetuaStafMurabahah = defineAsyncComponent(() => import('./Dashboard/KetuaStafMurabahah.vue'));
@@ -182,7 +182,7 @@ watch(selectedTransaksiSimpananFilter, () => applyFilter('selectedTransaksiSimpa
                     </select>
                 </div>
             </div>
-            <KetuaPengawas
+            <Ketua
                 @update:selected-transaction-filter="selectedTransactionFilter = $event"
                 :selected-transaction-filter="selectedTransactionFilter"
                 @update:selected-filter="selectedFilter = $event"
