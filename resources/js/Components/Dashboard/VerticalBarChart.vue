@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
+import moneyParser from '@/Composables/moneyParser.js'
 
 const props = defineProps({
     title: {
@@ -75,15 +76,13 @@ const chartOptions = ref({
         },
     },
     yaxis: {
-        title: false,
         labels: {
             style: {
                 fontSize: '14px',
             },
             formatter: function (value) {
-                return 'Rp' + new Intl.NumberFormat('id-ID', {
-                    maximumFractionDigits: 0
-                }).format(value);
+                if (value === undefined || value === null) return '';
+                return moneyParser(value);
             }
         }
     },
@@ -106,9 +105,8 @@ const chartOptions = ref({
         },
         y: {
             formatter: function (value) {
-                return 'Rp' + new Intl.NumberFormat('id-ID', {
-                    maximumFractionDigits: 0
-                }).format(value);
+                if (value === undefined || value === null) return '';
+                return moneyParser(value);
             }
         },
     },
@@ -117,13 +115,13 @@ const chartOptions = ref({
 const updateChart = () => {
     if (!props.data || Object.keys(props.data).length === 0) return
     const categories = Object.keys(props.data)
-    const values = Object.values(props.data)
+    const values = Object.values(props.data).map(v => Number(v))
 
     chartOptions.value = {
         ...chartOptions.value,
         xaxis: { ...chartOptions.value.xaxis, categories }
     }
-    series.value = [{ name: 'Keuntungan', data: [...values] }]
+    series.value = [{ name: 'Keuntungan', data: values }]
 }
 
 watch(() => props.filter, updateChart, { immediate: true })

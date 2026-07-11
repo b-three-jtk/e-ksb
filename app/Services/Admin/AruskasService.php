@@ -419,7 +419,7 @@ class AruskasService
 
     private function calculateOpeningBalance(array $filters): float
     {
-        $query = JournalEntry::query()
+        $query = DetailJurnal::query()
             ->where('no_ref_account', self::CASH_ACCOUNT);
 
         if (

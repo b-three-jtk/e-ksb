@@ -11,6 +11,7 @@ import { Link } from '@inertiajs/vue3';
 import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
 import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue';
 import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
+import FdrCard from '@/Components/Dashboard/FdrCard.vue';
 
 const props = defineProps({
     stats: Object,
@@ -25,9 +26,10 @@ const props = defineProps({
 
 const kolomTabel = computed(() => {
     const cols = [
-        { key: 'no_transaksi', label: 'No. Transaksi' },
         { key: 'anggota', label: 'Anggota' },
         { key: 'produk', label: 'Produk' },
+        { key: 'jumlah', label: 'Jumlah', sortable: true },
+        { key: 'dicatat_oleh', label: 'Dicatat Oleh'},
         { key: 'tanggal', label: 'Tanggal' },
         { key: 'akad', label: 'Akad' },
     ];
@@ -49,13 +51,12 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
     <div class="grid grid-cols-1 lg:grid-cols-7 gap-4">
         <!-- GRAFIK PENDAPATAN & TRANSAKSI TERBARU - BARIS SATU -->
         <div class="grid grid-cols-2 col-span-7 gap-4">
-            <div class="grid grid-cols-3 col-span-2 flex-col gap-4">
-                <CardInfo title="Rasio Kas" :content="props.stats.rasio_kas" :deskripsi="descriptions['Rasio Kas']" />
+            <SkeletonStatCard v-if="!stats" :count="3" />
+            <div v-else class="grid grid-cols-3 col-span-2 flex-col gap-4">
+                <FdrCard :fdr="props.stats.rasio_fdr" />
                 <CardInfo title="Total Kas" :content="parseCurrencyAmount(props.stats.total_kas)"
                     :percentage="props.stats.total_kas_persen" :filter="props.selectedFilter"
                     :deskripsi="descriptions['Total Kas']" />
-                <CardInfo title="Rasio Financing-to-Deposit (FDR)" :content="props.stats.rasio_fdr"
-                    :deskripsi="descriptions['Rasio Financing-to-Deposit (FDR)']" />
             </div>
             <div class="grid grid-cols-2 col-span-1 flex-col gap-4">
                 <SkeletonChartCard v-if="!pertumbuhan_pendapatan" class="col-span-2" :bars="12" :legend="2" />
