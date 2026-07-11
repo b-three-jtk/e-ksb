@@ -12,6 +12,10 @@ const props = defineProps({
     filter: {
         type: String,
     },
+    height: {
+        type: [String, Number],
+        default: 300,
+    }
 })
 
 const series = ref([
@@ -54,25 +58,34 @@ const chartOptions = ref({
         axisTicks: {
             show: false,
         },
+        labels: {
+            style: {
+                fontSize: '14px',
+            },
+        },
     },
     legend: {
         show: true,
         position: 'top',
         horizontalAlign: 'left',
         fontFamily: 'Manrope',
+        fontSize: '14px',
         markers: {
             radius: 99,
         },
     },
     yaxis: {
         title: false,
-    labels: {
-        formatter: function (value) {
-            return 'Rp' + new Intl.NumberFormat('id-ID', {
-                maximumFractionDigits: 0
-            }).format(value);
+        labels: {
+            style: {
+                fontSize: '14px',
+            },
+            formatter: function (value) {
+                return 'Rp' + new Intl.NumberFormat('id-ID', {
+                    maximumFractionDigits: 0
+                }).format(value);
+            }
         }
-    }
     },
     grid: {
         yaxis: {
@@ -85,6 +98,9 @@ const chartOptions = ref({
         opacity: 1,
     },
     tooltip: {
+        style: {
+            fontSize: '16px',
+        },
         x: {
             show: false,
         },
@@ -118,7 +134,7 @@ watch(() => props.data, updateChart, { deep: true })
     <div class="w-full">
         <div class="max-w-full overflow-x-auto custom-scrollbar">
             <div id="chartOne" class="-ml-5 min-w-162.5 xl:min-w-full pl-2">
-                <VueApexCharts type="bar" height="380" :key="filter" :options="chartOptions" :series="series" />
+                <VueApexCharts type="bar" :height="height" :key="filter" :options="chartOptions" :series="series" />
             </div>
         </div>
     </div>
