@@ -120,9 +120,9 @@ watch(() => filterState.allocation_status, applyFilters)
 
           <MemberAllocationTable
             :anggota="anggota"
-            :selected-anggota-ids="selectedMemberIds"
+            :selected-member-ids="selectedMemberIds"
             :all-visible-selected="allVisibleSelected"
-            :broken-anggota-avatar-ids="brokenMemberAvatarIds"
+            :broken-member-avatar-ids="brokenMemberAvatarIds"
             @toggle-visible-selection="toggleVisibleSelection"
             @update-selection="updateSelection"
             @mark-broken-anggota-avatar="markBrokenMemberAvatar"

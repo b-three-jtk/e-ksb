@@ -61,6 +61,21 @@ class DasborService
         );
     }
 
+    public function getTotalAnggotaBelumDialokasi($tanggalAkhir, $tanggalAkhirSebelumnya): array
+    {
+        return $this->getTotalDenganPersenPerubahan(
+            fn($tgl) => Pengguna::where('status', UserStatusEnum::ACTIVE->value)
+                ->whereNotNull('tgl_bergabung')
+                ->whereNotNull('kode_pengguna')
+                ->whereHas('roles', fn($q) => $q->where('name', UserRoleEnum::ANGGOTA->value))
+                ->whereHas('anggota', fn($q) => $q->whereNull('pj_anggota_id'))
+                ->where('created_at', '<=', $tgl)
+                ->count(),
+            $tanggalAkhir,
+            $tanggalAkhirSebelumnya
+        );
+    }
+
     public function getTotalPengurus($tanggalAkhir, $tanggalAkhirSebelumnya): array
     {
         return $this->getTotalDenganPersenPerubahan(

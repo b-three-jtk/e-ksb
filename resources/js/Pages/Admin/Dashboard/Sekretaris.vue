@@ -1,12 +1,9 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import CardInfo from '@/Components/CardInfo.vue';
-import AreaChart from '@/Components/Dashboard/AreaChart.vue'
-import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
 
 const props = defineProps({
     stats: Object,
-    pertumbuhan_anggota: Object,
     selectedFilter: String,
 });
 
@@ -14,15 +11,7 @@ const emit = defineEmits(['update:selectedFilter']);
 </script>
 
 <template>
-    <div class="grid grid-cols-1 lg:grid-cols-5 lg:gap-3.5">
-        <SkeletonChartCard v-if="!pertumbuhan_anggota" class="col-span-3" :bars="12" :legend="2" />
-        <div v-else class="card-layout col-span-3">
-            <div class="flex justify-between">
-                <h1 class="card-title">Grafik Pertumbuhan Anggota</h1>
-            </div>
-            <AreaChart :data="pertumbuhan_anggota" />
-        </div>
-        <div class="col-span-2 grid grid-cols-2 gap-3.5 mt-4 lg:mt-0">
+    <div class="col-span-2 grid grid-cols-3 gap-3.5 mt-4 lg:mt-0">
             <CardInfo
                 title="Total Anggota Aktif"
                 :content="props.stats.total_anggota_aktif"
@@ -30,9 +19,15 @@ const emit = defineEmits(['update:selectedFilter']);
                 :filter="selectedFilter"
             />
             <CardInfo
-                title="Total Anggota Non-Aktif"
-                :content="props.stats.total_anggota_non_aktif"
-                :percentage="props.stats.total_anggota_non_aktif_persen"
+                title="Total Pengurus"
+                :content="props.stats.total_pengurus"
+                :percentage="props.stats.total_pengurus_persen"
+                :filter="selectedFilter"
+            />
+            <CardInfo
+                title="Total Anggota Belum Dialokasikan"
+                :content="props.stats.total_anggota_belum_dialokasi"
+                :percentage="props.stats.total_anggota_belum_dialokasi_persen"
                 :filter="selectedFilter"
             />
             <div class="card-layout col-span-2 bg-light-bg! dark:bg-brand-900/60!">
@@ -74,7 +69,5 @@ const emit = defineEmits(['update:selectedFilter']);
                     </Link>
                 </div>
             </div>
-        </div>
     </div>
-
 </template>
