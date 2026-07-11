@@ -38,7 +38,7 @@
     "src": "public/images/logo/logo-icon.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-Bft8Uaw3.css",
+    "file": "assets/app-CZN1yIsM.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -47,7 +47,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DM5Ec7qG.js",
+    "file": "assets/app-BomA4kT0.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -57,7 +57,7 @@
     ],
     "css": [
       "assets/app-Bm-xrfF8.css",
-      "assets/app-Bft8Uaw3.css"
+      "assets/app-CZN1yIsM.css"
     ],
     "assets": [
       "assets/logo-icon-WY71gjSd.svg",
