@@ -160,6 +160,7 @@ class PembayaranAngsuranService
                 'angsuran_id' => $angsuran->id,
                 'updated_by' => $userId,
                 'struk_pembayaran' => $filePath,
+                'status' => 'Menunggu Verifikasi',
             ]);
 
             Akun::where(
@@ -186,6 +187,23 @@ class PembayaranAngsuranService
 
             return $data;
         });
+    }
+
+    public function verifyPayment(string $paymentId, string $verifiedById): PembayaranAngsuran
+    {
+        $payment = PembayaranAngsuran::lockForUpdate()->findOrFail($paymentId);
+
+        if ($payment->status === 'Diverifikasi') {
+            throw new \RuntimeException('Pembayaran ini sudah diverifikasi sebelumnya.');
+        }
+
+        $payment->update([
+            'status'      => 'Diverifikasi',
+            'verified_by' => $verifiedById,
+            'verified_at' => now(),
+        ]);
+
+        return $payment->fresh();
     }
 
     public function getCreatePaymentData(Pembiayaan $pembiayaan): array
@@ -308,6 +326,7 @@ class PembayaranAngsuranService
             'no_rekening'               => $validated['no_rekening'] ?? null,
             'bukti_pembayaran'          => $buktiPembayaranPath,
             'updated_by'             => auth()->id(),
+            'status'                 => 'Menunggu Verifikasi',
         ]);
 
             $angsuran = Angsuran::findOrFail($validated['angsuran_id']);
