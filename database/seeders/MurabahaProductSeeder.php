@@ -261,8 +261,10 @@ class MurabahaProductSeeder extends Seeder
             $monthlyPayment = $monthlyCostPrice + $monthlyMargin;
             $dueDate = $akadDate->copy()->addMonths($i);
 
-            // Tentukan status pembayaran cicilan (semua lancar)
-            $isPaid = $dueDate->isPast();
+            // Tentukan status pembayaran cicilan
+            $isPast = $dueDate->isPast();
+            // Buat sekitar 20% angsuran yang sudah jatuh tempo menjadi menunggak (unpaid)
+            $isPaid = $isPast && (rand(1, 100) > 20);
 
             $angsuran = Angsuran::create([
                 'pembiayaan_id' => $pembiayaan->id,
