@@ -150,7 +150,7 @@ watch(selectedTransaksiSimpananFilter, () => applyFilter('selectedTransaksiSimpa
 
         <div class="flex flex-col gap-4">
             <!-- Header & Global Filter Bar -->
-            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-200/60 dark:border-gray-800 shadow-xs mb-2">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-200/60 dark:border-gray-800 shadow-xs">
                 <div class="flex flex-col gap-1">
                     <h1 class="text-xl font-bold text-gray-900 dark:text-white">
                         Selamat Datang, {{ page.props.auth.user.nama }}!

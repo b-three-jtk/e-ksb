@@ -132,7 +132,8 @@ const descriptions = {
             <CardInfo title="Total Kas" :content="parseCurrencyAmount(props.stats.total_kas)"
                 :percentage="props.stats.total_kas_persen" :filter="props.selectedFilter"
                 :deskripsi="descriptions['Total Kas']" />
-            <CardInfo title="Total Pembiayaan Tersalurkan" :content="parseCurrencyAmount(props.stats.total_pembiayaan_tersalurkan)"
+            <CardInfo title="Total Pembiayaan Tersalurkan"
+                :content="parseCurrencyAmount(props.stats.total_pembiayaan_tersalurkan)"
                 :percentage="props.stats.total_pembiayaan_tersalurkan_persen" :filter="props.selectedFilter"
                 :deskripsi="'Nilai ini menunjukkan total piutang murabahah yang belum dilunasi oleh anggota untuk periode yang dipilih.'" />
 
