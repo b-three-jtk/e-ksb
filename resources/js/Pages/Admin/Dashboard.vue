@@ -231,10 +231,17 @@ watch(selectedTransaksiSimpananFilter, () => applyFilter('selectedTransaksiSimpa
             <!-- Dashboard Bendahara -->
             <Bendahara
                 v-if="role === 'Bendahara'"
-                :stats="props.stats"
-                :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
+                @update:selected-transaction-filter="selectedTransactionFilter = $event"
+                :selected-transaction-filter="selectedTransactionFilter"
                 @update:selected-filter="selectedFilter = $event"
                 :selected-filter="selectedFilter"
+                @update:selected-savings-filter="selectedSavingsFilter = $event"
+                :selected-savings-filter="selectedSavingsFilter"
+                :can="can"
+                :stats="props.stats"
+                :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan"
+                :peta_simpanan="props.peta_simpanan"
+                :transaksi_terbaru="props.transaksi_terbaru"
             />
             <!-- Dashboard Sekretaris -->
             <Sekretaris

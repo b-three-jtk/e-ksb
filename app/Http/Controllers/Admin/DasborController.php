@@ -44,6 +44,8 @@ class DasborController extends Controller
 
         [$data['total_anggota_non_aktif'], $data['total_anggota_non_aktif_persen']] = $service->getTotalAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, UserStatusEnum::INACTIVE->value);
 
+        [$data['total_anggota_belum_dialokasi'], $data['total_anggota_belum_dialokasi_persen']] = $service->getTotalAnggotaBelumDialokasi($tanggalAkhir, $tanggalAkhirSebelumnya);
+
         [$data['total_pengurus'], $data['total_pengurus_persen']] = $service->getTotalPengurus($tanggalAkhir, $tanggalAkhirSebelumnya);
 
         $data['rasio_kas'] = $service->getRasioKas($tanggalAkhir);
@@ -74,8 +76,8 @@ class DasborController extends Controller
                 'total_kas_persen' => $data['total_kas_persen'],
                 'total_anggota_aktif' => $data['total_anggota_aktif'],
                 'total_anggota_aktif_persen' => $data['total_anggota_aktif_persen'],
-                'total_anggota_non_aktif' => $data['total_anggota_non_aktif'],
-                'total_anggota_non_aktif_persen' => $data['total_anggota_non_aktif_persen'],
+                'total_anggota_belum_dialokasi' => $data['total_anggota_belum_dialokasi'],
+                'total_anggota_belum_dialokasi_persen' => $data['total_anggota_belum_dialokasi_persen'],
                 'total_pengurus' => $data['total_pengurus'],
                 'total_pengurus_persen' => $data['total_pengurus_persen'],
                 'total_simpanan_masuk' => $data['total_simpanan_masuk'],

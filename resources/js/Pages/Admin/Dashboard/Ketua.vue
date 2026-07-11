@@ -79,16 +79,16 @@ const formatDate = (dateStr) => {
 };
 
 const getProductColor = (produk) => {
-    if (!produk) return { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-700 dark:text-slate-300' }
-    const key = produk.toLowerCase()
-    if (key.includes('pokok')) return { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-200' }
-    if (key.includes('wajib')) return { bg: 'bg-green-100 dark:bg-green-900/40', text: 'text-green-700 dark:text-green-200' }
-    if (key.includes('anggota')) return { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-200' }
-    if (key.includes('berjangka')) return { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-700 dark:text-orange-200' }
-    if (key.includes('ibadah')) return { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-200' }
-    if (key.includes('pembiayaan')) return { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-200' }
-    return { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-700 dark:text-slate-100' }
-}
+    if (!produk) return { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-700 dark:text-slate-300' };
+    const key = produk.toLowerCase();
+    if (key.includes('pokok')) return { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-200' };
+    if (key.includes('wajib')) return { bg: 'bg-green-100 dark:bg-green-900/40', text: 'text-green-700 dark:text-green-200' };
+    if (key.includes('anggota')) return { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-200' };
+    if (key.includes('berjangka')) return { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-700 dark:text-orange-200' };
+    if (key.includes('ibadah')) return { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-200' };
+    if (key.includes('pembiayaan')) return { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-200' };
+    return { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-700 dark:text-slate-100' };
+};
 
 const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSavingsFilter', 'update:selectedFilter']);
 

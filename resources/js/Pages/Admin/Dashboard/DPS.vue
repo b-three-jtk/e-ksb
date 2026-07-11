@@ -1,22 +1,14 @@
 <script setup>
 import CardInfo from '@/Components/CardInfo.vue';
 import FdrCard from '@/Components/Dashboard/FdrCard.vue';
-import VerticalBarChart from '@/Components/Dashboard/VerticalBarChart.vue';
-import BaseTable from '@/Components/Table/BaseTable.vue';
-import parseCurrencyAmount from '@/Composables/moneyParser.js';
 import BarChart from '@/Components/Dashboard/Barchart.vue';
-import { computed, ref } from 'vue';
-import EyeIcon from '@/Icons/EyeIcon.vue';
-import { Link } from '@inertiajs/vue3';
+import parseCurrencyAmount from '@/Composables/moneyParser.js';
 import SkeletonStatCard from '@/Components/Dashboard/Loading/SkeletonStatCard.vue';
-import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
 import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue';
-import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
 
 const props = defineProps({
     stats: Object,
     pertumbuhan_pendapatan: Object,
-    peta_pembiayaan: Object,
     peta_simpanan: Object,
     transaksi_terbaru: Object,
     can: Object,
@@ -24,72 +16,6 @@ const props = defineProps({
     selectedTransactionFilter: String,
     selectedSavingsFilter: String,
 });
-
-const kolomTabel = computed(() => {
-    const cols = [
-        { key: 'anggota', label: 'Anggota', sortable: true },
-        { key: 'produk', label: 'Produk' },
-        { key: 'akad', label: 'Akad' },
-        { key: 'jumlah', label: 'Jumlah', sortable: true },
-        { key: 'dicatat_oleh', label: 'Dicatat Oleh' },
-        { key: 'tanggal', label: 'Tanggal', sortable: true },
-    ];
-    cols.push({ key: 'action', label: 'Aksi', align: 'center' });
-    return cols;
-});
-
-const sortBy = ref('tanggal');
-const sortDir = ref('desc');
-
-const handleSort = (field) => {
-    if (sortBy.value === field) {
-        sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
-    } else {
-        sortBy.value = field;
-        sortDir.value = 'asc';
-    }
-};
-
-const sortedTransaksi = computed(() => {
-    if (!props.transaksi_terbaru) return [];
-    return [...props.transaksi_terbaru].sort((a, b) => {
-        let valA = a[sortBy.value];
-        let valB = b[sortBy.value];
-
-        if (sortBy.value === 'jumlah') {
-            valA = Number(valA) || 0;
-            valB = Number(valB) || 0;
-        } else if (sortBy.value === 'tanggal') {
-            valA = new Date(valA).getTime();
-            valB = new Date(valB).getTime();
-        } else {
-            valA = String(valA || '').toLowerCase();
-            valB = String(valB || '').toLowerCase();
-        }
-
-        if (valA < valB) return sortDir.value === 'asc' ? -1 : 1;
-        if (valA > valB) return sortDir.value === 'asc' ? 1 : -1;
-        return 0;
-    });
-});
-
-const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-};
-
-const getProductColor = (produk) => {
-    if (!produk) return { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-700 dark:text-slate-300' }
-    const key = produk.toLowerCase()
-    if (key.includes('pokok')) return { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-200' }
-    if (key.includes('wajib')) return { bg: 'bg-green-100 dark:bg-green-900/40', text: 'text-green-700 dark:text-green-200' }
-    if (key.includes('anggota')) return { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-200' }
-    if (key.includes('berjangka')) return { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-700 dark:text-orange-200' }
-    if (key.includes('ibadah')) return { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-200' }
-    if (key.includes('pembiayaan')) return { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-200' }
-    return { bg: 'bg-gray-100 dark:bg-slate-700', text: 'text-gray-700 dark:text-slate-100' }
-}
 
 const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSavingsFilter', 'update:selectedFilter']);
 
