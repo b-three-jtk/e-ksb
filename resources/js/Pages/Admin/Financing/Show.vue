@@ -128,7 +128,7 @@ const batalkan = () => {
                 </div>
                 <div class="flex items-center gap-4">
                     <Button
-                        v-if="data.status !== 'Angsuran Berjalan' && data.status !== 'Tangguh'"
+                        v-if="data.status !== 'Angsuran Berjalan' && data.status !== 'Tangguh' && data.status !== 'Lunas'"
                         variant="gray"
                         @click="batalkan()">
                         Batalkan Permohonan
