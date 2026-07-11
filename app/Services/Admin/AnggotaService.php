@@ -120,12 +120,18 @@ class AnggotaService
 
 
 
-                $user->update([
+                $userData = [
                     'nama' => $validated['nama'] ?? $user->nama,
                     'nik' => $validated['nik'] ?? $user->nik,
                     'email' => $validated['email'] ?? $user->email,
                     'no_telp' => $validated['no_telp'] ?? $user->no_telp,
-                ]);
+                ];
+
+                if (!empty($validated['password'])) {
+                    $userData['password'] = bcrypt($validated['password']);
+                }
+
+                $user->update($userData);
 
                 if ($user->anggota) {
                     $user->anggota->update([
