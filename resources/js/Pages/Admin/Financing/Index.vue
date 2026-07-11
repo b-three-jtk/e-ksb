@@ -184,23 +184,24 @@ watch(() => filters.tab, applyFilters)
                         <div class="flex">
 
                             <Button
-                                v-if="can['edit_murabahah'] && (role === 'Staf Murabahah' && (row.status === 'Disetujui' || row.status === 'Ditolak' || row.status === 'Menunggu Kelengkapan Dokumen' || row.status === 'Disetujui dengan Catatan'))"
+                                v-if="can['edit_murabahah'] && ['Disetujui', 'Ditolak', 'Menunggu Kelengkapan Dokumen', 'Disetujui dengan Catatan'].includes(row.status)"
                                 :href="`/admin/pembiayaan/draft/${row.id}`" size="small" variant="info">
                                 <ReviewIcon width="18px" height="18px" />
                                 Lanjutkan
                             </Button>
+                            
                             <Button
-                                v-else-if="can['view_murabahah'] && ((role === 'Staf Murabahah' && ((row.status === 'Angsuran Berjalan') || (row.status === 'Belum Ditinjau') || (row.status === 'Lunas') || (row.status === 'Pembayaran Tangguh'))) || (role === 'Bendahara') || (role === 'Pengawas') || (role === 'Dewan Pengawas Syariah') || (role === 'Ketua Murabahah' && (row.status !== 'Belum Ditinjau')) || (role === 'Ketua' && (row.status !== 'Belum Ditinjau' || row.user_role !== 'Ketua Murabahah')))"
-                                :href="`/admin/pembiayaan/show/${row.id}`" size="small" variant="secondary">
-                                <Icon icon="mdi:eye-outline" class="w-5 h-5" />
-                                Lihat Detail
-                            </Button>
-
-                            <Button
-                                v-if="can['approve_murabahah'] && (role === 'Ketua Murabahah' && (row.status === 'Belum Ditinjau')) || (role === 'Ketua' && (row.status === 'Belum Ditinjau' && row.user_role === 'Ketua Murabahah'))"
+                                v-else-if="can['approve_murabahah'] && row.status === 'Belum Ditinjau'"
                                 :href="`/admin/pembiayaan/validation/${row.id}`" size="small" variant="warning">
                                 <ReviewIcon width="18px" height="18px" />
                                 Tinjau
+                            </Button>
+
+                            <Button
+                                v-else-if="can['view_murabahah']"
+                                :href="`/admin/pembiayaan/show/${row.id}`" size="small" variant="secondary">
+                                <Icon icon="mdi:eye-outline" class="w-5 h-5" />
+                                Lihat Detail
                             </Button>
 
                         </div>

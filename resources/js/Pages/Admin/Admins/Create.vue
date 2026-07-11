@@ -16,7 +16,7 @@ const form = useForm({
     email: '',
     nik: '',
     role_id: '',
-    name: '',
+    nama: '',
     no_telp: '',
 })
 
@@ -50,7 +50,7 @@ const searchMembers = () => {
 
     const q = searchQuery.value.toLowerCase().trim()
     searchResults.value = props.anggota.filter(m =>
-        m.name?.toLowerCase().includes(q) ||
+        m.nama?.toLowerCase().includes(q) ||
         m.nik?.toLowerCase().includes(q) ||
         m.email?.toLowerCase().includes(q) ||
         m.kode_pengguna?.toLowerCase().includes(q)
@@ -60,7 +60,7 @@ const searchMembers = () => {
 const selectMember = (anggota) => {
     selectedMember.value = anggota
     form.pengguna_id = anggota.id
-    form.name = anggota.name
+    form.nama = anggota.nama
     form.nik = anggota.nik
     form.email = anggota.email
     form.no_telp = anggota.no_telp
@@ -71,7 +71,7 @@ const selectMember = (anggota) => {
 const clearSelectedMember = () => {
     selectedMember.value = null
     form.pengguna_id = ''
-    form.name = ''
+    form.nama = ''
     form.nik = ''
     form.email = ''
     form.no_telp = ''
@@ -144,7 +144,7 @@ const submitForm = () => {
                                 class="absolute z-100 top-full left-0 right-0 mt-1 border rounded-lg bg-white shadow-lg">
                                 <div v-for="anggota in searchResults" :key="anggota.id" @click="selectMember(anggota)"
                                     class="px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-100">
-                                    <div class="font-semibold">{{ anggota.name }}</div>
+                                    <div class="font-semibold">{{ anggota.nama }}</div>
                                     <div class="text-sm text-gray-600">{{ anggota.kode_pengguna }} | NIK: {{ anggota.nik }}
                                     </div>
                                     <div class="text-sm text-gray-600">{{ anggota.email }}</div>
@@ -167,8 +167,8 @@ const submitForm = () => {
                         </BaseInputAdmin>
 
                         <!-- Nama -->
-                        <BaseInputAdmin v-model="form.name" label="Nama Lengkap" type="text" required
-                            placeholder="Masukkan nama lengkap" :error="errors.name"
+                        <BaseInputAdmin v-model="form.nama" label="Nama Lengkap" type="text" required
+                            placeholder="Masukkan nama lengkap" :error="errors.nama"
                         >
                         </BaseInputAdmin>
 
@@ -197,7 +197,7 @@ const submitForm = () => {
                         Batal
                     </Button>
                     <Button @click="submitForm" variant="secondary"
-                        :disabled="!form.role_id || form.processing || (isEditingExistingMember ? !selectedMember : !form.name || !form.nik || !form.email)">
+                        :disabled="!form.role_id || form.processing || (isEditingExistingMember ? !selectedMember : !form.nama || !form.nik || !form.email)">
                         <div v-if="form.processing" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                         {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                     </Button>

@@ -2,7 +2,8 @@
 import { computed, ref, onMounted, watch } from 'vue'
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import ChevronDownIcon from '../../Icons/ChevronDownIcon.vue'
-import Tooltip from '@/Components/Form/Tooltip.vue'
+import Tooltip from '../../Components/Form/Tooltip.vue'
+import { Icon } from '@iconify/vue'
 
 const props = defineProps<{
     modelValue: string | number | File
@@ -28,6 +29,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const fileName = ref('')
 const fileInput = ref<HTMLInputElement | null>(null)
+const showPassword = ref(false)
 
 watch(() => props.modelValue, (val) => {
     if (!val) {
@@ -207,12 +209,27 @@ const handleMoneyInput = (event: Event) => {
         </div>
 
         <!-- Regular Input (default) -->
-        <input v-else :type="inputType" :value="modelValue"
+        <input v-else-if="inputType !== 'password'" :type="inputType" :value="modelValue"
             @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)" :placeholder="placeholder"
             :maxlength="max" :minlength="min" :pattern="pattern" :disabled="disabled" :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
                 error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
             ]"
             class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+
+        <!-- Password Input with Toggle -->
+        <div v-else class="relative">
+            <input :type="showPassword ? 'text' : 'password'" :value="modelValue"
+                @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)" :placeholder="placeholder"
+                :maxlength="max" :minlength="min" :pattern="pattern" :disabled="disabled" :class="['h-11 w-full rounded-lg border bg-transparent font-body pl-4 pr-11 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
+                    error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
+                ]"
+                class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+            
+            <button type="button" @click="showPassword = !showPassword"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
+                <Icon :icon="showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'" class="w-5 h-5" />
+            </button>
+        </div>
 
         <p v-if="error" class="text-red-500 text-xs mt-1">{{ error }}</p>
     </div>

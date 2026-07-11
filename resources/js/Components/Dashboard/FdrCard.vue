@@ -43,7 +43,7 @@ const actionText = computed(() => {
         <div class="flex justify-between items-center mb-6">
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-full bg-[#e8f5e9] flex items-center justify-center text-brand-800 text-2xl dark:bg-green-900/30">
+                    class="w-10 h-10 rounded-lg bg-[#e8f5e9] flex items-center justify-center text-brand-800 text-2xl dark:bg-green-900/30">
                     <span class="icon-[tabler--zoom-money]"></span>
                 </div>
                 <span class="card-title">Rasio Pembiayaan</span>

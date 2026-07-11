@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '../../../Layouts/Admin/Layout.vue'
 import { reactive, watch, ref, computed } from 'vue'
 import { Icon } from '@iconify/vue'
@@ -26,8 +26,9 @@ const props = defineProps<{
         name: string;
         saldo: number
     }[]
-    can: Record<string, boolean>
 }>()
+const page = usePage<any>();
+const can = computed(() => page.props.auth.can as Record<string, boolean>);
 
 // Modal state
 const showModal = ref(false)
@@ -300,7 +301,7 @@ const columns = computed(() => {
         { key: 'status', label: 'Status', align: 'left' as const },
     ]
 
-    if (props.can.edit_akun) {
+    if (can.value.edit_akun) {
         base.push({ key: 'aksi', label: 'Aksi', align: 'left' as const })
     }
 
@@ -361,7 +362,7 @@ const nomorAkunGuide = [
                 </h2>
 
                 <Button
-                    v-if="props.can.tambah_akun"
+                    v-if="can['create_akun']"
                     size="medium"
                     type="button"
                     @click="openCreateModal"
@@ -471,7 +472,7 @@ const nomorAkunGuide = [
                 <!-- Aksi -->
                 <template #cell-aksi="{ row }">
                     <button
-                        v-if="props.can.edit_akun"
+                        v-if="can.edit_akun"
                         @click="openStatusModal(row)"
                         title="Ubah Status"
                     >

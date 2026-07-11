@@ -22,6 +22,8 @@ const form = useForm({
     nik: props.admin.nik || '',
     nama: props.admin.nama || '',
     email: props.admin.email || '',
+    password: '',
+    password_confirmation: '',
     role_id: props.admin.roles[0]?.id || '',
     no_telp: props.admin.no_telp || '',
 })
@@ -47,7 +49,7 @@ const submitForm = () => {
         if (result.isConfirmed) {
             form.put(('/admin/pengurus/update/' + props.admin.id), {
                 onSuccess: () => {
-                    toast("Data engurus berhasil diperbarui!", {
+                    toast("Data pengurus berhasil diperbarui!", {
                         "type": "success",
                         "position": "bottom-right",
                         "transition": "slide",
@@ -100,6 +102,17 @@ const submitForm = () => {
                             placeholder="Masukkan nomor telepon" pattern="[0-9]*" :error="errors.no_telp"
                         >
                     </BaseInputAdmin>
+
+                    <div class="md:col-span-2 grid md:grid-cols-2 gap-6 border border-gray-200 dark:border-gray-700 p-4 rounded-xl mb-2 mt-2">
+                        <div class="md:col-span-2">
+                            <h3 class="font-semibold text-sm text-gray-700 dark:text-gray-300">Ubah Kata Sandi (Opsional)</h3>
+                            <p class="text-xs text-gray-500">Kosongkan jika tidak ingin mengubah kata sandi.</p>
+                        </div>
+                        <BaseInputAdmin label="Kata Sandi Baru" placeholder="Masukkan kata sandi baru" v-model="form.password"
+                            :errors="errors.password" type="password" />
+                        <BaseInputAdmin label="Konfirmasi Kata Sandi" placeholder="Masukkan ulang kata sandi" v-model="form.password_confirmation"
+                            :errors="errors.password_confirmation" type="password" />
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-6 pb-6">

@@ -1,14 +1,15 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
-import { reactive, watch } from 'vue'
+import { Link, router, usePage } from '@inertiajs/vue3'
+import { reactive, watch, computed } from 'vue'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
 import { Icon } from '@iconify/vue'
 import PageBreadcrumb from '../../../Components/PageBreadcrumb.vue'
 import BaseTable from '../../../Components/Table/BaseTable.vue'
 import BaseFunctionality from '../../../Components/Table/BaseFunctionality.vue'
 import Pagination from '../../../Components/Table/Pagination.vue'
-import UserIcon from '../../../Icons/UserIcon.vue'
 import Button from '../../../Components/Form/Button.vue'
+
+const page = usePage();
 
 const columns = [
     { key: 'no', label: 'No' },
@@ -26,6 +27,8 @@ const props = defineProps({
     roles: Array,
     can: Object,
 })
+
+const can = computed(() => page.props.auth.can);
 
 const filters = reactive({
     search: props.filters?.search ?? '',
@@ -117,7 +120,7 @@ const breadcrumbItems = [
                     <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">Data Pengurus</h2>
                 </div>
                 <Button
-                    v-if="props.can.tambah_pengurus"
+                    v-if="can['create_pengurus']"
                     size="medium"
                     href="/admin/pengurus/create"
                     class="text-white bg-primary hover:bg-secondary transition"    
@@ -186,7 +189,7 @@ const breadcrumbItems = [
                 <template #cell-aksi="{ row }">
                     <div class="flex justify-center gap-3">
                         <Link
-                            v-if="props.can.edit_pengurus"
+                            v-if="can['edit_pengurus']"
                             :href="`/admin/pengurus/edit/${row.id}`"
                             class="text-gray-500 hover:text-blue-600 transition"
                             title="Edit"

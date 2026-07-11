@@ -102,6 +102,11 @@ class PengurusController extends Controller
         DB::beginTransaction();
         try {
             $data = $request->validated();
+            if (!empty($data['password'])) {
+                $data['password'] = bcrypt($data['password']);
+            } else {
+                unset($data['password']); // don't update password if empty
+            }
 
             $admin = $this->pengurusService->getPengurusById($id);
             $admin->update($data);

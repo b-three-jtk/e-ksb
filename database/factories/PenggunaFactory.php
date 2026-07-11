@@ -46,7 +46,7 @@ class PenggunaFactory extends Factory
         $userCode = $prefix . str_pad((string) self::$sequence, 3, '0', STR_PAD_LEFT);
 
         return [
-            'kode_pengguna' => 'KSB' . date('ym') . fake()->unique()->numerify('###'),
+            'kode_pengguna' => $userCode,
             'nik' => fake()->unique()->numerify('################'),
             'nama' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),

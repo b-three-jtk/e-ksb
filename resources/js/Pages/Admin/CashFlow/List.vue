@@ -44,6 +44,8 @@ const props = defineProps({
     can: Object,
 })
 
+const can = computed(() => page.props.auth.can);
+
 const tabs = [
     {
         key: 'journal',
@@ -372,7 +374,7 @@ const periodeOptions = [
                 </h2>
 
                 <Button
-                    v-if="props.can.tambah_alokasi"
+                    v-if="can['create_kas']"
                     @click="openModal"
                     size="medium"
                     class="bg-primary hover:bg-secondary transition text-white"

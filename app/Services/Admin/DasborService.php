@@ -6,14 +6,16 @@ use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\SavingTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
-use App\Models\PembayaranAngsuran;
-use App\Models\Pembiayaan;
-use App\Models\PengaturanUmum;
+use App\Models\Anggota;
 use App\Models\Angsuran;
 use App\Models\DetailJurnal;
 use App\Models\Notifikasi;
-use App\Models\TransaksiSimpanan;
+use App\Models\PembayaranAngsuran;
+use App\Models\Pembiayaan;
+use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
+use App\Models\TransaksiSimpanan;
+use App\Services\Admin\PembiayaanService;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -362,14 +364,15 @@ class DasborService
     public function getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)
     {
         return Pembiayaan::with('anggota.user', 'objekPembiayaan')
+            ->where('status', FinancingReqStatusEnum::PENDING_REVIEW->value)
             ->whereBetween('tgl_permohonan', [$tanggalAwal, $tanggalAkhir])
             ->latest()
             ->take(5)
             ->get()
             ->map(fn($f) => [
                 'id' => $f->id,
-                'no_transaksi' => $f->kode_pembiayaan,
                 'anggota' => $f->anggota->user->nama,
+                'produk' => $f->objekPembiayaan->nama_barang,
                 'status' => $f->status,
             ]);
     }
@@ -432,6 +435,48 @@ class DasborService
             ->sum('nominal_angsuran');
 
         return $total;
+    }
+
+    public function getRingkasanAnggotaPJ()
+    {
+        $pjId = auth()->id();
+        $anggota = Anggota::with(['user', 'akunSimpanan', 'pembiayaan.angsuran'])
+            ->where('pj_anggota_id', $pjId)
+            ->get();
+            
+        return $anggota->map(function ($a) {
+            // Breakdown simpanan per jenis
+            $simpananBreakdown = [];
+            $totalSimpanan = 0;
+            foreach ($a->akunSimpanan as $akun) {
+                $simpananBreakdown[] = [
+                    'jenis' => $akun->jenis_simpanan,
+                    'saldo' => $akun->saldo,
+                ];
+                $totalSimpanan += $akun->saldo;
+            }
+            
+            $sisaAngsuran = 0;
+            foreach ($a->pembiayaan as $p) {
+                if ($p->status === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
+                    $sisaAngsuran += $p->angsuran
+                        ->where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
+                        ->sum('nominal_angsuran');
+                }
+            }
+            
+            $statusUser = $a->user?->status === UserStatusEnum::ACTIVE->value ? 'Aktif' : 'Non-Aktif';
+            
+            return [
+                'id' => $a->id,
+                'nama' => $a->user?->nama ?? 'Tanpa Nama',
+                'no_telp' => $a->user?->no_telp,
+                'total_simpanan' => $totalSimpanan,
+                'simpanan_breakdown' => $simpananBreakdown,
+                'sisa_angsuran' => $sisaAngsuran,
+                'status' => $statusUser,
+            ];
+        })->toArray();
     }
 
     public function getJumlahPiutangMurabahahAktif($tanggalAkhir, $tanggalAkhirSebelumnya)
@@ -694,6 +739,8 @@ class DasborService
             'produk' => $account->jenis_simpanan,
             'jatuh_tempo' => Carbon::parse($ref->created_at)->addDays((int) $savingDueDate)->toDateString(),
             'status_notifikasi' => $notif->status ?? 'Belum Terkirim',
+            'no_telp' => $notif->anggota?->user?->no_telp,
+            'message' => $notif->message,
         ];
     }
 
@@ -714,6 +761,8 @@ class DasborService
             'produk' => 'Pembiayaan',
             'jatuh_tempo' => Carbon::parse($ref->tgl_jatuh_tempo)->toDateString(),
             'status_notifikasi' => $notif->status ?? 'Belum Terkirim',
+            'no_telp' => $notif->anggota?->user?->no_telp,
+            'message' => $notif->message,
         ];
     }
 
