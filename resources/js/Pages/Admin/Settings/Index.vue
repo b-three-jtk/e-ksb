@@ -296,15 +296,11 @@ const syncForms = () => {
     forms.points.tgl_diberlakukan = props.settings?.points?.saving_point_amount?.tgl_diberlakukan
         ?? props.settings?.points?.saving_point_reward?.tgl_diberlakukan
         ?? ''
+
     forms.points.murabaha_point_amount = props.settings?.points?.murabaha_point_amount?.value ?? ''
     forms.points.murabaha_point_reward = props.settings?.points?.murabaha_point_reward?.value ?? ''
-    forms.points.murabaha_effective_date = props.settings?.points?.murabaha_point_amount?.effective_date
-        ?? props.settings?.points?.murabaha_point_reward?.effective_date
-        ?? ''
-    forms.points.murabaha_point_amount = props.settings?.points?.murabaha_point_amount?.value ?? ''
-    forms.points.murabaha_point_reward = props.settings?.points?.murabaha_point_reward?.value ?? ''
-    forms.points.murabaha_effective_date = props.settings?.points?.murabaha_point_amount?.effective_date
-        ?? props.settings?.points?.murabaha_point_reward?.effective_date
+    forms.points.murabaha_effective_date = props.settings?.points?.murabaha_point_amount?.tgl_diberlakukan
+        ?? props.settings?.points?.murabaha_point_reward?.tgl_diberlakukan
         ?? ''
 
     forms.savings.saving_pokok_amount = props.settings?.savings?.saving_pokok_amount?.value ?? ''

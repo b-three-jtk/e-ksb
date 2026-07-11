@@ -44,7 +44,7 @@ const kolomTabelTransaksiSimpanan = computed(() => {
 });
 
 const getStatusClass = (status) => {
-    const base = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold'
+    const base = 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold'
     switch (status) {
         case 'sent': return `${base} bg-green-100 text-green-700`
         case 'draft': return `${base} bg-yellow-100 text-yellow-700`
@@ -140,20 +140,20 @@ const emit = defineEmits(['update:selectedTransaksiSimpananFilter', 'update:sele
         <div class="card-layout flex flex-col gap-5">
             <!-- Header with icon -->
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                    <Icon icon="mdi:account-search" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div class="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                    <Icon icon="mdi:account-search" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                    <h1 class="font-semibold text-gray-800 dark:text-gray-100 text-base">Cek Anggota</h1>
-                    <p class="text-xs text-gray-400">Pilih anggota untuk melihat ringkasan keuangan</p>
+                    <h1 class="card-title">Cek Anggota</h1>
+                    <p class="text-sm text-gray-400">Pilih anggota untuk melihat ringkasan keuangan</p>
                 </div>
             </div>
 
             <!-- Dropdown -->
             <div class="relative w-full">
                 <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
-                <select v-model="selectedAnggotaId" class="w-full bg-light-bg dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl pl-10 pr-10 py-3.5 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none transition-all">
-                    <option value="" disabled>Cari nama anggota...</option>
+                <select v-model="selectedAnggotaId" class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl pl-10 pr-10 py-3.5 text-base focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none transition-all">
+                    <option value="" disabled>Pilih Anggota</option>
                     <option v-for="anggota in ringkasan_anggota_pj" :key="anggota.id" :value="anggota.id">
                         {{ anggota.nama }}
                     </option>
@@ -169,11 +169,9 @@ const emit = defineEmits(['update:selectedTransaksiSimpananFilter', 'update:sele
                 <p class="text-sm text-gray-400">Pilih anggota di atas untuk melihat informasi</p>
             </div>
 
-            <!-- Data Cards -->
             <template v-if="selectedAnggotaData">
-                <!-- Status Badge -->
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
                         :class="selectedAnggotaData.status === 'Aktif' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'">
                         <span class="w-1.5 h-1.5 rounded-full" :class="selectedAnggotaData.status === 'Aktif' ? 'bg-green-500' : 'bg-red-500'"></span>
                         {{ selectedAnggotaData.status }}
@@ -181,8 +179,7 @@ const emit = defineEmits(['update:selectedTransaksiSimpananFilter', 'update:sele
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ selectedAnggotaData.nama }}</span>
                 </div>
 
-                <!-- Simpanan Breakdown -->
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl p-4 border border-blue-100 dark:border-blue-900/50">
+                <div class="bg-linear-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl p-4 border border-blue-100 dark:border-blue-900/50">
                     <div class="flex items-center gap-2 mb-3">
                         <Icon icon="mdi:wallet" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         <h3 class="text-sm font-semibold text-blue-800 dark:text-blue-300">Simpanan</h3>
@@ -214,18 +211,17 @@ const emit = defineEmits(['update:selectedTransaksiSimpananFilter', 'update:sele
                                             'text-pink-600 dark:text-pink-400': s.jenis === 'Tabungan Ibadah',
                                         }" />
                                 </div>
-                                <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ s.jenis }}</span>
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ s.jenis }}</span>
                             </div>
                             <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ parseCurrencyAmount(s.saldo) }}</span>
                         </div>
-                        <div v-if="!selectedAnggotaData.simpanan_breakdown?.length" class="text-center py-2 text-xs text-gray-400">
+                        <div v-if="!selectedAnggotaData.simpanan_breakdown?.length" class="text-center py-2 text-sm text-gray-400">
                             Belum memiliki simpanan
                         </div>
                     </div>
                 </div>
 
-                <!-- Sisa Angsuran -->
-                <div class="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30 rounded-xl p-4 border border-orange-100 dark:border-orange-900/50">
+                <div class="bg-linear-to-br from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30 rounded-xl p-4 border border-orange-100 dark:border-orange-900/50">
                     <div class="flex items-center gap-2">
                         <Icon icon="mdi:receipt-text-clock" class="w-5 h-5 text-orange-600 dark:text-orange-400" />
                         <h3 class="text-sm font-semibold text-orange-800 dark:text-orange-300">Sisa Angsuran</h3>
@@ -233,7 +229,6 @@ const emit = defineEmits(['update:selectedTransaksiSimpananFilter', 'update:sele
                     </div>
                 </div>
 
-                <!-- WhatsApp Button -->
                 <a
                     v-if="selectedAnggotaData.no_telp"
                     :href="waRingkasanUrl"

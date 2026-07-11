@@ -6,18 +6,19 @@ use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PaymentMethodsEnum;
-use App\Models\Pembiayaan;
-use App\Models\ObjekPembiayaan;
-use App\Models\Angsuran;
-use App\Models\PembayaranAngsuran;
-use App\Models\Jurnal;
-use App\Models\DetailJurnal;
 use App\Models\Anggota;
+use App\Models\Angsuran;
+use App\Models\DetailJurnal;
 use App\Models\JenisBarang;
+use App\Models\Jurnal;
+use App\Models\ObjekPembiayaan;
+use App\Models\PembayaranAngsuran;
+use App\Models\Pembiayaan;
 use App\Models\Pengguna;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class MurabahaProductSeeder extends Seeder
 {
@@ -32,7 +33,7 @@ class MurabahaProductSeeder extends Seeder
         // Reset counter setiap kali seeder dijalankan
         self::$transCodeCounter = 1000000;
 
-        Anggota::factory()->count(100)->create();
+        Anggota::factory()->count(111)->create();
 
         // Ambil semua anggota
         $anggota = Anggota::all();
@@ -43,12 +44,14 @@ class MurabahaProductSeeder extends Seeder
 
         // Mapping skenario
         $scenarios = [
-            ['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, 'kolektibilitas' => 'lancar'],
-            ['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, 'kolektibilitas' => 'kurang_lancar'],
-            ['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, 'kolektibilitas' => 'diragukan'],
-            ['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value, 'kolektibilitas' => 'macet'],
-            ['status' => FinancingReqStatusEnum::PENDING_REVIEW->value, 'kolektibilitas' => null],
-            ['status' => FinancingReqStatusEnum::PAID->value, 'kolektibilitas' => null],
+            ['status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value],
+            ['status' => FinancingReqStatusEnum::PENDING_REVIEW->value],
+            ['status' => FinancingReqStatusEnum::PAID->value],
+            ['status' => FinancingReqStatusEnum::APPROVED->value],
+            ['status' => FinancingReqStatusEnum::APPROVED_WITH_CONDITIONS->value],
+            ['status' => FinancingReqStatusEnum::REJECTED->value],
+            ['status' => FinancingReqStatusEnum::WAITING_DOCUMENTS->value],
+            ['status' => FinancingReqStatusEnum::TANGGUH->value],
         ];
 
         $items = [
@@ -59,8 +62,8 @@ class MurabahaProductSeeder extends Seeder
             ['nama_barang' => 'Mesin Jahit Singer', 'spec' => 'Mesin Jahit Singer Portable, Semi Otomatis', 'price' => 2000000, 'type' => 'Peralatan Usaha'],
         ];
 
-        // Generate 50 pembiayaan yang bervariasi agar grafiknya penuh
-        for ($j = 0; $j < 50; $j++) {
+        // Generate 200 pembiayaan yang bervariasi agar grafiknya penuh 5 tahun terakhir
+        for ($j = 0; $j < 200; $j++) {
             $memberIndex = $j % $anggota->count();
             $currentAnggota = $anggota[$memberIndex];
 
@@ -71,11 +74,11 @@ class MurabahaProductSeeder extends Seeder
             $item = $items[$itemIndex];
 
             if ($scenario['status'] === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
-                $this->seedActiveFinancing($currentAnggota, $item, $scenario['kolektibilitas']);
-            } elseif ($scenario['status'] === FinancingReqStatusEnum::PENDING_REVIEW->value) {
-                $this->seedPendingFinancing($currentAnggota, $item);
-            } else {
+                $this->seedActiveFinancing($currentAnggota, $item);
+            } elseif ($scenario['status'] === FinancingReqStatusEnum::PAID->value) {
                 $this->seedCompletedFinancing($currentAnggota, $item);
+            } else {
+                $this->seedPendingFinancing($currentAnggota, $item, $scenario['status']);
             }
         }
 
@@ -91,7 +94,7 @@ class MurabahaProductSeeder extends Seeder
             ->selectRaw("SUM(CASE WHEN posisi_akun = 'Debit' THEN nominal ELSE -nominal END) as total")
             ->value('total') ?? 0;
 
-        $groupId = \Illuminate\Support\Str::uuid();
+        $groupId = Str::uuid();
         
         Jurnal::create([
             'id' => $groupId,
@@ -120,6 +123,17 @@ class MurabahaProductSeeder extends Seeder
             DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '104', 'posisi_akun' => 'Debit', 'nominal' => $diffPiutang, 'updated_by' => $admin->id]);
             DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '102', 'posisi_akun' => 'Credit', 'nominal' => $diffPiutang, 'updated_by' => $admin->id]);
         }
+
+        // Sesuaikan Dana Alokasi Pembiayaan (102) agar tidak negatif (set ke 2 Miliar)
+        $alokasiBalance = DetailJurnal::where('no_ref_akun', '102')
+            ->selectRaw("SUM(CASE WHEN posisi_akun = 'Debit' THEN nominal ELSE -nominal END) as total")
+            ->value('total') ?? 0;
+            
+        if ($alokasiBalance < 2000000000) {
+            $diffAlokasi = 2000000000 - $alokasiBalance;
+            DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '102', 'posisi_akun' => 'Debit', 'nominal' => $diffAlokasi, 'updated_by' => $admin->id]);
+            // Hanya satu sisi (Debit) karena kita tidak ingin menambah ke Simpanan/COA lain
+        }
     }
 
     private function getUniqueTransCode(): string
@@ -127,40 +141,17 @@ class MurabahaProductSeeder extends Seeder
         return 'TP' . str_pad(self::$transCodeCounter++, 8, '0', STR_PAD_LEFT);
     }
 
-    private function seedActiveFinancing(Anggota $anggota, array $item, string $kolektibilitas = 'lancar'): void
+    private function seedActiveFinancing(Anggota $anggota, array $item): void
     {
         $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.2); // 20% margin
         $downPayment = (int)($item['price'] * 0.1); // 10% DP
 
         // 1. Atur Tenor & Rentang Waktu berdasarkan Kolektibilitas
-        $tenor = 12;
-        $akadMonthsAgo = 2; // Default lancar
-        $unpaidMonthsAgo = 0; // Kapan tunggakan mulai terjadi
-
-        switch ($kolektibilitas) {
-            case 'kurang_lancar':
-                $tenor = 24;
-                $akadMonthsAgo = 10;
-                $unpaidMonthsAgo = 5; // Nunggak 5 bulan
-                break;
-            case 'diragukan':
-                $tenor = 24;
-                $akadMonthsAgo = 15;
-                $unpaidMonthsAgo = 8; // Nunggak 8 bulan
-                break;
-            case 'macet':
-                $tenor = 12;
-                $akadMonthsAgo = 18; // Kontrak habis 6 bulan lalu
-                $unpaidMonthsAgo = 7; // Masih nunggak sejak 7 bulan lalu
-                break;
-            case 'lancar':
-            default:
-                $tenor = 12;
-                $akadMonthsAgo = 2;
-                break;
-        }
-
+        // Karena tidak ada kolektibilitas lagi, semuanya lancar tapi kita sebar mulai dari 1 sampai 60 bulan lalu
+        $tenor = 24;
+        $akadMonthsAgo = rand(1, 60); // Sebar di 5 tahun terakhir
+        
         $akadDate = now()->subMonths($akadMonthsAgo)->startOfDay();
 
         $pembiayaan = Pembiayaan::create([
@@ -249,21 +240,14 @@ class MurabahaProductSeeder extends Seeder
             'updated_by' => $admin?->id,
         ]);
 
-        // 2. Buat Angsuran sesuai skenario kolektibilitas
         for ($i = 1; $i <= $tenor; $i++) {
-            $monthlyPayment = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $tenor;
-            $monthlyMargin = $pembiayaan->margin_keuntungan / $tenor;
-            $monthlyCostPrice = ($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $tenor;
+            $monthlyMargin = round($pembiayaan->margin_keuntungan / $tenor, 2);
+            $monthlyCostPrice = round(($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $tenor, 2);
+            $monthlyPayment = $monthlyCostPrice + $monthlyMargin;
             $dueDate = $akadDate->copy()->addMonths($i);
 
-            // Tentukan status pembayaran cicilan
-            $isPaid = false;
-            if ($kolektibilitas === 'lancar') {
-                $isPaid = $dueDate->isPast();
-            } else {
-                $batasTunggakan = now()->subMonths($unpaidMonthsAgo)->startOfDay();
-                $isPaid = $dueDate->isBefore($batasTunggakan);
-            }
+            // Tentukan status pembayaran cicilan (semua lancar)
+            $isPaid = $dueDate->isPast();
 
             $angsuran = Angsuran::create([
                 'pembiayaan_id' => $pembiayaan->id,
@@ -319,7 +303,7 @@ class MurabahaProductSeeder extends Seeder
         }
     }
 
-    private function seedPendingFinancing(Anggota $anggota, array $item): void
+    private function seedPendingFinancing(Anggota $anggota, array $item, string $status): void
     {
         $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.1);
@@ -332,7 +316,7 @@ class MurabahaProductSeeder extends Seeder
             'margin_keuntungan' => $margin,
             'uang_muka' => $downPayment,
             'tgl_permohonan' => now(),
-            'status' => FinancingReqStatusEnum::PENDING_REVIEW->value,
+            'status' => $status,
             'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin?->id,
         ]);
@@ -375,7 +359,8 @@ class MurabahaProductSeeder extends Seeder
         $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.1);
         $downPayment = (int)($item['price'] * 0.1);
-        $tenor = 10;
+        $tenor = rand(6, 24);
+        $akadMonthsAgo = rand($tenor, 60); // 5 tahun terakhir
 
         $pembiayaan = Pembiayaan::create([
             'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
@@ -383,8 +368,8 @@ class MurabahaProductSeeder extends Seeder
             'harga_perolehan' => $item['price'],
             'margin_keuntungan' => $margin,
             'uang_muka' => $downPayment,
-            'tgl_akad' => now()->subMonths($tenor),
-            'tgl_lunas' => now(),
+            'tgl_akad' => now()->subMonths($akadMonthsAgo)->startOfDay(),
+            'tgl_lunas' => now()->subMonths($akadMonthsAgo - $tenor)->startOfDay(),
             'status' => FinancingReqStatusEnum::PAID->value,
             'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin?->id,
@@ -465,9 +450,9 @@ class MurabahaProductSeeder extends Seeder
         ]);
 
         for ($i = 1; $i <= $tenor; $i++) {
-            $monthlyPayment = ($pembiayaan->harga_perolehan + $pembiayaan->margin_keuntungan - $pembiayaan->uang_muka) / $tenor;
-            $monthlyMargin = $pembiayaan->margin_keuntungan / $tenor;
-            $monthlyCostPrice = ($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $tenor;
+            $monthlyMargin = round($pembiayaan->margin_keuntungan / $tenor, 2);
+            $monthlyCostPrice = round(($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $tenor, 2);
+            $monthlyPayment = $monthlyCostPrice + $monthlyMargin;
 
             $akadDate = Carbon::parse($pembiayaan->tgl_akad);
             $dueDate = $akadDate->copy()->addMonths($i);

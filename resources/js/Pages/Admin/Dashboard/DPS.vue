@@ -5,6 +5,8 @@ import BarChart from '@/Components/Dashboard/Barchart.vue';
 import parseCurrencyAmount from '@/Composables/moneyParser.js';
 import SkeletonStatCard from '@/Components/Dashboard/Loading/SkeletonStatCard.vue';
 import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue';
+import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
+import VerticalBarChart from '@/Components/Dashboard/VerticalBarchart.vue';
 
 const props = defineProps({
     stats: Object,
