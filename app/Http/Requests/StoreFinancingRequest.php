@@ -66,7 +66,8 @@ class StoreFinancingRequest extends FormRequest
             'pembiayaan.uang_muka' => 'nullable|numeric|min:0',
             'pembiayaan.status' => 'required|string|max:255',
             'pembiayaan.tenor' => 'nullable|integer',
-            'pembiayaan.akad_wakalah_date' => 'nullable|date',
+            'is_wakalah' => 'nullable|boolean',
+            'pembiayaan.akad_wakalah_date' => 'nullable|required_if:is_wakalah,true|date',
             'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
             'pembiayaan.pemasok_id' => 'required|exists:pemasok,id',
             'pembiayaan.tangguh_tgl_pembayaran' => 'nullable|date|after_or_equal:pembiayaan.tgl_akad',
@@ -81,14 +82,14 @@ class StoreFinancingRequest extends FormRequest
             // Pemasok data
             'pemasok.nama_pemasok' => 'required|string|max:255',
             'pemasok.alamat_pemasok' => 'required|string|max:500',
-            'pemasok.contact' => 'nullable|string|max:255',
+            'pemasok.kontak_pemasok' => 'nullable|string|max:255',
 
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
             'bank_book_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
             'purchase_receipt_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
             'akad_document_file' => 'nullable|file|mimes:pdf|max:2048',
-            'akad_wakalah_file' => 'nullable|file|mimes:pdf|max:2048',
+            'akad_wakalah_file' => 'nullable|required_if:is_wakalah,true|file|mimes:pdf|max:2048',
         ];
     }
 }

@@ -11,7 +11,7 @@ console.log('Received data:', props.data)
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin/dashboard' },
     { name: 'Pengelolaan Pembiayaan', link: '/admin/pembiayaan' },
-    { name: 'Detail Pembiayaan', link: `/admin/pembiayaan/${props.data?.pembiayaan_id || ''}` },
+    { name: 'Detail Pembiayaan' },
     { name: 'Permohonan Pelunasan' },
 ];
 </script>

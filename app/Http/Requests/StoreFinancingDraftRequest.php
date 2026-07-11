@@ -79,6 +79,7 @@ class StoreFinancingDraftRequest extends FormRequest
             'pembiayaan.status' => 'nullable|string|max:255',
             'pembiayaan.tenor' => 'nullable|integer',
             'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
+            'is_wakalah' => 'nullable|boolean',
             'pembiayaan.akad_wakalah_date' => 'nullable|date',
             'pembiayaan.pemasok_id' => 'nullable|exists:pemasok,id',
             'pembiayaan.tangguh_tgl_pembayaran' => 'nullable|date',
@@ -92,7 +93,7 @@ class StoreFinancingDraftRequest extends FormRequest
             // Pemasok data
             'pemasok.nama_pemasok' => 'nullable|string|max:255',
             'pemasok.alamat_pemasok' => 'nullable|string|max:500',
-            'pemasok.contact' => 'nullable|string|max:255',
+            'pemasok.kontak_pemasok' => 'nullable|string|max:255',
 
             // File uploads
             'income_slip_file' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',

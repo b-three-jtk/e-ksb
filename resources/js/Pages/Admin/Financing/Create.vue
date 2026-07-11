@@ -8,6 +8,7 @@ import { useFinancingValidation } from '@/Composables/Validation/useFinancingVal
 import PersonalData from './Create/PersonalData.vue'
 import FinancialData from './Create/FinancialData.vue'
 import FinancingObjectData from './Create/FinancingObjectData.vue'
+import WakalahData from './Create/WakalahData.vue'
 import ProcurementData from './Create/ProcurementData.vue'
 import Finalization from './Create/Finalization.vue'
 import Stepper from './Create/Stepper.vue'
@@ -17,7 +18,7 @@ import { useInputSanitizers } from '@/Composables/useInputSanitizers'
 const { onlyLetters, onlyNumbers } = useInputSanitizers()
 
 const activeStep = ref(1)
-const totalSteps = 5
+const totalSteps = 6
 
 onMounted(() => {
     if (props.pembiayaan && form.pembiayaan.status) {
@@ -100,15 +101,11 @@ const showSubmitButton = computed(() => {
 })
 
 const showNextButton = computed(() => {
-    if (activeStep.value >= totalSteps || activeStep.value === 5) {
+    if (activeStep.value >= totalSteps || activeStep.value === 6) {
         return false
     }
 
     if (activeStep.value === 3 && draftStatuses.includes(form.pembiayaan.status)) {
-        return false
-    }
-
-    if (activeStep.value === 4 && form.is_wakalah && form.wakala) {
         return false
     }
 
@@ -126,7 +123,7 @@ const handleSubmit = () => {
 }
 
 const handleFinalize = () => {
-    const valid = validateAndShowErrors(5)
+    const valid = validateAndShowErrors(6)
     if (!valid) return
     finalize()
 }
@@ -181,8 +178,15 @@ const handleCancel = () => {
                     @validate-field="(field) => validateField(field, 3)"
                 />
 
-                <ProcurementData
+                <WakalahData
                     v-if="activeStep === 4"
+                    :form="form"
+                    :errors="errors"
+                    @validate-field="(field) => validateField(field, 4)"
+                />
+
+                <ProcurementData
+                    v-if="activeStep === 5"
                     :form="form"
                     :data="props.data"
                     :search-pemasok-query="searchPemasokQuery"
@@ -193,11 +197,11 @@ const handleCancel = () => {
                     @update:search-pemasok-query="searchPemasokQuery = $event"
                     @selectPemasok="selectPemasok"
                     @resetPemasokSelection="resetPemasokSelection"
-                    @validate-field="(field) => validateField(field, 4)"
+                    @validate-field="(field) => validateField(field, 5)"
                 />
 
                 <Finalization
-                    v-if="activeStep === 5"
+                    v-if="activeStep === 6"
                     :form="form"
                     :data="props.data"
                     :errors="errors"
@@ -245,7 +249,7 @@ const handleCancel = () => {
                             Selanjutnya
                         </Button>
                         <Button
-                            v-if="activeStep === 5"
+                            v-if="activeStep === 6"
                             :disabled="!isFinalizationValid"
                             type="submit"
                             @click="handleFinalize()"

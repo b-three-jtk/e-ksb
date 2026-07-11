@@ -119,7 +119,7 @@ const onFieldChange = (field) => emit('validate-field', field)
         <section class="px-8 py-4">
             <h1 class="card-title text-lg!">Detail Objek Pembiayaan</h1>
             <div class="card-layout grid grid-cols-2 gap-4 mt-2">
-                <Info label="Nama Barang"        :value="form.pembiayaan.name" />
+                <Info label="Nama Barang"        :value="form.pembiayaan.nama_barang" />
                 <Info label="Kualitas"           :value="form.pembiayaan.kondisi_produk" />
                 <Info label="Kuantitas"          :value="form.pembiayaan.kuantitas" />
                 <Info label="Detail Spesifikasi" :value="form.pembiayaan.spesifikasi_barang" />

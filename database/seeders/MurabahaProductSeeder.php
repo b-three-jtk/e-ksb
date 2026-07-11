@@ -33,8 +33,6 @@ class MurabahaProductSeeder extends Seeder
         // Reset counter setiap kali seeder dijalankan
         self::$transCodeCounter = 1000000;
 
-        Anggota::factory()->count(111)->create();
-
         // Ambil semua anggota
         $anggota = Anggota::all();
 
@@ -72,6 +70,22 @@ class MurabahaProductSeeder extends Seeder
 
             $itemIndex = $j % count($items);
             $item = $items[$itemIndex];
+
+            // Pastikan tidak ada kewajiban yang aktif ganda untuk satu anggota
+            if (in_array($scenario['status'], [
+                FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                FinancingReqStatusEnum::TANGGUH->value,
+            ])) {
+                $hasActive = Pembiayaan::where('anggota_id', $currentAnggota->id)
+                    ->whereIn('status', [
+                        FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                        FinancingReqStatusEnum::TANGGUH->value,
+                    ])->exists();
+                
+                if ($hasActive) {
+                    $scenario['status'] = FinancingReqStatusEnum::PAID->value;
+                }
+            }
 
             if ($scenario['status'] === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
                 $this->seedActiveFinancing($currentAnggota, $item);
@@ -157,6 +171,7 @@ class MurabahaProductSeeder extends Seeder
         $pembiayaan = Pembiayaan::create([
             'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
             'anggota_id' => $anggota->id,
+            'harga_perkiraan' => $item['price'] + $margin,
             'harga_perolehan' => $item['price'],
             'margin_keuntungan' => $margin,
             'uang_muka' => $downPayment,
@@ -312,6 +327,7 @@ class MurabahaProductSeeder extends Seeder
         $pembiayaan = Pembiayaan::create([
             'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
             'anggota_id' => $anggota->id,
+            'harga_perkiraan' => $item['price'],
             'harga_perolehan' => $item['price'],
             'margin_keuntungan' => $margin,
             'uang_muka' => $downPayment,
@@ -365,6 +381,7 @@ class MurabahaProductSeeder extends Seeder
         $pembiayaan = Pembiayaan::create([
             'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
             'anggota_id' => $anggota->id,
+            'harga_perkiraan' => $item['price'] + $margin,
             'harga_perolehan' => $item['price'],
             'margin_keuntungan' => $margin,
             'uang_muka' => $downPayment,
