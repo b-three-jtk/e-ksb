@@ -358,7 +358,7 @@ class PembiayaanService
             $pemasok = Pemasok::updateOrCreate(
                 ['nama_pemasok' => $pemasokData['nama_pemasok']],
                 ['alamat_pemasok' => $pemasokData['alamat_pemasok'] ?? null,
-                'contact' => $pemasokData['contact'] ?? null]
+                'kontak_pemasok' => $pemasokData['kontak_pemasok'] ?? null]
             );
         }
 
@@ -376,7 +376,7 @@ class PembiayaanService
             ]
         );
 
-        if (isset($financingData['akad_wakalah_date'])) {
+        if (isset($data['is_wakalah']) && $data['is_wakalah']) {
             $wakalah = Wakalah::updateOrCreate(
                 ['pembiayaan_id' => $pembiayaan->id],
                 [
@@ -388,6 +388,8 @@ class PembiayaanService
                     'dokumen_akad' => $request->file('akad_wakalah_file')->store('documents', 'public'),
                 ]);
             }
+        } else {
+            $pembiayaan->wakalah()->delete();
         }
 
         if ($jaminanData && isset($jaminanData['jenis_jaminan'])) {

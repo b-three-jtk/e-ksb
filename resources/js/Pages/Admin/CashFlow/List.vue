@@ -395,7 +395,7 @@ const periodeOptions = [
             </div>
         </div>
 
-        <div class="flex gap-1 mb-[-1px]">
+        <div class="flex gap-1 -mb-px">
             <button
                 v-for="tab in tabs"
                 :key="tab.key"

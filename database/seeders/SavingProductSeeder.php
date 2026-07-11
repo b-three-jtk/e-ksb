@@ -20,6 +20,8 @@ class SavingProductSeeder extends Seeder
      */
     public function run(): void
     {
+        Anggota::factory()->count(111)->create();
+
         $anggota = Anggota::all();
 
         if ($anggota->isEmpty()) {
@@ -36,6 +38,9 @@ class SavingProductSeeder extends Seeder
             if ($index < 50) {
                 // 50 anggota * 2M = 100M
                 $this->seedTabunganAnggota($anggota, $admin, 2000000);
+            } else {
+                // Semua anggota butuh Tabungan Anggota > 1 bulan untuk syarat Murabahah
+                $this->seedTabunganAnggota($anggota, $admin, 50000);
             }
             if ($index >= 50 && $index < 60) {
                 // 10 anggota * 5M = 50M
