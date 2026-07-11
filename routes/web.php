@@ -126,6 +126,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:' . implode('|
     Route::post('/savings/deposit', [SimpananController::class, 'storeDeposit'])->middleware('permission:create_simpanan')->name('savings.deposit.store');
     Route::post('/savings/rekening-anggota', [SimpananController::class, 'storeRekening'])->middleware('permission:create_simpanan')->name('savings.rekening.store');
     Route::get('/savings/show/{id}', [SimpananController::class, 'show'])->middleware('permission:view_simpanan')->name('savings.show');
+    Route::post('/savings/{id}/verify', [SimpananController::class, 'verifyTransaction'])->middleware('permission:verify_simpanan')->name('savings.verify');
     Route::get('/savings/export/excel', [SimpananController::class, 'exportExcel'])->middleware('permission:view_simpanan')->name('savings.export.excel');
     Route::get('/savings/export/pdf', [SimpananController::class, 'exportPdf'])->middleware('permission:view_simpanan')->name('savings.export.pdf');
 

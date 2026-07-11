@@ -56,6 +56,7 @@ const columns = [
     { key: 'nominal',      label: 'Nominal' },
     { key: 'produk',       label: 'Produk' },
     { key: 'jenis',        label: 'Jenis Transaksi' },
+    { key: 'status',       label: 'Status' },
     { key: 'aksi',         label: 'Aksi', align: 'center' },
 ]
 
@@ -69,7 +70,14 @@ const filters = reactive({
     tab:      page.props.filters?.tab ?? 'semua',
     sort_by:  page.props.filters?.sort_by ?? 'tgl_transaksi',
     sort_dir: page.props.filters?.sort_dir ?? 'desc',
+    status:   page.props.filters?.status ?? '',
 })
+
+const onlyUnverified = computed({
+    get: () => filters.status === 'Menunggu Verifikasi',
+    set: (val) => { filters.status = val ? 'Menunggu Verifikasi' : '' },
+})
+
 
 const exportQuery = computed(() => {
     const params = {}
@@ -131,6 +139,7 @@ const applyFilters = () => {
             tab:      filters.tab,
             sort_by:  filters.sort_by,
             sort_dir: filters.sort_dir,
+            status:   filters.status || undefined,
             page:     1,
         },
         {
@@ -141,6 +150,22 @@ const applyFilters = () => {
     )
 }
 
+const verifyingId = ref(null)
+const verifyDeposit = (id) => {
+    if (verifyingId.value) return
+    verifyingId.value = id
+    router.post(`/admin/savings/${id}/verify`, {}, {
+        preserveScroll: true,
+        onFinish: () => { verifyingId.value = null },
+    })
+}
+
+const statusBadge = (status) => {
+    if (status === 'Diverifikasi') return { bg: 'bg-green-50 dark:bg-green-900/20', text: 'text-green-600 dark:text-green-400' }
+    if (status === 'Ditolak')      return { bg: 'bg-red-50 dark:bg-red-900/20',   text: 'text-red-600 dark:text-red-400' }
+    return { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-600 dark:text-amber-400' } // Menunggu Verifikasi
+}
+
 let timeout
 watch(() => filters.search, () => {
     clearTimeout(timeout)
@@ -148,6 +173,7 @@ watch(() => filters.search, () => {
 })
 watch(() => filters.per_page, applyFilters)
 watch(() => filters.tab, applyFilters)
+watch(() => filters.status, applyFilters)
 
 const breadcrumbItems = [
     { name: 'Dashboard', link: '/admin' },
@@ -320,6 +346,14 @@ onMounted(() => {
                 @update:search="val => filters.search = val"
             >
                 <template #actions>
+                    <!-- Filter khusus Bendahara -->
+                    <label
+                        v-if="can['verify_simpanan']"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border bg-gray-50 dark:bg-slate-700 dark:text-white cursor-pointer"
+                    >
+                        <input type="checkbox" v-model="onlyUnverified" class="rounded" />
+                        Belum Diverifikasi
+                    </label>
                     <a
                         :href="`/admin/savings/export/excel?${exportQuery}`"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg"
@@ -384,14 +418,33 @@ onMounted(() => {
                     </span>
                 </template>
 
+                <template #cell-status="{ row }">
+                    <span
+                        class="px-2.5 py-1 text-xs rounded-full font-medium whitespace-nowrap"
+                        :class="[statusBadge(row.status).bg, statusBadge(row.status).text]"
+                    >
+                        {{ row.status }}
+                    </span>
+                </template>
+
                 <template #cell-aksi="{ row }">
-                    <div class="flex justify-center">
+                    <div class="flex justify-center items-center gap-2">
                         <Link
                             :href="`/admin/savings/show/${row.id}`"
                             class="text-gray-400 hover:text-primary dark:text-gray-500 dark:hover:text-blue-400 transition-colors"
                         >
                             <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                         </Link>
+
+                        <button
+                            v-if="can['verify_simpanan'] && row.status === 'Menunggu Verifikasi'"
+                            @click="verifyDeposit(row.id)"
+                            :disabled="verifyingId === row.id"
+                            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                        >
+                            <Icon icon="mdi:check-circle-outline" class="w-3.5 h-3.5" />
+                            {{ verifyingId === row.id ? 'Memproses...' : 'Diterima' }}
+                        </button>
                     </div>
                 </template>
             </BaseTable>

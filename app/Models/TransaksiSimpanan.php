@@ -28,6 +28,9 @@ class TransaksiSimpanan extends Model
         'tgl_transaksi',
         'struk_simpanan',
         'bukti_penyetoran',
+        'status',
+        'verified_by',
+        'verified_at',
 
         'updated_by',
         'akun_simpanan_id',
@@ -43,6 +46,11 @@ class TransaksiSimpanan extends Model
     public function updatedBy()
     {
         return $this->belongsTo(Pengguna::class, 'updated_by');
+    }
+
+    public function verifiedBy()
+    {
+        return $this->belongsTo(Pengguna::class, 'verified_by');
     }
 
     public function rekeningAnggota()

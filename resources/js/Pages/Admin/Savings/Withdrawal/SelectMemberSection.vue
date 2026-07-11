@@ -35,7 +35,7 @@ const memberSuggestions = computed(() => {
 
   return memberList.value
     .filter((m) => {
-      const name = normalizeSearchValue(m?.name)
+      const name = normalizeSearchValue(m?.nama)
       const memberNumber = normalizeSearchValue(m?.kode_pengguna)
 
       return name.includes(q) || memberNumber.includes(q)
@@ -56,7 +56,7 @@ function initials(name = '') {
 }
 
 function selectMember(anggota) {
-  memberQuery.value = anggota.name
+  memberQuery.value = anggota.nama
   showDropdown.value = false
   emit('selected', anggota)
 }
@@ -69,7 +69,7 @@ function resetSelection() {
 function onQueryInput() {
   showDropdown.value = true
 
-  if (props.selected && memberQuery.value !== props.selected.name) {
+  if (props.selected && memberQuery.value !== props.selected.nama) {
     emit('reset')
   }
 }
@@ -78,7 +78,7 @@ watch(
   () => props.selected,
   (val) => {
     if (val) {
-      memberQuery.value = val.name || ''
+      memberQuery.value = val.nama || ''
       showDropdown.value = false
       return
     }
@@ -131,10 +131,10 @@ watch(
             class="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
           >
             <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-700 dark:text-blue-300 font-semibold text-sm shrink-0">
-              {{ initials(anggota.name) }}
+              {{ initials(anggota.nama) }}
             </div>
             <div>
-              <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ anggota.name }}</div>
+              <div class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ anggota.nama }}</div>
               <div class="text-xs text-gray-500">{{ anggota.kode_pengguna }}</div>
             </div>
           </button>
@@ -148,10 +148,10 @@ watch(
           class="flex items-center gap-4 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg"
         >
           <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xl font-bold text-blue-700 dark:text-blue-300 shrink-0">
-            {{ initials(selectedMember.name) }}
+            {{ initials(selectedMember.nama) }}
           </div>
           <div class="flex-1 min-w-0">
-            <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.name }}</div>
+            <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ selectedMember.nama }}</div>
             <div class="text-sm text-gray-500">{{ selectedMember.kode_pengguna }}</div>
           </div>
           <button @click="resetSelection" type="button" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
