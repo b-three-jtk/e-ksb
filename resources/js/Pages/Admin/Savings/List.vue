@@ -442,8 +442,8 @@ onMounted(() => {
                             :disabled="verifyingId === row.id"
                             class="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
                         >
-                            <Icon icon="mdi:check-circle-outline" class="w-3.5 h-3.5" />
-                            {{ verifyingId === row.id ? 'Memproses...' : 'Diterima' }}
+                            <!-- <Icon icon="mdi:check-circle-outline" class="w-3.5 h-3.5" /> -->
+                            {{ verifyingId === row.id ? 'Memproses...' : 'Verifikasi' }}
                         </button>
                     </div>
                 </template>
