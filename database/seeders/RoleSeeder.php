@@ -73,7 +73,7 @@ public function run(): void
                     $role->givePermissionTo(['view_murabahah', 'create_murabahah', 'edit_murabahah', 'payment_murabahah']);
                     break;
                 case UserRoleEnum::PJANGGOTA:
-                    $role->givePermissionTo(['view_anggota', 'create_simpanan', 'view_simpanan', 'edit_simpanan', 'view_notifikasi']);
+                    $role->givePermissionTo(['view_anggota', 'create_simpanan', 'view_simpanan', 'edit_simpanan', 'view_notifikasi', 'payment_murabahah']);
                     break;
                 default:
                     // Role lain tidak diberikan permission khusus
