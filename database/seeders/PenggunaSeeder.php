@@ -20,7 +20,7 @@ class PenggunaSeeder extends Seeder
         // DEFAULT USERS
         $adminSistem = Pengguna::create([
             'kode_pengguna' => 'KSB2607000',
-            'nik' => '0000000000',
+            'nik' => '3273111508900001',
             'nama' => 'Asep Suhendar',
             'email' => 'admin@example.com',
             'password' => bcrypt('password'),
@@ -31,7 +31,7 @@ class PenggunaSeeder extends Seeder
 
         $dps = Pengguna::create([
             'kode_pengguna' => 'KSB2607001',
-            'nik' => '0000000099',
+            'nik' => '3273121005850002',
             'nama' => 'Ust. Ahmad Fauzi',
             'email' => 'dps@example.com',
             'password' => bcrypt('password'),
@@ -42,7 +42,7 @@ class PenggunaSeeder extends Seeder
 
         $pengawas = Pengguna::create([
             'kode_pengguna' => 'KSB2607002',
-            'nik' => '0000000000000001',
+            'nik' => '3273142203820001',
             'nama' => 'Heri Hermawan',
             'email' => 'pengawas@example.com',
             'password' => bcrypt('password'),
@@ -53,7 +53,7 @@ class PenggunaSeeder extends Seeder
 
         $ketua = Pengguna::create([
             'kode_pengguna' => 'KSB2607003',
-            'nik' => '1234567890123456',
+            'nik' => '3273151708780003',
             'nama' => 'Suwita',
             'email' => 'ketua@example.com',
             'password' => bcrypt('password'),
@@ -64,7 +64,7 @@ class PenggunaSeeder extends Seeder
 
         $anggota = Pengguna::create([
             'kode_pengguna' => 'KSB2607004',
-            'nik' => '6543210987654321',
+            'nik' => '3273165209890001',
             'nama' => 'Popon Setyaningsih',
             'email' => 'popon@gmail.com',
             'password' => bcrypt('password'),
@@ -79,7 +79,7 @@ class PenggunaSeeder extends Seeder
 
         $sekretaris = Pengguna::create([
             'kode_pengguna' => 'KSB2607005',
-            'nik' => '1122334455667788',
+            'nik' => '3273116512920002',
             'nama' => 'Sri Wahyuni',
             'email' => 'sekretaris@example.com',
             'password' => bcrypt('password'),
@@ -90,7 +90,7 @@ class PenggunaSeeder extends Seeder
 
         $bendahara = Pengguna::create([
             'kode_pengguna' => 'KSB2607006',
-            'nik' => '8877665544332211',
+            'nik' => '3273125804950001',
             'nama' => 'Rahayu',
             'email' => 'bendahara@example.com',
             'password' => bcrypt('password'),
@@ -101,7 +101,7 @@ class PenggunaSeeder extends Seeder
 
         $ketuaMurabahah = Pengguna::create([
             'kode_pengguna' => 'KSB2607007',
-            'nik' => '1234432112344321',
+            'nik' => '3273146011880004',
             'nama' => 'Siti Rahmawati',
             'email' => 'ketuamurabah@example.com',
             'password' => bcrypt('password'),
@@ -112,7 +112,7 @@ class PenggunaSeeder extends Seeder
 
         $stafMurabahah = Pengguna::create([
             'kode_pengguna' => 'KSB2607008',
-            'nik' => '1234432112344391',
+            'nik' => '3273154807960002',
             'nama' => 'Nur Afni',
             'email' => 'seksimurabah@example.com',
             'password' => bcrypt('password'),
@@ -123,7 +123,7 @@ class PenggunaSeeder extends Seeder
 
         $pjAnggota = Pengguna::create([
             'kode_pengguna' => 'KSB2607009',
-            'nik' => '5678123456781234',
+            'nik' => '3273165502910001',
             'nama' => 'Yuli Astuti',
             'email' => 'pjanggota@example.com',
             'password' => bcrypt('password'),
