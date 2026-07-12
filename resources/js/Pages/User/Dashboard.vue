@@ -39,23 +39,11 @@ onMounted(() => {
 
                 <div class="relative z-10 max-w-7xl mx-auto px-6 text-white">
                     <div class="text-center mt-10">
-                        <h1 class="text-3xl md:text-4xl font-semibold mb-2 text-white">
+                        <h1 class="text-4xl md:text-5xl font-semibold mb-2 text-white">
                             Halo selamat datang
-                            <span class="text-accent">{{ user?.name }}</span>
+                            <span class="text-accent">{{ user?.nama }}</span>
                             !
                         </h1>
-
-                        <!-- <p class="font-body text-lg mb-6 text-gray-200">
-                            Punya kebutuhan pembiayaan?
-                        </p>
-
-                        <Link
-                            href="/pembiayaan/murabahah"
-                            class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors"
-                        >
-                            <Icon icon="tabler:cash" class="w-5 h-5" />
-                            Ajukan Pembiayaan
-                        </Link> -->
                     </div>
                 </div>
             </section>
@@ -64,43 +52,43 @@ onMounted(() => {
             <section class="-mt-16 relative z-20 max-w-7xl mx-auto px-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Total Simpanan -->
-                    <div class="bg-primary rounded-2xl shadow-lg p-6 text-white flex items-center justify-center min-h-35">
-                        <div class="flex items-center gap-4 w-full">
+                    <div class="bg-primary rounded-2xl shadow-lg p-8 text-white flex items-center justify-center min-h-45">
+                        <div class="flex items-center gap-5 w-full">
                             <div class="shrink-0">
-                                <Icon icon="tabler:wallet" class="w-12 h-12" />
+                                <Icon icon="tabler:wallet" class="w-16 h-16" />
                             </div>
 
                             <div class="flex-1">
-                                <p class="font-body text-sm opacity-90 mb-1">Total Simpanan</p>
-                                <h2 class="text-2xl font-bold">{{ rupiah(summary.total_saving) }}</h2>
+                                <p class="font-body text-base opacity-90 mb-1">Total Simpanan</p>
+                                <h2 class="text-3xl font-bold">{{ rupiah(summary.total_saving) }}</h2>
                             </div>
                         </div>
                     </div>
 
                     <!-- Total Angsuran -->
-                    <div class="bg-primary rounded-2xl shadow-lg p-6 text-white flex items-center justify-center min-h-35">
-                        <div class="flex items-center gap-4 w-full">
+                    <div class="bg-primary rounded-2xl shadow-lg p-8 text-white flex items-center justify-center min-h-45">
+                        <div class="flex items-center gap-5 w-full">
                             <div class="shrink-0">
-                                <Icon icon="tabler:receipt" class="w-12 h-12" />
+                                <Icon icon="tabler:receipt" class="w-16 h-16" />
                             </div>
 
                             <div class="flex-1">
-                                <p class="font-body text-sm opacity-90 mb-1">Total Sisa Angsuran</p>
-                                <h2 class="text-2xl font-bold">{{ rupiah(summary.total_installment) }}</h2>
+                                <p class="font-body text-base opacity-90 mb-1">Total Sisa Angsuran</p>
+                                <h2 class="text-3xl font-bold">{{ rupiah(summary.total_installment) }}</h2>
                             </div>
                         </div>
                     </div>
 
                     <!-- Jumlah Pembiayaan Murabahah -->
-                    <div class="bg-primary rounded-2xl shadow-lg p-6 text-white flex items-center justify-center min-h-[140px]">
-                        <div class="flex items-center gap-4 w-full">
+                    <div class="bg-primary rounded-2xl shadow-lg p-8 text-white flex items-center justify-center min-h-45">
+                        <div class="flex items-center gap-5 w-full">
                             <div class="flex-shrink-0">
-                                <Icon icon="streamline-block:money-coin" class="w-12 h-12" />
+                                <Icon icon="streamline-block:money-coin" class="w-16 h-16" />
                             </div>
 
                             <div class="flex-1">
-                                <p class="font-body text-sm opacity-90 mb-1">Total Poin</p>
-                                <h2 class="text-2xl font-bold">{{ summary.total_points }}</h2>
+                                <p class="font-body text-base opacity-90 mb-1">Total Poin</p>
+                                <h2 class="text-3xl font-bold">{{ summary.total_points }}</h2>
                             </div>
                         </div>
                     </div>
@@ -109,20 +97,20 @@ onMounted(() => {
 
             <!-- Quick Access-->
             <section class="max-w-7xl mx-auto px-6 mt-12 grid md:grid-cols-2 gap-6">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow dark:text-gray-100 h-62.5 flex flex-col">
-                    <h3 class="font-semibold text-lg mb-6">Akses Cepat</h3>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow dark:text-gray-100 h-75 flex flex-col">
+                    <h3 class="font-semibold text-xl mb-6">Akses Cepat</h3>
 
-                    <div class="flex justify-around text-center">
+                    <div class="flex justify-around text-center flex-1 items-center">
                         <Link href="/user/tabungan" class="group">
                             <div class="flex flex-col items-center gap-3">
-                                <div class="w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
-                                    <Icon icon="uil:transaction" class="w-9 h-9" />
+                                <div class="w-24 h-24 rounded-full bg-secondary flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
+                                    <Icon icon="uil:transaction" class="w-11 h-11" />
                                 </div>
                                 <div class="mt-1">
-                                    <p class="text-sm font-medium">
+                                    <p class="text-base font-medium">
                                         Tabungan
                                     </p>
-                                    <p class="text-sm font-medium mt-0.5 ">
+                                    <p class="text-base font-medium mt-0.5 ">
                                         Pribadi
                                     </p>
                                 </div>
@@ -131,14 +119,14 @@ onMounted(() => {
 
                         <Link href="/user/profile" class="group">
                             <div class="flex flex-col items-center gap-2">
-                                <div class="w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
-                                    <Icon icon="subway:coin" class="w-9 h-9" />
+                                <div class="w-24 h-24 rounded-full bg-secondary flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
+                                    <Icon icon="subway:coin" class="w-11 h-11" />
                                 </div>
                                 <div class="mt-1">
-                                    <p class="text-sm font-medium">
+                                    <p class="text-base font-medium">
                                         Riwayat
                                     </p>
-                                    <p class="text-sm font-medium mt-0.5 ">
+                                    <p class="text-base font-medium mt-0.5 ">
                                         Poin
                                     </p>
                                 </div>
@@ -147,14 +135,14 @@ onMounted(() => {
 
                         <Link href="/user/pembiayaan" class="group">
                             <div class="flex flex-col items-center gap-2">
-                                <div class="w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
-                                    <Icon icon="carbon:finance" class="w-9 h-9" />
+                                <div class="w-24 h-24 rounded-full bg-secondary flex items-center justify-center text-white group-hover:bg-green-600 transition-colors">
+                                    <Icon icon="carbon:finance" class="w-11 h-11" />
                                 </div>
                                 <div class="mt-1">
-                                    <p class="text-sm font-medium">
+                                    <p class="text-base font-medium">
                                         Pembiayaan
                                     </p>
-                                    <p class="text-sm font-medium mt-0.5 ">
+                                    <p class="text-base font-medium mt-0.5 ">
                                         Murabahah
                                     </p>
                                 </div>
@@ -164,12 +152,12 @@ onMounted(() => {
                 </div>
 
                 <!-- Mini Tabungan -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow dark:text-gray-100 h-62.5 flex flex-col">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow dark:text-gray-100 h-75 flex flex-col">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-semibold text-lg">Riwayat Transaksi Terbaru Anda</h3>
+                        <h3 class="font-semibold text-xl">Riwayat Transaksi Terbaru Anda</h3>
                         <Link
                             href="/user/tabungan"
-                            class="text-sm text-primary font-medium border border-primary hover:bg-secondary hover:text-white dark:hover:bg-accent/20 px-3 py-1.5 rounded-lg transition-colors">
+                            class="text-base text-primary font-medium border border-primary hover:bg-secondary hover:text-white dark:hover:bg-accent/20 px-3 py-1.5 rounded-lg transition-colors">
                             Lihat Semua
                         </Link>
                     </div>

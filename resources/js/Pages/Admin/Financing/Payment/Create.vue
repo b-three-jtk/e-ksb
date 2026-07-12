@@ -306,6 +306,20 @@ async function handleSubmit() {
     },
   )
 }
+
+const rescheduleMinDate = computed(() => {
+    if (!selectedFinancing.value?.current_due_date) return null
+    const d = new Date(selectedFinancing.value.current_due_date)
+    return new Date(d.getFullYear(), d.getMonth(), 1)
+        .toISOString().slice(0, 10)
+})
+
+const rescheduleMaxDate = computed(() => {
+    if (!selectedFinancing.value?.current_due_date) return null
+    const d = new Date(selectedFinancing.value.current_due_date)
+    return new Date(d.getFullYear(), d.getMonth() + 1, 0)
+        .toISOString().slice(0, 10)
+})
 </script>
 
 <template>
@@ -709,7 +723,8 @@ async function handleSubmit() {
                             <BaseInputAdmin
                                 v-model="rescheduleDate"
                                 type="date"
-                                :max-date="selectedFinancing.tanggal_akhir_periode"
+                                :min-date="rescheduleMinDate"
+                                :max-date="rescheduleMaxDate"
                                 placeholder="Pilih tanggal"
                             />
                         </div>

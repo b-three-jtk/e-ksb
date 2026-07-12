@@ -258,7 +258,7 @@
 
             <tr>
                 <td></td>
-                <td>Sisa Hutang</td>
+                <td>Sisa Kewajiban</td>
                 <td>
                     Rp {{ number_format($receipt['sisa_hutang'], 0, ',', '.') }}
                 </td>
