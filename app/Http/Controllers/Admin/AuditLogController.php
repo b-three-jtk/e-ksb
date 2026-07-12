@@ -19,10 +19,10 @@ class AuditLogController extends Controller
         $type = $request->input('type');
         $per_page = $request->input('per_page') ?? 10;
 
-        $logs = AuditLog::with('user')
+        $logs = AuditLog::with('pengguna')
             ->when($search, function ($query, $search) {
-                $query->whereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'ilike', "%{$search}%");
+                $query->whereHas('pengguna', function ($q) use ($search) {
+                    $q->where('nama', 'ilike', "%{$search}%");
                 })->orWhere('auditable_type', 'ilike', "%{$search}%");
             })
             ->when($event, function ($query, $event) {

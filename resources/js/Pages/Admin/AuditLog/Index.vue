@@ -141,9 +141,7 @@ const formatAuditableType = (typeString) => {
 </script>
 
 <template>
-    <Head title="Audit Trail (Log Aktivitas)" />
-
-    <AdminLayout>
+    <AdminLayout title="Log Aktivitas">
         <PageBreadcrumb :page-title="'Log Aktivitas'" :items="[{ name: 'Dashboard', link: '/admin/dashboard' }, { name: 'Log Aktivitas', link: '' }]" />
 
         <div class="mt-6">

@@ -19,10 +19,10 @@ class AhliWarisFactory extends Factory
     public function definition(): array
     {
         return [
-            'nik_ahli_waris' => $this->faker->unique()->numerify('################'),
-            'nama_ahli_waris' => $this->faker->name(),
-            'hubungan' => $this->faker->randomElement(AhliWarisEnum::cases())->value,
-            'kontak_ahli_waris' => $this->faker->phoneNumber(),
+            'nik_ahli_waris' => fake('id_ID')->unique()->numerify('################'),
+            'nama_ahli_waris' => fake('id_ID')->name(),
+            'hubungan' => fake('id_ID')->randomElement(AhliWarisEnum::cases())->value,
+            'kontak_ahli_waris' => fake('id_ID')->phoneNumber(),
             'anggota_id' => Anggota::factory(),
         ];
     }

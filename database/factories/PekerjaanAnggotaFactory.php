@@ -14,13 +14,13 @@ class PekerjaanAnggotaFactory extends Factory
     {
         return [
             'anggota_id' => Anggota::factory(),
-            'status_pekerjaan' => $this->faker->randomElement(['Employed', 'Self-Employed', 'Unemployed', 'Student', 'Retired']),
-            'jabatan_pekerjaan' => $this->faker->jobTitle(),
-            'nama_perusahaan' => $this->faker->company(),
-            'bidang_usaha' => $this->faker->randomElement(['Manufacturing', 'Retail', 'Services', 'Technology', 'Agriculture']),
-            'lama_bekerja' => $this->faker->numberBetween(1, 30),
-            'alamat_tempat_bekerja' => $this->faker->address(),
-            'no_telp_kantor' => $this->faker->phoneNumber(),
+            'status_pekerjaan' => fake('id_ID')->randomElement(['PNS', 'Pegawai Swasta', 'Wiraswasta', 'Mahasiswa', 'Pensiunan']),
+            'jabatan_pekerjaan' => fake('id_ID')->jobTitle(),
+            'nama_perusahaan' => fake('id_ID')->company(),
+            'bidang_usaha' => fake('id_ID')->randomElement(['Manufaktur', 'Ritel', 'Jasa', 'Teknologi', 'Pertanian', 'Pendidikan']),
+            'lama_bekerja' => fake('id_ID')->numberBetween(1, 30),
+            'alamat_tempat_bekerja' => fake('id_ID')->address(),
+            'no_telp_kantor' => fake('id_ID')->phoneNumber(),
         ];
     }
 }

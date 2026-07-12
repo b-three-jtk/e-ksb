@@ -862,6 +862,10 @@ class DasborService
                     'tipe' => class_basename($log->auditable_type),
                     'waktu' => $log->created_at->diffForHumans(),
                     'waktu_lengkap' => $log->created_at->format('d M Y, H:i'),
+                    'old_values' => $log->old_values,
+                    'new_values' => $log->new_values,
+                    'auditable_type' => $log->auditable_type,
+                    'auditable_id' => $log->auditable_id,
                 ];
             })->toArray();
     }

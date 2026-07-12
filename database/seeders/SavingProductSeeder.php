@@ -20,8 +20,6 @@ class SavingProductSeeder extends Seeder
      */
     public function run(): void
     {
-        Anggota::factory()->count(111)->create();
-
         $anggota = Anggota::all();
 
         if ($anggota->isEmpty()) {

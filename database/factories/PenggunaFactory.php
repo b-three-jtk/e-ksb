@@ -47,11 +47,11 @@ class PenggunaFactory extends Factory
 
         return [
             'kode_pengguna' => $userCode,
-            'nik' => fake()->unique()->numerify('################'),
-            'nama' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'no_telp' => fake()->unique()->numerify('628##########'),
-            'tgl_bergabung' => fake()->date(),
+            'nik' => fake('id_ID')->unique()->numerify('3273############'),
+            'nama' => fake('id_ID')->name(),
+            'email' => fake('id_ID')->unique()->safeEmail(),
+            'no_telp' => fake('id_ID')->unique()->numerify('628##########'),
+            'tgl_bergabung' => fake('id_ID')->date(),
             'status' => UserStatusEnum::ACTIVE->value,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

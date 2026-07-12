@@ -31,5 +31,22 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $exception, \Illuminate\Http\Request $request) {
+            if (in_array($response->getStatusCode(), [500, 503, 404, 403])) {
+                // If it's a 500/503 and we're in debug mode, let Laravel show the default error page with stack trace
+                if (in_array($response->getStatusCode(), [500, 503]) && config('app.debug')) {
+                    return $response;
+                }
+                
+                return \Inertia\Inertia::render('Error', ['status' => $response->getStatusCode()])
+                    ->toResponse($request)
+                    ->setStatusCode($response->getStatusCode());
+            } elseif ($response->getStatusCode() === 419) {
+                return back()->with([
+                    'message' => 'Sesi telah berakhir, silakan coba lagi.',
+                ]);
+            }
+
+            return $response;
+        });
     })->create();

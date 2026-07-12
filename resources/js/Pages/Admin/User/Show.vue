@@ -176,7 +176,7 @@ const breadcrumbItems = [
                                 }}</span>
                             </div>
                             <p class="text-gray-500">
-                                {{ user.roles[0].name }} - {{ user.kode_pengguna }}
+                                {{ user.roles[0]?.name }} - {{ user.kode_pengguna }}
                             </p>
                         </div>
                     </div>
