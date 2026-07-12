@@ -24,9 +24,10 @@ const leftPosition = computed(() => {
 });
 
 const statusText = computed(() => {
-    if (numericFdr.value < 50) return 'Tidak Aman (Tidak Likuid).';
-    if (numericFdr.value < 75) return 'Kurang Aman (Kurang Likuid).';
-    if (numericFdr.value <= 99) return 'Cukup Aman (Cukup Likuid).';
+    if (numericFdr.value < 50) return 'Tidak Likuid';
+    if (numericFdr.value < 75) return 'Kurang Likuid';
+    if (numericFdr.value <= 99) return 'Cukup Likuid';
+    return 'Likuid';
 });
 
 const actionText = computed(() => {
