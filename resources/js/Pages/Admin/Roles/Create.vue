@@ -22,7 +22,6 @@ const actionColumns = [
     { key: 'create', label: 'Membuat' },
     { key: 'edit', label: 'Mengedit' },
     { key: 'approve', label: 'Memvalidasi' },
-    { key: 'payment', label: 'Pembayaran' },
     { key: 'verify', label: 'Verifikasi' },
 ]
 
@@ -33,7 +32,6 @@ const permissionRows = computed(() => {
             create: null,
             edit: null,
             approve: null,
-            payment: null,
             verify: null,
         }
 
@@ -141,7 +139,6 @@ const breadcrumbItems = [
                                     <th class="px-5 py-4 font-medium text-center">Membuat</th>
                                     <th class="px-5 py-4 font-medium text-center">Mengedit</th>
                                     <th class="px-5 py-4 font-medium text-center">Memvalidasi</th>
-                                    <th class="px-5 py-4 font-medium text-center">Pembayaran</th>
                                     <th class="px-5 py-4 font-medium text-center">Verifikasi</th>
                                 </tr>
                             </thead>
@@ -206,21 +203,6 @@ const breadcrumbItems = [
                                                 :value="row.actions.approve"
                                                 :checked="isChecked(row.actions.approve)"
                                                 @change="togglePermission(row.actions.approve)"
-                                                class="h-4 w-4 accent-green-600"
-                                            />
-                                        </template>
-                                        <template v-else>
-                                            <span class="text-gray-400">-</span>
-                                        </template>
-                                    </td>
-
-                                    <td class="px-5 py-4 text-center">
-                                        <template v-if="row.actions.payment">
-                                        <input
-                                                type="checkbox"
-                                                :value="row.actions.payment"
-                                                :checked="isChecked(row.actions.payment)"
-                                                @change="togglePermission(row.actions.payment)"
                                                 class="h-4 w-4 accent-green-600"
                                             />
                                         </template>
