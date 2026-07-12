@@ -184,7 +184,7 @@ watch(() => filters.tab, applyFilters)
                         <div class="flex">
 
                             <Button
-                                v-if="can['edit_murabahah'] && ['Disetujui', 'Ditolak', 'Menunggu Kelengkapan Dokumen', 'Disetujui dengan Catatan'].includes(row.status)"
+                                v-if="can['create_murabahah'] && ['Disetujui', 'Ditolak', 'Menunggu Kelengkapan Dokumen', 'Disetujui dengan Catatan'].includes(row.status)"
                                 :href="`/admin/pembiayaan/draft/${row.id}`" size="small" variant="info">
                                 <ReviewIcon width="18px" height="18px" />
                                 Lanjutkan

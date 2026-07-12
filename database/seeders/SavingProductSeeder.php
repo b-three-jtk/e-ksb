@@ -7,6 +7,8 @@ use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\TransaksiSimpanan;
 use App\Models\Pengguna;
+use App\Models\Jurnal;
+use App\Models\DetailJurnal;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,15 +22,15 @@ class SavingProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $anggota = Anggota::all();
+        $anggotas = Anggota::all();
 
-        if ($anggota->isEmpty()) {
+        if ($anggotas->isEmpty()) {
             return; // Skip jika tidak ada anggota
         }
 
         $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Administrator Sistem'))->first() ?? Pengguna::first();
 
-        foreach ($anggota as $index => $anggota) {
+        foreach ($anggotas as $index => $anggota) {
             // Semua anggota punya Simpanan Pokok dan Wajib
             $this->seedSimpananPokok($anggota, $admin);
             $this->seedSimpananWajib($anggota, $admin);
@@ -62,7 +64,7 @@ class SavingProductSeeder extends Seeder
         ]);
 
         // Transaksi awal (setor simpanan pokok)
-        TransaksiSimpanan::create([
+        $trx = TransaksiSimpanan::create([
             'akun_simpanan_id' => $account->id,
             'kode_transaksi_simpanan' => 'SP' . str_pad($anggota->id, 8, '0', STR_PAD_LEFT),
             'tipe_transaksi' => 'Penyetoran',
@@ -71,8 +73,13 @@ class SavingProductSeeder extends Seeder
             'tgl_transaksi' => now()->subMonths(12),
             'metode_pembayaran_simpanan' => 'Tunai',
             'deskripsi_simpanan' => 'Setor Awal Simpanan Pokok',
+            'status' => 'Diverifikasi',
+            'verified_by' => $admin->id,
+            'verified_at' => now()->subMonths(12),
             'updated_by' => $admin->id,
         ]);
+
+        $this->createJurnal($trx, $admin->id, SavingTypeEnum::SIMPANAN_POKOK->value);
     }
 
     private function seedSimpananWajib(Anggota $anggota, Pengguna $admin): void
@@ -92,7 +99,7 @@ class SavingProductSeeder extends Seeder
 
         for ($i = 1; $i <= $maxMonths; $i++) {
             $saldo += 50000;
-            TransaksiSimpanan::create([
+            $trx = TransaksiSimpanan::create([
                 'akun_simpanan_id' => $account->id,
                 'kode_transaksi_simpanan' => 'SW' . str_pad($anggota->id, 4, '0', STR_PAD_LEFT) . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'tipe_transaksi' => 'Penyetoran',
@@ -101,8 +108,12 @@ class SavingProductSeeder extends Seeder
                 'tgl_transaksi' => now()->subMonths(13 - $i),
                 'metode_pembayaran_simpanan' => 'Tunai',
                 'deskripsi_simpanan' => 'Setoran Simpanan Wajib Bulan ke-' . $i,
+                'status' => 'Diverifikasi',
+                'verified_by' => $admin->id,
+                'verified_at' => now()->subMonths(13 - $i),
                 'updated_by' => $admin->id,
             ]);
+            $this->createJurnal($trx, $admin->id, SavingTypeEnum::SIMPANAN_WAJIB->value);
         }
         
         $account->update(['saldo' => $saldo]);
@@ -118,7 +129,7 @@ class SavingProductSeeder extends Seeder
             'created_at' => now()->subMonths(8),
         ]);
 
-        TransaksiSimpanan::create([
+        $trx = TransaksiSimpanan::create([
             'akun_simpanan_id' => $account->id,
             'kode_transaksi_simpanan' => 'TA' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
             'tipe_transaksi' => 'Penyetoran',
@@ -127,8 +138,12 @@ class SavingProductSeeder extends Seeder
             'saldo_setelah_transaksi' => $amount,
             'tgl_transaksi' => now()->subMonths(8),
             'deskripsi_simpanan' => 'Setor Awal Tabungan Anggota',
+            'status' => 'Diverifikasi',
+            'verified_by' => $admin->id,
+            'verified_at' => now()->subMonths(8),
             'updated_by' => $admin->id,
         ]);
+        $this->createJurnal($trx, $admin->id, SavingTypeEnum::TABUNGAN_ANGGOTA->value);
     }
 
     private function seedTabunganBerjangka(Anggota $anggota, Pengguna $admin, $amount): void
@@ -141,7 +156,7 @@ class SavingProductSeeder extends Seeder
             'created_at' => now()->subMonths(6),
         ]);
 
-        TransaksiSimpanan::create([
+        $trx = TransaksiSimpanan::create([
             'akun_simpanan_id' => $account->id,
             'kode_transaksi_simpanan' => 'TB' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
             'tipe_transaksi' => 'Penyetoran',
@@ -150,8 +165,12 @@ class SavingProductSeeder extends Seeder
             'metode_pembayaran_simpanan' => 'Tunai',
             'tgl_transaksi' => now()->subMonths(6),
             'deskripsi_simpanan' => 'Setor Tabungan Berjangka',
+            'status' => 'Diverifikasi',
+            'verified_by' => $admin->id,
+            'verified_at' => now()->subMonths(6),
             'updated_by' => $admin->id,
         ]);
+        $this->createJurnal($trx, $admin->id, SavingTypeEnum::TABUNGAN_BERJANGKA->value);
     }
 
     private function seedTabunganIbadah(Anggota $anggota, Pengguna $admin, $amount): void
@@ -164,7 +183,7 @@ class SavingProductSeeder extends Seeder
             'created_at' => now()->subMonths(10),
         ]);
 
-        TransaksiSimpanan::create([
+        $trx = TransaksiSimpanan::create([
             'akun_simpanan_id' => $account->id,
             'kode_transaksi_simpanan' => 'TI' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . '1',
             'tipe_transaksi' => 'Penyetoran',
@@ -173,7 +192,44 @@ class SavingProductSeeder extends Seeder
             'tgl_transaksi' => now()->subMonths(10),
             'metode_pembayaran_simpanan' => 'Tunai',
             'deskripsi_simpanan' => 'Setor Awal Tabungan Ibadah',
+            'status' => 'Diverifikasi',
+            'verified_by' => $admin->id,
+            'verified_at' => now()->subMonths(10),
             'updated_by' => $admin->id,
+        ]);
+        $this->createJurnal($trx, $admin->id, SavingTypeEnum::TABUNGAN_IBADAH->value);
+    }
+
+    private function createJurnal(TransaksiSimpanan $transaksi, string $adminId, string $jenisSimpanan): void
+    {
+        $noRefAkun = match ($jenisSimpanan) {
+            SavingTypeEnum::SIMPANAN_POKOK->value => '301',
+            SavingTypeEnum::SIMPANAN_WAJIB->value => '302',
+            SavingTypeEnum::TABUNGAN_ANGGOTA->value => '201',
+            SavingTypeEnum::TABUNGAN_BERJANGKA->value => '202',
+            SavingTypeEnum::TABUNGAN_IBADAH->value => '203',
+            default => '201',
+        };
+
+        $jurnal = Jurnal::create([
+            'tgl_transaksi' => $transaksi->tgl_transaksi,
+            'created_by' => $adminId,
+        ]);
+
+        DetailJurnal::create([
+            'jurnal_id' => $jurnal->id,
+            'no_ref_akun' => '101', // Debit Kas
+            'posisi_akun' => 'Debit',
+            'nominal' => $transaksi->nominal_simpanan,
+            'updated_by' => $adminId,
+        ]);
+
+        DetailJurnal::create([
+            'jurnal_id' => $jurnal->id,
+            'no_ref_akun' => $noRefAkun, // Credit Simpanan
+            'posisi_akun' => 'Credit',
+            'nominal' => $transaksi->nominal_simpanan,
+            'updated_by' => $adminId,
         ]);
     }
 }
