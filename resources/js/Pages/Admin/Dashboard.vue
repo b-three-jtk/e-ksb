@@ -171,7 +171,7 @@ watch(selectedTransaksiSimpananFilter, () => applyFilter('selectedTransaksiSimpa
                     </div>
                 </div>
 
-                <div v-if="role !== 'Administrator Sistem'" class="flex flex-wrap items-center gap-3 mt-4 xl:mt-0">
+                <div v-if="role !== 'Administrator Sistem' && role !== 'Penanggung Jawab Anggota'" class="flex flex-wrap items-center gap-3 mt-4 xl:mt-0">
                     <!-- Date Range Picker -->
                     <div class="w-64">
                         <VueDatePicker v-model="dates" range :enable-time-picker="false" :is-dark="isDarkMode"

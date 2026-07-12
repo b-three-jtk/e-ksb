@@ -87,6 +87,8 @@ class DasborController extends Controller
                 'total_simpanan_keluar_persen' => $data['total_simpanan_keluar_persen'],
                 'total_angsuran_belum_lunas' => $data['total_angsuran_belum_lunas'],
                 'total_pembiayaan_tersalurkan' => $data['total_pembiayaan_tersalurkan'],
+                'total_permohonan_pembiayaan' => $data['total_permohonan_pembiayaan'],
+                'total_permohonan_pembiayaan_persen' => $data['total_permohonan_pembiayaan_persen'],
                 'modal_sudah_dialokasi' => $data['modal_sudah_dialokasi'],
                 'modal_sudah_dialokasi_persen' => $data['modal_sudah_dialokasi_persen'],
                 'total_pembiayaan_aktif' => $data['total_pembiayaan_aktif'],

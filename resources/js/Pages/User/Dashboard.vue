@@ -167,7 +167,7 @@ onMounted(() => {
                             { key: 'date', label: 'Tanggal' },
                             { key: 'product', label: 'Produk' },
                             { key: 'type', label: 'Jenis' },
-                            { key: 'amount', label: 'Saldo', align: 'right' }
+                            { key: 'amount', label: 'Nominal', align: 'right' }
                         ]"
                         :data="tabungan"
                     />

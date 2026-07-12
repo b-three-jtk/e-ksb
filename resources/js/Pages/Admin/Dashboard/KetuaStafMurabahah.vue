@@ -62,8 +62,8 @@ const emit = defineEmits(['update:selectedFilter']);
                 :percentage="stats.modal_sudah_dialokasi_persen" :filter="selectedFilter" />
             <CardInfo title="Jumlah Piutang Murabahah Aktif" :content="stats.total_pembiayaan_aktif"
                 :percentage="stats.total_pembiayaan_aktif" :filter="selectedFilter" />
-            <CardInfo title="Total Permohonan Pembiayaan" :content="stats.total_permohonan_pembiayaan"
-                :percentage="stats.total_permohonan_pembiayaan_persen" :filter="selectedFilter" />
+            <CardInfo title="Jumlah Permohonan Pembiayaan" :content="stats.total_permohonan_pembiayaan"
+                :percentage="stats.total_permohonan_pembiayaan_persen" deskripsi="Jumlah permohonan yang sedang diproses" :filter="selectedFilter" />
         </div>
         <div class="flex flex-col gap-4 col-span-3">
             <SkeletonChartCard v-if="!pertumbuhan_pendapatan" class="col-span-3" :bars="12" :legend="2" />
