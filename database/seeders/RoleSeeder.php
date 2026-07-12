@@ -21,7 +21,7 @@ public function run(): void
             'akun' => ['view', 'create', 'edit'],
             'pengunduran_diri' => ['view', 'create', 'edit'],
             'pengurus' => ['view', 'create', 'edit'],
-            'murabahah' => ['view', 'create', 'edit', 'approve', 'verify'],
+            'murabahah' => ['view', 'create', 'edit', 'approve', 'payment', 'verify'],
             'simpanan' => ['view', 'create', 'edit', 'verify'],
             'kas' => ['view', 'create', 'edit'],
             'pengaturan' => ['view', 'create', 'edit'],
