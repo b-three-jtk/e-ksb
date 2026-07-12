@@ -239,7 +239,7 @@ class AruskasService
     {
         $journals = $this->buildBaseQuery($filters)
             ->get()
-            ->groupBy('journal_group_id');
+            ->groupBy('jurnal_id');
 
         $operating = [];
         $investing = [];
@@ -345,25 +345,17 @@ class AruskasService
 
     private function classifyJournal($entries): ?array
     {
-        $cashEntry = $entries->firstWhere(
-            'no_ref_account',
-            self::CASH_ACCOUNT
-        );
+        $cashEntry = $entries->firstWhere('no_ref_akun', self::CASH_ACCOUNT);
 
         if (!$cashEntry) {
             return null;
         }
 
-        $accountCodes = $entries
-            ->pluck('no_ref_account')
-            ->toArray();
+        $accountCodes = $entries->pluck('no_ref_akun')->toArray();
 
-        $cashIn = $cashEntry->position === PositionEnum::DEBIT->value;
+        $cashIn = $cashEntry->posisi_akun === PositionEnum::DEBIT->value;
 
-        if (
-            in_array('104', $accountCodes)
-            && in_array('401', $accountCodes)
-        ) {
+        if (in_array('104', $accountCodes) && in_array('401', $accountCodes)) {
             return [
                 'activity' => 'operating',
                 'description' => 'Penerimaan Angsuran Murabahah',
@@ -372,11 +364,7 @@ class AruskasService
             ];
         }
 
-        /**
-         * Uang Muka
-         */
         if (in_array('204', $accountCodes)) {
-
             return [
                 'activity' => 'operating',
                 'description' => 'Penerimaan Uang Muka Murabahah',
@@ -385,11 +373,7 @@ class AruskasService
             ];
         }
 
-        /**
-         * Dana Alokasi
-         */
         if (in_array('102', $accountCodes)) {
-
             return [
                 'activity' => 'operating',
                 'description' => 'Penyaluran Dana Pembiayaan Murabahah',
@@ -399,16 +383,13 @@ class AruskasService
         }
 
         foreach (self::CASH_FLOW_MAPPING as $account => $mapping) {
-
             if (!in_array($account, $accountCodes)) {
                 continue;
             }
 
             return [
                 'activity' => $mapping['activity'],
-                'description' => $cashIn
-                    ? $mapping['in']
-                    : $mapping['out'],
+                'description' => $cashIn ? $mapping['in'] : $mapping['out'],
                 'cash_in' => $cashIn,
                 'amount' => $cashEntry->nominal,
             ];
@@ -419,29 +400,22 @@ class AruskasService
 
     private function calculateOpeningBalance(array $filters): float
     {
-        $query = DetailJurnal::query()
-            ->where('no_ref_account', self::CASH_ACCOUNT);
-
-        if (
-            ($filters['periode'] ?? null) === 'custom'
-            && !empty($filters['date_from'])
-        ) {
-            $query->whereDate(
-                'transaction_date',
-                '<',
-                $filters['date_from']
-            );
-        } else {
+        if (($filters['periode'] ?? null) !== 'custom' || empty($filters['date_from'])) {
             return 0;
         }
 
+        $query = DetailJurnal::query()
+            ->join('jurnal', 'detail_jurnal.jurnal_id', '=', 'jurnal.id')
+            ->where('detail_jurnal.no_ref_akun', self::CASH_ACCOUNT)
+            ->whereDate('jurnal.tgl_transaksi', '<', $filters['date_from']);
+
         $debit = (clone $query)
-            ->where('position', PositionEnum::DEBIT->value)
-            ->sum('nominal');
+            ->where('detail_jurnal.posisi_akun', PositionEnum::DEBIT->value)
+            ->sum('detail_jurnal.nominal');
 
         $credit = (clone $query)
-            ->where('position', PositionEnum::CREDIT->value)
-            ->sum('nominal');
+            ->where('detail_jurnal.posisi_akun', PositionEnum::CREDIT->value)
+            ->sum('detail_jurnal.nominal');
 
         return $debit - $credit;
     }

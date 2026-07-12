@@ -101,6 +101,25 @@ class SimpananController extends Controller
         ]);
     }
 
+    public function verifyTransaction(Request $request, string $id)
+    {
+        if (!Auth::user()->hasRole(UserRoleEnum::BENDAHARA->value) && !Auth::user()->hasRole(UserRoleEnum::ADMIN->value)) {
+            abort(403, 'Anda tidak memiliki izin untuk memverifikasi transaksi ini.');
+        }
+
+        try {
+            $trx = $this->simpananService->verifyTransaction($id, Auth::id());
+
+            $message = $trx->tipe_transaksi === TransactionTypeEnum::WITHDRAWAL->value
+                ? 'Penarikan berhasil diverifikasi, saldo telah dikurangi dan jurnal telah dibuat.'
+                : 'Transaksi simpanan berhasil diverifikasi dan jurnal telah dibuat.';
+
+            return back()->with('success', $message);
+        } catch (\Throwable $th) {
+            return back()->withErrors(['error' => 'Gagal memverifikasi transaksi: ' . $th->getMessage()]);
+        }
+    }
+
     public function createDeposit(Request $request)
     {
         return Inertia::render('Admin/Savings/Penyetoran/Create', [
@@ -230,6 +249,13 @@ class SimpananController extends Controller
                 $request->validated(),
                 Auth::id()
             );
+
+            $isBendahara = Auth::user()->hasRole(UserRoleEnum::BENDAHARA->value)
+                || Auth::user()->hasRole(UserRoleEnum::ADMIN->value);
+
+            if ($isBendahara && !empty($result['struk']['transaction_id'])) {
+                $this->simpananService->verifyTransaction($result['struk']['transaction_id'], Auth::id());
+            }
 
             return redirect()
                 ->route('admin.savings.withdrawal.create')

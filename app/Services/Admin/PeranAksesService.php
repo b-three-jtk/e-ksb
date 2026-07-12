@@ -103,6 +103,7 @@ class PeranAksesService
             'create' => 'Buat',
             'edit' => 'Ubah',
             'approve' => 'Setujui',
+            'verify' => 'Verifikasi',
             default => ucfirst($action),
         };
 
