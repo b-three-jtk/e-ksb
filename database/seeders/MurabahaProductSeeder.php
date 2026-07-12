@@ -6,6 +6,7 @@ use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PaymentMethodsEnum;
+use App\Models\AhliWaris;
 use App\Models\Anggota;
 use App\Models\Angsuran;
 use App\Models\DetailJurnal;
@@ -85,6 +86,16 @@ class MurabahaProductSeeder extends Seeder
                 if ($hasActive) {
                     $scenario['status'] = FinancingReqStatusEnum::PAID->value;
                 }
+            }
+
+            // Pastikan Anggota memiliki setidaknya 1 Ahli Waris (Wajib untuk pembiayaan)
+            if ($currentAnggota->ahliWaris()->count() === 0) {
+                $ahliWaris = AhliWaris::create([
+                    'nik_ahli_waris' => (string) mt_rand(1000000000000000, 9999999999999999),
+                    'nama_ahli_waris' => 'Ahli Waris ' . ($currentAnggota->user->nama ?? 'Anggota'),
+                    'kontak_ahli_waris' => '08' . mt_rand(100000000, 999999999),
+                ]);
+                $currentAnggota->ahliWaris()->attach($ahliWaris->nik_ahli_waris, ['hubungan' => \App\Enums\AhliWarisEnum::CHILD->value]);
             }
 
             if ($scenario['status'] === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {

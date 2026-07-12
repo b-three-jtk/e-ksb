@@ -30,10 +30,10 @@ const statusText = computed(() => {
 });
 
 const actionText = computed(() => {
-    if (numericFdr.value < 50) return 'Terlalu banyak dana menganggur. Tindakan: Perlu segera memaksimalkan penyaluran pembiayaan kepada anggota.';
-    if (numericFdr.value < 75) return 'Produktivitas perputaran dana belum optimal. Tindakan: Tingkatkan promosi dan penyaluran produk pembiayaan.';
-    if (numericFdr.value <= 99) return 'Perputaran dana cukup produktif. Tindakan: Pertahankan kinerja penyaluran dengan tetap memperhatikan prinsip kehati-hatian.';
-    return 'Penyaluran dana sangat maksimal. Tindakan: Pastikan ketersediaan kas tunai minimum tetap terjaga untuk melayani penarikan simpanan.';
+    if (numericFdr.value < 50) return 'Terlalu banyak dana menganggur. Perlu segera memaksimalkan penyaluran pembiayaan kepada anggota.';
+    if (numericFdr.value < 75) return 'Produktivitas perputaran dana belum optimal. Tingkatkan promosi dan penyaluran produk pembiayaan.';
+    if (numericFdr.value <= 99) return 'Perputaran dana cukup produktif. Pertahankan kinerja penyaluran dengan tetap memperhatikan prinsip kehati-hatian.';
+    return 'Penyaluran dana sangat maksimal. Pastikan ketersediaan kas tunai minimum tetap terjaga untuk melayani penarikan simpanan.';
 });
 </script>
 
@@ -102,8 +102,7 @@ const actionText = computed(() => {
         </div>
         <div
             class="mt-2 text-[14px] text-brand-800 dark:text-gray-500 bg-brand-300/20 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-700">
-            Nilai <strong>{{ numericFdr }}%</strong> menunjukkan status <strong>{{ statusText }} </strong><span
-                class="font-semibold text-gray-700 dark:text-gray-300">Rekomendasi:</span> {{ actionText }}
+            Nilai <strong>{{ numericFdr }}%</strong> menunjukkan status <strong>{{ statusText }} </strong><br>{{ actionText }}
         </div>
     </div>
 </template>
