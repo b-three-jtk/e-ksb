@@ -108,6 +108,7 @@ class DasborController extends Controller
                 'pembayaran_terlambat' => Inertia::lazy(fn() => $service->getPembayaranTerlambat($tanggalAkhir)),
                 'transaksi_simpanan_terbaru' => Inertia::lazy(fn() => $service->getTransaksiSimpananTerbaru($tanggalAkhir, $req->saving_transaction_filter ?? 'all')),
                 'anggota_bermasalah_pj' => Inertia::lazy(fn() => $role === UserRoleEnum::PJANGGOTA->value ? $service->getAnggotaBermasalahPJ() : []),
+                'log_aktivitas' => Inertia::lazy(fn() => $role === UserRoleEnum::ADMIN->value ? $service->getLogAktivitasSistem() : []),
         ]);
     }
 }

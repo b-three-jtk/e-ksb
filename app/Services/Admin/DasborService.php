@@ -9,6 +9,7 @@ use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Anggota;
 use App\Models\Angsuran;
+use App\Models\AuditLog;
 use App\Models\DetailJurnal;
 use App\Models\Notifikasi;
 use App\Models\PembayaranAngsuran;
@@ -845,5 +846,23 @@ class DasborService
             SavingTypeEnum::TABUNGAN_BERJANGKA->value, SavingTypeEnum::TABUNGAN_IBADAH->value => 'Mudharabah Mutlaqah',
             default => null,
         };
+    }
+
+    public function getLogAktivitasSistem($limit = 10)
+    {
+        return AuditLog::with('pengguna')
+            ->latest()
+            ->take($limit)
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'event' => $log->event,
+                    'user' => $log->pengguna ? $log->pengguna->nama : 'Sistem',
+                    'tipe' => class_basename($log->auditable_type),
+                    'waktu' => $log->created_at->diffForHumans(),
+                    'waktu_lengkap' => $log->created_at->format('d M Y, H:i'),
+                ];
+            })->toArray();
     }
 }

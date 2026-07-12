@@ -13,6 +13,7 @@ const KetuaStafMurabahah = defineAsyncComponent(() => import('./Dashboard/KetuaS
 const PJAnggota = defineAsyncComponent(() => import('./Dashboard/PJAnggota.vue'));
 const DPS = defineAsyncComponent(() => import('./Dashboard/DPS.vue'));
 const Pengawas = defineAsyncComponent(() => import('./Dashboard/Pengawas.vue'));
+const AdminSistem = defineAsyncComponent(() => import('./Dashboard/AdminSistem.vue'));
 
 const page = usePage()
 
@@ -32,6 +33,7 @@ const props = defineProps({
     pembayaran_terlambat: Object,
     transaksi_simpanan_terbaru: Object,
     anggota_bermasalah_pj: Array,
+    log_aktivitas: Array,
 });
 
 const dates = ref([new Date(), new Date()]);
@@ -62,7 +64,7 @@ onMounted(() => {
     router.reload({
         only: [
             'pertumbuhan_pendapatan', 'pertumbuhan_anggota', 'peta_simpanan', 'peta_pembiayaan',
-            'transaksi_terbaru', 'jatuh_tempo_terdekat', 'permohonan_murabahah', 'pembayaran_terlambat', 'transaksi_simpanan_terbaru', 'anggota_bermasalah_pj',
+            'transaksi_terbaru', 'jatuh_tempo_terdekat', 'permohonan_murabahah', 'pembayaran_terlambat', 'transaksi_simpanan_terbaru', 'anggota_bermasalah_pj', 'log_aktivitas'
         ],
         preserveState: true,
     })
@@ -79,7 +81,8 @@ const globalUpdateFields = [
     'permohonan_murabahah',
     'pembayaran_terlambat',
     'transaksi_simpanan_terbaru',
-    'anggota_bermasalah_pj'
+    'anggota_bermasalah_pj',
+    'log_aktivitas'
 ];
 
 const filterDataMap = {
@@ -190,9 +193,13 @@ watch(selectedTransaksiSimpananFilter, () => applyFilter('selectedTransaksiSimpa
                 @update:selected-filter="selectedFilter = $event" :selected-filter="selectedFilter"
                 @update:selected-savings-filter="selectedSavingsFilter = $event"
                 :selected-savings-filter="selectedSavingsFilter" :can="can"
-                v-if="role === 'Ketua' || role === 'Administrator Sistem'" :stats="props.stats"
+                v-if="role === 'Ketua'" :stats="props.stats"
                 :pertumbuhan_pendapatan="props.pertumbuhan_pendapatan" :peta_simpanan="props.peta_simpanan"
                 :peta_pembiayaan="props.peta_pembiayaan" :transaksi_terbaru="props.transaksi_terbaru" />
+                
+            <!-- Dashboard Administrator Sistem Tambahan -->
+            <AdminSistem v-if="role === 'Administrator Sistem'" :stats="props.stats" :log_aktivitas="props.log_aktivitas" />
+            
             <!-- Dashboard Pengawas -->
             <Pengawas @update:selected-transaction-filter="selectedTransactionFilter = $event"
                 :selected-transaction-filter="selectedTransactionFilter"
