@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Pembiayaan;
 use Carbon\Carbon;
+use App\Enums\FinancingReqStatusEnum;
 
 class PembiayaanService
 {
@@ -79,5 +80,23 @@ class PembiayaanService
             },
             'wakalah',
         ])->findOrFail($id);
+    }
+
+    public function getActiveFinancing($anggotaId)
+    {
+        return Pembiayaan::with([
+                'objekPembiayaan.jenisBarang',
+                'angsuran' => function ($q) {
+                    $q->orderBy('angsuran_ke');
+                },
+            ])
+            ->where('anggota_id', $anggotaId)
+            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
+            ->latest('tgl_akad')
+            ->get()
+            ->each(function ($pembiayaan) {
+                $this->computePembiayaanSummary($pembiayaan);
+                $this->computeNextDueDate($pembiayaan);
+            });
     }
 }
