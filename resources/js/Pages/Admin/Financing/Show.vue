@@ -31,7 +31,7 @@ const installments = computed(() => props.data?.angsuran ?? {
 const hasInstallmentHistory = computed(() => Number(props.data.total_price) > 0)
 
 const canPayBill = computed(() =>
-    can.value['payment_murabahah']
+    can.value['edit_murabahah']
     && props.data.angsuran
 )
 
@@ -94,41 +94,41 @@ const verifyPayment = (paymentId) => {
 
 const batalkan = () => {
     Swal.fire({
-            title: 'Konfirmasi',
-            text: 'Apakah Anda yakin ingin membatalkan permohonan ini?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, batal',
-            cancelButtonText: 'Batal',
-            confirmButtonColor: '#009141',
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin membatalkan permohonan ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, batal',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#009141',
     }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(`/admin/pembiayaan/batal/${props.data.id}`, {
-                    onSuccess: (page) => {
-                        if (page.props.flash?.success) {
-                            toast(page.props.flash.success, {
-                                type: 'success',
-                                position: 'bottom-right',
-                            })
-                        }
-                    },
-                    onError: (errors) => {
-                        const errorMessages = Object.values(errors).flat()
-
-                        if (errorMessages.length > 0) {
-                            toast(errorMessages.join(', '), {
-                                type: 'error',
-                                position: 'bottom-right',
-                            })
-                        } else {
-                            toast('Gagal menyimpan permohonan', {
-                                type: 'error',
-                                position: 'bottom-right',
-                            })
-                        }
+        if (result.isConfirmed) {
+            router.delete(`/admin/pembiayaan/batal/${props.data.id}`, {
+                onSuccess: (page) => {
+                    if (page.props.flash?.success) {
+                        toast(page.props.flash.success, {
+                            type: 'success',
+                            position: 'bottom-right',
+                        })
                     }
-                })
-            }
+                },
+                onError: (errors) => {
+                    const errorMessages = Object.values(errors).flat()
+
+                    if (errorMessages.length > 0) {
+                        toast(errorMessages.join(', '), {
+                            type: 'error',
+                            position: 'bottom-right',
+                        })
+                    } else {
+                        toast('Gagal menyimpan permohonan', {
+                            type: 'error',
+                            position: 'bottom-right',
+                        })
+                    }
+                }
+            })
+        }
     })
 }
 </script>
@@ -140,22 +140,22 @@ const batalkan = () => {
             <div class="card-layout flex justify-between">
                 <div class="flex gap-2 items-center">
                     <h1 class="font-semibold text-dark-text dark:text-white">No. Transaksi #{{
-                        data.kode_pembiayaan }} <span class="my-auto ml-2"
-                            :class="useFinancingStatus(data.status)">{{ data.status }}</span>
+                        data.kode_pembiayaan }} <span class="my-auto ml-2" :class="useFinancingStatus(data.status)">{{
+                            data.status }}</span>
                     </h1>
                 </div>
                 <div class="flex items-center gap-4">
-                    <Button
-                        v-if="data.status !== 'Angsuran Berjalan' && data.status !== 'Tangguh' && data.status !== 'Lunas'"
-                        variant="gray"
+                    <Button v-if="data.status !== 'Angsuran Berjalan' && data.status !== 'Tangguh'" variant="gray"
                         @click="batalkan()">
                         Batalkan Permohonan
                     </Button>
-                    <Button v-if="canPayBill && data.status === 'Angsuran Berjalan'" :href="`/admin/pembiayaan/repayment/${data.id}`" variant="secondary">
+                    <Button v-if="canPayBill && data.status === 'Angsuran Berjalan'"
+                        :href="`/admin/pembiayaan/repayment/${data.id}`" variant="secondary">
                         <span class="icon-[tabler--moneybag-move]" style="width:18px;height:18px;" />
                         Pelunasan Dipercepat
                     </Button>
-                    <Button v-if="canPayBill && (data.status === 'Angsuran Berjalan' || data.status === 'Tangguh')" :href="`/admin/pembiayaan/${data.id}/payments/create`" variant="info">
+                    <Button v-if="canPayBill && (data.status === 'Angsuran Berjalan' || data.status === 'Tangguh')"
+                        :href="`/admin/pembiayaan/${data.id}/payments/create`" variant="info">
                         <span class="icon-[tabler--credit-card-pay]" style="width:18px;height:18px;" />
                         Bayar Tagihan
                     </Button>
@@ -188,7 +188,8 @@ const batalkan = () => {
                                 <Info label="Tanggal Akad" :value="dateParser(data.tgl_akad)" />
                                 <Info label="Jumlah/Kuantitas" :value="data.objek_pembiayaan?.kuantitas" />
                                 <Info label="Kondisi" :value="data.objek_pembiayaan?.kondisi_produk" />
-                                <Info label="Deskripsi Spesifikasi" :value="data.objek_pembiayaan?.spesifikasi_barang" />
+                                <Info label="Deskripsi Spesifikasi"
+                                    :value="data.objek_pembiayaan?.spesifikasi_barang" />
                             </ul>
                         </div>
                         <section class="flex flex-col py-2 gap-2">
@@ -283,7 +284,7 @@ const batalkan = () => {
                     </div>
                     <Documents :data="data" />
 
-                    </div>
+                </div>
             </div>
         </div>
         <ModalDocument ref="modalRef" modal-id="buktiModal" title="Bukti Penyetoran Angsuran" :name="selectedReceipt"
