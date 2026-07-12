@@ -62,7 +62,11 @@ class PembiayaanController extends Controller
         $sortBy = $request->input('sort_by', 'created_at');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        $pembiayaan = $this->pembiayaanService->getSemuaPembiayaan($search, $tab, $sortBy, $sortDir, $perPage, $user);
+        if ($tab === 'unverified_angsuran') {
+            $pembiayaan = $this->pembayaranAngsuranService->getUnverifiedAngsuran($search, $perPage, $sortBy, $sortDir);
+        } else {
+            $pembiayaan = $this->pembiayaanService->getSemuaPembiayaan($search, $tab, $sortBy, $sortDir, $perPage, $user);
+        }
 
         $ringkasanData = [
             ['title' => 'Total Pengajuan Pembiayaan Murabahah','value' => $this->pembiayaanService->getTotalPermohonanPembiayaan(now())],

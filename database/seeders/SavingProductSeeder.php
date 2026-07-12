@@ -51,6 +51,29 @@ class SavingProductSeeder extends Seeder
                 $this->seedTabunganIbadah($anggota, $admin, 10000000);
             }
         }
+
+        // --- SEED TRANSAKSI MENUNGGU VERIFIKASI ---
+        $someAnggotas = $anggotas->take(3);
+        foreach ($someAnggotas as $idx => $anggota) {
+            $account = AkunSimpanan::where('anggota_id', $anggota->id)
+                ->where('jenis_simpanan', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
+                ->first();
+            
+            if ($account) {
+                TransaksiSimpanan::create([
+                    'akun_simpanan_id' => $account->id,
+                    'kode_transaksi_simpanan' => 'TA' . str_pad($anggota->id, 5, '0', STR_PAD_LEFT) . 'P' . $idx,
+                    'tipe_transaksi' => 'Penyetoran',
+                    'nominal_simpanan' => 150000,
+                    'saldo_setelah_transaksi' => $account->saldo, // belum verifikasi
+                    'tgl_transaksi' => now(),
+                    'metode_pembayaran_simpanan' => 'Non-Tunai',
+                    'deskripsi_simpanan' => 'Setoran Menunggu Verifikasi',
+                    'status' => 'Menunggu Verifikasi',
+                    'updated_by' => $admin->id,
+                ]);
+            }
+        }
     }
 
     private function seedSimpananPokok(Anggota $anggota, Pengguna $admin): void

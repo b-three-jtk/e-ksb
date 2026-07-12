@@ -12,6 +12,7 @@ import Button from '@/Components/Form/Button.vue';
 import useFinancingStatus, { getStatusLabel } from '@/Composables/useFinancingStatus'
 import ReviewIcon from '@/Icons/ReviewIcon.vue'
 import moneyParser from '@/Composables/moneyParser';
+import Swal from 'sweetalert2';
 
 const page = usePage();
 
@@ -20,6 +21,28 @@ const role = computed(() => page.props.auth.role);
 const can = computed(() => page.props.auth.can);
 
 const isLoading = ref(false);
+const verifyingId = ref(null);
+
+const verifyPayment = async (id) => {
+    const result = await Swal.fire({
+        title: 'Verifikasi Transaksi?',
+        text: "Apakah Anda yakin ingin memverifikasi transaksi ini?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#059669',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Verifikasi!',
+        cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+        verifyingId.value = id;
+        router.post(`/admin/pembiayaan/payments/${id}/verify`, {}, {
+            preserveScroll: true,
+            onFinish: () => verifyingId.value = null,
+        });
+    }
+};
 
 const props = defineProps({
     pembiayaan: Object,
@@ -36,6 +59,7 @@ const tabs = [
     { key: 'request', label: 'Permohonan Pembiayaan Murabahah' },
     { key: 'validated', label: 'Permohonan Tervalidasi' },
     { key: 'active', label: 'Pembiayaan Aktif' },
+    { key: 'unverified_angsuran', label: 'Pembayaran Angsuran Belum Diverifikasi' }
 ]
 
 const filters = reactive({
@@ -76,6 +100,17 @@ const tableTitle = computed(() => {
 })
 
 const columns = computed(() => {
+    if (filters.tab === 'unverified_angsuran') {
+        return [
+            { key: 'kode_pembiayaan', label: 'No. Transaksi', align: 'left' },
+            { key: 'tgl_akad', label: 'Tanggal Bayar', align: 'left' },
+            { key: 'user', label: 'Anggota', align: 'left' },
+            { key: 'nominal', label: 'Nominal', align: 'left' },
+            { key: 'status', label: 'Status', align: 'left' },
+            { key: 'aksi', label: 'Aksi', align: 'left' }
+        ]
+    }
+
     const baseColumns = [
         { key: 'kode_pembiayaan', label: 'No. Transaksi', align: 'left' },
         { key: 'tgl_akad', label: 'Tanggal Akad', align: 'left' },
@@ -174,36 +209,63 @@ watch(() => filters.tab, applyFilters)
                     :pagination="transactions" :sort-by="filters.sort_by" :sort-dir="filters.sort_dir"
                     @sort="toggleSort">
 
+                    <template #cell-nominal="{ row }">
+                        {{ moneyParser(row.nominal) }}
+                    </template>
+
                     <template #cell-status="{ row }">
-                        <span :class="useFinancingStatus(row.status)">
+                        <span v-if="filters.tab === 'unverified_angsuran'" class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500">
+                            {{ row.status }}
+                        </span>
+                        <span v-else :class="useFinancingStatus(row.status)">
                             {{ getStatusLabel(row.status) }}
                         </span>
                     </template>
 
                     <template #cell-aksi="{ row }">
                         <div class="flex">
+                            <template v-if="filters.tab === 'unverified_angsuran'">
+                                <a v-if="row.struk_pembayaran" :href="row.struk_pembayaran" target="_blank" class="inline-flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 mr-2">
+                                    <Icon icon="mdi:eye-outline" class="w-4 h-4" />
+                                    Lihat Bukti
+                                </a>
+                                <button v-else disabled class="inline-flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-gray-400 text-white mr-2">
+                                    <Icon icon="mdi:eye-outline" class="w-4 h-4" />
+                                    Lihat Bukti
+                                </button>
 
-                            <Button
-                                v-if="can['create_murabahah'] && ['Disetujui', 'Ditolak', 'Menunggu Kelengkapan Dokumen', 'Disetujui dengan Catatan'].includes(row.status)"
-                                :href="`/admin/pembiayaan/draft/${row.id}`" size="small" variant="info">
-                                <ReviewIcon width="18px" height="18px" />
-                                Lanjutkan
-                            </Button>
+                                <button
+                                    v-if="can['verify_murabahah'] && row.status === 'Menunggu Verifikasi'"
+                                    @click="verifyPayment(row.id)"
+                                    :disabled="verifyingId === row.id"
+                                    class="inline-flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                                >
+                                    {{ verifyingId === row.id ? 'Memproses...' : 'Verifikasi' }}
+                                </button>
+                            </template>
                             
-                            <Button
-                                v-else-if="can['approve_murabahah'] && row.status === 'Belum Ditinjau'"
-                                :href="`/admin/pembiayaan/validation/${row.id}`" size="small" variant="warning">
-                                <ReviewIcon width="18px" height="18px" />
-                                Tinjau
-                            </Button>
+                            <template v-else>
+                                <Button
+                                    v-if="can['create_murabahah'] && ['Disetujui', 'Ditolak', 'Menunggu Kelengkapan Dokumen', 'Disetujui dengan Catatan'].includes(row.status)"
+                                    :href="`/admin/pembiayaan/draft/${row.id}`" size="small" variant="info">
+                                    <ReviewIcon width="18px" height="18px" />
+                                    Lanjutkan
+                                </Button>
+                                
+                                <Button
+                                    v-else-if="can['approve_murabahah'] && row.status === 'Belum Ditinjau'"
+                                    :href="`/admin/pembiayaan/validation/${row.id}`" size="small" variant="warning">
+                                    <ReviewIcon width="18px" height="18px" />
+                                    Tinjau
+                                </Button>
 
-                            <Button
-                                v-else-if="can['view_murabahah']"
-                                :href="`/admin/pembiayaan/show/${row.id}`" size="small" variant="secondary">
-                                <Icon icon="mdi:eye-outline" class="w-5 h-5" />
-                                Lihat Detail
-                            </Button>
-
+                                <Button
+                                    v-else-if="can['view_murabahah']"
+                                    :href="`/admin/pembiayaan/show/${row.id}`" size="small" variant="secondary">
+                                    <Icon icon="mdi:eye-outline" class="w-5 h-5" />
+                                    Lihat Detail
+                                </Button>
+                            </template>
                         </div>
                     </template>
                 </BaseTable>

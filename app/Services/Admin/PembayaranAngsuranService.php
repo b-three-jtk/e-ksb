@@ -17,6 +17,33 @@ use Illuminate\Support\Facades\Storage;
 
 class PembayaranAngsuranService
 {
+    public function getUnverifiedAngsuran($search, $perPage, $sortBy, $sortDir)
+    {
+        return PembayaranAngsuran::with(['angsuran.pembiayaan.anggota.user'])
+            ->where('status', 'Menunggu Verifikasi')
+            ->where(function ($query) use ($search) {
+                if ($search) {
+                    $query->where('kode_transaksi_pembayaran', 'like', "%{$search}%")
+                        ->orWhereHas('angsuran.pembiayaan.anggota.user', function ($q) use ($search) {
+                            $q->where('nama', 'like', "%{$search}%");
+                        });
+                }
+            })
+            ->latest()
+            ->paginate($perPage)
+            ->through(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'kode_pembiayaan' => $item->kode_transaksi_pembayaran, 
+                    'tgl_akad' => Carbon::parse($item->tgl_pembayaran)->format('d M Y'), 
+                    'user' => $item->angsuran?->pembiayaan?->anggota?->user?->nama ?? '-',
+                    'nominal' => $item->jumlah_angsuran_dibayar, 
+                    'status' => $item->status,
+                    'struk_pembayaran' => $item->struk_pembayaran ? asset('storage/' . $item->struk_pembayaran) : null,
+                ];
+            });
+    }
+
     public function calculateDetails(Pembiayaan $pembiayaan): array
     {
         $tenor = $pembiayaan->tenor == 0 ? 1 : $pembiayaan->tenor;

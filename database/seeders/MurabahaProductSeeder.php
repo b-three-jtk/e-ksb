@@ -159,6 +159,31 @@ class MurabahaProductSeeder extends Seeder
             DetailJurnal::create(['jurnal_id' => $groupId, 'no_ref_akun' => '102', 'posisi_akun' => 'Debit', 'nominal' => $diffAlokasi, 'updated_by' => $admin->id]);
             // Hanya satu sisi (Debit) karena kita tidak ingin menambah ke Simpanan/COA lain
         }
+
+        // --- SEED TRANSAKSI ANGSURAN MENUNGGU VERIFIKASI ---
+        $pendingAngsurans = Angsuran::where('status', InstallmentPaymentScheduleStatusEnum::SCHEDULED->value)
+            ->where('tgl_jatuh_tempo', '<=', now())
+            ->take(3)
+            ->get();
+
+        foreach ($pendingAngsurans as $idx => $angsuran) {
+            $pembiayaan = $angsuran->pembiayaan;
+            $monthlyMargin = round($pembiayaan->margin_keuntungan / $pembiayaan->tenor, 2);
+            $monthlyCostPrice = round(($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $pembiayaan->tenor, 2);
+            
+            PembayaranAngsuran::create([
+                'kode_transaksi_pembayaran' => $this->getUniqueTransCode(),
+                'angsuran_id' => $angsuran->id,
+                'jumlah_angsuran_dibayar' => $angsuran->nominal_angsuran,
+                'pokok_dibayar' => $monthlyCostPrice,
+                'margin_dibayar' => $monthlyMargin,
+                'metode_pembayaran' => PaymentMethodsEnum::CASHLESS->value,
+                'is_pelunasan_lebih_cepat' => false,
+                'tgl_pembayaran' => now(),
+                'status' => 'Menunggu Verifikasi',
+                'updated_by' => $admin->id,
+            ]);
+        }
     }
 
     private function getUniqueTransCode(): string

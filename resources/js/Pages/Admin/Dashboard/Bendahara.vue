@@ -1,17 +1,48 @@
 <script setup>
 import CardInfo from '@/Components/CardInfo.vue';
-import FdrCard from '@/Components/Dashboard/FdrCard.vue';
 import VerticalBarChart from '@/Components/Dashboard/VerticalBarChart.vue';
 import BaseTable from '@/Components/Table/BaseTable.vue';
 import parseCurrencyAmount from '@/Composables/moneyParser.js';
 import BarChart from '@/Components/Dashboard/Barchart.vue';
 import { computed, ref } from 'vue';
-import EyeIcon from '@/Icons/EyeIcon.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import SkeletonChartCard from '@/Components/Dashboard/Loading/SkeletonChartCard.vue';
 import SkeletonMapCard from '@/Components/Dashboard/Loading/SkeletonMapCard.vue';
 import SkeletonTableCard from '@/Components/Dashboard/Loading/SkeletonTableCard.vue';
 import AccountIcon from '@/Icons/AccountIcon.vue';
+import Swal from 'sweetalert2';
+
+const verifyingId = ref(null);
+
+const verifyTransaction = async (row) => {
+    const result = await Swal.fire({
+        title: 'Verifikasi Transaksi?',
+        text: "Apakah Anda yakin ingin memverifikasi transaksi ini?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#059669', // green-600
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Verifikasi!',
+        cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+        verifyingId.value = row.id;
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.reload({ only: ['transaksi_terbaru', 'stats', 'peta_simpanan', 'pertumbuhan_pendapatan'] });
+            },
+            onFinish: () => verifyingId.value = null,
+        };
+
+        if (row.type_transaksi === 'simpanan') {
+            router.post(`/admin/savings/${row.id}/verify`, {}, options);
+        } else if (row.type_transaksi === 'angsuran') {
+            router.post(`/admin/pembiayaan/payments/${row.id}/verify`, {}, options);
+        }
+    }
+};
 
 const props = defineProps({
     stats: Object,
@@ -96,7 +127,7 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
     <!-- INFO - BARIS SATU -->
     <div class="grid grid-cols-6 gap-4">
         <div class="col-span-6 grid grid-cols-2 gap-4">
-            <CardInfo title="Total Modal Belum Dialokasi (Kas)" :content="parseCurrencyAmount(stats.total_kas)"
+            <CardInfo title="Total Kas" :content="parseCurrencyAmount(stats.total_kas)"
                 :percentage="stats.total_kas_persen" />
             <CardInfo title="Total Modal Sudah Dialokasi" :content="parseCurrencyAmount(stats.modal_sudah_dialokasi)"
                 :percentage="stats.modal_sudah_dialokasi_persen" :filter="selectedFilter" />
@@ -140,7 +171,6 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                         class="h-11 w-full font-body appearance-none rounded-lg border px-4 bg-white pr-11 text-sm shadow-theme-xs focus:outline-hidden dark:bg-dark-900 text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                         <option value="all">Semua</option>
                         <option value="simpanan">Simpanan</option>
-                        <option value="pembiayaan">Pembiayaan</option>
                         <option value="angsuran">Pembayaran Angsuran</option>
                     </select>
                     <svg class="absolute z-30 right-4 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 stroke-current text-gray-500 dark:text-gray-400"
@@ -168,11 +198,16 @@ const emit = defineEmits(['update:selectedTransactionFilter', 'update:selectedSa
                         {{ formatDate(row.tanggal) }}
                     </template>
                     <template #cell-action="{ row }">
-                        <Link
-                            :href="row.produk !== 'Pembiayaan' && !row.produk.includes('Pembayaran Angsuran') ? `/admin/savings/show/${row.id}` : `/admin/pembiayaan/show/${row.id}`">
-                            <EyeIcon
-                                class="w-6 h-6 text-gray-400 hover:text-primary dark:text-gray-500 dark:hover:text-blue-400 transition-colors" />
-                        </Link>
+                        <div class="flex items-center gap-2">
+                            <button
+                                v-if="(row.type_transaksi === 'simpanan' ? props.can['verify_simpanan'] : props.can['verify_murabahah']) && row.status === 'Menunggu Verifikasi'"
+                                @click="verifyTransaction(row)"
+                                :disabled="verifyingId === row.id"
+                                class="inline-flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                            >
+                                {{ verifyingId === row.id ? 'Memproses...' : 'Verifikasi' }}
+                            </button>
+                        </div>
                     </template>
                 </BaseTable>
             </div>

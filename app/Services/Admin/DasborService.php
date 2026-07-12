@@ -104,8 +104,22 @@ class DasborService
     public function getTransaksiTerbaru($filter, $role, $tanggalAwal, $tanggalAkhir)
     {
         $amount = $role === UserRoleEnum::DPS->value ? 5 : 6;
-        $transaksiSimpanan = TransaksiSimpanan::with('akunSimpanan.anggota.user', 'updatedBy')
-            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+        $simpananQuery = TransaksiSimpanan::with('akunSimpanan.anggota.user', 'updatedBy')
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir]);
+            
+        $pembiayaanQuery = Pembiayaan::with('anggota.user', 'objekPembiayaan', 'updatedBy')
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir]);
+            
+        $angsuranQuery = PembayaranAngsuran::with('angsuran.pembiayaan.anggota.user', 'updatedBy')
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir]);
+
+        if ($role === UserRoleEnum::BENDAHARA->value) {
+            $simpananQuery->where('status', 'Menunggu Verifikasi');
+            $pembiayaanQuery->whereRaw('1 = 0');
+            $angsuranQuery->where('status', 'Menunggu Verifikasi');
+        }
+
+        $transaksiSimpanan = $simpananQuery
             ->latest()->take($amount)->get()
             ->map(fn($t) => [
                 'id' => $t->id,
@@ -115,10 +129,11 @@ class DasborService
                 'dicatat_oleh' => $t->updatedBy?->nama ?? '-', 
                 'akad' => $this->getAkadSimpanan($t->akunSimpanan?->jenis_simpanan ?? ''),
                 'tanggal' => $t->created_at->toDateString(),
+                'status' => $t->status ?? null,
+                'type_transaksi' => 'simpanan',
             ]);
 
-        $transaksiPembiayaan = Pembiayaan::with('anggota.user', 'objekPembiayaan', 'updatedBy')
-            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+        $transaksiPembiayaan = $pembiayaanQuery
             ->latest()->take($amount)->get()
             ->map(fn($f) => [
                 'id' => $f->id,
@@ -128,19 +143,22 @@ class DasborService
                 'akad' => 'Murabahah',
                 'dicatat_oleh' => $f->updatedBy?->nama ?? '-', 
                 'tanggal' => $f->created_at->toDateString(),
+                'status' => $f->status ?? null,
+                'type_transaksi' => 'pembiayaan',
             ]);
 
-        $transaksiAngsuran = PembayaranAngsuran::with('angsuran.pembiayaan.anggota.user', 'updatedBy')
-            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+        $transaksiAngsuran = $angsuranQuery
             ->latest()->take($amount)->get()
             ->map(fn($a) => [
                 'id' => $a->id,
                 'anggota' => $a->angsuran?->pembiayaan?->anggota?->user?->nama ?? '-',
                 'jumlah' => $a->jumlah_angsuran_dibayar,
-                'produk' => 'Pembiayaan - Pembayaran Angsuran',
+                'produk' => 'Pembayaran Angsuran',
                 'akad' => '-',
                 'dicatat_oleh' => $a->updatedBy?->nama ?? '-', 
                 'tanggal' => $a->created_at->toDateString(),
+                'status' => $a->status ?? null,
+                'type_transaksi' => 'angsuran',
             ]);
 
         $data = match ($filter) {
