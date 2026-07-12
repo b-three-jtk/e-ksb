@@ -95,6 +95,8 @@ class PembiayaanController extends Controller
                 'nominal_angsuran'                     => $item->nominal_angsuran,
                 'is_pelunasan_lebih_cepat'         => $item->payment?->is_pelunasan_lebih_cepat ?? false,
                 'struk_pembayaran' => $item->payment?->struk_pembayaran ? asset('storage/' . $item->payment->struk_pembayaran) : null,
+                'payment_id' => $item->payment?->id,
+                'status_verifikasi' => $item->payment?->status,
             ];
         });
 
@@ -1073,6 +1075,21 @@ class PembiayaanController extends Controller
                 'success' => 'Pembayaran berhasil diproses',
                 'pdf_url' => $fileName ? asset('storage/' . $fileName) : null,
             ]);
+    }
+
+    public function verifyPayment(Request $request, string $paymentId)
+    {
+        if (!auth()->user()->hasRole('Bendahara') && !auth()->user()->hasRole('Admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk memverifikasi pembayaran ini.');
+        }
+
+        try {
+            $this->pembayaranAngsuranService->verifyPayment($paymentId, auth()->id());
+
+            return back()->with('success', 'Pembayaran berhasil diverifikasi dan jurnal telah dibuat.');
+        } catch (\Throwable $th) {
+            return back()->withErrors(['error' => 'Gagal memverifikasi pembayaran: ' . $th->getMessage()]);
+        }
     }
 
     public function reschedulePayment(Request $request, Pembiayaan $pembiayaan)

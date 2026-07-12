@@ -76,49 +76,34 @@ class SimpananServices
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $saldoSebelum = $lockedSavingAccount->saldo;
-            if ($saldoSebelum === null) {
-                $saldoSebelum = (float) ($lockedSavingAccount->saldo ?? 0);
-            } else {
-                $saldoSebelum = (float) $saldoSebelum;
-            }
+            $saldoSebelum = (float) ($lockedSavingAccount->saldo ?? 0);
 
             if ($saldoSebelum < (float) $validated['amount']) {
                 throw new \RuntimeException('Saldo tidak cukup untuk penarikan.');
             }
 
             $transaction = TransaksiSimpanan::create([
-                'kode_transaksi_simpanan' => $this->generateWithdrawalTransactionCode($savingType),
-                'akun_simpanan_id' => $lockedSavingAccount->id,
-                'saldo_setelah_transaksi' => $saldoSebelum - $validated['amount'],
-                'nominal_simpanan' => $validated['amount'],
-                'tipe_transaksi' => TransactionTypeEnum::WITHDRAWAL->value,
+                'kode_transaksi_simpanan'    => $this->generateWithdrawalTransactionCode($savingType),
+                'akun_simpanan_id'           => $lockedSavingAccount->id,
+                'saldo_setelah_transaksi'    => $saldoSebelum,
+                'nominal_simpanan'           => $validated['amount'],
+                'tipe_transaksi'             => TransactionTypeEnum::WITHDRAWAL->value,
                 'metode_pembayaran_simpanan' => $validated['method'],
-                'tgl_transaksi' => $validated['withdrawal_date'],
-                'deskripsi_simpanan' => $validated['catatan'] ?? '',
-                'updated_by' => $userId,
+                'tgl_transaksi'              => $validated['withdrawal_date'],
+                'deskripsi_simpanan'         => $validated['catatan'] ?? '',
+                'updated_by'                 => $userId,
+                'status'                     => 'Menunggu Verifikasi',
+                'verified_by'                => null,
+                'verified_at'                => null,
             ]);
 
             if ($validated['method'] === 'Non-Tunai') {
                 RekeningAnggota::updateOrCreate(
-                    [
-                        'anggota_id' => $anggota->id,
-                        'no_rekening' => $validated['no_rekening'],
-                    ],
-                    [
-                        'nama_bank' => $validated['nama_bank'],
-                        'atas_nama' => $validated['atas_nama'],
-                    ]
+                    ['anggota_id' => $anggota->id, 'no_rekening' => $validated['no_rekening']],
+                    ['nama_bank' => $validated['nama_bank'], 'atas_nama' => $validated['atas_nama']]
                 );
-
-                $transaction->update([
-                    'no_rekening' => $validated['no_rekening'],
-                ]);
+                $transaction->update(['no_rekening' => $validated['no_rekening']]);
             }
-
-            $lockedSavingAccount->update([
-                'saldo' => $saldoSebelum - $validated['amount'],
-            ]);
 
             return [$transaction, $saldoSebelum];
         });

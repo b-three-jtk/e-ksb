@@ -42,6 +42,7 @@ const INSTALLMENT_COLUMNS = [
     { key: 'tgl_pembayaran', label: 'Tanggal Pembayaran' },
     { key: 'nominal_angsuran', label: 'Nominal' },
     { key: 'is_pelunasan_lebih_cepat', label: 'Keterangan' },
+    { key: 'status_verifikasi', label: 'Status' },
     { key: 'struk_pembayaran', label: 'Aksi' },
 ]
 
@@ -72,6 +73,23 @@ const openReceiptModal = (receiptPath) => {
         : `/storage/${receiptPath}`
 
     modalRef.value.openModal()
+}
+
+const verifyingId = ref(null)
+const verifyPayment = (paymentId) => {
+    if (verifyingId.value) return
+    verifyingId.value = paymentId
+    router.post(`/admin/pembiayaan/payments/${paymentId}/verify`, {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast('Pembayaran berhasil diverifikasi', { type: 'success', position: 'bottom-right' })
+        },
+        onError: (errors) => {
+            const msg = Object.values(errors).flat().join('\n')
+            toast(msg || 'Gagal memverifikasi', { type: 'error', position: 'bottom-right' })
+        },
+        onFinish: () => { verifyingId.value = null },
+    })
 }
 
 const batalkan = () => {
@@ -198,16 +216,39 @@ const batalkan = () => {
                                             {{ row.is_pelunasan_lebih_cepat ? 'Pelunasan Dipercepat' : 'Reguler' }}
                                         </span>
                                     </template>
+                                    <template #cell-status_verifikasi="{ row }">
+                                        <span
+                                            class="px-2.5 py-1 text-xs rounded-full font-medium whitespace-nowrap"
+                                            :class="row.status_verifikasi === 'Diverifikasi'
+                                                ? 'bg-green-50 text-green-600'
+                                                : 'bg-amber-50 text-amber-600'"
+                                        >
+                                            {{ row.status_verifikasi }}
+                                        </span>
+                                    </template>
+
                                     <template #cell-struk_pembayaran="{ row }">
-                                        <Button v-if="row.struk_pembayaran" size="small" variant="primary"
-                                            @click="openReceiptModal(row.struk_pembayaran)">
-                                            <EyeIcon width="18px" height="18px" />
-                                            Lihat Bukti
-                                        </Button>
-                                        <Button v-else size="small" variant="gray" disabled>
-                                            <EyeIcon width="18px" height="18px" />
-                                            Lihat Bukti
-                                        </Button>
+                                        <div class="flex items-center gap-2">
+                                            <Button v-if="row.struk_pembayaran" size="small" variant="primary"
+                                                @click="openReceiptModal(row.struk_pembayaran)">
+                                                <EyeIcon width="18px" height="18px" />
+                                                Lihat Bukti
+                                            </Button>
+                                            <Button v-else size="small" variant="gray" disabled>
+                                                <EyeIcon width="18px" height="18px" />
+                                                Lihat Bukti
+                                            </Button>
+
+                                            <Button
+                                                v-if="can['verify_simpanan'] && row.status_verifikasi === 'Menunggu Verifikasi'"
+                                                size="small"
+                                                variant="success"
+                                                :disabled="verifyingId === row.payment_id"
+                                                @click="verifyPayment(row.payment_id)"
+                                            >
+                                                {{ verifyingId === row.payment_id ? 'Memproses...' : 'Verifikasi' }}
+                                            </Button>
+                                        </div>
                                     </template>
 
                                 </BaseTable>

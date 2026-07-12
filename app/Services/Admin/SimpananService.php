@@ -7,6 +7,7 @@ use App\Enums\SavingTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
+use App\Enums\PositionEnum;
 use App\Models\PengaturanUmum;
 use App\Models\AkunBerjangka;
 use App\Models\AkunIbadah;
@@ -14,6 +15,7 @@ use App\Models\Anggota;
 use App\Models\AkunSimpanan;
 use App\Models\TransaksiSimpanan;
 use App\Models\RekeningAnggota;
+use App\Models\Akun;
 use App\Services\PengaturanUmumService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -28,7 +30,8 @@ use Illuminate\Validation\ValidationException;
 class SimpananService
 {
     public function __construct(
-        private PengaturanUmumService $pengaturanUmumService
+        private PengaturanUmumService $pengaturanUmumService,
+        private JurnalService $jurnalService
     ) {}
 
     // Helpers
@@ -140,6 +143,9 @@ class SimpananService
         }
 
         return $query
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->where('status', $request->input('status'));
+            })
             ->when($search, function ($q) use ($search) {
                 $q->whereHas('akunSimpanan.anggota.user', function ($m) use ($search) {
                     $m->where('nama', 'like', "%{$search}%")
@@ -194,6 +200,7 @@ class SimpananService
                                 : $trx->nominal_simpanan,
                 'produk'       => $trx->akunSimpanan->jenis_simpanan,
                 'jenis'        => $trx->tipe_transaksi,
+                'status'       => $trx->status,
             ]);
 
         $summaryBase     = $this->buildBaseQuery($request);
@@ -246,6 +253,7 @@ class SimpananService
                 'tab'      => $tab,
                 'sort_by'  => $sortBy,
                 'sort_dir' => $sortDir,
+                'status'   => $request->input('status'),
             ],
         ];
     }
@@ -452,40 +460,94 @@ class SimpananService
     {
         return DB::transaction(function () use ($data, $akunSimpanan, $anggota) {
             $akunSimpanan->refresh();
-            $newBalance = $akunSimpanan->saldo + $data['amount'];
+
             $buktiPenyetoran = null;
             if (
                 ($data['metode_pembayaran_simpanan'] ?? null) === 'Non-Tunai'
                 && isset($data['bukti_penyetoran'])
             ) {
-                $buktiPenyetoran = $data['bukti_penyetoran']->store(
-                    'bukti_penyetoran',
-                    'public'
-                );
+                $buktiPenyetoran = $data['bukti_penyetoran']->store('bukti_penyetoran', 'public');
             }
+
             $trx = TransaksiSimpanan::create([
-                'kode_transaksi_simpanan' => $this->generateTransactionCode($data['saving_category']),
-                'nominal_simpanan'              => $data['amount'],
-                'saldo_setelah_transaksi'  => $newBalance,
-                'tipe_transaksi'           => TransactionTypeEnum::DEPOSIT->value,
-                'metode_pembayaran_simpanan'      => $data['metode_pembayaran_simpanan'],
+                'kode_transaksi_simpanan'    => $this->generateTransactionCode($data['saving_category']),
+                'nominal_simpanan'           => $data['amount'],
+                'saldo_setelah_transaksi'    => $akunSimpanan->saldo,
+                'tipe_transaksi'             => TransactionTypeEnum::DEPOSIT->value,
+                'metode_pembayaran_simpanan' => $data['metode_pembayaran_simpanan'],
                 'deskripsi_simpanan'         => $data['catatan'] ?? 'Penyetoran',
-                'tgl_transaksi'           => $data['date'],
+                'tgl_transaksi'              => $data['date'],
                 'updated_by'                 => Auth::id(),
-                'akun_simpanan_id'          => $akunSimpanan->id,
-                'no_rekening' => $data['no_rekening'] ?? null,
-                'bukti_penyetoran' => $buktiPenyetoran,
+                'akun_simpanan_id'           => $akunSimpanan->id,
+                'no_rekening'                => $data['no_rekening'] ?? null,
+                'bukti_penyetoran'           => $buktiPenyetoran,
+                'status'                     => 'Menunggu Verifikasi',
+                'verified_by'                => null,
+                'verified_at'                => null,
             ]);
 
-            $akunSimpanan->update([
-                'saldo' => $akunSimpanan->saldo + $data['amount']
-            ]);
+            $isBendahara = Auth::user()->hasRole(UserRoleEnum::BENDAHARA->value) || Auth::user()->hasRole(UserRoleEnum::ADMIN->value);
+            if ($isBendahara) {
+                $this->verifyTransaction($trx->id, Auth::id());
+                $trx->refresh();
 
-            if ($data['saving_category'] === 'Simpanan Pokok') {
-                $anggota->update(['status' => MemberStatusEnum::ACTIVE->value]);
+                if ($data['saving_category'] === SavingTypeEnum::SIMPANAN_POKOK->value) {
+                    $anggota->update(['status' => MemberStatusEnum::ACTIVE->value]);
+                }
             }
 
             return $trx;
+        });
+    }
+
+    public function verifyTransaction(string $id, string $verifiedById): TransaksiSimpanan
+    {
+        return DB::transaction(function () use ($id, $verifiedById) {
+            $trx = TransaksiSimpanan::with('akunSimpanan.anggota')
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            if ($trx->status === 'Diverifikasi') {
+                throw ValidationException::withMessages([
+                    'status' => 'Transaksi ini sudah diverifikasi sebelumnya.',
+                ]);
+            }
+            if ($trx->status === 'Ditolak') {
+                throw ValidationException::withMessages([
+                    'status' => 'Transaksi yang sudah ditolak tidak bisa diverifikasi.',
+                ]);
+            }
+
+            $akunSimpanan = $trx->akunSimpanan;
+
+            $newBalance = $trx->tipe_transaksi === TransactionTypeEnum::WITHDRAWAL->value
+                ? $akunSimpanan->saldo - $trx->nominal_simpanan
+                : $akunSimpanan->saldo + $trx->nominal_simpanan;
+
+            if ($newBalance < 0) {
+                throw ValidationException::withMessages([
+                    'status' => 'Saldo tidak mencukupi untuk memverifikasi penarikan ini.',
+                ]);
+            }
+
+            $trx->update([
+                'status'                  => 'Diverifikasi',
+                'verified_by'             => $verifiedById,
+                'verified_at'             => now(),
+                'saldo_setelah_transaksi' => $newBalance,
+            ]);
+
+            $akunSimpanan->update(['saldo' => $newBalance]);
+
+            if (
+                $trx->tipe_transaksi === TransactionTypeEnum::DEPOSIT->value
+                && $akunSimpanan->jenis_simpanan === SavingTypeEnum::SIMPANAN_POKOK->value
+                && $akunSimpanan->anggota
+            ) {
+                $akunSimpanan->anggota->update(['status' => MemberStatusEnum::ACTIVE->value]);
+            }
+
+            return $trx->fresh();
         });
     }
 

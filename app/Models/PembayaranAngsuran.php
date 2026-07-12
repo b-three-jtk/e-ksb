@@ -27,10 +27,14 @@ class PembayaranAngsuran extends Model
         'no_rekening',
         'angsuran_id',
         'updated_by',
+        'status',
+        'verified_by',
+        'verified_at',
     ];
 
     protected $casts = [
         'tgl_pembayaran' => 'datetime',
+        'verified_at' => 'datetime',
     ];
 
     public function angsuran()

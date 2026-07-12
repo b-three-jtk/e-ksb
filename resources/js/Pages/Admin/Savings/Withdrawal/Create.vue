@@ -76,7 +76,7 @@ const isFormValid = computed(() => {
 })
 
 const confirmationData = computed(() => ({
-  memberName: selectedMember.value?.name || '',
+  memberName: selectedMember.value?.nama || '',
   memberNumber: selectedMember.value?.kode_pengguna || '',
   savingType: selectedSaving.value?.type || '',
   method: currentFormData.value.method || 'Tunai',
