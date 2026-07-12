@@ -103,7 +103,6 @@ class PeranAksesService
             'create' => 'Buat',
             'edit' => 'Ubah',
             'approve' => 'Setujui',
-            'payment' => 'Bayar',
             'verify' => 'Verifikasi',
             default => ucfirst($action),
         };
