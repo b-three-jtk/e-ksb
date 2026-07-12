@@ -11,6 +11,7 @@ use App\Enums\KeuanganAnggotaCostEnum;
 use App\Enums\KeuanganAnggotaIncomeEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\PositionEnum;
+use App\Enums\UserRoleEnum;
 use App\Models\AhliWaris;
 use App\Models\Anggota;
 use App\Models\Angsuran;
@@ -52,6 +53,11 @@ class PembiayaanService
                             ->orWhere('kode_pengguna', 'like', "%{$search}%");
                     });
                 });
+        })
+        ->when(auth()->user()->hasRole(UserRoleEnum::PJANGGOTA->value), function ($q) {
+            $q->whereHas('anggota', function ($query) {
+                $query->where('pj_anggota_id', auth()->id());
+            });
         })
         ->when($tab === 'request', function ($q) use ($verifikator) {
                 if (in_array($verifikator->getRoleNames()->first(), ['Ketua Murabahah'])) {
