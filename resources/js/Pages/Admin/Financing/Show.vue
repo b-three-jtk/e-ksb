@@ -81,8 +81,10 @@ const verifyPayment = (paymentId) => {
     verifyingId.value = paymentId
     router.post(`/admin/pembiayaan/payments/${paymentId}/verify`, {}, {
         preserveScroll: true,
-        onSuccess: () => {
-            toast('Pembayaran berhasil diverifikasi', { type: 'success', position: 'bottom-right' })
+        onSuccess: (page) => {
+            if (page.props.flash?.success) {
+                toast(page.props.flash.success, { type: 'success', position: 'bottom-right' })
+            }
         },
         onError: (errors) => {
             const msg = Object.values(errors).flat().join('\n')

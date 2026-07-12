@@ -1,6 +1,7 @@
 <script setup>
 import { Link, usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/Admin/Layout.vue'
+import { toast } from 'vue3-toastify'
 import { Icon } from '@iconify/vue'
 import { ref, computed, reactive, watch } from 'vue'
 import PageBreadcrumb from '@/Components/PageBreadcrumb.vue'
@@ -156,6 +157,13 @@ const verifyDeposit = (id) => {
     verifyingId.value = id
     router.post(`/admin/savings/${id}/verify`, {}, {
         preserveScroll: true,
+        onSuccess: () => {
+            toast('Transaksi berhasil diverifikasi', { type: 'success', position: 'bottom-right' })
+        },
+        onError: (errors) => {
+            const msg = Object.values(errors).flat().join('\n')
+            toast(msg || 'Gagal memverifikasi transaksi', { type: 'error', position: 'bottom-right' })
+        },
         onFinish: () => { verifyingId.value = null },
     })
 }
