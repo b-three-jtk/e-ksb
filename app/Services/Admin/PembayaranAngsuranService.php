@@ -505,15 +505,11 @@ class PembayaranAngsuranService
 
     public function rescheduleInstallments(Pembiayaan $pembiayaan, string $installmentId, string $newDueDate): void
     {
-        $currentInstallment = Angsuran::findOrFail($installmentId);
-        $newDate            = Carbon::parse($newDueDate);
+        $installment = Angsuran::where('pembiayaan_id', $pembiayaan->id)
+            ->findOrFail($installmentId);
 
-        Angsuran::where('pembiayaan_id', $pembiayaan->id)
-            ->where('angsuran_ke', '>=', $currentInstallment->angsuran_ke)
-            ->orderBy('angsuran_ke')
-            ->get()
-            ->each(function ($item, $index) use ($newDate) {
-                $item->update(['tgl_jatuh_tempo' => $newDate->copy()->addMonths($index)]);
-            });
+        $installment->update([
+            'tgl_jatuh_tempo' => Carbon::parse($newDueDate),
+        ]);
     }
 }

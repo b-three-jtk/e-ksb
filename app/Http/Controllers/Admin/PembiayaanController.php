@@ -25,6 +25,7 @@ use App\Models\Pemasok;
 use App\Models\Pembiayaan;
 use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
+use App\Models\Angsuran;
 use App\Models\VerifikasiPembiayaan;
 use App\Services\Admin\JurnalService;
 use App\Services\Admin\PembayaranAngsuranService;
@@ -1095,31 +1096,30 @@ class PembiayaanController extends Controller
     public function reschedulePayment(Request $request, Pembiayaan $pembiayaan)
     {
         $tanggalAkhirPeriode = \App\Models\PengaturanUmum::where('key', 'tanggal_akhir_periode')->value('value');
+
         $validated = $request->validate([
-            'angsuran_id' => 'required|exists:angsuran,id',
-            'tgl_jatuh_tempo'       => ['required', 'date', 'after_or_equal:today', 'before_or_equal:' . $tanggalAkhirPeriode],
+            'angsuran_id'     => 'required|exists:angsuran,id',
+            'tgl_jatuh_tempo' => ['required', 'date', 'after_or_equal:today', 'before_or_equal:' . $tanggalAkhirPeriode],
         ], [
             'tgl_jatuh_tempo.before_or_equal' => 'Jadwal angsuran tidak boleh melebihi tanggal akhir periode (' . $tanggalAkhirPeriode . ').'
         ]);
 
-        $currentInstallment = \App\Models\Angsuran::findOrFail($validated['angsuran_id']);
-        $remainingInstallmentsCount = \App\Models\Angsuran::where('pembiayaan_id', $pembiayaan->id)
-            ->where('angsuran_ke', '>=', $currentInstallment->angsuran_ke)
-            ->count();
+        $installment = \App\Models\Angsuran::where('pembiayaan_id', $pembiayaan->id)
+            ->findOrFail($validated['angsuran_id']);
 
-        if ($remainingInstallmentsCount > 1) {
-            $lastInstallmentDate = \Carbon\Carbon::parse($validated['tgl_jatuh_tempo'])->addMonths($remainingInstallmentsCount - 1);
-            $endDate = \Carbon\Carbon::parse($tanggalAkhirPeriode);
+        $originalDate = \Carbon\Carbon::parse($installment->tgl_jatuh_tempo);
+        $newDate      = \Carbon\Carbon::parse($validated['tgl_jatuh_tempo']);
 
-            if ($lastInstallmentDate->gt($endDate)) {
-                return back()->withErrors(['tgl_jatuh_tempo' => 'Reschedule ditolak karena jadwal angsuran terakhir (' . $lastInstallmentDate->format('Y-m-d') . ') akan melebihi tanggal akhir periode pengaturan umum (' . $tanggalAkhirPeriode . ').']);
-            }
+        if (!$newDate->isSameMonth($originalDate) || !$newDate->isSameYear($originalDate)) {
+            return back()->withErrors([
+                'tgl_jatuh_tempo' => 'Reschedule hanya diperbolehkan pada bulan yang sama dengan jatuh tempo saat ini (' . $originalDate->translatedFormat('F Y') . ').'
+            ]);
         }
 
         try {
             $this->pembayaranAngsuranService->rescheduleInstallments(
                 $pembiayaan,
-                $validated['angsuran_id'],
+                $installment->id,
                 $validated['tgl_jatuh_tempo']
             );
 
