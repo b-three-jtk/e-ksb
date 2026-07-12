@@ -7,6 +7,7 @@ use App\Models\PembayaranAngsuran;
 use App\Models\Anggota;
 use App\Models\Poin;
 use App\Models\TransaksiSimpanan;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,7 +17,7 @@ use Spatie\Permission\Traits\HasRoles;
 class Pengguna extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasUuids, HasRoles;
+    use HasFactory, Notifiable, HasUuids, HasRoles, Auditable;
 
     /**
      * The attributes that are mass assignable.

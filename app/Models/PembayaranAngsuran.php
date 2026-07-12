@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Pengguna;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PembayaranAngsuran extends Model
 {
-    use HasUuids, HasFactory;
+    use HasUuids, HasFactory, Auditable;
     protected $keyType = 'string';
     public $incrementing = false;
     protected $table = 'pembayaran_angsuran';

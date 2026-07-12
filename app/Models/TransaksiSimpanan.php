@@ -6,6 +6,7 @@ use App\Models\RekeningAnggota;
 use App\Models\Poin;
 use App\Models\AkunSimpanan;
 use App\Models\Pengguna;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class TransaksiSimpanan extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, Auditable;
 
     protected $keyType = 'string';
     public $incrementing = false;

@@ -7,13 +7,14 @@ use App\Models\ObjekPembiayaan;
 use App\Models\Angsuran;
 use App\Models\Anggota;
 use App\Models\Pengguna;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Pembiayaan extends Model
 {
-    use HasUuids, HasFactory;
+    use HasUuids, HasFactory, Auditable;
 
     protected $keyType = 'string';
     protected $table = 'pembiayaan';
