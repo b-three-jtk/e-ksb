@@ -27,6 +27,7 @@ class UpdateAdminRequest extends FormRequest
             'email' => 'nullable|email|max:255|unique:pengguna,email,' . $this->route('id'),
             'no_telp' => 'required|string|max:20',
             'role_id' => 'nullable|exists:roles,id',
+            'password' => 'nullable|string|min:8|confirmed',
         ];
     }
 }

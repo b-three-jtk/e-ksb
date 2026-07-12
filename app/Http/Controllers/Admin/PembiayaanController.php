@@ -103,13 +103,13 @@ class PembiayaanController extends Controller
         return inertia('Admin/Financing/Show', ['data' => $data]);
     }
 
-    public function downloadWakalahAgreement(string $id)
+    public function downloadWakalahAgreement(Request $request, string $id)
     {
         $pembiayaan = Pembiayaan::with(['anggota.user', 'objekPembiayaan', 'wakalah'])->findOrFail($id);
 
-        if (!$pembiayaan->tgl_akad) {
-            $pembiayaan->tgl_akad = now();
-        }
+        $wakalahDate = $request->query('date') ?: ($pembiayaan->wakalah?->tgl_akad ?: now());
+        // Override tgl_akad for the view
+        $pembiayaan->tgl_akad = Carbon::parse($wakalahDate);
 
         $logoPath = public_path('images/logo/logo-icon.svg');
         $src = '';
@@ -237,6 +237,7 @@ class PembiayaanController extends Controller
                     'tenor' => $pembiayaan->tenor,
                     'harga_perkiraan' => $pembiayaan->harga_perkiraan,
                     'tangguh_tgl_pembayaran' => $pembiayaan->tangguh_tgl_pembayaran,
+                    'is_wakalah' => $pembiayaan->wakalah !== null,
                 ],
                 'jaminan' => [
                     'jenis_jaminan' => $pembiayaan->jaminan?->jenis_jaminan,
@@ -263,7 +264,7 @@ class PembiayaanController extends Controller
                 'pemasok' => $pembiayaan->objekPembiayaan->pemasok ? [
                     'nama_pemasok' => $pembiayaan->objekPembiayaan->pemasok->nama_pemasok,
                     'alamat_pemasok' => $pembiayaan->objekPembiayaan->pemasok->alamat_pemasok,
-                    'contact' => $pembiayaan->objekPembiayaan->pemasok->contact,
+                    'kontak_pemasok' => $pembiayaan->objekPembiayaan->pemasok->kontak_pemasok,
                 ] : null,
             ],
         ]);
@@ -301,6 +302,8 @@ class PembiayaanController extends Controller
                     'tenor' => $pembiayaan->tenor,
                     'harga_perkiraan' => $pembiayaan->harga_perkiraan,
                     'tangguh_tgl_pembayaran' => $pembiayaan->tangguh_tgl_pembayaran,
+                    'akad_wakalah_date' => $pembiayaan->wakalah?->tgl_akad,
+                    'is_wakalah' => $pembiayaan->wakalah !== null,
                 ],
                 'jaminan' => [
                     'jenis_jaminan' => $pembiayaan->jaminan?->jenis_jaminan,
@@ -316,7 +319,7 @@ class PembiayaanController extends Controller
                 'pemasok' => $pembiayaan->objekPembiayaan->pemasok ? [
                     'nama_pemasok' => $pembiayaan->objekPembiayaan->pemasok->nama_pemasok,
                     'alamat_pemasok' => $pembiayaan->objekPembiayaan->pemasok->alamat_pemasok,
-                    'contact' => $pembiayaan->objekPembiayaan->pemasok->contact,
+                    'kontak_pemasok' => $pembiayaan->objekPembiayaan->pemasok->kontak_pemasok,
                 ] : null,
             ],
         ]);
@@ -877,11 +880,11 @@ class PembiayaanController extends Controller
             ->get()
             ->map(function (Anggota $anggota) {
                 $hasActiveFinancing = $anggota->pembiayaan?->whereIn('status', [
-                FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+                    FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
                     FinancingReqStatusEnum::TANGGUH->value,
                 ])->isNotEmpty();
 
-                $anggota->is_have_no_obligation = $hasActiveFinancing;
+                $anggota->is_have_no_obligation = !$hasActiveFinancing;
 
                 $hasEligibleSaving = AkunSimpanan::where('anggota_id', $anggota->id)
                     ->where('jenis_simpanan', SavingTypeEnum::TABUNGAN_ANGGOTA->value)

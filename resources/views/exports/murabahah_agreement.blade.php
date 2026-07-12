@@ -192,7 +192,7 @@
             PASAL 5<br>
             JATUH TEMPO PEMBIAYAAN
         </div>
-        <p>Fasilitas pembiayaan Murabahah yang dimaksud dalam Akad ini berlangsung untuk jangka waktu {{ $tenor }} {{ $pembiayaan->satuan_tenor ?? 'bulan' }} terhitung sejak tanggal Akad ini ditandatangani serta berakhir pada tanggal {{ \Carbon\Carbon::parse($pembiayaan->tgl_lunas)->translatedFormat('d F Y') }}. Berakhirnya jatuh tempo Pembiayaan tidak dengan sendirinya menyebabkan Hutang lunas sepanjang masih terdapat sisa Hutang <strong>PENERIMA PEMBIAYAAN</strong>.</p>
+        <p>Fasilitas pembiayaan Murabahah yang dimaksud dalam Akad ini berlangsung untuk jangka waktu {{ $tenor }} {{ $satuanTenor }} terhitung sejak tanggal Akad ini ditandatangani serta berakhir pada tanggal {{ \Carbon\Carbon::parse($pembiayaan->tgl_lunas)->translatedFormat('d F Y') }}. Berakhirnya jatuh tempo Pembiayaan tidak dengan sendirinya menyebabkan Hutang lunas sepanjang masih terdapat sisa Hutang <strong>PENERIMA PEMBIAYAAN</strong>.</p>
         
         <br><br>
         <table class="signatures" style="width: 100%; border-collapse: collapse; margin-top: 40px; page-break-inside: avoid;">

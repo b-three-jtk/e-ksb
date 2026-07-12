@@ -46,6 +46,7 @@ class UpdateMemberRequest extends FormRequest
             'ahli_waris.*.nama_ahli_waris' => 'required|string|max:255',
             'ahli_waris.*.hubungan' => 'required|string',
             'ahli_waris.*.kontak_ahli_waris' => 'required|string|max:20',
+            'password' => 'nullable|string|min:8|confirmed',
         ];
     }
 }

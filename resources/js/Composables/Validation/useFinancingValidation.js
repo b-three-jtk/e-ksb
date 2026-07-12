@@ -6,8 +6,9 @@ const stepLabels = {
     1: 'Identitas Pribadi',
     2: 'Data Keuangan',
     3: 'Objek Pembiayaan',
-    4: 'Data Pengadaan',
-    5: 'Finalisasi',
+    4: 'Data Wakalah',
+    5: 'Data Pengadaan',
+    6: 'Finalisasi',
 }
 
 export function useFinancingValidation(form) {
@@ -145,6 +146,24 @@ export function useFinancingValidation(form) {
 
     const validateStep4 = () => {
         const errs = {}
+        
+        if (form.is_wakalah) {
+            if (!form.akad_wakalah_file && !form.documents?.akad_wakalah)
+                errs.akad_wakalah_file = 'Dokumen akad wakalah wajib diunggah.'
+            else if (form.akad_wakalah_file && !['application/pdf'].includes(form.akad_wakalah_file.type))
+                errs.akad_wakalah_file = 'Format dokumen akad wakalah harus PDF.'
+            else if (form.akad_wakalah_file && form.akad_wakalah_file.size > 2 * 1024 * 1024)
+                errs.akad_wakalah_file = 'Ukuran dokumen akad wakalah maksimal 2 MB.'
+
+            if (!form.pembiayaan.akad_wakalah_date || form.pembiayaan.akad_wakalah_date === '')
+                errs.akad_wakalah_date = 'Tanggal akad wakalah wajib diisi.'
+        }
+
+        return errs
+    }
+
+    const validateStep5 = () => {
+        const errs = {}
 
         if (!form.pembiayaan.pemasok_id)
             errs.nama_pemasok = 'Pemasok wajib diisi.'
@@ -162,22 +181,10 @@ export function useFinancingValidation(form) {
         else if (form.purchase_receipt_file && form.purchase_receipt_file.size > 2 * 1024 * 1024)
             errs.purchase_receipt_file = 'Ukuran nota pembelian maksimal 2 MB.'
 
-        if (form.is_wakalah) {
-            if (!form.akad_wakalah_file && !form.documents?.akad_wakalah)
-                errs.akad_wakalah_file = 'Dokumen akad wakalah wajib diunggah.'
-            else if (form.akad_wakalah_file && !['application/pdf'].includes(form.akad_wakalah_file.type))
-                errs.akad_wakalah_file = 'Format dokumen akad wakalah harus PDF.'
-            else if (form.akad_wakalah_file && form.akad_wakalah_file.size > 2 * 1024 * 1024)
-                errs.akad_wakalah_file = 'Ukuran dokumen akad wakalah maksimal 2 MB.'
-
-            if (!form.pembiayaan.akad_wakalah_date || form.pembiayaan.akad_wakalah_date === '')
-                errs.akad_wakalah_date = 'Tanggal akad wakalah wajib diisi.'
-        }
-
         return errs
     }
 
-    const validateStep5 = () => {
+    const validateStep6 = () => {
         const errs = {}
 
         if (form.pembiayaan.status !== 'Disetujui')
@@ -208,6 +215,7 @@ export function useFinancingValidation(form) {
         3: validateStep3,
         4: validateStep4,
         5: validateStep5,
+        6: validateStep6,
     }
 
     /**
@@ -281,8 +289,9 @@ function getAllKeysForStep(step) {
             'lama_bekerja', 'no_telp_kantor', 'alamat_tempat_bekerja',
             'income_slip_file', 'bank_book_file'],
         3: ['financing_name', 'jenis_jaminan'],
-        4: ['nama_pemasok', 'harga_perolehan', 'purchase_receipt_file'],
-        5: ['status', 'tgl_akad', 'akad_document_file', 'metode_pembayaran'],
+        4: ['akad_wakalah_file', 'akad_wakalah_date'],
+        5: ['nama_pemasok', 'harga_perolehan', 'purchase_receipt_file'],
+        6: ['status', 'tgl_akad', 'akad_document_file', 'metode_pembayaran'],
     }
     return map[step] ?? []
 }

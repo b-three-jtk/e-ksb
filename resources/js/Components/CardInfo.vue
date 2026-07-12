@@ -41,7 +41,6 @@ const filterText = computed(() => {
                 <p class="text-gray-text dark:text-gray-400">{{ title }}</p>
                 <Tooltip v-if="deskripsi">
                     <p class="font-semibold">Informasi {{ title }}</p>
-                    <p>Nilai ini menunjukkan {{ title.toLowerCase() }} untuk periode yang dipilih.</p>
                     <p>{{ deskripsi }}.</p>
                 </Tooltip>
             </div>

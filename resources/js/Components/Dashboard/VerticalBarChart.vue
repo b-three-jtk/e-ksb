@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
+import moneyParser from '@/Composables/moneyParser.js'
 
 const props = defineProps({
     title: {
@@ -12,6 +13,10 @@ const props = defineProps({
     filter: {
         type: String,
     },
+    height: {
+        type: [String, Number],
+        default: 300,
+    }
 })
 
 const series = ref([
@@ -54,25 +59,32 @@ const chartOptions = ref({
         axisTicks: {
             show: false,
         },
+        labels: {
+            style: {
+                fontSize: '14px',
+            },
+        },
     },
     legend: {
         show: true,
         position: 'top',
         horizontalAlign: 'left',
         fontFamily: 'Manrope',
+        fontSize: '14px',
         markers: {
             radius: 99,
         },
     },
     yaxis: {
-        title: false,
-    labels: {
-        formatter: function (value) {
-            return 'Rp' + new Intl.NumberFormat('id-ID', {
-                maximumFractionDigits: 0
-            }).format(value);
+        labels: {
+            style: {
+                fontSize: '14px',
+            },
+            formatter: function (value) {
+                if (value === undefined || value === null) return '';
+                return moneyParser(value);
+            }
         }
-    }
     },
     grid: {
         yaxis: {
@@ -85,14 +97,16 @@ const chartOptions = ref({
         opacity: 1,
     },
     tooltip: {
+        style: {
+            fontSize: '16px',
+        },
         x: {
             show: false,
         },
         y: {
             formatter: function (value) {
-                return 'Rp' + new Intl.NumberFormat('id-ID', {
-                    maximumFractionDigits: 0
-                }).format(value);
+                if (value === undefined || value === null) return '';
+                return moneyParser(value);
             }
         },
     },
@@ -101,13 +115,13 @@ const chartOptions = ref({
 const updateChart = () => {
     if (!props.data || Object.keys(props.data).length === 0) return
     const categories = Object.keys(props.data)
-    const values = Object.values(props.data)
+    const values = Object.values(props.data).map(v => Number(v))
 
     chartOptions.value = {
         ...chartOptions.value,
         xaxis: { ...chartOptions.value.xaxis, categories }
     }
-    series.value = [{ name: 'Keuntungan', data: [...values] }]
+    series.value = [{ name: 'Keuntungan', data: values }]
 }
 
 watch(() => props.filter, updateChart, { immediate: true })
@@ -118,7 +132,7 @@ watch(() => props.data, updateChart, { deep: true })
     <div class="w-full">
         <div class="max-w-full overflow-x-auto custom-scrollbar">
             <div id="chartOne" class="-ml-5 min-w-162.5 xl:min-w-full pl-2">
-                <VueApexCharts type="bar" height="380" :key="filter" :options="chartOptions" :series="series" />
+                <VueApexCharts type="bar" :height="height" :key="filter" :options="chartOptions" :series="series" />
             </div>
         </div>
     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\DasborService;
@@ -17,18 +18,34 @@ class DasborController extends Controller
         $role = auth()->user()->getRoleNames()->first();
 
         $data = [];
-        $tanggalAwal = now()->startOfMonth()->startOfDay();
-        $tanggalAkhir = now()->endOfMonth()->endOfDay();
-
         $filterBy = $req->filter_by ?? 'month';
 
-        [$tanggalAwalSebelumnya, $tanggalAkhirSebelumnya] = $service->getPeriodeSebelumnya($tanggalAwal, $filterBy);
+        if ($req->start_date && $req->end_date) {
+            $tanggalAwal = Carbon::parse($req->start_date)->startOfDay();
+            $tanggalAkhir = Carbon::parse($req->end_date)->endOfDay();
+            $filterBy = 'custom';
+        } else {
+            if ($filterBy === 'day') {
+                $tanggalAwal = now()->startOfDay();
+                $tanggalAkhir = now()->endOfDay();
+            } else if ($filterBy === 'year') {
+                $tanggalAwal = now()->startOfYear()->startOfDay();
+                $tanggalAkhir = now()->endOfYear()->endOfDay();
+            } else {
+                $tanggalAwal = now()->startOfMonth()->startOfDay();
+                $tanggalAkhir = now()->endOfMonth()->endOfDay();
+            }
+        }
+
+        [$tanggalAwalSebelumnya, $tanggalAkhirSebelumnya] = $service->getPeriodeSebelumnya($tanggalAwal, $filterBy, $tanggalAkhir);
 
         [$data['total_kas'], $data['total_kas_persen']] = $service->getTotalKas($tanggalAkhir, $tanggalAkhirSebelumnya);
 
         [$data['total_anggota_aktif'], $data['total_anggota_aktif_persen']] = $service->getTotalAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, UserStatusEnum::ACTIVE->value);
 
         [$data['total_anggota_non_aktif'], $data['total_anggota_non_aktif_persen']] = $service->getTotalAnggota($tanggalAkhir, $tanggalAkhirSebelumnya, UserStatusEnum::INACTIVE->value);
+
+        [$data['total_anggota_belum_dialokasi'], $data['total_anggota_belum_dialokasi_persen']] = $service->getTotalAnggotaBelumDialokasi($tanggalAkhir, $tanggalAkhirSebelumnya);
 
         [$data['total_pengurus'], $data['total_pengurus_persen']] = $service->getTotalPengurus($tanggalAkhir, $tanggalAkhirSebelumnya);
 
@@ -60,8 +77,8 @@ class DasborController extends Controller
                 'total_kas_persen' => $data['total_kas_persen'],
                 'total_anggota_aktif' => $data['total_anggota_aktif'],
                 'total_anggota_aktif_persen' => $data['total_anggota_aktif_persen'],
-                'total_anggota_non_aktif' => $data['total_anggota_non_aktif'],
-                'total_anggota_non_aktif_persen' => $data['total_anggota_non_aktif_persen'],
+                'total_anggota_belum_dialokasi' => $data['total_anggota_belum_dialokasi'],
+                'total_anggota_belum_dialokasi_persen' => $data['total_anggota_belum_dialokasi_persen'],
                 'total_pengurus' => $data['total_pengurus'],
                 'total_pengurus_persen' => $data['total_pengurus_persen'],
                 'total_simpanan_masuk' => $data['total_simpanan_masuk'],
@@ -81,15 +98,17 @@ class DasborController extends Controller
                 'total_simpanan_anggota_keluar' => $data['total_simpanan_anggota_keluar'],
                 'total_simpanan_anggota_keluar_persen' => $data['total_simpanan_anggota_keluar_persen'],
             ],
-                'pertumbuhan_pendapatan' => Inertia::lazy(fn() => $service->getPendapatanPerPeriode($req->start_date, $req->end_date, $filterBy)),
+                'pertumbuhan_pendapatan' => Inertia::lazy(fn() => $service->getPendapatanPerPeriode($tanggalAwal, $tanggalAkhir, $filterBy)),
                 'pertumbuhan_anggota' => Inertia::lazy(fn() => $service->getTotalAnggotaPerPeriode($tanggalAwal, $tanggalAkhir, $filterBy)),
                 'peta_simpanan' => Inertia::lazy(fn() => $service->getPetaSimpanan($tanggalAkhir, $req->savings_filter ?? 'jenis')),
                 'peta_pembiayaan' => Inertia::lazy(fn() => $service->getPetaPembiayaan($tanggalAkhir)),
-                'transaksi_terbaru' => Inertia::lazy(fn() => $service->getTransaksiTerbaru($req->transaction_filter ?? 'all', $role)),
+                'transaksi_terbaru' => Inertia::lazy(fn() => $service->getTransaksiTerbaru($req->transaction_filter ?? 'all', $role, $tanggalAwal, $tanggalAkhir)),
                 'jatuh_tempo_terdekat' => Inertia::lazy(fn() => $service->getJatuhTempoTerdekat($req->nearest_filter ?? 'all')),
                 'permohonan_murabahah' => Inertia::lazy(fn() => $service->getPermohonanMurabahahTerbaru($tanggalAwal, $tanggalAkhir)),
                 'pembayaran_terlambat' => Inertia::lazy(fn() => $service->getPembayaranTerlambat($tanggalAkhir)),
                 'transaksi_simpanan_terbaru' => Inertia::lazy(fn() => $service->getTransaksiSimpananTerbaru($tanggalAkhir, $req->saving_transaction_filter ?? 'all')),
+                'anggota_bermasalah_pj' => Inertia::lazy(fn() => $role === UserRoleEnum::PJANGGOTA->value ? $service->getAnggotaBermasalahPJ() : []),
+                'log_aktivitas' => Inertia::lazy(fn() => $role === UserRoleEnum::ADMIN->value ? $service->getLogAktivitasSistem() : []),
         ]);
     }
 }

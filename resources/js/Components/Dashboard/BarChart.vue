@@ -7,6 +7,7 @@ const props = defineProps({
     title: String,
     data: Object,
     filter: String,
+    height: Number,
 })
 
 const series = ref([
@@ -16,13 +17,13 @@ const series = ref([
     },
 ])
 
-const chartHeight = 300
+const chartHeight = computed(() => props.height)
 const categories = computed(() => props.data ? Object.keys(props.data) : [])
 const values = computed(() => props.data ? Object.values(props.data) : [])
 
 const rowHeight = computed(() => {
     if (!categories.value.length) return 0
-    let calculatedHeight = categories.value.length === 3 ? (chartHeight - 150) / categories.value.length : (chartHeight - 240) / categories.value.length
+    let calculatedHeight = categories.value.length === 3 ? (chartHeight.value - 150) / categories.value.length : (chartHeight.value - 240) / categories.value.length
     return calculatedHeight
 })
 
@@ -49,6 +50,9 @@ const chartOptions = ref({
         axisBorder: { show: false },
         axisTicks: { show: false },
         labels: {
+            style: {
+                fontSize: '14px',
+            },
             formatter: function (val) {
                 if (val >= 1000000) return (val / 1000000).toFixed(0) + ' Jt';
                 return val;
@@ -58,10 +62,20 @@ const chartOptions = ref({
     legend: {
         show: false,
     },
-    yaxis: { title: false },
+    yaxis: {
+        title: false,
+        labels: {
+            style: {
+                fontSize: '14px',
+            }
+        }
+    },
     grid: { yaxis: { lines: { show: true } } },
     fill: { opacity: 1 },
     tooltip: {
+        style: {
+            fontSize: '16px',
+        },
         y: {
             formatter: function (val) {
                 return 'Rp ' + new Intl.NumberFormat('id-ID').format(val)
@@ -80,7 +94,7 @@ const updateChart = () => {
 
     const sourceData = props.data;
     const categories = Object.keys(sourceData);
-    const values = Object.values(sourceData);
+    const values = Object.values(sourceData).map(v => Number(v));
 
     chartOptions.value = {
         ...chartOptions.value,
@@ -99,29 +113,18 @@ watch(() => props.data, updateChart, { deep: true })
         <div class="flex-1 min-w-0">
             <div class="max-w-full overflow-x-auto custom-scrollbar">
                 <div id="chartOne" class="-ml-5 min-w-162.5 xl:min-w-full pl-2">
-                    <VueApexCharts
-                        type="bar"
-                        :height="chartHeight"
-                        :key="filter"
-                        :options="chartOptions"
-                        :series="series"
-                    />
+                    <VueApexCharts type="bar" :height="chartHeight" :key="filter" :options="chartOptions"
+                        :series="series" />
                 </div>
             </div>
         </div>
 
         <div class="shrink-0 flex flex-col">
-            <p class="text-gray-400 text-xs font-semibold tracking-wide mb-2">JUMLAH</p>
-            <div
-                class="flex flex-col mt-3.5"
-                :style="{ gap: rowHeight + 'px' }"
-            >
-                <div
-                    v-for="(value, name) in data"
-                    :key="name"
-                    class="bg-gray-100 text-sm px-3 py-4 rounded-lg text-gray-700 whitespace-nowrap flex items-center"
-                    :style="{ height: rowHeight * 0.5 + 'px' }"
-                >
+            <p class="text-gray-400 text-sm font-semibold tracking-wide mb-2">JUMLAH</p>
+            <div class="flex flex-col mt-3.5" :style="{ gap: rowHeight + 'px' }">
+                <div v-for="(value, name) in data" :key="name"
+                    class="bg-gray-100 text-lg px-3 py-4 rounded-lg text-gray-700 whitespace-nowrap flex items-center"
+                    :style="{ height: rowHeight * 0.5 + 'px' }">
                     {{ parseCurrencyAmount(value) }}
                     <span class="text-gray-500 font-medium ml-1">
                         ({{ totalSimpanan > 0 ? ((value / totalSimpanan) * 100).toFixed(1).replace('.', ',') : 0 }}%)

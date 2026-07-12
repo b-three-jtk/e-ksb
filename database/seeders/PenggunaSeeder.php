@@ -19,9 +19,9 @@ class PenggunaSeeder extends Seeder
     {
         // DEFAULT USERS
         $adminSistem = Pengguna::create([
-            'kode_pengguna' => 'KSB2605000',
+            'kode_pengguna' => 'KSB2607000',
             'nik' => '0000000000',
-            'nama' => 'Administrator Sistem',
+            'nama' => 'Asep Suhendar',
             'email' => 'admin@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
@@ -30,9 +30,9 @@ class PenggunaSeeder extends Seeder
         $adminSistem->assignRole(UserRoleEnum::ADMIN->value);
 
         $dps = Pengguna::create([
-            'kode_pengguna' => 'KSB2605001',
+            'kode_pengguna' => 'KSB2607001',
             'nik' => '0000000099',
-            'nama' => 'DPS',
+            'nama' => 'Ust. Ahmad Fauzi',
             'email' => 'dps@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
@@ -41,9 +41,9 @@ class PenggunaSeeder extends Seeder
         $dps->assignRole(UserRoleEnum::DPS->value);
 
         $pengawas = Pengguna::create([
-            'kode_pengguna' => 'KSB2605002',
+            'kode_pengguna' => 'KSB2607002',
             'nik' => '0000000000000001',
-            'nama' => 'Pengawas',
+            'nama' => 'Heri Hermawan',
             'email' => 'pengawas@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
@@ -52,9 +52,9 @@ class PenggunaSeeder extends Seeder
         $pengawas->assignRole(UserRoleEnum::PENGAWAS->value);
 
         $ketua = Pengguna::create([
-            'kode_pengguna' => 'KSB2605003',
+            'kode_pengguna' => 'KSB2607003',
             'nik' => '1234567890123456',
-            'nama' => 'Ketua',
+            'nama' => 'Suwita',
             'email' => 'ketua@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
@@ -63,10 +63,10 @@ class PenggunaSeeder extends Seeder
         $ketua->assignRole(UserRoleEnum::KETUA->value);
 
         $anggota = Pengguna::create([
-            'kode_pengguna' => 'KSB2605004',
+            'kode_pengguna' => 'KSB2607004',
             'nik' => '6543210987654321',
-            'nama' => 'Anggota',
-            'email' => 'raizelmaid@gmail.com',
+            'nama' => 'Popon Setyaningsih',
+            'email' => 'popon@gmail.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
             'no_telp' => '081234568590',
@@ -78,9 +78,9 @@ class PenggunaSeeder extends Seeder
         ]);
 
         $sekretaris = Pengguna::create([
-            'kode_pengguna' => 'KSB2605005',
+            'kode_pengguna' => 'KSB2607005',
             'nik' => '1122334455667788',
-            'nama' => 'Sekretaris',
+            'nama' => 'Sri Wahyuni',
             'email' => 'sekretaris@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
@@ -89,9 +89,9 @@ class PenggunaSeeder extends Seeder
         $sekretaris->assignRole(UserRoleEnum::SEKRETARIS->value);
 
         $bendahara = Pengguna::create([
-            'kode_pengguna' => 'KSB2605006',
+            'kode_pengguna' => 'KSB2607006',
             'nik' => '8877665544332211',
-            'nama' => 'Bendahara',
+            'nama' => 'Rahayu',
             'email' => 'bendahara@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
@@ -100,9 +100,9 @@ class PenggunaSeeder extends Seeder
         $bendahara->assignRole(UserRoleEnum::BENDAHARA->value);
 
         $ketuaMurabahah = Pengguna::create([
-            'kode_pengguna' => 'KSB2605007',
+            'kode_pengguna' => 'KSB2607007',
             'nik' => '1234432112344321',
-            'nama' => 'Ketua Murabahah',
+            'nama' => 'Siti Rahmawati',
             'email' => 'ketuamurabah@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
@@ -111,9 +111,9 @@ class PenggunaSeeder extends Seeder
         $ketuaMurabahah->assignRole(UserRoleEnum::KETUAMURABAHAH->value);
 
         $stafMurabahah = Pengguna::create([
-            'kode_pengguna' => 'KSB2605008',
+            'kode_pengguna' => 'KSB2607008',
             'nik' => '1234432112344391',
-            'nama' => 'Staf Murabahah',
+            'nama' => 'Nur Afni',
             'email' => 'seksimurabah@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
@@ -122,9 +122,9 @@ class PenggunaSeeder extends Seeder
         $stafMurabahah->assignRole(UserRoleEnum::STAFMURABAHAH->value);
 
         $pjAnggota = Pengguna::create([
-            'kode_pengguna' => 'KSB2605009',
+            'kode_pengguna' => 'KSB2607009',
             'nik' => '5678123456781234',
-            'nama' => 'Penanggung Jawab Anggota',
+            'nama' => 'Yuli Astuti',
             'email' => 'pjanggota@example.com',
             'password' => bcrypt('password'),
             'status' => UserStatusEnum::ACTIVE->value,
@@ -155,27 +155,14 @@ class PenggunaSeeder extends Seeder
             ]);
         });
 
-        // create 10-15 random pengurus
-        $pengurusRoles = [
-            UserRoleEnum::DPS->value,
-            UserRoleEnum::PENGAWAS->value,
-            UserRoleEnum::KETUA->value,
-            UserRoleEnum::SEKRETARIS->value,
-            UserRoleEnum::BENDAHARA->value,
-            UserRoleEnum::KETUAMURABAHAH->value,
-            UserRoleEnum::STAFMURABAHAH->value,
-            UserRoleEnum::PJANGGOTA->value,
-        ];
-        
-        $jumlahPengurus = rand(10, 15);
-        Pengguna::factory($jumlahPengurus)->create()->each(function ($user) use ($getRandomDate, $pengurusRoles) {
+        // create 4 random PJ Anggota (total 5)
+        Pengguna::factory(4)->create()->each(function ($user) use ($getRandomDate) {
             $randomDate = $getRandomDate();
             $user->update([
                 'created_at' => $randomDate,
                 'updated_at' => $randomDate,
             ]);
-            $randomRole = $pengurusRoles[array_rand($pengurusRoles)];
-            $user->assignRole($randomRole);
+            $user->assignRole(UserRoleEnum::PJANGGOTA->value);
             
             Anggota::factory()->create([
                 'pengguna_id' => $user->id,

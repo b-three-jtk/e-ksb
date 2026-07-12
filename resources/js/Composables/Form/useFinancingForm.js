@@ -99,8 +99,9 @@ export function useFinancingForm(initialData = null) {
         pemasok: {
             nama_pemasok: initialData?.pemasok?.nama_pemasok || '',
             alamat_pemasok: initialData?.pemasok?.alamat_pemasok || '',
-            contact: initialData?.pemasok?.contact || '',
+            kontak_pemasok: initialData?.pemasok?.kontak_pemasok || '',
         },
+        is_wakalah: initialData?.pembiayaan?.is_wakalah || false,
         // Local state untuk temporary input
         monthly_installment: null,
         monthly_income: null,
@@ -265,7 +266,7 @@ export function useFinancingForm(initialData = null) {
         form.pemasok = {
             nama_pemasok: '',
             alamat_pemasok: '',
-            contact: '',
+            kontak_pemasok: '',
         }
         isAnggotaSelected.value = false
     }
@@ -307,7 +308,7 @@ export function useFinancingForm(initialData = null) {
 
         form.pemasok.nama_pemasok = pemasok.nama_pemasok || ''
         form.pemasok.alamat_pemasok = pemasok.alamat_pemasok || ''
-        form.pemasok.contact = pemasok.contact || ''
+        form.pemasok.kontak_pemasok = pemasok.kontak_pemasok || ''
 
         pemasokResults.value = []
         isPemasokSelected.value = true
@@ -319,7 +320,7 @@ export function useFinancingForm(initialData = null) {
         form.pemasok = {
             nama_pemasok: '',
             alamat_pemasok: '',
-            contact: '',
+            kontak_pemasok: '',
         }
         isPemasokSelected.value = false
     }

@@ -29,6 +29,8 @@ const form = useForm({
     nik: props.data.nik || '',
     nama: props.data.nama || '',
     email: props.data.email || '',
+    password: '',
+    password_confirmation: '',
     no_telp: props.data.no_telp || '',
     jenis_kelamin: props.data.anggota.jenis_kelamin || '',
     tempat_lahir: props.data.anggota.tempat_lahir || '',
@@ -37,7 +39,7 @@ const form = useForm({
     status_pernikahan: props.data.anggota.status_pernikahan || '',
     alamat_domisili: props.data.anggota.alamat_domisili || '',
     alamat_ktp: props.data.anggota.alamat_ktp || '',
-    jml_tanggungan: props.data.anggota.jml_tanggungan || [],
+    jml_tanggungan: props.data.anggota.jml_tanggungan || '',
 
     kk: props.data.kk || '',
     ktp: props.data.ktp || '',
@@ -209,6 +211,17 @@ const submitForm = () => {
                         :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" />
                     <BaseInputAdmin label="Email" placeholder="Masukkan email" v-model="form.email"
                         :errors="errors.email" type="email" />
+                    
+                    <div class="col-span-2 grid grid-cols-2 gap-4 border border-gray-200 dark:border-gray-700 p-4 rounded-xl mb-2 mt-2">
+                        <div class="col-span-2">
+                            <h3 class="font-semibold text-sm text-gray-700 dark:text-gray-300">Ubah Kata Sandi (Opsional)</h3>
+                            <p class="text-xs text-gray-500">Kosongkan jika tidak ingin mengubah kata sandi.</p>
+                        </div>
+                        <BaseInputAdmin label="Kata Sandi Baru" placeholder="Masukkan kata sandi baru" v-model="form.password"
+                            :errors="errors.password" type="password" />
+                        <BaseInputAdmin label="Konfirmasi Kata Sandi" placeholder="Masukkan ulang kata sandi" v-model="form.password_confirmation"
+                            :errors="errors.password_confirmation" type="password" />
+                    </div>
                     <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="14"
                         v-model="form.no_telp" :errors="errors.no_telp" @input="onlyNumbers"
                         inputmode="numeric" />
