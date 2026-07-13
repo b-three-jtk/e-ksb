@@ -29,6 +29,8 @@ const props = defineProps({
 	},
 })
 
+console.log(props.hubunganOptions);
+
 const requiredMemberFields = computed(() => [
 	'nama',
 	'jenis_kelamin',
@@ -201,7 +203,7 @@ const submitForm = () => {
 						:get-field-error="getFieldError"
 						:only-letters="onlyLetters"
 						:only-numbers="onlyNumbers"
-						:ahli_waris-hubungan-options="props.hubunganOptions"
+						:hubungan-options="props.hubunganOptions"
 					/>
 				</div>
 
