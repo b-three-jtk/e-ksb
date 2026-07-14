@@ -329,11 +329,11 @@ const submit = () => {
 <template>
     <Base title="Edit Profil Anggota">
         <div
-            class="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] pt-24 pb-12"
+            class="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] dark:bg-none dark:bg-gray-900 pt-24 pb-12 transition-colors duration-200"
         >
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-8 mt-2">
-                    <h1 class="text-3xl font-bold text-primary">
+                    <h1 class="text-3xl font-bold text-primary dark:text-emerald-500">
                         Edit Profil Anggota
                     </h1>
                 </div>
@@ -348,7 +348,7 @@ const submit = () => {
                             <div class="relative shrink-0">
                                 <div
                                     v-if="previewUrl"
-                                    class="w-20 h-20 rounded-full overflow-hidden border border-stroke bg-white"
+                                    class="w-20 h-20 rounded-full overflow-hidden border border-stroke dark:border-gray-700 bg-white dark:bg-gray-800"
                                 >
                                     <img
                                         :src="previewUrl"
@@ -360,8 +360,8 @@ const submit = () => {
                                     />
                                 </div>
                                 <div
-                                    v-else
-                                    class="w-20 h-20 rounded-full bg-white border border-stroke flex items-center justify-center text-gray-500"
+                                    v-if="!previewUrl"
+                                    class="w-20 h-20 rounded-full bg-white dark:bg-gray-800 border border-stroke dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400"
                                 >
                                     <UserIcon />
                                 </div>
@@ -398,7 +398,7 @@ const submit = () => {
                                         {{ user.nama || "-" }}
                                     </h1>
                                 </div>
-                                <p class="text-gray-500">
+                                <p class="text-gray-500 dark:text-gray-400">
                                     {{ user.kode_pengguna || "-" }}
                                 </p>
                             </div>
@@ -416,7 +416,7 @@ const submit = () => {
                                 type="button"
                                 @click="handleChangePicture"
                                 :disabled="uploading || deleting"
-                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-400 px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-500 disabled:opacity-50"
+                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-400 px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-500 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600"
                             >
                                 {{ uploading ? "Mengunggah..." : "Ubah Foto" }}
                             </button>
@@ -428,7 +428,7 @@ const submit = () => {
                                     deleting ||
                                     (!selectedFile && !user.foto_profil)
                                 "
-                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-red-500 px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-red-600 disabled:opacity-50"
+                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-red-500 px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-red-600 disabled:opacity-50 dark:border-red-600 dark:bg-red-600 dark:hover:bg-red-700"
                             >
                                 {{ deleting ? "Menghapus..." : "Hapus Foto" }}
                             </button>
@@ -479,7 +479,7 @@ const submit = () => {
                             </div>
 
                             <div
-                                class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-10 py-6"
+                                class="flex flex-col gap-8 border-t-2 border-t-stroke dark:border-t-gray-700 xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-10 py-6"
                             >
                                 <h1 class="card-title">Berkas Pendukung</h1>
                                 <div
@@ -488,7 +488,7 @@ const submit = () => {
                                     <div
                                         v-for="field in documentState"
                                         :key="field.label"
-                                        class="rounded-2xl border border-stroke bg-white p-5 shadow-sm"
+                                        class="rounded-2xl border border-stroke dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm"
                                     >
                                         <div
                                             class="flex items-start justify-between gap-4"
@@ -583,8 +583,8 @@ const submit = () => {
                                 </ul>
                             </div>
 
-                            <div
-                                class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-10 py-6"
+                             <div
+                                class="flex flex-col gap-8 border-t-2 border-t-stroke dark:border-t-gray-700 xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-10 py-6"
                             >
                                 <h1 class="card-title">Ahli Waris</h1>
                                 <div
@@ -594,7 +594,7 @@ const submit = () => {
                                     <div
                                         v-for="ahli_waris in heirFields"
                                         :key="ahli_waris.nik_ahli_waris"
-                                        class="grid xl:grid-cols-2 grid-cols-1 gap-4 rounded-2xl border border-stroke p-4 bg-white"
+                                        class="grid xl:grid-cols-2 grid-cols-1 gap-4 rounded-2xl border border-stroke dark:border-gray-700 p-4 bg-white dark:bg-gray-800"
                                     >
                                         <BaseInput
                                             label="Nama Ahli Waris"
@@ -627,7 +627,7 @@ const submit = () => {
                                 </div>
                                 <p
                                     v-else
-                                    class="rounded-2xl border border-dashed border-stroke px-4 py-5 text-sm text-gray-500"
+                                    class="rounded-2xl border border-dashed border-stroke dark:border-gray-700 px-4 py-5 text-sm text-gray-500 dark:text-gray-400"
                                 >
                                     Belum ada data ahli waris.
                                 </p>
@@ -640,14 +640,14 @@ const submit = () => {
                             type="button"
                             @click="handleCancel"
                             :disabled="form.processing"
-                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-200 px-5 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-300 disabled:opacity-50"
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-200 px-5 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-300 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         >
                             Batal
                         </button>
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-[#008e43] px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-[#00783a] disabled:opacity-50"
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-[#008e43] px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-[#00783a] disabled:opacity-50 dark:border-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
                         >
                             <span v-if="form.processing">
                                 <svg
@@ -685,25 +685,25 @@ const submit = () => {
                 @click.self="closeDocumentPreview"
             >
                 <div
-                    class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+                    class="w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl border dark:border-gray-700"
                 >
                     <div
-                        class="flex items-center justify-between border-b border-slate-200 px-5 py-4"
+                        class="flex items-center justify-between border-b border-slate-200 dark:border-gray-700 px-5 py-4"
                     >
                         <div>
-                            <h4 class="text-base font-semibold text-slate-900">
+                            <h4 class="text-base font-semibold text-slate-900 dark:text-white">
                                 {{
                                     previewDocument.title || "Pratinjau Dokumen"
                                 }}
                             </h4>
-                            <p class="text-sm text-slate-500">
+                            <p class="text-sm text-slate-500 dark:text-gray-400">
                                 Dokumen pendukung anggota
                             </p>
                         </div>
                         <button
                             type="button"
                             @click="closeDocumentPreview"
-                            class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                            class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-white"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -717,7 +717,7 @@ const submit = () => {
                             </svg>
                         </button>
                     </div>
-                    <div class="bg-slate-50 p-5">
+                    <div class="bg-slate-50 dark:bg-gray-900 p-5">
                         <img
                             v-if="
                                 previewDocument.url &&

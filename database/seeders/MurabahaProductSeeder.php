@@ -95,7 +95,7 @@ class MurabahaProductSeeder extends Seeder
                     'nama_ahli_waris' => 'Ahli Waris ' . ($currentAnggota->user->nama ?? 'Anggota'),
                     'kontak_ahli_waris' => '08' . mt_rand(100000000, 999999999),
                 ]);
-                $currentAnggota->ahliWaris()->attach($ahliWaris->nik_ahli_waris, ['hubungan' => \App\Enums\AhliWarisEnum::CHILD->value]);
+                $currentAnggota->ahliWaris()->attach($ahliWaris->nik_ahli_waris, ['hubungan' => \App\Enums\AhliWarisEnum::SON->value]);
             }
 
             if ($scenario['status'] === FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value) {
