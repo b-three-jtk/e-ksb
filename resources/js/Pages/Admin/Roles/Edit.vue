@@ -137,7 +137,7 @@ const breadcrumbItems = computed(() => [
                             v-model="form.name"
                             type="text"
                             placeholder="Masukkan nama peran"
-                            :disabled="readonly"
+                            disabled
                         />
                     </div>
 
