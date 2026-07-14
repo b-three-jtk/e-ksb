@@ -34,7 +34,7 @@ const isMultiline = computed(() => !!props.multiline)
 const isLocked = computed(() => !!props.locked)
 
 const fieldClass = computed(() => {
-  const baseClass = `peer w-full rounded-lg border px-4 text-sm text-gray-800 dark:text-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 ${isPasswordField.value ? 'pr-12' : ''} [&::-ms-reveal]:hidden autofill:shadow-[inset_0_0_0px_1000px_#ffffff] dark:autofill:shadow-[inset_0_0_0px_1000px_#1f2937] autofill:[-webkit-text-fill-color:#1f2937] dark:autofill:[-webkit-text-fill-color:#e5e7eb]`
+  const baseClass = `peer w-full rounded-lg border px-4 text-sm text-gray-800 dark:text-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 ${isPasswordField.value ? 'pr-12' : ''} [&::-ms-reveal]:hidden autofill:shadow-[inset_0_0_0px_1000px_#ffffff] dark:autofill:shadow-[inset_0_0_0px_1000px_#1f2937] autofill:[-webkit-text-fill-color:#1f2937] dark:autofill:[-webkit-text-fill-color:#e5e7eb] disabled:bg-gray-50 disabled:dark:bg-gray-800/50 disabled:text-gray-500 disabled:dark:text-gray-400 disabled:border-gray-200 disabled:dark:border-gray-700 disabled:cursor-not-allowed`
 
   if (isMultiline.value) {
     return `${baseClass} min-h-28 pt-4 pb-3 resize-y`
@@ -46,7 +46,7 @@ const fieldClass = computed(() => {
 const lockedClass = computed(() => {
   if (!isLocked.value) return ''
 
-  return 'border-gray-300 bg-gray-50 text-gray-600 placeholder:text-gray-400 cursor-not-allowed'
+  return 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 placeholder:text-gray-400 cursor-not-allowed'
 })
 </script>
 
