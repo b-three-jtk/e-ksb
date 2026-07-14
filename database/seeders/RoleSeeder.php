@@ -52,16 +52,16 @@ public function run(): void
                     $role->givePermissionTo(Permission::all());
                     break;
                 case UserRoleEnum::DPS:
-                    $role->givePermissionTo(['view_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'view_peran_akses', 'view_alokasi_pj', 'view_akun']);
+                    $role->givePermissionTo(['view_anggota', 'view_akun', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'view_peran_akses', 'view_alokasi_pj']);
                     break;
                 case UserRoleEnum::PENGAWAS:
-                    $role->givePermissionTo(['view_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'view_peran_akses', 'view_alokasi_pj', 'view_akun']);
+                    $role->givePermissionTo(['view_anggota', 'view_akun', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'view_peran_akses', 'view_alokasi_pj']);
                     break;
                 case UserRoleEnum::KETUA:
-                    $role->givePermissionTo(['view_anggota', 'edit_anggota', 'view_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'edit_pengunduran_diri', 'create_pengaturan', 'edit_pengaturan', 'approve_murabahah', 'view_notifikasi', 'view_peran_akses', 'create_peran_akses', 'edit_peran_akses', 'view_alokasi_pj', 'edit_alokasi_pj', 'view_akun']);
+                    $role->givePermissionTo(['view_anggota', 'edit_anggota', 'view_akun', 'view_pengunduran_diri', 'edit_pengunduran_diri', 'view_pengurus', 'view_murabahah', 'approve_murabahah', 'view_simpanan', 'view_kas', 'view_pengaturan', 'create_pengaturan', 'edit_pengaturan', 'view_notifikasi', 'view_peran_akses', 'create_peran_akses', 'edit_peran_akses', 'view_alokasi_pj']);
                     break;
                 case UserRoleEnum::SEKRETARIS:
-                    $role->givePermissionTo(['create_anggota', 'view_anggota', 'edit_anggota', 'create_pengurus', 'view_pengurus', 'edit_pengurus', 'view_pengaturan']);
+                    $role->givePermissionTo(['create_anggota', 'view_anggota', 'edit_anggota', 'create_pengurus', 'view_pengurus', 'edit_pengurus', 'view_pengaturan', 'view_alokasi_pj', 'edit_alokasi_pj']);
                     break;
                 case UserRoleEnum::BENDAHARA:
                     $role->givePermissionTo(['view_simpanan', 'verify_simpanan', 'view_murabahah', 'verify_murabahah', 'create_kas', 'view_kas', 'edit_kas', 'view_pengaturan']);
