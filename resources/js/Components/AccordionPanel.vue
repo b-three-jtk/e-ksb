@@ -15,7 +15,7 @@ const togglePanel = (event) => {
     <div class="panel">
         <button :class="showPanel ? 'rounded-t-2xl border-b border-stroke dark:border-gray-600' : 'rounded-2xl'" class="bg-white dark:bg-gray-800 shadow-md px-6 py-4 w-full flex items-center justify-between transition-all duration-400 ease-in-out" :aria-label="ariaTitle" @click.prevent="togglePanel">
                 <div class="flex flex-col">
-                    <h1 class="font-semibold text-lg dark:text-gray-300">{{ title }}</h1>
+                    <h1 class="font-semibold text-lg dark:text-gray-300 text-left">{{ title }}</h1>
                     <p class="text-gray-400 text-sm text-left" v-if="subTitle">{{ subTitle }}</p>
                 </div>
             <span :class="showPanel ? 'icon-[tabler--chevron-up]' : 'icon-[tabler--chevron-down]'" class="transition-all duration-300" style="width: 24px; height: 24px;" aria-hidden="true"></span>

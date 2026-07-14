@@ -44,7 +44,7 @@ class PengurusService
                 $q->whereHas(
                     'roles',
                     fn($r) =>
-                    $r->where('nama', $request->role)
+                    $r->where('name', $request->role)
                 )
             )
             ->orderBy($sortBy, $sortDir)
