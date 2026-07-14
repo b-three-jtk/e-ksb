@@ -54,13 +54,20 @@ const transactions = computed(() => page.props.pembiayaan ?? {
     data: [], current_page: 1, per_page: 10, total: 0, links: [],
 })
 
-const tabs = [
-    { key: 'all', label: 'Semua' },
-    { key: 'request', label: 'Permohonan Pembiayaan Murabahah' },
-    { key: 'validated', label: 'Permohonan Tervalidasi' },
-    { key: 'active', label: 'Pembiayaan Aktif' },
-    { key: 'unverified_angsuran', label: 'Pembayaran Angsuran Belum Diverifikasi' }
-]
+const tabs = computed(() => {
+    const baseTabs = [
+        { key: 'all', label: 'Semua' },
+        { key: 'request', label: 'Permohonan Pembiayaan Murabahah' },
+        { key: 'validated', label: 'Permohonan Tervalidasi' },
+        { key: 'active', label: 'Pembiayaan Aktif' }
+    ];
+    
+    if (can.value['verify_murabahah'] && role.value === 'Bendahara') {
+        baseTabs.push({ key: 'unverified_angsuran', label: 'Pembayaran Angsuran Belum Diverifikasi' });
+    }
+    
+    return baseTabs;
+});
 
 const filters = reactive({
     search: page.props.filters?.search ?? '',

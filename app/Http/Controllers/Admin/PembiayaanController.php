@@ -7,6 +7,7 @@ use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\PositionEnum;
 use App\Enums\SavingTypeEnum;
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePreFinancingRequest;
@@ -37,9 +38,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Illuminate\Validation\Rule;
 
 class PembiayaanController extends Controller
 {
@@ -62,7 +63,10 @@ class PembiayaanController extends Controller
         $sortBy = $request->input('sort_by', 'created_at');
         $sortDir = $request->input('sort_dir', 'desc');
 
-        if ($tab === 'unverified_angsuran') {
+        if ($tab === 'unverified_angsuran' ) {
+            if (!$user->can('verify_murabahah') || $user->hasRole(UserRoleEnum::BENDAHARA->value)) {
+                abort(403, 'Unauthorized action.');
+            }
             $pembiayaan = $this->pembayaranAngsuranService->getUnverifiedAngsuran($search, $perPage, $sortBy, $sortDir);
         } else {
             $pembiayaan = $this->pembiayaanService->getSemuaPembiayaan($search, $tab, $sortBy, $sortDir, $perPage, $user);

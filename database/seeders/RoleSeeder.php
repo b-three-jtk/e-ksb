@@ -67,7 +67,7 @@ public function run(): void
                     $role->givePermissionTo(['view_simpanan', 'verify_simpanan', 'view_murabahah', 'verify_murabahah', 'create_kas', 'view_kas', 'edit_kas', 'view_pengaturan']);
                     break;
                 case UserRoleEnum::KETUAMURABAHAH:
-                    $role->givePermissionTo(['view_murabahah', 'approve_murabahah']);
+                    $role->givePermissionTo(['view_murabahah', 'approve_murabahah', 'view_pengaturan']);
                     break;
                 case UserRoleEnum::STAFMURABAHAH:
                     $role->givePermissionTo(['view_murabahah', 'create_murabahah', 'edit_murabahah', 'delete_murabahah']);
