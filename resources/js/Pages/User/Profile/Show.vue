@@ -120,11 +120,11 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
 <template>
     <Base title="Profil Anggota">
         <div
-            class="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] pt-24 pb-12"
+            class="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] dark:bg-none dark:bg-gray-900 pt-24 pb-12 transition-colors duration-200"
         >
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-8 mt-2">
-                    <h1 class="text-3xl font-bold text-[#007031]">
+                    <h1 class="text-3xl font-bold text-[#007031] dark:text-emerald-500">
                         Profil Anggota
                     </h1>
                 </div>
@@ -136,7 +136,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                         class="flex flex-col xl:flex-row justify-center items-center text-center xl:text-left gap-6"
                     >
                         <div
-                            class="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100"
+                            class="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border border-slate-200 dark:border-gray-700 bg-slate-100 dark:bg-gray-800"
                         >
                             <img
                                 v-if="photoUrl"
@@ -146,7 +146,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                             />
                             <div
                                 v-else
-                                class="flex h-full w-full items-center justify-center text-slate-400"
+                                class="flex h-full w-full items-center justify-center text-slate-400 dark:text-slate-500"
                             >
                                 <UserIcon class="h-10 w-10" />
                             </div>
@@ -157,7 +157,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                     {{ user.nama || "-" }}
                                 </h1>
                             </div>
-                            <p class="text-gray-500">
+                            <p class="text-gray-500 dark:text-gray-400">
                                 {{ user.kode_pengguna || "-" }}
                             </p>
                         </div>
@@ -165,13 +165,13 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                     <div class="flex gap-4">
                         <button
                             @click="router.visit('/user/profile/edit')"
-                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-400 px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-500 dark:border-gray-700 dark:hover:text-gray-200"
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-400 px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-gray-500 dark:border-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-200"
                         >
                             Edit Profil
                         </button>
                         <button
                             @click="openPasswordModal"
-                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-[#008e43] px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-[#00783a] dark:border-gray-700 dark:hover:text-gray-200"
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-[#008e43] px-5 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-[#00783a] dark:border-gray-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:hover:text-gray-200"
                         >
                             Ubah Password
                         </button>
@@ -203,14 +203,14 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                         </div>
 
                         <div
-                            class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6"
+                            class="flex flex-col gap-8 border-t-2 border-t-stroke dark:border-t-gray-700 xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6"
                         >
                             <h1 class="card-title">Berkas Pendukung</h1>
                             <div class="grid xl:grid-cols-2 grid-cols-1 gap-6">
                                 <div
                                     v-for="field in documentFields"
                                     :key="field.label"
-                                    class="rounded-2xl border border-stroke bg-white p-5 shadow-sm"
+                                    class="rounded-2xl border border-stroke dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm"
                                 >
                                     <div
                                         class="flex items-start justify-between gap-4"
@@ -267,40 +267,40 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                         </div>
 
                         <div
-                            class="flex flex-col gap-8 border-t-2 border-t-stroke xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6"
+                            class="flex flex-col gap-8 border-t-2 border-t-stroke dark:border-t-gray-700 xl:border-0 xl:border-l-2 xl:border-l-stroke xl:dark:border-l-gray-700 xl:pl-8 py-6"
                         >
                             <h1 class="card-title">Ahli Waris</h1>
                             <div v-if="heirRows.length" class="grid gap-4">
                                 <div
                                     v-for="ahli_waris in heirRows"
                                     :key="ahli_waris.nik_ahli_waris"
-                                    class="grid md:grid-cols-2 gap-4 items-start rounded-2xl border border-stroke p-4 bg-white"
+                                    class="grid md:grid-cols-2 gap-4 items-start rounded-2xl border border-stroke dark:border-gray-700 p-4 bg-white dark:bg-gray-800"
                                 >
                                     <div>
-                                        <span class="text-sm text-gray-500"
+                                        <span class="text-sm text-gray-500 dark:text-gray-400"
                                             >Nama Ahli Waris</span
                                         >
                                         <div
-                                            class="font-medium text-dark-text text-lg"
+                                            class="font-medium text-dark-text dark:text-white text-lg"
                                         >
                                             {{ ahli_waris.nama_ahli_waris }}
                                         </div>
 
                                         <span
-                                            class="text-sm text-gray-500 mt-4 block"
+                                            class="text-sm text-gray-500 dark:text-gray-400 mt-4 block"
                                             >Kontak Ahli Waris</span
                                         >
-                                        <div class="font-medium text-dark-text">
+                                        <div class="font-medium text-dark-text dark:text-white">
                                             {{ ahli_waris.kontak_ahli_waris || "-" }}
                                         </div>
                                     </div>
 
                                     <div>
-                                        <span class="text-sm text-gray-500"
+                                        <span class="text-sm text-gray-500 dark:text-gray-400"
                                             >Hubungan Keluarga</span
                                         >
                                         <div
-                                            class="font-medium text-dark-text text-lg"
+                                            class="font-medium text-dark-text dark:text-white text-lg"
                                         >
                                             {{ ahli_waris.hubungan }}
                                         </div>
@@ -309,7 +309,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                             </div>
                             <p
                                 v-else
-                                class="rounded-2xl border border-dashed border-stroke px-4 py-5 text-sm text-gray-500"
+                                class="rounded-2xl border border-dashed border-stroke dark:border-gray-700 px-4 py-5 text-sm text-gray-500 dark:text-gray-400"
                             >
                                 Belum ada data ahli waris.
                             </p>
@@ -327,17 +327,17 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                             class="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]"
                         >
                             <div
-                                class="rounded-2xl border border-stroke bg-white p-5 shadow-sm"
+                                class="rounded-2xl border border-stroke dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm"
                             >
                                 <div
                                     class="flex h-full flex-col justify-between gap-6"
                                 >
                                     <div>
-                                        <p class="text-sm text-gray-500">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
                                             Total Poin
                                         </p>
                                         <div
-                                            class="mt-2 text-5xl font-semibold leading-none text-[#00a04a]"
+                                            class="mt-2 text-5xl font-semibold leading-none text-[#00a04a] dark:text-emerald-400"
                                         >
                                             {{
                                                 formatPoint(
@@ -349,7 +349,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
 
                                     <div class="grid grid-cols-2 gap-4 text-sm">
                                         <div>
-                                            <p class="text-gray-500">
+                                            <p class="text-gray-500 dark:text-gray-400">
                                                 Terakhir diperbarui
                                             </p>
                                             <p
@@ -362,7 +362,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                             </p>
                                         </div>
                                         <div>
-                                            <p class="text-gray-500">
+                                            <p class="text-gray-500 dark:text-gray-400">
                                                 Poin Terakhir
                                             </p>
                                             <p
@@ -377,7 +377,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                             </p>
                                         </div>
                                         <div>
-                                            <p class="text-gray-500">
+                                            <p class="text-gray-500 dark:text-gray-400">
                                                 Total Simpanan Terakhir
                                             </p>
                                             <p
@@ -391,7 +391,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                             </p>
                                         </div>
                                         <div>
-                                            <p class="text-gray-500">
+                                            <p class="text-gray-500 dark:text-gray-400">
                                                 Tanggal Pendapatan Poin
                                             </p>
                                             <p
@@ -408,9 +408,9 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                             </div>
 
                             <div
-                                class="overflow-hidden rounded-2xl border border-stroke bg-white shadow-sm"
+                                class="overflow-hidden rounded-2xl border border-stroke dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm"
                             >
-                                <div class="border-b border-stroke px-5 py-4">
+                                <div class="border-b border-stroke dark:border-gray-700 px-5 py-4">
                                     <h2
                                         class="text-base font-semibold text-dark-text dark:text-white"
                                     >
@@ -420,10 +420,10 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
 
                                 <div class="overflow-x-auto">
                                     <table
-                                        class="min-w-full divide-y divide-stroke text-left text-sm"
+                                        class="min-w-full divide-y divide-stroke dark:divide-gray-700 text-left text-sm"
                                     >
-                                        <thead class="bg-gray-50">
-                                            <tr class="text-gray-500">
+                                        <thead class="bg-gray-50 dark:bg-gray-900">
+                                            <tr class="text-gray-500 dark:text-gray-400">
                                                 <th
                                                     class="px-5 py-3 font-medium"
                                                 >
@@ -446,13 +446,13 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                                 </th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-stroke">
+                                        <tbody class="divide-y divide-stroke dark:divide-gray-700">
                                             <tr
                                                 v-if="pointHistory.length === 0"
                                             >
                                                 <td
                                                     colspan="4"
-                                                    class="px-5 py-8 text-center text-gray-500"
+                                                    class="px-5 py-8 text-center text-gray-500 dark:text-gray-400"
                                                 >
                                                     Belum ada riwayat poin.
                                                 </td>
@@ -460,7 +460,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                             <tr
                                                 v-for="row in pointHistory"
                                                 :key="row.id"
-                                                class="hover:bg-gray-50/70"
+                                                class="hover:bg-gray-50/70 dark:hover:bg-gray-700/50"
                                             >
                                                 <td
                                                     class="px-5 py-4 font-medium text-dark-text dark:text-white"
@@ -477,7 +477,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                                     }}
                                                 </td>
                                                 <td
-                                                    class="px-5 py-4 font-medium text-[#00a04a]"
+                                                    class="px-5 py-4 font-medium text-[#00a04a] dark:text-emerald-400"
                                                 >
                                                     +{{
                                                         formatPoint(
@@ -512,25 +512,25 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                 @click.self="closePhotoPreview"
             >
                 <div
-                    class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+                    class="w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl border dark:border-gray-700"
                 >
                     <div
-                        class="flex items-center justify-between border-b border-slate-200 px-5 py-4"
+                        class="flex items-center justify-between border-b border-slate-200 dark:border-gray-700 px-5 py-4"
                     >
                         <div>
-                            <h4 class="text-base font-semibold text-slate-900">
+                            <h4 class="text-base font-semibold text-slate-900 dark:text-white">
                                 {{
                                     previewDocument.title || "Pratinjau Dokumen"
                                 }}
                             </h4>
-                            <p class="text-sm text-slate-500">
+                            <p class="text-sm text-slate-500 dark:text-gray-400">
                                 Pratinjau dokumen anggota
                             </p>
                         </div>
                         <button
                             type="button"
                             @click="closePhotoPreview"
-                            class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                            class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-white"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -544,7 +544,7 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                             </svg>
                         </button>
                     </div>
-                    <div class="bg-slate-50 p-5">
+                    <div class="bg-slate-50 dark:bg-gray-900 p-5">
                         <img
                             v-if="
                                 previewDocument.url &&

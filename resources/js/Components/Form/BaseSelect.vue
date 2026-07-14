@@ -19,7 +19,11 @@ defineEmits(['update:modelValue'])
       class="peer h-12 w-full rounded-lg border border-gray-300
               bg-white dark:bg-gray-800 px-4 pt-2 pb-2 text-sm
               text-gray-800 dark:text-gray-200
-              focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20
+              disabled:bg-gray-50 disabled:dark:bg-gray-800/50
+              disabled:text-gray-500 disabled:dark:text-gray-400
+              disabled:border-gray-200 disabled:dark:border-gray-700
+              disabled:cursor-not-allowed"
     >
       <option value="" disabled hidden></option>
       <slot />
