@@ -12,7 +12,7 @@ defineProps({
             <h1 class="card-title">Identitas Pemohon</h1>
             <div class="grid grid-cols-2 gap-6 mt-8">
                 <Info label="Nomor Anggota KSB" :value="data.anggota.kode_pengguna" />
-                <Info label="Nama Lengkap" :value="data.anggota.name" />
+                <Info label="Nama Lengkap" :value="data.anggota.nama" />
                 <Info label="NIK" :value="data.anggota.nik" />
                 <Info label="Jenis Kelamin" :value="data.anggota.jenis_kelamin" />
                 <Info label="Tempat, Tanggal Lahir" :value="`${data.anggota.tempat_lahir}, ${data.anggota.tgl_lahir}`" />

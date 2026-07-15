@@ -116,7 +116,7 @@ const submit = () => {
         <div class="grid grid-cols-6 gap-6">
             <div class="bg-secondary dark:bg-primary flex flex-col col-span-6 rounded-2xl">
                 <div class="px-10 py-6 flex justify-between items-center">
-                    <h1 class="font-semibold text-white">{{ data.pembiayaan.name }}</h1>
+                    <h1 class="font-semibold text-white">{{ data.pembiayaan.nama_barang }}</h1>
                     <div class="flex items-center gap-4">
                         <p class="text-white">No. Transaksi : #{{ data.pembiayaan.kode_pembiayaan }}</p>
                         <span :class="useFinancingStatus(data.pembiayaan.status)">

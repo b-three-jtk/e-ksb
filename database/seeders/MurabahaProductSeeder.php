@@ -88,6 +88,35 @@ class MurabahaProductSeeder extends Seeder
                 }
             }
 
+            // Pastikan Anggota memiliki data Pekerjaan
+            if (!$currentAnggota->pekerjaanAnggota()->exists()) {
+                \App\Models\PekerjaanAnggota::create([
+                    'anggota_id' => $currentAnggota->id,
+                    'status_pekerjaan' => 'Karyawan Swasta',
+                    'jabatan_pekerjaan' => 'Staff',
+                    'nama_perusahaan' => 'PT Makmur Sejahtera',
+                    'bidang_usaha' => 'Perdagangan',
+                    'lama_bekerja' => rand(1, 10),
+                    'alamat_tempat_bekerja' => 'Jl. Sudirman No. 123, Jakarta',
+                    'no_telp_kantor' => '021' . rand(1000000, 9999999),
+                ]);
+            }
+
+            // Pastikan Anggota memiliki data Keuangan
+            if (!$currentAnggota->keuanganAnggota()->exists()) {
+                \App\Models\KeuanganAnggota::create([
+                    'anggota_id' => $currentAnggota->id,
+                    'jml_gaji_pokok' => rand(5000000, 15000000),
+                    'jml_penghasilan_usaha' => rand(0, 5000000),
+                    'jml_penghasilan_pasangan' => 0,
+                    'jml_penghasilan_lainnya' => 0,
+                    'jml_biaya_hidup_keluarga' => rand(2000000, 5000000),
+                    'jml_biaya_pendidikan' => rand(500000, 2000000),
+                    'jml_cicilan' => rand(0, 1000000),
+                    'jml_biaya_lainnya' => 0,
+                ]);
+            }
+
             // Pastikan Anggota memiliki setidaknya 1 Ahli Waris (Wajib untuk pembiayaan)
             if ($currentAnggota->ahliWaris()->count() === 0) {
                 $ahliWaris = AhliWaris::create([
@@ -197,12 +226,26 @@ class MurabahaProductSeeder extends Seeder
         $margin = (int)($item['price'] * 0.2); // 20% margin
         $downPayment = (int)($item['price'] * 0.1); // 10% DP
 
-        // 1. Atur Tenor & Rentang Waktu berdasarkan Kolektibilitas
-        // Karena tidak ada kolektibilitas lagi, semuanya lancar tapi kita sebar mulai dari 1 sampai 60 bulan lalu
-        $tenor = 24;
-        $akadMonthsAgo = rand(1, 60); // Sebar di 5 tahun terakhir
+        // Atur agar tenor tidak menyeberang tahun (selalu habis di tahun yang sama dengan akad)
+        // Karena statusnya masih berjalan (Active), maka akad harus di tahun ini
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
         
-        $akadDate = now()->subMonths($akadMonthsAgo)->startOfDay();
+        // Pilih bulan akad sebelum bulan ini agar ada cicilan yang sudah lewat
+        $akadMonth = rand(1, max(1, $currentMonth - 1));
+        
+        $monthsPassed = $currentMonth - $akadMonth;
+        
+        $minTenor = $monthsPassed + 1; // Agar masih ada sisa cicilan (belum lunas)
+        $maxTenor = 12 - $akadMonth; // Agar tidak nyebrang tahun
+        
+        if ($minTenor > $maxTenor) {
+            $tenor = $maxTenor;
+        } else {
+            $tenor = rand($minTenor, $maxTenor);
+        }
+        
+        $akadDate = Carbon::createFromDate($currentYear, $akadMonth, rand(1, 28))->startOfDay();
 
         $pembiayaan = Pembiayaan::create([
             'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
@@ -423,9 +466,20 @@ class MurabahaProductSeeder extends Seeder
         $admin = Pengguna::whereHas('roles', fn($q) => $q->where('name', 'Admin'))->first() ?? Pengguna::first();
         $margin = (int)($item['price'] * 0.1);
         $downPayment = (int)($item['price'] * 0.1);
-        $tenor = rand(6, 24);
-        $akadMonthsAgo = rand($tenor, 60); // 5 tahun terakhir
+        // Untuk pembiayaan Lunas, cari bulan dan tahun yang tidak menyeberang tahun
+        $year = now()->year - rand(0, 4);
+        $akadMonth = rand(1, 10); // Maks bulan 10 agar ada ruang tenor
+        $maxTenor = 12 - $akadMonth;
+        
+        $tenor = rand(2, $maxTenor); // Minimal 2 bulan, maksimal sampai Desember tahun yang sama
 
+        $akadDate = Carbon::createFromDate($year, $akadMonth, rand(1, 28))->startOfDay();
+        
+        // Jika ternyata tanggal lunasnya (akad + tenor) melewati hari ini, mundurkan tahunnya
+        if ($akadDate->copy()->addMonths($tenor)->isFuture()) {
+            $akadDate->subYear();
+        }
+        
         $pembiayaan = Pembiayaan::create([
             'kode_pembiayaan' => 'PM' . strtoupper(uniqid()),
             'anggota_id' => $anggota->id,
@@ -433,8 +487,8 @@ class MurabahaProductSeeder extends Seeder
             'harga_perolehan' => $item['price'],
             'margin_keuntungan' => $margin,
             'uang_muka' => $downPayment,
-            'tgl_akad' => now()->subMonths($akadMonthsAgo)->startOfDay(),
-            'tgl_lunas' => now()->subMonths($akadMonthsAgo - $tenor)->startOfDay(),
+            'tgl_akad' => $akadDate,
+            'tgl_lunas' => $akadDate->copy()->addMonths($tenor),
             'status' => FinancingReqStatusEnum::PAID->value,
             'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
             'updated_by' => $admin?->id,
