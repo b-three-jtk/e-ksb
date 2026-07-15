@@ -163,7 +163,7 @@ watch(() => filters.tab, applyFilters)
     <AdminLayout title="Pengelolaan Pembiayaan Murabahah">
         <PageBreadcrumb :page-title="'Pengelolaan Pembiayaan Murabahah'" :items="breadcrumbItems" />
         <!-- Ringkasan -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl p-6 mb-8">
+        <div v-if="role !== 'Penanggung Jawab Anggota'" class="bg-white dark:bg-slate-800 rounded-xl p-6 mb-8">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="font-head text-lg font-semibold text-gray-900 dark:text-gray-100">
                     Ringkasan

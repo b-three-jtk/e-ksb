@@ -97,7 +97,7 @@ const draftStatuses = [
 ]
 
 const showSubmitButton = computed(() => {
-    return activeStep.value === 3 && draftStatuses.includes(form.pembiayaan.status)
+    return activeStep.value === 3 && (!form.pembiayaan.status || draftStatuses.includes(form.pembiayaan.status))
 })
 
 const showNextButton = computed(() => {
@@ -105,7 +105,7 @@ const showNextButton = computed(() => {
         return false
     }
 
-    if (activeStep.value === 3 && draftStatuses.includes(form.pembiayaan.status)) {
+    if (activeStep.value === 3 && (!form.pembiayaan.status || draftStatuses.includes(form.pembiayaan.status))) {
         return false
     }
 

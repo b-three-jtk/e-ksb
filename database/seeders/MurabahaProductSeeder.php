@@ -291,16 +291,26 @@ class MurabahaProductSeeder extends Seeder
             'updated_by' => $admin?->id,
         ]);
 
+        // Hitung cicilan yang sudah jatuh tempo
+        $pastInstallments = 0;
+        for ($k = 1; $k <= $tenor; $k++) {
+            if ($akadDate->copy()->addMonths($k)->isPast()) {
+                $pastInstallments++;
+            }
+        }
+        
+        // 80% lancar, 20% menunggak 1-3 bulan terakhir
+        $unpaidMonths = (rand(1, 100) <= 80) ? 0 : rand(1, min(3, max(1, $pastInstallments)));
+        $paidInstallments = max(0, $pastInstallments - $unpaidMonths);
+
         for ($i = 1; $i <= $tenor; $i++) {
             $monthlyMargin = round($pembiayaan->margin_keuntungan / $tenor, 2);
             $monthlyCostPrice = round(($pembiayaan->harga_perolehan - $pembiayaan->uang_muka) / $tenor, 2);
             $monthlyPayment = $monthlyCostPrice + $monthlyMargin;
             $dueDate = $akadDate->copy()->addMonths($i);
 
-            // Tentukan status pembayaran cicilan
-            $isPast = $dueDate->isPast();
-            // Buat sekitar 20% angsuran yang sudah jatuh tempo menjadi menunggak (unpaid)
-            $isPaid = $isPast && (rand(1, 100) > 20);
+            // Tentukan status pembayaran cicilan (berurutan)
+            $isPaid = $i <= $paidInstallments;
 
             $angsuran = Angsuran::create([
                 'pembiayaan_id' => $pembiayaan->id,
@@ -517,7 +527,7 @@ class MurabahaProductSeeder extends Seeder
                 'angsuran_ke' => $i,
                 'tgl_jatuh_tempo' => $dueDate,
                 'nominal_angsuran' => $monthlyPayment,
-                'status' => $dueDate->isPast() ? InstallmentPaymentScheduleStatusEnum::PENDING->value : InstallmentPaymentScheduleStatusEnum::PAID->value,
+                'status' => InstallmentPaymentScheduleStatusEnum::PAID->value,
             ]);
 
             PembayaranAngsuran::create([
