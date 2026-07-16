@@ -56,7 +56,7 @@ class AnggotaService
                     ? \Carbon\Carbon::parse($user->tgl_bergabung)->format('d/m/Y')
                     : null,
                 'phone'         => $user->no_telp,
-                'status'        => $user->status,
+                'status'        => $user->anggota?->status,
                 'total_simpanan' => 'Rp ' . number_format(
                     DB::table('akun_simpanan')
                         ->where('anggota_id', $user->anggota?->id)

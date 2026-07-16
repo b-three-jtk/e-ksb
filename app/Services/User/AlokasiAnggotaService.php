@@ -63,7 +63,7 @@ class AlokasiAnggotaService
                     'avatar' => $user->foto_profile_url,
                     'no_telp' => $user->no_telp,
                     'tgl_bergabung' => optional($user->tgl_bergabung)->format('d M Y'),
-                    'status' => $user->status,
+                    'status' => $user->anggota?->status,
                     'pj_id' => $anggota?->pj_anggota_id,
                     'pj_name' => $anggota?->penanggungJawab?->nama,
                     'allocation_status' => $anggota?->pj_anggota_id ? 'Sudah Dialokasikan' : 'Belum Dialokasikan',
