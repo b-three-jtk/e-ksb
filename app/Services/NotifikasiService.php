@@ -252,10 +252,10 @@ class NotifikasiService
             ->get()
             ->map(fn(Notifikasi $notification) => [
                 'id' => $notification->id,
-                'judul' => $notification->judul,
-                'pesan' => $notification->pesan,
-                'sudah_dibaca' => $notification->sudah_dibaca,
-                'dijadwalkan_pada' => $notification->dijadwalkan_pada?->format('Y-m-d H:i:s'),
+                'title' => $notification->judul,
+                'message' => $notification->pesan,
+                'is_read' => $notification->sudah_dibaca,
+                'scheduled_at' => $notification->dijadwalkan_pada?->format('Y-m-d H:i:s'),
                 'href' => route('user.notifikasi.show', ['notification' => $notification->id]),
             ])
             ->toArray();
@@ -280,8 +280,8 @@ class NotifikasiService
             ->get()
             ->map(fn(Notifikasi $notification) => [
                 'id' => $notification->id,
-                'judul' => $notification->judul,
-                'pesan' => $notification->pesan,
+                'title' => $notification->judul,
+                'message' => $notification->pesan,
             ])
             ->toArray();
     }
