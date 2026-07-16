@@ -357,7 +357,7 @@ class DasborService
 
         $allTransactions = $query->latest()->get()
             ->map(function ($notif) use ($savingDueDate, $savingNominal) {
-                $ref = $notif->reference;
+                $ref = $notif->referensi;
 
                 if (!$ref) return null;
 
