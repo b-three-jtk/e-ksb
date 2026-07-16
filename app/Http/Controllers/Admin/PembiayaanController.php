@@ -140,7 +140,9 @@ class PembiayaanController extends Controller
     {
         $pembiayaan = Pembiayaan::with(['anggota.user', 'objekPembiayaan', 'objekPembiayaan.jenisBarang', 'jaminan'])->findOrFail($id);
 
-        if (!$pembiayaan->tgl_akad) {
+        if (request('tgl_akad')) {
+            $pembiayaan->tgl_akad = Carbon::parse(request('tgl_akad'));
+        } elseif (!$pembiayaan->tgl_akad) {
             $pembiayaan->tgl_akad = now();
         }
 
@@ -180,6 +182,7 @@ class PembiayaanController extends Controller
         $angsuran = $tenor > 0 ? $piutang / $tenor : 0;
         
         $tglAkad = $pembiayaan->tgl_akad ?? now();
+        $noDokumen = $pembiayaan->kode_pembiayaan . '/KSB-MUR/' . Carbon::parse($tglAkad)->format('m') . '/' . Carbon::parse($tglAkad)->format('Y');
         $tanggalJatuhTempo = strtolower($satuanTenor) === 'minggu'
             ? Carbon::parse($tglAkad)->translatedFormat('l')
             : Carbon::parse($tglAkad)->format('d');
@@ -198,7 +201,7 @@ class PembiayaanController extends Controller
         $pdf = Pdf::loadView('exports.murabahah_agreement', compact(
             'pembiayaan', 'src', 'ketuaKoperasi', 'hargaBeli', 'margin', 'satuanTenor',
             'hargaJual', 'uangMuka', 'piutang', 'tenor', 'angsuran', 'tanggalJatuhTempo',
-            'tglLunas', 'kuantitas', 'hargaBeliPerUnit', 'totalHargaBeli', 'namaPemasok', 'alamatPemasok'
+            'tglLunas', 'kuantitas', 'hargaBeliPerUnit', 'totalHargaBeli', 'namaPemasok', 'alamatPemasok', 'noDokumen'
         ));
 
         return $pdf->download('Murabahah_Agreement_' . $pembiayaan->kode_pembiayaan . '.pdf');

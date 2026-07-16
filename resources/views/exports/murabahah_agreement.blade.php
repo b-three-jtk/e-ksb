@@ -47,7 +47,7 @@
                 PERJANJIAN MURABAHAH
             </td>
             <td style="font-weight: bold;text-align:center;font-size:12px; border: 1px #000 solid;">
-                No. Dokumen: <span style="font-weight:normal;">......................</span>
+                No. Dokumen: <span style="font-weight:normal;">{{ $noDokumen }}</span>
             </td>
         </tr>
     </table>
@@ -60,7 +60,7 @@
             KOPERASI SYARIAH BERKAH<br>
             DAN<br>
             {{ $pembiayaan->anggota->user->nama }}<br>
-            Nomor: {{ $pembiayaan->kode_pembiayaan }}/KSB-MUR/{{ \Carbon\Carbon::parse($pembiayaan->tgl_akad)->format('m') }}/{{ \Carbon\Carbon::parse($pembiayaan->tgl_akad)->format('Y') }}
+            Nomor: {{ $noDokumen }}
         </div>
 
         <p style="margin-bottom: 10px;">Yang bertanda tangan dibawah ini:</p>
@@ -192,7 +192,7 @@
             PASAL 5<br>
             JATUH TEMPO PEMBIAYAAN
         </div>
-        <p>Fasilitas pembiayaan Murabahah yang dimaksud dalam Akad ini berlangsung untuk jangka waktu {{ $tenor }} {{ $satuanTenor }} terhitung sejak tanggal Akad ini ditandatangani serta berakhir pada tanggal {{ \Carbon\Carbon::parse($pembiayaan->tgl_lunas)->translatedFormat('d F Y') }}. Berakhirnya jatuh tempo Pembiayaan tidak dengan sendirinya menyebabkan Hutang lunas sepanjang masih terdapat sisa Hutang <strong>PENERIMA PEMBIAYAAN</strong>.</p>
+        <p>Fasilitas pembiayaan Murabahah yang dimaksud dalam Akad ini berlangsung untuk jangka waktu {{ $tenor }} {{ $satuanTenor }} terhitung sejak tanggal Akad ini ditandatangani serta berakhir pada tanggal {{ $tglLunas->translatedFormat('d F Y') }}. Berakhirnya jatuh tempo Pembiayaan tidak dengan sendirinya menyebabkan Hutang lunas sepanjang masih terdapat sisa Hutang <strong>PENERIMA PEMBIAYAAN</strong>.</p>
         
         <br><br>
         <table class="signatures" style="width: 100%; border-collapse: collapse; margin-top: 40px; page-break-inside: avoid;">
@@ -226,7 +226,7 @@
                     FORMULIR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PEMBIAYAAN MURABAHAH
                 </td>
                 <td style="font-weight: bold;text-align:center;font-size:14px; border: 1px #000 solid;">
-                    No Dokumen
+                    No. Dokumen: <span style="font-weight:normal;">{{ $noDokumen }}</span>
                 </td>
             </tr>
         </table>
@@ -284,7 +284,7 @@
                     PERJANJIAN MURABAHAH
                 </td>
                 <td style="font-weight: bold;text-align:center;font-size:12px; border: 1px #000 solid;">
-                    No. Dokumen: <span style="font-weight:normal;">......................</span>
+                    No. Dokumen: <span style="font-weight:normal;">{{ $noDokumen }}</span>
                 </td>
             </tr>
         </table>
