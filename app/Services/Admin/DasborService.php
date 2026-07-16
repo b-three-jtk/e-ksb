@@ -333,7 +333,7 @@ class DasborService
 
         $query = Notifikasi::with([
             'anggota.user',
-            'reference' => function (MorphTo $morphTo) {
+            'referensi' => function (MorphTo $morphTo) {
                 $morphTo->morphWith([
                     TransaksiSimpanan::class => ['akunSimpanan'],
                     Angsuran::class => ['pembiayaan'],
