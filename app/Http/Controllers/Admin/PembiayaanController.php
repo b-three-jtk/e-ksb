@@ -895,7 +895,7 @@ class PembiayaanController extends Controller
                     FinancingReqStatusEnum::TANGGUH->value,
                 ])->isNotEmpty();
 
-                $anggota->is_have_no_obligation = $hasActiveFinancing;
+                $anggota->is_have_no_obligation = !$hasActiveFinancing;
 
                 $hasEligibleSaving = AkunSimpanan::where('anggota_id', $anggota->id)
                     ->where('jenis_simpanan', SavingTypeEnum::TABUNGAN_ANGGOTA->value)
