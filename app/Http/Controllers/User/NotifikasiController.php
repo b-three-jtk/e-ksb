@@ -25,15 +25,15 @@ class NotifikasiController extends Controller
         $notifikasi = $this->notificationService->getMemberNotifications($anggotaId, $unreadOnly, $perPage)
             ->through(fn($notification) => [
                 'id' => $notification->id,
-                'judul' => $notification->judul,
-                'pesan' => $notification->pesan,
-                'jenis_notifikasi' => $notification->jenis_notifikasi,
-                'jenis_pengingat' => $notification->jenis_pengingat,
+                'title' => $notification->judul,
+                'message' => $notification->pesan,
+                'notification_type' => $notification->jenis_notifikasi,
+                'reminder_type' => $notification->jenis_pengingat,
                 'status' => $notification->status,
-                'sudah_dibaca' => $notification->sudah_dibaca,
-                'dijadwalkan_pada' => optional($notification->dijadwalkan_pada)?->format('d/m/Y H:i'),
-                'dikirim_pada' => optional($notification->dikirim_pada)?->format('d/m/Y H:i'),
-                'dibaca_pada' => optional($notification->dibaca_pada)?->format('d/m/Y H:i'),
+                'is_read' => $notification->sudah_dibaca,
+                'scheduled_at' => optional($notification->dijadwalkan_pada)?->format('d/m/Y H:i'),
+                'sent_at' => optional($notification->dikirim_pada)?->format('d/m/Y H:i'),
+                'read_at' => optional($notification->dibaca_pada)?->format('d/m/Y H:i'),
             ]);
 
         return Inertia::render('User/Notifications/Index', [
@@ -55,15 +55,15 @@ class NotifikasiController extends Controller
         return Inertia::render('User/Notifications/Show', [
             'notification' => [
                 'id' => $notification->id,
-                'judul' => $notification->judul,
-                'pesan' => $notification->pesan,
-                'jenis_notifikasi' => $notification->jenis_notifikasi,
-                'jenis_pengingat' => $notification->jenis_pengingat,
+                'title' => $notification->judul,
+                'message' => $notification->pesan,
+                'notification_type' => $notification->jenis_notifikasi,
+                'reminder_type' => $notification->jenis_pengingat,
                 'status' => $notification->status,
-                'sudah_dibaca' => $notification->sudah_dibaca,
-                'dijadwalkan_pada' => optional($notification->dijadwalkan_pada)?->format('d/m/Y H:i'),
-                'dikirim_pada' => optional($notification->dikirim_pada)?->format('d/m/Y H:i'),
-                'dibaca_pada' => optional($notification->dibaca_pada)?->format('d/m/Y H:i'),
+                'is_read' => $notification->sudah_dibaca,
+                'scheduled_at' => optional($notification->dijadwalkan_pada)?->format('d/m/Y H:i'),
+                'sent_at' => optional($notification->dikirim_pada)?->format('d/m/Y H:i'),
+                'read_at' => optional($notification->dibaca_pada)?->format('d/m/Y H:i'),
             ],
         ]);
     }
