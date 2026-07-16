@@ -36,14 +36,12 @@
                 PERJANJIAN WAKALAH
             </td>
             <td style="font-weight: bold;text-align:center;font-size:12px; border: 1px #000 solid;">
-                No. Dokumen: <span style="font-weight:normal;">......................</span>
+                No. Dokumen: <span style="font-weight:normal;">{{ $pembiayaan->kode_pembiayaan }}/KSB-WAK/{{ \Carbon\Carbon::parse($pembiayaan->tgl_akad)->format('m') }}/{{ \Carbon\Carbon::parse($pembiayaan->tgl_akad)->format('Y') }}</span>
             </td>
         </tr>
     </table>
 
     <div class="content">
-        <p>Nomor: {{ $pembiayaan->kode_pembiayaan }}/KSB-WAK/{{ \Carbon\Carbon::parse($pembiayaan->tgl_akad)->format('m') }}/{{ \Carbon\Carbon::parse($pembiayaan->tgl_akad)->format('Y') }}</p>
-        
         <p>Perjanjian <strong>Wakalah</strong> ini dibuat dan ditandatangani pada hari ini, {{ \Carbon\Carbon::parse($pembiayaan->tgl_akad)->translatedFormat('l') }}, tanggal {{ \Carbon\Carbon::parse($pembiayaan->tgl_akad)->translatedFormat('j F Y') }} di Kota Bandung, Provinsi Jawa Barat antara :</p>
         
         <ol>

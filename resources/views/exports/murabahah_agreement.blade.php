@@ -127,8 +127,10 @@
             <tr><td>g.</td><td>Jatuh Tempo Pembiayaan</td><td>:</td><td>{{ $tglLunas->translatedFormat('d F Y') }}</td></tr>
             <tr><td>h.</td><td>Angsuran per {{ strtolower($satuanTenor) === 'minggu' ? 'minggu' : 'bulan' }}</td><td>:</td><td>Rp {{ number_format($angsuran, 0, ',', '.') }} per {{ strtolower($satuanTenor) === 'minggu' ? 'minggu' : 'bulan' }}</td></tr>
             <tr><td>i.</td><td>Jatuh Tempo Pembayaran Angsuran</td><td>:</td><td>Setiap {{ strtolower($satuanTenor) === 'minggu' ? 'hari' : 'tanggal' }} {{ $tanggalJatuhTempo }} per {{ strtolower($satuanTenor) === 'minggu' ? 'minggu' : 'bulan' }}</td></tr>
+            @if ($pembiayaan->jaminan)
             <tr><td>j.</td><td>Jenis Jaminan</td><td>:</td><td>{{ $pembiayaan->jaminan->jenis_jaminan ?? '........................' }}</td></tr>
             <tr><td>k.</td><td>Nama Pemilik Aset</td><td>:</td><td>{{ $pembiayaan->jaminan->nama_pemilik ?? '........................' }}</td></tr>
+            @endif
         </table>
 
         <div class="pasal-title">
@@ -152,8 +154,10 @@
             <li><strong>Jatuh Tempo Pembayaran Angsuran</strong> adalah tanggal <strong>PENERIMA PEMBIAYAAN</strong> berkewajiban membayar angsuran setiap bulan.</li>
             <li><strong>Tunggakan</strong> adalah suatu Hutang Murabahah yang telah jatuh tempo, tetapi belum dibayar oleh <strong>PENERIMA PEMBIAYAAN</strong>.</li>
             <li><strong>Pemasok</strong> adalah pihak ketiga yang menyediakan Barang yang dibutuhkan oleh <strong>PENERIMA PEMBIAYAAN</strong> untuk dan atas nama <strong>PENYELENGGARA</strong>.</li>
+            @if ($pembiayaan->jaminan)
             <li><strong>Jaminan</strong> adalah jaminan yang bersifat materiil maupun immaterial untuk mendukung keyakinan <strong>PENYELENGGARA</strong> atas kemampuan dan kesanggupan <strong>PENERIMA PEMBIAYAAN</strong> untuk melunasi Hutangnya sesuai Akad.</li>
             <li><strong>Dokumen Jaminan</strong> adalah akta-akta, surat-surat bukti kepemilikan, dan surat lainnya yang merupakan bukti hak atas barang jaminan berikut surat-surat lain yang merupakan satu kesatuan dan bagian tidak terpisah dari barang jaminan guna menjamin pemenuhan kewajiban <strong>PENERIMA PEMBIAYAAN</strong> kepada <strong>PENYELENGGARA</strong> berdasarkan Akad ini.</li>
+            @endif
             <li><strong>Hari Kerja</strong> adalah Hari Kerja Otoritas Jasa Keuangan.</li>
         </ol>
 
@@ -177,9 +181,9 @@
         <ol>
             <li><strong>PENYELENGGARA</strong> akan merealisasikan Pembiayaan berdasarkan prinsip Murabahah berdasarkan Akad ini, setelah <strong>PENERIMA PEMBIAYAAN</strong> terlebih dahulu memenuhi seluruh persyaratan sebagai berikut:
                 <ol type="a">
-                    <li>Menyerahkan kepada <strong>PENYELENGGARA</strong> seluruh dokumen yang disyaratkan oleh <strong>PENYELENGGARA</strong> termasuk tetapi tidak terbatas pada dokumen bukti diri <strong>PENERIMA PEMBIAYAAN</strong>, dokumen kepemilikan jaminan dan atau surat lainnya yang berkaitan dengan Akad ini dan pengikatan jaminan, yang ditentukan dalam Surat Penawaran Pembiayaan dari <strong>PENYELENGGARA</strong>.</li>
+                    <li>Menyerahkan kepada <strong>PENYELENGGARA</strong> seluruh dokumen yang disyaratkan oleh <strong>PENYELENGGARA</strong> termasuk tetapi tidak terbatas pada dokumen bukti diri <strong>PENERIMA PEMBIAYAAN</strong>{{ $pembiayaan->jaminan ? ', dokumen kepemilikan jaminan dan atau surat lainnya yang berkaitan dengan Akad ini dan pengikatan jaminan' : '' }}, yang ditentukan dalam Surat Penawaran Pembiayaan dari <strong>PENYELENGGARA</strong>.</li>
                     <li><strong>PENERIMA PEMBIAYAAN</strong> wajib membuka dan memelihara akun pada <strong>PENYELENGGARA</strong> selama <strong>PENERIMA PEMBIAYAAN</strong> mempunyai Pembiayaan Murabahah dari <strong>PENYELENGGARA</strong>.</li>
-                    <li>Menandatangani Akad ini dan perjanjian pengikatan jaminan yang disyaratkan oleh <strong>PENYELENGGARA</strong>.</li>
+                    <li>Menandatangani Akad ini{{ $pembiayaan->jaminan ? ' dan perjanjian pengikatan jaminan yang disyaratkan oleh PENYELENGGARA' : '' }}.</li>
                     <li>Menyetorkan uang muka pembelian dan atau biaya-biaya yang disyaratkan oleh <strong>PENYELENGGARA</strong> sebagai yang tercantum dalam Surat Penawaran Pembiayaan.</li>
                 </ol>
             </li>
