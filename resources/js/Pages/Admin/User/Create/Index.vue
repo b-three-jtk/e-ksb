@@ -176,8 +176,8 @@ const submitForm = () => {
 						:only-letters="onlyLetters"
 						:only-numbers="onlyNumbers"
 						:gender-options="genderOptions"
-						:marital-status-options="props.statusPernikahanOptions"
-						:education-options="props.pendidikanOptions"
+						:status-pernikahan-options="props.statusPernikahanOptions"
+						:pendidikan-options="props.pendidikanOptions"
 					/>
 
 					<SupportingDocument
