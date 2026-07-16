@@ -785,7 +785,7 @@ class DasborService
             'jatuh_tempo' => Carbon::parse($ref->created_at)->addDays((int) $savingDueDate)->toDateString(),
             'status_notifikasi' => $notif->status ?? 'Belum Terkirim',
             'no_telp' => $notif->anggota?->user?->no_telp,
-            'message' => $notif->message,
+            'message' => $notif->pesan,
         ];
     }
 
@@ -807,7 +807,7 @@ class DasborService
             'jatuh_tempo' => Carbon::parse($ref->tgl_jatuh_tempo)->toDateString(),
             'status_notifikasi' => $notif->status ?? 'Belum Terkirim',
             'no_telp' => $notif->anggota?->user?->no_telp,
-            'message' => $notif->message,
+            'message' => $notif->pesan,
         ];
     }
 
