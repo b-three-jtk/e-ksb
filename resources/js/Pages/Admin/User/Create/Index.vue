@@ -175,7 +175,7 @@ const submitForm = () => {
 						:get-field-error="getFieldError"
 						:only-letters="onlyLetters"
 						:only-numbers="onlyNumbers"
-						:jenis_kelamin-options="genderOptions"
+						:gender-options="genderOptions"
 						:marital-status-options="props.statusPernikahanOptions"
 						:education-options="props.pendidikanOptions"
 					/>
