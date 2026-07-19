@@ -46,7 +46,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                 <div class="col-span-2 grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
                         <BaseInputAdmin type="file" label="Upload Dokumen Wakalah Tertandatangani"
-                            v-model="form.akad_wakalah_file" accept="application/pdf" required
+                            v-model="form.akad_wakalah_file" accept="application/pdf" required :disabled="!form.pembiayaan.akad_wakalah_date"
                             :error="errors?.akad_wakalah_file" @change="onFieldChange('akad_wakalah_file')" />
                         <div class="grid grid-cols-2 text-xs text-gray-400 gap-1">
                             <p>Format: PDF</p>
