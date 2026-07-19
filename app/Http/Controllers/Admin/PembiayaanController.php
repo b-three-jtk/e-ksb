@@ -533,6 +533,19 @@ class PembiayaanController extends Controller
         }
     }
 
+    private function getSaldoDanaAlokasi(Akun $danaAlokasi): float
+    {
+        $masuk = DetailJurnal::where('no_ref_akun', $danaAlokasi->no_ref_akun)
+            ->where('posisi_akun', PositionEnum::DEBIT->value)
+            ->sum('nominal');
+
+        $keluar = DetailJurnal::where('no_ref_akun', $danaAlokasi->no_ref_akun)
+            ->where('posisi_akun', PositionEnum::CREDIT->value)
+            ->sum('nominal');
+
+        return $masuk - $keluar;
+    }
+
     public function finalize(StoreFinancingRequest $request)
     {
         try {
@@ -649,9 +662,36 @@ class PembiayaanController extends Controller
                             auth()->id()
                         );
                     } else {
-                        throw ValidationException::withMessages([
-                            'harga_perolehan' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
-                        ]);
+                        $kelebihan = abs($selisih);
+                        $saldoDanaAlokasi = $this->getSaldoDanaAlokasi($danaAlokasi);
+
+                        if ($saldoDanaAlokasi < $kelebihan) {
+                            throw ValidationException::withMessages([
+                                'harga_perolehan' => 'Harga pokok aktual melebihi dana yang dialokasikan dan saldo dana alokasi tidak mencukupi untuk menutup selisih.'
+                            ]);
+                        }
+
+                        app(JurnalService::class)->create(
+                            [
+                                [
+                                    'akun' => $piutangMurabahah->no_ref_akun,
+                                    'posisi_akun' => PositionEnum::DEBIT->value,
+                                    'nominal' => $piutang,
+                                ],
+                                [
+                                    'akun' => $pembiayaanDalamProses->no_ref_akun,
+                                    'posisi_akun' => PositionEnum::CREDIT->value,
+                                    'nominal' => $allocatedAmount,
+                                ],
+                                [
+                                    'akun' => $danaAlokasi->no_ref_akun,
+                                    'posisi_akun' => PositionEnum::CREDIT->value,
+                                    'nominal' => $kelebihan,
+                                ],
+                            ],
+                            now()->toDateString(),
+                            auth()->id()
+                        );
                     }
                 }
 
@@ -714,9 +754,41 @@ class PembiayaanController extends Controller
                         auth()->id()
                         );
                     } else {
-                        throw ValidationException::withMessages([
-                            'harga_perolehan' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
-                        ]);
+                        $kelebihan = abs($selisih);
+                        $saldoDanaAlokasi = $this->getSaldoDanaAlokasi($danaAlokasi);
+
+                        if ($saldoDanaAlokasi < $kelebihan) {
+                            throw ValidationException::withMessages([
+                                'harga_perolehan' => 'Harga pokok aktual melebihi dana yang dialokasikan dan saldo dana alokasi tidak mencukupi untuk menutup selisih.'
+                            ]);
+                        }
+
+                        app(JurnalService::class)->create(
+                        [
+                            [
+                                'akun' => $kas->no_ref_akun,
+                                'posisi_akun' => PositionEnum::DEBIT->value,
+                                'nominal' => $piutang + $margin,
+                            ],
+                            [
+                                'akun' => $pembiayaanDalamProses->no_ref_akun,
+                                'posisi_akun' => PositionEnum::CREDIT->value,
+                                'nominal' => $allocatedAmount,
+                            ],
+                            [
+                                'akun' => $danaAlokasi->no_ref_akun,
+                                'posisi_akun' => PositionEnum::CREDIT->value,
+                                'nominal' => $kelebihan,
+                            ],
+                            [
+                                'akun' => $pendapatanMargin->no_ref_akun,
+                                'posisi_akun' => PositionEnum::CREDIT->value,
+                                'nominal' => $margin,
+                            ],
+                        ],
+                        now()->toDateString(),
+                        auth()->id()
+                        );
                     }
 
                     // Generate Berita Acara Pelunasan
@@ -827,9 +899,36 @@ class PembiayaanController extends Controller
                             auth()->id()
                         );
                     } else {
-                        throw ValidationException::withMessages([
-                            'harga_perolehan' => 'Harga pokok aktual melebihi dana yang telah dialokasikan.'
-                        ]);
+                        $kelebihan = abs($selisih);
+                        $saldoDanaAlokasi = $this->getSaldoDanaAlokasi($danaAlokasi);
+
+                        if ($saldoDanaAlokasi < $kelebihan) {
+                            throw ValidationException::withMessages([
+                                'harga_perolehan' => 'Harga pokok aktual melebihi dana yang dialokasikan dan saldo dana alokasi tidak mencukupi untuk menutup selisih.'
+                            ]);
+                        }
+
+                        app(JurnalService::class)->create(
+                            [
+                                [
+                                    'akun' => $piutangMurabahah->no_ref_akun,
+                                    'posisi_akun' => PositionEnum::DEBIT->value,
+                                    'nominal' => $piutang,
+                                ],
+                                [
+                                    'akun' => $pembiayaanDalamProses->no_ref_akun,
+                                    'posisi_akun' => PositionEnum::CREDIT->value,
+                                    'nominal' => $allocatedAmount,
+                                ],
+                                [
+                                    'akun' => $danaAlokasi->no_ref_akun,
+                                    'posisi_akun' => PositionEnum::CREDIT->value,
+                                    'nominal' => $kelebihan,
+                                ],
+                            ],
+                            now()->toDateString(),
+                            auth()->id()
+                        );
                     }
                 }
                 return $pembiayaan;
