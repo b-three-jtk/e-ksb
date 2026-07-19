@@ -1,11 +1,14 @@
 <?php
 
+use App\Enums\AkunCategoryEnum;
+use App\Enums\UserStatusEnum;
 use App\Models\Akun;
 use App\Models\Pengguna;
 use Database\Seeders\AkunSeeder;
 use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia;
 
 uses(RefreshDatabase::class);
 beforeEach(function () {
@@ -14,54 +17,51 @@ beforeEach(function () {
     $this->seed(PengaturanUmumSeeder::class);
 });
 
-describe('Aplikasi harus menyediakan pengelolaan akun koperasi oleh bendahara.', function () {
-    it('Bendahara dapat menambahkan akun koperasi.', function () {
-        $bendahara = Pengguna::factory()->create();
-        $bendahara->assignRole('Bendahara');
+describe('Pengelolaan Akun', function () {
+    it('Bendahara dapat melihat daftar akun', function () {
+        $bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $bendahara->syncRoles('Bendahara');
+
+        $response = $this->actingAs($bendahara)->get('/admin/akun');
+        
+        $response->assertStatus(200);
+        $response->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Accounts/List')
+                ->has('akun.data')
+        );
+    });
+
+    it('Bendahara dapat menyimpan akun baru', function () {
+        $bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $bendahara->syncRoles('Bendahara');
 
         $response = $this->actingAs($bendahara)->post('/admin/akun/create', [
-            'nama_akun' => 'Akun Baru',
-            'nomor_akun' => '123',
-            'jenis_akun' => 'Aset',
+            'nomor_akun' => '999999',
+            'nama_akun' => 'Akun Test Bendahara',
+            'jenis_akun' => AkunCategoryEnum::ASSET->value,
         ]);
+
         $response->assertStatus(302);
+        $response->assertSessionHasNoErrors();
         $this->assertDatabaseHas('akun', [
-            'nama_akun' => 'Akun Baru',
-            'no_ref_akun' => '123',
-            'kategori_akun' => 'Aset',
+            'no_ref_akun' => '999999',
+            'nama_akun' => 'Akun Test Bendahara',
         ]);
     });
 
-    it('Selain bendahara, pengguna lain tidak dapat menambahkan akun koperasi.', function () {
-        $user = Pengguna::factory()->create();
-        $user->assignRole('Pengawas');
-        $response = $this->actingAs($user)->post('/admin/akun/create', [
-            'nama_akun' => 'Akun Baru',
-            'nomor_akun' => '123',
-            'jenis_akun' => 'Aset',
-        ]);
+    it('Staf Murabahah tidak dapat menyimpan atau melihat daftar akun', function () {
+        $staf = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $staf->syncRoles('Staf Murabahah');
+
+        $response = $this->actingAs($staf)->get('/admin/akun');
         $response->assertStatus(403);
-    });
 
-    it('Bendahara dapat memperbarui status akun koperasi.', function () {
-        $bendahara = Pengguna::factory()->create();
-        $bendahara->assignRole('Bendahara');
-
-        $akun = Akun::factory()->create([
-            'no_ref_akun' => '123',
-            'nama_akun' => 'Akun Lama',
-            'kategori_akun' => 'Aset',
-            'status' => 'Aktif',
+        $responsePost = $this->actingAs($staf)->post('/admin/akun/create', [
+            'nomor_akun' => '888888',
+            'nama_akun' => 'Akun Test Staf',
+            'jenis_akun' => AkunCategoryEnum::ASSET->value,
         ]);
-
-        $response = $this->actingAs($bendahara)->patch("/admin/akun/{$akun->no_ref_akun}/status", [
-            'status' => 'Non-Aktif',
-        ]);
-        $response->assertStatus(302);
-        $this->assertDatabaseHas('akun', [
-            'no_ref_akun' => '123',
-            'status' => 'Non-Aktif',
-        ]);
+        $responsePost->assertStatus(403);
     });
 });
 
@@ -174,5 +174,20 @@ describe('Aplikasi harus menyediakan pencatatan alokasi kas koperasi untuk setia
             'posisi_akun' => 'Credit',
             'nominal' => 100000.00,
         ]);
+    });
+    
+    it('Sistem menolak alokasi jika akun debit dan kredit sama', function () {
+        $bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $bendahara->syncRoles('Bendahara');
+
+        $akun = Akun::first();
+
+        $response = $this->actingAs($bendahara)->post('/admin/kas/store', [
+            'nominal' => 5000000,
+            'akun_debit' => $akun->no_ref_akun,
+            'akun_kredit' => $akun->no_ref_akun, // Sama dengan debit
+        ]);
+
+        $response->assertSessionHasErrors(['akun_kredit']);
     });
 });

@@ -201,7 +201,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
             ]);
 
         $response->assertSessionHasErrors([
-            'error' => "Gagal menyimpan permohonan: Pemohon masih memiliki pembiayaan yang sedang berjalan atau dalam proses"
+            'error' => "Gagal menyimpan permohonan: Pemohon masih memiliki pembiayaan yang sedang berjalan"
         ]);
     });
 
@@ -276,6 +276,7 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
 
         $response->assertStatus(403);
     });
+
 });
 
 describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah dengan akad wakalah oleh anggota sebagai perwakilan (muwakkil) dari koperasi.', function () {

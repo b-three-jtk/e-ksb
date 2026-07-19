@@ -32,7 +32,10 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         /** @var \Tests\TestCase $this */
         $this->userMember = Pengguna::factory()->create(['nama' => 'Leon S Kennedy', 'status' => UserStatusEnum::ACTIVE->value]);
         $this->userMember->assignRole('Anggota');
-        $this->anggota = Anggota::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value]);
+        $this->pjAnggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $this->pjAnggota->assignRole('Penanggung Jawab Anggota');
+
+        $this->anggota = Anggota::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value, 'pj_anggota_id' => $this->pjAnggota->id]);
 
         AkunSimpanan::factory()->create([
             'anggota_id' => $this->anggota->id,
@@ -46,6 +49,9 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
 
         $this->ketuaMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $this->ketuaMurabahah->assignRole('Ketua Murabahah');
+
+        $this->bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $this->bendahara->assignRole('Bendahara');
 
         $this->pemasok = Pemasok::create([
             'nama_pemasok' => 'PT. Pemasok Integrasi',
@@ -77,7 +83,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                 'nik' => '1234567890123456',
                 'no_telp' => '08123456789',
                 'status_pekerjaan' => 'Karyawan Swasta',
-                'ahli_waris' => [['nama_ahli_waris' => 'Ahli Waris', 'nik_ahli_waris' => '1234567890654321', 'hubungan' => 'Anak', 'kontak_ahli_waris' => '081234567890']],
+                'ahli_waris' => [['nama_ahli_waris' => 'Ahli Waris', 'nik_ahli_waris' => '1234567890654321', 'hubungan' => 'Anak Laki-laki', 'kontak_ahli_waris' => '081234567890']],
             ],
             'jaminan' => [
                 'jenis_jaminan' => 'Logam Mulia',
@@ -199,7 +205,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         ]);
 
         // tes bayar angsurannya sekali lunas
-        $this->actingAs($this->staffMurabahah)
+        $this->actingAs($this->pjAnggota)
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
                 'angsuran_id' => $angsuran->id,
                 'pembiayaan_id' => $pembiayaan->id,
@@ -208,9 +214,15 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                 'metode_pembayaran' => 'Tunai',
             ])->assertSessionHasNoErrors()->assertStatus(302);
 
+        $payment = \App\Models\PembayaranAngsuran::where('angsuran_id', $angsuran->id)->first();
+        $this->actingAs($this->bendahara)
+            ->post("/admin/pembiayaan/payments/{$payment->id}/verify")
+            ->assertSessionHasNoErrors();
+
         $this->assertDatabaseHas('pembayaran_angsuran', [
             'angsuran_id' => $angsuran->id,
             'jumlah_angsuran_dibayar' => 5500000,
+            'status' => 'Diverifikasi',
         ]);
 
         // status pembiayaan harusnya lunas kalau angsuran udah beres semua
@@ -277,7 +289,7 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
         ]);
 
         // tes bayar cicilan bulan pertama
-        $this->actingAs($this->staffMurabahah)
+        $this->actingAs($this->pjAnggota)
             ->post("/admin/pembiayaan/{$pembiayaan->id}/payments/store", [
                 'angsuran_id' => $installment1->id,
                 'pembiayaan_id' => $pembiayaan->id,
@@ -286,12 +298,20 @@ describe('IT01 Skenario Pembiayaan Murabahah', function () {
                 'metode_pembayaran' => 'Tunai',
             ])->assertSessionHasNoErrors();
 
+        $payment1 = \App\Models\PembayaranAngsuran::where('angsuran_id', $installment1->id)->first();
+        $this->actingAs($this->bendahara)->post("/admin/pembiayaan/payments/{$payment1->id}/verify")->assertSessionHasNoErrors();
+
         // anggota mau lunasin sisa angsurannya lebih awal
-        $this->actingAs($this->staffMurabahah)
+        $this->actingAs($this->pjAnggota)
             ->post('/admin/pembiayaan/repayment', [
                 'method' => 'Tunai',
                 'angsuran_id' => $installment2->id,
             ])->assertSessionHasNoErrors()->assertStatus(302);
+            
+        $payment2 = \App\Models\PembayaranAngsuran::where('angsuran_id', $installment2->id)->first();
+        if ($payment2) {
+            $this->actingAs($this->bendahara)->post("/admin/pembiayaan/payments/{$payment2->id}/verify")->assertSessionHasNoErrors();
+        }
 
         $this->assertDatabaseHas('pembiayaan', [
             'id' => $pembiayaan->id,
@@ -340,6 +360,121 @@ describe('IT02 Skenario Pengunduran Diri Anggota', function () {
         $this->assertDatabaseHas('pengguna', [
             'id' => $this->userMember->id,
             'status' => UserStatusEnum::INACTIVE->value,
+        ]);
+    });
+});
+
+describe('IT03 Skenario Transaksi Simpanan', function () {
+    beforeEach(function () {
+        /** @var \Tests\TestCase $this */
+        $this->userMember = Pengguna::factory()->create(['nama' => 'Ada Wong', 'status' => UserStatusEnum::ACTIVE->value]);
+        $this->userMember->assignRole('Anggota');
+        $this->staffSimpanan = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $this->staffSimpanan->assignRole('Penanggung Jawab Anggota');
+
+        $this->anggota = Anggota::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value, 'pj_anggota_id' => $this->staffSimpanan->id]);
+
+        $this->bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $this->bendahara->assignRole('Bendahara');
+        
+        $this->akunSimpanan = AkunSimpanan::factory()->create([
+            'anggota_id' => $this->anggota->id,
+            'saldo' => 0,
+            'jenis_simpanan' => 'Tabungan Anggota',
+        ]);
+    });
+
+    it('Skenario Penyetoran Tunai -> Verifikasi Bendahara', function () {
+        /** @var \Tests\TestCase $this */
+        $this->actingAs($this->staffSimpanan)
+            ->post('/admin/savings/deposit', [
+                'anggota_id' => $this->anggota->id,
+                'saving_category' => 'Tabungan Anggota',
+                'amount' => 500000,
+                'date' => now()->format('Y-m-d'),
+                'metode_pembayaran_simpanan' => 'Tunai',
+                'catatan' => 'Setoran awal',
+            ])->assertSessionHasNoErrors();
+
+        $transaksi = \App\Models\TransaksiSimpanan::where('akun_simpanan_id', $this->akunSimpanan->id)->first();
+        expect($transaksi)->not->toBeNull();
+
+        $this->actingAs($this->bendahara)
+            ->post("/admin/savings/{$transaksi->id}/verify")
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('transaksi_simpanan', [
+            'id' => $transaksi->id,
+            'status' => 'Diverifikasi',
+        ]);
+        
+        $this->assertDatabaseHas('akun_simpanan', [
+            'id' => $this->akunSimpanan->id,
+            'saldo' => 500000,
+        ]);
+    });
+});
+
+describe('IT04 Skenario Pembayaran Angsuran Khusus', function () {
+    beforeEach(function () {
+        /** @var \Tests\TestCase $this */
+        $this->userMember = Pengguna::factory()->create(['nama' => 'Albert Wesker', 'status' => UserStatusEnum::ACTIVE->value]);
+        $this->userMember->assignRole('Anggota');
+        $this->pjAnggota = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $this->pjAnggota->assignRole('Penanggung Jawab Anggota');
+
+        $this->anggota = Anggota::factory()->create(['pengguna_id' => $this->userMember->id, 'status' => MemberStatusEnum::ACTIVE->value, 'pj_anggota_id' => $this->pjAnggota->id]);
+
+        $this->bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $this->bendahara->assignRole('Bendahara');
+
+        $this->jenisBarang = JenisBarang::first();
+
+        // Buat data pembiayaan yang sudah aktif
+        $this->pembiayaan = Pembiayaan::factory()->create([
+            'anggota_id' => $this->anggota->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'metode_pembayaran' => 'Cicilan',
+        ]);
+
+        // Buat 1 angsuran terjadwal
+        $this->angsuran = Angsuran::factory()->create([
+            'pembiayaan_id' => $this->pembiayaan->id,
+            'angsuran_ke' => 1,
+            'nominal_angsuran' => 500000,
+            'tgl_jatuh_tempo' => now()->addMonth(),
+            'status' => 'Terjadwal',
+        ]);
+    });
+
+    it('Skenario Pembayaran Angsuran -> Verifikasi Bendahara', function () {
+        /** @var \Tests\TestCase $this */
+        // Penanggung Jawab Anggota menerima pembayaran dari anggota
+        $this->actingAs($this->pjAnggota)
+            ->post("/admin/pembiayaan/{$this->pembiayaan->id}/payments/store", [
+                'angsuran_id' => $this->angsuran->id,
+                'pembiayaan_id' => $this->pembiayaan->id,
+                'jumlah_angsuran_dibayar' => 500000,
+                'tgl_pembayaran' => now()->format('Y-m-d'),
+                'metode_pembayaran' => 'Tunai',
+            ])->assertSessionHasNoErrors();
+
+        $payment = \App\Models\PembayaranAngsuran::where('angsuran_id', $this->angsuran->id)->first();
+        expect($payment)->not->toBeNull();
+
+        // Bendahara melakukan verifikasi penerimaan kas dari pembayaran angsuran
+        $this->actingAs($this->bendahara)
+            ->post("/admin/pembiayaan/payments/{$payment->id}/verify")
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('pembayaran_angsuran', [
+            'id' => $payment->id,
+            'status' => 'Diverifikasi',
+        ]);
+        
+        $this->assertDatabaseHas('angsuran', [
+            'id' => $this->angsuran->id,
+            'status' => \App\Enums\InstallmentPaymentScheduleStatusEnum::PAID->value,
         ]);
     });
 });
