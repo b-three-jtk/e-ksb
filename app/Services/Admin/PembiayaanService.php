@@ -152,7 +152,7 @@ class PembiayaanService
             'hubungans' => array_column(AhliWarisEnum::cases(), 'value'),
             'conditions' => array_column(ConditionEnum::cases(), 'value'),
             'jenisBarang' => DB::table('jenis_barang')->select('id', 'nama_jenis_barang')->get(),
-            'pemasok' => DB::table('pemasok')->select('id', 'nama_pemasok', 'alamat_pemasok')->get(),
+            'pemasok' => DB::table('pemasok')->select('id', 'nama_pemasok', 'alamat_pemasok', 'kontak_pemasok')->get(),
             'margin_percentage' => PengaturanUmum::where('key', 'murabahah_margin_percentage')->where('tgl_diberlakukan', '<=', now())->latest()->first()?->value,
             'tanggal_akhir_periode' => PengaturanUmum::where('key', 'tanggal_akhir_periode')->latest()->first()?->value,
         ];

@@ -1265,7 +1265,7 @@ class PembiayaanController extends Controller
         $validatedData = $request->validate([
             'nama_pemasok' => 'required|string|max:255|unique:pemasok,nama_pemasok',
             'alamat_pemasok' => 'required|string|max:255',
-            'contact' => 'required|string|max:255',
+            'kontak_pemasok' => 'required|string|max:255',
         ]);
 
         $pemasok = Pemasok::create($validatedData);

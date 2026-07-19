@@ -61,7 +61,7 @@ const handlePemasokChange = (value) => {
         props.form.pembiayaan.pemasok_id = null
         props.form.pemasok.nama_pemasok = ''
         props.form.pemasok.alamat_pemasok = ''
-        props.form.pemasok.contact = ''
+        props.form.pemasok.kontak_pemasok = ''
     } else {
         showNewPemasokInput.value = false
         props.form.pembiayaan.pemasok_id = value
@@ -69,7 +69,7 @@ const handlePemasokChange = (value) => {
         const selectedPemasok = props.data.pemasok.find(s => String(s.id) === String(value))
         props.form.pemasok.nama_pemasok = selectedPemasok?.nama_pemasok || ''
         props.form.pemasok.alamat_pemasok = selectedPemasok?.alamat_pemasok || ''
-        props.form.pemasok.contact = selectedPemasok?.contact || ''
+        props.form.pemasok.kontak_pemasok = selectedPemasok?.kontak_pemasok || ''
     }
 }
 
@@ -80,7 +80,7 @@ const createNewPemasok = async () => {
         const response = await axios.post('/admin/pemasok', {
             nama_pemasok: newPemasokName.value,
             alamat_pemasok: newPemasokAddress.value,
-            contact: props.form.pemasok.contact,
+            kontak_pemasok: newPemasokContact.value,
         })
 
         props.data.pemasok.push(response.data)
@@ -88,7 +88,7 @@ const createNewPemasok = async () => {
         props.form.pembiayaan.pemasok_id = response.data.id
         props.form.pemasok.nama_pemasok = response.data.nama_pemasok || newPemasokName.value
         props.form.pemasok.alamat_pemasok = response.data.alamat_pemasok || newPemasokAddress.value
-        props.form.pemasok.contact = response.data.contact || props.form.pemasok.contact
+        props.form.pemasok.kontak_pemasok = response.data.kontak_pemasok || newPemasokContact.value
 
         // Reset state modal
         newPemasokName.value = ''
@@ -155,7 +155,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                 <!-- Pemasok search / input -->
                 <BaseInputAdmin v-model="form.pembiayaan.pemasok_id" label="Pemasok" type="select"
                     :selectables="pemasokSelectables" @update:modelValue="handlePemasokChange" />
-                <BaseInputAdmin v-model="form.pemasok.contact" label="Kontak" type="text"
+                <BaseInputAdmin v-model="form.pemasok.kontak_pemasok" label="Kontak" type="text"
                     placeholder="Masukkan kontak pemasok" />
                 <BaseInputAdmin v-model="form.pemasok.alamat_pemasok" label="Alamat" type="textarea" rows="3"
                     placeholder="Masukkan alamat pemasok" />
@@ -182,7 +182,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kontak Pemasok</label>
-                    <input v-model="props.form.pemasok.contact" type="text" placeholder="Masukkan kontak pemasok..."
+                    <input v-model="newPemasokContact" type="text" placeholder="Masukkan kontak pemasok..."
                         class="w-full px-4 py-2 border border-gray-300 dark:text-gray-300 font-body rounded-lg focus:border-brand-300 focus:ring-brand-500/10 focus:ring-3 focus:outline-none"
                         @keyup.enter="createNewPemasok" />
                 </div>
