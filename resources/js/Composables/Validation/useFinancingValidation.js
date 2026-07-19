@@ -47,7 +47,7 @@ export function useFinancingValidation(form) {
             errs.jenis_kelamin = 'Jenis kelamin wajib dipilih.'
 
         if (!isValidDependents(m.jml_tanggungan))
-            errs.jml_tanggungan = 'Jumlah tanggungan harus angka.'
+            errs.jml_tanggungan = 'Jumlah tanggungan harus angka positif.'
 
         if (!form.anggota.ahli_waris || form.anggota.ahli_waris.length === 0) {
             errs.ahli_waris = 'Minimal satu data ahli waris wajib ditambahkan.'
@@ -132,6 +132,9 @@ export function useFinancingValidation(form) {
                 errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
             else if (form.pembiayaan.harga_perkiraan <= 0)
                 errs.harga_perkiraan = 'Harga perkiraan harus lebih dari 0.'
+
+            if (Number(form.pembiayaan.uang_muka) >= Number(form.pembiayaan.harga_perkiraan))
+                errs.uang_muka = 'Uang muka tidak boleh sama atau lebih besar dari harga perkiraan.'
         }
 
         if (!form.pembiayaan.spesifikasi_barang?.trim())
@@ -299,8 +302,8 @@ function getAllKeysForStep(step) {
             'alamat_ktp', 'ahli_waris', 'eligible_saving', 'no_obligation'],
         2: ['jabatan_pekerjaan', 'nama_perusahaan', 'bidang_usaha',
             'lama_bekerja', 'no_telp_kantor', 'alamat_tempat_bekerja',
-            'income_slip_file', 'bank_book_file'],
-        3: ['financing_name', 'jenis_jaminan'],
+            'income_slip_file', 'bank_book_file', 'netIncome'],
+        3: ['nama_barang', 'jenis_jaminan', 'harga_perkiraan', 'uang_muka', 'spesifikasi_barang', 'jenis_jaminan', 'nama_pemilik', 'nilai_perkiraan_pasar', 'lokasi_kondisi_jaminan'],
         4: ['akad_wakalah_file', 'akad_wakalah_date'],
         5: ['nama_pemasok', 'harga_perolehan', 'purchase_receipt_file'],
         6: ['status', 'tgl_akad', 'akad_document_file', 'metode_pembayaran'],

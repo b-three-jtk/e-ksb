@@ -70,7 +70,7 @@ class StorePreFinancingRequest extends FormRequest
             'pembiayaan.spesifikasi_barang' => 'required|string|max:1000',
             'pembiayaan.status' => 'required|string|max:255',
             'pembiayaan.harga_perkiraan' => 'required|numeric|gt:0',
-            'pembiayaan.uang_muka' => 'nullable|numeric|min:0',
+            'pembiayaan.uang_muka' => 'nullable|numeric|min:0|lt:pembiayaan.harga_perkiraan',
             'pembiayaan.satuan_tenor' => 'nullable|string|in:Bulan,Minggu',
 
             // Jaminan data

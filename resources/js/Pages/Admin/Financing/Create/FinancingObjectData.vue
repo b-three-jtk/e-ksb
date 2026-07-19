@@ -93,9 +93,9 @@ const onFieldChange = (field) => emit('validate-field', field)
                 :selectables="data.conditions.map((c) => ({ value: c, text: c }))" />
             <BaseInputAdmin required v-model="form.pembiayaan.kuantitas" min="1" label="Jumlah" type="number" />
             <BaseInputAdmin required v-model="form.pembiayaan.harga_perkiraan" label="Harga Perkiraan"
-                :error="errors?.harga_perkiraan" isMoney :disabled="form.pembiayaan.status === 'Disetujui'" />
+                :error="errors?.harga_perkiraan" isMoney :disabled="form.pembiayaan.status === 'Disetujui'"/>
             <BaseInputAdmin v-model.number="form.pembiayaan.uang_muka" label="Uang Muka" isMoney
-                    placeholder="Masukkan uang muka" :disabled="form.pembiayaan.status === 'Disetujui'" />
+                    placeholder="Masukkan uang muka" :disabled="form.pembiayaan.status === 'Disetujui'" :error="errors?.uang_muka" />
             <BaseInputAdmin v-model="form.pembiayaan.spesifikasi_barang" label="Deskripsi" type="textarea" rows="4" required
                 :error="errors?.spesifikasi_barang" placeholder="Masukkan deskripsi produk" />
         </div>
