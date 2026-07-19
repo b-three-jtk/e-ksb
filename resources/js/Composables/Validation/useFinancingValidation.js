@@ -102,6 +102,14 @@ export function useFinancingValidation(form) {
         else if (form.bank_book_file && form.bank_book_file.size > 2 * 1024 * 1024)
             errs.bank_book_file = 'Ukuran buku tabungan maksimal 2 MB.'
 
+        const totalIncome = (Number(m.jml_gaji_pokok) || 0) + (Number(m.jml_penghasilan_usaha) || 0) + (Number(m.jml_penghasilan_pasangan) || 0) + (Number(m.jml_penghasilan_lainnya) || 0);
+        const totalExpense = (Number(m.jml_biaya_hidup_keluarga) || 0) + (Number(m.jml_biaya_pendidikan) || 0) + (Number(m.jml_cicilan) || 0) + (Number(m.jml_biaya_lainnya) || 0);
+        const netIncome = totalIncome - totalExpense;
+
+        if (netIncome <= 0) {
+            errs.netIncome = 'Sisa penghasilan bulanan tidak boleh minus atau 0.';
+        }
+
         return errs
     }
 

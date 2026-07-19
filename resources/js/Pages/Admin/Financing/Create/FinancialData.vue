@@ -158,7 +158,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                         </tr>
                     </tbody>
                 </table>
-                <div class="font-semibold flex justify-between text-primary bg-light-bg rounded-xl border mt-2">
+                <div :class="netIncome <= 0 ? 'text-red-800 bg-red-100' : 'text-primary bg-light-bg'" class="font-semibold flex justify-between rounded-xl border mt-2">
                     <div class="py-4 text-left pl-6">Sisa Penghasilan Bulanan</div>
                     <div class="pt-4 text-right pr-6">{{ moneyParser(netIncome) }}</div>
                 </div>

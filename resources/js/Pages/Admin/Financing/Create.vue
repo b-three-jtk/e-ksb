@@ -25,7 +25,7 @@ onMounted(() => {
         if (form.pembiayaan.status === 'Disetujui') {
             activeStep.value = 4
         } else if (['Disetujui dengan Catatan', 'Menunggu Kelengkapan Dokumen', 'Ditolak'].includes(form.pembiayaan.status)) {
-            activeStep.value = 3
+            activeStep.value = 1
         }
     }
 })
