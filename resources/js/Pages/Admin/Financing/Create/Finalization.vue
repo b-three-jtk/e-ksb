@@ -292,12 +292,15 @@ const onFieldChange = (field) => emit('validate-field', field)
         </section>
 
         <div class="px-8 pb-8 grid grid-cols-2 items-end gap-4">
-            <a :href="form.pembiayaan.id ? `/admin/pembiayaan/${form.pembiayaan.id}/murabahah/download?tenor=${tenor}&satuan_tenor=${form.pembiayaan.satuan_tenor || 'Bulan'}&uang_muka=${form.pembiayaan.uang_muka || 0}&margin=${form.pembiayaan.margin_keuntungan || 0}&nama_pemasok=${form.pemasok?.nama_pemasok || ''}&alamat_pemasok=${form.pemasok?.alamat_pemasok || ''}` : '#'" target="_blank"
-                class="border border-gray-300 flex justify-between rounded-lg p-4">
-                <div class="text-sm text-primary hover:underline">
+            <a :href="form.pembiayaan.id && form.pembiayaan.tgl_akad ? `/admin/pembiayaan/${form.pembiayaan.id}/murabahah/download?tenor=${tenor}&satuan_tenor=${form.pembiayaan.satuan_tenor || 'Bulan'}&uang_muka=${form.pembiayaan.uang_muka || 0}&margin=${form.pembiayaan.margin_keuntungan || 0}&nama_pemasok=${form.pemasok?.nama_pemasok || ''}&alamat_pemasok=${form.pemasok?.alamat_pemasok || ''}` : '#'" target="_blank"
+                :class="[
+                    'border flex justify-between rounded-lg p-4 transition-colors',
+                    (!form.pembiayaan.tgl_akad) ? 'border-gray-200 bg-gray-50 cursor-not-allowed pointer-events-none' : 'border-primary bg-primary/5 hover:bg-primary/10'
+                ]">
+                <div :class="['text-sm font-medium', (!form.pembiayaan.tgl_akad) ? 'text-gray-400' : 'text-primary']">
                     Unduh Dokumen Akad Murabahah
                 </div>
-                <span class="icon-[tabler--download] text-green-500"></span>
+                <span :class="['icon-[tabler--download] text-xl', (!form.pembiayaan.tgl_akad) ? 'text-gray-400' : 'text-primary']"></span>
             </a>
             <div>
                 <BaseInputAdmin
@@ -306,6 +309,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     v-model="form.akad_document_file"
                     accept="application/pdf"
                     required
+                    :disabled="!form.pembiayaan.tgl_akad"
                     :error="errors?.akad_document_file"
                     @change="onFieldChange('akad_document_file')"
                 />
