@@ -119,8 +119,12 @@ export function useFinancingValidation(form) {
         else if (!form.pembiayaan.kuantitas)
             errs.kuantitas = 'Jumlah objek pembiayaan wajib diisi.'
 
-        if (!form.pembiayaan.harga_perkiraan)
-            errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
+        if (form.pembiayaan.status !== 'Disetujui') {
+            if (!form.pembiayaan.harga_perkiraan && form.pembiayaan.harga_perkiraan !== 0)
+                errs.harga_perkiraan = 'Harga perkiraan wajib diisi.'
+            else if (form.pembiayaan.harga_perkiraan <= 0)
+                errs.harga_perkiraan = 'Harga perkiraan harus lebih dari 0.'
+        }
 
         if (!form.pembiayaan.spesifikasi_barang?.trim())
             errs.spesifikasi_barang = 'Spesifikasi objek pembiayaan wajib diisi.'

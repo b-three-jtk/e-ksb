@@ -69,7 +69,7 @@ class StorePreFinancingRequest extends FormRequest
             'pembiayaan.kuantitas' => 'required|integer|min:1',
             'pembiayaan.spesifikasi_barang' => 'required|string|max:1000',
             'pembiayaan.status' => 'required|string|max:255',
-            'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
+            'pembiayaan.harga_perkiraan' => 'required|numeric|gt:0',
             'pembiayaan.uang_muka' => 'nullable|numeric|min:0',
             'pembiayaan.satuan_tenor' => 'nullable|string|in:Bulan,Minggu',
 

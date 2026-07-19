@@ -78,7 +78,7 @@ class StoreFinancingDraftRequest extends FormRequest
             'pembiayaan.catatan' => 'nullable|string|max:1000',
             'pembiayaan.status' => 'nullable|string|max:255',
             'pembiayaan.tenor' => 'nullable|integer',
-            'pembiayaan.harga_perkiraan' => 'required|numeric|min:0',
+            'pembiayaan.harga_perkiraan' => 'required|numeric|gt:0',
             'is_wakalah' => 'nullable|boolean',
             'pembiayaan.akad_wakalah_date' => 'nullable|date',
             'pembiayaan.pemasok_id' => 'nullable|exists:pemasok,id',

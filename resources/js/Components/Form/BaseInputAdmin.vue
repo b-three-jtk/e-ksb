@@ -148,7 +148,7 @@ const handleMoneyInput = (event: Event) => {
                 class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-700 dark:text-gray-300">Rp</span>
             <input type="text" inputmode="numeric" :value="formatMoney(modelValue)" @input="handleMoneyInput"
                 :disabled="disabled" :placeholder="placeholder || '0'" :class="[
-                    'h-11 w-full rounded-lg font-body pl-9 pr-4 py-2.5 text-sm font-medium border bg-transparent text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
+                    'h-11 w-full rounded-lg font-body pl-9 pr-4 py-2.5 text-sm font-medium border bg-transparent text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-75',
                     error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
                 ]"
                 class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
@@ -211,7 +211,7 @@ const handleMoneyInput = (event: Event) => {
         <!-- Regular Input (default) -->
         <input v-else-if="inputType !== 'password'" :type="inputType" :value="modelValue"
             @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)" :placeholder="placeholder"
-            :maxlength="max" :minlength="min" :pattern="pattern" :disabled="disabled" :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3',
+            :maxlength="max" :minlength="min" :pattern="pattern" :disabled="disabled" :class="['h-11 w-full rounded-lg border bg-transparent font-body px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-theme-xs focus:outline-hidden focus:ring-3 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-75',
                 error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
             ]"
             class="dark:bg-dark-900 text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
