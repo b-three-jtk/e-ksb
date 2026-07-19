@@ -201,6 +201,7 @@ class PembiayaanService
                 'objekPembiayaan.pemasok',
                 'jaminan',
                 'wakalah',
+                'verification.verifikator',
             ])
             ->first();
     }

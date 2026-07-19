@@ -139,7 +139,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                                 </p>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-700">{{ verification.catatan }}</p>
+                        <p class="text-sm text-gray-700 wrap-break-word">{{ verification.catatan }}</p>
                     </div>
                 </template>
                 <p v-else class="text-sm text-gray-500">Belum ada hasil verifikasi.</p>

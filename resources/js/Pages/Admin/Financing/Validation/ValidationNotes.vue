@@ -24,6 +24,38 @@ const expenses = computed(() => [
 ])
 
 const tenor = ref(12)
+const satuan_tenor = ref('Bulan')
+
+const maxTenor = computed(() => {
+    const akhirPeriodeStr = props.data?.tanggal_akhir_periode
+    if (!akhirPeriodeStr) return 60;
+
+    const tglAkadStr = props.data?.pembiayaan?.tgl_akad
+    const start = tglAkadStr ? new Date(tglAkadStr) : new Date()
+    const end = new Date(akhirPeriodeStr)
+    
+    if (start >= end) return 0;
+    
+    if (satuan_tenor.value === 'Minggu') {
+        const diffTime = end - start
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        return Math.floor(diffDays / 7)
+    } else {
+        const years = end.getFullYear() - start.getFullYear()
+        const months = end.getMonth() - start.getMonth()
+        let totalMonths = (years * 12) + months
+        if (end.getDate() < start.getDate()) {
+            totalMonths--
+        }
+        return Math.max(0, totalMonths)
+    }
+})
+
+watch(maxTenor, (newMax) => {
+    if (tenor.value > newMax) {
+        tenor.value = Math.max(1, newMax)
+    }
+}, { immediate: true })
 
 const totalIncome = computed(() => {
     return incomes.value.reduce((total, item) => total + (Number(props.data.anggota[item.model]) || 0), 0)
@@ -98,15 +130,24 @@ watch([
                 <div class="mb-8">
                     <div class="flex justify-between items-center mb-4">
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Jangka Waktu Cicilan</label>
-                        <span class="text-lg font-semibold text-primary dark:text-secondary">{{ tenor }} Bulan</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg font-semibold text-primary dark:text-secondary">{{ tenor }}</span>
+                            <select 
+                                v-model="satuan_tenor" 
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                            >
+                                <option value="Bulan">Bulan</option>
+                                <option value="Minggu">Minggu</option>
+                            </select>
+                        </div>
                     </div>
-                    <input v-model.number="tenor" type="range" min="3" max="60" step="1"
+                    <input v-model.number="tenor" type="range" :min="Math.min(1, maxTenor)" :max="maxTenor" step="1"
                         class="w-full h-2 rounded-lg appearance-none cursor-pointer" :style="{
-                            background: `linear-gradient(to right, #007943 0%, #007943 ${((tenor - 3) / (60 - 3)) * 100}%, #e5e7eb ${((tenor - 3) / (60 - 3)) * 100}%, #e5e7eb 100%)`
+                            background: maxTenor > 1 ? `linear-gradient(to right, #007943 0%, #007943 ${((tenor - Math.min(1, maxTenor)) / (maxTenor - Math.min(1, maxTenor))) * 100}%, #e5e7eb ${((tenor - Math.min(1, maxTenor)) / (maxTenor - Math.min(1, maxTenor))) * 100}%, #e5e7eb 100%)` : '#e5e7eb'
                         }" />
                     <div class="flex justify-between text-xs text-gray-500 mt-2">
-                        <span>3</span>
-                        <span>60</span>
+                        <span>{{ Math.min(1, maxTenor) }}</span>
+                        <span>{{ maxTenor }}</span>
                     </div>
                 </div>
 
@@ -122,7 +163,7 @@ watch([
                     <div>
                         <p class="text-gray-500 dark:text-gray-300 mb-2">Perkiraan Cicilan</p>
                         <p class="text-lg font-semibold text-dark-text dark:text-gray-200">{{ moneyParser(monthlyInstallment)
-                        }}<span class="text-sm text-gray-500 dark:text-gray-300">/bulan</span></p>
+                        }}<span class="text-sm text-gray-500 dark:text-gray-300">/{{ satuan_tenor === 'Bulan' ? 'bulan' : 'minggu' }}</span></p>
                     </div>
                 </div>
 
@@ -229,6 +270,32 @@ watch([
 
             <BaseInputAdmin v-if="form.final_decision_status !== 'Disetujui'" v-model="form.catatan" label="Catatan Pemeriksaan" type="textarea"
                 placeholder="Masukkan catatan pemeriksaan" rows="4" />
+        </div>
+
+        <div v-if="data?.verification && data.verification.length > 0" class="card-layout">
+            <h1 class="card-title">Riwayat Penilaian</h1>
+            <div class="pt-4">
+                <div v-for="(verification, index) in data.verification" :key="index"
+                    class="bg-gray-50 dark:bg-gray-700 border scroll-auto border-gray-200 rounded-lg p-4 mb-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span :class="{
+                            'text-green-500': verification.keputusan_akhir === 'Disetujui',
+                            'text-red-500': verification.keputusan_akhir === 'Ditolak',
+                            'text-yellow-500': verification.keputusan_akhir === 'Disetujui dengan Catatan',
+                        }" class="icon-[tabler--circle-check] w-5 h-5"></span>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-gray-200 capitalize">
+                                {{ verification.keputusan_akhir.replace(/_/g, ' ') }}
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ new Date(verification.diverifikasi_pada).toLocaleString() }} oleh {{
+                                verification.diverifikasi_oleh_name }}
+                            </p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-700 dark:text-gray-200 wrap-break-word">{{ verification.catatan }}</p>
+                </div>
+            </div>
         </div>
     </div>
 </template>

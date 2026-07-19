@@ -91,7 +91,7 @@ const netIncome = computed(() => totalIncome.value - totalExpense.value)
                 </tbody>
             </table>
         </div>
-        <div class="bg-light-bg flex justify-between items-center text-primary border rounded-2xl px-10 py-8">
+        <div class="bg-light-bg flex justify-between items-center text-primary border rounded-2xl px-10 py-6">
             <p class="text-lg font-semibold">Sisa Penghasilan Bulanan</p>
             <p class="text-lg font-semibold">{{ moneyParser(netIncome) }}</p>
         </div>

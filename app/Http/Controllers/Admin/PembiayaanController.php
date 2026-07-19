@@ -294,6 +294,7 @@ class PembiayaanController extends Controller
             'data' => [
                 'anggota' => $this->pembiayaanService->formatMemberData($pembiayaan->anggota),
                 'margin_percentage' => PengaturanUmum::where('key', 'murabahah_margin_percentage')->where('tgl_diberlakukan', '<=', now())->latest()->first()?->value,
+                'tanggal_akhir_periode' => PengaturanUmum::where('key', 'tanggal_akhir_periode')->latest()->first()?->value,
                 'pembiayaan' => [
                     'id' => $pembiayaan->id,
                     'kode_pembiayaan' => $pembiayaan->kode_pembiayaan,
@@ -322,6 +323,14 @@ class PembiayaanController extends Controller
                     'nilai_perkiraan_pasar' => $pembiayaan->jaminan?->nilai_perkiraan_pasar,
                     'lokasi_kondisi_jaminan' => $pembiayaan->jaminan?->lokasi_kondisi_jaminan,
                 ],
+                'verification' => $pembiayaan->verification->map(function ($item) {
+                    return [
+                        'keputusan_akhir' => $item->keputusan_akhir,
+                        'catatan' => $item->catatan,
+                        'diverifikasi_oleh_name' => $item->verifikator?->nama,
+                        'diverifikasi_pada' => $item->diverifikasi_pada?->format('Y-m-d H:i:s'),
+                    ];
+                })->sortByDesc('diverifikasi_pada')->values(),
                 'documents' => [
                     'family_card' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'kartu_keluarga')->first()?->lampiran_dokumen),
                     'income_slip' => $this->getDocumentUrl($pembiayaan->anggota->dokumenAnggota->where('nama_dokumen', 'slip_gaji')->first()?->lampiran_dokumen),
