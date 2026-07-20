@@ -33,10 +33,11 @@ class AlokasiAnggotaService
         $query = clone $memberBaseQuery;
 
         if ($search !== '') {
-            $query->where(function ($memberQuery) use ($search) {
-                $memberQuery->where('nama', 'like', '%' . $search . '%')
-                    ->orWhere('kode_pengguna', 'like', '%' . $search . '%')
-                    ->orWhere('no_telp', 'like', '%' . $search . '%');
+            $searchLower = mb_strtolower($search);
+            $query->where(function ($memberQuery) use ($searchLower) {
+                $memberQuery->whereRaw('LOWER(nama) LIKE ?', ['%' . $searchLower . '%'])
+                    ->orWhereRaw('LOWER(kode_pengguna) LIKE ?', ['%' . $searchLower . '%'])
+                    ->orWhereRaw('LOWER(no_telp) LIKE ?', ['%' . $searchLower . '%']);
             });
         }
 
