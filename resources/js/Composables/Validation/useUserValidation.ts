@@ -12,7 +12,7 @@ export function useUserValidation(
         email: "",
         nik: "",
         nik_ahli_waris: "",
-        name: "",
+        nama: "",
         role_id: "",
         no_telp: "",
         foto_profil: "",
@@ -64,9 +64,9 @@ export function useUserValidation(
     );
 
     watch(
-        () => form.name,
+        () => form.nama,
         (v) => {
-            errors.name = v ? "" : "Nama lengkap wajib diisi";
+            errors.nama = v ? "" : "Nama lengkap wajib diisi";
         },
     );
 
