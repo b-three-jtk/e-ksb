@@ -22,7 +22,7 @@ defineEmits(['submit'])
       <div>
         <div class="text-sm text-slate-500 dark:text-slate-400">Penanggung Jawab Terpilih</div>
         <div class="mt-1 text-base font-semibold text-slate-900 dark:text-white">
-          {{ selectedPj?.name || '-' }}
+          {{ selectedPj?.nama || '-' }}
         </div>
         <div class="text-sm text-slate-500 dark:text-slate-400">
           {{ selectedPj?.kode_pengguna || '-' }}
