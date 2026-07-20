@@ -13,6 +13,7 @@ const props = defineProps({
 const emit = defineEmits(['validate-field'])
 
 const tenor = ref(props.form.pembiayaan.tenor || 1)
+const simulasiTenor = ref(tenor.value)
 
 const maxTenor = computed(() => {
     const akhirPeriodeStr = props.data?.tanggal_akhir_periode
@@ -43,6 +44,22 @@ watch(maxTenor, (newMax) => {
     if (tenor.value > newMax) {
         tenor.value = Math.max(1, newMax)
     }
+    if (simulasiTenor.value > newMax) {
+        simulasiTenor.value = Math.max(1, newMax)
+    }
+})
+
+watch(tenor, (newVal) => {
+    simulasiTenor.value = newVal
+})
+
+const tenorOptions = computed(() => {
+    const options = []
+    const max = maxTenor.value
+    for (let i = 1; i <= max; i++) {
+        options.push({ value: i, text: String(i) })
+    }
+    return options
 })
 
 const totalPrice = computed(() => {
@@ -54,6 +71,10 @@ const totalPrice = computed(() => {
 
 const monthlyInstallment = computed(() =>
     tenor.value > 0 ? totalPrice.value / tenor.value : 0
+)
+
+const simulasiMonthlyInstallment = computed(() =>
+    simulasiTenor.value > 0 ? totalPrice.value / simulasiTenor.value : 0
 )
 
 const incomes = [
@@ -75,7 +96,7 @@ const monthlyIncome = computed(() => {
     return totalIn - totalOut
 })
 
-const remainingIncome = computed(() => monthlyIncome.value - monthlyInstallment.value)
+const remainingIncome = computed(() => monthlyIncome.value - simulasiMonthlyInstallment.value)
 
 const firstDueDate = computed(() => {
     const d = props.form.pembiayaan.tgl_akad ? new Date(props.form.pembiayaan.tgl_akad) : new Date()
@@ -97,12 +118,31 @@ const lastDueDate = computed(() => {
     return d.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' })
 })
 
+const canDownloadDocument = computed(() => {
+    const p = props.form.pembiayaan;
+    if (!p.metode_pembayaran || !p.tgl_akad) return false;
+    
+    if (p.metode_pembayaran === 'Cicilan') {
+        return tenor.value && p.satuan_tenor;
+    } else if (p.metode_pembayaran === 'Tangguh') {
+        return !!p.tangguh_tgl_pembayaran;
+    }
+    return true; // Tunai
+})
+
 // Sync tenor & simulasi ke form supaya bisa dikirim ke backend
 watch([tenor, monthlyInstallment, monthlyIncome], () => {
     props.form.pembiayaan.tenor   = tenor.value
     props.form.monthly_installment = monthlyInstallment.value
     props.form.monthly_income    = monthlyIncome.value
 }, { immediate: true })
+
+const minTangguhDate = computed(() => {
+    if (!props.form.pembiayaan.tgl_akad) return undefined;
+    const date = new Date(props.form.pembiayaan.tgl_akad);
+    date.setDate(date.getDate() + 1);
+    return date;
+})
 
 const paymentMethods = ['Cicilan', 'Tunai', 'Tangguh']
 
@@ -177,6 +217,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     v-model="form.pembiayaan.tgl_akad"
                     label="Tanggal Akad"
                     type="date"
+                    required
                     :error="errors?.tgl_akad"
                     @change="onFieldChange('tgl_akad')"
                 />
@@ -190,8 +231,29 @@ const onFieldChange = (field) => emit('validate-field', field)
                 type="date"
                 :error="errors?.tangguh_tgl_pembayaran"
                 required
+                :minDate="minTangguhDate"
                 hint="Tanggal pembayaran tangguh harus setelah tanggal akad"
                 @change="onFieldChange('tangguh_tgl_pembayaran')"
+            />
+        </section>
+
+        <section v-if="form.pembiayaan.metode_pembayaran === 'Cicilan'" class="grid grid-cols-2 gap-4 px-8 py-4">
+            <BaseInputAdmin
+                type="select"
+                v-model.number="tenor"
+                label="Jangka Waktu (Tenor)"
+                :selectables="tenorOptions"
+                required
+                :hint="data?.tanggal_akhir_periode ? `Berdasarkan sisa waktu hingga akhir periode (${new Date(data.tanggal_akhir_periode).toLocaleDateString('id-ID')})` : ''"
+                @change="onFieldChange('tenor')"
+            />
+            <BaseInputAdmin
+                v-model="form.pembiayaan.satuan_tenor"
+                label="Satuan Waktu"
+                type="select"
+                :selectables="[{value: 'Bulan', text: 'Bulan'}, {value: 'Minggu', text: 'Minggu'}]"
+                required
+                @change="onFieldChange('satuan_tenor')"
             />
         </section>
 
@@ -199,37 +261,25 @@ const onFieldChange = (field) => emit('validate-field', field)
         <section v-if="form.pembiayaan.metode_pembayaran === 'Cicilan'" class="px-8 py-4">
             <h1 class="card-title text-lg!">Simulasi Cicilan</h1>
             <div class="bg-white dark:bg-gray-800 border rounded-2xl p-6 mt-4">
-                <!-- Tenor Slider -->
                 <div class="mb-8">
                     <div class="flex justify-between items-center mb-4">
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Jangka Waktu Cicilan</label>
-                        <div class="flex items-center gap-2">
-                            <span class="text-lg font-semibold text-primary dark:text-secondary">{{ tenor }}</span>
-                            <select 
-                                v-model="form.pembiayaan.satuan_tenor" 
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                                @change="onFieldChange('satuan_tenor')"
-                            >
-                                <option value="Bulan">Bulan</option>
-                                <option value="Minggu">Minggu</option>
-                            </select>
-                        </div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Representasi Jangka Waktu</label>
+                        <span class="text-lg font-semibold text-primary dark:text-secondary">{{ simulasiTenor }} {{ form.pembiayaan.satuan_tenor }}</span>
                     </div>
                     
                     <input
-                        v-model.number="tenor"
+                        v-model.number="simulasiTenor"
                         type="range"
-                        :min="1"
+                        :min="Math.min(1, maxTenor)"
                         :max="maxTenor"
                         step="1"
-                        class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-200 dark:bg-gray-700"
+                        class="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                        :style="{
+                            background: maxTenor > 1 ? `linear-gradient(to right, #007943 0%, #007943 ${((simulasiTenor - Math.min(1, maxTenor)) / (maxTenor - Math.min(1, maxTenor))) * 100}%, #e5e7eb ${((simulasiTenor - Math.min(1, maxTenor)) / (maxTenor - Math.min(1, maxTenor))) * 100}%, #e5e7eb 100%)` : '#e5e7eb'
+                        }"
                     />
                     <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        <span>1</span><span>{{ maxTenor }}</span>
-                    </div>
-                    <div v-if="data?.tanggal_akhir_periode" class="mt-2 text-xs text-blue-600 dark:text-blue-400">
-                        <span class="icon-[tabler--info-circle] align-middle mr-1"></span>
-                        Maksimal tenor yang dapat dipilih adalah {{ maxTenor }} {{ form.pembiayaan.satuan_tenor }} (hingga akhir periode: {{ new Date(data.tanggal_akhir_periode).toLocaleDateString('id-ID') }})
+                        <span>{{ Math.min(1, maxTenor) }}</span><span>{{ maxTenor }}</span>
                     </div>
                 </div>
 
@@ -243,7 +293,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     <!-- Perkiraan Cicilan -->
                     <div>
                         <p class="text-gray-500 dark:text-gray-300 mb-2">Perkiraan Cicilan</p>
-                        <p class="text-lg font-semibold text-dark-text dark:text-gray-200">{{ parseCurrencyAmount(monthlyInstallment)
+                        <p class="text-lg font-semibold text-dark-text dark:text-gray-200">{{ parseCurrencyAmount(simulasiMonthlyInstallment)
                         }}<span class="text-sm text-gray-500 dark:text-gray-300">/{{ form.pembiayaan.satuan_tenor?.toLowerCase() }}</span></p>
                     </div>
                 </div>
@@ -292,15 +342,15 @@ const onFieldChange = (field) => emit('validate-field', field)
         </section>
 
         <div class="px-8 pb-8 grid grid-cols-2 items-end gap-4">
-            <a :href="form.pembiayaan.id && form.pembiayaan.tgl_akad ? `/admin/pembiayaan/${form.pembiayaan.id}/murabahah/download?tenor=${tenor}&satuan_tenor=${form.pembiayaan.satuan_tenor || 'Bulan'}&uang_muka=${form.pembiayaan.uang_muka || 0}&margin=${form.pembiayaan.margin_keuntungan || 0}&nama_pemasok=${form.pemasok?.nama_pemasok || ''}&alamat_pemasok=${form.pemasok?.alamat_pemasok || ''}` : '#'" target="_blank"
+            <a :href="form.pembiayaan.id && canDownloadDocument ? `/admin/pembiayaan/${form.pembiayaan.id}/murabahah/download?tenor=${tenor}&satuan_tenor=${form.pembiayaan.satuan_tenor || 'Bulan'}&uang_muka=${form.pembiayaan.uang_muka || 0}&margin=${form.pembiayaan.margin_keuntungan || 0}&nama_pemasok=${form.pemasok?.nama_pemasok || ''}&alamat_pemasok=${form.pemasok?.alamat_pemasok || ''}&metode_pembayaran=${form.pembiayaan.metode_pembayaran || ''}&tangguh_tgl_pembayaran=${form.pembiayaan.tangguh_tgl_pembayaran || ''}` : '#'" target="_blank"
                 :class="[
                     'border flex justify-between rounded-lg p-4 transition-colors',
-                    (!form.pembiayaan.tgl_akad) ? 'border-gray-200 bg-gray-50 cursor-not-allowed pointer-events-none' : 'border-primary bg-primary/5 hover:bg-primary/10'
+                    (!canDownloadDocument) ? 'border-gray-200 bg-gray-50 cursor-not-allowed pointer-events-none' : 'border-primary bg-primary/5 hover:bg-primary/10'
                 ]">
-                <div :class="['text-sm font-medium', (!form.pembiayaan.tgl_akad) ? 'text-gray-400' : 'text-primary']">
+                <div :class="['text-sm font-medium', (!canDownloadDocument) ? 'text-gray-400' : 'text-primary']">
                     Unduh Dokumen Akad Murabahah
                 </div>
-                <span :class="['icon-[tabler--download] text-xl', (!form.pembiayaan.tgl_akad) ? 'text-gray-400' : 'text-primary']"></span>
+                <span :class="['icon-[tabler--download] text-xl', (!canDownloadDocument) ? 'text-gray-400' : 'text-primary']"></span>
             </a>
             <div>
                 <BaseInputAdmin
@@ -309,7 +359,7 @@ const onFieldChange = (field) => emit('validate-field', field)
                     v-model="form.akad_document_file"
                     accept="application/pdf"
                     required
-                    :disabled="!form.pembiayaan.tgl_akad"
+                    :disabled="!canDownloadDocument"
                     :error="errors?.akad_document_file"
                     @change="onFieldChange('akad_document_file')"
                 />

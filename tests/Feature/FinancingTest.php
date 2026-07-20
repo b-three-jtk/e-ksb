@@ -277,6 +277,138 @@ describe('Aplikasi harus dapat menyediakan pencatatan permohonan pembiayaan mura
         $response->assertStatus(403);
     });
 
+    it('Harga perkiraan 0', function () {
+        $staffMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $staffMurabahah->syncRoles('Staf Murabahah');
+        $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+
+        AkunSimpanan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 10000000,
+            'created_at' => now()->subMonths(6),
+        ]);
+
+        $response = $this->actingAs($staffMurabahah)
+            ->post('/admin/pembiayaan/store', [
+                'anggota'=> [
+                    'kode_pengguna' => $anggota->user->kode_pengguna,
+                    'nama' => $anggota->user->nama,
+                    'nik' => $anggota->user->nik,
+                    'no_telp' => $anggota->user->no_telp,
+                    'status_pekerjaan' => 'Karyawan Swasta',
+                    'ahli_waris' => [
+                        [
+                            'nama_ahli_waris' => 'Ahli Waris 1',
+                            'nik_ahli_waris' => '1234567890654321',
+                            'hubungan' => 'Istri',
+                            'kontak_ahli_waris' => '081234567890'
+                        ]
+                    ],
+                ],
+                'pembiayaan' => [
+                    'nama_barang' => 'Motor Honda',
+                    'jenis_barang_id' => JenisBarang::first()->id,
+                    'harga_perkiraan' => 0,
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
+                    'tgl_akad' => '2024-01-01',
+                    'status' => 'Belum Ditinjau',
+                    'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
+                ],
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
+                ],
+                'income_slip_file' => UploadedFile::fake()->create('income_slip.jpg'),
+                'bank_book_file' => UploadedFile::fake()->create('bank_book.jpg'),
+            ]);
+
+        $response->assertSessionHasErrors(['pembiayaan.harga_perkiraan']);
+        $this->assertDatabaseMissing('pembiayaan', [
+            'harga_perkiraan' => 0,
+        ]);
+    });
+
+    it('Finalisasi dengan harga perolehannya 0', function () {
+        $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
+        $user->syncRoles('Anggota');
+        $staffMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $staffMurabahah->syncRoles('Staf Murabahah');
+
+        AkunSimpanan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 10000000,
+            'created_at' => now()->subMonths(6),
+        ]);
+
+        $pemasok = Pemasok::create([
+            'nama_pemasok' => 'PT. Pemasok Jaya',
+            'contact' => '081234567890',
+            'alamat_pemasok' => 'Jl. Pemasok No. 1',
+        ]);
+
+        $response = $this->actingAs($staffMurabahah)
+            ->post('/admin/pembiayaan/finalize', [
+                'anggota'=> [
+                    'kode_pengguna' => $user->kode_pengguna,
+                    'nama' => $user->nama,
+                    'nik' => $user->nik,
+                    'no_telp' => $user->no_telp,
+                    'status_pekerjaan' => 'Karyawan Swasta',
+                    'ahli_waris' => [
+                        [
+                            'nama_ahli_waris' => 'Ada Wong',
+                            'nik_ahli_waris' => '1234567890654321',
+                            'hubungan' => 'Istri',
+                            'kontak_ahli_waris' => '081234567890'
+                        ]
+                    ],
+                ],
+                'pembiayaan' => [
+                    'nama_barang' => 'Motor Honda',
+                    'jenis_barang_id' => JenisBarang::first()->id,
+                    'harga_perkiraan' => 50000000,
+                    'harga_beli_per_unit' => 50000000,
+                    'harga_perolehan' => 0,
+                    'margin_keuntungan' => 10000000,
+                    'metode_pembayaran' => 'Cicilan',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
+                    'tgl_akad' => '2024-01-01',
+                    'akad_wakalah_date' => '2024-01-02',
+                    'status' => 'Angsuran Berjalan',
+                    'pemasok_id' => $pemasok->id,
+                    'spesifikasi_barang' => 'Pembiayaan untuk pembelian motor Honda terbaru.',
+                ],
+                'pemasok' => [
+                    'nama_pemasok' => 'PT. Pemasok Jaya',
+                    'contact' => '081234567890',
+                    'alamat_pemasok' => 'Jl. Pemasok No. 1',
+                ],
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
+                ],
+                'akad_document_file' => UploadedFile::fake()->create('akad.pdf'),
+                'akad_wakalah_file' => UploadedFile::fake()->create('akad_wakalah.pdf'),
+                'income_slip_file' => UploadedFile::fake()->create('income_slip.jpg'),
+                'bank_book_file' => UploadedFile::fake()->create('bank_book.jpg'),
+            ]);
+
+        $response->assertSessionHasErrors(['pembiayaan.harga_perolehan']);
+        $this->assertDatabaseMissing('pembiayaan', [
+            'harga_perolehan' => 0,
+        ]);
+        $this->assertDatabaseHas('objek_pembiayaan', ['nama_barang' => 'Motor Honda']);
+        $this->assertDatabaseHas('jaminan', ['jenis_jaminan' => 'Motor']);
+    });
 });
 
 describe('Aplikasi harus menyediakan pencatatan permohonan pembiayaan murabahah dengan akad wakalah oleh anggota sebagai perwakilan (muwakkil) dari koperasi.', function () {

@@ -60,7 +60,7 @@
             KOPERASI SYARIAH BERKAH<br>
             DAN<br>
             {{ $pembiayaan->anggota->user->nama }}<br>
-            Nomor: {{ $noDokumen }}
+            <span style="text-transform:none;">Nomor {{ $noDokumen }}</span>
         </div>
 
         <p style="margin-bottom: 10px;">Yang bertanda tangan dibawah ini:</p>
@@ -84,7 +84,7 @@
             </tr>
             <tr>
                 <td></td>
-                <td colspan="3" style="text-align: justify;">Berdasarkan Perjanjian Layanan Pembiayaan Berbasis Teknologi Dengan Prinsip Syariah No. ..... tanggal dalam hal ini bertindak selaku wakil dari <strong>PEMBERI PEMBIAYAAN</strong>, selanjutnya disebut <strong>PENYELENGGARA</strong>;</td>
+                <td colspan="3" style="text-align: justify;">Dalam hal ini bertindak selaku wakil dari <strong>PEMBERI PEMBIAYAAN</strong>, selanjutnya disebut <strong>PENYELENGGARA</strong>;</td>
             </tr>
         </table>
 
@@ -123,10 +123,15 @@
             <tr><td>c.</td><td>Uang Muka</td><td>:</td><td>Rp {{ number_format($uangMuka, 0, ',', '.') }}</td></tr>
             <tr><td>d.</td><td>Harga Jual Murabahah</td><td>:</td><td>Rp {{ number_format($hargaJual, 0, ',', '.') }}</td></tr>
             <tr><td>e.</td><td>Kegunaan/Jenis Pembiayaan</td><td>:</td><td>Pembiayaan Kepemilikan {{ $pembiayaan->objekPembiayaan->jenisBarang->nama_jenis_barang ?? 'Barang' }}</td></tr>
+            @if ($isCicilan)
             <tr><td>f.</td><td>Jangka Waktu Pembiayaan</td><td>:</td><td>{{ $tenor }} {{ ucfirst($satuanTenor) }}</td></tr>
             <tr><td>g.</td><td>Jatuh Tempo Pembiayaan</td><td>:</td><td>{{ $tglLunas->translatedFormat('d F Y') }}</td></tr>
             <tr><td>h.</td><td>Angsuran per {{ strtolower($satuanTenor) === 'minggu' ? 'minggu' : 'bulan' }}</td><td>:</td><td>Rp {{ number_format($angsuran, 0, ',', '.') }} per {{ strtolower($satuanTenor) === 'minggu' ? 'minggu' : 'bulan' }}</td></tr>
             <tr><td>i.</td><td>Jatuh Tempo Pembayaran Angsuran</td><td>:</td><td>Setiap {{ strtolower($satuanTenor) === 'minggu' ? 'hari' : 'tanggal' }} {{ $tanggalJatuhTempo }} per {{ strtolower($satuanTenor) === 'minggu' ? 'minggu' : 'bulan' }}</td></tr>
+            @endif
+            @if ($isTangguh)
+            <tr><td>f.</td><td>Jatuh Tempo Pembayaran Tangguh</td><td>:</td><td>{{ $tglLunas->translatedFormat('d F Y') }}</td></tr>
+            @endif
             @if ($pembiayaan->jaminan)
             <tr><td>j.</td><td>Jenis Jaminan</td><td>:</td><td>{{ $pembiayaan->jaminan->jenis_jaminan ?? '........................' }}</td></tr>
             <tr><td>k.</td><td>Nama Pemilik Aset</td><td>:</td><td>{{ $pembiayaan->jaminan->nama_pemilik ?? '........................' }}</td></tr>
@@ -148,17 +153,19 @@
             <li><strong>Harga Jual</strong> adalah harga beli ditambah margin keuntungan <strong>PENYELENGGARA</strong> yang ditetapkan oleh <strong>PENYELENGGARA</strong> dan disetujui/disepakati oleh <strong>PENERIMA PEMBIAYAAN</strong> yang merupakan jumlah Pembiayaan.</li>
             <li><strong>Margin Keuntungan</strong> adalah jumlah uang yang wajib dibayar <strong>PENERIMA PEMBIAYAAN</strong> kepada <strong>PENYELENGGARA</strong> sebagai imbalan atas Pembiayaan yang diberikan oleh <strong>PENYELENGGARA</strong>, yang merupakan selisih antara Harga Jual dan Harga Beli.</li>
             <li><strong>Uang Muka</strong> adalah sejumlah uang yang besarnya ditetapkan oleh <strong>PENYELENGGARA</strong> dan disetujui oleh <strong>PENERIMA PEMBIAYAAN</strong> yang harus dibayarkan terlebih dahulu oleh <strong>PENERIMA PEMBIAYAAN</strong> kepada <strong>PENYELENGGARA</strong> sebagai salah satu syarat yang harus dipenuhi <strong>PENYELENGGARA</strong> untuk memperoleh Pembiayaan Murabahah dari <strong>PENYELENGGARA</strong>.</li>
-            <li><strong>Piutang Murabahah</strong> adalah hak tagih <strong>PENYELENGGARA</strong> kepada <strong>PENERIMA PEMBIAYAAN</strong> yang timbul karena <strong>PENERIMA PEMBIAYAAN</strong> telah menerima fasilitas pembiayaan dari <strong>PENERIMA PEMBIAYAAN</strong> dan besarnya adalah sama dengan Harga Jual.</li>
+            <li><strong>Piutang Murabahah</strong> adalah hak tagih <strong>PENYELENGGARA</strong> kepada <strong>PENERIMA PEMBIAYAAN</strong> yang timbul karena <strong>PENERIMA PEMBIAYAAN</strong> telah menerima fasilitas pembiayaan dari <strong>PENYELENGGARA</strong> dan besarnya adalah sama dengan Harga Jual.</li>
             <li><strong>Hutang Murabahah</strong> adalah sejumlah kewajiban keuangan <strong>PENERIMA PEMBIAYAAN</strong> kepada <strong>PENYELENGGARA</strong> yang timbul dari realisasi Pembiayaan berdasarkan Akad ini, maksimal sebesar harga jual Barang.</li>
+            @if ($isCicilan)
             <li><strong>Angsuran</strong> adalah sejumlah uang untuk pembayaran Jumlah Harga Jual yang wajib dibayar secara bulanan oleh <strong>PENERIMA PEMBIAYAAN</strong> kepada <strong>PENYELENGGARA</strong> sebagaimana ditentukan Akad ini.</li>
             <li><strong>Jatuh Tempo Pembayaran Angsuran</strong> adalah tanggal <strong>PENERIMA PEMBIAYAAN</strong> berkewajiban membayar angsuran setiap bulan.</li>
             <li><strong>Tunggakan</strong> adalah suatu Hutang Murabahah yang telah jatuh tempo, tetapi belum dibayar oleh <strong>PENERIMA PEMBIAYAAN</strong>.</li>
+            @endif
             <li><strong>Pemasok</strong> adalah pihak ketiga yang menyediakan Barang yang dibutuhkan oleh <strong>PENERIMA PEMBIAYAAN</strong> untuk dan atas nama <strong>PENYELENGGARA</strong>.</li>
             @if ($pembiayaan->jaminan)
             <li><strong>Jaminan</strong> adalah jaminan yang bersifat materiil maupun immaterial untuk mendukung keyakinan <strong>PENYELENGGARA</strong> atas kemampuan dan kesanggupan <strong>PENERIMA PEMBIAYAAN</strong> untuk melunasi Hutangnya sesuai Akad.</li>
             <li><strong>Dokumen Jaminan</strong> adalah akta-akta, surat-surat bukti kepemilikan, dan surat lainnya yang merupakan bukti hak atas barang jaminan berikut surat-surat lain yang merupakan satu kesatuan dan bagian tidak terpisah dari barang jaminan guna menjamin pemenuhan kewajiban <strong>PENERIMA PEMBIAYAAN</strong> kepada <strong>PENYELENGGARA</strong> berdasarkan Akad ini.</li>
             @endif
-            <li><strong>Hari Kerja</strong> adalah Hari Kerja Otoritas Jasa Keuangan.</li>
+            <li><strong>Hari Kerja</strong> adalah Hari Kerja Koperasi Syariah Berkah.</li>
         </ol>
 
         <div class="pasal-title">
@@ -167,7 +174,7 @@
         </div>
         <p>Pelaksanaan prinsip Murabahah yang berlangsung antara <strong>PENYELENGGARA</strong> dengan <strong>PENERIMA PEMBIAYAAN</strong> sebagai Penerima Fasilitas Pembiayaan dilaksanakan dan diatur menurut ketentuan-ketentuan dan persyaratan sebagai berikut :</p>
         <ol>
-            <li><strong>PENERIMA PEMBIAYAAN</strong> membutuhkan Barang dengan spesifikasi sebagaimana terdapat pada Lampiran [2] dan meminta kepada <strong>PENYELENGGARA</strong> untuk memberikan fasilitas Pembiayaan Murabahah guna pembelian Barang.</li>
+            <li><strong>PENERIMA PEMBIAYAAN</strong> membutuhkan Barang dengan spesifikasi sebagaimana terdapat pada Lampiran [1] dan meminta kepada <strong>PENYELENGGARA</strong> untuk memberikan fasilitas Pembiayaan Murabahah guna pembelian Barang.</li>
             <li><strong>PENYELENGGARA</strong> bersedia menyediakan Pembiayaan Murabahah sesuai dengan permohonan <strong>PENERIMA PEMBIAYAAN</strong>.</li>
             <li><strong>PENERIMA PEMBIAYAAN</strong> bersedia membayar Harga Jual Barang sesuai Akad ini, dan Harga Jual tidak dapat berubah selama berlakunya Akad ini.</li>
             <li><strong>PENYELENGGARA</strong> dengan Akad ini mewakilkan secara penuh kepada <strong>PENERIMA PEMBIAYAAN</strong> untuk membeli dan menerima Barang dari Pemasok, serta memberi hak melakukan pembuatan akta jual beli untuk dan atas nama <strong>PENERIMA PEMBIAYAAN</strong> sendiri langsung dengan Pemasok.</li>
@@ -192,12 +199,13 @@
             <li>Apabila <strong>PENYELENGGARA</strong> telah membayar kepada Pemasok termasuk pembayaran uang muka, maka <strong>PENERIMA PEMBIAYAAN</strong> tidak dapat membatalkan secara sepihak Akad ini.</li>
         </ol>
 
+        @if($isCicilan)
         <div class="pasal-title">
             PASAL 5<br>
             JATUH TEMPO PEMBIAYAAN
         </div>
         <p>Fasilitas pembiayaan Murabahah yang dimaksud dalam Akad ini berlangsung untuk jangka waktu {{ $tenor }} {{ $satuanTenor }} terhitung sejak tanggal Akad ini ditandatangani serta berakhir pada tanggal {{ $tglLunas->translatedFormat('d F Y') }}. Berakhirnya jatuh tempo Pembiayaan tidak dengan sendirinya menyebabkan Hutang lunas sepanjang masih terdapat sisa Hutang <strong>PENERIMA PEMBIAYAAN</strong>.</p>
-        
+        @endif
         <br><br>
         <table class="signatures" style="width: 100%; border-collapse: collapse; margin-top: 40px; page-break-inside: avoid;">
             <tr>
@@ -212,63 +220,6 @@
                     <div>Anggota</div>
                 </td>
             </tr>
-        </table>
-        
-        <div style="page-break-before: always;"></div>
-        
-        <table class="table-header">
-            <tr>
-                <td rowspan="2" style="width: 15%; text-align: center; border: 1px #000 solid;">
-                    <img style="width: 70px;" src="{{ $src }}" alt="Logo KSB">
-                </td>
-                <td class="title" colspan="2" style="border-bottom: 1px #000 solid;font-size:16px; padding: 10px;">
-                    KOPERASI SYARIAH BERKAH
-                </td>
-            </tr>
-            <tr>
-                <td style="font-weight: bold;text-align: center;font-size:14px;border: 1px #000 solid; width: 50%;">
-                    FORMULIR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PEMBIAYAAN MURABAHAH
-                </td>
-                <td style="font-weight: bold;text-align:center;font-size:14px; border: 1px #000 solid;">
-                    No. Dokumen: <span style="font-weight:normal;">{{ $noDokumen }}</span>
-                </td>
-            </tr>
-        </table>
-        
-        <div class="pasal-title">
-            LAMPIRAN [1]<br>
-            JADWAL PEMBAYARAN ANGSURAN
-        </div>
-        <table style="width: 50%; margin-bottom: 20px;">
-            <tr><td>Harga Perolehan</td><td>: Rp {{ number_format($hargaBeli, 0, ',', '.') }}</td></tr>
-            <tr><td>Margin Keuntungan</td><td>: Rp {{ number_format($margin, 0, ',', '.') }}</td></tr>
-            <tr><td>Harga Jual</td><td>: Rp {{ number_format($hargaJual, 0, ',', '.') }}</td></tr>
-            <tr><td>Uang Muka</td><td>: Rp {{ number_format($uangMuka, 0, ',', '.') }}</td></tr>
-            <tr><td>Angsuran per {{ ucfirst($satuanTenor) }}</td><td>: Rp {{ number_format($angsuran, 0, ',', '.') }}</td></tr>
-        </table>
-        
-        <table style="width: 100%; border-collapse: collapse; text-align: center;" border="1">
-            <thead>
-                <tr>
-                    <th style="padding: 5px;">Tanggal Pembayaran</th>
-                    <th style="padding: 5px;">Jumlah Pembayaran Angsuran</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for ($i = 1; $i <= $tenor; $i++)
-
-                <tr>
-                    <td style="padding: 5px;">
-                        {{ 
-                            strtolower($satuanTenor) === 'minggu' 
-                                ? \Carbon\Carbon::parse($pembiayaan->tgl_akad)->addWeeks($i)->translatedFormat('d F Y') 
-                                : \Carbon\Carbon::parse($pembiayaan->tgl_akad)->addMonths($i)->translatedFormat('d F Y') 
-                        }}
-                    </td>
-                    <td style="padding: 5px;">Rp {{ number_format($angsuran, 0, ',', '.') }}</td>
-                </tr>
-                @endfor
-            </tbody>
         </table>
 
         <div style="page-break-before: always;"></div>
@@ -294,7 +245,7 @@
         </table>
 
         <div class="pasal-title">
-            LAMPIRAN [2]<br>
+            LAMPIRAN [1]<br>
             SPESIFIKASI BARANG
         </div>
 

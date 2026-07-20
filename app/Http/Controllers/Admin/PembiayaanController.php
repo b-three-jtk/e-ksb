@@ -191,6 +191,29 @@ class PembiayaanController extends Controller
             ? Carbon::parse($tglAkad)->addWeeks($tenor) 
             : Carbon::parse($tglAkad)->addMonths($tenor);
 
+        $reqMetode = request('metode_pembayaran');
+        $metodePembayaran = !empty($reqMetode) ? $reqMetode : $pembiayaan->metode_pembayaran;
+
+        $metodeStr = $metodePembayaran instanceof \BackedEnum 
+            ? $metodePembayaran->value 
+            : (string) $metodePembayaran;
+        $metodeStr = strtolower(trim($metodeStr));
+
+        $isCicilan = $metodeStr === 'cicilan';
+        $isTangguh = $metodeStr === 'tangguh';
+
+        if ($isTangguh) {
+            $tangguhTgl = request('tangguh_tgl_pembayaran');
+            if (!empty($tangguhTgl)) {
+                $tglLunas = Carbon::parse($tangguhTgl);
+            } else {
+                $angsuranTangguh = $pembiayaan->angsuran()->orderBy('angsuran_ke')->first();
+                if ($angsuranTangguh && $angsuranTangguh->tgl_jatuh_tempo) {
+                    $tglLunas = Carbon::parse($angsuranTangguh->tgl_jatuh_tempo);
+                }
+            }
+        }
+
         $kuantitas = $pembiayaan->objekPembiayaan->kuantitas ?: 1;
         $hargaBeliPerUnit = $pembiayaan->objekPembiayaan->harga_beli_per_unit ?: ($hargaBeli / $kuantitas);
         $totalHargaBeli = $kuantitas * $hargaBeliPerUnit;
@@ -199,8 +222,8 @@ class PembiayaanController extends Controller
         $alamatPemasok = request('alamat_pemasok') ?: ($pembiayaan->objekPembiayaan->pemasok->alamat_pemasok ?? '..........................................................');
 
         $pdf = Pdf::loadView('exports.murabahah_agreement', compact(
-            'pembiayaan', 'src', 'ketuaKoperasi', 'hargaBeli', 'margin', 'satuanTenor',
-            'hargaJual', 'uangMuka', 'piutang', 'tenor', 'angsuran', 'tanggalJatuhTempo',
+            'pembiayaan', 'src', 'ketuaKoperasi', 'hargaBeli', 'margin', 'satuanTenor', 'isCicilan', 'isTangguh',
+            'hargaJual', 'uangMuka', 'tenor', 'angsuran', 'tanggalJatuhTempo',
             'tglLunas', 'kuantitas', 'hargaBeliPerUnit', 'totalHargaBeli', 'namaPemasok', 'alamatPemasok', 'noDokumen'
         ));
 

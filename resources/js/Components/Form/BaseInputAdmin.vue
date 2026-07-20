@@ -15,6 +15,7 @@ const props = defineProps<{
     max?: string
     maxDate?: Date | string
     min?: string
+    minDate?: Date | string
     pattern?: string
     selectables?: Array<{ value: string | number; text: string }>
     rows?: string
@@ -158,7 +159,7 @@ const handleMoneyInput = (event: Event) => {
         <VueDatePicker v-else-if="inputType === 'date'" v-model="dateValue" format="yyyy-MM-dd" :time-picker="false"
             :time-config="{ enableTimePicker: false, ignoreTimeValidation: true }" teleport="body"
             :input-class="datePickerInputClass" :disabled="disabled" :placeholder="placeholder || 'Pilih tanggal'"
-            :dark="isDarkMode" :max-date="maxDate ? new Date(maxDate) : undefined" />
+            :dark="isDarkMode" :max-date="maxDate ? new Date(maxDate) : undefined" :min-date="minDate ? new Date(minDate) : undefined" />
 
         <!-- Select -->
         <div v-else-if="inputType === 'select'" class="relative z-20 bg-transparent">
@@ -203,8 +204,8 @@ const handleMoneyInput = (event: Event) => {
                 Choose file
             </button>
             <div
-                class="flex-1 px-4 py-2.5 border border-l-0 border-gray-300 rounded-r-lg bg-white dark:bg-gray-900 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
-                {{ fileName || 'No file chosen' }}
+                class="flex-1 min-w-0 px-4 py-2.5 border border-l-0 border-gray-300 rounded-r-lg bg-white dark:bg-gray-900 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                <span class="truncate">{{ fileName || 'No file chosen' }}</span>
             </div>
         </div>
 

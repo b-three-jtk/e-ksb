@@ -113,6 +113,16 @@ const closeModal = () => {
     newPemasokContact.value = ''
 }
 
+watch(() => props.form.pembiayaan.harga_beli_per_unit, (newVal) => {
+    if (newVal > 1000000000) {
+        props.form.pembiayaan.harga_beli_per_unit = 1000000000
+        toast('Harga per item maksimal adalah Rp 1 Miliar', {
+            type: 'warning',
+            position: 'bottom-right',
+        })
+    }
+})
+
 const onFieldChange = (field) => emit('validate-field', field)
 </script>
 
@@ -123,7 +133,7 @@ const onFieldChange = (field) => emit('validate-field', field)
         <div class="card-layout mx-4">
             <h1 class="card-title">Pengadaan Barang</h1>
             <div class="grid grid-cols-2 gap-4 pt-4">
-                <div>
+                <div class="col-span-1">
                     <BaseInputAdmin type="file" label="Bukti Pembelian" v-model="form.purchase_receipt_file"
                         accept=".jpg,.jpeg,.png" required :error="errors?.purchase_receipt_file"
                         @change="onFieldChange('purchase_receipt_file')" />
@@ -140,9 +150,10 @@ const onFieldChange = (field) => emit('validate-field', field)
                 <Info :label="`Margin (${data.margin_percentage}%)`" :value="parseCurrencyAmount(form.pembiayaan.margin_keuntungan)" />
             </div>
 
-            <div class="bg-light-bg flex justify-between border px-8 py-4 mt-6 rounded-lg">
-                <div class="font-semibold text-primary">Total Pembiayaan Murabahah</div>
-                <div class="font-semibold text-primary">{{ parseCurrencyAmount(totalPrice) }}</div>
+            <div class="flex justify-between border px-8 py-4 mt-6 rounded-lg"
+                :class="totalPrice < 0 ? 'bg-red-50 border-red-200' : 'bg-light-bg'">
+                <div class="font-semibold" :class="totalPrice < 0 ? 'text-red-600' : 'text-primary'">Total Pembiayaan Murabahah</div>
+                <div class="font-semibold" :class="totalPrice < 0 ? 'text-red-600' : 'text-primary'">{{ parseCurrencyAmount(totalPrice) }}</div>
             </div>
 
         </div>
@@ -153,7 +164,7 @@ const onFieldChange = (field) => emit('validate-field', field)
             <div class="grid grid-cols-2 gap-4 pt-4">
 
                 <!-- Pemasok search / input -->
-                <BaseInputAdmin v-model="form.pembiayaan.pemasok_id" label="Pemasok" type="select"
+                <BaseInputAdmin required v-model="form.pembiayaan.pemasok_id" label="Pemasok" type="select"
                     :selectables="pemasokSelectables" @update:modelValue="handlePemasokChange" />
                 <BaseInputAdmin v-model="form.pemasok.kontak_pemasok" label="Kontak" type="text"
                     placeholder="Masukkan kontak pemasok" />
