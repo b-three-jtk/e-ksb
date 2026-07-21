@@ -41,7 +41,9 @@ class AnggotaService
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->whereHas('anggota', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            });
         }
 
         return $query

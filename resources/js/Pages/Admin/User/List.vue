@@ -237,7 +237,7 @@ const breadcrumbItems = [
 
                 <template #cell-status="{ row }">
                     <span
-                        class="px-3 py-1 text-xs rounded-full font-medium"
+                        class="inline-flex items-center whitespace-nowrap px-3 py-1 text-xs rounded-full font-medium"
                         :class="statusClass(row.status)"
                     >
                         {{ row.status }}

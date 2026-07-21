@@ -7,6 +7,7 @@ use App\Enums\AhliWarisEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\UserStatusEnum;
+use App\Enums\MemberStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMemberAllocationRequest;
 use App\Http\Requests\StoreMemberRequest;
@@ -89,7 +90,7 @@ class PenggunaController extends Controller
             'anggota' => $this->anggotaService->getListAnggota($request),
             'filters' => $request->only(['search', 'status', 'per_page', 'sort_by', 'sort_dir']),
             'summary' => $this->anggotaService->getSummary(),
-            'statuses' => array_column(UserStatusEnum::cases(), 'value'),
+            'statuses' => array_column(MemberStatusEnum::cases(), 'value'),
             'can' => [
                 'tambah_anggota' => Auth::user()->hasPermissionTo('create_anggota'),
                 'edit_anggota'   => Auth::user()->hasPermissionTo('edit_anggota'),
