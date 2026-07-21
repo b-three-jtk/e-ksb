@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
 import moneyParser from '@/Composables/moneyParser.js'
 
@@ -19,14 +19,17 @@ const props = defineProps({
     }
 })
 
-const series = ref([
+const categories = computed(() => (props.data ? Object.keys(props.data) : []))
+const values = computed(() => (props.data ? Object.values(props.data).map(v => Number(v) || 0) : []))
+
+const series = computed(() => [
     {
         name: 'Keuntungan',
-        data: [],
+        data: values.value,
     },
 ])
 
-const chartOptions = ref({
+const chartOptions = computed(() => ({
     colors: ['#C3DC6D'],
     chart: {
         fontFamily: 'Manrope, sans-serif',
@@ -52,7 +55,7 @@ const chartOptions = ref({
         colors: ['transparent'],
     },
     xaxis: {
-        categories: [],
+        categories: categories.value,
         axisBorder: {
             show: false,
         },
@@ -81,7 +84,7 @@ const chartOptions = ref({
                 fontSize: '14px',
             },
             formatter: function (value) {
-                if (value === undefined || value === null) return '';
+                if (value === undefined || value === null) return 'Rp0';
                 return moneyParser(value);
             }
         }
@@ -105,27 +108,12 @@ const chartOptions = ref({
         },
         y: {
             formatter: function (value) {
-                if (value === undefined || value === null) return '';
+                if (value === undefined || value === null) return 'Rp0';
                 return moneyParser(value);
             }
         },
     },
-})
-
-const updateChart = () => {
-    if (!props.data || Object.keys(props.data).length === 0) return
-    const categories = Object.keys(props.data)
-    const values = Object.values(props.data).map(v => Number(v))
-
-    chartOptions.value = {
-        ...chartOptions.value,
-        xaxis: { ...chartOptions.value.xaxis, categories }
-    }
-    series.value = [{ name: 'Keuntungan', data: values }]
-}
-
-watch(() => props.filter, updateChart, { immediate: true })
-watch(() => props.data, updateChart, { deep: true })
+}))
 </script>
 
 <template>
