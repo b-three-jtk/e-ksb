@@ -18,6 +18,10 @@ const props = defineProps({
 		type: Function,
 		required: true,
 	},
+	onlyAddress: {
+		type: Function,
+		required: true,
+	},
 })
 
 const normalizePhoneNumber = (value, onlyNumbers) => {
@@ -66,6 +70,7 @@ const normalizePhoneNumber = (value, onlyNumbers) => {
 				type="text"
 				placeholder="Isi dengan huruf dan angka"
 				required
+				@input="form.alamat_domisili = onlyAddress(form.alamat_domisili)"
 				:error="getFieldError('alamat_domisili', errors.alamat_domisili)"
 			/>
 
@@ -75,6 +80,7 @@ const normalizePhoneNumber = (value, onlyNumbers) => {
 				label="Alamat Domisili"
 				type="text"
 				placeholder="Isi dengan huruf dan angka"
+				@input="form.alamat_ktp = onlyAddress(form.alamat_ktp)"
 				:error="getFieldError('alamat_ktp', errors.alamat_ktp)"
 			/>
 		</div>

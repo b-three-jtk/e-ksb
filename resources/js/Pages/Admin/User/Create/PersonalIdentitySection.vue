@@ -71,6 +71,7 @@ defineProps({
 				type="text"
 				placeholder="Isi tempat lahir"
 				required
+				@input="form.tempat_lahir = onlyLetters(form.tempat_lahir)"
 				:error="getFieldError('tempat_lahir', errors.tempat_lahir)"
 			/>
 
