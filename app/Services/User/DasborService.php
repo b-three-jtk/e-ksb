@@ -17,6 +17,7 @@ class DasborService
         $totalSaving = DB::table('akun_simpanan')
             ->where('anggota_id', $anggotaId)
             ->sum('saldo');
+        $totalSaving = (int) round($totalSaving);
 
         $totalInstallment = Angsuran::whereHas('pembiayaan', function ($q) use ($anggotaId) {
             $q->where('anggota_id', $anggotaId)
@@ -28,6 +29,7 @@ class DasborService
             InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
         ])
         ->sum('nominal_angsuran');
+        $totalInstallment = (int) round($totalInstallment);
 
         $totalPoints = Poin::where('pengguna_id', $userId)
             ->sum('jml_perolehan');

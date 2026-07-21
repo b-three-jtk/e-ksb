@@ -4,7 +4,9 @@ namespace App\Services\User;
 
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\MemberStatusEnum;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Models\Pembiayaan;
+use App\Models\Angsuran;
 use App\Models\DokumenAnggota;
 use App\Models\TransaksiSimpanan;
 use Illuminate\Support\Facades\DB;
@@ -35,15 +37,15 @@ class PengunduranDiriService
 
     public function getTotalObligation(int $anggotaId): float
     {
-        $costPriceSum = Pembiayaan::where('anggota_id', $anggotaId)
-            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->sum('harga_perolehan');
-
-        $marginAmountSum = Pembiayaan::where('anggota_id', $anggotaId)
-            ->where('status', FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value)
-            ->sum('margin_keuntungan');
-
-        return $costPriceSum + $marginAmountSum;
+        return (float) Angsuran::whereHas(
+            'pembiayaan',
+            fn($q) => $q->where('anggota_id', $anggotaId)
+        )
+        ->whereNotIn('status', [
+            InstallmentPaymentScheduleStatusEnum::PAID->value,
+            InstallmentPaymentScheduleStatusEnum::CANCELLED->value,
+        ])
+        ->sum('nominal_angsuran');
     }
 
     /**
