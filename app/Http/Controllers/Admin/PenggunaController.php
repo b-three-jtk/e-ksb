@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\EducationEnum;
 use App\Enums\AhliWarisEnum;
+use App\Enums\EducationEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MaritalStatusEnum;
 use App\Enums\UserStatusEnum;
@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMemberAllocationRequest;
 use App\Http\Requests\StoreMemberRequest;
 use App\Http\Requests\UpdateMemberRequest;
+use App\Models\AhliWaris;
 use App\Models\Pengguna;
 use App\Services\Admin\AnggotaService;
 use App\Services\Admin\PembiayaanService;
@@ -122,6 +123,11 @@ class PenggunaController extends Controller
                 $pembiayaan->setAttribute('next_due_date', $nextInstallment?->tgl_jatuh_tempo);
                 });
             }
+
+            $user->anggota->setRelation('ahliWaris', $user->anggota->ahliWaris->map(function (AhliWaris $ahli_waris) {
+                    $ahli_waris->hubungan = $ahli_waris->pivot->hubungan;
+                    return $ahli_waris;
+                }));
         }
 
         return inertia('Admin/User/Show', [
