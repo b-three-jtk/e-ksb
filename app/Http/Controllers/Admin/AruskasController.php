@@ -27,21 +27,28 @@ class AruskasController extends Controller
         $filters = $request->only([
             'search', 'per_page', 'periode',
             'date_from', 'date_to', 'sort_by', 'sort_dir',
+            'outside_period',
         ]);
 
+        $cfMonth = $request->input('cf_month', now()->format('Y-m'));
+
         [, $transactions] = $this->aruskasService->getTransactions($filters);
+
+        $cfFilters = $this->aruskasService->buildCashflowMonthFilters($cfMonth);
 
         return Inertia::render('Admin/CashFlow/List', [
             'transactions' => $transactions,
             'summary'      => $this->aruskasService->getKasSummary(),
-            'cashFlowReport'=>$this->aruskasService->getCashFlowReport($filters),
-            'filters'      => $filters,
+            'cashFlowReport' => $this->aruskasService->getCashFlowReport($cfFilters),
+            'filters'      => array_merge($filters, ['cf_month' => $cfMonth]),
             'akunOptions'  => Akun::select(
                                 'no_ref_akun as nomor_akun',
                                 'nama_akun as nama_akun'
-                              )
-                              ->orderBy('no_ref_akun')
-                              ->get(),
+                            )
+                            ->orderBy('no_ref_akun')
+                            ->get(),
+            'period_start' => \App\Models\PengaturanUmum::where('key', 'tanggal_awal_periode')->latest('tgl_diberlakukan')->value('value'),
+            'period_end'   => \App\Models\PengaturanUmum::where('key', 'tanggal_akhir_periode')->latest('tgl_diberlakukan')->value('value'),
             'can' => [
                 'tambah_alokasi' => Auth::user()->hasRole(UserRoleEnum::BENDAHARA->value),
             ],
@@ -62,6 +69,21 @@ class AruskasController extends Controller
             ]);
         }
 
+        $startDate = \App\Models\PengaturanUmum::where('key', 'tanggal_awal_periode')->latest('tgl_diberlakukan')->value('value');
+        $endDate = \App\Models\PengaturanUmum::where('key', 'tanggal_akhir_periode')->latest('tgl_diberlakukan')->value('value');
+        $txDate = now()->toDateString();
+
+        if ($startDate && $txDate < $startDate) {
+            return back()->withErrors([
+                'nominal' => "Tanggal transaksi hari ini ({$txDate}) tidak boleh kurang dari tanggal awal periode ({$startDate})",
+            ]);
+        }
+        if ($endDate && $txDate > $endDate) {
+            return back()->withErrors([
+                'nominal' => "Tanggal transaksi hari ini ({$txDate}) tidak boleh melebihi tanggal akhir periode ({$endDate})",
+            ]);
+        }
+
         $debitAkun  = Akun::where('no_ref_akun', $validated['akun_debit'])->firstOrFail();
         $creditAkun = Akun::where('no_ref_akun', $validated['akun_kredit'])->firstOrFail();
 
@@ -70,7 +92,7 @@ class AruskasController extends Controller
                 ['akun' => $debitAkun->no_ref_akun,  'posisi_akun' => PositionEnum::DEBIT->value,  'nominal' => $validated['nominal']],
                 ['akun' => $creditAkun->no_ref_akun, 'posisi_akun' => PositionEnum::CREDIT->value, 'nominal' => $validated['nominal']],
             ],
-            now()->toDateString(),
+            $txDate,
             auth()->id()
         );
 
@@ -94,7 +116,6 @@ class AruskasController extends Controller
             '1_minggu' => '1 Minggu Terakhir',
             '1_bulan'  => '1 Bulan Terakhir',
             '3_bulan'  => '3 Bulan Terakhir',
-            '1_tahun'  => '1 Tahun Terakhir',
             'custom' => (
                 !empty($filters['date_from']) && !empty($filters['date_to'])
                     ? Carbon::parse($filters['date_from'])->format('d/m/Y')
@@ -113,38 +134,13 @@ class AruskasController extends Controller
 
     public function exportCashflow(Request $request)
     {
-        $filters = $request->only([
-            'search',
-            'periode',
-            'date_from',
-            'date_to',
-            'sort_by',
-            'sort_dir',
-        ]);
+        $cfMonth = $request->input('cf_month', now()->format('Y-m'));
+
+        $filters = $this->aruskasService->buildCashflowMonthFilters($cfMonth);
 
         $report = $this->aruskasService->getCashFlowReport($filters);
 
-        $periode = match ($filters['periode'] ?? '') {
-
-            '1_minggu' => '1 Minggu Terakhir',
-
-            '1_bulan' => '1 Bulan Terakhir',
-
-            '3_bulan' => '3 Bulan Terakhir',
-
-            '1_tahun' => '1 Tahun Terakhir',
-
-            'custom' => (
-                !empty($filters['date_from']) &&
-                !empty($filters['date_to'])
-                    ? Carbon::parse($filters['date_from'])->translatedFormat('d F Y')
-                    .' s.d. '.
-                    Carbon::parse($filters['date_to'])->translatedFormat('d F Y')
-                    : 'Periode Kustom'
-            ),
-
-            default => 'Berakhir '.now()->translatedFormat('d F Y'),
-        };
+        $periode = Carbon::parse($filters['date_from'])->translatedFormat('F Y');
 
         return Excel::download(
             new LaporanArusKasExport($report, $periode),

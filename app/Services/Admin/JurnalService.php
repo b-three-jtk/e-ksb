@@ -13,10 +13,22 @@ class JurnalService
     {
         $this->validateEntries($entries);
 
-        return DB::transaction(function () use ($entries, $date, $userId) {
+        $txDate = $date ?? now()->toDateString();
+
+        $startDate = \App\Models\PengaturanUmum::where('key', 'tanggal_awal_periode')->latest('tgl_diberlakukan')->value('value');
+        $endDate = \App\Models\PengaturanUmum::where('key', 'tanggal_akhir_periode')->latest('tgl_diberlakukan')->value('value');
+
+        if ($startDate && $txDate < $startDate) {
+            throw new \Exception("Tanggal transaksi ({$txDate}) tidak boleh kurang dari tanggal awal periode ({$startDate})");
+        }
+        if ($endDate && $txDate > $endDate) {
+            throw new \Exception("Tanggal transaksi ({$txDate}) tidak boleh melebihi tanggal akhir periode ({$endDate})");
+        }
+
+        return DB::transaction(function () use ($entries, $txDate, $userId) {
 
             $journal = Jurnal::create([
-                'tgl_transaksi' => $date ?? now()->toDateString(),
+                'tgl_transaksi' => $txDate,
                 'created_by'    => $userId,
             ]);
 

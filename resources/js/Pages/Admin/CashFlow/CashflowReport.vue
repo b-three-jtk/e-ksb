@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from "vue"
 import { Icon } from "@iconify/vue"
-import { usePage } from "@inertiajs/vue3"
+import { usePage, router } from "@inertiajs/vue3"
 import BaseTable from "@/Components/Table/BaseTable.vue"
 
 const props = defineProps({
@@ -10,23 +10,22 @@ const props = defineProps({
 
 const page = usePage()
 
+const cfMonth = computed({
+    get() {
+        return page.props.filters?.cf_month ?? new Date().toISOString().slice(0, 7)
+    },
+    set(value) {
+        router.get(
+            '/admin/kas',
+            { ...page.props.filters, cf_month: value },
+            { preserveScroll: true, replace: true }
+        )
+    },
+})
+
 const exportUrl = computed(() => {
     const params = new URLSearchParams()
-
-    const filters = page.props.filters ?? {}
-
-    if (filters.periode) {
-        params.append("periode", filters.periode)
-    }
-
-    if (filters.date_from) {
-        params.append("date_from", filters.date_from)
-    }
-
-    if (filters.date_to) {
-        params.append("date_to", filters.date_to)
-    }
-
+    params.append("cf_month", cfMonth.value)
     return `/admin/kas/export/cashflow?${params.toString()}`
 })
 
@@ -191,18 +190,38 @@ const rows = computed(() => {
                 </p>
             </div>
 
-            <a
-                :href="exportUrl"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
-                    bg-green-600 hover:bg-green-700 text-white text-sm transition"
-            >
-                <Icon
-                    icon="mdi:file-excel"
-                    class="w-5 h-5"
-                />
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex items-center gap-1.5"
+                    title="Laporan arus kas disusun per bulan sesuai standar akuntansi keuangan"
+                >
+                    <input
+                        type="month"
+                        v-model="cfMonth"
+                        class="border rounded-lg px-3 py-2 text-sm
+                            bg-white text-gray-900
+                            dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                            focus:ring-2 focus:ring-blue-500"
+                    />
+                    <Icon
+                        icon="mdi:information-outline"
+                        class="w-4 h-4 text-gray-400 cursor-help shrink-0"
+                    />
+                </div>
 
-                Export Excel
-            </a>
+                <a
+                    :href="exportUrl"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+                        bg-green-600 hover:bg-green-700 text-white text-sm transition"
+                >
+                    <Icon
+                        icon="mdi:file-excel"
+                        class="w-5 h-5"
+                    />
+
+                    Export Excel
+                </a>
+            </div>
 
         </div>
 

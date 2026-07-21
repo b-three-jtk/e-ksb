@@ -42,6 +42,8 @@ const props = defineProps({
     filters: Object,
     akunOptions: Array,
     can: Object,
+    period_start: String,
+    period_end: String,
 })
 
 const can = computed(() => page.props.auth.can);
@@ -83,6 +85,7 @@ const filters = reactive({
     date_to:   page.props.filters?.date_to   ?? '',
     sort_by:   page.props.filters?.sort_by   ?? 'tanggal',
     sort_dir:  page.props.filters?.sort_dir  ?? 'desc',
+    outside_period: page.props.filters?.outside_period ?? '',
 })
 
 const showDatePicker = computed(() => {
@@ -116,6 +119,7 @@ const exportQuery = computed(() => {
     if (filters.periode)   params.periode   = filters.periode
     if (filters.date_from) params.date_from = filters.date_from 
     if (filters.date_to)   params.date_to   = filters.date_to
+    if (filters.outside_period) params.outside_period = filters.outside_period
     params.sort_by  = filters.sort_by
     params.sort_dir = filters.sort_dir
     return new URLSearchParams(params).toString()
@@ -180,6 +184,7 @@ const applyFilters = () => {
             date_to: filters.date_to || undefined,
             sort_by: filters.sort_by,
             sort_dir: filters.sort_dir,
+            outside_period: filters.outside_period || undefined,
             page: 1,
         },
         {
@@ -260,7 +265,38 @@ const validateForm = () => {
     return !Object.values(errors).some(Boolean)
 }
 
+const period_start = computed(() => props.period_start)
+const period_end = computed(() => props.period_end)
+
+const toggleOutsidePeriod = () => {
+    filters.outside_period = filters.outside_period === 'true' ? '' : 'true'
+    filters.periode = ''
+    filters.date_from = ''
+    filters.date_to = ''
+    applyFilters()
+}
+
 const openModal = () => {
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    if (period_start.value && today < period_start.value) {
+        Swal.fire({
+            title: 'Diluar Periode Aktif',
+            text: `Tidak dapat menambah alokasi kas karena tanggal hari ini (${today}) kurang dari tanggal awal periode (${period_start.value}).`,
+            icon: 'warning',
+            confirmButtonColor: '#009141',
+        })
+        return
+    }
+    if (period_end.value && today > period_end.value) {
+        Swal.fire({
+            title: 'Diluar Periode Aktif',
+            text: `Tidak dapat menambah alokasi kas karena tanggal hari ini (${today}) melebihi tanggal akhir periode (${period_end.value}).`,
+            icon: 'warning',
+            confirmButtonColor: '#009141',
+        })
+        return
+    }
     Object.assign(form, formDefault())
     Object.assign(errors, {
         nominal: '',
@@ -357,7 +393,6 @@ const periodeOptions = [
     { label: '1 Minggu', value: '1_minggu' },
     { label: '1 Bulan',  value: '1_bulan'  },
     { label: '3 Bulan',  value: '3_bulan'  },
-    { label: '1 Tahun',  value: '1_tahun'  },
     { label: 'Pilih Tanggal', value: 'custom' },
 ]
 </script>
@@ -426,13 +461,12 @@ const periodeOptions = [
             <!-- Functionality -->
             <BaseFunctionality
                 :per-page="filters.per_page"
-                :search="filters.search"
                 @update:per-page="val => filters.per_page = Number(val)"
                 @update:search="val => filters.search = val"
             >
                 <template #actions>
                     <!-- Pilih Periode -->
-                    <div class="relative">
+                    <div class="relative" v-if="filters.outside_period !== 'true'">
                         <select
                             v-model="filters.periode"
                             class="appearance-none border rounded-lg px-3 py-2 pr-8 text-sm
@@ -452,19 +486,22 @@ const periodeOptions = [
                     </div>
 
                     <!-- Range Tanggal — muncul kalau pilih "Pilih Tanggal" -->
-                    <template v-if="showDatePicker">
+                    <template v-if="filters.outside_period !== 'true' && showDatePicker">
                         <div class="flex items-center gap-2">
                             <BaseInputAdmin
                                 v-model="filters.date_from"
                                 type="date"
                                 placeholder="Dari tanggal"
+                                :min-date="period_start"
+                                :max-date="period_end"
                             />
                             <span class="text-sm text-gray-500">s/d</span>
                             <BaseInputAdmin
                                 v-model="filters.date_to"
                                 type="date"
                                 placeholder="Sampai tanggal"
-                                :max-date="undefined"
+                                :min-date="period_start"
+                                :max-date="period_end"
                             />
                             <button
                                 @click="applyFilters"
@@ -474,6 +511,18 @@ const periodeOptions = [
                             </button>
                         </div>
                     </template>
+                    <!-- Toggle Histori Luar Periode -->
+                    <button
+                        type="button"
+                        @click="toggleOutsidePeriod"
+                        class="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition font-medium"
+                        :class="filters.outside_period === 'true'
+                            ? 'bg-amber-600 hover:bg-amber-700 text-white border-transparent'
+                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-gray-200 dark:border-slate-600'"
+                    >
+                        <Icon :icon="filters.outside_period === 'true' ? 'mdi:calendar-check' : 'mdi:history'" class="w-4 h-4" />
+                        {{ filters.outside_period === 'true' ? 'Tampilkan Periode Aktif' : 'Histori Jurnal Luar Periode' }}
+                    </button>
                     <!-- Export CSV -->
                     <a
                         :href="`/admin/kas/export/excel?${exportQuery}`"

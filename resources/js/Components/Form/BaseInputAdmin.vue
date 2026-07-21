@@ -14,6 +14,7 @@ const props = defineProps<{
     placeholder?: string
     max?: string
     maxDate?: Date | string
+    minDate?: Date | string
     min?: string
     pattern?: string
     selectables?: Array<{ value: string | number; text: string }>
@@ -158,7 +159,7 @@ const handleMoneyInput = (event: Event) => {
         <VueDatePicker v-else-if="inputType === 'date'" v-model="dateValue" format="yyyy-MM-dd" :time-picker="false"
             :time-config="{ enableTimePicker: false, ignoreTimeValidation: true }" teleport="body"
             :input-class="datePickerInputClass" :disabled="disabled" :placeholder="placeholder || 'Pilih tanggal'"
-            :dark="isDarkMode" :max-date="maxDate ? new Date(maxDate) : undefined" />
+            :dark="isDarkMode" :min-date="minDate ? new Date(minDate) : undefined" :max-date="maxDate ? new Date(maxDate) : undefined" />
 
         <!-- Select -->
         <div v-else-if="inputType === 'select'" class="relative z-20 bg-transparent">

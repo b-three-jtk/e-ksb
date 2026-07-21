@@ -85,28 +85,82 @@ class AruskasService
             });
         }
 
-        if (!empty($filters['periode'])) {
-            switch ($filters['periode']) {
-                case '1_minggu':
-                    $query->whereDate('jurnal.tgl_transaksi', '>=', now()->subWeek());
-                    break;
-                case '1_bulan':
-                    $query->whereDate('jurnal.tgl_transaksi', '>=', now()->subMonth());
-                    break;
-                case '3_bulan':
-                    $query->whereDate('jurnal.tgl_transaksi', '>=', now()->subMonths(3));
-                    break;
-                case '1_tahun':
-                    $query->whereDate('jurnal.tgl_transaksi', '>=', now()->subYear());
-                    break;
-                case 'custom':
-                    if (!empty($filters['date_from']) && !empty($filters['date_to'])) {
-                        $query->whereBetween('jurnal.tgl_transaksi', [
-                            $filters['date_from'],
-                            $filters['date_to'],
-                        ]);
+        $startDate = \App\Models\PengaturanUmum::where('key', 'tanggal_awal_periode')->latest('tgl_diberlakukan')->value('value');
+        $endDate = \App\Models\PengaturanUmum::where('key', 'tanggal_akhir_periode')->latest('tgl_diberlakukan')->value('value');
+
+        if (!empty($filters['outside_period']) && $filters['outside_period'] === 'true') {
+            $query->where(function ($q) use ($startDate, $endDate) {
+                $hasCondition = false;
+                if ($startDate) {
+                    $q->whereDate('jurnal.tgl_transaksi', '<', $startDate);
+                    $hasCondition = true;
+                }
+                if ($endDate) {
+                    if ($hasCondition) {
+                        $q->orWhereDate('jurnal.tgl_transaksi', '>', $endDate);
+                    } else {
+                        $q->whereDate('jurnal.tgl_transaksi', '>', $endDate);
                     }
-                    break;
+                }
+            });
+        } else {
+            if (!empty($filters['periode'])) {
+                switch ($filters['periode']) {
+                    case '1_minggu':
+                        $from = now()->subWeek()->toDateString();
+                        if ($startDate && $from < $startDate) {
+                            $from = $startDate;
+                        }
+                        $query->whereDate('jurnal.tgl_transaksi', '>=', $from);
+                        if ($endDate) {
+                            $query->whereDate('jurnal.tgl_transaksi', '<=', $endDate);
+                        }
+                        break;
+                    case '1_bulan':
+                        $from = now()->subMonth()->toDateString();
+                        if ($startDate && $from < $startDate) {
+                            $from = $startDate;
+                        }
+                        $query->whereDate('jurnal.tgl_transaksi', '>=', $from);
+                        if ($endDate) {
+                            $query->whereDate('jurnal.tgl_transaksi', '<=', $endDate);
+                        }
+                        break;
+                    case '3_bulan':
+                        $from = now()->subMonths(3)->toDateString();
+                        if ($startDate && $from < $startDate) {
+                            $from = $startDate;
+                        }
+                        $query->whereDate('jurnal.tgl_transaksi', '>=', $from);
+                        if ($endDate) {
+                            $query->whereDate('jurnal.tgl_transaksi', '<=', $endDate);
+                        }
+                        break;
+                    case 'custom':
+                        if (!empty($filters['date_from']) && !empty($filters['date_to'])) {
+                            $dateFrom = $filters['date_from'];
+                            $dateTo = $filters['date_to'];
+                            // Clamp up to general settings period
+                            if ($startDate && $dateFrom < $startDate) {
+                                $dateFrom = $startDate;
+                            }
+                            if ($endDate && $dateTo > $endDate) {
+                                $dateTo = $endDate;
+                            }
+                            $query->whereBetween('jurnal.tgl_transaksi', [
+                                $dateFrom,
+                                $dateTo,
+                            ]);
+                        }
+                        break;
+                }
+            } else {
+                if ($startDate) {
+                    $query->whereDate('jurnal.tgl_transaksi', '>=', $startDate);
+                }
+                if ($endDate) {
+                    $query->whereDate('jurnal.tgl_transaksi', '<=', $endDate);
+                }
             }
         }
 
@@ -233,6 +287,33 @@ class AruskasService
                     ? number_format($trx->nominal, 0, ',', '.')
                     : '',
             ]);
+    }
+
+    public function buildCashflowMonthFilters(string $cfMonth): array
+    {
+        $startDate = \App\Models\PengaturanUmum::where('key', 'tanggal_awal_periode')->latest('tgl_diberlakukan')->value('value');
+        $endDate = \App\Models\PengaturanUmum::where('key', 'tanggal_akhir_periode')->latest('tgl_diberlakukan')->value('value');
+
+        try {
+            $monthStart = Carbon::createFromFormat('Y-m', $cfMonth)->startOfMonth()->toDateString();
+            $monthEnd   = Carbon::createFromFormat('Y-m', $cfMonth)->endOfMonth()->toDateString();
+        } catch (\Exception $e) {
+            $monthStart = now()->startOfMonth()->toDateString();
+            $monthEnd   = now()->endOfMonth()->toDateString();
+        }
+
+        if ($startDate && $monthStart < $startDate) {
+            $monthStart = $startDate;
+        }
+        if ($endDate && $monthEnd > $endDate) {
+            $monthEnd = $endDate;
+        }
+
+        return [
+            'periode'   => 'custom',
+            'date_from' => $monthStart,
+            'date_to'   => $monthEnd,
+        ];
     }
     
     public function getCashFlowReport(array $filters): array
