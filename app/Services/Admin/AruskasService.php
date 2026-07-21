@@ -171,6 +171,21 @@ class AruskasService
         return [$detailJurnal, $transactions];
     }
 
+    public function getSaldoKas(): float
+    {
+        $kasAkun = Akun::where('nama_akun', 'Kas')->firstOrFail();
+
+        $totalKasMasuk = DetailJurnal::where('no_ref_akun', $kasAkun->no_ref_akun)
+            ->where('posisi_akun', PositionEnum::DEBIT->value)
+            ->sum('nominal');
+
+        $totalKasKeluar = DetailJurnal::where('no_ref_akun', $kasAkun->no_ref_akun)
+            ->where('posisi_akun', PositionEnum::CREDIT->value)
+            ->sum('nominal');
+
+        return (float) ($totalKasMasuk - $totalKasKeluar);
+    }
+
     public function getKasSummary(): array
     {
         $kasAkun = Akun::where('nama_akun', 'Kas')->firstOrFail();

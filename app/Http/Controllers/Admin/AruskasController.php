@@ -34,6 +34,7 @@ class AruskasController extends Controller
         return Inertia::render('Admin/CashFlow/List', [
             'transactions' => $transactions,
             'summary'      => $this->aruskasService->getKasSummary(),
+            'saldoKas'     => $this->aruskasService->getSaldoKas(),
             'cashFlowReport'=>$this->aruskasService->getCashFlowReport($filters),
             'filters'      => $filters,
             'akunOptions'  => Akun::select(
@@ -59,6 +60,15 @@ class AruskasController extends Controller
         if ($validated['akun_debit'] === $validated['akun_kredit']) {
             return back()->withErrors([
                 'akun_kredit' => 'Akun debit dan kredit tidak boleh sama',
+            ]);
+        }
+
+        // Validasi nominal tidak melebihi saldo kas tersedia
+        $saldoKas = $this->aruskasService->getSaldoKas();
+        if ((float) $validated['nominal'] > $saldoKas) {
+            return back()->withErrors([
+                'nominal' => 'Nominal alokasi (Rp' . number_format($validated['nominal'], 0, ',', '.') .
+                             ') melebihi kas yang tersedia (Rp' . number_format($saldoKas, 0, ',', '.') . ')',
             ]);
         }
 

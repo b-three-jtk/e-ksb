@@ -42,6 +42,7 @@ const props = defineProps({
     filters: Object,
     akunOptions: Array,
     can: Object,
+    saldoKas: { type: Number, default: 0 },
 })
 
 const can = computed(() => page.props.auth.can);
@@ -257,6 +258,11 @@ const validateForm = () => {
     errors.nominal     = form.nominal     ? '' : 'Nominal wajib diisi'
     errors.akun_debit  = form.akun_debit  ? '' : 'Akun debit wajib dipilih'
     errors.akun_kredit = form.akun_kredit ? '' : 'Akun kredit wajib dipilih'
+
+    if (form.nominal && Number(form.nominal) > props.saldoKas) {
+        errors.nominal = `Nominal melebihi kas tersedia (Rp ${props.saldoKas.toLocaleString('id-ID')})`
+    }
+
     return !Object.values(errors).some(Boolean)
 }
 
