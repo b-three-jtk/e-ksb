@@ -43,7 +43,7 @@ class PeranAksesService
         return Role::with('permissions')
             ->where('name', '!=', UserRoleEnum::ANGGOTA->value)
             ->when($search, function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
+                $query->whereRaw('LOWER(name) LIKE ?', ['%' . mb_strtolower($search) . '%']);
             })
             ->orderBy($sortBy, $sortDir)
             ->paginate($perPage)

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { computed } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
 import parseCurrencyAmount from '@/Composables/moneyParser.js';
 
@@ -10,16 +10,16 @@ const props = defineProps({
     height: Number,
 })
 
-const series = ref([
+const chartHeight = computed(() => props.height)
+const categories = computed(() => (props.data ? Object.keys(props.data) : []))
+const values = computed(() => (props.data ? Object.values(props.data).map(v => Number(v) || 0) : []))
+
+const series = computed(() => [
     {
         name: 'Simpanan',
-        data: [],
+        data: values.value,
     },
 ])
-
-const chartHeight = computed(() => props.height)
-const categories = computed(() => props.data ? Object.keys(props.data) : [])
-const values = computed(() => props.data ? Object.values(props.data) : [])
 
 const rowHeight = computed(() => {
     if (!categories.value.length) return 0
@@ -27,7 +27,7 @@ const rowHeight = computed(() => {
     return calculatedHeight
 })
 
-const chartOptions = ref({
+const chartOptions = computed(() => ({
     colors: ['#044B27', '#097939', '#0D9F4A', '#72A36B', '#C3DC6D'],
     chart: {
         fontFamily: 'Manrope, sans-serif',
@@ -46,7 +46,7 @@ const chartOptions = ref({
     dataLabels: { enabled: false },
     stroke: { show: true, width: 4, colors: ['transparent'] },
     xaxis: {
-        categories: [],
+        categories: categories.value,
         axisBorder: { show: false },
         axisTicks: { show: false },
         labels: {
@@ -78,33 +78,16 @@ const chartOptions = ref({
         },
         y: {
             formatter: function (val) {
-                return 'Rp ' + new Intl.NumberFormat('id-ID').format(val)
+                return parseCurrencyAmount(val)
             },
         },
     },
-})
+}))
 
 const totalSimpanan = computed(() => {
     if (!props.data) return 0;
-    return Object.values(props.data).reduce((a, b) => a + b, 0);
+    return Object.values(props.data).reduce((a, b) => a + Number(b), 0);
 });
-
-const updateChart = () => {
-    if (!props.data) return
-
-    const sourceData = props.data;
-    const categories = Object.keys(sourceData);
-    const values = Object.values(sourceData).map(v => Number(v));
-
-    chartOptions.value = {
-        ...chartOptions.value,
-        xaxis: { ...chartOptions.value.xaxis, categories }
-    }
-    series.value = [{ name: 'Simpanan', data: values }]
-}
-
-watch(() => props.filter, updateChart, { immediate: true })
-watch(() => props.data, updateChart, { deep: true })
 </script>
 
 <template>

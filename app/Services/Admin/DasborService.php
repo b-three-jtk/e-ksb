@@ -187,7 +187,7 @@ class DasborService
             ->whereBetween('jurnal.tgl_transaksi', [$rangeAwal, $rangeAkhir])
             ->get()
             ->groupBy(fn($entry) => Carbon::parse($entry->tgl_transaksi)->format($format))
-            ->map(fn($group) => $group->sum('nominal'));
+            ->map(fn($group) => (float) $group->sum('nominal'));
 
         $result = $data->replace($pendapatan);
 

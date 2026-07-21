@@ -24,7 +24,7 @@ const props = defineProps({
 const user = computed(() => props.user || {});
 
 const form = useForm({
-    name: props.user.nama || "",
+    nama: props.user.nama || "",
     nik: props.user.nik || "",
     email: props.user.email || "",
     no_telp: props.user.no_telp || "",

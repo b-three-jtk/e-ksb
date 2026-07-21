@@ -79,7 +79,7 @@ const genderOptions = [
 ]
 
 const { errors } = useUserValidation(form, { requireEmail: false })
-const { onlyLetters, onlyNumbers } = useInputSanitizers()
+const { onlyLetters, onlyNumbers, onlyAddress } = useInputSanitizers()
 const { ktpPreviewUrl, kkPreviewUrl, setFile } = useImageUploadPreview(form)
 
 const getFieldError = (field, fallback = '') => {
@@ -195,6 +195,7 @@ const submitForm = () => {
 						:errors="errors"
 						:get-field-error="getFieldError"
 						:only-numbers="onlyNumbers"
+						:only-address="onlyAddress"
 					/>
 
 					<HeirSection

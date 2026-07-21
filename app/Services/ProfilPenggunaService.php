@@ -58,7 +58,7 @@ class ProfilPenggunaService
             return [
                 'nik_ahli_waris' => $ahli_waris->nik_ahli_waris,
                 'nama_ahli_waris' => $ahli_waris->nama_ahli_waris,
-                'hubungan' => $ahli_waris->hubungan,
+                'hubungan' => $ahli_waris->pivot->hubungan,
                 'kontak_ahli_waris' => $ahli_waris->kontak_ahli_waris,
             ];
         })->values() ?? collect();
