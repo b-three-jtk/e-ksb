@@ -13,7 +13,7 @@ const summary = computed(() => page.props.summary)
 const tabungan = computed(() => page.props.tabungan)
 
 const rupiah = (value) =>
-    'Rp ' + new Intl.NumberFormat('id-ID').format(value ?? 0)
+    'Rp ' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(value ?? 0)
 
 onMounted(() => {
     if (page.props.flash?.login_success) {
