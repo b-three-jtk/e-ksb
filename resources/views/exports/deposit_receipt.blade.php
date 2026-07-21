@@ -125,7 +125,7 @@
 <body>
     @php
         $trxDate = \Carbon\Carbon::parse($struk['tanggal'] ?? now())->locale('id');
-        $tanggalFormatted = $trxDate->translatedFormat('d M Y') . '  ' . $trxDate->format('H:i');
+        $tanggalFormatted = $trxDate->translatedFormat('d M Y');
         $waktuCetak = now()->locale('id')->translatedFormat('d/m/Y H:i') . ' WIB';
     @endphp
 

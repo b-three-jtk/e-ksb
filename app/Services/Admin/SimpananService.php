@@ -71,12 +71,12 @@ class SimpananService
     public function getTrxCodePrefix(string $category): string
     {
         return match ($category) {
-            'Tabungan Anggota'   => 'TTA',
-            'Simpanan Pokok'     => 'TSP',
-            'Simpanan Wajib'     => 'TSW',
-            'Tabungan Berjangka' => 'TTB',
-            'Tabungan Ibadah'    => 'TTI',
-            default              => 'TST',
+            'Tabungan Anggota'   => 'TA',
+            'Simpanan Pokok'     => 'SP',
+            'Simpanan Wajib'     => 'SW',
+            'Tabungan Berjangka' => 'TB',
+            'Tabungan Ibadah'    => 'TI',
+            default              => 'ST',
         };
     }
 
