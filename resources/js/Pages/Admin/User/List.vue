@@ -45,6 +45,8 @@ const showNewMemberCredentials = async () => {
         icon: 'success',
         confirmButtonText: 'Kirim ke WhatsApp',
         confirmButtonColor: '#009141',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
     })
 
     if (result.isConfirmed) {
@@ -55,9 +57,14 @@ const showNewMemberCredentials = async () => {
 }
 
 onMounted(() => {
-    memberCredentials.value = page.props.flash?.member_credentials ?? null
-    if (memberCredentials.value) {
-        showNewMemberCredentials()
+    const flashCredentials = page.props.flash?.member_credentials ?? null
+    if (flashCredentials && flashCredentials.kode_pengguna) {
+        const storageKey = `shown_credentials_${flashCredentials.kode_pengguna}`
+        if (!sessionStorage.getItem(storageKey)) {
+            memberCredentials.value = flashCredentials
+            sessionStorage.setItem(storageKey, 'true')
+            showNewMemberCredentials()
+        }
     }
 })
 
