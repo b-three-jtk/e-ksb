@@ -132,9 +132,14 @@ const showResignationInfo = async () => {
 }
 
 onMounted(() => {
-    resignationInfo.value = page.props.flash?.resignation_info ?? null
-    if (resignationInfo.value) {
-        showResignationInfo()
+    const flashResignation = page.props.flash?.resignation_info ?? null
+    if (flashResignation && flashResignation.kode_pengguna) {
+        const storageKey = `shown_resignation_${flashResignation.kode_pengguna}`
+        if (!sessionStorage.getItem(storageKey)) {
+            resignationInfo.value = flashResignation
+            sessionStorage.setItem(storageKey, 'true')
+            showResignationInfo()
+        }
     }
 })
 </script>
