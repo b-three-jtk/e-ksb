@@ -163,6 +163,7 @@ const submitForm = () => {
                         <!-- NIK -->
                         <BaseInputAdmin v-model="form.nik" label="NIK" type="text" required
                             placeholder="Masukkan 16 digit NIK" max="16" min="16" pattern="[0-9]*" :error="errors.nik"
+                            @input="form.nik = onlyNumbers(form.nik)"
                         >
                         </BaseInputAdmin>
 

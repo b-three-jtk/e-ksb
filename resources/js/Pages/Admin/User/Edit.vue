@@ -114,6 +114,11 @@ const onlyAlphaNumericDash = (event) => {
     input.value = input.value.replace(/[^a-zA-Z0-9\s\-.,]/g, '');
 }
 
+const noEmoji = (event) => {
+    const input = event.target;
+    input.value = input.value.replace(/[^\x00-\x7F]/g, '');
+}
+
 const heirInput = ref({
     nik_ahli_waris: '',
     nama_ahli_waris: '',
@@ -206,11 +211,11 @@ const submitForm = () => {
                     <BaseInputAdmin label="Nomor Anggota" placeholder="Masukkan nomor anggota"
                         v-model="form.kode_pengguna" disabled :errors="errors.kode_pengguna" @input="onlyAlpha" />
                     <BaseInputAdmin label="Nama Lengkap" placeholder="Masukkan nama lengkap" v-model="form.nama"
-                        required :errors="errors.nama" @input="onlyAlpha" />
+                        required :errors="errors.nama" @input="onlyAlpha" disabled />
                     <BaseInputAdmin label="NIK" placeholder="Masukkan NIK" v-model="form.nik" max="16" required
-                        :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" />
+                        :errors="errors.nik" @input="onlyNumbers" inputmode="numeric" disabled />
                     <BaseInputAdmin label="Email" placeholder="Masukkan email" v-model="form.email"
-                        :errors="errors.email" type="email" />
+                        :errors="errors.email" type="email" @input="noEmoji" />
                     
                     <div class="col-span-2 grid grid-cols-2 gap-4 border border-gray-200 dark:border-gray-700 p-4 rounded-xl mb-2 mt-2">
                         <div class="col-span-2">
@@ -218,9 +223,9 @@ const submitForm = () => {
                             <p class="text-xs text-gray-500">Kosongkan jika tidak ingin mengubah kata sandi.</p>
                         </div>
                         <BaseInputAdmin label="Kata Sandi Baru" placeholder="Masukkan kata sandi baru" v-model="form.password"
-                            :errors="errors.password" type="password" />
+                            :errors="errors.password" type="password" @input="noEmoji" />
                         <BaseInputAdmin label="Konfirmasi Kata Sandi" placeholder="Masukkan ulang kata sandi" v-model="form.password_confirmation"
-                            :errors="errors.password_confirmation" type="password" />
+                            :errors="errors.password_confirmation" type="password" @input="noEmoji" />
                     </div>
                     <BaseInputAdmin label="Nomor Telepon" required placeholder="Masukkan nomor telepon" max="14"
                         v-model="form.no_telp" :errors="errors.no_telp" @input="onlyNumbers"
@@ -231,10 +236,10 @@ const submitForm = () => {
                     ]" :error="errors.jenis_kelamin">
                     </BaseInputAdmin>
                     <BaseInputAdmin label="Tempat Lahir" required v-model="form.tempat_lahir" :error="errors.tempat_lahir"
-                        placeholder="Masukkan tempat lahir" @input="onlyAlpha" />
+                        placeholder="Masukkan tempat lahir" @input="onlyAlpha" disabled />
                     <BaseInputAdmin label="Tanggal Lahir" required type="date" v-model="form.tgl_lahir"
                         :maxDate="maxBirthDate"
-                        :error="errors.tgl_lahir" />
+                        :error="errors.tgl_lahir" disabled />
                     <BaseInputAdmin v-model="form.alamat_ktp" label="Alamat KTP" type="textarea"
                         placeholder="Masukkan alamat lengkap sesuai KTP" rows="4" :error="errors.alamat_ktp"
                         @input="onlyAlphaNumericDash" />
@@ -332,9 +337,16 @@ const submitForm = () => {
                         </div>
                     </div>
                 </div>
-                <Button variant="secondary" class="self-end" @click="submitForm">
-                    Simpan
-                </Button>
+                <div class="flex items-center justify-end gap-6 w-full mt-4">
+                    <Button href="/admin/users" variant="light">
+                        Batal
+                    </Button>
+                    <Button @click="submitForm" variant="secondary"
+                        :disabled="form.processing || !form.nama || !form.nik || !form.no_telp || !form.tempat_lahir || !form.tgl_lahir || !form.pendidikan_terakhir || !form.status_pernikahan">
+                        <div v-if="form.processing" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2 inline-block align-middle" />
+                        <span class="align-middle">{{ form.processing ? 'Menyimpan...' : 'Simpan' }}</span>
+                    </Button>
+                </div>
             </div>
         </div>
     </AdminLayout>
