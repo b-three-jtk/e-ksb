@@ -38,7 +38,7 @@
     "src": "public/images/logo/logo-icon.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-Decyenge.css",
+    "file": "assets/app-DvpcBAeA.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -47,7 +47,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-D4NcMfaU.js",
+    "file": "assets/app-BKdlQut7.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -56,8 +56,8 @@
       "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js"
     ],
     "css": [
-      "assets/app-di7EIiro.css",
-      "assets/app-Decyenge.css"
+      "assets/app-BzDHEnBn.css",
+      "assets/app-DvpcBAeA.css"
     ],
     "assets": [
       "assets/logo-icon-WY71gjSd.svg",
