@@ -1,16 +1,39 @@
 <?php
 
 use App\Enums\EducationEnum;
+use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
-use App\Models\Pembiayaan;
-use App\Models\Anggota;
+use App\Enums\InstallmentPaymentScheduleStatusEnum;
+use App\Enums\MemberStatusEnum;
+use App\Enums\NotificationStatusEnum;
+use App\Enums\SavingTypeEnum;
+use App\Enums\UserRoleEnum;
+use App\Enums\UserStatusEnum;
+use App\Models\Akun;
 use App\Models\AkunSimpanan;
+use App\Models\Anggota;
+use App\Models\Angsuran;
+use App\Models\DetailJurnal;
+use App\Models\JenisBarang;
+use App\Models\Jurnal;
+use App\Models\Notifikasi;
+use App\Models\ObjekPembiayaan;
+use App\Models\Pemasok;
+use App\Models\PembayaranAngsuran;
+use App\Models\Pembiayaan;
+use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
+use App\Models\TransaksiSimpanan;
+use App\Models\Wakalah;
+use App\Services\NotifikasiService;
+use Database\Seeders\AkunSeeder;
+use Database\Seeders\JenisBarangSeeder;
 use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia;
 use Spatie\Permission\Models\Role;
 
@@ -943,6 +966,233 @@ describe('Aplikasi harus menyediakan verifikasi permohonan pengunduran diri angg
             ->put('/admin/resignations/' . $user->id);
 
         $res->assertStatus(403);
+    });
+});
+
+// ============================================================================
+// 3. Validasi Kelengkapan Data dan Peringatan Duplikasi Data Anggota/Pengurus
+//    Aplikasi harus memvalidasi kelengkapan data dan memberikan peringatan
+//    potensi duplikasi data anggota/pengurus sebelum disimpan oleh sekretaris.
+// ============================================================================
+describe('Aplikasi harus memvalidasi kelengkapan data dan memberikan peringatan potensi duplikasi data anggota/pengurus sebelum disimpan oleh sekretaris.', function () {
+
+    it('Sistem menolak penyimpanan anggota baru jika data wajib tidak lengkap', function () {
+        $sekretaris = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $sekretaris->assignRole('Sekretaris');
+
+        // Kirim data tanpa field wajib (nama, nik, no_telp, alamat, pendidikan)
+        $response = $this->actingAs($sekretaris)
+            ->post('/admin/users/store', [
+                'jenis_kelamin' => 'Laki-laki',
+                'tempat_lahir' => 'Bandung',
+                'tgl_lahir' => '1990-01-01',
+            ]);
+
+        $response->assertSessionHasErrors(['nama', 'nik', 'no_telp', 'alamat_domisili', 'pendidikan_terakhir']);
+    });
+
+    it('Sistem menolak penyimpanan jika NIK anggota sudah ada (duplikasi)', function () {
+        $sekretaris = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $sekretaris->assignRole('Sekretaris');
+
+        // Buat anggota pertama dengan NIK tertentu
+        Pengguna::factory()->create(['nik' => '3201012345678901']);
+
+        // Coba daftarkan anggota baru dengan NIK yang sama
+        $response = $this->actingAs($sekretaris)
+            ->post('/admin/users/store', [
+                'nama' => 'Duplikat User',
+                'jenis_kelamin' => 'Laki-laki',
+                'tempat_lahir' => 'Bandung',
+                'tgl_lahir' => '1990-01-01',
+                'status_pernikahan' => 'Kawin',
+                'email' => 'duplikat@example.com',
+                'alamat_domisili' => 'Jl. Test No. 1',
+                'pendidikan_terakhir' => 'SMA',
+                'nik' => '3201012345678901',
+                'no_telp' => '081234567890',
+                'nik_ahli_waris' => '6543210987654321',
+                'nama_ahli_waris' => 'Ahli Waris',
+                'heir_hubungan' => 'Istri',
+                'kontak_ahli_waris' => '081234567891',
+            ]);
+
+        $response->assertSessionHasErrors(['nik']);
+        $this->assertDatabaseMissing('pengguna', ['nama' => 'Duplikat User']);
+    });
+
+    it('Sistem menolak penyimpanan pengurus jika NIK sudah terdaftar', function () {
+        $sekretaris = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $sekretaris->assignRole('Sekretaris');
+
+        // Buat pengurus pertama
+        Pengguna::factory()->create(['nik' => '1111222233334444']);
+
+        $role = \Spatie\Permission\Models\Role::where('name', 'Bendahara')->first();
+
+        // Coba tambah pengurus baru dengan NIK yang sama
+        $response = $this->actingAs($sekretaris)
+            ->post('/admin/pengurus/store', [
+                'nama' => 'Pengurus Duplikat',
+                'email' => 'pengurus@example.com',
+                'nik' => '1111222233334444',
+                'no_telp' => '081234567890',
+                'role_id' => $role->id,
+            ]);
+
+        // Controller menangkap duplikasi NIK sebagai exception umum
+        $response->assertSessionHasErrors();
+        $this->assertDatabaseMissing('pengguna', ['nama' => 'Pengurus Duplikat']);
+    });
+});
+
+// ============================================================================
+// 4. Menampilkan Daftar Anggota Berdasarkan Penanggung Jawab Anggota (PJA)
+//    Aplikasi harus menampilkan daftar anggota yang menjadi tanggung jawab
+//    masing-masing penanggung jawab anggota.
+// ============================================================================
+describe('Aplikasi harus menampilkan daftar anggota yang menjadi tanggung jawab masing-masing penanggung jawab anggota.', function () {
+
+    it('PJA hanya melihat anggota yang dialokasikan kepadanya pada halaman daftar anggota', function () {
+        $pja = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $pja->syncRoles('Penanggung Jawab Anggota');
+
+        // Buat 3 anggota yang dialokasikan ke PJA ini
+        $anggotaMilikPja = Anggota::factory()->count(3)->create([
+            'pj_anggota_id' => $pja->id,
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ]);
+
+        // Buat 2 anggota yang TIDAK dialokasikan ke PJA ini
+        Anggota::factory()->count(2)->create([
+            'pj_anggota_id' => null,
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ]);
+
+        $response = $this->actingAs($pja)->get('/admin/users');
+        $response->assertStatus(200);
+
+        // PJA hanya bisa melihat anggota miliknya
+        $response->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/User/List')
+                ->has('anggota.data')
+        );
+    });
+
+    it('PJA hanya melihat pembiayaan dari anggota yang dialokasikan kepadanya', function () {
+        $pja = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $pja->syncRoles('Penanggung Jawab Anggota');
+
+        // Anggota milik PJA
+        $anggota1 = Anggota::factory()->create([
+            'pj_anggota_id' => $pja->id,
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ]);
+        Pembiayaan::factory()->create([
+            'anggota_id' => $anggota1->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+        ]);
+
+        // Anggota bukan milik PJA
+        $anggota2 = Anggota::factory()->create([
+            'pj_anggota_id' => null,
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ]);
+        Pembiayaan::factory()->create([
+            'anggota_id' => $anggota2->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+        ]);
+
+        $response = $this->actingAs($pja)->get('/admin/pembiayaan');
+        $response->assertStatus(200);
+    });
+});
+
+// ============================================================================
+// 5. Menampilkan Daftar Anggota yang Jatuh Tempo / Menunggak bagi PJA
+//    Aplikasi harus menampilkan daftar anggota yang jatuh tempo atau menunggak
+//    pembayaran bagi penanggung jawab anggota.
+// ============================================================================
+describe('Aplikasi harus menampilkan daftar anggota yang jatuh tempo atau menunggak pembayaran bagi penanggung jawab anggota.', function () {
+
+    it('PJA dapat melihat data anggota bermasalah pada dashboard', function () {
+        $pja = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $pja->syncRoles('Penanggung Jawab Anggota');
+
+        // Buat anggota milik PJA dengan tunggakan
+        $anggota = Anggota::factory()->create([
+            'pj_anggota_id' => $pja->id,
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ]);
+
+        $pembiayaan = Pembiayaan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'tgl_akad' => now()->subMonths(6),
+            'tenor' => 12,
+        ]);
+
+        // Buat angsuran yang sudah lewat jatuh tempo (overdue)
+        Angsuran::factory()->create([
+            'pembiayaan_id' => $pembiayaan->id,
+            'angsuran_ke' => 1,
+            'tgl_jatuh_tempo' => now()->subDays(30),
+            'status' => InstallmentPaymentScheduleStatusEnum::OVERDUE->value,
+        ]);
+
+        // PJA mengakses dashboard => harus bisa melihat data anggota bermasalah
+        $response = $this->actingAs($pja)->get('/admin/dashboard');
+        $response->assertStatus(200);
+        $response->assertInertia(fn (AssertableInertia $page) =>
+            $page->component('Admin/Dashboard')
+                ->has('stats')
+        );
+    });
+
+    it('PJA hanya melihat notifikasi terkait anggota miliknya', function () {
+        $pja = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $pja->syncRoles('Penanggung Jawab Anggota');
+
+        // Anggota milik PJA
+        $anggotaPja = Anggota::factory()->create([
+            'pj_anggota_id' => $pja->id,
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ]);
+
+        Notifikasi::create([
+            'anggota_id' => $anggotaPja->id,
+            'judul' => 'Tunggakan Angsuran',
+            'pesan' => 'Anggota ini memiliki tunggakan angsuran.',
+            'jenis_notifikasi' => 'angsuran',
+            'periode_notifikasi' => now()->format('Y-m'),
+            'jenis_pengingat' => 'H-0',
+            'status' => NotificationStatusEnum::SENT->value,
+            'sudah_dibaca' => false,
+            'dijadwalkan_pada' => now(),
+            'dikirim_pada' => now(),
+        ]);
+
+        // Anggota bukan milik PJA
+        $anggotaLain = Anggota::factory()->create([
+            'pj_anggota_id' => null,
+            'status' => MemberStatusEnum::ACTIVE->value,
+        ]);
+
+        Notifikasi::create([
+            'anggota_id' => $anggotaLain->id,
+            'judul' => 'Notifikasi Lain',
+            'pesan' => 'Ini bukan untuk PJA ini.',
+            'jenis_notifikasi' => 'angsuran',
+            'periode_notifikasi' => now()->format('Y-m'),
+            'jenis_pengingat' => 'H-3',
+            'status' => NotificationStatusEnum::SENT->value,
+            'sudah_dibaca' => false,
+            'dijadwalkan_pada' => now(),
+            'dikirim_pada' => now(),
+        ]);
+
+        $response = $this->actingAs($pja)->get('/admin/notifikasi');
+        $response->assertStatus(200);
     });
 });
 

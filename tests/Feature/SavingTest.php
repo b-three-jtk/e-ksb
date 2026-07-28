@@ -18,7 +18,6 @@ use Database\Seeders\AkunSeeder;
 use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Inertia\Testing\AssertableInertia;
 
 uses(RefreshDatabase::class);

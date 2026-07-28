@@ -4,8 +4,10 @@ use App\Enums\FinancingPaymentMethodEnum;
 use App\Enums\FinancingReqStatusEnum;
 use App\Enums\InstallmentPaymentScheduleStatusEnum;
 use App\Enums\MemberStatusEnum;
+use App\Enums\NotificationStatusEnum;
 use App\Enums\PositionEnum;
 use App\Enums\SavingTypeEnum;
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Akun;
 use App\Models\AkunSimpanan;
@@ -14,12 +16,16 @@ use App\Models\Angsuran;
 use App\Models\DetailJurnal;
 use App\Models\JenisBarang;
 use App\Models\Jurnal;
+use App\Models\Notifikasi;
 use App\Models\ObjekPembiayaan;
 use App\Models\Pemasok;
 use App\Models\PembayaranAngsuran;
 use App\Models\Pembiayaan;
 use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
+use App\Models\TransaksiSimpanan;
+use App\Models\Wakalah;
+use App\Services\NotifikasiService;
 use Database\Seeders\AkunSeeder;
 use Database\Seeders\JenisBarangSeeder;
 use Database\Seeders\PengaturanUmumSeeder;
@@ -27,6 +33,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Testing\AssertableInertia;
 
 uses(RefreshDatabase::class);
 
@@ -1127,3 +1134,400 @@ describe('Aplikasi harus dapat menghitung poin anggota dari pembayaran margin pe
         $files = Storage::disk('public')->allFiles('receipts/' . $anggota->id);
         expect($files)->not->toBeEmpty();
     });
+// ============================================================================
+// 6. Menampilkan Status Kewajiban/Tunggakan saat Input Permohonan Pembiayaan Baru
+//    Aplikasi harus menampilkan status kewajiban/tunggakan anggota secara otomatis
+//    saat staf murabahah menginput permohonan pembiayaan baru.
+// ============================================================================
+describe('Aplikasi harus menampilkan status kewajiban/tunggakan anggota secara otomatis saat staf murabahah menginput permohonan pembiayaan baru.', function () {
+
+    it('Sistem otomatis menolak permohonan pembiayaan baru jika anggota masih memiliki pembiayaan berjalan', function () {
+        $staffMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $staffMurabahah->syncRoles('Staf Murabahah');
+
+        $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+
+        // Buat pembiayaan aktif (masih berjalan / tunggakan)
+        Pembiayaan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+        ]);
+
+        AkunSimpanan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 10000000,
+            'created_at' => now()->subMonths(6),
+        ]);
+
+        // Staf mencoba input pembiayaan baru => harus gagal karena masih ada yang berjalan
+        $response = $this->actingAs($staffMurabahah)
+            ->post('/admin/pembiayaan/store', [
+                'anggota' => [
+                    'kode_pengguna' => $anggota->user->kode_pengguna,
+                    'nama' => $anggota->user->nama,
+                    'nik' => $anggota->user->nik,
+                    'no_telp' => $anggota->user->no_telp,
+                    'status_pekerjaan' => 'Karyawan Swasta',
+                    'ahli_waris' => [[
+                        'nama_ahli_waris' => 'Waris Test',
+                        'nik_ahli_waris' => '1234567890654321',
+                        'hubungan' => 'Istri',
+                        'kontak_ahli_waris' => '081234567890'
+                    ]],
+                ],
+                'pembiayaan' => [
+                    'nama_barang' => 'Laptop',
+                    'jenis_barang_id' => JenisBarang::first()->id,
+                    'harga_perkiraan' => 15000000,
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
+                    'tgl_akad' => now()->format('Y-m-d'),
+                    'status' => 'Belum Ditinjau',
+                    'spesifikasi_barang' => 'Laptop untuk kerja.',
+                ],
+                'jaminan' => [
+                    'jenis_jaminan' => 'Laptop',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 10000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
+                ],
+                'income_slip_file' => UploadedFile::fake()->create('slip.jpg'),
+                'bank_book_file' => UploadedFile::fake()->create('buku.jpg'),
+            ]);
+
+        // Controller menangkap error dan mengembalikan pesan error di session
+        $response->assertSessionHasErrors();
+    });
+
+    it('Sistem memperbolehkan permohonan pembiayaan baru jika anggota tidak memiliki tunggakan', function () {
+        $staffMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $staffMurabahah->syncRoles('Staf Murabahah');
+
+        $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+
+        AkunSimpanan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 10000000,
+            'created_at' => now()->subMonths(6),
+        ]);
+
+        // Tidak ada pembiayaan berjalan
+        $response = $this->actingAs($staffMurabahah)
+            ->post('/admin/pembiayaan/store', [
+                'anggota' => [
+                    'kode_pengguna' => $anggota->user->kode_pengguna,
+                    'nama' => $anggota->user->nama,
+                    'nik' => $anggota->user->nik,
+                    'no_telp' => $anggota->user->no_telp,
+                    'status_pekerjaan' => 'Karyawan Swasta',
+                    'ahli_waris' => [[
+                        'nama_ahli_waris' => 'Waris Test',
+                        'nik_ahli_waris' => '1234567890654321',
+                        'hubungan' => 'Istri',
+                        'kontak_ahli_waris' => '081234567890'
+                    ]],
+                ],
+                'pembiayaan' => [
+                    'nama_barang' => 'Motor Honda',
+                    'jenis_barang_id' => JenisBarang::first()->id,
+                    'harga_perkiraan' => 50000000,
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
+                    'tgl_akad' => now()->format('Y-m-d'),
+                    'status' => 'Belum Ditinjau',
+                    'spesifikasi_barang' => 'Motor Honda terbaru.',
+                ],
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
+                ],
+                'income_slip_file' => UploadedFile::fake()->create('slip.jpg'),
+                'bank_book_file' => UploadedFile::fake()->create('buku.jpg'),
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertStatus(302);
+        $this->assertDatabaseHas('pembiayaan', [
+            'anggota_id' => $anggota->id,
+            'harga_perkiraan' => 50000000,
+        ]);
+    });
+});
+
+// ============================================================================
+// 7. Perhitungan Otomatis Sisa Kewajiban saat Pelunasan Dipercepat
+//    Aplikasi harus dapat menghitung secara otomatis sisa kewajiban saat
+//    pelunasan dipercepat diproses.
+// ============================================================================
+describe('Aplikasi harus dapat menghitung secara otomatis sisa kewajiban saat pelunasan dipercepat diproses.', function () {
+
+    it('Sistem menghitung otomatis dan melunasi pembiayaan saat pelunasan dipercepat diproses', function () {
+        $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
+        $user->syncRoles('Anggota');
+
+        $staffMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $staffMurabahah->syncRoles('Staf Murabahah');
+
+        $pembiayaan = Pembiayaan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'harga_perolehan' => 50000000,
+            'margin_keuntungan' => 10000000,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'tgl_akad' => now()->subMonths(6),
+            'tenor' => 12,
+            'metode_pembayaran' => FinancingPaymentMethodEnum::INSTALLMENT->value,
+        ]);
+
+        ObjekPembiayaan::factory()->create([
+            'pembiayaan_id' => $pembiayaan->id,
+            'nama_barang' => 'Motor Honda',
+            'harga_beli_per_unit' => 50000000,
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
+        ]);
+
+        // Buat angsuran (sisa yang belum dibayar)
+        $angsuran = Angsuran::factory()->create([
+            'pembiayaan_id' => $pembiayaan->id,
+            'angsuran_ke' => 7,
+            'nominal_angsuran' => 5000000,
+            'tgl_jatuh_tempo' => now()->addDays(10)->startOfDay(),
+            'status' => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+        ]);
+
+        // Proses pelunasan dipercepat
+        $response = $this->actingAs($staffMurabahah)
+            ->post('/admin/pembiayaan/repayment', [
+                'method' => 'Tunai',
+                'angsuran_id' => $angsuran->id,
+            ]);
+
+        $response->assertStatus(302);
+
+        // Status pembiayaan harus berubah menjadi Lunas
+        $this->assertDatabaseHas('pembiayaan', [
+            'id' => $pembiayaan->id,
+            'status' => FinancingReqStatusEnum::PAID->value,
+        ]);
+    });
+
+    it('Selain Staf Murabahah tidak dapat memproses pelunasan dipercepat', function () {
+        $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+
+        $ketuaMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $ketuaMurabahah->syncRoles('Ketua Murabahah');
+
+        $pembiayaan = Pembiayaan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+            'tgl_akad' => now()->subMonths(6),
+        ]);
+
+        ObjekPembiayaan::factory()->create([
+            'pembiayaan_id' => $pembiayaan->id,
+            'nama_barang' => 'Motor Honda',
+            'harga_beli_per_unit' => 50000000,
+            'kuantitas' => 1,
+            'kondisi_produk' => 'Baru',
+        ]);
+
+        $angsuran = Angsuran::factory()->create([
+            'pembiayaan_id' => $pembiayaan->id,
+            'angsuran_ke' => 1,
+            'nominal_angsuran' => 5000000,
+            'tgl_jatuh_tempo' => now()->addDays(10)->startOfDay(),
+            'status' => InstallmentPaymentScheduleStatusEnum::SCHEDULED->value,
+        ]);
+
+        $response = $this->actingAs($ketuaMurabahah)
+            ->post('/admin/pembiayaan/repayment', [
+                'method' => 'Tunai',
+                'angsuran_id' => $angsuran->id,
+            ]);
+
+        $response->assertStatus(403);
+    });
+});
+
+// ============================================================================
+// 8. Penguncian Alur: Akad Wakalah Harus Diunggah Sebelum Transaksi Murabahah
+//    Aplikasi harus menerapkan urutan proses (mengunci alur) agar dokumen akad
+//    wakalah diunggah terlebih dahulu sebelum transaksi murabahah dapat diproses.
+// ============================================================================
+describe('Aplikasi harus menerapkan urutan proses (mengunci alur) agar dokumen akad wakalah diunggah terlebih dahulu sebelum transaksi murabahah dapat diproses.', function () {
+
+    it('Finalisasi pembiayaan murabahah berhasil jika dokumen akad wakalah disertakan', function () {
+        $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
+        $user->syncRoles('Anggota');
+
+        $staffMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $staffMurabahah->syncRoles('Staf Murabahah');
+
+        AkunSimpanan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 10000000,
+            'created_at' => now()->subMonths(6),
+        ]);
+
+        $pemasok = Pemasok::create([
+            'nama_pemasok' => 'PT. Pemasok Jaya',
+            'contact' => '081234567890',
+            'alamat_pemasok' => 'Jl. Pemasok No. 1',
+        ]);
+
+        $danaAlokasi = Akun::where('nama_akun', 'Dana Alokasi Pembiayaan Murabahah')->first();
+        $jurnal = \App\Models\Jurnal::create(['tgl_transaksi' => now()]);
+        DetailJurnal::factory()->create([
+            'jurnal_id' => $jurnal->id,
+            'no_ref_akun' => $danaAlokasi->no_ref_akun,
+            'posisi_akun' => 'Debit',
+            'nominal' => 200000000,
+        ]);
+
+        // Finalisasi DENGAN file akad wakalah => harus berhasil
+        $response = $this->actingAs($staffMurabahah)
+            ->post('/admin/pembiayaan/finalize', [
+                'anggota' => [
+                    'kode_pengguna' => $user->kode_pengguna,
+                    'nama' => $user->nama,
+                    'nik' => $user->nik,
+                    'no_telp' => $user->no_telp,
+                    'status_pekerjaan' => 'Karyawan Swasta',
+                    'ahli_waris' => [[
+                        'nama_ahli_waris' => 'Ada Wong',
+                        'nik_ahli_waris' => '1234567890654321',
+                        'hubungan' => 'Istri',
+                        'kontak_ahli_waris' => '081234567890',
+                    ]],
+                ],
+                'pembiayaan' => [
+                    'nama_barang' => 'Motor Honda',
+                    'jenis_barang_id' => JenisBarang::first()->id,
+                    'harga_perkiraan' => 50000000,
+                    'harga_beli_per_unit' => 50000000,
+                    'harga_perolehan' => 50000000,
+                    'margin_keuntungan' => 10000000,
+                    'metode_pembayaran' => 'Cicilan',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
+                    'tgl_akad' => '2024-01-01',
+                    'akad_wakalah_date' => '2024-01-02',
+                    'status' => 'Angsuran Berjalan',
+                    'pemasok_id' => $pemasok->id,
+                    'spesifikasi_barang' => 'Pembiayaan motor Honda.',
+                ],
+                'pemasok' => [
+                    'nama_pemasok' => 'PT. Pemasok Jaya',
+                    'contact' => '081234567890',
+                    'alamat_pemasok' => 'Jl. Pemasok No. 1',
+                ],
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
+                ],
+                'is_wakalah' => true,
+                'akad_document_file' => UploadedFile::fake()->create('akad.pdf'),
+                'akad_wakalah_file' => UploadedFile::fake()->create('akad_wakalah.pdf'),
+                'income_slip_file' => UploadedFile::fake()->create('income_slip.jpg'),
+                'bank_book_file' => UploadedFile::fake()->create('bank_book.jpg'),
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertStatus(302);
+
+        // Pastikan data wakalah tersimpan
+        $this->assertDatabaseHas('pembiayaan', [
+            'harga_perolehan' => 50000000,
+            'margin_keuntungan' => 10000000,
+            'status' => FinancingReqStatusEnum::ACTIVE_INSTALLMENTS->value,
+        ]);
+        $this->assertDatabaseHas('wakalah', [
+            'tgl_akad' => '2024-01-02',
+        ]);
+    });
+
+    it('Finalisasi pembiayaan murabahah gagal jika dokumen akad wakalah tidak disertakan', function () {
+        $anggota = Anggota::factory()->create(['status' => MemberStatusEnum::ACTIVE->value]);
+        $user = Pengguna::where('id', $anggota->pengguna_id)->first();
+        $user->syncRoles('Anggota');
+
+        $staffMurabahah = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $staffMurabahah->syncRoles('Staf Murabahah');
+
+        AkunSimpanan::factory()->create([
+            'anggota_id' => $anggota->id,
+            'jenis_simpanan' => SavingTypeEnum::TABUNGAN_ANGGOTA->value,
+            'saldo' => 10000000,
+            'created_at' => now()->subMonths(6),
+        ]);
+
+        $pemasok = Pemasok::create([
+            'nama_pemasok' => 'PT. Pemasok Test',
+            'contact' => '081234567890',
+            'alamat_pemasok' => 'Jl. Test No. 1',
+        ]);
+
+        // Finalisasi TANPA file akad wakalah tapi is_wakalah = true => harus gagal (validasi)
+        $response = $this->actingAs($staffMurabahah)
+            ->post('/admin/pembiayaan/finalize', [
+                'anggota' => [
+                    'kode_pengguna' => $user->kode_pengguna,
+                    'nama' => $user->nama,
+                    'nik' => $user->nik,
+                    'no_telp' => $user->no_telp,
+                    'status_pekerjaan' => 'Karyawan Swasta',
+                    'ahli_waris' => [[
+                        'nama_ahli_waris' => 'Ada Wong',
+                        'nik_ahli_waris' => '1234567890654321',
+                        'hubungan' => 'Istri',
+                        'kontak_ahli_waris' => '081234567890',
+                    ]],
+                ],
+                'pembiayaan' => [
+                    'nama_barang' => 'Motor Honda',
+                    'jenis_barang_id' => JenisBarang::first()->id,
+                    'harga_perkiraan' => 50000000,
+                    'harga_beli_per_unit' => 50000000,
+                    'harga_perolehan' => 50000000,
+                    'margin_keuntungan' => 10000000,
+                    'metode_pembayaran' => 'Cicilan',
+                    'kuantitas' => 1,
+                    'kondisi_produk' => 'Baru',
+                    'tgl_akad' => '2024-01-01',
+                    'akad_wakalah_date' => '2024-01-02',
+                    'status' => 'Angsuran Berjalan',
+                    'pemasok_id' => $pemasok->id,
+                    'spesifikasi_barang' => 'Pembiayaan motor Honda.',
+                ],
+                'pemasok' => [
+                    'nama_pemasok' => 'PT. Pemasok Test',
+                    'contact' => '081234567890',
+                    'alamat_pemasok' => 'Jl. Test No. 1',
+                ],
+                'jaminan' => [
+                    'jenis_jaminan' => 'Motor',
+                    'nama_pemilik' => 'Pemohon',
+                    'nilai_perkiraan_pasar' => 30000000,
+                    'lokasi_kondisi_jaminan' => 'Bandung',
+                ],
+                'is_wakalah' => true,
+                'akad_document_file' => UploadedFile::fake()->create('akad.pdf'),
+                // akad_wakalah_file SENGAJA TIDAK DISERTAKAN padahal is_wakalah = true
+                'income_slip_file' => UploadedFile::fake()->create('income_slip.jpg'),
+                'bank_book_file' => UploadedFile::fake()->create('bank_book.jpg'),
+            ]);
+
+        // Harus ada error validasi karena dokumen wakalah tidak diunggah (required_if:is_wakalah,true)
+        $response->assertSessionHasErrors(['akad_wakalah_file']);
+    });
+});
+

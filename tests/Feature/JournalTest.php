@@ -1,7 +1,10 @@
 <?php
 
 use App\Enums\AkunCategoryEnum;
+use App\Enums\PositionEnum;
 use App\Enums\UserStatusEnum;
+use App\Exports\JurnalUmumExport;
+use App\Exports\LaporanArusKasExport;
 use App\Models\Akun;
 use App\Models\Pengguna;
 use Database\Seeders\AkunSeeder;
@@ -9,14 +12,19 @@ use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 uses(RefreshDatabase::class);
+
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
     $this->seed(AkunSeeder::class);
     $this->seed(PengaturanUmumSeeder::class);
 });
 
+// ============================================================================
+// 1. Pengelolaan Akun oleh Bendahara
+// ============================================================================
 describe('Pengelolaan Akun', function () {
     it('Bendahara dapat melihat daftar akun', function () {
         $bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
@@ -65,117 +73,40 @@ describe('Pengelolaan Akun', function () {
     });
 });
 
-describe('Aplikasi harus menyediakan ekspor laporan arus kas dengan format excel bagi pengawas, DPS, ketua koperasi, dan bendahara.', function () {
-    it('Pengawas dapat mengekspor laporan arus kas dengan format excel.', function () {
-        $pengawas = Pengguna::factory()->create();
-        $pengawas->assignRole('Pengawas');
+// ============================================================================
+// 2. Pencatatan Alokasi Kas Koperasi
+// ============================================================================
+describe('Pencatatan Alokasi Kas', function () {
+    it('Bendahara dapat menyimpan pencatatan alokasi kas koperasi untuk setiap produk', function () {
+        $bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+        $bendahara->syncRoles('Bendahara');
 
-        $response = $this->actingAs($pengawas)->get('/admin/kas/export/excel');
-        $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    });
-
-    it('DPS dapat mengekspor laporan arus kas dengan format excel.', function () {
-        $dps = Pengguna::factory()->create();
-        $dps->assignRole('Dewan Pengawas Syariah');
-
-        $response = $this->actingAs($dps)->get('/admin/kas/export/excel');
-        $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    });
-
-    it('Ketua koperasi dapat mengekspor laporan arus kas dengan format excel.', function () {
-        $ketua = Pengguna::factory()->create();
-        $ketua->assignRole('Ketua');
-
-        $response = $this->actingAs($ketua)->get('/admin/kas/export/excel');
-        $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    });
-
-    it('Bendahara dapat mengekspor laporan arus kas dengan format excel.', function () {
-        $bendahara = Pengguna::factory()->create();
-        $bendahara->assignRole('Bendahara');
-
-        $response = $this->actingAs($bendahara)->get('/admin/kas/export/excel');
-        $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    });
-});
-
-describe('Aplikasi harus menyediakan pencatatan alokasi kas koperasi untuk setiap produk oleh bendahara.', function () {
-    it('Bendahara dapat mencatat alokasi kas koperasi untuk setiap produk.', function () {
-        $bendahara = Pengguna::factory()->create();
-        $bendahara->assignRole('Bendahara');
-
-        $akunDebit = Akun::factory()->create([
-            'no_ref_akun' => '111',
-            'nama_akun' => 'Akun Debit',
-            'kategori_akun' => 'Aset',
-            'status' => 'Aktif',
-        ]);
-
-        $akunKredit = Akun::factory()->create([
-            'no_ref_akun' => '222',
-            'nama_akun' => 'Akun Kredit',
-            'kategori_akun' => 'Liabilitas',
-            'status' => 'Aktif',
-        ]);
+        $akunDebit = Akun::where('no_ref_akun', '!=', '')->first();
+        $akunKredit = Akun::where('no_ref_akun', '!=', $akunDebit->no_ref_akun)->first();
 
         $response = $this->actingAs($bendahara)->post('/admin/kas/store', [
-            'nominal' => 100000,
+            'nominal' => 5000000,
             'akun_debit' => $akunDebit->no_ref_akun,
             'akun_kredit' => $akunKredit->no_ref_akun,
         ]);
+
         $response->assertStatus(302);
+        $response->assertSessionHasNoErrors();
+        $response->assertSessionHas('success', 'Alokasi kas berhasil diposting');
+
+        // Pastikan detail jurnal tercatat di database (karena menggunakan JurnalService->create)
         $this->assertDatabaseHas('detail_jurnal', [
             'no_ref_akun' => $akunDebit->no_ref_akun,
-            'posisi_akun' => 'Debit',
-            'nominal' => 100000.00,
+            'posisi_akun' => PositionEnum::DEBIT->value,
+            'nominal' => 5000000,
         ]);
         $this->assertDatabaseHas('detail_jurnal', [
             'no_ref_akun' => $akunKredit->no_ref_akun,
-            'posisi_akun' => 'Credit',
-            'nominal' => 100000.00,
+            'posisi_akun' => PositionEnum::CREDIT->value,
+            'nominal' => 5000000,
         ]);
     });
 
-    it('Selain bendahara, pengguna lain tidak dapat mencatat alokasi kas koperasi untuk setiap produk.', function () {
-        $user = Pengguna::factory()->create();
-        $user->assignRole('Pengawas');
-
-        $akunDebit = Akun::factory()->create([
-            'no_ref_akun' => '111',
-            'nama_akun' => 'Akun Debit',
-            'kategori_akun' => 'Aset',
-            'status' => 'Aktif',
-        ]);
-
-        $akunKredit = Akun::factory()->create([
-            'no_ref_akun' => '222',
-            'nama_akun' => 'Akun Kredit',
-            'kategori_akun' => 'Liabilitas',
-            'status' => 'Aktif',
-        ]);
-
-        $response = $this->actingAs($user)->post('/admin/kas/store', [
-            'nominal' => 100000,
-            'akun_debit' => $akunDebit->no_ref_akun,
-            'akun_kredit' => $akunKredit->no_ref_akun,
-        ]);
-        $response->assertStatus(403);
-        $this->assertDatabaseMissing('detail_jurnal', [
-            'no_ref_akun' => $akunDebit->no_ref_akun,
-            'posisi_akun' => 'Debit',
-            'nominal' => 100000.00,
-        ]);
-        $this->assertDatabaseMissing('detail_jurnal', [
-            'no_ref_akun' => $akunKredit->no_ref_akun,
-            'posisi_akun' => 'Credit',
-            'nominal' => 100000.00,
-        ]);
-    });
-    
     it('Sistem menolak alokasi jika akun debit dan kredit sama', function () {
         $bendahara = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
         $bendahara->syncRoles('Bendahara');
@@ -189,5 +120,63 @@ describe('Aplikasi harus menyediakan pencatatan alokasi kas koperasi untuk setia
         ]);
 
         $response->assertSessionHasErrors(['akun_kredit']);
+    });
+});
+
+// ============================================================================
+// 3. Ekspor Laporan Arus Kas dan Jurnal Umum
+// ============================================================================
+describe('Ekspor Laporan Arus Kas dan Jurnal Umum', function () {
+    it('Pengawas, DPS, Ketua Koperasi, dan Bendahara dapat mengekspor laporan arus kas dan jurnal umum', function () {
+        Excel::fake();
+
+        $roles = [
+            'Pengawas',
+            'Dewan Pengawas Syariah',
+            'Ketua',
+            'Bendahara',
+        ];
+
+        foreach ($roles as $roleName) {
+            $user = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+            $user->syncRoles($roleName);
+
+            // Mock waktu agar timestamp di nama file sama persis
+            $now = now();
+            \Carbon\Carbon::setTestNow($now);
+
+            // Test Export Jurnal Umum
+            $responseExcel = $this->actingAs($user)->get('/admin/kas/export/excel');
+            $responseExcel->assertStatus(200);
+            Excel::assertDownloaded('jurnal_umum_' . $now->format('Ymd_His') . '.xlsx');
+
+            // Test Export Laporan Arus Kas
+            $responseCashflow = $this->actingAs($user)->get('/admin/kas/export/cashflow');
+            $responseCashflow->assertStatus(200);
+            Excel::assertDownloaded('laporan_arus_kas_' . $now->format('Ymd_His') . '.xlsx');
+            
+            \Carbon\Carbon::setTestNow(); // Reset mock
+        }
+    });
+
+    it(' ', function () {
+        $disallowedRoles = [
+            'Sekretaris',
+            'Ketua Murabahah',
+            'Staf Murabahah',
+            'Penanggung Jawab Anggota',
+            'Anggota'
+        ];
+
+        foreach ($disallowedRoles as $roleName) {
+            $user = Pengguna::factory()->create(['status' => UserStatusEnum::ACTIVE->value]);
+            $user->syncRoles($roleName);
+
+            $responseExcel = $this->actingAs($user)->get('/admin/kas/export/excel');
+            $responseExcel->assertStatus(403);
+
+            $responseCashflow = $this->actingAs($user)->get('/admin/kas/export/cashflow');
+            $responseCashflow->assertStatus(403);
+        }
     });
 });

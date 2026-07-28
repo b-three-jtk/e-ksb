@@ -2,7 +2,6 @@
 
 use App\Enums\UserStatusEnum;
 use App\Models\AuditLog;
-use App\Models\PengaturanUmum;
 use App\Models\Pengguna;
 use Database\Seeders\PengaturanUmumSeeder;
 use Database\Seeders\RoleSeeder;
