@@ -1,10 +1,4 @@
 {
-  "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js": {
-    "file": "assets/apexcharts.ssr.esm-fe46cd2d-CHmRg-9z.js",
-    "name": "apexcharts.ssr.esm-fe46cd2d",
-    "src": "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js",
-    "isDynamicEntry": true
-  },
   "public/images/home/about_us.webp": {
     "file": "assets/about_us-DdriqnDB.webp",
     "src": "public/images/home/about_us.webp"
@@ -38,7 +32,7 @@
     "src": "public/images/logo/logo-icon.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DvpcBAeA.css",
+    "file": "assets/app-DSAqPsor.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -47,17 +41,13 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BKdlQut7.js",
+    "file": "assets/app-C7pIlkkP.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
-    "dynamicImports": [
-      "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js",
-      "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js"
-    ],
     "css": [
-      "assets/app-BzDHEnBn.css",
-      "assets/app-DvpcBAeA.css"
+      "assets/app-CpYtAay7.css",
+      "assets/app-DSAqPsor.css"
     ],
     "assets": [
       "assets/logo-icon-WY71gjSd.svg",
