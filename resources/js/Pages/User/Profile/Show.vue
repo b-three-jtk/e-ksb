@@ -418,11 +418,11 @@ const formatPoint = (value) => `${Number(value ?? 0).toLocaleString("id-ID")}`;
                                     </h2>
                                 </div>
 
-                                <div class="overflow-x-auto">
+                                <div class="overflow-x-auto overflow-y-auto max-h-[350px]">
                                     <table
                                         class="min-w-full divide-y divide-stroke dark:divide-gray-700 text-left text-sm"
                                     >
-                                        <thead class="bg-gray-50 dark:bg-gray-900">
+                                        <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900">
                                             <tr class="text-gray-500 dark:text-gray-400">
                                                 <th
                                                     class="px-5 py-3 font-medium"
